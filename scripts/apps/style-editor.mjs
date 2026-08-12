@@ -199,17 +199,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.element.addEventListener("change", onChange);
     this.element.addEventListener("input", onChange);
     this.#renderTabBadges();
-    this.#removeUnsupportedEyedroppers();
     this.#applyPreview();
-  }
-
-  /**
-   * Drop the eyedropper buttons when the browser cannot sample the screen,
-   * rather than offering a control that silently does nothing.
-   */
-  #removeUnsupportedEyedroppers() {
-    if (globalThis.EyeDropper) return;
-    for (const button of this.element.querySelectorAll(".illuminus-eyedropper")) button.remove();
   }
 
   /**
@@ -325,35 +315,125 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Sample a colour from anywhere on screen.
+   * Sample a colour by pointing at anything in the Foundry window.
    *
-   * Foundry's own colour control is a plain `<input type="color">`, which on
-   * macOS hands off to the system colour panel — whose magnifier is outside
-   * this module's reach and does not reliably sample. The EyeDropper API is
-   * the browser's own picker and sidesteps it entirely.
+   * Neither the operating system's colour panel nor the browser's EyeDropper
+   * API sample reliably on every machine — both go through screen capture,
+   * and when that is unavailable they return one fixed colour wherever you
+   * point. This reads the colour out of the page instead, which needs no
+   * capture permission at all and, unlike either of those, keeps transparency.
    *
-   * The sampled value is applied by assigning to the colour element, so it
-   * travels the same change path as any manual edit.
+   * The trade-off is that it samples elements rather than raw pixels: colours
+   * from a background picture are not available this way.
    */
   static async #onPickColor(_event, target) {
     const path = target.dataset.path;
     const picker = this.element.querySelector(`[data-field="${path}"] color-picker`);
     if (!picker) return;
+    const hex = await IlluminusStyleEditor.#pickFromWindow();
+    if (hex) picker.value = hex;
+  }
 
-    if (!globalThis.EyeDropper) {
-      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NoEyedropper"));
-      return;
-    }
+  /**
+   * Enter pointing mode until the user clicks or presses Escape.
+   * @returns {Promise<string|null>} The chosen colour, or null if cancelled.
+   */
+  static #pickFromWindow() {
+    return new Promise((resolve) => {
+      const readout = document.createElement("div");
+      readout.className = "illuminus-picker-readout";
+      document.body.append(readout);
+      document.documentElement.classList.add("illuminus-picking");
 
-    try {
-      const { sRGBHex } = await new globalThis.EyeDropper().open();
-      if (sRGBHex) picker.value = sRGBHex;
-    } catch (error) {
-      // Dismissing the picker rejects with AbortError; that is not a failure.
-      if (error?.name === "AbortError") return;
-      log.error("eyedropper failed", error);
-      ui.notifications.error(game.i18n.localize("ILLUMINUS.Notifications.EyedropperFailed"));
+      let current = null;
+      let wantText = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      const update = () => {
+        current = IlluminusStyleEditor.#colorAt(lastX, lastY, wantText);
+        readout.style.left = `${lastX + 16}px`;
+        readout.style.top = `${lastY + 16}px`;
+        readout.innerHTML = `<span class="illuminus-picker-swatch" style="background:${current ?? "transparent"}"></span>`
+          + `<span>${current ?? "—"}</span>`
+          + `<span class="illuminus-picker-mode">${game.i18n.localize(wantText
+            ? "ILLUMINUS.Picker.TextMode" : "ILLUMINUS.Picker.BackgroundMode")}</span>`;
+      };
+
+      const onMove = (event) => {
+        lastX = event.clientX;
+        lastY = event.clientY;
+        wantText = event.altKey;
+        update();
+      };
+
+      // Capture phase, so pointing at a button samples it rather than pressing it.
+      const onClick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        finish(current);
+      };
+
+      const onKey = (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          finish(null);
+        } else if (event.key === "Alt") {
+          wantText = true;
+          update();
+        }
+      };
+
+      const onKeyUp = (event) => {
+        if (event.key === "Alt") {
+          wantText = false;
+          update();
+        }
+      };
+
+      function finish(value) {
+        document.removeEventListener("mousemove", onMove, true);
+        document.removeEventListener("click", onClick, true);
+        document.removeEventListener("keydown", onKey, true);
+        document.removeEventListener("keyup", onKeyUp, true);
+        document.documentElement.classList.remove("illuminus-picking");
+        readout.remove();
+        resolve(value);
+      }
+
+      document.addEventListener("mousemove", onMove, true);
+      document.addEventListener("click", onClick, true);
+      document.addEventListener("keydown", onKey, true);
+      document.addEventListener("keyup", onKeyUp, true);
+      update();
+    });
+  }
+
+  /**
+   * The colour under a point: the element's text colour when `wantText`, else
+   * the nearest ancestor that actually paints a background.
+   * @returns {string|null} A #rrggbb or #rrggbbaa string.
+   */
+  static #colorAt(x, y, wantText) {
+    const element = document.elementFromPoint(x, y);
+    if (!element) return null;
+    if (wantText) return IlluminusStyleEditor.#toHex(getComputedStyle(element).color);
+    for (let node = element; node instanceof Element; node = node.parentElement) {
+      const hex = IlluminusStyleEditor.#toHex(getComputedStyle(node).backgroundColor);
+      if (hex && !hex.endsWith("00")) return hex;
     }
+    return null;
+  }
+
+  /** Convert a computed `rgb()` / `rgba()` colour to hex, keeping any alpha. */
+  static #toHex(value) {
+    const parts = String(value).match(/[\d.]+/g);
+    if (!parts || parts.length < 3) return null;
+    const [r, g, b, a = 1] = parts.map(Number);
+    const pair = (n) => Math.round(n).toString(16).padStart(2, "0");
+    const rgb = `#${pair(r)}${pair(g)}${pair(b)}`;
+    return a >= 1 ? rgb : `${rgb}${pair(a * 255)}`;
   }
 
   /** Collapse or expand a section, remembering the choice across re-renders. */

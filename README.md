@@ -30,10 +30,11 @@ it to whichever journals should wear it, and export it to carry into another wor
   slider, and any real journal already open repaints too. The sample reveals the sidebar
   while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
   is written to the world until you press Save.
-- **Its own eyedropper.** Every colour control can sample any colour on screen, including
-  from the live sample beside it. Foundry's colour input hands off to the operating
-  system's colour panel, whose sampler is unreliable on macOS; this one uses the
-  browser's own and sidesteps it.
+- **Its own colour picker.** Every colour control can copy the colour of anything in the
+  Foundry window — point and click, hold Option/Alt for lettering colour instead of fill.
+  It reads colours out of the page rather than off the screen, so unlike the operating
+  system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
+  and it keeps transparency.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **Four styles included:** Aged Parchment, Midnight Codex, Clean Manuscript, Datapad.
   They are ordinary styles once seeded — edit or delete them freely.

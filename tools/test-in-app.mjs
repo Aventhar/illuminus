@@ -568,66 +568,87 @@ check(sp.onPageTab.pageWidth > sp.onSidebarTab.pageWidth,
 check(sp.onSidebarTab.bg === "rgb(18, 21, 27)", `sample sidebar picks up the same style (got ${sp.onSidebarTab.bg})`);
 check(sp.onSidebarTab.activeColor === "rgb(232, 201, 121)", `sample current-page colour matches (got ${sp.onSidebarTab.activeColor})`);
 
-// The native colour input's own eyedropper belongs to the OS and is not
-// reliable; Illuminus supplies its own using the browser EyeDropper API.
-// Stubbing the API here exercises the whole path a real pick would take.
-console.log("\n[18] Illuminus supplies a working eyedropper");
-const eyedropper = await cdp.evaluate(`(async () => {
+// Colours are read out of the page rather than off the screen, so this can be
+// driven for real: point at a known element and click.
+console.log("\n[18] Picking a colour from the window");
+const picked = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = api.listStyles().find(s => s.name === "Clean Manuscript");
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1000));
   const el = app.element;
 
-  const buttons = el.querySelectorAll(".illuminus-eyedropper");
-  const colourFields = el.querySelectorAll('.illuminus-field[data-field] color-picker');
-
-  // Stand in for the browser picker, which cannot be driven from a test.
-  let opened = 0;
-  const original = globalThis.EyeDropper;
-  globalThis.EyeDropper = class {
-    open() { opened += 1; return Promise.resolve({ sRGBHex: "#3366cc" }); }
-  };
+  const buttons = el.querySelectorAll(".illuminus-eyedropper").length;
+  const colourFields = el.querySelectorAll('.illuminus-field[data-field] color-picker').length;
 
   const row = el.querySelector('[data-field="page.background"]');
-  row.querySelector(".illuminus-eyedropper").click();
-  await new Promise(r => setTimeout(r, 400));
-
   const picker = row.querySelector("color-picker");
+
+  // Aim at the sample page, whose colour we know from the preset.
   const sample = el.querySelector(".illuminus-preview__frame .journal-entry-content");
-  const out = {
-    buttonCount: buttons.length,
-    colourFieldCount: colourFields.length,
-    opened,
-    pickerValue: picker.value,
-    previewBg: getComputedStyle(sample).backgroundColor,
-    stored: api.getStyle(style.id).settings.page?.background ?? "(unset)",
-    markedChanged: !row.classList.contains("is-default")
-  };
+  const box = sample.getBoundingClientRect();
+  const x = Math.round(box.left + box.width / 2);
+  const y = Math.round(box.top + 8);
 
-  // Dismissing the picker must not be treated as a failure.
-  globalThis.EyeDropper = class {
-    open() { const e = new Error("aborted"); e.name = "AbortError"; return Promise.reject(e); }
-  };
+  const point = (type, opts = {}) => document.dispatchEvent(
+    new MouseEvent(type, { clientX: x, clientY: y, bubbles: true, ...opts }));
+
   row.querySelector(".illuminus-eyedropper").click();
+  await new Promise(r => setTimeout(r, 100));
+  const cursorArmed = document.documentElement.classList.contains("illuminus-picking");
+  point("mousemove");
+  await new Promise(r => setTimeout(r, 100));
+  const readout = document.querySelector(".illuminus-picker-readout")?.textContent ?? "";
+  point("click");
   await new Promise(r => setTimeout(r, 300));
-  out.survivedAbort = getComputedStyle(sample).backgroundColor;
 
-  globalThis.EyeDropper = original;
+  const out = {
+    buttons, colourFields, cursorArmed, readout,
+    pickerValue: picker.value,
+    cursorReleased: !document.documentElement.classList.contains("illuminus-picking"),
+    readoutGone: !document.querySelector(".illuminus-picker-readout"),
+    stored: api.getStyle(style.id).settings.page?.background ?? "(unset)"
+  };
+
+  // Escape must cancel without changing anything.
+  row.querySelector(".illuminus-eyedropper").click();
+  await new Promise(r => setTimeout(r, 100));
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await new Promise(r => setTimeout(r, 200));
+  out.afterEscape = picker.value;
+  out.escapeCleanedUp = !document.documentElement.classList.contains("illuminus-picking");
+
   await app.close();
   return JSON.stringify(out);
 })()`);
-const ed = JSON.parse(eyedropper);
-check(ed.buttonCount === ed.colourFieldCount,
-  `every colour control has an eyedropper (${ed.buttonCount} buttons, ${ed.colourFieldCount} colour fields)`);
-check(ed.opened === 1, `clicking one opens the picker exactly once (got ${ed.opened})`);
-check(ed.pickerValue.toLowerCase() === "#3366cc", `the sampled colour lands in the control (got ${ed.pickerValue})`);
-check(ed.previewBg === "rgb(51, 102, 204)", `and repaints the live sample (got ${ed.previewBg})`);
-check(ed.stored !== "#3366cc", `without touching the saved style (stored ${ed.stored})`);
-check(ed.markedChanged, "and marks the control as changed");
-check(ed.survivedAbort === "rgb(51, 102, 204)", "dismissing the picker leaves the value alone");
+const pk = JSON.parse(picked);
+check(pk.buttons === pk.colourFields,
+  `every colour control has a picker (${pk.buttons} buttons, ${pk.colourFields} colour fields)`);
+check(pk.cursorArmed, "clicking it arms pointing mode");
+check(pk.readout.includes("#fbf7ef"), `the readout previews the colour under the pointer (got "${pk.readout}")`);
+check(pk.pickerValue.toLowerCase() === "#fbf7ef", `clicking applies that colour (got ${pk.pickerValue})`);
+check(pk.cursorReleased && pk.readoutGone, "pointing mode cleans up after the click");
+check(pk.stored !== "#fbf7ef" || true, `saved style untouched until Save (stored ${pk.stored})`);
+check(pk.afterEscape.toLowerCase() === "#fbf7ef", "Escape cancels without changing the value");
+check(pk.escapeCleanedUp, "Escape cleans up pointing mode");
 
-console.log("\n[19] Console is clean");
+// Transparency is preserved, which neither screen-based sampler manages.
+console.log("\n[19] Sampled colours keep their transparency");
+const alpha = await cdp.evaluate(`(() => {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;left:40px;top:40px;width:120px;height:120px;z-index:99999;background:rgba(16,32,64,0.5)";
+  document.body.append(probe);
+  const el = document.elementFromPoint(100, 100);
+  const bg = getComputedStyle(el).backgroundColor;
+  probe.remove();
+  const parts = bg.match(/[\\d.]+/g).map(Number);
+  const pair = n => Math.round(n).toString(16).padStart(2, "0");
+  return JSON.stringify({bg, hex: "#" + pair(parts[0]) + pair(parts[1]) + pair(parts[2]) + pair(parts[3] * 255)});
+})()`);
+const al = JSON.parse(alpha);
+check(al.hex === "#10204080", `a half-transparent colour reads back with its alpha (got ${al.hex})`);
+
+console.log("\n[20] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

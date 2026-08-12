@@ -876,8 +876,9 @@
   flex: 0 0 auto;
 }
 
-/* Illuminus supplies its own screen sampler: the one inside a native colour
-   input belongs to the operating system and cannot be relied on. */
+/* Illuminus samples colours out of the page rather than off the screen: the
+   samplers in the native colour input and the browser EyeDropper API both go
+   through screen capture, which is not available on every machine. */
 .illuminus-eyedropper {
   flex: 0 0 auto;
   width: auto;
@@ -1027,4 +1028,44 @@
   /* Scale the sample down so a full page of elements fits the pane while
      keeping every relative size faithful to the real thing. */
   zoom: 0.75;
+}
+
+/* --- Colour picking mode ------------------------------------------------ */
+
+/* No overlay element: a covering div would hide the very thing being pointed
+   at from elementFromPoint. The cursor changes and events are intercepted in
+   the capture phase instead. */
+html.illuminus-picking,
+html.illuminus-picking * {
+  cursor: crosshair !important;
+}
+
+.illuminus-picker-readout {
+  position: fixed;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 85%);
+  color: #f0f0e0;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 50%);
+}
+
+.illuminus-picker-swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-radius: 2px;
+}
+
+.illuminus-picker-mode {
+  opacity: 0.6;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
