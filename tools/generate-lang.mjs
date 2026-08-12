@@ -21,7 +21,9 @@ const put = (k, v) => { out[k] = v; };
 const CARRY = [
   "ILLUMINUS.Settings.", "ILLUMINUS.Controls.", "ILLUMINUS.Manager.", "ILLUMINUS.Editor.",
   "ILLUMINUS.Picker.", "ILLUMINUS.Buttons.", "ILLUMINUS.Style.", "ILLUMINUS.Confirm.",
-  "ILLUMINUS.Preview.", "ILLUMINUS.Notifications.", "ILLUMINUS.Errors."
+  // Preview strings are defined below rather than carried, so renaming one
+  // does not leave the old key behind forever.
+  "ILLUMINUS.Notifications.", "ILLUMINUS.Errors."
 ];
 for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWith(p))) put(k, v);
 
@@ -32,10 +34,26 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSection": "Reset",
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
-  "ILLUMINUS.Preview.Search": "Search Pages",
-  "ILLUMINUS.Preview.Category": "Chapters",
-  "ILLUMINUS.Preview.Page2": "The Drowned Choir",
-  "ILLUMINUS.Preview.AddPage": "Add Page",
+  // The sample names each element after the setting that controls it, so it
+  // reads as a legend rather than as a page of prose.
+  "ILLUMINUS.Preview.WindowTitle": "Window Title",
+  "ILLUMINUS.Preview.JournalTitle": "Journal Title",
+  "ILLUMINUS.Preview.Heading1": "Heading 1",
+  "ILLUMINUS.Preview.Heading2": "Heading 2",
+  "ILLUMINUS.Preview.Heading3": "Heading 3",
+  "ILLUMINUS.Preview.Body": "Body text, run on long enough to wrap over several lines so that line spacing, alignment, paragraph width, and the opening capital can all be judged. It contains a",
+  "ILLUMINUS.Preview.Link": "link",
+  "ILLUMINUS.Preview.Boxed": "Boxed text, as used for read-aloud description. Long enough to wrap, so its own line spacing and padding are visible.",
+  "ILLUMINUS.Preview.ListItem": "List item",
+  "ILLUMINUS.Preview.TableHeader": "Table header",
+  "ILLUMINUS.Preview.TableCell": "Table cell",
+  "ILLUMINUS.Preview.Caption": "Picture caption",
+  "ILLUMINUS.Preview.Category": "Category",
+  "ILLUMINUS.Preview.CurrentPage": "Current page",
+  "ILLUMINUS.Preview.SubHeading": "Sub-heading",
+  "ILLUMINUS.Preview.PageEntry": "Page entry",
+  "ILLUMINUS.Preview.Search": "Search box",
+  "ILLUMINUS.Preview.Button": "Button",
   "ILLUMINUS.Buttons.PickColor": "Pick a colour from the screen",
   "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its colour — fills, borders, and lettering. Hold Option/Alt for lettering, Escape to cancel.",
   "ILLUMINUS.Picker.BackgroundMode": "Fill",

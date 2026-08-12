@@ -97,7 +97,7 @@
     <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
       <div class="illuminus-preview__window">
       <header class="window-header">
-        <h1 class="window-title">{{localize "ILLUMINUS.Preview.JournalTitle"}}</h1>
+        <h1 class="window-title">{{localize "ILLUMINUS.Preview.WindowTitle"}}</h1>
         <button type="button" class="header-control icon fa-solid fa-palette" disabled></button>
         <button type="button" class="header-control icon fa-solid fa-xmark" disabled></button>
       </header>
@@ -112,23 +112,23 @@
             <li class="page active">
               <div class="page-heading">
                 <span class="page-index">1</span>
-                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.Heading1"}}</span>
+                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.CurrentPage"}}</span>
               </div>
               <ol class="headings">
-                <li class="heading h2"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.Heading2"}}</a></li>
-                <li class="heading h3"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.Heading3"}}</a></li>
+                <li class="heading h2"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
+                <li class="heading h3"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
               </ol>
             </li>
             <li class="page">
               <div class="page-heading">
                 <span class="page-index">2</span>
-                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.Page2"}}</span>
+                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.PageEntry"}}</span>
               </div>
             </li>
           </ol>
         </nav>
         <footer class="action-buttons flexrow">
-          <button type="button" disabled>{{localize "ILLUMINUS.Preview.AddPage"}}</button>
+          <button type="button" disabled>{{localize "ILLUMINUS.Preview.Button"}}</button>
         </footer>
       </aside>
 
@@ -143,25 +143,25 @@
                 <h1>{{localize "ILLUMINUS.Preview.Heading1"}}</h1>
               </header>
               <section class="journal-page-content">
-                <p>{{localize "ILLUMINUS.Preview.Body1"}}
+                <p>{{localize "ILLUMINUS.Preview.Body"}}
                   <a class="content-link">{{localize "ILLUMINUS.Preview.Link"}}</a>.</p>
                 <h2>{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
                 <blockquote><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
                 <h3>{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
                 <ul>
-                  <li>{{localize "ILLUMINUS.Preview.Item1"}}</li>
-                  <li>{{localize "ILLUMINUS.Preview.Item2"}}</li>
+                  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
+                  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
                 </ul>
                 <table>
                   <thead>
                     <tr>
-                      <th>{{localize "ILLUMINUS.Preview.TableHead1"}}</th>
-                      <th>{{localize "ILLUMINUS.Preview.TableHead2"}}</th>
+                      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
+                      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell1"}}</td><td>1d6</td></tr>
-                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell2"}}</td><td>2d8</td></tr>
+                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
+                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
                   </tbody>
                 </table>
                 <figure>

@@ -501,7 +501,14 @@ const sidebar = await cdp.evaluate(`(async () => {
   }
   await api.assignStyle(entry, style.id);
   await entry.sheet.render({force: true});
-  await new Promise(r => setTimeout(r, 1500));
+  await new Promise(r => setTimeout(r, 800));
+  // Which entry is "current" comes from an intersection observer, so the sheet
+  // has to actually be on screen — otherwise no page is ever marked active.
+  entry.sheet.setPosition({left: 80, top: 60, width: 900, height: 700});
+  for (let i = 0; i < 30; i++) {
+    if (entry.sheet.element.querySelector(".toc li.page.active")) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
 
   const root = entry.sheet.element;
   const aside = root.querySelector(".journal-sidebar");
@@ -523,12 +530,13 @@ const sidebar = await cdp.evaluate(`(async () => {
   return JSON.stringify(out);
 })()`);
 const sb = JSON.parse(sidebar);
+check(sb.activeColor !== undefined, "an entry is marked as the current page");
 check(sb.sidebarBg === "rgb(18, 21, 27)", `panel background applied over core's (got ${sb.sidebarBg})`);
 check(sb.sidebarWidth === "300px", `panel width control feeds core's variable (got ${sb.sidebarWidth})`);
 check(sb.entryColor === "rgb(200, 210, 222)", `page entry colour applied (got ${sb.entryColor})`);
 check(sb.activeColor === "rgb(232, 201, 121)", `current page colour applied (got ${sb.activeColor})`);
 check(sb.activeWeight === "700", `current page weight applied (got ${sb.activeWeight})`);
-check(sb.activeShadow.includes("rgb(232, 201, 121)"), `current page accent bar drawn (got ${sb.activeShadow})`);
+check((sb.activeShadow ?? "").includes("rgb(232, 201, 121)"), `current page accent bar drawn (got ${sb.activeShadow})`);
 check(sb.entryBorderBottom.startsWith("1px") && sb.entryBorderBottom.includes("38, 44, 56"),
   `entry divider beat core's own border rule (got ${sb.entryBorderBottom})`);
 check(sb.numberColor === "rgb(107, 118, 136)", `page number colour applied (got ${sb.numberColor})`);
