@@ -1,0 +1,22 @@
+{
+  "ILLUMINUS.Settings.Enabled.Name": "Enable Illuminus",
+  "ILLUMINUS.Settings.Enabled.Hint": "Turn off to disable all Illuminus features for this world without uninstalling the module.",
+  "ILLUMINUS.Settings.Debug.Name": "Debug Logging",
+  "ILLUMINUS.Settings.Debug.Hint": "Print verbose Illuminus messages to the browser console. Affects only your client.",
+
+  "ILLUMINUS.Controls.OpenPanel": "Illuminus Panel",
+
+  "ILLUMINUS.Panel.Title": "Illuminus",
+  "ILLUMINUS.Panel.Intro": "Illuminus is installed and running. Replace this panel with your own interface.",
+  "ILLUMINUS.Panel.Version": "Version",
+  "ILLUMINUS.Panel.System": "Game System",
+  "ILLUMINUS.Panel.Status": "Status",
+  "ILLUMINUS.Panel.Role": "You are",
+  "ILLUMINUS.Panel.Enabled": "Enabled",
+  "ILLUMINUS.Panel.Disabled": "Disabled",
+  "ILLUMINUS.Panel.GM": "Gamemaster",
+  "ILLUMINUS.Panel.Player": "Player",
+  "ILLUMINUS.Panel.Ping": "Test Notification",
+
+  "ILLUMINUS.Notifications.Ping": "Illuminus is wired up correctly."
+}

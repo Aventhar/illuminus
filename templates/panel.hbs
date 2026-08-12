@@ -1,0 +1,30 @@
+<section class="illuminus-panel__body">
+  <p class="illuminus-panel__intro">{{localize "ILLUMINUS.Panel.Intro"}}</p>
+
+  <dl class="illuminus-panel__facts">
+    <dt>{{localize "ILLUMINUS.Panel.Version"}}</dt>
+    <dd>{{version}}</dd>
+
+    <dt>{{localize "ILLUMINUS.Panel.System"}}</dt>
+    <dd>{{systemTitle}} <span class="illuminus-muted">({{systemId}})</span></dd>
+
+    <dt>{{localize "ILLUMINUS.Panel.Status"}}</dt>
+    <dd>
+      {{#if enabled}}
+        <span class="illuminus-badge illuminus-badge--on">{{localize "ILLUMINUS.Panel.Enabled"}}</span>
+      {{else}}
+        <span class="illuminus-badge illuminus-badge--off">{{localize "ILLUMINUS.Panel.Disabled"}}</span>
+      {{/if}}
+    </dd>
+
+    <dt>{{localize "ILLUMINUS.Panel.Role"}}</dt>
+    <dd>{{#if isGM}}{{localize "ILLUMINUS.Panel.GM"}}{{else}}{{localize "ILLUMINUS.Panel.Player"}}{{/if}}</dd>
+  </dl>
+
+  <footer class="illuminus-panel__footer">
+    <button type="button" data-action="ping">
+      <i class="fa-solid fa-bell"></i>
+      {{localize "ILLUMINUS.Panel.Ping"}}
+    </button>
+  </footer>
+</section>
