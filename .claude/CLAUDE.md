@@ -39,6 +39,10 @@ In a non-interactive runner, background `tools/sandbox.sh up`; it leaves long-li
 child processes, and a foreground pipe will appear to hang after the script has already
 succeeded.
 
+Tests share one browser session and one world, so a check that mutates a preset or
+leaves a style behind will break a later one. Create what a check needs, then delete it.
+`tools/sandbox.sh reset` wipes the world when state has drifted.
+
 Prefer adding a case to `test-in-app.mjs` over a one-off script. When a bug is found
 visually, add the assertion that would have caught it — the preview-background and
 drop-cap regressions both have one.
@@ -52,12 +56,22 @@ a "no hardware acceleration" toast that overlays the top of the window — remov
 
 These are all load-bearing and none are obvious from the code.
 
-- **Module CSS is injected unlayered.** Core's styles sit in cascade layers, and
-  unlayered styles beat layered ones regardless of specificity. That is the only reason
-  `.illuminus-styled .journal-sidebar .toc li.page` overrides core's six-class rule. Do
-  not "fix" a low-specificity selector by inflating it; verify with computed styles
-  instead. Also: the stylesheet will not appear in `document.styleSheets` with an
-  `href`, so do not test for its presence that way.
+- **Module CSS lands in a `modules` cascade layer that comes after core's layers.**
+  That is why `.illuminus-styled .journal-sidebar .toc li.page` overrides core's
+  six-class rule despite being less specific. Do not "fix" a low-specificity selector by
+  inflating it; verify with computed styles instead. Also: the stylesheet does not appear
+  in `document.styleSheets` with an `href`, and walking `cssRules` will not find these
+  rules either — `CSS.getMatchedStylesForNode` over CDP is the way to see which
+  declaration actually wins, and it reports the layer.
+- **Some core styling is fed through element-local custom properties.** A journal
+  sheet's header buttons carry `--button-text-color` on themselves, which a generic
+  `button { color: var(--button-text-color) }` then resolves. Setting `color` works, but
+  set the variable too — the sidebar buttons are styled that way.
+- **Buttons animate.** Reading a computed colour or size straight after a render can
+  return a value part-way through a transition (`14.0717px` rather than `14` or `22`).
+  Freeze transitions before measuring:
+  `* { transition: none !important; animation: none !important; }`. A test that
+  mysteriously reads the old value is usually this, not a cascade problem.
 - **Render hooks fire for the whole inheritance chain.** `renderJournalEntrySheet` fires
   for system subclasses too, so hooking the core class is enough.
 - **An ApplicationV2 part template must have exactly one root element.** More than one

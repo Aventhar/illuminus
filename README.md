@@ -16,12 +16,13 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 498 settings across 12 tabs and 79 collapsible
+- **Everything is a GUI control.** 570 settings across 13 tabs and 83 collapsible
   sections, labelled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
-- **The whole window, not just the page.** A Sidebar tab styles the contents panel:
-  page entries, the current-page marker, page numbers, sub-headings, category rows,
-  the search box, and the buttons.
+- **The whole window, not just the page.** A Sidebar tab styles the contents panel —
+  page entries, the current-page marker, page numbers, sub-headings, category rows, the
+  search box, and its buttons — and a Window tab styles the frame, the title bar, its
+  icon buttons, and the edit pencil that appears over a page.
 - **Nothing is collapsed into one control.** Each of the four borders has its own
   thickness, style, and colour; each corner its own rounding; each side its own padding
   and margin; each shadow its own offset, softness, size, and colour. A **Match** button

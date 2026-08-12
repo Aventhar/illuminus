@@ -743,7 +743,87 @@ check(tb.wide.tall.length === 0, `no tab label wraps onto a second line${tb.wide
 check(tb.wide.labels.every((l) => l && l.split(" ").length <= 2),
   `every tab label is one or two words (${tb.wide.labels.join(", ")})`);
 
-console.log("\n[22] Console is clean");
+// The title bar and the page's edit pencil sit outside the page itself, so
+// they need their own rules; core styles them and this must win.
+// The window frame is built once when a sheet first renders. Re-joining gives
+// this check a clean session rather than one shaped by twenty other tests.
+await joinAndWait();
+console.log("\n[22] Window frame, title bar, and icon buttons take style");
+const win = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  // A style of its own: mutating a preset leaves other checks in this file
+  // reading values they did not set.
+  const style = await api.createStyle({
+    name: "Window Probe Style",
+    settings: {
+      window: {
+        titleBarBackground: "#204060", color: "#ffcc00", size: 20,
+        headerButtonColor: "#00ff88", headerButtonSize: 22,
+        pageButtonColor: "#ff00ff", pageButtonBackground: "#101010"
+      }
+    }
+  });
+
+  const entry = await JournalEntry.create({name: "Window Style Test"});
+  await entry.createEmbeddedDocuments("JournalEntryPage",
+    [{name: "P", type: "text", text: {content: "<p>x</p>"}}]);
+  await api.assignStyle(entry, style.id);
+  await entry.sheet.render({force: true});
+  await new Promise(r => setTimeout(r, 1500));
+
+  const root = entry.sheet.element;
+
+  // Foundry animates buttons, so a computed read taken mid-transition returns a
+  // value part-way between old and new. Freeze transitions before measuring.
+  const freeze = document.createElement("style");
+  freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+  document.head.append(freeze);
+  void root.offsetHeight;
+
+  const cs = sel => { const el = root.querySelector(sel); return el ? getComputedStyle(el) : null; };
+  const button = cs(".window-header button.header-control");
+  const edit = cs(".journal-entry-page .edit-container button");
+  const out = {
+    headerBg: cs(".window-header")?.backgroundColor,
+    titleColor: cs(".window-header .window-title")?.color,
+    titleSize: cs(".window-header .window-title")?.fontSize,
+    buttonColor: button?.color,
+    buttonSize: button?.fontSize,
+    editColor: edit?.color,
+    editBg: edit?.backgroundColor,
+    // The controls dropdown reuses the class on list items; they are not icons.
+    dropdownItemsUntouched: [...root.querySelectorAll("li.header-control")]
+      .every(li => getComputedStyle(li).fontSize !== "22px"),
+    diag: (() => {
+      const b = root.querySelector(".window-header button.header-control");
+      const c = getComputedStyle(b);
+      return {
+        matches: b.matches(".illuminus-styled .window-header button.header-control"),
+        insideStyled: !!b.closest(".illuminus-styled"),
+        attrOnAncestor: b.closest("[data-illuminus-style]")?.getAttribute("data-illuminus-style"),
+        illVar: c.getPropertyValue("--ill-window-header-button-color").trim(),
+        buttonVar: c.getPropertyValue("--button-text-color").trim()
+      };
+    })()
+  };
+
+  freeze.remove();
+  await entry.delete();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const wn = JSON.parse(win);
+check(wn.headerBg === "rgb(32, 64, 96)", `title bar fill applied (got ${wn.headerBg})`);
+check(wn.titleColor === "rgb(255, 204, 0)", `title lettering applied (got ${wn.titleColor})`);
+check(wn.titleSize === "20px", `title size applied (got ${wn.titleSize})`);
+if (wn.buttonColor !== "rgb(0, 255, 136)") console.log("      diag:", JSON.stringify(wn.diag));
+check(wn.buttonColor === "rgb(0, 255, 136)", `title bar icon colour applied (got ${wn.buttonColor})`);
+check(wn.buttonSize === "22px", `title bar icon size applied (got ${wn.buttonSize})`);
+check(wn.editColor === "rgb(255, 0, 255)", `edit pencil colour applied (got ${wn.editColor})`);
+check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
+check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
+
+console.log("\n[23] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

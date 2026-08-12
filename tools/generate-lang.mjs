@@ -46,6 +46,7 @@ Object.assign(out, {
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
   page: ["Page", "The paper the text sits on: its colour, any background picture, and the frame around it."],
+  window: ["Window", "The journal window itself: its frame, the title bar across the top, and the icon buttons."],
   sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."],
   title: ["Title", "The journal's name, shown across the top of the window."],
   heading1: ["Heading 1", "The largest headings — page titles and chapter openers."],
@@ -94,7 +95,11 @@ const SECTION_TEXT = {
   subHeadings: ["Sub-Headings", "The headings listed underneath the page you are reading"],
   category: ["Category Rows", "Group headers in the contents panel"],
   search: ["Search Box", "The search field at the top of the panel"],
-  buttons: ["Buttons", "The controls beside the search box and along the bottom"]
+  buttons: ["Buttons", "The controls beside the search box and along the bottom"],
+  frame: ["Window Frame", "The edge of the window, visible around the page"],
+  titleBar: ["Title Bar", "The strip across the top carrying the journal's name"],
+  headerButtons: ["Title Bar Buttons", "The icon buttons at the right of the title bar, including Illuminus's own"],
+  pageButton: ["Edit Button", "The pencil that appears over a page when you point at it"]
 };
 for (const [id, [label, hint]] of Object.entries(SECTION_TEXT)) {
   put(`ILLUMINUS.Sections.${id}.label`, label);
@@ -112,6 +117,8 @@ for (const [id, [label, hint]] of Object.entries(SECTION_TEXT)) {
  */
 const NOUN = {
   border: "edge", cellBorder: "cell edge", entryBorder: "entry edge", searchBorder: "search box edge",
+  headerButtonBorder: "button edge", pageButtonBorder: "button edge",
+  headerButtonCorner: "button", pageButtonCorner: "button",
   padding: "contents", cellPadding: "cell's contents", entryPadding: "entry's contents",
   margin: "", corner: "", searchCorner: "search box", buttonCorner: "button",
   shadow: "shadow", innerShadow: "inner shading", textShadow: "text shadow"
@@ -249,6 +256,17 @@ const FIELD_TEXT = {
   captionSpacing: ["Gap Above Caption", "Space between a picture and its caption."],
 
   sidebarWidth: ["Panel Width", "How wide the contents panel is."],
+  titleBarBackground: ["Fill Colour", "Colour of the strip across the top of the window."],
+  headerButtonColor: ["Icon Colour", "Colour of the title bar's icon buttons."],
+  headerButtonHoverColor: ["Icon Colour When Pointed At", "Icon colour while the mouse is over a title bar button."],
+  headerButtonBackground: ["Fill Colour", "Colour behind the title bar's icon buttons."],
+  headerButtonHoverBackground: ["Fill When Pointed At", "Colour behind a title bar button while the mouse is over it."],
+  headerButtonSize: ["Icon Size", "How large the title bar's icons are."],
+  pageButtonColor: ["Icon Colour", "Colour of the edit pencil."],
+  pageButtonHoverColor: ["Icon Colour When Pointed At", "Colour of the edit pencil while the mouse is over it."],
+  pageButtonBackground: ["Fill Colour", "Colour behind the edit pencil."],
+  pageButtonHoverBackground: ["Fill When Pointed At", "Colour behind the edit pencil while the mouse is over it."],
+  pageButtonSize: ["Icon Size", "How large the edit pencil is."],
   hoverBackground: ["Highlight When Pointed At", "Colour behind an entry while the mouse is over it."],
   activeColor: ["Current Page Colour", "Lettering colour of the page you are reading."],
   activeBackground: ["Current Page Highlight", "Colour behind the page you are reading."],

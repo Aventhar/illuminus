@@ -95,6 +95,12 @@
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}
     <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
+      <div class="illuminus-preview__window">
+      <header class="window-header">
+        <h1 class="window-title">{{localize "ILLUMINUS.Preview.JournalTitle"}}</h1>
+        <button type="button" class="header-control icon fa-solid fa-palette" disabled></button>
+        <button type="button" class="header-control icon fa-solid fa-xmark" disabled></button>
+      </header>
       <div class="illuminus-preview__sheet">
       <aside class="sidebar journal-sidebar flexcol">
         <search>
@@ -163,9 +169,13 @@
                 </figure>
               </section>
             </div>
+            <div class="edit-container">
+              <button type="button" class="icon fa-solid fa-edit" disabled></button>
+            </div>
           </article>
         </div>
       </section>
+      </div>
       </div>
     </div>
   </aside>

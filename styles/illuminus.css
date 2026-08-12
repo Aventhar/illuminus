@@ -79,6 +79,94 @@
   margin-inline: auto;
 }
 
+/* --- Window frame, title bar, and its buttons --------------------------- */
+
+/* Scoped to `.application` so the editor's sample frame, which carries the same
+   marker class but has no window around it, is left alone. */
+.illuminus-styled.application {
+  background-color: var(--ill-window-background);
+  border-width: var(--ill-window-border-top-width) var(--ill-window-border-right-width)
+                var(--ill-window-border-bottom-width) var(--ill-window-border-left-width);
+  border-style: var(--ill-window-border-top-style) var(--ill-window-border-right-style)
+                var(--ill-window-border-bottom-style) var(--ill-window-border-left-style);
+  border-color: var(--ill-window-border-top-color) var(--ill-window-border-right-color)
+                var(--ill-window-border-bottom-color) var(--ill-window-border-left-color);
+  border-radius: var(--ill-window-corner-top-left) var(--ill-window-corner-top-right)
+                 var(--ill-window-corner-bottom-right) var(--ill-window-corner-bottom-left);
+}
+
+.illuminus-styled .window-header {
+  background-color: var(--ill-window-title-bar-background);
+  padding: var(--ill-window-padding-top) var(--ill-window-padding-right)
+           var(--ill-window-padding-bottom) var(--ill-window-padding-left);
+}
+
+.illuminus-styled .window-header .window-title {
+  font-family: var(--ill-window-font);
+  font-size: var(--ill-window-size);
+  font-weight: var(--ill-window-weight);
+  font-style: var(--ill-window-style);
+  font-variant: var(--ill-window-caps-variant);
+  text-transform: var(--ill-window-caps-transform);
+  letter-spacing: var(--ill-window-letter-spacing);
+  text-align: var(--ill-window-align);
+  color: var(--ill-window-color);
+}
+
+/* The icon buttons in the title bar: close and the controls menu. Matching
+   `button` matters — the entries inside the controls dropdown carry the same
+   class but are list items, and styling those as icons is wrong. */
+.illuminus-styled .window-header button.header-control {
+  /* Core sets --button-text-color on the button itself and lets the generic
+     button rule resolve it, so overriding `color` alone is not enough — the
+     variables have to be fed too. The sidebar buttons work for this reason. */
+  --button-text-color: var(--ill-window-header-button-color);
+  --button-background-color: var(--ill-window-header-button-background);
+  --button-size: calc(var(--ill-window-header-button-size) * 1.7);
+  color: var(--ill-window-header-button-color);
+  background-color: var(--ill-window-header-button-background);
+  font-size: var(--ill-window-header-button-size);
+  border-width: var(--ill-window-header-button-border-top-width) var(--ill-window-header-button-border-right-width)
+                var(--ill-window-header-button-border-bottom-width) var(--ill-window-header-button-border-left-width);
+  border-style: var(--ill-window-header-button-border-top-style) var(--ill-window-header-button-border-right-style)
+                var(--ill-window-header-button-border-bottom-style) var(--ill-window-header-button-border-left-style);
+  border-color: var(--ill-window-header-button-border-top-color) var(--ill-window-header-button-border-right-color)
+                var(--ill-window-header-button-border-bottom-color) var(--ill-window-header-button-border-left-color);
+  border-radius: var(--ill-window-header-button-corner-top-left) var(--ill-window-header-button-corner-top-right)
+                 var(--ill-window-header-button-corner-bottom-right) var(--ill-window-header-button-corner-bottom-left);
+}
+
+.illuminus-styled .window-header button.header-control:hover {
+  --button-text-color: var(--ill-window-header-button-hover-color);
+  --button-background-color: var(--ill-window-header-button-hover-background);
+  color: var(--ill-window-header-button-hover-color);
+  background-color: var(--ill-window-header-button-hover-background);
+}
+
+/* The pencil that appears over a page on hover. */
+.illuminus-styled .journal-entry-page .edit-container button {
+  --button-text-color: var(--ill-window-page-button-color);
+  --button-background-color: var(--ill-window-page-button-background);
+  color: var(--ill-window-page-button-color);
+  background-color: var(--ill-window-page-button-background);
+  font-size: var(--ill-window-page-button-size);
+  border-width: var(--ill-window-page-button-border-top-width) var(--ill-window-page-button-border-right-width)
+                var(--ill-window-page-button-border-bottom-width) var(--ill-window-page-button-border-left-width);
+  border-style: var(--ill-window-page-button-border-top-style) var(--ill-window-page-button-border-right-style)
+                var(--ill-window-page-button-border-bottom-style) var(--ill-window-page-button-border-left-style);
+  border-color: var(--ill-window-page-button-border-top-color) var(--ill-window-page-button-border-right-color)
+                var(--ill-window-page-button-border-bottom-color) var(--ill-window-page-button-border-left-color);
+  border-radius: var(--ill-window-page-button-corner-top-left) var(--ill-window-page-button-corner-top-right)
+                 var(--ill-window-page-button-corner-bottom-right) var(--ill-window-page-button-corner-bottom-left);
+}
+
+.illuminus-styled .journal-entry-page .edit-container button:hover {
+  --button-text-color: var(--ill-window-page-button-hover-color);
+  --button-background-color: var(--ill-window-page-button-hover-background);
+  color: var(--ill-window-page-button-hover-color);
+  background-color: var(--ill-window-page-button-hover-background);
+}
+
 /* --- Sidebar (table of contents) ---------------------------------------- */
 
 /* Core sets the sidebar width as a variable on the sheet root, so the width
@@ -955,10 +1043,57 @@
    element scrolls. The inner row carries min-height so the sidebar and page
    both grow past the frame's height — pinning them to 100% would leave the
    scrolled-past area with no background. */
+/* The window wrapper carries the min-height so both the mock title bar and the
+   sheet below it grow past the frame, keeping their backgrounds under anything
+   scrolled past. */
+.illuminus-preview__window {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .illuminus-preview__sheet {
   display: flex;
   align-items: stretch;
-  min-height: 100%;
+  flex: 1;
+}
+
+/* Like the sidebar, the mock title bar and edit button appear only while the
+   tab that styles them is open. */
+.illuminus-preview__frame .window-header,
+.illuminus-preview__frame .edit-container {
+  display: none;
+}
+
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="window"].active) .illuminus-preview__frame .window-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="window"].active) .illuminus-preview__frame .edit-container {
+  display: block;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.illuminus-preview__frame .window-header .window-title {
+  flex: 1;
+  margin: 0;
+  border: none;
+  font-size: 14px;
+}
+
+.illuminus-preview__frame .header-control {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0.15rem 0.3rem;
+  background: none;
+}
+
+.illuminus-preview__frame .journal-entry-page {
+  position: relative;
 }
 
 .illuminus-preview__frame .journal-entry-content {

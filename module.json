@@ -1,8 +1,8 @@
 {
   "id": "illuminus",
   "title": "Illuminus",
-  "description": "Decorative styling for Foundry journals, applied per journal and configured entirely through a plain-language GUI. 498 controls across 12 tabs covering the page and the contents sidebar — every border side, corner, and shadow component set independently. Build parchment, grimoire, or sci-fi looks like those in professionally produced adventures, then export them to share between worlds.",
-  "version": "0.4.4",
+  "description": "Decorative styling for Foundry journals, applied per journal and configured entirely through a plain-language GUI. 570 controls across 13 tabs covering the page and the contents sidebar — every border side, corner, and shadow component set independently. Build parchment, grimoire, or sci-fi looks like those in professionally produced adventures, then export them to share between worlds.",
+  "version": "0.5.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.365"

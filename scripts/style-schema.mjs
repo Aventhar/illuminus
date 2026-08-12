@@ -248,6 +248,60 @@ export const GROUPS = [
   },
 
   {
+    id: "window",
+    icon: "fa-solid fa-window-maximize",
+    sections: [
+      {
+        id: "frame",
+        fields: [
+          col("background", "#00000000"),
+          ...borderFields("border", { color: "#00000000" }),
+          ...cornerFields("corner")
+        ]
+      },
+      {
+        id: "titleBar",
+        fields: [
+          col("titleBarBackground", "#00000000"),
+          font("font", ""),
+          num("size", 16, "px", 6, 60, 1),
+          col("color", "#f7f3e8"),
+          select("weight", "700", CHOICES.weight),
+          select("style", "normal", CHOICES.fontStyle),
+          select("caps", "none", CHOICES.caps, { emit: emitCaps }),
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          select("align", "left", CHOICES.alignNoJustify),
+          ...spacingFields("padding", 0, { max: 60 })
+        ]
+      },
+      {
+        id: "headerButtons",
+        fields: [
+          col("headerButtonColor", "#f7f3e8"),
+          col("headerButtonHoverColor", "#ffffff"),
+          col("headerButtonBackground", "#00000000"),
+          col("headerButtonHoverBackground", "#00000000"),
+          num("headerButtonSize", 14, "px", 6, 48, 1),
+          ...borderFields("headerButtonBorder", { color: "#00000000" }),
+          ...cornerFields("headerButtonCorner", 3)
+        ]
+      },
+      {
+        id: "pageButton",
+        fields: [
+          col("pageButtonColor", "#e7d1b1"),
+          col("pageButtonHoverColor", "#ffffff"),
+          col("pageButtonBackground", "#0b0a1380"),
+          col("pageButtonHoverBackground", "#0b0a13cc"),
+          num("pageButtonSize", 14, "px", 6, 48, 1),
+          ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
+          ...cornerFields("pageButtonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+  {
     id: "sidebar",
     icon: "fa-solid fa-list-tree",
     sections: [
