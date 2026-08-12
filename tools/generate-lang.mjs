@@ -45,18 +45,18 @@ Object.assign(out, {
 
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
-  page: ["The Page", "The paper the text sits on: its colour, any background picture, and the frame around it."],
-  title: ["Journal Title", "The journal's name, shown across the top of the window."],
-  heading1: ["Major Headings", "The largest headings — page titles and chapter openers."],
-  heading2: ["Section Headings", "Mid-level headings that break a page into sections."],
-  heading3: ["Minor Headings", "The smallest headings. Also used for anything smaller still."],
-  body: ["Body Text", "Ordinary paragraphs — the bulk of what people read."],
+  page: ["Page", "The paper the text sits on: its colour, any background picture, and the frame around it."],
+  sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."],
+  title: ["Title", "The journal's name, shown across the top of the window."],
+  heading1: ["Heading 1", "The largest headings — page titles and chapter openers."],
+  heading2: ["Heading 2", "Mid-level headings that break a page into sections."],
+  heading3: ["Heading 3", "The smallest headings. Also used for anything smaller still."],
+  body: ["Body", "Ordinary paragraphs — the bulk of what people read."],
   links: ["Links", "Clickable references to other documents, rolls, and web pages."],
   lists: ["Lists", "Bulleted and numbered lists."],
   tables: ["Tables", "Tables of results, treasure, encounters, and the like."],
-  boxes: ["Boxed Text", "Set-apart passages, such as read-aloud description. Applies to quote blocks in the editor."],
-  images: ["Pictures", "Images placed in a page, and their captions."],
-  sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."]
+  boxes: ["Boxes", "Set-apart passages, such as read-aloud description. Applies to quote blocks in the editor."],
+  images: ["Pictures", "Images placed in a page, and their captions."]
 };
 for (const [id, [label, hint]] of Object.entries(GROUP_TEXT)) {
   put(`ILLUMINUS.Groups.${id}.label`, label);

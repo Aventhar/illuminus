@@ -703,7 +703,47 @@ check(bd.middle.value.toLowerCase() === "#0a141e",
   `the middle still gives the fill, not a border (got ${bd.middle.value})`);
 check(bd.middle.readout.includes("Fill"), `and reports it as fill (got "${bd.middle.readout}")`);
 
-console.log("\n[21] Console is clean");
+// Tab labels are short enough to sit on one line with their badge, and the
+// strip wraps rather than hiding a tab when the window narrows.
+console.log("\n[21] The tab strip never hides a tab");
+const tabs = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const app = await api.openEditor(api.listStyles()[0].id);
+  await new Promise(r => setTimeout(r, 900));
+
+  const measure = () => {
+    const nav = app.element.querySelector("nav.tabs");
+    const nb = nav.getBoundingClientRect();
+    const items = [...nav.querySelectorAll("[data-tab]")];
+    return {
+      clipped: items.filter(i => {
+        const r = i.getBoundingClientRect();
+        return r.right > nb.right + 1 || r.bottom > nb.bottom + 1;
+      }).map(i => i.dataset.tab),
+      // A tab whose label wrapped internally is taller than a single line.
+      tall: items.filter(i => i.getBoundingClientRect().height > 44).map(i => i.dataset.tab),
+      labels: items.map(i => i.querySelector("span")?.textContent.trim())
+    };
+  };
+
+  app.setPosition({width: 1000});
+  await new Promise(r => setTimeout(r, 400));
+  const wide = measure();
+  app.setPosition({width: 700});
+  await new Promise(r => setTimeout(r, 400));
+  const narrow = measure();
+
+  await app.close();
+  return JSON.stringify({wide, narrow});
+})()`);
+const tb = JSON.parse(tabs);
+check(tb.wide.clipped.length === 0, `no tab clipped at 1000px${tb.wide.clipped.length ? ": " + tb.wide.clipped : ""}`);
+check(tb.narrow.clipped.length === 0, `no tab clipped at 700px${tb.narrow.clipped.length ? ": " + tb.narrow.clipped : ""}`);
+check(tb.wide.tall.length === 0, `no tab label wraps onto a second line${tb.wide.tall.length ? ": " + tb.wide.tall : ""}`);
+check(tb.wide.labels.every((l) => l && l.split(" ").length <= 2),
+  `every tab label is one or two words (${tb.wide.labels.join(", ")})`);
+
+console.log("\n[22] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

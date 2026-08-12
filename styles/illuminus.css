@@ -894,6 +894,18 @@
 
 /* --- Tab badges --------------------------------------------------------- */
 
+/* Keep each tab on one line: without this the changed-count badge wraps below
+   the label, and a two-word label splits around it. The strip itself wraps
+   between tabs instead, so narrowing the window never hides one. */
+.illuminus-editor nav.tabs {
+  flex-wrap: wrap;
+  row-gap: 0.15rem;
+}
+
+.illuminus-editor nav.tabs [data-tab] {
+  white-space: nowrap;
+}
+
 .illuminus-editor nav.tabs .illuminus-badge {
   margin-left: 0.3rem;
   padding: 0 0.3rem;

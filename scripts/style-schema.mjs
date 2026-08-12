@@ -346,7 +346,7 @@ export const GROUPS = [
 
   {
     id: "title",
-    icon: "fa-solid fa-heading",
+    icon: "fa-solid fa-signature",
     sections: bannerSections({
       size: 36, color: "#3b2412", weight: "700", align: "center", lineHeight: 1.2
     })
@@ -354,21 +354,21 @@ export const GROUPS = [
 
   {
     id: "heading1",
-    icon: "fa-solid fa-1",
+    icon: "fa-solid fa-heading",
     sections: bannerSections({
       size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 }
     })
   },
   {
     id: "heading2",
-    icon: "fa-solid fa-2",
+    icon: "fa-solid fa-heading",
     sections: bannerSections({
       size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 }
     })
   },
   {
     id: "heading3",
-    icon: "fa-solid fa-3",
+    icon: "fa-solid fa-heading",
     sections: bannerSections({
       size: 18, color: "#5a4326", weight: "700", style: "italic", lineHeight: 1.3,
       margin: { top: 14, bottom: 6 }
