@@ -774,9 +774,13 @@
   border-radius: 4px;
 }
 
+/* The frame is the scroll container here, unlike the real sheet where an inner
+   element scrolls. So the page must be free to grow past the frame's height —
+   pinning it to 100% leaves the scrolled-past area with no page background. */
 .illuminus-preview__frame .journal-entry-content {
   display: block;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
 }
 
 .illuminus-preview__frame .journal-header {
