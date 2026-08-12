@@ -19,6 +19,15 @@ export const PRESETS = [
     name: "Aged Parchment",
     description: "Warm paper, rust-red headings, and boxed read-aloud text. The classic printed-adventure look.",
     settings: {
+      sidebar: {
+        background: "#2b1d12", color: "#e8dcc2", activeColor: "#f6efe0", activeBackground: "#3d2a1a",
+        activeAccentColor: "#a8341c", activeAccentWidth: 4, activeWeight: "700", hoverBackground: "#3a281a",
+        entryBorderBottomWidth: 1, entryBorderBottomColor: "#463322", numberColor: "#9c8a6a",
+        categoryColor: "#d9a441", categorySize: 20, headingColor: "#c9b28d", headingHoverColor: "#f6efe0",
+        searchBackground: "#1d130b", searchColor: "#e8dcc2", searchPlaceholderColor: "#8a7454",
+        buttonColor: "#e8dcc2", buttonBorderColor: "#6b4f2f", buttonHoverColor: "#f6efe0",
+        buttonHoverBorderColor: "#a8341c"
+      },
       page: {
         background: "#ece0c6", textureFit: "cover", paddingTop: 32, paddingRight: 32, paddingBottom: 32,
         paddingLeft: 32, borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2,
@@ -68,6 +77,15 @@ export const PRESETS = [
     name: "Midnight Codex",
     description: "A dark grimoire: deep slate paper, pale gold headings, and cool highlights.",
     settings: {
+      sidebar: {
+        background: "#12151b", color: "#c8d2de", activeColor: "#e8c979", activeBackground: "#1c2029",
+        activeAccentColor: "#e8c979", activeAccentWidth: 3, activeWeight: "700", hoverBackground: "#191d25",
+        entryBorderBottomWidth: 1, entryBorderBottomColor: "#262c38", numberColor: "#6b7688",
+        categoryColor: "#e8c979", categorySize: 20, headingColor: "#9fb3c8", headingHoverColor: "#e8c979",
+        searchBackground: "#0d1015", searchColor: "#c8d2de", searchPlaceholderColor: "#5d6878",
+        buttonColor: "#c8d2de", buttonBorderColor: "#3d4658", buttonHoverColor: "#e8c979",
+        buttonHoverBorderColor: "#c9a961"
+      },
       page: {
         background: "#171a21", paddingTop: 32, paddingRight: 32, paddingBottom: 32, paddingLeft: 32,
         borderTopWidth: 1, borderTopColor: "#3d4658", borderRightWidth: 1, borderRightColor: "#3d4658",
@@ -120,6 +138,18 @@ export const PRESETS = [
     name: "Clean Manuscript",
     description: "Understated cream and ink. Generous spacing for long reads, with no heavy ornament.",
     settings: {
+      sidebar: {
+        background: "#ece7dd", color: "#3a3a3a", activeColor: "#1f1f1f", activeBackground: "#ffffff",
+        activeAccentColor: "#1a5fb4", activeAccentWidth: 3, activeWeight: "600", hoverBackground: "#f4f1ea",
+        entryBorderBottomWidth: 1, entryBorderBottomColor: "#d8d2c6", numberColor: "#9a9384",
+        categoryColor: "#1f1f1f", categorySize: 18, categoryCaps: "none", headingColor: "#5a5a5a",
+        headingHoverColor: "#1a5fb4", searchBackground: "#ffffff", searchColor: "#2b2b2b",
+        searchPlaceholderColor: "#a09a8d", searchBorderTopWidth: 1, searchBorderRightWidth: 1,
+        searchBorderBottomWidth: 1, searchBorderLeftWidth: 1, searchBorderTopColor: "#d8d2c6",
+        searchBorderRightColor: "#d8d2c6", searchBorderBottomColor: "#d8d2c6", searchBorderLeftColor: "#d8d2c6",
+        buttonColor: "#3a3a3a", buttonBorderColor: "#c9c1b2", buttonHoverColor: "#1a5fb4",
+        buttonHoverBorderColor: "#1a5fb4"
+      },
       page: {
         background: "#fbf7ef", maxWidth: 780, paddingTop: 40, paddingRight: 40, paddingBottom: 40, paddingLeft: 40,
         borderTopStyle: "none", borderRightStyle: "none", borderBottomStyle: "none", borderLeftStyle: "none"
@@ -168,6 +198,17 @@ export const PRESETS = [
     name: "Datapad",
     description: "A science-fiction readout: dark panel, cyan rules, and monospaced headings.",
     settings: {
+      sidebar: {
+        background: "#0a1114", color: "#a8b8c0", activeColor: "#5fe3d6", activeBackground: "#10222a",
+        activeAccentColor: "#5fe3d6", activeAccentWidth: 2, activeWeight: "700", hoverBackground: "#0e1a1f",
+        entryBorderBottomWidth: 1, entryBorderBottomColor: "#16323a", numberColor: "#4d6870",
+        categoryColor: "#5fe3d6", categorySize: 18, categoryLetterSpacing: 3, headingColor: "#7fb8c8",
+        headingHoverColor: "#5fe3d6", searchBackground: "#060d10", searchColor: "#c2ced4",
+        searchPlaceholderColor: "#4d6870", searchCornerTopLeft: 2, searchCornerTopRight: 2,
+        searchCornerBottomRight: 2, searchCornerBottomLeft: 2,
+        buttonColor: "#a8b8c0", buttonBorderColor: "#1f6f7a", buttonHoverColor: "#5fe3d6",
+        buttonHoverBorderColor: "#5fe3d6"
+      },
       page: {
         background: "#0d1418", paddingTop: 28, paddingRight: 28, paddingBottom: 28, paddingLeft: 28,
         borderTopWidth: 1, borderTopColor: "#1f6f7a", borderRightWidth: 1, borderRightColor: "#1f6f7a",

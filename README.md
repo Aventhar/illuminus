@@ -16,16 +16,20 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 391 settings across 11 tabs and 68 collapsible
+- **Everything is a GUI control.** 498 settings across 12 tabs and 79 collapsible
   sections, labelled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
+- **The whole window, not just the page.** A Sidebar tab styles the contents panel:
+  page entries, the current-page marker, page numbers, sub-headings, category rows,
+  the search box, and the buttons.
 - **Nothing is collapsed into one control.** Each of the four borders has its own
   thickness, style, and colour; each corner its own rounding; each side its own padding
   and margin; each shadow its own offset, softness, size, and colour. A **Match** button
   in each section copies one value across its siblings when you do want them the same.
 - **Live sample.** The editor carries a miniature journal that repaints as you drag a
-  slider, and any real journal already open repaints too. Nothing is written to the world
-  until you press Save.
+  slider, and any real journal already open repaints too. The sample reveals the sidebar
+  while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
+  is written to the world until you press Save.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **Four styles included:** Aged Parchment, Midnight Codex, Clean Manuscript, Datapad.
   They are ordinary styles once seeded — edit or delete them freely.

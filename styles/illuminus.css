@@ -79,6 +79,161 @@
   margin-inline: auto;
 }
 
+/* --- Sidebar (table of contents) ---------------------------------------- */
+
+/* Core sets the sidebar width as a variable on the sheet root, so the width
+   control is fed in there rather than onto the aside itself. */
+.illuminus-styled.sheet.journal-entry,
+.illuminus-preview__frame.illuminus-styled {
+  --sidebar-width-expanded: var(--ill-sidebar-sidebar-width);
+}
+
+.illuminus-styled .journal-sidebar {
+  background-color: var(--ill-sidebar-background);
+  padding: var(--ill-sidebar-padding-top) var(--ill-sidebar-padding-right)
+           var(--ill-sidebar-padding-bottom) var(--ill-sidebar-padding-left);
+  border-width: var(--ill-sidebar-border-top-width) var(--ill-sidebar-border-right-width)
+                var(--ill-sidebar-border-bottom-width) var(--ill-sidebar-border-left-width);
+  border-style: var(--ill-sidebar-border-top-style) var(--ill-sidebar-border-right-style)
+                var(--ill-sidebar-border-bottom-style) var(--ill-sidebar-border-left-style);
+  border-color: var(--ill-sidebar-border-top-color) var(--ill-sidebar-border-right-color)
+                var(--ill-sidebar-border-bottom-color) var(--ill-sidebar-border-left-color);
+  border-radius: var(--ill-sidebar-corner-top-left) var(--ill-sidebar-corner-top-right)
+                 var(--ill-sidebar-corner-bottom-right) var(--ill-sidebar-corner-bottom-left);
+}
+
+/* Page entries */
+.illuminus-styled .journal-sidebar .toc li.page {
+  padding: var(--ill-sidebar-entry-padding-top) var(--ill-sidebar-entry-padding-right)
+           var(--ill-sidebar-entry-padding-bottom) var(--ill-sidebar-entry-padding-left);
+  border-width: var(--ill-sidebar-entry-border-top-width) var(--ill-sidebar-entry-border-right-width)
+                var(--ill-sidebar-entry-border-bottom-width) var(--ill-sidebar-entry-border-left-width);
+  border-style: var(--ill-sidebar-entry-border-top-style) var(--ill-sidebar-entry-border-right-style)
+                var(--ill-sidebar-entry-border-bottom-style) var(--ill-sidebar-entry-border-left-style);
+  border-color: var(--ill-sidebar-entry-border-top-color) var(--ill-sidebar-entry-border-right-color)
+                var(--ill-sidebar-entry-border-bottom-color) var(--ill-sidebar-entry-border-left-color);
+}
+
+.illuminus-styled .journal-sidebar .toc .page-title {
+  font-family: var(--ill-sidebar-font);
+  font-size: var(--ill-sidebar-size);
+  font-weight: var(--ill-sidebar-weight);
+  font-style: var(--ill-sidebar-style);
+  font-variant: var(--ill-sidebar-caps-variant);
+  text-transform: var(--ill-sidebar-caps-transform);
+  letter-spacing: var(--ill-sidebar-letter-spacing);
+  word-spacing: var(--ill-sidebar-word-spacing);
+  line-height: var(--ill-sidebar-line-height);
+  text-align: var(--ill-sidebar-align);
+  color: var(--ill-sidebar-color);
+}
+
+.illuminus-styled .journal-sidebar .toc li.page:hover {
+  background-color: var(--ill-sidebar-hover-background);
+}
+
+.illuminus-styled .journal-sidebar .toc li.page:hover .page-title {
+  color: var(--ill-sidebar-hover-color);
+}
+
+/* The current page. Core marks its neighbours' edges too; the accent is drawn
+   here as a left bar so it reads the same wherever the entry sits in the list. */
+.illuminus-styled .journal-sidebar .toc li.page.active {
+  background-color: var(--ill-sidebar-active-background);
+  box-shadow: inset var(--ill-sidebar-active-accent-width) 0 0 0 var(--ill-sidebar-active-accent-color);
+}
+
+.illuminus-styled .journal-sidebar .toc li.page.active .page-title {
+  color: var(--ill-sidebar-active-color);
+  font-weight: var(--ill-sidebar-active-weight);
+}
+
+/* Page numbers */
+.illuminus-styled .journal-sidebar .toc .page-index,
+.illuminus-styled .journal-sidebar .toc .page-number {
+  color: var(--ill-sidebar-number-color);
+  font-size: var(--ill-sidebar-number-size);
+  font-weight: var(--ill-sidebar-number-weight);
+  text-align: var(--ill-sidebar-number-align);
+  width: var(--ill-sidebar-number-width);
+}
+
+/* Sub-headings listed beneath the current page */
+.illuminus-styled .journal-sidebar .toc .headings {
+  margin-left: var(--ill-sidebar-heading-indent);
+}
+
+.illuminus-styled .journal-sidebar .toc .heading-link {
+  font-family: var(--ill-sidebar-heading-font);
+  font-size: var(--ill-sidebar-heading-size);
+  font-weight: var(--ill-sidebar-heading-weight);
+  font-style: var(--ill-sidebar-heading-style);
+  line-height: var(--ill-sidebar-heading-line-height);
+  color: var(--ill-sidebar-heading-color);
+}
+
+.illuminus-styled .journal-sidebar .toc .heading-link:hover {
+  color: var(--ill-sidebar-heading-hover-color);
+  text-shadow: none;
+}
+
+/* Category rows */
+.illuminus-styled .journal-sidebar .toc li.category {
+  background-color: var(--ill-sidebar-category-background);
+}
+
+.illuminus-styled .journal-sidebar .toc li.category strong {
+  font-family: var(--ill-sidebar-category-font);
+  font-size: var(--ill-sidebar-category-size);
+  font-weight: var(--ill-sidebar-category-weight);
+  font-variant: var(--ill-sidebar-category-caps-variant);
+  text-transform: var(--ill-sidebar-category-caps-transform);
+  letter-spacing: var(--ill-sidebar-category-letter-spacing);
+  text-align: var(--ill-sidebar-category-align);
+  color: var(--ill-sidebar-category-color);
+}
+
+/* Search box */
+.illuminus-styled .journal-sidebar search input[type="search"] {
+  --input-background-color: var(--ill-sidebar-search-background);
+  --input-text-color: var(--ill-sidebar-search-color);
+  --input-placeholder-color: var(--ill-sidebar-search-placeholder-color);
+  background-color: var(--ill-sidebar-search-background);
+  color: var(--ill-sidebar-search-color);
+  font-size: var(--ill-sidebar-search-size);
+  border-width: var(--ill-sidebar-search-border-top-width) var(--ill-sidebar-search-border-right-width)
+                var(--ill-sidebar-search-border-bottom-width) var(--ill-sidebar-search-border-left-width);
+  border-style: var(--ill-sidebar-search-border-top-style) var(--ill-sidebar-search-border-right-style)
+                var(--ill-sidebar-search-border-bottom-style) var(--ill-sidebar-search-border-left-style);
+  border-color: var(--ill-sidebar-search-border-top-color) var(--ill-sidebar-search-border-right-color)
+                var(--ill-sidebar-search-border-bottom-color) var(--ill-sidebar-search-border-left-color);
+  border-radius: var(--ill-sidebar-search-corner-top-left) var(--ill-sidebar-search-corner-top-right)
+                 var(--ill-sidebar-search-corner-bottom-right) var(--ill-sidebar-search-corner-bottom-left);
+}
+
+.illuminus-styled .journal-sidebar search input[type="search"]::placeholder {
+  color: var(--ill-sidebar-search-placeholder-color);
+}
+
+/* Footer buttons, and the small controls beside the search box */
+.illuminus-styled .journal-sidebar button {
+  --button-text-color: var(--ill-sidebar-button-color);
+  --button-border-color: var(--ill-sidebar-button-border-color);
+  --button-hover-border-color: var(--ill-sidebar-button-hover-border-color);
+  color: var(--ill-sidebar-button-color);
+  background-color: var(--ill-sidebar-button-background);
+  border-width: var(--ill-sidebar-button-border-width);
+  border-color: var(--ill-sidebar-button-border-color);
+  border-radius: var(--ill-sidebar-button-corner-top-left) var(--ill-sidebar-button-corner-top-right)
+                 var(--ill-sidebar-button-corner-bottom-right) var(--ill-sidebar-button-corner-bottom-left);
+}
+
+.illuminus-styled .journal-sidebar button:hover {
+  color: var(--ill-sidebar-button-hover-color);
+  background-color: var(--ill-sidebar-button-hover-background);
+  border-color: var(--ill-sidebar-button-hover-border-color);
+}
+
 /* --- Journal title ------------------------------------------------------ */
 
 .illuminus-styled .journal-header .title {
@@ -746,7 +901,7 @@
 /* --- Editor preview pane ------------------------------------------------ */
 
 .illuminus-preview {
-  flex: 0 0 320px;
+  flex: 0 0 400px;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -775,12 +930,20 @@
 }
 
 /* The frame is the scroll container here, unlike the real sheet where an inner
-   element scrolls. So the page must be free to grow past the frame's height —
-   pinning it to 100% leaves the scrolled-past area with no page background. */
+   element scrolls. The inner row carries min-height so the sidebar and page
+   both grow past the frame's height — pinning them to 100% would leave the
+   scrolled-past area with no background. */
+.illuminus-preview__sheet {
+  display: flex;
+  align-items: stretch;
+  min-height: 100%;
+}
+
 .illuminus-preview__frame .journal-entry-content {
   display: block;
+  flex: 1;
+  min-width: 0;
   height: auto;
-  min-height: 100%;
 }
 
 .illuminus-preview__frame .journal-header {
@@ -789,6 +952,66 @@
 
 .illuminus-preview__frame .journal-entry-pages {
   display: block;
+}
+
+/* Core's sidebar layout is scoped to a real journal sheet, so the sample needs
+   just enough of it to be representative. Appearance still comes entirely from
+   the skeleton rules above. */
+/* The sample sidebar appears only while the Sidebar tab is open. Showing it
+   always would permanently halve the page preview for the sake of one tab. */
+.illuminus-preview__frame .journal-sidebar {
+  display: none;
+  flex: 0 0 auto;
+  /* Honour the width control, but never let it crowd out the page. */
+  width: min(var(--ill-sidebar-sidebar-width), 50%);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="sidebar"].active)
+  .illuminus-preview__frame .journal-sidebar {
+  display: flex;
+}
+
+.illuminus-preview__frame .journal-sidebar search {
+  display: flex;
+  margin: 0.4rem;
+}
+
+.illuminus-preview__frame .journal-sidebar search input {
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-preview__frame .journal-sidebar .toc {
+  flex: 1;
+}
+
+.illuminus-preview__frame .journal-sidebar .toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.illuminus-preview__frame .journal-sidebar .page-heading {
+  display: flex;
+  align-items: center;
+}
+
+.illuminus-preview__frame .journal-sidebar .page-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.illuminus-preview__frame .journal-sidebar .action-buttons {
+  padding: 0.4rem;
+}
+
+.illuminus-preview__frame .journal-sidebar .action-buttons button {
+  width: 100%;
 }
 
 .illuminus-preview__frame .journal-page-content {

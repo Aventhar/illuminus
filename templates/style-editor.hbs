@@ -89,6 +89,37 @@
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}
     <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
+      <div class="illuminus-preview__sheet">
+      <aside class="sidebar journal-sidebar flexcol">
+        <search>
+          <input type="search" placeholder="{{localize 'ILLUMINUS.Preview.Search'}}" disabled>
+        </search>
+        <nav class="toc">
+          <ol>
+            <li class="category"><strong>{{localize "ILLUMINUS.Preview.Category"}}</strong></li>
+            <li class="page active">
+              <div class="page-heading">
+                <span class="page-index">1</span>
+                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.Heading1"}}</span>
+              </div>
+              <ol class="headings">
+                <li class="heading h2"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.Heading2"}}</a></li>
+                <li class="heading h3"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.Heading3"}}</a></li>
+              </ol>
+            </li>
+            <li class="page">
+              <div class="page-heading">
+                <span class="page-index">2</span>
+                <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.Page2"}}</span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+        <footer class="action-buttons flexrow">
+          <button type="button" disabled>{{localize "ILLUMINUS.Preview.AddPage"}}</button>
+        </footer>
+      </aside>
+
       <section class="journal-entry-content">
         <header class="journal-header">
           <div class="title">{{localize "ILLUMINUS.Preview.JournalTitle"}}</div>
@@ -129,6 +160,7 @@
           </article>
         </div>
       </section>
+      </div>
     </div>
   </aside>
 

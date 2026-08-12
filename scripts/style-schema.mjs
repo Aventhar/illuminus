@@ -248,6 +248,103 @@ export const GROUPS = [
   },
 
   {
+    id: "sidebar",
+    icon: "fa-solid fa-list-tree",
+    sections: [
+      {
+        id: "surface",
+        fields: [
+          col("background", "#00000000"),
+          num("sidebarWidth", 300, "px", 120, 700, 10),
+          ...spacingFields("padding", 0, { max: 80 })
+        ]
+      },
+      { id: "border", fields: borderFields("border", { color: "#00000000" }) },
+      { id: "corners", fields: cornerFields("corner") },
+      {
+        id: "entries",
+        fields: [
+          ...textFields("", { size: 14, color: "#f0f0e0", weight: "400", lineHeight: 2.3 }),
+          ...spacingFields("entryPadding", 0, { max: 60 })
+        ]
+      },
+      { id: "entryBorder", fields: borderFields("entryBorder", { color: "#00000000" }) },
+      {
+        id: "entryStates",
+        fields: [
+          col("hoverColor", "#ffffff"),
+          col("hoverBackground", "#00000000"),
+          col("activeColor", "#ffffff"),
+          col("activeBackground", "#00000000"),
+          col("activeAccentColor", "#c9a961"),
+          num("activeAccentWidth", 0, "px", 0, 20, 1),
+          select("activeWeight", "400", CHOICES.weight)
+        ]
+      },
+      {
+        id: "number",
+        fields: [
+          col("numberColor", "#8a8a8a"),
+          num("numberSize", 14, "px", 6, 60, 1),
+          select("numberWeight", "400", CHOICES.weight),
+          select("numberAlign", "center", CHOICES.alignNoJustify),
+          num("numberWidth", 40, "px", 0, 120, 2)
+        ]
+      },
+      {
+        id: "subHeadings",
+        fields: [
+          font("headingFont", ""),
+          num("headingSize", 14, "px", 6, 60, 1),
+          col("headingColor", "#c8c8b8"),
+          select("headingWeight", "400", CHOICES.weight),
+          select("headingStyle", "normal", CHOICES.fontStyle),
+          col("headingHoverColor", "#ffffff"),
+          num("headingIndent", 16, "px", 0, 120, 2),
+          num("headingLineHeight", 2.3, "", 0.5, 5, 0.05)
+        ]
+      },
+      {
+        id: "category",
+        fields: [
+          font("categoryFont", ""),
+          num("categorySize", 24, "px", 6, 80, 1),
+          col("categoryColor", "#f0f0e0"),
+          select("categoryWeight", "700", CHOICES.weight),
+          select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
+          num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
+          select("categoryAlign", "center", CHOICES.alignNoJustify),
+          col("categoryBackground", "#00000000")
+        ]
+      },
+      {
+        id: "search",
+        fields: [
+          col("searchBackground", "#00000000"),
+          col("searchColor", "#f0f0e0"),
+          col("searchPlaceholderColor", "#8a8a8a"),
+          num("searchSize", 14, "px", 6, 40, 1),
+          ...borderFields("searchBorder", { color: "#00000000" }),
+          ...cornerFields("searchCorner", 3)
+        ]
+      },
+      {
+        id: "buttons",
+        fields: [
+          col("buttonColor", "#f0f0e0"),
+          col("buttonBackground", "#00000000"),
+          col("buttonBorderColor", "#8a8a8a"),
+          col("buttonHoverColor", "#ffffff"),
+          col("buttonHoverBackground", "#00000000"),
+          col("buttonHoverBorderColor", "#c9a961"),
+          num("buttonBorderWidth", 1, "px", 0, 12, 1),
+          ...cornerFields("buttonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+  {
     id: "title",
     icon: "fa-solid fa-heading",
     sections: bannerSections({
