@@ -222,32 +222,7 @@ function bannerSections(defaults = {}) {
 
 /** @type {Array<{id: string, icon: string, sections: Array<{id: string, fields: object[]}>}>} */
 export const GROUPS = [
-  {
-    id: "page",
-    icon: "fa-solid fa-scroll",
-    sections: [
-      {
-        id: "surface",
-        fields: [
-          col("background", "#ede0c8"),
-          { type: "image", name: "texture", default: "" },
-          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
-          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
-          select("textureAttachment", "scroll", CHOICES.textureAttachment),
-          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
-          num("textureOpacity", 100, "%", 0, 100, 1)
-        ]
-      },
-      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
-      { id: "padding", fields: spacingFields("padding", 24) },
-      { id: "border", fields: borderFields("border") },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", fields: shadowFields("shadow") },
-      { id: "innerShadow", fields: shadowFields("innerShadow") }
-    ]
-  },
-
-  {
+{
     id: "window",
     icon: "fa-solid fa-window-maximize",
     sections: [
@@ -395,6 +370,31 @@ export const GROUPS = [
           ...cornerFields("buttonCorner", 3)
         ]
       }
+    ]
+  },
+
+    {
+    id: "page",
+    icon: "fa-solid fa-scroll",
+    sections: [
+      {
+        id: "surface",
+        fields: [
+          col("background", "#ede0c8"),
+          { type: "image", name: "texture", default: "" },
+          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
+          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
+          select("textureAttachment", "scroll", CHOICES.textureAttachment),
+          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
+          num("textureOpacity", 100, "%", 0, 100, 1)
+        ]
+      },
+      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      { id: "padding", fields: spacingFields("padding", 24) },
+      { id: "border", fields: borderFields("border") },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      { id: "innerShadow", fields: shadowFields("innerShadow") }
     ]
   },
 

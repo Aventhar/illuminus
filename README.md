@@ -27,10 +27,17 @@ it to whichever journals should wear it, and export it to carry into another wor
   thickness, style, and color; each corner its own rounding; each side its own padding
   and margin; each shadow its own offset, softness, size, and color. A **Match** button
   in each section copies one value across its siblings when you do want them the same.
+- **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
+  the values the style was last saved with, and the per-tab badges count what has changed
+  since then.
 - **Live sample.** The editor carries a miniature journal that repaints as you drag a
   slider, and any real journal already open repaints too. The sample reveals the sidebar
   while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
   is written to the world until you press Save.
+- **Its own color picker.** Clicking a swatch opens Illuminus's picker rather than the
+  operating system's: RGB and HSL side by side with sliders and numeric boxes, opacity on
+  both, the hex including its alpha, and a row of saved colors belonging to that style.
+  It is free-floating and draggable, and only OK keeps a change.
 - **Transparency is visible.** Color swatches are drawn over a checkerboard and show
   their alpha, with a fully transparent one labeled "None" — a native color input
   cannot show alpha and paints `#00000000` as solid black. Type an eight-digit hex such
@@ -82,7 +89,8 @@ scripts/style-injector.mjs   Keeps the compiled sheet and sheet tagging in sync
 scripts/style-store.mjs      CRUD over the world's styles; journal assignment
 scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
-scripts/apps/                The GUI (library, editor, assignment dialog)
+scripts/color-tools.mjs      Color conversion, and sampling colors from the page
+scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
 assets/Samples/textures/     Bundled background pictures
 assets/Samples/Pictures/     Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling

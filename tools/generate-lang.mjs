@@ -35,6 +35,14 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
   "ILLUMINUS.Color.None": "None",
+  "ILLUMINUS.Buttons.OK": "OK",
+  "ILLUMINUS.ColorPicker.Title": "Color",
+  "ILLUMINUS.ColorPicker.Open": "Choose a color",
+  "ILLUMINUS.ColorPicker.Hex": "Color code",
+  "ILLUMINUS.ColorPicker.Rgb": "Red, Green, Blue",
+  "ILLUMINUS.ColorPicker.Hsl": "Hue, Saturation, Lightness",
+  "ILLUMINUS.ColorPicker.Saved": "Saved Colors",
+  "ILLUMINUS.ColorPicker.SaveColor": "Save",
   // The sample names each element after the setting that controls it, so it
   // reads as a legend rather than as a page of prose.
   "ILLUMINUS.Preview.WindowTitle": "Window Title",

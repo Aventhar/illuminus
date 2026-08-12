@@ -299,7 +299,12 @@ const roundTrip = await cdp.evaluate(`(async () => {
 
   const original = api.getStyle(style.id);
   const copy = api.getStyle(created[0].id);
-  const identical = JSON.stringify(original.settings) === JSON.stringify(copy.settings);
+  // Compare structurally: key order follows the schema, so reordering a tab
+  // would otherwise look like data loss.
+  const stable = (value) => (value && typeof value === "object" && !Array.isArray(value))
+    ? Object.fromEntries(Object.keys(value).sort().map((k) => [k, stable(value[k])]))
+    : value;
+  const identical = JSON.stringify(stable(original.settings)) === JSON.stringify(stable(copy.settings));
 
   // clean up the imported duplicate
   await api.deleteStyle(created[0].id);
@@ -1018,17 +1023,9 @@ const swatch = await cdp.evaluate(`(async () => {
       noneVisible: tag ? getComputedStyle(tag).display !== "none" : false,
       layers: getComputedStyle(chip).backgroundImage,
       nativeValue: input.value,
-      // Hiding the input entirely would take away the browser's own picker.
-      inputClickable: inputBox.width > 0 && inputBox.height > 0
-        && inputStyle.display !== "none" && inputStyle.visibility !== "hidden"
-        && inputStyle.pointerEvents !== "none",
-      chipOverlap: (() => {
-        if (!chip) return 0;
-        const c = chip.getBoundingClientRect();
-        const w = Math.max(0, Math.min(c.right, inputBox.right) - Math.max(c.left, inputBox.left));
-        const h = Math.max(0, Math.min(c.bottom, inputBox.bottom) - Math.max(c.top, inputBox.top));
-        return Math.round((w * h) / (inputBox.width * inputBox.height) * 100);
-      })()
+      // The native input must be gone: it opens the OS panel, not ours.
+      nativeHidden: inputStyle.display === "none",
+      chipIsButton: chip?.tagName === "BUTTON"
     };
   };
 
@@ -1052,15 +1049,146 @@ check(sw.clear.swatchVar === "#00000000", `a transparent fill reaches the swatch
 check(sw.clear.nativeValue === "#000000", `while the native input still shows black (got ${sw.clear.nativeValue})`);
 check(sw.clear.transparent && sw.clear.noneVisible, "so it is labeled None");
 check(sw.clear.layers.includes("linear-gradient"), "and drawn over a checkerboard");
-check(sw.clear.inputClickable, "the browser's own color picker is still reachable");
-check(sw.clear.chipOverlap >= 80, `and the drawn swatch sits over the click target (${sw.clear.chipOverlap}% overlap)`);
+check(sw.clear.nativeHidden, "the native color input is out of the way entirely");
+check(sw.clear.chipIsButton, "and the swatch is the button that opens Illuminus's picker");
 check(sw.half.swatchVar === "#3366cc80", `a half-transparent color keeps its alpha (got ${sw.half.swatchVar})`);
 check(!sw.half.transparent && !sw.half.noneVisible, "and is not labeled None");
 check(sw.solid.swatchVar === "#112233" && !sw.solid.noneVisible, "an opaque color is shown plainly");
 check(sw.afterEdit.transparent && sw.afterEdit.noneVisible,
   "editing a color to transparent updates the swatch straight away");
 
-console.log("\n[26] Console is clean");
+// The picker replaces the operating system panel outright, so it has to cover
+// what that panel did and what it could not.
+console.log("\n[26] The color picker");
+const cp = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Picker Probe", settings: {page: {background: "#3366cc"}}});
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1100));
+  const el = app.element;
+  const control = el.querySelector('[data-field="page.background"] color-picker');
+  const swatch = el.querySelector('[data-field="page.background"] .illuminus-swatch');
+
+  swatch.click();
+  await new Promise(r => setTimeout(r, 300));
+  const cp = document.querySelector(".illuminus-cp");
+  const out = {opened: !!cp};
+  if (!cp) return JSON.stringify(out);
+
+  // Take the picker element as an argument: reopening makes a new one, and
+  // writing to the old detached copy still drives its listeners.
+  const set = (panel, sel, value) => {
+    const input = panel.querySelector(sel);
+    input.value = String(value);
+    input.dispatchEvent(new Event("input", {bubbles: true}));
+  };
+  const num = (group, key) => cp.querySelector('[data-channel="' + group + '-' + key + '"] input[type=number]').value;
+
+  // Opens to the right of the swatch it belongs to.
+  const sb = swatch.getBoundingClientRect();
+  const pb = cp.getBoundingClientRect();
+  out.toTheRight = pb.left >= sb.right - 1;
+
+  // Editing RGB updates HSL, and the hex carries alpha.
+  set(cp, '[data-channel="rgb-r"] input[type=range]', 255);
+  await new Promise(r => setTimeout(r, 120));
+  out.afterRed = {hex: cp.querySelector(".illuminus-cp__hex").value, h: num("hsl","h"), l: num("hsl","l")};
+
+  // Editing HSL updates RGB.
+  set(cp, '[data-channel="hsl-h"] input[type=range]', 120);
+  await new Promise(r => setTimeout(r, 120));
+  out.afterHue = {r: num("rgb","r"), g: num("rgb","g"), hex: cp.querySelector(".illuminus-cp__hex").value};
+
+  // Alpha appears in the hex, and both alpha sliders track together.
+  set(cp, '[data-channel="rgb-a"] input[type=range]', 50);
+  await new Promise(r => setTimeout(r, 120));
+  out.afterAlpha = {hex: cp.querySelector(".illuminus-cp__hex").value, hslAlpha: num("hsl","a")};
+
+  // Live while open, but the stored style must not move yet.
+  out.liveValue = control.value;
+  out.storedDuring = api.getStyle(style.id).settings.page?.background;
+
+  // Save a swatch, then cancel and confirm the color reverts.
+  cp.querySelector('[data-cp="save"]').click();
+  await new Promise(r => setTimeout(r, 300));
+  out.swatchSlots = cp.querySelectorAll(".illuminus-cp__swatch").length;
+  out.swatchSaved = (api.getStyle(style.id).swatches ?? []).length;
+
+  cp.querySelector('.illuminus-cp__foot [data-cp="cancel"]').click();
+  await new Promise(r => setTimeout(r, 250));
+  out.closedOnCancel = !document.querySelector(".illuminus-cp");
+  out.afterCancel = control.value;
+
+  // Reopen and accept, which should keep the change.
+  swatch.click();
+  await new Promise(r => setTimeout(r, 250));
+  const cp2 = document.querySelector(".illuminus-cp");
+  set(cp2, '[data-channel="rgb-g"] input[type=range]', 200);
+  await new Promise(r => setTimeout(r, 120));
+  const wanted = cp2.querySelector(".illuminus-cp__hex").value;
+  cp2.querySelector('[data-cp="ok"]').click();
+  await new Promise(r => setTimeout(r, 250));
+  out.afterOk = {value: control.value, wanted, closed: !document.querySelector(".illuminus-cp")};
+
+  await app.close();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const pick = JSON.parse(cp);
+check(pick.opened, "clicking the swatch opens the picker");
+check(pick.toTheRight, "it appears to the right of the swatch");
+check(pick.afterRed.hex.toLowerCase().startsWith("#ff"), `editing RGB updates the hex (got ${pick.afterRed.hex})`);
+check(Number(pick.afterRed.h) > 0 || Number(pick.afterRed.l) > 0, "and the HSL fields follow");
+check(Number(pick.afterHue.g) > Number(pick.afterHue.r), `editing HSL updates RGB (r ${pick.afterHue.r}, g ${pick.afterHue.g})`);
+check(pick.afterAlpha.hex.length === 9, `alpha shows in the hex (got ${pick.afterAlpha.hex})`);
+check(pick.afterAlpha.hslAlpha === "50", `both alpha controls track together (HSL alpha ${pick.afterAlpha.hslAlpha})`);
+check(pick.liveValue === pick.afterAlpha.hex, "the control follows live while the picker is open");
+check(pick.storedDuring === "#3366cc", `the saved style is untouched meanwhile (stored ${pick.storedDuring})`);
+check(pick.swatchSlots >= 20, `at least 20 saved-color slots (got ${pick.swatchSlots})`);
+check(pick.swatchSaved === 1, `saving keeps the color on the style (${pick.swatchSaved} saved)`);
+check(pick.closedOnCancel && pick.afterCancel === "#3366cc",
+  `Cancel closes and restores the original (got ${pick.afterCancel})`);
+check(pick.afterOk.closed && pick.afterOk.value === pick.afterOk.wanted,
+  `OK closes and keeps the choice (${pick.afterOk.value})`);
+
+// Saving a style makes those values the new baseline for Reset.
+console.log("\n[27] Saving sets the baseline that Reset returns to");
+const baseline = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Baseline Probe"});
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1000));
+  const el = app.element;
+  const control = el.querySelector('[data-field="page.background"] color-picker');
+  const schemaDefault = control.value;
+
+  control.value = "#123456";
+  await new Promise(r => setTimeout(r, 200));
+  await app.submit();
+  await new Promise(r => setTimeout(r, 500));
+
+  const savedMarkedClean = el.querySelector('[data-field="page.background"]').classList.contains("is-default");
+
+  el.querySelector('[data-field="page.background"] color-picker').value = "#abcdef";
+  await new Promise(r => setTimeout(r, 200));
+  const markedChanged = !el.querySelector('[data-field="page.background"]').classList.contains("is-default");
+
+  // Reset the section and see which value comes back.
+  el.querySelector('[data-action="resetSection"][data-group="page"][data-section="surface"]').click();
+  await new Promise(r => setTimeout(r, 400));
+  const afterReset = el.querySelector('[data-field="page.background"] color-picker').value;
+
+  await app.close();
+  await api.deleteStyle(style.id);
+  return JSON.stringify({schemaDefault, savedMarkedClean, markedChanged, afterReset});
+})()`);
+const bl = JSON.parse(baseline);
+check(bl.schemaDefault !== "#123456", `the style starts at the schema default (${bl.schemaDefault})`);
+check(bl.savedMarkedClean, "after saving, the changed marker clears");
+check(bl.markedChanged, "editing again marks it changed");
+check(bl.afterReset === "#123456", `Reset returns to the saved value, not the schema default (got ${bl.afterReset})`);
+
+console.log("\n[28] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

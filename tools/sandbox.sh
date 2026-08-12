@@ -101,7 +101,12 @@ start() {
 down() {
   pkill -f "remote-debugging-port=$CDP_PORT" 2>/dev/null || true
   pkill -f "main.mjs --dataPath=$SANDBOX_DIR" 2>/dev/null || true
-  sleep 2
+  # Wait for the port to actually free: the process takes a moment to let go,
+  # and "reset" would otherwise try to start on a port still held.
+  for _ in $(seq 1 30); do
+    lsof -ti:"$PORT" >/dev/null 2>&1 || break
+    sleep 1
+  done
   echo "sandbox stopped"
 }
 

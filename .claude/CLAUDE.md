@@ -74,6 +74,11 @@ These are all load-bearing and none are obvious from the code.
   `modules/illuminus/styles/`. `sanitizePath` makes them root-relative through
   `foundry.utils.getRoute`, which also handles a server `routePrefix`. Any new
   path-valued field must go through it.
+- **The native `<input type="color">` is display:none.** Illuminus supplies its own
+  picker (`scripts/apps/color-picker.mjs`); the element stays only because it carries the
+  field's name and value, and writing to `element.value` is still how a color reaches the
+  form. Do not restore its visibility to "fix" anything — it opens the operating system's
+  panel, which cannot express alpha.
 - **A native `<input type="color">` cannot show alpha**, and its `::-webkit-color-swatch`
   resists styling even with `appearance: none`. The editor draws its own swatch over the
   input, which is made transparent but keeps its box so it still opens the browser

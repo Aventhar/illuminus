@@ -2,6 +2,7 @@ import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "../constants.mjs";
 import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
+import { openColorPicker, closeColorPicker } from "./color-picker.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -36,6 +37,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** The working copy of the style's settings, including defaults for unset fields. */
   #working;
 
+  /**
+   * What Reset returns to, and what the changed-count badges measure against.
+   * Starts as the stored style and moves forward on every save, so saving
+   * establishes the new baseline.
+   */
+  #baseline;
+
   /** Whether the working copy differs from what is stored. */
   #dirty = false;
 
@@ -65,7 +73,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resetAll: IlluminusStyleEditor.#onResetAll,
       revert: IlluminusStyleEditor.#onRevert,
       toggleSection: IlluminusStyleEditor.#onToggleSection,
-      pickColor: IlluminusStyleEditor.#onPickColor
+      pickColor: IlluminusStyleEditor.#onPickColor,
+      openColorPicker: IlluminusStyleEditor.#onOpenColorPicker
     }
   };
 
@@ -82,7 +91,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static TABS = {
     sheet: {
       tabs: GROUPS.map((group) => ({ id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` })),
-      initial: GROUPS[0].id
+      // Named rather than taken from the first tab, so the strip can be
+      // reordered without changing where the editor opens.
+      initial: "page"
     }
   };
 
@@ -103,7 +114,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Merge stored settings over schema defaults so every control has a value. */
   #loadWorking() {
     this.#working = foundry.utils.mergeObject(defaultSettings(), this.style?.settings ?? {}, { inplace: false });
+    this.#baseline = foundry.utils.deepClone(this.#working);
     this.#dirty = false;
+  }
+
+  /** The value Reset restores for one field. */
+  #baselineFor(groupId, field) {
+    const value = this.#baseline?.[groupId]?.[field.name];
+    return value === undefined ? field.default : value;
   }
 
   /** Font family choices offered by Foundry, plus a "use the sheet default" entry. */
@@ -159,7 +177,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** How many controls in a group differ from their default, for the tab badge. */
   #changedCount(group) {
-    return groupFields(group).filter((field) => this.#working?.[group.id]?.[field.name] !== field.default).length;
+    return groupFields(group)
+      .filter((field) => this.#working?.[group.id]?.[field.name] !== this.#baselineFor(group.id, field)).length;
   }
 
   /** Build the template data for one control. */
@@ -171,7 +190,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       label: game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
       hint: game.i18n.localize(`ILLUMINUS.Field.${field.name}.hint`),
       value,
-      isDefault: value === field.default
+      isDefault: value === this.#baselineFor(group.id, field)
     };
     if (field.type === "number") Object.assign(context, {
       min: field.min, max: field.max, step: field.step, unit: field.unit
@@ -257,7 +276,30 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** @override */
   _onClose(options) {
     super._onClose(options);
+    closeColorPicker();
     clearPreview(this.#styleId);
+  }
+
+  /**
+   * Open Illuminus's color picker for one control.
+   *
+   * The picker edits through the same element the rest of the editor watches,
+   * so its changes travel the ordinary path: live sample, changed marker, and
+   * tab badge all follow without special casing. Only OK keeps the result —
+   * anything else puts back the value the picker opened with.
+   */
+  static #onOpenColorPicker(_event, target) {
+    const path = target.dataset.path;
+    const picker = this.element.querySelector(`[data-field="${path}"] color-picker`);
+    if (!picker) return;
+
+    openColorPicker({
+      anchor: target,
+      value: picker.value,
+      onChange: (hex) => { picker.value = hex; },
+      swatches: this.style?.swatches ?? [],
+      onSwatches: (swatches) => updateStyle(this.#styleId, { swatches })
+    });
   }
 
   /**
@@ -284,7 +326,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.#applyPreview();
 
     const row = this.element.querySelector(`[data-field="${groupId}.${fieldName}"]`);
-    row?.classList.toggle("is-default", coerced === field.default);
+    row?.classList.toggle("is-default", coerced === this.#baselineFor(groupId, field));
     if (row && field.type === "color") this.#showSwatch(row, String(coerced));
     this.#updateTabBadge(groupId);
   }
@@ -297,6 +339,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const count = this.#changedCount(group);
     badge.textContent = count || "";
     badge.classList.toggle("is-empty", !count);
+  }
+
+  /**
+   * Re-mark every control against the baseline, in place.
+   *
+   * Saving moves the baseline, so everything becomes "unchanged" again. Doing
+   * it without a re-render keeps the scroll position, the open sections, and
+   * the focused control where the user left them.
+   */
+  #refreshBaselineMarkers() {
+    for (const group of GROUPS) {
+      for (const field of groupFields(group)) {
+        const row = this.element.querySelector(`[data-field="${group.id}.${field.name}"]`);
+        row?.classList.toggle("is-default",
+          this.#working?.[group.id]?.[field.name] === this.#baselineFor(group.id, field));
+      }
+      this.#updateTabBadge(group.id);
+    }
   }
 
   /** Push the working copy to the live stylesheet. */
@@ -319,7 +379,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Save the working copy to the world. */
   static async #onSubmit() {
     await updateStyle(this.#styleId, { settings: this.#working });
+    this.#baseline = foundry.utils.deepClone(this.#working);
     this.#dirty = false;
+    this.#refreshBaselineMarkers();
     clearPreview(this.#styleId);
     refreshStyles();
     ui.notifications.info(game.i18n.format("ILLUMINUS.Notifications.Saved", { name: this.style?.name ?? "" }));
@@ -542,7 +604,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static async #onResetSection(_event, target) {
     const { group, section } = IlluminusStyleEditor.#sectionFrom(target);
     if (!group || !section) return;
-    for (const field of section.fields) this.#working[group.id][field.name] = field.default;
+    for (const field of section.fields) this.#working[group.id][field.name] = this.#baselineFor(group.id, field);
     this.#dirty = true;
     this.#applyPreview();
     this.render();
@@ -559,7 +621,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       })}</p>`
     });
     if (!confirmed) return;
-    for (const field of groupFields(group)) this.#working[group.id][field.name] = field.default;
+    for (const field of groupFields(group)) this.#working[group.id][field.name] = this.#baselineFor(group.id, field);
     this.#dirty = true;
     this.#applyPreview();
     this.render();
@@ -572,7 +634,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       content: `<p>${game.i18n.localize("ILLUMINUS.Confirm.ResetAll")}</p>`
     });
     if (!confirmed) return;
-    this.#working = defaultSettings();
+    this.#working = foundry.utils.deepClone(this.#baseline);
     this.#dirty = true;
     this.#applyPreview();
     this.render();

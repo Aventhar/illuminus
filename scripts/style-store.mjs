@@ -12,14 +12,32 @@ import { PRESETS } from "./presets.mjs";
  * is exported to or imported from a compendium.
  */
 
+/** How many saved colors a style may keep. */
+const MAX_SWATCHES = 40;
+
+/** Keep only well-formed hex colors, without duplicates. */
+function cleanSwatches(swatches) {
+  if (!Array.isArray(swatches)) return [];
+  const seen = new Set();
+  for (const value of swatches) {
+    const hex = String(value).trim().toLowerCase();
+    if (/^#[0-9a-f]{6}([0-9a-f]{2})?$/.test(hex)) seen.add(hex);
+    if (seen.size >= MAX_SWATCHES) break;
+  }
+  return [...seen];
+}
+
 /** Shape of a stored style record. */
-function makeRecord({ id, name, description = "", settings = {}, preset = false }) {
+function makeRecord({ id, name, description = "", settings = {}, swatches = [], preset = false }) {
   return {
     id,
     name,
     description,
     preset,
     schemaVersion: SCHEMA_VERSION,
+    // A style's own palette. Not part of `settings`, since it changes nothing
+    // about how a journal looks — it is a convenience for whoever edits it.
+    swatches: cleanSwatches(swatches),
     settings: cleanSettings(settings)
   };
 }
@@ -82,6 +100,7 @@ export async function createStyle(data = {}) {
     id: uniqueId(styles),
     name: data.name || game.i18n.localize("ILLUMINUS.Style.NewName"),
     description: data.description ?? "",
+    swatches: data.swatches ?? [],
     settings: data.settings ?? defaultSettings()
   });
   styles[record.id] = record;
@@ -105,6 +124,7 @@ export async function updateStyle(id, changes = {}) {
     ...changes,
     id,
     preset: existing.preset,
+    swatches: changes.swatches ?? existing.swatches,
     settings: changes.settings ?? existing.settings
   });
   await writeStyles(styles);
@@ -139,6 +159,7 @@ export async function duplicateStyle(id) {
   return createStyle({
     name: game.i18n.format("ILLUMINUS.Style.CopyName", { name: source.name }),
     description: source.description,
+    swatches: [...(source.swatches ?? [])],
     settings: foundry.utils.deepClone(source.settings)
   });
 }
@@ -157,6 +178,7 @@ export async function importStyles(records) {
       id: uniqueId(styles),
       name: incoming.name || game.i18n.localize("ILLUMINUS.Style.NewName"),
       description: incoming.description ?? "",
+      swatches: incoming.swatches ?? [],
       settings: incoming.settings ?? {}
     });
     styles[record.id] = record;

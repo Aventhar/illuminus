@@ -30,7 +30,7 @@ export function buildExport(ids) {
   const styles = ids
     .map((id) => getStyle(id))
     .filter(Boolean)
-    .map(({ name, description, settings }) => ({ name, description, settings }));
+    .map(({ name, description, swatches, settings }) => ({ name, description, swatches, settings }));
   if (!styles.length) return null;
   return {
     module: MODULE_ID,
@@ -97,6 +97,7 @@ export function normalizeImport(parsed) {
     styles.push({
       name: String(raw.name ?? "").trim() || game.i18n.localize("ILLUMINUS.Style.NewName"),
       description: String(raw.description ?? ""),
+      swatches: Array.isArray(raw.swatches) ? raw.swatches : [],
       settings
     });
   }

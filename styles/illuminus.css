@@ -990,12 +990,18 @@
   min-width: 0;
 }
 
+/* The native input opens the operating system's picker, which cannot express
+   alpha and looks nothing like the rest of the interface. It is removed from
+   the layout entirely; Illuminus's own picker takes its place. The element
+   itself stays, since it still carries the field's name and value. */
 .illuminus-field__control color-picker input[type="color"] {
-  opacity: 0;
+  display: none;
 }
 
 .illuminus-swatch {
   position: absolute;
+  padding: 0;
+  cursor: var(--cursor-pointer, pointer);
   right: 0;
   top: 50%;
   transform: translateY(-50%);
@@ -1288,4 +1294,215 @@ html.illuminus-picking * {
   text-transform: uppercase;
   font-size: 10px;
   letter-spacing: 0.04em;
+}
+
+/* --- Color picker ------------------------------------------------------- */
+
+.illuminus-cp {
+  position: fixed;
+  z-index: 100001;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-highlight, #ff6400);
+  border-radius: 6px;
+  background: var(--color-cool-5-90, rgb(23 25 33 / 96%));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 55%);
+  font-size: var(--font-size-12, 12px);
+}
+
+/* While sampling, the picker must not sit between the pointer and the page. */
+.illuminus-cp.is-sampling {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.illuminus-cp__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+  cursor: var(--cursor-grab, grab);
+  user-select: none;
+}
+
+.illuminus-cp__title {
+  flex: 1;
+  font-weight: bold;
+}
+
+.illuminus-cp__close {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 0.3rem;
+  background: none;
+  border: none;
+}
+
+.illuminus-cp__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.6rem;
+}
+
+.illuminus-cp__readout {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.illuminus-cp__preview {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 26px;
+  border: 1px solid rgb(0 0 0 / 45%);
+  border-radius: 3px;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(var(--illuminus-swatch, transparent), var(--illuminus-swatch, transparent)),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%);
+  background-size: auto, 8px 8px, 8px 8px;
+  background-position: 0 0, 0 0, 4px 4px;
+}
+
+.illuminus-cp__hex {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono, monospace);
+  text-transform: lowercase;
+}
+
+.illuminus-cp__sample {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 0.45rem;
+}
+
+.illuminus-cp__group h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.3rem;
+  font-size: var(--font-size-11, 11px);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  border: none;
+}
+
+.illuminus-cp__channel {
+  display: grid;
+  grid-template-columns: 1rem 1fr 3.4rem 0.8rem;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.15rem;
+}
+
+.illuminus-cp__channel label {
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+/* The track previews what moving this slider would do. */
+.illuminus-cp__channel input[type="range"] {
+  width: 100%;
+  height: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 6px;
+  background-color: #ffffff;
+  background-image:
+    var(--illuminus-cp-track, none),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%);
+  background-size: auto, 8px 8px, 8px 8px;
+  background-position: 0 0, 0 0, 4px 4px;
+  border: 1px solid rgb(0 0 0 / 40%);
+}
+
+.illuminus-cp__channel input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--illuminus-cp-current, #fff);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 70%);
+  cursor: var(--cursor-pointer, pointer);
+}
+
+.illuminus-cp__channel input[type="number"] {
+  width: 100%;
+  text-align: right;
+}
+
+.illuminus-cp__unit {
+  opacity: 0.5;
+}
+
+.illuminus-cp__save {
+  width: auto;
+  padding: 0 0.35rem;
+  font-size: var(--font-size-10, 10px);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.illuminus-cp__swatches {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+
+.illuminus-cp__swatch {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid rgb(0 0 0 / 45%);
+  border-radius: 3px;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(var(--illuminus-swatch, transparent), var(--illuminus-swatch, transparent)),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%);
+  background-size: auto, 6px 6px, 6px 6px;
+  background-position: 0 0, 0 0, 3px 3px;
+}
+
+.illuminus-cp__swatch.is-empty {
+  border-style: dashed;
+  border-color: rgb(255 255 255 / 18%);
+  background: none;
+}
+
+.illuminus-cp__swatch-remove {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: none;
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--color-level-error, #b0413e);
+  color: #fff;
+}
+
+.illuminus-cp__swatch:hover .illuminus-cp__swatch-remove {
+  display: block;
+}
+
+.illuminus-cp__foot {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border-top: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+}
+
+.illuminus-cp__foot button {
+  flex: 1;
 }

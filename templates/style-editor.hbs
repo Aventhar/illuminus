@@ -48,8 +48,12 @@
             {{#if (eq field.type "color")}}
               <span class="illuminus-swatch-wrap">
                 <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
-                {{!-- Drawn over the native swatch, which cannot show alpha. --}}
-                <span class="illuminus-swatch" aria-hidden="true"></span>
+                {{!-- Replaces the native swatch, which cannot show alpha and
+                      opens the operating system's picker rather than ours. --}}
+                <button type="button" class="illuminus-swatch" data-action="openColorPicker"
+                        data-path="{{field.path}}"
+                        data-tooltip="{{localize 'ILLUMINUS.ColorPicker.Open'}}"
+                        aria-label="{{localize 'ILLUMINUS.ColorPicker.Open'}}"></button>
               </span>
               <span class="illuminus-none-tag">{{localize "ILLUMINUS.Color.None"}}</span>
               {{!-- Removed at render time when the browser has no EyeDropper API. --}}
