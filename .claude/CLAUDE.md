@@ -41,7 +41,20 @@ succeeded.
 
 Tests share one browser session and one world, so a check that mutates a preset or
 leaves a style behind will break a later one. Create what a check needs, then delete it.
-`tools/sandbox.sh reset` wipes the world when state has drifted.
+`tools/sandbox.sh reset` wipes the world when state has drifted. Create fixtures inside
+`try/finally` — a check that bails out early otherwise leaves a style behind and breaks
+the next run's counts.
+
+**Asset folder case is load-bearing.** macOS is case-insensitive, so a renamed folder
+does not even show up in `git status`, and every path keeps working locally while
+breaking on a Linux-hosted server. `validate.mjs` compares references against the on-disk
+spelling; when it complains, record the rename with `git mv` through a temporary name,
+since a direct `git mv` is a no-op here.
+
+**Click the way a person does.** `element.click()` skips hit testing, so a control that
+CSS has made unclickable still passes. Take the element's centre, ask
+`document.elementFromPoint`, assert it is the control, and click what comes back. A dead
+swatch shipped because a check called `.click()` directly.
 
 Prefer adding a case to `test-in-app.mjs` over a one-off script. When a bug is found
 visually, add the assertion that would have caught it — the preview-background and
@@ -114,7 +127,7 @@ These are all load-bearing and none are obvious from the code.
 
 ## Bundled assets
 
-`assets/Samples/textures/` and `assets/Samples/Pictures/` ship with the module and are
+`assets/samples/textures/` and `assets/samples/pictures/` ship with the module and are
 referenced by path from `scripts/presets.mjs` (the seeded style's texture) and
 `templates/style-editor.hbs` (the picture in the sample). Those paths are strings, so
 moving a file breaks them silently — `validate.mjs` resolves every

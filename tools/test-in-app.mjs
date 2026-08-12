@@ -856,19 +856,19 @@ const assets = await cdp.evaluate(`(async () => {
   // Every bundled asset, so a move that misses a reference fails here rather
   // than silently 404ing in someone's game.
   const paths = [
-    "modules/illuminus/assets/Samples/Pictures/castle.jpg",
-    "modules/illuminus/assets/Samples/textures/parchment.svg",
-    "modules/illuminus/assets/Samples/textures/paper-fibres.svg",
-    "modules/illuminus/assets/Samples/textures/linen.svg",
-    "modules/illuminus/assets/Samples/textures/stone.svg",
-    "modules/illuminus/assets/Samples/textures/grid.svg",
-    "modules/illuminus/assets/Samples/textures/hatch.svg",
-    "modules/illuminus/assets/Samples/textures/ufo.svg",
-    "modules/illuminus/assets/Samples/textures/bricks.jpg",
-    "modules/illuminus/assets/Samples/textures/canvas.jpg",
-    "modules/illuminus/assets/Samples/textures/marble.jpg",
-    "modules/illuminus/assets/Samples/textures/parchment.jpg",
-    "modules/illuminus/assets/Samples/textures/stars.jpg"
+    "modules/illuminus/assets/samples/pictures/castle.jpg",
+    "modules/illuminus/assets/samples/textures/parchment.svg",
+    "modules/illuminus/assets/samples/textures/paper-fibres.svg",
+    "modules/illuminus/assets/samples/textures/linen.svg",
+    "modules/illuminus/assets/samples/textures/stone.svg",
+    "modules/illuminus/assets/samples/textures/grid.svg",
+    "modules/illuminus/assets/samples/textures/hatch.svg",
+    "modules/illuminus/assets/samples/textures/ufo.svg",
+    "modules/illuminus/assets/samples/textures/bricks.jpg",
+    "modules/illuminus/assets/samples/textures/canvas.jpg",
+    "modules/illuminus/assets/samples/textures/marble.jpg",
+    "modules/illuminus/assets/samples/textures/parchment.jpg",
+    "modules/illuminus/assets/samples/textures/stars.jpg"
   ];
   const fetched = {};
   for (const path of paths) {
@@ -928,7 +928,7 @@ check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its color (go
 const texture = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Texture Probe", settings: {
-    page: {texture: "modules/illuminus/assets/Samples/textures/linen.svg"}
+    page: {texture: "modules/illuminus/assets/samples/textures/linen.svg"}
   }});
   const entry = await JournalEntry.create({name: "Texture Probe Journal"});
   await entry.createEmbeddedDocuments("JournalEntryPage",
@@ -1063,17 +1063,30 @@ console.log("\n[26] The color picker");
 const cp = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Picker Probe", settings: {page: {background: "#3366cc"}}});
+  // Clean up even when a check below bails out, or the leftover shows up in
+  // the next run's preset count.
+  try {
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1100));
   const el = app.element;
   const control = el.querySelector('[data-field="page.background"] color-picker');
   const swatch = el.querySelector('[data-field="page.background"] .illuminus-swatch');
 
-  swatch.click();
+  // Click through hit testing, as a person does. Calling .click() directly
+  // bypasses it, so a control made unclickable by CSS still "works".
+  const hit = (el) => {
+    const box = el.getBoundingClientRect();
+    const x = Math.round(box.left + box.width / 2);
+    const y = Math.round(box.top + box.height / 2);
+    const top = document.elementFromPoint(x, y);
+    return { reachable: top === el || el.contains(top), top: top?.className ?? null, x, y };
+  };
+  const swatchHit = hit(swatch);
+  document.elementFromPoint(swatchHit.x, swatchHit.y)?.click();
   await new Promise(r => setTimeout(r, 300));
   const cp = document.querySelector(".illuminus-cp");
-  const out = {opened: !!cp};
-  if (!cp) return JSON.stringify(out);
+  const out = {opened: !!cp, swatchReachable: swatchHit.reachable, topAtSwatch: swatchHit.top};
+  if (!cp) { await app.close(); return JSON.stringify(out); }
 
   // Take the picker element as an argument: reopening makes a new one, and
   // writing to the old detached copy still drives its listeners.
@@ -1120,7 +1133,7 @@ const cp = await cdp.evaluate(`(async () => {
   out.afterCancel = control.value;
 
   // Reopen and accept, which should keep the change.
-  swatch.click();
+  document.elementFromPoint(swatchHit.x, swatchHit.y)?.click();
   await new Promise(r => setTimeout(r, 250));
   const cp2 = document.querySelector(".illuminus-cp");
   set(cp2, '[data-channel="rgb-g"] input[type=range]', 200);
@@ -1131,11 +1144,17 @@ const cp = await cdp.evaluate(`(async () => {
   out.afterOk = {value: control.value, wanted, closed: !document.querySelector(".illuminus-cp")};
 
   await app.close();
-  await api.deleteStyle(style.id);
   return JSON.stringify(out);
+  } finally {
+    for (const a of foundry.applications.instances.values()) {
+      if (a.id?.startsWith("illuminus-style-editor")) await a.close();
+    }
+    await api.deleteStyle(style.id);
+  }
 })()`);
 const pick = JSON.parse(cp);
-check(pick.opened, "clicking the swatch opens the picker");
+check(pick.swatchReachable, `the swatch is what the pointer actually hits (topmost: ${pick.topAtSwatch})`);
+check(pick.opened, "clicking it opens the picker");
 check(pick.toTheRight, "it appears to the right of the swatch");
 check(pick.afterRed.hex.toLowerCase().startsWith("#ff"), `editing RGB updates the hex (got ${pick.afterRed.hex})`);
 check(Number(pick.afterRed.h) > 0 || Number(pick.afterRed.l) > 0, "and the HSL fields follow");

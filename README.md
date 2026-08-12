@@ -48,7 +48,7 @@ it to whichever journals should wear it, and export it to carry into another wor
   It reads colors out of the page rather than off the screen, so unlike the operating
   system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
   and it keeps transparency.
-- **Textures included.** Background pictures under `assets/Samples/textures/`, reachable
+- **Textures included.** Background pictures under `assets/samples/textures/`, reachable
   from the Background Picture control's file browser. The SVG ones — parchment, paper
   fibres, linen, stone, grid, hatch — are grayscale on purpose: the texture supplies the
   grain and the Fill Color supplies the hue, so one file suits any palette under
@@ -91,8 +91,8 @@ scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
-assets/Samples/textures/     Bundled background pictures
-assets/Samples/Pictures/     Bundled artwork, and the sample shown in the editor
+assets/samples/textures/     Bundled background pictures
+assets/samples/pictures/     Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox

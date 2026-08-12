@@ -239,21 +239,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   #showSwatch(row, value) {
     row.style.setProperty("--illuminus-swatch", value);
     row.classList.toggle("is-transparent", /^#[0-9a-f]{6}00$/i.test(value));
-
-    // Align the drawn swatch to the input it stands in for, rather than to the
-    // edge of the row: the color element's internal spacing is not ours to
-    // assume, and being a few pixels out puts the visual off its click target.
-    const chip = row.querySelector(".illuminus-swatch");
-    const input = row.querySelector('color-picker input[type="color"]');
-    if (!chip || !input) return;
-    const wrap = chip.parentElement.getBoundingClientRect();
-    const box = input.getBoundingClientRect();
-    if (!box.width || !box.height) return;
-    chip.style.right = `${Math.round(wrap.right - box.right)}px`;
-    chip.style.top = `${Math.round(box.top - wrap.top)}px`;
-    chip.style.width = `${Math.round(box.width)}px`;
-    chip.style.height = `${Math.round(box.height)}px`;
-    chip.style.transform = "none";
   }
 
   /**

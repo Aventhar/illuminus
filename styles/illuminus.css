@@ -990,6 +990,11 @@
   min-width: 0;
 }
 
+/* Keep the typed value clear of the swatch sitting over the field's right end. */
+.illuminus-swatch-wrap color-picker input[type="text"] {
+  padding-right: 26px;
+}
+
 /* The native input opens the operating system's picker, which cannot express
    alpha and looks nothing like the rest of the interface. It is removed from
    the layout entirely; Illuminus's own picker takes its place. The element
@@ -1009,7 +1014,6 @@
   height: 20px;
   border: 1px solid rgb(0 0 0 / 40%);
   border-radius: 3px;
-  pointer-events: none;
   background-color: #ffffff;
   background-image:
     linear-gradient(var(--illuminus-swatch, transparent), var(--illuminus-swatch, transparent)),
