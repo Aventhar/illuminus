@@ -127,3 +127,7 @@ illuminus.exportStyles([styleId]);              // download as JSON
 - Never write CSS jargon into a label. The GUI is for people who do not write CSS.
 - Register settings in `init`, read world documents no earlier than `ready`.
 - Prefix every CSS class with `illuminus-` so styles cannot leak into core UI.
+
+## License
+
+[MIT](LICENSE).
