@@ -98,6 +98,7 @@
   "ILLUMINUS.Choices.verticalAlign.bottom": "Bottom",
   "ILLUMINUS.Choices.verticalAlign.top": "Top",
   "ILLUMINUS.Choices.wavy": "Wavy line",
+  "ILLUMINUS.Colour.None": "None",
   "ILLUMINUS.Confirm.Delete": "Delete the style \"{name}\"? This cannot be undone.",
   "ILLUMINUS.Confirm.DeleteInUse": "{count} journal(s) currently use this style. They will go back to Foundry's default appearance.",
   "ILLUMINUS.Confirm.DeleteTitle": "Delete Style",

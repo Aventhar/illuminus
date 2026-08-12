@@ -31,6 +31,10 @@ it to whichever journals should wear it, and export it to carry into another wor
   slider, and any real journal already open repaints too. The sample reveals the sidebar
   while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
   is written to the world until you press Save.
+- **Transparency is visible.** Colour swatches are drawn over a chequerboard and show
+  their alpha, with a fully transparent one labelled "None" — a native colour input
+  cannot show alpha and paints `#00000000` as solid black. Type an eight-digit hex such
+  as `#00000000` for none, or `#ece0c680` for half strength.
 - **Its own colour picker.** Every colour control can copy the colour of anything in the
   Foundry window — fills, borders, and lettering. Point and click; a readout follows the
   cursor showing exactly what will be taken. Hold Option/Alt for lettering colour.

@@ -46,7 +46,12 @@
 
           <div class="illuminus-field__control">
             {{#if (eq field.type "color")}}
-              <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
+              <span class="illuminus-swatch-wrap">
+                <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
+                {{!-- Drawn over the native swatch, which cannot show alpha. --}}
+                <span class="illuminus-swatch" aria-hidden="true"></span>
+              </span>
+              <span class="illuminus-none-tag">{{localize "ILLUMINUS.Colour.None"}}</span>
               {{!-- Removed at render time when the browser has no EyeDropper API. --}}
               <button type="button" class="illuminus-eyedropper" data-action="pickColor" data-path="{{field.path}}"
                       data-tooltip="{{localize 'ILLUMINUS.Buttons.PickColorTooltip'}}"

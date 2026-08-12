@@ -34,6 +34,7 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSection": "Reset",
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
+  "ILLUMINUS.Colour.None": "None",
   // The sample names each element after the setting that controls it, so it
   // reads as a legend rather than as a page of prose.
   "ILLUMINUS.Preview.WindowTitle": "Window Title",

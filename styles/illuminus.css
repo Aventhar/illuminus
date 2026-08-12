@@ -971,6 +971,62 @@
   flex: 0 0 auto;
 }
 
+/* --- Colour swatches ---------------------------------------------------- */
+
+/* A native colour input drops alpha: it draws #00000000 as solid black, so a
+   transparent setting is indistinguishable from an opaque one. Styling the
+   browser's own swatch is unreliable, so the input is made invisible — it keeps
+   its box and still opens the browser picker when clicked — and the true colour
+   is drawn over a chequerboard in its place. */
+.illuminus-swatch-wrap {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-swatch-wrap color-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-field__control color-picker input[type="color"] {
+  opacity: 0;
+}
+
+.illuminus-swatch {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgb(0 0 0 / 40%);
+  border-radius: 3px;
+  pointer-events: none;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(var(--illuminus-swatch, transparent), var(--illuminus-swatch, transparent)),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%),
+    linear-gradient(45deg, #9a9a9a 25%, transparent 25%, transparent 75%, #9a9a9a 75%);
+  background-size: auto, 8px 8px, 8px 8px;
+  background-position: 0 0, 0 0, 4px 4px;
+}
+
+/* Spelled out, because a chequerboard alone reads as "no value set". */
+.illuminus-none-tag {
+  display: none;
+  flex: 0 0 auto;
+  font-size: var(--font-size-10, 10px);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.illuminus-field.is-transparent .illuminus-none-tag {
+  display: inline;
+}
+
 /* Illuminus samples colours out of the page rather than off the screen: the
    samplers in the native colour input and the browser EyeDropper API both go
    through screen capture, which is not available on every machine. */

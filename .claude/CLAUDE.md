@@ -74,6 +74,12 @@ These are all load-bearing and none are obvious from the code.
   `modules/illuminus/styles/`. `sanitizePath` makes them root-relative through
   `foundry.utils.getRoute`, which also handles a server `routePrefix`. Any new
   path-valued field must go through it.
+- **A native `<input type="color">` cannot show alpha**, and its `::-webkit-color-swatch`
+  resists styling even with `appearance: none`. The editor draws its own swatch over the
+  input, which is made transparent but keeps its box so it still opens the browser
+  picker. The overlay is positioned from the input's measured rect, because the colour
+  element's internal spacing is not ours to assume — aligning to the row's edge left it
+  five pixels off its click target.
 - **Some core styling is fed through element-local custom properties.** A journal
   sheet's header buttons carry `--button-text-color` on themselves, which a generic
   `button { color: var(--button-text-color) }` then resolves. Setting `color` works, but

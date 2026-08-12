@@ -199,7 +199,42 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.element.addEventListener("change", onChange);
     this.element.addEventListener("input", onChange);
     this.#renderTabBadges();
+    for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
+      const [groupId, fieldName] = row.dataset.field.split(".");
+      const value = this.#working?.[groupId]?.[fieldName];
+      if (typeof value === "string" && value.startsWith("#")) this.#showSwatch(row, value);
+    }
     this.#applyPreview();
+  }
+
+  /**
+   * Paint the true colour, alpha included, behind the native colour input.
+   *
+   * A native `<input type="color">` cannot represent alpha: it renders
+   * `#00000000` as solid black, so a transparent setting looks like an opaque
+   * one. The real colour is drawn over a chequerboard instead, and a fully
+   * transparent value is spelled out.
+   * @param {HTMLElement} row
+   * @param {string} value
+   */
+  #showSwatch(row, value) {
+    row.style.setProperty("--illuminus-swatch", value);
+    row.classList.toggle("is-transparent", /^#[0-9a-f]{6}00$/i.test(value));
+
+    // Align the drawn swatch to the input it stands in for, rather than to the
+    // edge of the row: the colour element's internal spacing is not ours to
+    // assume, and being a few pixels out puts the visual off its click target.
+    const chip = row.querySelector(".illuminus-swatch");
+    const input = row.querySelector('color-picker input[type="color"]');
+    if (!chip || !input) return;
+    const wrap = chip.parentElement.getBoundingClientRect();
+    const box = input.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    chip.style.right = `${Math.round(wrap.right - box.right)}px`;
+    chip.style.top = `${Math.round(box.top - wrap.top)}px`;
+    chip.style.width = `${Math.round(box.width)}px`;
+    chip.style.height = `${Math.round(box.height)}px`;
+    chip.style.transform = "none";
   }
 
   /**
@@ -250,6 +285,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     const row = this.element.querySelector(`[data-field="${groupId}.${fieldName}"]`);
     row?.classList.toggle("is-default", coerced === field.default);
+    if (row && field.type === "color") this.#showSwatch(row, String(coerced));
     this.#updateTabBadge(groupId);
   }
 

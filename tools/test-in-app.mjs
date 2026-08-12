@@ -991,7 +991,76 @@ check(es.styled.marked, "the edit window is still styled by Illuminus");
 check(es.styled.position !== "relative" && es.styled.position !== "static",
   `and stays out of normal flow (position ${es.styled.position})`);
 
-console.log("\n[25] Console is clean");
+// A native colour input renders #00000000 as solid black, so the true colour
+// is painted behind it and a fully transparent one is named.
+console.log("\n[25] Colour swatches show transparency honestly");
+const swatch = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Swatch Probe", settings: {
+    page: {background: "#00000000"},
+    heading1: {background: "#3366cc80"},
+    body: {color: "#112233"}
+  }});
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1100));
+  const el = app.element;
+
+  const read = (path) => {
+    const row = el.querySelector('[data-field="' + path + '"]');
+    const input = row.querySelector('color-picker input[type="color"]');
+    const chip = row.querySelector(".illuminus-swatch");
+    const tag = row.querySelector(".illuminus-none-tag");
+    const inputBox = input.getBoundingClientRect();
+    const inputStyle = getComputedStyle(input);
+    return {
+      swatchVar: getComputedStyle(row).getPropertyValue("--illuminus-swatch").trim(),
+      transparent: row.classList.contains("is-transparent"),
+      noneVisible: tag ? getComputedStyle(tag).display !== "none" : false,
+      layers: getComputedStyle(chip).backgroundImage,
+      nativeValue: input.value,
+      // Hiding the input entirely would take away the browser's own picker.
+      inputClickable: inputBox.width > 0 && inputBox.height > 0
+        && inputStyle.display !== "none" && inputStyle.visibility !== "hidden"
+        && inputStyle.pointerEvents !== "none",
+      chipOverlap: (() => {
+        if (!chip) return 0;
+        const c = chip.getBoundingClientRect();
+        const w = Math.max(0, Math.min(c.right, inputBox.right) - Math.max(c.left, inputBox.left));
+        const h = Math.max(0, Math.min(c.bottom, inputBox.bottom) - Math.max(c.top, inputBox.top));
+        return Math.round((w * h) / (inputBox.width * inputBox.height) * 100);
+      })()
+    };
+  };
+
+  const out = {
+    clear: read("page.background"),
+    half: read("heading1.background"),
+    solid: read("body.color")
+  };
+
+  // And it must follow an edit, not just the initial render.
+  el.querySelector('[data-field="body.color"] color-picker').value = "#00000000";
+  await new Promise(r => setTimeout(r, 300));
+  out.afterEdit = read("body.color");
+
+  await app.close();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const sw = JSON.parse(swatch);
+check(sw.clear.swatchVar === "#00000000", `a transparent fill reaches the swatch (got ${sw.clear.swatchVar})`);
+check(sw.clear.nativeValue === "#000000", `while the native input still shows black (got ${sw.clear.nativeValue})`);
+check(sw.clear.transparent && sw.clear.noneVisible, "so it is labelled None");
+check(sw.clear.layers.includes("linear-gradient"), "and drawn over a chequerboard");
+check(sw.clear.inputClickable, "the browser's own colour picker is still reachable");
+check(sw.clear.chipOverlap >= 80, `and the drawn swatch sits over the click target (${sw.clear.chipOverlap}% overlap)`);
+check(sw.half.swatchVar === "#3366cc80", `a half-transparent colour keeps its alpha (got ${sw.half.swatchVar})`);
+check(!sw.half.transparent && !sw.half.noneVisible, "and is not labelled None");
+check(sw.solid.swatchVar === "#112233" && !sw.solid.noneVisible, "an opaque colour is shown plainly");
+check(sw.afterEdit.transparent && sw.afterEdit.noneVisible,
+  "editing a colour to transparent updates the swatch straight away");
+
+console.log("\n[26] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
