@@ -823,7 +823,100 @@ check(wn.editColor === "rgb(255, 0, 255)", `edit pencil colour applied (got ${wn
 check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
 check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
 
-console.log("\n[23] Console is clean");
+// Bundled assets have to be reachable at the paths the presets and the sample
+// reference, and the sample image must take the Pictures settings.
+console.log("\n[23] Bundled textures and the sample image");
+const assets = await cdp.evaluate(`(async () => {
+  const paths = [
+    "modules/illuminus/assets/sample-illustration.svg",
+    "modules/illuminus/assets/textures/parchment.svg",
+    "modules/illuminus/assets/textures/paper-fibres.svg",
+    "modules/illuminus/assets/textures/linen.svg",
+    "modules/illuminus/assets/textures/stone.svg",
+    "modules/illuminus/assets/textures/grid.svg",
+    "modules/illuminus/assets/textures/hatch.svg"
+  ];
+  const fetched = {};
+  for (const path of paths) {
+    const res = await fetch("/" + path);
+    fetched[path] = {ok: res.ok, type: res.headers.get("content-type")};
+  }
+
+  const api = game.modules.get("illuminus").api;
+  const parchment = api.listStyles().find(s => s.name === "Aged Parchment");
+
+  const style = await api.createStyle({name: "Picture Probe", settings: {
+    images: {borderTopWidth: 5, borderTopColor: "#ff0000", opacity: 50, captionColor: "#00ff00"}
+  }});
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1200));
+  const freeze = document.createElement("style");
+  freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+  document.head.append(freeze);
+
+  // The sample renders at zoom 0.75 so a whole page fits the pane, and computed
+  // lengths come back scaled. Undo it just for the measurement.
+  const zoomed = app.element.querySelector(".illuminus-preview__frame .journal-page-content");
+  const priorZoom = zoomed.style.zoom;
+  zoomed.style.zoom = "1";
+
+  const img = app.element.querySelector(".illuminus-preview__frame figure img");
+  const cap = app.element.querySelector(".illuminus-preview__frame figcaption");
+  const out = {
+    fetched,
+    presetTexture: parchment.settings.page?.texture ?? "(none)",
+    sampleImagePresent: !!img,
+    sampleImageLoaded: img ? img.naturalWidth > 0 : false,
+    imgBorder: img ? getComputedStyle(img).borderTopWidth + " " + getComputedStyle(img).borderTopColor : null,
+    imgOpacity: img ? getComputedStyle(img).opacity : null,
+    captionColor: cap ? getComputedStyle(cap).color : null
+  };
+  zoomed.style.zoom = priorZoom;
+  freeze.remove();
+  await app.close();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const as = JSON.parse(assets);
+const missing = Object.entries(as.fetched).filter(([, v]) => !v.ok).map(([k]) => k);
+check(missing.length === 0, `all 7 bundled assets are served${missing.length ? ": missing " + missing.join(", ") : ""}`);
+check(Object.values(as.fetched).every((v) => /svg/.test(v.type ?? "")),
+  "and are served as SVG");
+check(as.presetTexture.endsWith("textures/parchment.svg"),
+  `Aged Parchment ships pointing at a bundled texture (${as.presetTexture})`);
+check(as.sampleImagePresent && as.sampleImageLoaded, "the sample figure has an image and it loads");
+check(as.imgBorder === "5px rgb(255, 0, 0)", `the sample image takes the Pictures border (got ${as.imgBorder})`);
+check(as.imgOpacity === "0.5", `and its opacity (got ${as.imgOpacity})`);
+check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its colour (got ${as.captionColor})`);
+
+// A relative url() in a stylesheet resolves against the stylesheet's own
+// folder, so a picked path must be made root-relative or it 404s.
+const texture = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Texture Probe", settings: {
+    page: {texture: "modules/illuminus/assets/textures/linen.svg"}
+  }});
+  const entry = await JournalEntry.create({name: "Texture Probe Journal"});
+  await entry.createEmbeddedDocuments("JournalEntryPage",
+    [{name: "P", type: "text", text: {content: "<p>x</p>"}}]);
+  await api.assignStyle(entry, style.id);
+  await entry.sheet.render({force: true});
+  await new Promise(r => setTimeout(r, 1200));
+
+  const content = entry.sheet.element.querySelector(".journal-entry-content");
+  const url = getComputedStyle(content, "::before").backgroundImage.match(/url\\("([^"]+)"\\)/)?.[1];
+  const res = url ? await fetch(url) : null;
+  const out = {url, ok: res?.ok ?? false, doubled: (url ?? "").includes("styles/modules")};
+
+  await entry.delete();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const tx = JSON.parse(texture);
+check(!tx.doubled, `the texture URL is not resolved against the stylesheet folder (${tx.url})`);
+check(tx.ok, `and the browser can actually fetch it (${tx.url})`);
+
+console.log("\n[24] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

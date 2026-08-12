@@ -1096,6 +1096,16 @@
   position: relative;
 }
 
+.illuminus-preview__frame figure {
+  margin: 0.5rem 0;
+}
+
+.illuminus-preview__frame figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .illuminus-preview__frame .journal-entry-content {
   display: block;
   flex: 1;

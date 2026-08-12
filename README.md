@@ -37,6 +37,10 @@ it to whichever journals should wear it, and export it to carry into another wor
   It reads colours out of the page rather than off the screen, so unlike the operating
   system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
   and it keeps transparency.
+- **Textures included.** Six tileable background pictures — parchment, paper fibres,
+  linen, stone, grid, hatching — under `assets/textures/`. They are greyscale on purpose:
+  the texture supplies the grain and the Fill Colour supplies the hue, so one file suits
+  any palette. Point the Background Picture control at your own art just as easily.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **Four styles included:** Aged Parchment, Midnight Codex, Clean Manuscript, Datapad.
   They are ordinary styles once seeded — edit or delete them freely.
@@ -72,6 +76,7 @@ scripts/style-store.mjs      CRUD over the world's styles; journal assignment
 scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
 scripts/apps/                The GUI (library, editor, assignment dialog)
+assets/                      Bundled textures and the sample illustration
 styles/illuminus.css         Skeleton rules + GUI styling
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox

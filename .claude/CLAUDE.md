@@ -63,6 +63,12 @@ These are all load-bearing and none are obvious from the code.
   in `document.styleSheets` with an `href`, and walking `cssRules` will not find these
   rules either — `CSS.getMatchedStylesForNode` over CDP is the way to see which
   declaration actually wins, and it reports the layer.
+- **A relative `url()` in a stylesheet resolves against the stylesheet, not the page.**
+  Foundry's file picker hands back data-root-relative paths like
+  `worlds/x/art/paper.webp`, which would be looked for under
+  `modules/illuminus/styles/`. `sanitizePath` makes them root-relative through
+  `foundry.utils.getRoute`, which also handles a server `routePrefix`. Any new
+  path-valued field must go through it.
 - **Some core styling is fed through element-local custom properties.** A journal
   sheet's header buttons carry `--button-text-color` on themselves, which a generic
   `button { color: var(--button-text-color) }` then resolves. Setting `color` works, but

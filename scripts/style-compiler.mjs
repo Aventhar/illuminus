@@ -27,8 +27,17 @@ function sanitize(value) {
 }
 
 /**
- * Accept only paths that cannot escape into a script or another origin. Foundry
- * serves user files from relative paths; remote art is allowed over https.
+ * Accept only paths that cannot escape into a script or another origin, and
+ * make them resolvable from a stylesheet.
+ *
+ * Foundry's file picker returns paths relative to the data root, such as
+ * `worlds/my-world/art/paper.webp`. A relative `url()` inside a stylesheet
+ * resolves against the *stylesheet's* location, not the page, so that path
+ * would be looked for under `modules/illuminus/styles/`. Making it
+ * root-relative fixes it; `getRoute` also prepends a server's routePrefix when
+ * one is configured. Outside Foundry (the validation tooling) a leading slash
+ * is equivalent.
+ *
  * @param {string} path
  * @returns {string|null}  The safe path, or null if it should be ignored.
  */
@@ -37,7 +46,8 @@ function sanitizePath(path) {
   if (!clean) return null;
   if (/^(https?:)?\/\//i.test(clean)) return clean;
   if (/^[a-z][a-z0-9+.-]*:/i.test(clean)) return null; // reject javascript:, data:, and friends
-  return clean;
+  if (clean.startsWith("/")) return clean;
+  return globalThis.foundry?.utils?.getRoute?.(clean) ?? `/${clean}`;
 }
 
 /**

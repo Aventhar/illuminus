@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360"
+     role="img" aria-label="A ruined chapel standing in still water">
+  <title>The Sunken Chapel</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.16"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.12"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#sky)"/>
+
+  <g fill="#000" fill-opacity="0.55">
+    <path d="M120 268V150l40-30 40 30v118z"/>
+    <path d="M440 268V150l40-30 40 30v118z"/>
+    <path d="M236 268V96l84-56 84 56v172z"/>
+    <path d="M304 40h32v-26h-32z"/>
+    <path d="M312 6h16v34h-16z"/>
+    <path d="M296 18h48v10h-48z"/>
+  </g>
+
+  <g fill="url(#sky)" fill-opacity="0.9">
+    <path d="M300 268v-92a20 20 0 0 1 40 0v92z"/>
+    <path d="M258 268v-52a14 14 0 0 1 28 0v52z"/>
+    <path d="M354 268v-52a14 14 0 0 1 28 0v52z"/>
+    <path d="M146 268v-46a14 14 0 0 1 28 0v46z"/>
+    <path d="M466 268v-46a14 14 0 0 1 28 0v46z"/>
+  </g>
+
+  <rect y="268" width="640" height="92" fill="url(#water)"/>
+  <g stroke="#000" stroke-opacity="0.18" stroke-width="2" fill="none">
+    <path d="M40 292h150M230 292h180M450 292h150"/>
+    <path d="M80 312h120M250 312h150M440 312h130"/>
+    <path d="M30 332h180M260 332h120M420 332h190"/>
+  </g>
+
+  <g fill="#000" fill-opacity="0.18">
+    <path d="M236 268l84 26 84-26z"/>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Linen Weave</title>
+  <defs>
+    <pattern id="w" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#ffffff"/>
+      <rect width="8" height="4" fill="#000000" opacity="0.045"/>
+      <rect width="4" height="8" fill="#000000" opacity="0.045"/>
+    </pattern>
+    <filter id="l" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4"
+                    seed="3" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.12" intercept="0"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#w)"/>
+  <rect width="512" height="512" filter="url(#l)"/>
+</svg>
