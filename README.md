@@ -80,7 +80,7 @@ tools/sandbox.sh down
 ```
 
 The sandbox builds its own data directory so tests never touch a live world. See
-[CLAUDE.md](CLAUDE.md) for the workflow and the Foundry v14 API traps.
+[.claude/CLAUDE.md](.claude/CLAUDE.md) for the workflow and the Foundry v14 API traps.
 
 ## How it works
 

@@ -1,7 +1,7 @@
 # Working on Illuminus
 
 Illuminus is a Foundry VTT v14 module: per-journal decorative styling, configured
-through a plain-language GUI. **Read [README.md](README.md) first** — it covers what
+through a plain-language GUI. **Read [README.md](../README.md) first** — it covers what
 the module does, the file layout, and the schema → compiler → stylesheet architecture.
 This file covers only what that document does not: the workflow, and the traps that
 cost time to rediscover.
