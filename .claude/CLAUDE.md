@@ -63,7 +63,12 @@ These are all load-bearing and none are obvious from the code.
   in `document.styleSheets` with an `href`, and walking `cssRules` will not find these
   rules either — `CSS.getMatchedStylesForNode` over CDP is the way to see which
   declaration actually wins, and it reports the layer.
-- **A relative `url()` in a stylesheet resolves against the stylesheet, not the page.**
+- **`journal-entry-page` names two very different things.** It is the `<article>` for a
+  page inside the journal sheet, and it is also a root class on the standalone page
+  sheet — the window that Edit Page opens, which Foundry appends to `<body>` and
+  positions itself. A rule written for the page area lands on that window too. Paint
+  properties are fine there; layout properties are not. Setting `position: relative` on
+  it dropped a 600px window into normal flow and shoved the whole interface sideways.
   Foundry's file picker hands back data-root-relative paths like
   `worlds/x/art/paper.webp`, which would be looked for under
   `modules/illuminus/styles/`. `sanitizePath` makes them root-relative through

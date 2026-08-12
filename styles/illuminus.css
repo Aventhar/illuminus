@@ -27,7 +27,6 @@
 
 .illuminus-styled .journal-entry-content,
 .illuminus-styled.journal-entry-page {
-  position: relative;
   background-color: var(--ill-page-background);
   border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
                 var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
@@ -42,6 +41,14 @@
     var(--ill-page-shadow-blur) var(--ill-page-shadow-spread) var(--ill-page-shadow-color),
     inset var(--ill-page-inner-shadow-offset-x) var(--ill-page-inner-shadow-offset-y)
     var(--ill-page-inner-shadow-blur) var(--ill-page-inner-shadow-spread) var(--ill-page-inner-shadow-color);
+}
+
+/* Only the in-sheet page area needs a positioning context for the texture layer
+   below. A popped-out page sheet is an application window that Foundry has
+   already positioned, and forcing `relative` on it drops it into normal flow,
+   where it pushes the rest of the interface aside. */
+.illuminus-styled .journal-entry-content {
+  position: relative;
 }
 
 /* The background picture rides on its own layer so it can carry an independent

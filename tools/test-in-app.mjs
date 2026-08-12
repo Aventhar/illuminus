@@ -924,7 +924,53 @@ const tx = JSON.parse(texture);
 check(!tx.doubled, `the texture URL is not resolved against the stylesheet folder (${tx.url})`);
 check(tx.ok, `and the browser can actually fetch it (${tx.url})`);
 
-console.log("\n[24] Console is clean");
+// Opening a page for editing must not disturb the rest of the interface. The
+// edit sheet is its own window carrying the journal-entry-page class, so a rule
+// meant for the page area can land on it and drop it into normal flow.
+console.log("\n[24] Editing a page leaves the interface alone");
+const editShift = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const sidebar = document.querySelector("#sidebar");
+  const at = () => Math.round(sidebar.getBoundingClientRect().left);
+
+  const run = async (styled) => {
+    const entry = await JournalEntry.create({name: "Edit Shift " + styled});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>hello</p>"}}]);
+    if (styled) {
+      await api.assignStyle(entry, api.listStyles().find(s => s.name === "Aged Parchment").id);
+    }
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1200));
+    const before = at();
+
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
+    await new Promise(r => setTimeout(r, 1600));
+    const after = at();
+
+    const editSheet = [...foundry.applications.instances.values()].find(
+      a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
+    const position = editSheet ? getComputedStyle(editSheet.element).position : null;
+    const marked = editSheet ? editSheet.element.classList.contains("illuminus-styled") : false;
+
+    await editSheet?.close();
+    await entry.delete();
+    await new Promise(r => setTimeout(r, 400));
+    return {before, after, position, marked};
+  };
+
+  return JSON.stringify({plain: await run(false), styled: await run(true)});
+})()`);
+const es = JSON.parse(editShift);
+check(es.plain.before === es.plain.after,
+  `unstyled journal: sidebar stays put (${es.plain.before} -> ${es.plain.after})`);
+check(es.styled.before === es.styled.after,
+  `styled journal: sidebar stays put (${es.styled.before} -> ${es.styled.after})`);
+check(es.styled.marked, "the edit window is still styled by Illuminus");
+check(es.styled.position !== "relative" && es.styled.position !== "static",
+  `and stays out of normal flow (position ${es.styled.position})`);
+
+console.log("\n[25] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
