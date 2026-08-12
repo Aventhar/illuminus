@@ -848,14 +848,22 @@ check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left al
 // reference, and the sample image must take the Pictures settings.
 console.log("\n[23] Bundled textures and the sample image");
 const assets = await cdp.evaluate(`(async () => {
+  // Every bundled asset, so a move that misses a reference fails here rather
+  // than silently 404ing in someone's game.
   const paths = [
-    "modules/illuminus/assets/sample-illustration.svg",
-    "modules/illuminus/assets/textures/parchment.svg",
-    "modules/illuminus/assets/textures/paper-fibres.svg",
-    "modules/illuminus/assets/textures/linen.svg",
-    "modules/illuminus/assets/textures/stone.svg",
-    "modules/illuminus/assets/textures/grid.svg",
-    "modules/illuminus/assets/textures/hatch.svg"
+    "modules/illuminus/assets/Samples/Pictures/castle.jpg",
+    "modules/illuminus/assets/Samples/textures/parchment.svg",
+    "modules/illuminus/assets/Samples/textures/paper-fibres.svg",
+    "modules/illuminus/assets/Samples/textures/linen.svg",
+    "modules/illuminus/assets/Samples/textures/stone.svg",
+    "modules/illuminus/assets/Samples/textures/grid.svg",
+    "modules/illuminus/assets/Samples/textures/hatch.svg",
+    "modules/illuminus/assets/Samples/textures/ufo.svg",
+    "modules/illuminus/assets/Samples/textures/bricks.jpg",
+    "modules/illuminus/assets/Samples/textures/canvas.jpg",
+    "modules/illuminus/assets/Samples/textures/marble.jpg",
+    "modules/illuminus/assets/Samples/textures/parchment.jpg",
+    "modules/illuminus/assets/Samples/textures/stars.jpg"
   ];
   const fetched = {};
   for (const path of paths) {
@@ -900,9 +908,9 @@ const assets = await cdp.evaluate(`(async () => {
 })()`);
 const as = JSON.parse(assets);
 const missing = Object.entries(as.fetched).filter(([, v]) => !v.ok).map(([k]) => k);
-check(missing.length === 0, `all 7 bundled assets are served${missing.length ? ": missing " + missing.join(", ") : ""}`);
-check(Object.values(as.fetched).every((v) => /svg/.test(v.type ?? "")),
-  "and are served as SVG");
+check(missing.length === 0, `all ${Object.keys(as.fetched).length} bundled assets are served${missing.length ? ": missing " + missing.join(", ") : ""}`);
+check(Object.values(as.fetched).every((v) => /svg|jpeg|png|webp/.test(v.type ?? "")),
+  "and are served as images");
 check(as.presetTexture.endsWith("textures/parchment.svg"),
   `Aged Parchment ships pointing at a bundled texture (${as.presetTexture})`);
 check(as.sampleImagePresent && as.sampleImageLoaded, "the sample figure has an image and it loads");
@@ -915,7 +923,7 @@ check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its colour (g
 const texture = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Texture Probe", settings: {
-    page: {texture: "modules/illuminus/assets/textures/linen.svg"}
+    page: {texture: "modules/illuminus/assets/Samples/textures/linen.svg"}
   }});
   const entry = await JournalEntry.create({name: "Texture Probe Journal"});
   await entry.createEmbeddedDocuments("JournalEntryPage",

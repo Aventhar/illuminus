@@ -30,7 +30,7 @@ export const PRESETS = [
         buttonHoverBorderColor: "#a8341c"
       },
       page: {
-        background: "#ece0c6", texture: "modules/illuminus/assets/textures/parchment.svg", paddingTop: 32, paddingRight: 32, paddingBottom: 32,
+        background: "#ece0c6", texture: "modules/illuminus/assets/Samples/textures/parchment.svg", paddingTop: 32, paddingRight: 32, paddingBottom: 32,
         paddingLeft: 32, borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2,
         cornerTopLeft: 2, cornerTopRight: 2, cornerBottomRight: 2, cornerBottomLeft: 2, innerShadowBlur: 40,
         innerShadowColor: "#50321459"

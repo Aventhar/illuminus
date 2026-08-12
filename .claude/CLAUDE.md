@@ -101,6 +101,23 @@ These are all load-bearing and none are obvious from the code.
   application classes, `templates/` for Handlebars, `public/less2/` for styles. Check
   there rather than guessing at the API.
 
+## Bundled assets
+
+`assets/Samples/textures/` and `assets/Samples/Pictures/` ship with the module and are
+referenced by path from `scripts/presets.mjs` (the seeded style's texture) and
+`templates/style-editor.hbs` (the picture in the sample). Those paths are strings, so
+moving a file breaks them silently — `validate.mjs` resolves every
+`modules/illuminus/assets/...` reference found in the source against the filesystem, and
+also checks the spelling matches on-disk case, since macOS forgives a wrong case and a
+Linux-hosted server does not.
+
+Greyscale SVG textures are meant to be combined with a Fill Colour under Multiply
+blending; the colour JPEGs are meant to be used as they are. A texture that is not
+greyscale will tint twice.
+
+Anything added here is redistributed under the repository's MIT licence, so only bundle
+art that may be licensed that way.
+
 ## Generated files — do not hand-edit
 
 - **`lang/en.json`** is written by `node tools/generate-lang.mjs`. Side, corner, and
