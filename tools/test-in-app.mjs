@@ -568,7 +568,66 @@ check(sp.onPageTab.pageWidth > sp.onSidebarTab.pageWidth,
 check(sp.onSidebarTab.bg === "rgb(18, 21, 27)", `sample sidebar picks up the same style (got ${sp.onSidebarTab.bg})`);
 check(sp.onSidebarTab.activeColor === "rgb(232, 201, 121)", `sample current-page colour matches (got ${sp.onSidebarTab.activeColor})`);
 
-console.log("\n[18] Console is clean");
+// The native colour input's own eyedropper belongs to the OS and is not
+// reliable; Illuminus supplies its own using the browser EyeDropper API.
+// Stubbing the API here exercises the whole path a real pick would take.
+console.log("\n[18] Illuminus supplies a working eyedropper");
+const eyedropper = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = api.listStyles().find(s => s.name === "Clean Manuscript");
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1000));
+  const el = app.element;
+
+  const buttons = el.querySelectorAll(".illuminus-eyedropper");
+  const colourFields = el.querySelectorAll('.illuminus-field[data-field] color-picker');
+
+  // Stand in for the browser picker, which cannot be driven from a test.
+  let opened = 0;
+  const original = globalThis.EyeDropper;
+  globalThis.EyeDropper = class {
+    open() { opened += 1; return Promise.resolve({ sRGBHex: "#3366cc" }); }
+  };
+
+  const row = el.querySelector('[data-field="page.background"]');
+  row.querySelector(".illuminus-eyedropper").click();
+  await new Promise(r => setTimeout(r, 400));
+
+  const picker = row.querySelector("color-picker");
+  const sample = el.querySelector(".illuminus-preview__frame .journal-entry-content");
+  const out = {
+    buttonCount: buttons.length,
+    colourFieldCount: colourFields.length,
+    opened,
+    pickerValue: picker.value,
+    previewBg: getComputedStyle(sample).backgroundColor,
+    stored: api.getStyle(style.id).settings.page?.background ?? "(unset)",
+    markedChanged: !row.classList.contains("is-default")
+  };
+
+  // Dismissing the picker must not be treated as a failure.
+  globalThis.EyeDropper = class {
+    open() { const e = new Error("aborted"); e.name = "AbortError"; return Promise.reject(e); }
+  };
+  row.querySelector(".illuminus-eyedropper").click();
+  await new Promise(r => setTimeout(r, 300));
+  out.survivedAbort = getComputedStyle(sample).backgroundColor;
+
+  globalThis.EyeDropper = original;
+  await app.close();
+  return JSON.stringify(out);
+})()`);
+const ed = JSON.parse(eyedropper);
+check(ed.buttonCount === ed.colourFieldCount,
+  `every colour control has an eyedropper (${ed.buttonCount} buttons, ${ed.colourFieldCount} colour fields)`);
+check(ed.opened === 1, `clicking one opens the picker exactly once (got ${ed.opened})`);
+check(ed.pickerValue.toLowerCase() === "#3366cc", `the sampled colour lands in the control (got ${ed.pickerValue})`);
+check(ed.previewBg === "rgb(51, 102, 204)", `and repaints the live sample (got ${ed.previewBg})`);
+check(ed.stored !== "#3366cc", `without touching the saved style (stored ${ed.stored})`);
+check(ed.markedChanged, "and marks the control as changed");
+check(ed.survivedAbort === "rgb(51, 102, 204)", "dismissing the picker leaves the value alone");
+
+console.log("\n[19] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

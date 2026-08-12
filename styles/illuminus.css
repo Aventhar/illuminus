@@ -876,6 +876,15 @@
   flex: 0 0 auto;
 }
 
+/* Illuminus supplies its own screen sampler: the one inside a native colour
+   input belongs to the operating system and cannot be relied on. */
+.illuminus-eyedropper {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 0.4rem;
+  line-height: 1;
+}
+
 .illuminus-unit {
   flex: 0 0 auto;
   font-size: var(--font-size-11, 11px);

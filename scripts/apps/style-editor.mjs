@@ -64,7 +64,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resetGroup: IlluminusStyleEditor.#onResetGroup,
       resetAll: IlluminusStyleEditor.#onResetAll,
       revert: IlluminusStyleEditor.#onRevert,
-      toggleSection: IlluminusStyleEditor.#onToggleSection
+      toggleSection: IlluminusStyleEditor.#onToggleSection,
+      pickColor: IlluminusStyleEditor.#onPickColor
     }
   };
 
@@ -198,7 +199,17 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.element.addEventListener("change", onChange);
     this.element.addEventListener("input", onChange);
     this.#renderTabBadges();
+    this.#removeUnsupportedEyedroppers();
     this.#applyPreview();
+  }
+
+  /**
+   * Drop the eyedropper buttons when the browser cannot sample the screen,
+   * rather than offering a control that silently does nothing.
+   */
+  #removeUnsupportedEyedroppers() {
+    if (globalThis.EyeDropper) return;
+    for (const button of this.element.querySelectorAll(".illuminus-eyedropper")) button.remove();
   }
 
   /**
@@ -311,6 +322,38 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.#dirty = true;
     this.#applyPreview();
     this.render();
+  }
+
+  /**
+   * Sample a colour from anywhere on screen.
+   *
+   * Foundry's own colour control is a plain `<input type="color">`, which on
+   * macOS hands off to the system colour panel — whose magnifier is outside
+   * this module's reach and does not reliably sample. The EyeDropper API is
+   * the browser's own picker and sidesteps it entirely.
+   *
+   * The sampled value is applied by assigning to the colour element, so it
+   * travels the same change path as any manual edit.
+   */
+  static async #onPickColor(_event, target) {
+    const path = target.dataset.path;
+    const picker = this.element.querySelector(`[data-field="${path}"] color-picker`);
+    if (!picker) return;
+
+    if (!globalThis.EyeDropper) {
+      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NoEyedropper"));
+      return;
+    }
+
+    try {
+      const { sRGBHex } = await new globalThis.EyeDropper().open();
+      if (sRGBHex) picker.value = sRGBHex;
+    } catch (error) {
+      // Dismissing the picker rejects with AbortError; that is not a failure.
+      if (error?.name === "AbortError") return;
+      log.error("eyedropper failed", error);
+      ui.notifications.error(game.i18n.localize("ILLUMINUS.Notifications.EyedropperFailed"));
+    }
   }
 
   /** Collapse or expand a section, remembering the choice across re-renders. */

@@ -35,7 +35,11 @@ Object.assign(out, {
   "ILLUMINUS.Preview.Search": "Search Pages",
   "ILLUMINUS.Preview.Category": "Chapters",
   "ILLUMINUS.Preview.Page2": "The Drowned Choir",
-  "ILLUMINUS.Preview.AddPage": "Add Page"
+  "ILLUMINUS.Preview.AddPage": "Add Page",
+  "ILLUMINUS.Buttons.PickColor": "Pick a colour from the screen",
+  "ILLUMINUS.Buttons.PickColorTooltip": "Sample any colour on screen, including from the sample beside this panel",
+  "ILLUMINUS.Notifications.NoEyedropper": "This browser cannot sample colours from the screen. Type or paste a colour code instead.",
+  "ILLUMINUS.Notifications.EyedropperFailed": "Could not sample that colour. Type or paste a colour code instead."
 });
 
 /* ---------- Groups ---------- */
