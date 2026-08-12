@@ -69,9 +69,9 @@ const styleInfo = await cdp.evaluate(`JSON.stringify({
   ruleCount: document.getElementById("illuminus-compiled-styles")?.sheet?.cssRules.length ?? 0
 })`);
 const styles = JSON.parse(styleInfo);
-check(styles.count === 4, `4 preset styles seeded (got ${styles.count}: ${styles.names.join(", ")})`);
+check(styles.count === 1, `1 preset style seeded (got ${styles.count}: ${styles.names.join(", ")})`);
 check(styles.sheetPresent, "compiled <style> element is in document.head");
-check(styles.ruleCount === 5, `stylesheet parsed into ${styles.ruleCount} rules (1 base + 4 styles) — no CSS syntax errors`);
+check(styles.ruleCount === 2, `stylesheet parsed into ${styles.ruleCount} rules (1 base + 1 style) — no CSS syntax errors`);
 
 // Foundry v14 inlines module CSS into a cascade layer rather than adding a
 // <link>, so assert the rules take effect rather than looking for the file.
@@ -158,19 +158,25 @@ console.log("\n[5] Switching styles restyles without re-render");
 const switched = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const entry = game.journal.getName("Illuminus Test Journal");
-  const midnight = api.listStyles().find(s => s.name === "Midnight Codex");
-  await api.assignStyle(entry, midnight.id);
+  const other = await api.createStyle({name: "Switch Target", settings: {
+    page: {background: "#171a21"}, body: {color: "#d7dbe2"}
+  }});
+  await api.assignStyle(entry, other.id);
   await new Promise(r => setTimeout(r, 600));
   const root = entry.sheet.element;
-  return JSON.stringify({
-    attr: root.getAttribute("data-illuminus-style") === midnight.id,
+  const out = {
+    attr: root.getAttribute("data-illuminus-style") === other.id,
     pageBg: getComputedStyle(root.querySelector(".journal-entry-content")).backgroundColor,
     bodyColor: getComputedStyle(root.querySelector(".journal-page-content")).color
-  });
+  };
+  // Leaving it behind would show up in the manager's count later.
+  await api.assignStyle(entry, "");
+  await api.deleteStyle(other.id);
+  return JSON.stringify(out);
 })()`);
 const s = JSON.parse(switched);
 check(s.attr, "data attribute updated to the new style");
-check(s.pageBg === "rgb(23, 26, 33)", `page repainted to Midnight Codex slate (got ${s.pageBg})`);
+check(s.pageBg === "rgb(23, 26, 33)", `page repainted to the other style (got ${s.pageBg})`);
 check(s.bodyColor === "rgb(215, 219, 226)", `body text repainted to pale grey (got ${s.bodyColor})`);
 
 console.log("\n[6] Clearing the style restores Foundry's default");
@@ -204,7 +210,7 @@ const manager = await cdp.evaluate(`(async () => {
 })()`);
 const m = JSON.parse(manager);
 check(m.rendered, "style manager renders");
-check(m.rows === 4, `manager lists all 4 styles (got ${m.rows})`);
+check(m.rows === 1, `manager lists the seeded style (got ${m.rows})`);
 check(JSON.stringify(m.toolbarButtons) === JSON.stringify(["create", "import", "exportSelected", "exportAll"]),
   `toolbar has create/import/export buttons (got ${m.toolbarButtons.join(",")})`);
 check(m.untranslated.length === 0, `no untranslated keys in manager${m.untranslated.length ? `: ${m.untranslated.slice(0,3)}` : ""}`);
@@ -490,7 +496,13 @@ check(pb.bg === "rgb(236, 224, 198)", `and is still painted with the style colou
 console.log("\n[16] Sidebar styling reaches a real journal sheet");
 const sidebar = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const style = api.listStyles().find(s => s.name === "Midnight Codex");
+  const style = await api.createStyle({name: "Sidebar Probe", settings: {sidebar: {
+      background: "#12151b", color: "#c8d2de",
+      activeColor: "#e8c979", activeWeight: "700",
+      activeAccentColor: "#e8c979", activeAccentWidth: 3,
+      entryBorderBottomWidth: 1, entryBorderBottomColor: "#262c38",
+      numberColor: "#6b7688", searchBackground: "#0d1015"
+    }}});
   let entry = game.journal.getName("Sidebar Test Journal");
   if (!entry) {
     entry = await JournalEntry.create({name: "Sidebar Test Journal"});
@@ -545,7 +557,7 @@ check(sb.searchBg === "rgb(13, 16, 21)", `search box colour applied (got ${sb.se
 console.log("\n[17] The sample shows a sidebar, but only on the Sidebar tab");
 const sample = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const style = api.listStyles().find(s => s.name === "Midnight Codex");
+  const style = api.listStyles().find(s => s.name === "Sidebar Probe");
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1000));
   const el = app.element;
@@ -566,6 +578,7 @@ const sample = await cdp.evaluate(`(async () => {
   };
 
   await app.close();
+  await api.deleteStyle(style.id);
   return JSON.stringify({onPageTab, onSidebarTab});
 })()`);
 const sp = JSON.parse(sample);
@@ -581,7 +594,7 @@ check(sp.onSidebarTab.activeColor === "rgb(232, 201, 121)", `sample current-page
 console.log("\n[18] Picking a colour from the window");
 const picked = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const style = api.listStyles().find(s => s.name === "Clean Manuscript");
+  const style = api.listStyles().find(s => s.name === "Aged Parchment");
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1000));
   const el = app.element;
@@ -633,11 +646,11 @@ const pk = JSON.parse(picked);
 check(pk.buttons === pk.colourFields,
   `every colour control has a picker (${pk.buttons} buttons, ${pk.colourFields} colour fields)`);
 check(pk.cursorArmed, "clicking it arms pointing mode");
-check(pk.readout.includes("#fbf7ef"), `the readout previews the colour under the pointer (got "${pk.readout}")`);
-check(pk.pickerValue.toLowerCase() === "#fbf7ef", `clicking applies that colour (got ${pk.pickerValue})`);
+check(pk.readout.includes("#ece0c6"), `the readout previews the colour under the pointer (got "${pk.readout}")`);
+check(pk.pickerValue.toLowerCase() === "#ece0c6", `clicking applies that colour (got ${pk.pickerValue})`);
 check(pk.cursorReleased && pk.readoutGone, "pointing mode cleans up after the click");
-check(pk.stored !== "#fbf7ef" || true, `saved style untouched until Save (stored ${pk.stored})`);
-check(pk.afterEscape.toLowerCase() === "#fbf7ef", "Escape cancels without changing the value");
+check(pk.stored !== "#ece0c6" || true, `saved style untouched until Save (stored ${pk.stored})`);
+check(pk.afterEscape.toLowerCase() === "#ece0c6", "Escape cancels without changing the value");
 check(pk.escapeCleanedUp, "Escape cleans up pointing mode");
 
 // Transparency is preserved, which neither screen-based sampler manages.

@@ -42,8 +42,8 @@ it to whichever journals should wear it, and export it to carry into another wor
   the texture supplies the grain and the Fill Colour supplies the hue, so one file suits
   any palette. Point the Background Picture control at your own art just as easily.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
-- **Four styles included:** Aged Parchment, Midnight Codex, Clean Manuscript, Datapad.
-  They are ordinary styles once seeded — edit or delete them freely.
+- **One style included:** Aged Parchment, seeded the first time the module runs in a
+  world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
 
 ## Using it
 
