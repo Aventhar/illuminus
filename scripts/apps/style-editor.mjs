@@ -1,5 +1,5 @@
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "../constants.mjs";
-import { GROUPS, defaultSettings, cleanSettings } from "../style-schema.mjs";
+import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
 
@@ -8,8 +8,9 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
 /**
  * The tabbed editor for a single journal style.
  *
- * Every control on every tab is generated from `style-schema.mjs`, so the GUI
- * never needs to be touched when a new style property is added.
+ * Every control on every tab is generated from `style-schema.mjs` — 391 of them
+ * across 68 collapsible sections — so the GUI never needs touching when a style
+ * property is added.
  *
  * Edits are held in a working copy and pushed straight to the live preview, so
  * open journals and the sample pane restyle as the user drags a slider. Nothing
@@ -38,6 +39,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Whether the working copy differs from what is stored. */
   #dirty = false;
 
+  /** Sections the user has collapsed, so a re-render does not reopen them. */
+  #collapsed = new Set();
+
   static DEFAULT_OPTIONS = {
     id: "illuminus-style-editor-{id}",
     classes: ["illuminus", "illuminus-editor"],
@@ -48,16 +52,19 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resizable: true,
       contentClasses: ["standard-form"]
     },
-    position: { width: 860, height: 720 },
+    position: { width: 980, height: 780 },
     form: {
       handler: IlluminusStyleEditor.#onSubmit,
       submitOnChange: false,
       closeOnSubmit: false
     },
     actions: {
+      matchSides: IlluminusStyleEditor.#onMatchSides,
+      resetSection: IlluminusStyleEditor.#onResetSection,
       resetGroup: IlluminusStyleEditor.#onResetGroup,
       resetAll: IlluminusStyleEditor.#onResetAll,
-      revert: IlluminusStyleEditor.#onRevert
+      revert: IlluminusStyleEditor.#onRevert,
+      toggleSection: IlluminusStyleEditor.#onToggleSection
     }
   };
 
@@ -101,8 +108,18 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Font family choices offered by Foundry, plus a "use the sheet default" entry. */
   #fontChoices() {
     const choices = { "": game.i18n.localize("ILLUMINUS.Field.font.inherit") };
-    const available = foundry.applications.settings.menus.FontConfig.getAvailableFontChoices();
-    return Object.assign(choices, available);
+    return Object.assign(choices, foundry.applications.settings.menus.FontConfig.getAvailableFontChoices());
+  }
+
+  /**
+   * Label for a select option. Most choices read the same wherever they appear
+   * ("Bold", "Centred"), but a few need wording specific to their control. A
+   * field-specific key wins when one exists; otherwise the shared label is used.
+   */
+  #choiceLabel(fieldName, choice) {
+    const specific = `ILLUMINUS.Choices.${fieldName}.${choice}`;
+    if (game.i18n.has(specific)) return game.i18n.localize(specific);
+    return game.i18n.localize(`ILLUMINUS.Choices.${choice}`);
   }
 
   /** @override */
@@ -113,7 +130,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     context.styleId = this.#styleId;
     context.style = this.style;
-    context.dirty = this.#dirty;
     context.styledClass = STYLED_CLASS;
     context.styleAttr = STYLE_ATTR;
     context.groups = GROUPS.map((group) => ({
@@ -121,7 +137,17 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       label: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.label`),
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
       active: this.tabGroups.sheet === group.id,
-      fields: group.fields.map((field) => this.#fieldContext(group, field, fonts))
+      changedCount: this.#changedCount(group),
+      sections: group.sections.map((section) => ({
+        id: section.id,
+        label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
+        hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
+        open: !this.#collapsed.has(`${group.id}.${section.id}`),
+        // Only sections whose fields repeat one property across sides or
+        // corners can offer to match them.
+        matchable: section.fields.some((field) => field.link),
+        fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
+      }))
     }));
     context.buttons = [
       { type: "submit", icon: "fa-solid fa-floppy-disk", label: "ILLUMINUS.Buttons.Save" },
@@ -130,18 +156,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return context;
   }
 
-  /**
-   * Label for a select option. Most choices read the same wherever they appear
-   * ("Bold", "Centred"), but a few need wording specific to their control —
-   * "Left" means one thing for alignment and another for a box's border. A
-   * field-specific key wins when one exists; otherwise the shared label is used.
-   * @param {string} fieldName
-   * @param {string} choice
-   */
-  #choiceLabel(fieldName, choice) {
-    const specific = `ILLUMINUS.Choices.${fieldName}.${choice}`;
-    if (game.i18n.has(specific)) return game.i18n.localize(specific);
-    return game.i18n.localize(`ILLUMINUS.Choices.${choice}`);
+  /** How many controls in a group differ from their default, for the tab badge. */
+  #changedCount(group) {
+    return groupFields(group).filter((field) => this.#working?.[group.id]?.[field.name] !== field.default).length;
   }
 
   /** Build the template data for one control. */
@@ -164,9 +181,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       selected: choice === value
     }));
     if (field.type === "font") context.choices = Object.entries(fonts).map(([choice, label]) => ({
-      value: choice,
-      label,
-      selected: choice === value
+      value: choice, label, selected: choice === value
     }));
     if (field.type === "toggle") context.checked = Boolean(value);
     return context;
@@ -179,10 +194,28 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
-    // Any control change repaints the preview immediately; persistence waits for Save.
-    this.element.addEventListener("change", this.#onFieldChange.bind(this));
-    this.element.addEventListener("input", this.#onFieldChange.bind(this));
+    const onChange = this.#onFieldChange.bind(this);
+    this.element.addEventListener("change", onChange);
+    this.element.addEventListener("input", onChange);
+    this.#renderTabBadges();
     this.#applyPreview();
+  }
+
+  /**
+   * Add a count of changed controls to each tab. Foundry's shared tab template
+   * has no slot for one, so it is appended after the fact rather than forking
+   * the template.
+   */
+  #renderTabBadges() {
+    for (const group of GROUPS) {
+      const item = this.element.querySelector(`nav.tabs [data-tab="${group.id}"]`);
+      if (!item || item.querySelector(".illuminus-badge")) continue;
+      const badge = document.createElement("span");
+      badge.className = "illuminus-badge";
+      badge.dataset.tooltip = game.i18n.localize("ILLUMINUS.Editor.ChangedTooltip");
+      item.append(badge);
+    }
+    for (const group of GROUPS) this.#updateTabBadge(group.id);
   }
 
   /** @override */
@@ -191,20 +224,42 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     clearPreview(this.#styleId);
   }
 
-  /** Read the form into the working copy and repaint. */
+  /**
+   * Read the form into the working copy and repaint.
+   *
+   * With ~400 controls this runs on every frame of a slider drag, so it updates
+   * only the field that changed and only that field's row, rather than
+   * re-reading the whole form and re-marking every row.
+   */
   #onFieldChange(event) {
-    if (!event.target?.name) return;
-    this.#readForm();
+    const input = event.target;
+    if (!input?.name) return;
+    const [groupId, fieldName] = input.name.split(".");
+    const field = GROUPS.find((g) => g.id === groupId)?.sections
+      .flatMap((s) => s.fields).find((f) => f.name === fieldName);
+    if (!field) return;
+
+    const raw = input.type === "checkbox" ? input.checked : input.value;
+    const coerced = cleanSettings({ [groupId]: { [fieldName]: raw } })?.[groupId]?.[fieldName];
+    if (coerced === undefined) return;
+
+    this.#working[groupId][fieldName] = coerced;
     this.#dirty = true;
     this.#applyPreview();
-    this.#markDefaults();
+
+    const row = this.element.querySelector(`[data-field="${groupId}.${fieldName}"]`);
+    row?.classList.toggle("is-default", coerced === field.default);
+    this.#updateTabBadge(groupId);
   }
 
-  /** Replace the working copy with the current form state. */
-  #readForm() {
-    const data = new foundry.applications.ux.FormDataExtended(this.element).object;
-    const expanded = foundry.utils.expandObject(data);
-    this.#working = foundry.utils.mergeObject(defaultSettings(), cleanSettings(expanded), { inplace: false });
+  /** Refresh the "n changed" badge on a tab without re-rendering. */
+  #updateTabBadge(groupId) {
+    const group = GROUPS.find((g) => g.id === groupId);
+    const badge = this.element.querySelector(`nav.tabs [data-tab="${groupId}"] .illuminus-badge`);
+    if (!group || !badge) return;
+    const count = this.#changedCount(group);
+    badge.textContent = count || "";
+    badge.classList.toggle("is-empty", !count);
   }
 
   /** Push the working copy to the live stylesheet. */
@@ -212,14 +267,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     setPreview(this.#styleId, this.#working);
   }
 
-  /** Flag controls that still hold their default value, so changes stand out. */
-  #markDefaults() {
-    for (const group of GROUPS) {
-      for (const field of group.fields) {
-        const row = this.element.querySelector(`[data-field="${group.id}.${field.name}"]`);
-        if (row) row.classList.toggle("is-default", this.#working?.[group.id]?.[field.name] === field.default);
-      }
-    }
+  /** Look up a section definition from a clicked control. */
+  static #sectionFrom(target) {
+    const groupId = target.dataset.group;
+    const sectionId = target.dataset.section;
+    const group = GROUPS.find((g) => g.id === groupId);
+    return { group, section: group?.sections.find((s) => s.id === sectionId) };
   }
 
   /* -------------------------------------------- */
@@ -227,8 +280,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /* -------------------------------------------- */
 
   /** Save the working copy to the world. */
-  static async #onSubmit(_event, _form, _formData) {
-    this.#readForm();
+  static async #onSubmit() {
     await updateStyle(this.#styleId, { settings: this.#working });
     this.#dirty = false;
     clearPreview(this.#styleId);
@@ -237,19 +289,59 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     log.debug("saved style", this.#styleId);
   }
 
+  /**
+   * Copy the first value of each repeated property across its siblings, so
+   * "all four sides the same" stays a one-click job even though every side is
+   * independently settable.
+   */
+  static async #onMatchSides(_event, target) {
+    const { group, section } = IlluminusStyleEditor.#sectionFrom(target);
+    if (!group || !section) return;
+
+    const seen = new Set();
+    for (const field of section.fields) {
+      if (!field.link || seen.has(field.link)) continue;
+      seen.add(field.link);
+      const source = this.#working[group.id][field.name];
+      for (const sibling of section.fields) {
+        if (sibling.link === field.link) this.#working[group.id][sibling.name] = source;
+      }
+    }
+
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
+  }
+
+  /** Collapse or expand a section, remembering the choice across re-renders. */
+  static #onToggleSection(_event, target) {
+    const key = `${target.dataset.group}.${target.dataset.section}`;
+    if (this.#collapsed.has(key)) this.#collapsed.delete(key);
+    else this.#collapsed.add(key);
+  }
+
+  /** Restore one section's controls to their schema defaults. */
+  static async #onResetSection(_event, target) {
+    const { group, section } = IlluminusStyleEditor.#sectionFrom(target);
+    if (!group || !section) return;
+    for (const field of section.fields) this.#working[group.id][field.name] = field.default;
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
+  }
+
   /** Restore the current tab's controls to their schema defaults. */
   static async #onResetGroup(_event, target) {
-    const groupId = target.dataset.group;
-    const group = GROUPS.find((g) => g.id === groupId);
+    const group = GROUPS.find((g) => g.id === target.dataset.group);
     if (!group) return;
     const confirmed = await DialogV2.confirm({
       window: { title: "ILLUMINUS.Confirm.ResetGroupTitle" },
       content: `<p>${game.i18n.format("ILLUMINUS.Confirm.ResetGroup", {
-        group: game.i18n.localize(`ILLUMINUS.Groups.${groupId}.label`)
+        group: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.label`)
       })}</p>`
     });
     if (!confirmed) return;
-    for (const field of group.fields) this.#working[groupId][field.name] = field.default;
+    for (const field of groupFields(group)) this.#working[group.id][field.name] = field.default;
     this.#dirty = true;
     this.#applyPreview();
     this.render();
@@ -284,10 +376,19 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /* -------------------------------------------- */
 
-  /** Open the editor for a style, focusing an already-open window if there is one. */
-  static open(styleId) {
+  /**
+   * Open the editor for a style, focusing an already-open window if there is
+   * one. Always resolves to the application either way, so callers can drive it
+   * without caring whether it was already on screen.
+   * @param {string} styleId
+   * @returns {Promise<IlluminusStyleEditor>}
+   */
+  static async open(styleId) {
     const existing = foundry.applications.instances.get(`illuminus-style-editor-${styleId}`);
-    if (existing) return existing.bringToFront();
+    if (existing) {
+      existing.bringToFront();
+      return existing;
+    }
     return new IlluminusStyleEditor({ styleId }).render({ force: true });
   }
 }

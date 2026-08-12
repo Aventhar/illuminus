@@ -12,9 +12,11 @@
    2. The module's own GUI (style manager and style editor), namespaced under
       `.illuminus`.
 
-   Every var() below is guaranteed to resolve: the compiler emits a base rule
-   on `.illuminus-styled` carrying every schema default before any per-style
-   rule.
+   Every side, corner, and shadow component is a separate custom property, and
+   they are read back through CSS shorthands so one declaration consumes four
+   variables. Every var() below is guaranteed to resolve: the compiler emits a
+   base rule on `.illuminus-styled` carrying every schema default before any
+   per-style rule.
    ========================================================================== */
 
 /* ==========================================================================
@@ -25,20 +27,50 @@
 
 .illuminus-styled .journal-entry-content,
 .illuminus-styled.journal-entry-page {
+  position: relative;
   background-color: var(--ill-page-background);
+  border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
+                var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
+  border-style: var(--ill-page-border-top-style) var(--ill-page-border-right-style)
+                var(--ill-page-border-bottom-style) var(--ill-page-border-left-style);
+  border-color: var(--ill-page-border-top-color) var(--ill-page-border-right-color)
+                var(--ill-page-border-bottom-color) var(--ill-page-border-left-color);
+  border-radius: var(--ill-page-corner-top-left) var(--ill-page-corner-top-right)
+                 var(--ill-page-corner-bottom-right) var(--ill-page-corner-bottom-left);
+  box-shadow:
+    var(--ill-page-shadow-offset-x) var(--ill-page-shadow-offset-y)
+    var(--ill-page-shadow-blur) var(--ill-page-shadow-spread) var(--ill-page-shadow-color),
+    inset var(--ill-page-inner-shadow-offset-x) var(--ill-page-inner-shadow-offset-y)
+    var(--ill-page-inner-shadow-blur) var(--ill-page-inner-shadow-spread) var(--ill-page-inner-shadow-color);
+}
+
+/* The background picture rides on its own layer so it can carry an independent
+   opacity and blend mode without affecting the text above it. */
+.illuminus-styled .journal-entry-content::before,
+.illuminus-styled.journal-entry-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
   background-image: var(--ill-page-texture);
   background-size: var(--ill-page-texture-fit-size);
   background-repeat: var(--ill-page-texture-fit-repeat);
-  background-blend-mode: var(--ill-page-texture-blend);
-  border-style: var(--ill-page-border-style);
-  border-color: var(--ill-page-border-color);
-  border-width: var(--ill-page-border-width);
-  border-radius: var(--ill-page-radius);
-  box-shadow: var(--ill-page-inner-shadow);
+  background-position: var(--ill-page-texture-position);
+  background-attachment: var(--ill-page-texture-attachment);
+  mix-blend-mode: var(--ill-page-texture-blend);
+  opacity: var(--ill-page-texture-opacity);
+}
+
+.illuminus-styled .journal-entry-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 .illuminus-styled .journal-entry-pages {
-  padding: var(--ill-page-padding);
+  padding: var(--ill-page-padding-top) var(--ill-page-padding-right)
+           var(--ill-page-padding-bottom) var(--ill-page-padding-left);
 }
 
 /* Constrain measure without moving the page background. */
@@ -51,10 +83,6 @@
 
 .illuminus-styled .journal-header .title {
   height: auto;
-  line-height: 1.2;
-  background: none;
-  border: none;
-  box-shadow: none;
   font-family: var(--ill-title-font);
   font-size: var(--ill-title-size);
   font-weight: var(--ill-title-weight);
@@ -62,9 +90,26 @@
   font-variant: var(--ill-title-caps-variant);
   text-transform: var(--ill-title-caps-transform);
   letter-spacing: var(--ill-title-letter-spacing);
+  word-spacing: var(--ill-title-word-spacing);
+  line-height: var(--ill-title-line-height);
   text-align: var(--ill-title-align);
   color: var(--ill-title-color);
-  text-shadow: var(--ill-title-shadow);
+  text-shadow: var(--ill-title-text-shadow-offset-x) var(--ill-title-text-shadow-offset-y)
+               var(--ill-title-text-shadow-blur) var(--ill-title-text-shadow-color);
+  margin: var(--ill-title-margin-top) var(--ill-title-margin-right)
+          var(--ill-title-margin-bottom) var(--ill-title-margin-left);
+  padding: var(--ill-title-padding-top) var(--ill-title-padding-right)
+           var(--ill-title-padding-bottom) var(--ill-title-padding-left);
+  background: var(--ill-title-background);
+  border-width: var(--ill-title-border-top-width) var(--ill-title-border-right-width)
+                var(--ill-title-border-bottom-width) var(--ill-title-border-left-width);
+  border-style: var(--ill-title-border-top-style) var(--ill-title-border-right-style)
+                var(--ill-title-border-bottom-style) var(--ill-title-border-left-style);
+  border-color: var(--ill-title-border-top-color) var(--ill-title-border-right-color)
+                var(--ill-title-border-bottom-color) var(--ill-title-border-left-color);
+  border-radius: var(--ill-title-corner-top-left) var(--ill-title-corner-top-right)
+                 var(--ill-title-corner-bottom-right) var(--ill-title-corner-bottom-left);
+  box-shadow: none;
 }
 
 /* --- Headings ----------------------------------------------------------- */
@@ -81,15 +126,25 @@
   font-variant: var(--ill-heading1-caps-variant);
   text-transform: var(--ill-heading1-caps-transform);
   letter-spacing: var(--ill-heading1-letter-spacing);
+  word-spacing: var(--ill-heading1-word-spacing);
+  line-height: var(--ill-heading1-line-height);
   text-align: var(--ill-heading1-align);
   color: var(--ill-heading1-color);
+  text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
+               var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
   background-color: var(--ill-heading1-background);
-  margin: var(--ill-heading1-space-above) 0 var(--ill-heading1-space-below);
-  padding: var(--ill-heading1-padding-y) var(--ill-heading1-padding-x);
-  border-radius: var(--ill-heading1-radius);
-  border-bottom-style: var(--ill-heading1-rule-style);
-  border-bottom-color: var(--ill-heading1-rule-color);
-  border-bottom-width: var(--ill-heading1-rule-width);
+  margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right)
+          var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
+  padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right)
+           var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
+  border-width: var(--ill-heading1-border-top-width) var(--ill-heading1-border-right-width)
+                var(--ill-heading1-border-bottom-width) var(--ill-heading1-border-left-width);
+  border-style: var(--ill-heading1-border-top-style) var(--ill-heading1-border-right-style)
+                var(--ill-heading1-border-bottom-style) var(--ill-heading1-border-left-style);
+  border-color: var(--ill-heading1-border-top-color) var(--ill-heading1-border-right-color)
+                var(--ill-heading1-border-bottom-color) var(--ill-heading1-border-left-color);
+  border-radius: var(--ill-heading1-corner-top-left) var(--ill-heading1-corner-top-right)
+                 var(--ill-heading1-corner-bottom-right) var(--ill-heading1-corner-bottom-left);
 }
 
 .illuminus-styled .journal-page-content h2 {
@@ -100,15 +155,25 @@
   font-variant: var(--ill-heading2-caps-variant);
   text-transform: var(--ill-heading2-caps-transform);
   letter-spacing: var(--ill-heading2-letter-spacing);
+  word-spacing: var(--ill-heading2-word-spacing);
+  line-height: var(--ill-heading2-line-height);
   text-align: var(--ill-heading2-align);
   color: var(--ill-heading2-color);
+  text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
+               var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
   background-color: var(--ill-heading2-background);
-  margin: var(--ill-heading2-space-above) 0 var(--ill-heading2-space-below);
-  padding: var(--ill-heading2-padding-y) var(--ill-heading2-padding-x);
-  border-radius: var(--ill-heading2-radius);
-  border-bottom-style: var(--ill-heading2-rule-style);
-  border-bottom-color: var(--ill-heading2-rule-color);
-  border-bottom-width: var(--ill-heading2-rule-width);
+  margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right)
+          var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
+  padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right)
+           var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
+  border-width: var(--ill-heading2-border-top-width) var(--ill-heading2-border-right-width)
+                var(--ill-heading2-border-bottom-width) var(--ill-heading2-border-left-width);
+  border-style: var(--ill-heading2-border-top-style) var(--ill-heading2-border-right-style)
+                var(--ill-heading2-border-bottom-style) var(--ill-heading2-border-left-style);
+  border-color: var(--ill-heading2-border-top-color) var(--ill-heading2-border-right-color)
+                var(--ill-heading2-border-bottom-color) var(--ill-heading2-border-left-color);
+  border-radius: var(--ill-heading2-corner-top-left) var(--ill-heading2-corner-top-right)
+                 var(--ill-heading2-corner-bottom-right) var(--ill-heading2-corner-bottom-left);
 }
 
 /* Levels 4 to 6 follow level 3 rather than going unstyled. */
@@ -123,15 +188,25 @@
   font-variant: var(--ill-heading3-caps-variant);
   text-transform: var(--ill-heading3-caps-transform);
   letter-spacing: var(--ill-heading3-letter-spacing);
+  word-spacing: var(--ill-heading3-word-spacing);
+  line-height: var(--ill-heading3-line-height);
   text-align: var(--ill-heading3-align);
   color: var(--ill-heading3-color);
+  text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
+               var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
   background-color: var(--ill-heading3-background);
-  margin: var(--ill-heading3-space-above) 0 var(--ill-heading3-space-below);
-  padding: var(--ill-heading3-padding-y) var(--ill-heading3-padding-x);
-  border-radius: var(--ill-heading3-radius);
-  border-bottom-style: var(--ill-heading3-rule-style);
-  border-bottom-color: var(--ill-heading3-rule-color);
-  border-bottom-width: var(--ill-heading3-rule-width);
+  margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right)
+          var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
+  padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right)
+           var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
+  border-width: var(--ill-heading3-border-top-width) var(--ill-heading3-border-right-width)
+                var(--ill-heading3-border-bottom-width) var(--ill-heading3-border-left-width);
+  border-style: var(--ill-heading3-border-top-style) var(--ill-heading3-border-right-style)
+                var(--ill-heading3-border-bottom-style) var(--ill-heading3-border-left-style);
+  border-color: var(--ill-heading3-border-top-color) var(--ill-heading3-border-right-color)
+                var(--ill-heading3-border-bottom-color) var(--ill-heading3-border-left-color);
+  border-radius: var(--ill-heading3-corner-top-left) var(--ill-heading3-corner-top-right)
+                 var(--ill-heading3-corner-bottom-right) var(--ill-heading3-corner-bottom-left);
 }
 
 /* --- Body text ---------------------------------------------------------- */
@@ -139,14 +214,28 @@
 .illuminus-styled .journal-page-content {
   font-family: var(--ill-body-font);
   font-size: var(--ill-body-size);
+  font-weight: var(--ill-body-weight);
+  font-style: var(--ill-body-style);
+  font-variant: var(--ill-body-caps-variant);
+  text-transform: var(--ill-body-caps-transform);
+  letter-spacing: var(--ill-body-letter-spacing);
+  word-spacing: var(--ill-body-word-spacing);
   line-height: var(--ill-body-line-height);
   color: var(--ill-body-color);
   text-align: var(--ill-body-align);
+  column-count: var(--ill-body-column-count);
+  column-gap: var(--ill-body-column-gap);
+  column-rule-width: var(--ill-body-column-rule-width);
+  column-rule-style: var(--ill-body-column-rule-style);
+  column-rule-color: var(--ill-body-column-rule-color);
 }
 
 .illuminus-styled .journal-page-content p {
-  margin: 0 0 var(--ill-body-paragraph-spacing);
+  margin: var(--ill-body-margin-top) var(--ill-body-margin-right)
+          var(--ill-body-margin-bottom) var(--ill-body-margin-left);
   text-indent: var(--ill-body-first-line-indent);
+  white-space: var(--ill-body-white-space);
+  word-break: var(--ill-body-word-break);
 }
 
 /* The first paragraph is never indented — the drop cap sits there instead. */
@@ -172,10 +261,24 @@
 .illuminus-styled .journal-page-content a.inline-roll {
   color: var(--ill-links-color);
   font-weight: var(--ill-links-weight);
-  text-decoration-line: var(--ill-links-underline);
-  background: var(--ill-links-chip-background);
-  border: 1px solid var(--ill-links-chip-border-color);
-  border-radius: var(--ill-links-chip-radius);
+  font-style: var(--ill-links-style);
+  letter-spacing: var(--ill-links-letter-spacing);
+  text-decoration-line: var(--ill-links-decoration-line);
+  text-decoration-style: var(--ill-links-decoration-style);
+  text-decoration-color: var(--ill-links-decoration-color);
+  text-decoration-thickness: var(--ill-links-decoration-thickness);
+  text-underline-offset: var(--ill-links-decoration-offset);
+  background: var(--ill-links-background);
+  padding: var(--ill-links-padding-top) var(--ill-links-padding-right)
+           var(--ill-links-padding-bottom) var(--ill-links-padding-left);
+  border-width: var(--ill-links-border-top-width) var(--ill-links-border-right-width)
+                var(--ill-links-border-bottom-width) var(--ill-links-border-left-width);
+  border-style: var(--ill-links-border-top-style) var(--ill-links-border-right-style)
+                var(--ill-links-border-bottom-style) var(--ill-links-border-left-style);
+  border-color: var(--ill-links-border-top-color) var(--ill-links-border-right-color)
+                var(--ill-links-border-bottom-color) var(--ill-links-border-left-color);
+  border-radius: var(--ill-links-corner-top-left) var(--ill-links-corner-top-right)
+                 var(--ill-links-corner-bottom-right) var(--ill-links-corner-bottom-left);
 }
 
 .illuminus-styled .journal-page-content a:hover,
@@ -190,7 +293,8 @@
 .illuminus-styled .journal-page-content ul,
 .illuminus-styled .journal-page-content ol {
   padding-inline-start: var(--ill-lists-indent);
-  margin: 0 0 var(--ill-body-paragraph-spacing);
+  margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right)
+          var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
 }
 
 .illuminus-styled .journal-page-content ul {
@@ -203,31 +307,65 @@
 
 .illuminus-styled .journal-page-content li::marker {
   color: var(--ill-lists-marker-color);
+  font-family: var(--ill-lists-marker-font);
 }
 
 /* --- Tables ------------------------------------------------------------- */
 
+/* Separate borders rather than collapsed, so the table can carry its own frame
+   and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table {
-  width: 100%;
-  border-collapse: collapse;
+  width: var(--ill-tables-width);
+  border-collapse: separate;
+  border-spacing: 0;
   overflow: hidden;
-  margin: 0 0 var(--ill-body-paragraph-spacing);
+  font-family: var(--ill-tables-font);
+  font-size: var(--ill-tables-size);
+  line-height: var(--ill-tables-line-height);
   color: var(--ill-tables-text-color);
-  border: var(--ill-tables-border-width) solid var(--ill-tables-border-color);
-  border-radius: var(--ill-tables-radius);
-}
-
-.illuminus-styled .journal-page-content th {
-  font-family: var(--ill-tables-header-font);
-  background-color: var(--ill-tables-header-background);
-  color: var(--ill-tables-header-color);
-  text-align: left;
+  margin: var(--ill-tables-margin-top) var(--ill-tables-margin-right)
+          var(--ill-tables-margin-bottom) var(--ill-tables-margin-left);
+  border-width: var(--ill-tables-border-top-width) var(--ill-tables-border-right-width)
+                var(--ill-tables-border-bottom-width) var(--ill-tables-border-left-width);
+  border-style: var(--ill-tables-border-top-style) var(--ill-tables-border-right-style)
+                var(--ill-tables-border-bottom-style) var(--ill-tables-border-left-style);
+  border-color: var(--ill-tables-border-top-color) var(--ill-tables-border-right-color)
+                var(--ill-tables-border-bottom-color) var(--ill-tables-border-left-color);
+  border-radius: var(--ill-tables-corner-top-left) var(--ill-tables-corner-top-right)
+                 var(--ill-tables-corner-bottom-right) var(--ill-tables-corner-bottom-left);
 }
 
 .illuminus-styled .journal-page-content th,
 .illuminus-styled .journal-page-content td {
-  padding: var(--ill-tables-cell-padding-y) var(--ill-tables-cell-padding-x);
-  border: var(--ill-tables-border-width) solid var(--ill-tables-border-color);
+  padding: var(--ill-tables-cell-padding-top) var(--ill-tables-cell-padding-right)
+           var(--ill-tables-cell-padding-bottom) var(--ill-tables-cell-padding-left);
+  vertical-align: var(--ill-tables-vertical-align);
+  border-width: var(--ill-tables-cell-border-top-width) var(--ill-tables-cell-border-right-width)
+                var(--ill-tables-cell-border-bottom-width) var(--ill-tables-cell-border-left-width);
+  border-style: var(--ill-tables-cell-border-top-style) var(--ill-tables-cell-border-right-style)
+                var(--ill-tables-cell-border-bottom-style) var(--ill-tables-cell-border-left-style);
+  border-color: var(--ill-tables-cell-border-top-color) var(--ill-tables-cell-border-right-color)
+                var(--ill-tables-cell-border-bottom-color) var(--ill-tables-cell-border-left-color);
+}
+
+.illuminus-styled .journal-page-content td {
+  text-align: var(--ill-tables-align);
+}
+
+.illuminus-styled .journal-page-content th {
+  font-family: var(--ill-tables-header-font);
+  font-size: var(--ill-tables-header-size);
+  font-weight: var(--ill-tables-header-weight);
+  font-variant: var(--ill-tables-header-caps-variant);
+  text-transform: var(--ill-tables-header-caps-transform);
+  letter-spacing: var(--ill-tables-header-letter-spacing);
+  text-align: var(--ill-tables-header-align);
+  background-color: var(--ill-tables-header-background);
+  color: var(--ill-tables-header-color);
+}
+
+.illuminus-styled .journal-page-content tbody tr {
+  background-color: var(--ill-tables-row-color);
 }
 
 .illuminus-styled .journal-page-content tbody tr:nth-child(even) {
@@ -238,20 +376,32 @@
 
 .illuminus-styled .journal-page-content blockquote,
 .illuminus-styled .journal-page-content .illuminus-box {
-  margin: var(--ill-boxes-spacing) 0;
-  padding: var(--ill-boxes-padding);
-  background-color: var(--ill-boxes-background);
-  color: var(--ill-boxes-text-color);
   font-family: var(--ill-boxes-font);
+  font-size: var(--ill-boxes-size);
+  font-weight: var(--ill-boxes-weight);
   font-style: var(--ill-boxes-style);
-  border-radius: var(--ill-boxes-radius);
-  border-style: solid;
-  border-color: var(--ill-boxes-border-color);
-  /* The edge control emits 0/1 per side, multiplied by the chosen width. */
-  border-top-width: calc(var(--ill-boxes-edge-top) * var(--ill-boxes-border-width));
-  border-right-width: calc(var(--ill-boxes-edge-right) * var(--ill-boxes-border-width));
-  border-bottom-width: calc(var(--ill-boxes-edge-bottom) * var(--ill-boxes-border-width));
-  border-left-width: calc(var(--ill-boxes-edge-left) * var(--ill-boxes-border-width));
+  font-variant: var(--ill-boxes-caps-variant);
+  text-transform: var(--ill-boxes-caps-transform);
+  letter-spacing: var(--ill-boxes-letter-spacing);
+  word-spacing: var(--ill-boxes-word-spacing);
+  line-height: var(--ill-boxes-line-height);
+  text-align: var(--ill-boxes-align);
+  color: var(--ill-boxes-color);
+  background-color: var(--ill-boxes-background);
+  margin: var(--ill-boxes-margin-top) var(--ill-boxes-margin-right)
+          var(--ill-boxes-margin-bottom) var(--ill-boxes-margin-left);
+  padding: var(--ill-boxes-padding-top) var(--ill-boxes-padding-right)
+           var(--ill-boxes-padding-bottom) var(--ill-boxes-padding-left);
+  border-width: var(--ill-boxes-border-top-width) var(--ill-boxes-border-right-width)
+                var(--ill-boxes-border-bottom-width) var(--ill-boxes-border-left-width);
+  border-style: var(--ill-boxes-border-top-style) var(--ill-boxes-border-right-style)
+                var(--ill-boxes-border-bottom-style) var(--ill-boxes-border-left-style);
+  border-color: var(--ill-boxes-border-top-color) var(--ill-boxes-border-right-color)
+                var(--ill-boxes-border-bottom-color) var(--ill-boxes-border-left-color);
+  border-radius: var(--ill-boxes-corner-top-left) var(--ill-boxes-corner-top-right)
+                 var(--ill-boxes-corner-bottom-right) var(--ill-boxes-corner-bottom-left);
+  box-shadow: var(--ill-boxes-shadow-offset-x) var(--ill-boxes-shadow-offset-y)
+              var(--ill-boxes-shadow-blur) var(--ill-boxes-shadow-spread) var(--ill-boxes-shadow-color);
 }
 
 .illuminus-styled .journal-page-content blockquote > :last-child,
@@ -262,18 +412,35 @@
 /* --- Images ------------------------------------------------------------- */
 
 .illuminus-styled .journal-page-content img {
-  border-style: var(--ill-images-border-style);
-  border-color: var(--ill-images-border-color);
-  border-width: var(--ill-images-border-width);
-  border-radius: var(--ill-images-radius);
-  box-shadow: var(--ill-images-shadow);
+  max-width: var(--ill-images-max-width);
+  opacity: var(--ill-images-opacity);
+  background: var(--ill-images-background);
+  margin: var(--ill-images-margin-top) var(--ill-images-margin-right)
+          var(--ill-images-margin-bottom) var(--ill-images-margin-left);
+  padding: var(--ill-images-padding-top) var(--ill-images-padding-right)
+           var(--ill-images-padding-bottom) var(--ill-images-padding-left);
+  border-width: var(--ill-images-border-top-width) var(--ill-images-border-right-width)
+                var(--ill-images-border-bottom-width) var(--ill-images-border-left-width);
+  border-style: var(--ill-images-border-top-style) var(--ill-images-border-right-style)
+                var(--ill-images-border-bottom-style) var(--ill-images-border-left-style);
+  border-color: var(--ill-images-border-top-color) var(--ill-images-border-right-color)
+                var(--ill-images-border-bottom-color) var(--ill-images-border-left-color);
+  border-radius: var(--ill-images-corner-top-left) var(--ill-images-corner-top-right)
+                 var(--ill-images-corner-bottom-right) var(--ill-images-corner-bottom-left);
+  box-shadow: var(--ill-images-shadow-offset-x) var(--ill-images-shadow-offset-y)
+              var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color);
 }
 
 .illuminus-styled .journal-page-content figcaption {
-  color: var(--ill-images-caption-color);
+  font-family: var(--ill-images-caption-font);
   font-size: var(--ill-images-caption-size);
+  font-weight: var(--ill-images-caption-weight);
   font-style: var(--ill-images-caption-style);
+  font-variant: var(--ill-images-caption-caps-variant);
+  text-transform: var(--ill-images-caption-caps-transform);
   text-align: var(--ill-images-caption-align);
+  color: var(--ill-images-caption-color);
+  margin-top: var(--ill-images-caption-spacing);
 }
 
 /* ==========================================================================
@@ -450,16 +617,62 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.35rem;
   padding-right: 0.35rem;
 }
+
+/* --- Sections ----------------------------------------------------------- */
+
+/* With ~400 controls, collapsible sections are what keeps a tab navigable. */
+.illuminus-section {
+  border: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 20%));
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem 0.4rem;
+}
+
+.illuminus-section > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0.1rem;
+  cursor: pointer;
+  list-style-position: outside;
+}
+
+.illuminus-section > summary:hover {
+  color: var(--color-text-emphatic, #f0f0e0);
+}
+
+.illuminus-section__label {
+  font-weight: bold;
+  font-size: var(--font-size-13, 13px);
+}
+
+.illuminus-section__hint {
+  flex: 1;
+  font-size: var(--font-size-11, 11px);
+  opacity: 0.6;
+}
+
+.illuminus-section__tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding-bottom: 0.25rem;
+}
+
+.illuminus-section:not([open]) .illuminus-section__tools {
+  display: none;
+}
+
+/* --- Fields ------------------------------------------------------------- */
 
 .illuminus-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   align-items: center;
   gap: 0.5rem;
-  padding: 0.35rem 0.4rem;
+  padding: 0.3rem 0.4rem;
   border-radius: 3px;
   border-left: 3px solid var(--color-border-highlight, #ff6400);
 }
@@ -512,6 +725,22 @@
   flex: 0 0 auto;
   font-size: var(--font-size-11, 11px);
   opacity: 0.6;
+}
+
+/* --- Tab badges --------------------------------------------------------- */
+
+.illuminus-editor nav.tabs .illuminus-badge {
+  margin-left: 0.3rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--color-border-highlight, #ff6400);
+  color: var(--color-dark-1, #111);
+  font-size: var(--font-size-10, 10px);
+  font-weight: bold;
+}
+
+.illuminus-editor nav.tabs .illuminus-badge.is-empty {
+  display: none;
 }
 
 /* --- Editor preview pane ------------------------------------------------ */

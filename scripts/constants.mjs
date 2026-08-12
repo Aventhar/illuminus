@@ -26,14 +26,21 @@ export const STYLED_CLASS = "illuminus-styled";
 /** Data attribute on a styled sheet root holding the applied style's id. */
 export const STYLE_ATTR = "data-illuminus-style";
 
-/** Id of the <style> element in document.head holding compiled styles. */
+/** Id of the <style> element in document.head holding the saved styles. */
 export const STYLE_ELEMENT_ID = "illuminus-compiled-styles";
+
+/**
+ * Id of a second <style> element holding unsaved editor previews. Keeping them
+ * apart means dragging a slider recompiles one style rather than all of them,
+ * and preview rules always win on document order.
+ */
+export const PREVIEW_ELEMENT_ID = "illuminus-preview-styles";
 
 /** Reserved style id meaning "no style; use the Foundry default appearance". */
 export const NO_STYLE = "";
 
 /** Current schema version, stamped onto exported files for forward migration. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /**
  * Console logger that stays quiet unless the `debug` setting is on.

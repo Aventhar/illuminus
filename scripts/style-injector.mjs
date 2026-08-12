@@ -1,59 +1,69 @@
-import { STYLE_ELEMENT_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
-import { compileAll, compileDeclarations } from "./style-compiler.mjs";
+import { STYLE_ELEMENT_ID, PREVIEW_ELEMENT_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
+import { compileAll, compileDeclarations, selectorFor } from "./style-compiler.mjs";
 import { getStyles, getAssignedStyleId } from "./style-store.mjs";
 
 /**
- * Keeps the compiled stylesheet in `document.head` in sync with the style store,
- * and tags journal sheets so the right scoped rule applies to them.
+ * Keeps the compiled stylesheets in `document.head` in sync with the style
+ * store, and tags journal sheets so the right scoped rule applies to them.
  *
- * One <style> element holds every style in the world. Sheets opt in by carrying
- * the `illuminus-styled` class plus a `data-illuminus-style` attribute, so
- * applying, changing, or clearing a style never needs a re-render.
+ * Two <style> elements, in this order:
+ *   1. the saved styles, rebuilt only when the store changes
+ *   2. unsaved editor previews, rebuilt on every slider drag
+ * Splitting them means editing one style does not recompile the other four, and
+ * a preview always wins over the saved rule on document order.
+ *
+ * Sheets opt in by carrying the `illuminus-styled` class plus a
+ * `data-illuminus-style` attribute, so applying, changing, or clearing a style
+ * never needs a re-render.
  */
 
-/** Live preview overrides, keyed by style id, set while the editor is open. */
+/** Unsaved editor values, keyed by style id. */
 const previews = new Map();
 
-/** The <style> element, created on first use. */
-function styleElement() {
-  let element = document.getElementById(STYLE_ELEMENT_ID);
+/** Get or create one of the two style elements, keeping them in order. */
+function styleElement(id) {
+  let element = document.getElementById(id);
   if (!element) {
     element = document.createElement("style");
-    element.id = STYLE_ELEMENT_ID;
+    element.id = id;
     document.head.append(element);
   }
   return element;
 }
 
-/**
- * Recompile every style into the document stylesheet. Cheap enough to call on
- * any change — the whole sheet is a few kilobytes of custom properties.
- */
+/** Rebuild the saved-styles sheet. Cheap enough to call on any store change. */
 export function refreshStyles() {
-  let css = compileAll(getStyles());
+  const styles = getStyles();
+  styleElement(STYLE_ELEMENT_ID).textContent = compileAll(styles);
+  refreshPreviews();
+  log.debug(`compiled ${Object.keys(styles).length} style(s)`);
+}
+
+/** Rebuild only the preview sheet. */
+function refreshPreviews() {
+  const rules = [];
   for (const [id, settings] of previews) {
     const declarations = compileDeclarations(settings);
-    if (declarations) css += `\n\n.${STYLED_CLASS}[${STYLE_ATTR}="${id}"] {\n${declarations}\n}`;
+    if (declarations) rules.push(`${selectorFor(id)} {\n${declarations}\n}`);
   }
-  styleElement().textContent = css;
-  log.debug(`compiled ${Object.keys(getStyles()).length} style(s), ${previews.size} preview(s)`);
+  styleElement(PREVIEW_ELEMENT_ID).textContent = rules.join("\n\n");
 }
 
 /**
- * Show unsaved editor values on any open journal using that style. The preview
- * rule is appended after the stored rules, so it wins on document order.
+ * Show unsaved editor values on any open journal using that style, and on the
+ * editor's own sample pane.
  * @param {string} id
  * @param {object} settings
  */
 export function setPreview(id, settings) {
   previews.set(id, settings);
-  refreshStyles();
+  refreshPreviews();
 }
 
-/** Drop a live preview, restoring the stored appearance. */
+/** Drop a live preview, restoring the saved appearance. */
 export function clearPreview(id) {
   if (!previews.delete(id)) return;
-  refreshStyles();
+  refreshPreviews();
 }
 
 /* -------------------------------------------- */

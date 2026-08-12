@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS, FLAGS, NO_STYLE, SCHEMA_VERSION, getSetting, setSetting, log } from "./constants.mjs";
 import { cleanSettings, defaultSettings } from "./style-schema.mjs";
+import { migrateStyle } from "./migrations.mjs";
 import { PRESETS } from "./presets.mjs";
 
 /**
@@ -23,10 +24,23 @@ function makeRecord({ id, name, description = "", settings = {}, preset = false 
   };
 }
 
-/** All styles in the world, keyed by id. Never returns null. */
+/**
+ * All styles in the world, keyed by id. Never returns null.
+ *
+ * Styles saved under an older schema are migrated on the way out, so callers
+ * always see current field names. The migration is not written back here —
+ * that happens the next time the style is saved — so a world opened by a GM
+ * without write access is never modified just by being read.
+ */
 export function getStyles() {
   const stored = getSetting(SETTINGS.styles);
-  return stored && typeof stored === "object" ? stored : {};
+  if (!stored || typeof stored !== "object") return {};
+  const migrated = {};
+  for (const [id, style] of Object.entries(stored)) {
+    if (!style || typeof style !== "object") continue;
+    migrated[id] = migrateStyle(style);
+  }
+  return migrated;
 }
 
 /** A single style by id, or undefined. */

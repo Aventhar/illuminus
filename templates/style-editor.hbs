@@ -13,39 +13,65 @@
     </header>
 
     <div class="illuminus-fields scrollable">
-      {{#each group.fields as |field|}}
-      <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
-        <label for="illuminus-{{field.path}}">
-          <span class="illuminus-field__label">{{field.label}}</span>
-          <span class="illuminus-field__hint">{{field.hint}}</span>
-        </label>
+      {{#each group.sections as |section|}}
+      <details class="illuminus-section" {{#if section.open}}open{{/if}}>
+        <summary data-action="toggleSection" data-group="{{group.id}}" data-section="{{section.id}}">
+          <span class="illuminus-section__label">{{section.label}}</span>
+          <span class="illuminus-section__hint">{{section.hint}}</span>
+        </summary>
 
-        <div class="illuminus-field__control">
-          {{#if (eq field.type "color")}}
-            <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
-
-          {{else if (eq field.type "image")}}
-            <file-picker id="illuminus-{{field.path}}" name="{{field.path}}" type="image"
-                         value="{{field.value}}" placeholder="{{localize 'ILLUMINUS.Field.texture.placeholder'}}"></file-picker>
-
-          {{else if (eq field.type "number")}}
-            <range-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"
-                          min="{{field.min}}" max="{{field.max}}" step="{{field.step}}"></range-picker>
-            {{#if field.unit}}<span class="illuminus-unit">{{field.unit}}</span>{{/if}}
-
-          {{else if (eq field.type "toggle")}}
-            <input type="checkbox" id="illuminus-{{field.path}}" name="{{field.path}}"
-                   data-dtype="Boolean" {{checked field.checked}}>
-
-          {{else}}
-            <select id="illuminus-{{field.path}}" name="{{field.path}}">
-              {{#each field.choices as |choice|}}
-              <option value="{{choice.value}}" {{#if choice.selected}}selected{{/if}}>{{choice.label}}</option>
-              {{/each}}
-            </select>
+        <div class="illuminus-section__tools">
+          {{#if section.matchable}}
+          <button type="button" class="illuminus-reset" data-action="matchSides"
+                  data-group="{{group.id}}" data-section="{{section.id}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.MatchSidesTooltip'}}">
+            <i class="fa-solid fa-link"></i>
+            {{localize "ILLUMINUS.Buttons.MatchSides"}}
+          </button>
           {{/if}}
+          <button type="button" class="illuminus-reset" data-action="resetSection"
+                  data-group="{{group.id}}" data-section="{{section.id}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetSectionTooltip'}}">
+            <i class="fa-solid fa-rotate-left"></i>
+            {{localize "ILLUMINUS.Buttons.ResetSection"}}
+          </button>
         </div>
-      </div>
+
+        {{#each section.fields as |field|}}
+        <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
+          <label for="illuminus-{{field.path}}">
+            <span class="illuminus-field__label">{{field.label}}</span>
+            <span class="illuminus-field__hint">{{field.hint}}</span>
+          </label>
+
+          <div class="illuminus-field__control">
+            {{#if (eq field.type "color")}}
+              <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
+
+            {{else if (eq field.type "image")}}
+              <file-picker id="illuminus-{{field.path}}" name="{{field.path}}" type="image"
+                           value="{{field.value}}" placeholder="{{localize 'ILLUMINUS.Field.texture.placeholder'}}"></file-picker>
+
+            {{else if (eq field.type "number")}}
+              <range-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"
+                            min="{{field.min}}" max="{{field.max}}" step="{{field.step}}"></range-picker>
+              {{#if field.unit}}<span class="illuminus-unit">{{field.unit}}</span>{{/if}}
+
+            {{else if (eq field.type "toggle")}}
+              <input type="checkbox" id="illuminus-{{field.path}}" name="{{field.path}}"
+                     data-dtype="Boolean" {{checked field.checked}}>
+
+            {{else}}
+              <select id="illuminus-{{field.path}}" name="{{field.path}}">
+                {{#each field.choices as |choice|}}
+                <option value="{{choice.value}}" {{#if choice.selected}}selected{{/if}}>{{choice.label}}</option>
+                {{/each}}
+              </select>
+            {{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </details>
       {{/each}}
     </div>
   </section>

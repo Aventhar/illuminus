@@ -4,8 +4,13 @@ import { CSS_VAR_PREFIX } from "./constants.mjs";
  * The single source of truth for what a journal style can control.
  *
  * Both the settings GUI and the CSS compiler are generated from this table, so
- * adding a new control is a one-line change here plus a rule in
+ * adding a control is a one-line change here plus a rule in
  * `styles/illuminus.css` that consumes the emitted custom property.
+ *
+ * Structure: GROUPS -> sections -> fields. A group is one tab; a section is one
+ * collapsible block within that tab. Nothing here ever collapses two CSS
+ * properties into one control — each side of a border, each corner of a box,
+ * and each component of a shadow is separately addressable.
  *
  * Field contract:
  *   name    Key within its group. Path in the style data is `<group>.<name>`.
@@ -19,45 +24,57 @@ import { CSS_VAR_PREFIX } from "./constants.mjs";
  *   default Value used when a style does not specify this field. Every field
  *           MUST have one — defaults are emitted as a base rule so no var() in
  *           the skeleton stylesheet can ever resolve to nothing.
+ *   link    Optional grouping key marking this field as one variant of a
+ *           repeated property (the four `borderWidth` sides share a link key).
+ *           The editor's "Match all sides" button copies the first value in
+ *           each link group across its siblings.
  *   emit    Optional (value) => string | Record<suffix, string>. Returning a
- *           record emits several related custom properties from one control,
- *           which is how a single natural-language choice like "Drop cap: three
- *           lines" drives float, size, and spacing together. Suffixes extend
- *           the base property name: suffix "size" on field `dropCap` in group
- *           `body` emits `--ill-body-drop-cap-size`.
- *   zeroAs  For number fields, the CSS to emit when the value is 0. Lets "0"
- *           mean "no limit" for things like maximum width.
+ *           record emits several related custom properties from one control.
+ *           Suffixes extend the base property name.
+ *   zeroAs  For number fields, the CSS to emit when the value is 0.
  *
  * Labels are localized from `ILLUMINUS.Field.<name>.label` / `.hint`, shared
- * across groups so "Font" reads the same wherever it appears.
+ * across groups so "Top Thickness" reads the same wherever it appears.
  */
 
 const SERIF = "serif";
 
-/** Choices reused across several groups. */
+/** The four sides of a CSS box, in the order the shorthands take them. */
+const SIDES = ["Top", "Right", "Bottom", "Left"];
+
+/** The four corners, in border-radius shorthand order. */
+const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
+
 const CHOICES = {
   align: ["left", "center", "right", "justify"],
   alignNoJustify: ["left", "center", "right"],
-  weight: ["normal", "bold"],
-  fontStyle: ["normal", "italic"],
-  caps: ["none", "uppercase", "smallCaps"],
-  lineStyle: ["none", "solid", "double", "dashed", "dotted"],
-  borderStyle: ["none", "solid", "double", "groove", "ridge", "dashed", "dotted"],
-  bullet: ["disc", "circle", "square", "none", "diamond", "star"],
-  blend: ["normal", "multiply", "overlay", "softLight", "luminosity"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  fontStyle: ["normal", "italic", "oblique"],
+  caps: ["none", "uppercase", "lowercase", "capitalize", "smallCaps"],
+  borderStyle: ["none", "solid", "double", "groove", "ridge", "inset", "outset", "dashed", "dotted"],
+  lineStyle: ["none", "solid", "double", "dashed", "dotted", "wavy"],
+  decorationLine: ["none", "underline", "overline", "lineThrough"],
+  bullet: ["disc", "circle", "square", "none", "diamond", "star", "dash", "arrow"],
+  blend: ["normal", "multiply", "overlay", "softLight", "hardLight", "screen", "luminosity", "colorBurn"],
   textureFit: ["tile", "cover", "contain", "stretch"],
-  edge: ["all", "left", "topBottom", "none"],
-  dropCap: ["none", "two", "three", "four"]
+  texturePosition: ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"],
+  textureAttachment: ["scroll", "fixed", "local"],
+  dropCap: ["none", "two", "three", "four", "five"],
+  verticalAlign: ["top", "middle", "bottom"],
+  whiteSpace: ["normal", "preWrap", "nowrap"],
+  wordBreak: ["normal", "breakWord", "breakAll"]
 };
 
 /* -------------------------------------------- */
 /*  Multi-property emitters                     */
 /* -------------------------------------------- */
 
-/** Capitalisation needs both text-transform and font-variant to be set. */
+/** Capitalisation needs both text-transform and font-variant. */
 const emitCaps = (value) => ({
   none: { transform: "none", variant: "normal" },
   uppercase: { transform: "uppercase", variant: "normal" },
+  lowercase: { transform: "lowercase", variant: "normal" },
+  capitalize: { transform: "capitalize", variant: "normal" },
   smallCaps: { transform: "none", variant: "small-caps" }
 }[value] ?? { transform: "none", variant: "normal" });
 
@@ -69,29 +86,21 @@ const emitTextureFit = (value) => ({
   stretch: { size: "100% 100%", repeat: "no-repeat" }
 }[value] ?? { size: "auto", repeat: "repeat" });
 
-/**
- * Which sides of a boxed-text block get a border, as 0/1 multipliers that the
- * stylesheet multiplies by the chosen border width.
- */
-const emitEdge = (value) => {
-  const sides = {
-    all: [1, 1, 1, 1],
-    left: [0, 0, 0, 1],
-    topBottom: [1, 0, 1, 0],
-    none: [0, 0, 0, 0]
-  }[value] ?? [0, 0, 0, 1];
-  const [top, right, bottom, left] = sides;
-  return { top, right, bottom, left };
-};
+/** Nine-point background position. */
+const emitTexturePosition = (value) => ({
+  topLeft: "left top", top: "center top", topRight: "right top",
+  left: "left center", center: "center center", right: "right center",
+  bottomLeft: "left bottom", bottom: "center bottom", bottomRight: "right bottom"
+}[value] ?? "left top");
 
 /**
- * A drop cap sets float, size, leading, and tint together, or neutralises all
- * of them. The tint indirects through the separate colour field so that turning
- * the drop cap off leaves the first letter looking like ordinary body text
- * rather than a stray coloured character.
+ * A drop cap sets float, size, leading, weight, and tint together, or
+ * neutralises all of them. The tint indirects through the separate colour field
+ * so that switching the drop cap off leaves the first letter looking like
+ * ordinary body text rather than a stray coloured character.
  */
 const emitDropCap = (value) => {
-  const lines = { two: 2, three: 3, four: 4 }[value];
+  const lines = { two: 2, three: 3, four: 4, five: 5 }[value];
   if (!lines) {
     return { float: "none", size: "inherit", "line-height": "inherit", gap: "0", weight: "inherit", tint: "inherit" };
   }
@@ -105,52 +114,105 @@ const emitDropCap = (value) => {
   };
 };
 
-/** Bullet glyphs, including the decorative options that need quoted strings. */
+/** Bullet glyphs, including decorative options that need quoted strings. */
 const emitBullet = (value) => ({
-  disc: "disc",
-  circle: "circle",
-  square: "square",
-  none: "none",
-  diamond: '"\\2726  "',
-  star: '"\\2605  "'
+  disc: "disc", circle: "circle", square: "square", none: "none",
+  diamond: '"\\2726  "', star: '"\\2605  "', dash: '"\\2014  "', arrow: '"\\27A4  "'
 }[value] ?? "disc");
+
+/** Multi-word CSS keywords that differ from their camelCase choice value. */
+const KEYWORD = {
+  softLight: "soft-light", hardLight: "hard-light", colorBurn: "color-burn",
+  lineThrough: "line-through", preWrap: "pre-wrap", breakWord: "break-word", breakAll: "break-all"
+};
+const emitKeyword = (value) => KEYWORD[value] ?? value;
 
 /* -------------------------------------------- */
 /*  Field builders                              */
 /* -------------------------------------------- */
 
-const color = (name, def, opts = {}) => ({ type: "color", name, default: def, ...opts });
+const col = (name, def, opts = {}) => ({ type: "color", name, default: def, ...opts });
 const num = (name, def, unit, min, max, step, opts = {}) =>
   ({ type: "number", name, default: def, unit, min, max, step, ...opts });
 const select = (name, def, choices, opts = {}) => ({ type: "select", name, default: def, choices, ...opts });
-const toggle = (name, def, on, off, opts = {}) => ({ type: "toggle", name, default: def, on, off, ...opts });
 const font = (name, def, opts = {}) => ({ type: "font", name, default: def, fallback: SERIF, ...opts });
 
 /**
- * The shared field set for a heading level. Every heading tab offers the same
- * controls so users learn the panel once.
- * @param {object} defaults  Per-level default overrides, keyed by field name.
+ * Twelve fields: width, style, and colour for each of the four sides.
+ * Default style is `solid` rather than `none` so that raising a thickness
+ * produces a visible border without a second trip to the style dropdown.
  */
-function headingFields(defaults = {}) {
-  const d = (name, fallback) => (name in defaults ? defaults[name] : fallback);
+function borderFields(prefix, { width = 0, style = "solid", color = "#8a6a3d" } = {}) {
+  return SIDES.flatMap((side) => [
+    num(`${prefix}${side}Width`, width, "px", 0, 40, 1, { link: `${prefix}Width` }),
+    select(`${prefix}${side}Style`, style, CHOICES.borderStyle, { link: `${prefix}Style` }),
+    col(`${prefix}${side}Color`, color, { link: `${prefix}Color` })
+  ]);
+}
+
+/** Four fields, one per corner. */
+function cornerFields(prefix, radius = 0) {
+  return CORNERS.map((corner) => num(`${prefix}${corner}`, radius, "px", 0, 120, 1, { link: prefix }));
+}
+
+/**
+ * Four fields, one per side. Used for both padding and margin; `values` may be
+ * a single number or a per-side object.
+ */
+function spacingFields(prefix, values = 0, { min = 0, max = 200 } = {}) {
+  const at = (side) => (typeof values === "object" ? values[side.toLowerCase()] ?? 0 : values);
+  return SIDES.map((side) => num(`${prefix}${side}`, at(side), "px", min, max, 1, { link: prefix }));
+}
+
+/** Five fields describing one box shadow. A transparent colour means none. */
+function shadowFields(prefix, { color = "#00000000", blur = 0, offsetY = 0 } = {}) {
   return [
-    font("font", d("font", "")),
-    num("size", d("size", 24), "px", 8, 96, 1),
-    color("color", d("color", "#5e1914")),
-    select("weight", d("weight", "bold"), CHOICES.weight),
-    select("style", d("style", "normal"), CHOICES.fontStyle),
-    select("caps", d("caps", "none"), CHOICES.caps, { emit: emitCaps }),
-    num("letterSpacing", d("letterSpacing", 0), "px", -2, 12, 0.5),
-    select("align", d("align", "left"), CHOICES.alignNoJustify),
-    num("spaceAbove", d("spaceAbove", 16), "px", 0, 96, 1),
-    num("spaceBelow", d("spaceBelow", 8), "px", 0, 96, 1),
-    color("background", d("background", "#00000000")),
-    num("paddingX", d("paddingX", 0), "px", 0, 48, 1),
-    num("paddingY", d("paddingY", 0), "px", 0, 48, 1),
-    num("radius", d("radius", 0), "px", 0, 32, 1),
-    select("ruleStyle", d("ruleStyle", "none"), CHOICES.lineStyle),
-    color("ruleColor", d("ruleColor", "#8a6a3d")),
-    num("ruleWidth", d("ruleWidth", 2), "px", 0, 12, 1)
+    num(`${prefix}OffsetX`, 0, "px", -100, 100, 1),
+    num(`${prefix}OffsetY`, offsetY, "px", -100, 100, 1),
+    num(`${prefix}Blur`, blur, "px", 0, 200, 1),
+    num(`${prefix}Spread`, 0, "px", -100, 100, 1),
+    col(`${prefix}Color`, color)
+  ];
+}
+
+/** Four fields describing one text shadow. */
+function textShadowFields(prefix = "textShadow") {
+  return [
+    num(`${prefix}OffsetX`, 0, "px", -40, 40, 1),
+    num(`${prefix}OffsetY`, 0, "px", -40, 40, 1),
+    num(`${prefix}Blur`, 0, "px", 0, 60, 1),
+    col(`${prefix}Color`, "#00000000")
+  ];
+}
+
+/** The typography set shared by every text-bearing group. */
+function textFields(prefix, defaults = {}) {
+  const d = (name, fallback) => (name in defaults ? defaults[name] : fallback);
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    font(n("Font"), d("font", "")),
+    num(n("Size"), d("size", 16), "px", 6, 200, 1),
+    col(n("Color"), d("color", "#241b10")),
+    select(n("Weight"), d("weight", "400"), CHOICES.weight),
+    select(n("Style"), d("style", "normal"), CHOICES.fontStyle),
+    select(n("Caps"), d("caps", "none"), CHOICES.caps, { emit: emitCaps }),
+    num(n("LetterSpacing"), d("letterSpacing", 0), "px", -5, 40, 0.5),
+    num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
+    num(n("LineHeight"), d("lineHeight", 1.4), "", 0.5, 4, 0.05),
+    select(n("Align"), d("align", "left"), d("choices", CHOICES.alignNoJustify))
+  ];
+}
+
+/** The section set shared by heading levels and the journal title. */
+function bannerSections(defaults = {}) {
+  return [
+    { id: "text", fields: textFields("", defaults) },
+    { id: "textShadow", fields: textShadowFields() },
+    { id: "margin", fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 }) },
+    { id: "padding", fields: spacingFields("padding", defaults.padding ?? 0) },
+    { id: "background", fields: [col("background", defaults.background ?? "#00000000")] },
+    { id: "border", fields: borderFields("border", defaults.border) },
+    { id: "corners", fields: cornerFields("corner") }
   ];
 }
 
@@ -158,128 +220,246 @@ function headingFields(defaults = {}) {
 /*  Groups (one tab each)                       */
 /* -------------------------------------------- */
 
-/** @type {Array<{id: string, icon: string, fields: object[]}>} */
+/** @type {Array<{id: string, icon: string, sections: Array<{id: string, fields: object[]}>}>} */
 export const GROUPS = [
   {
     id: "page",
     icon: "fa-solid fa-scroll",
-    fields: [
-      color("background", "#ede0c8"),
-      { type: "image", name: "texture", default: "" },
-      select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
-      select("textureBlend", "multiply", CHOICES.blend, {
-        emit: (v) => (v === "softLight" ? "soft-light" : v)
-      }),
-      num("padding", 24, "px", 0, 120, 2),
-      num("maxWidth", 0, "px", 0, 1600, 20, { zeroAs: "none" }),
-      color("borderColor", "#8a6a3d"),
-      select("borderStyle", "none", CHOICES.borderStyle),
-      num("borderWidth", 2, "px", 0, 24, 1),
-      num("radius", 0, "px", 0, 48, 1),
-      toggle("innerShadow", false, "inset 0 0 40px rgb(80 50 20 / 35%)", "none")
+    sections: [
+      {
+        id: "surface",
+        fields: [
+          col("background", "#ede0c8"),
+          { type: "image", name: "texture", default: "" },
+          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
+          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
+          select("textureAttachment", "scroll", CHOICES.textureAttachment),
+          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
+          num("textureOpacity", 100, "%", 0, 100, 1)
+        ]
+      },
+      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      { id: "padding", fields: spacingFields("padding", 24) },
+      { id: "border", fields: borderFields("border") },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      { id: "innerShadow", fields: shadowFields("innerShadow") }
     ]
   },
+
   {
     id: "title",
     icon: "fa-solid fa-heading",
-    fields: [
-      font("font", ""),
-      num("size", 36, "px", 10, 96, 1),
-      color("color", "#3b2412"),
-      select("align", "center", CHOICES.alignNoJustify),
-      select("weight", "bold", CHOICES.weight),
-      select("style", "normal", CHOICES.fontStyle),
-      select("caps", "none", CHOICES.caps, { emit: emitCaps }),
-      num("letterSpacing", 0, "px", -2, 16, 0.5),
-      toggle("shadow", false, "0 1px 2px rgb(0 0 0 / 35%)", "none")
-    ]
+    sections: bannerSections({
+      size: 36, color: "#3b2412", weight: "700", align: "center", lineHeight: 1.2
+    })
   },
-  { id: "heading1", icon: "fa-solid fa-1", fields: headingFields({ size: 28, color: "#5e1914" }) },
-  { id: "heading2", icon: "fa-solid fa-2", fields: headingFields({ size: 22, color: "#7a3b16" }) },
-  { id: "heading3", icon: "fa-solid fa-3", fields: headingFields({ size: 18, color: "#5a4326", style: "italic" }) },
+
+  {
+    id: "heading1",
+    icon: "fa-solid fa-1",
+    sections: bannerSections({
+      size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 }
+    })
+  },
+  {
+    id: "heading2",
+    icon: "fa-solid fa-2",
+    sections: bannerSections({
+      size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 }
+    })
+  },
+  {
+    id: "heading3",
+    icon: "fa-solid fa-3",
+    sections: bannerSections({
+      size: 18, color: "#5a4326", weight: "700", style: "italic", lineHeight: 1.3,
+      margin: { top: 14, bottom: 6 }
+    })
+  },
+
   {
     id: "body",
     icon: "fa-solid fa-paragraph",
-    fields: [
-      font("font", ""),
-      num("size", 16, "px", 8, 40, 1),
-      color("color", "#241b10"),
-      num("lineHeight", 1.5, "", 1, 3, 0.05),
-      num("paragraphSpacing", 8, "px", 0, 48, 1),
-      num("firstLineIndent", 0, "px", 0, 96, 2),
-      select("align", "left", CHOICES.align),
-      select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
-      color("dropCapColor", "#7a2010")
+    sections: [
+      {
+        id: "text",
+        fields: textFields("", { size: 16, color: "#241b10", lineHeight: 1.5, choices: CHOICES.align })
+      },
+      {
+        id: "paragraph",
+        fields: [
+          ...spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 }),
+          num("firstLineIndent", 0, "px", -100, 200, 2),
+          select("whiteSpace", "normal", CHOICES.whiteSpace, { emit: emitKeyword }),
+          select("wordBreak", "normal", CHOICES.wordBreak, { emit: emitKeyword })
+        ]
+      },
+      {
+        id: "columns",
+        fields: [
+          num("columnCount", 1, "", 1, 4, 1),
+          num("columnGap", 32, "px", 0, 200, 2),
+          num("columnRuleWidth", 0, "px", 0, 20, 1),
+          select("columnRuleStyle", "solid", CHOICES.borderStyle),
+          col("columnRuleColor", "#8a6a3d")
+        ]
+      },
+      {
+        id: "dropCap",
+        fields: [
+          select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
+          col("dropCapColor", "#7a2010")
+        ]
+      }
     ]
   },
+
   {
     id: "links",
     icon: "fa-solid fa-link",
-    fields: [
-      color("color", "#7a2010"),
-      color("hoverColor", "#a8341c"),
-      toggle("underline", true, "underline", "none"),
-      select("weight", "normal", CHOICES.weight),
-      color("chipBackground", "#00000000"),
-      color("chipBorderColor", "#00000000"),
-      num("chipRadius", 3, "px", 0, 16, 1)
+    sections: [
+      {
+        id: "text",
+        fields: [
+          col("color", "#7a2010"),
+          col("hoverColor", "#a8341c"),
+          select("weight", "400", CHOICES.weight),
+          select("style", "normal", CHOICES.fontStyle),
+          num("letterSpacing", 0, "px", -5, 40, 0.5)
+        ]
+      },
+      {
+        id: "decoration",
+        fields: [
+          select("decorationLine", "underline", CHOICES.decorationLine, { emit: emitKeyword }),
+          select("decorationStyle", "solid", CHOICES.lineStyle),
+          col("decorationColor", "#7a2010"),
+          num("decorationThickness", 1, "px", 0, 12, 0.5),
+          num("decorationOffset", 2, "px", -10, 20, 0.5)
+        ]
+      },
+      { id: "chip", fields: [col("background", "#00000000"), ...spacingFields("padding", 0, { max: 40 })] },
+      { id: "border", fields: borderFields("border", { color: "#00000000" }) },
+      { id: "corners", fields: cornerFields("corner", 3) }
     ]
   },
+
   {
     id: "lists",
     icon: "fa-solid fa-list-ul",
-    fields: [
-      select("bullet", "disc", CHOICES.bullet, { emit: emitBullet }),
-      color("markerColor", "#7a2010"),
-      num("indent", 24, "px", 0, 96, 2),
-      num("itemSpacing", 4, "px", 0, 32, 1)
+    sections: [
+      {
+        id: "marker",
+        fields: [
+          select("bullet", "disc", CHOICES.bullet, { emit: emitBullet }),
+          col("markerColor", "#7a2010"),
+          font("markerFont", "")
+        ]
+      },
+      {
+        id: "layout",
+        fields: [
+          num("indent", 24, "px", 0, 200, 2),
+          num("itemSpacing", 4, "px", 0, 60, 1),
+          ...spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+        ]
+      }
     ]
   },
+
   {
     id: "tables",
     icon: "fa-solid fa-table",
-    fields: [
-      color("headerBackground", "#5e1914"),
-      color("headerColor", "#f6efe0"),
-      font("headerFont", ""),
-      color("textColor", "#241b10"),
-      color("stripeColor", "#00000010"),
-      color("borderColor", "#8a6a3d"),
-      num("borderWidth", 1, "px", 0, 8, 1),
-      num("cellPaddingX", 8, "px", 0, 32, 1),
-      num("cellPaddingY", 4, "px", 0, 32, 1),
-      num("radius", 0, "px", 0, 24, 1)
+    sections: [
+      {
+        id: "text",
+        fields: [
+          font("font", ""),
+          num("size", 16, "px", 6, 100, 1),
+          col("textColor", "#241b10"),
+          num("lineHeight", 1.4, "", 0.5, 4, 0.05),
+          select("align", "left", CHOICES.align),
+          select("verticalAlign", "middle", CHOICES.verticalAlign),
+          num("width", 100, "%", 10, 100, 1)
+        ]
+      },
+      {
+        id: "header",
+        fields: [
+          col("headerBackground", "#5e1914"),
+          col("headerColor", "#f6efe0"),
+          font("headerFont", ""),
+          num("headerSize", 16, "px", 6, 100, 1),
+          select("headerWeight", "700", CHOICES.weight),
+          select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
+          select("headerAlign", "left", CHOICES.align),
+          num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
+        ]
+      },
+      { id: "rows", fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
+      { id: "cellPadding", fields: spacingFields("cellPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 80 }) },
+      { id: "cellBorder", fields: borderFields("cellBorder", { width: 1 }) },
+      { id: "border", fields: borderFields("border", { width: 1 }) },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "margin", fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 }) }
     ]
   },
+
   {
     id: "boxes",
     icon: "fa-solid fa-comment-dots",
-    fields: [
-      color("background", "#e3d3ad"),
-      color("textColor", "#241b10"),
-      font("font", ""),
-      select("style", "italic", CHOICES.fontStyle),
-      select("edge", "left", CHOICES.edge, { emit: emitEdge }),
-      color("borderColor", "#7a2010"),
-      num("borderWidth", 4, "px", 0, 24, 1),
-      num("radius", 2, "px", 0, 32, 1),
-      num("padding", 12, "px", 0, 48, 1),
-      num("spacing", 12, "px", 0, 48, 1)
+    sections: [
+      {
+        id: "text",
+        fields: textFields("", {
+          size: 16, color: "#241b10", style: "italic", lineHeight: 1.5, choices: CHOICES.align
+        })
+      },
+      { id: "background", fields: [col("background", "#e3d3ad")] },
+      { id: "padding", fields: spacingFields("padding", 12) },
+      { id: "margin", fields: spacingFields("margin", 12, { min: -100 }) },
+      {
+        id: "border",
+        // Left-only by default: the classic read-aloud accent bar.
+        fields: borderFields("border", { color: "#7a2010" }).map((field) =>
+          field.name === "borderLeftWidth" ? { ...field, default: 4 } : field)
+      },
+      { id: "corners", fields: cornerFields("corner", 2) },
+      { id: "shadow", fields: shadowFields("shadow") }
     ]
   },
+
   {
     id: "images",
     icon: "fa-solid fa-image",
-    fields: [
-      color("borderColor", "#8a6a3d"),
-      select("borderStyle", "none", CHOICES.borderStyle),
-      num("borderWidth", 2, "px", 0, 16, 1),
-      num("radius", 0, "px", 0, 32, 1),
-      toggle("shadow", false, "0 2px 8px rgb(0 0 0 / 35%)", "none"),
-      color("captionColor", "#5a4326"),
-      num("captionSize", 13, "px", 8, 32, 1),
-      select("captionStyle", "italic", CHOICES.fontStyle),
-      select("captionAlign", "center", CHOICES.alignNoJustify)
+    sections: [
+      {
+        id: "layout",
+        fields: [
+          num("maxWidth", 100, "%", 5, 100, 1),
+          num("opacity", 100, "%", 0, 100, 1),
+          ...spacingFields("margin", 0, { min: -100 })
+        ]
+      },
+      { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
+      { id: "background", fields: [col("background", "#00000000")] },
+      { id: "border", fields: borderFields("border") },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      {
+        id: "caption",
+        fields: [
+          font("captionFont", ""),
+          num("captionSize", 13, "px", 6, 100, 1),
+          col("captionColor", "#5a4326"),
+          select("captionWeight", "400", CHOICES.weight),
+          select("captionStyle", "italic", CHOICES.fontStyle),
+          select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
+          select("captionAlign", "center", CHOICES.alignNoJustify),
+          num("captionSpacing", 4, "px", 0, 60, 1)
+        ]
+      }
     ]
   }
 ];
@@ -294,7 +474,7 @@ function kebab(name) {
 }
 
 /**
- * The custom property a field emits, e.g. `--ill-heading1-rule-color`.
+ * The custom property a field emits, e.g. `--ill-page-border-top-width`.
  * @param {string} groupId
  * @param {object} field
  * @param {string} [suffix]  Extra segment for fields that emit several properties.
@@ -304,14 +484,21 @@ export function cssVarFor(groupId, field, suffix = "") {
   return suffix ? `${base}-${kebab(suffix)}` : base;
 }
 
-/** The dot path a field occupies in style data, e.g. `heading1.ruleColor`. */
+/** The dot path a field occupies in style data, e.g. `page.borderTopWidth`. */
 export function pathFor(groupId, field) {
   return `${groupId}.${field.name}`;
 }
 
-/** Every field in the schema, paired with its group. */
+/** Every field in a group, flattened across its sections. */
+export function groupFields(group) {
+  return group.sections.flatMap((section) => section.fields);
+}
+
+/** Every field in the schema, paired with its group and section. */
 export function allFields() {
-  return GROUPS.flatMap((group) => group.fields.map((field) => ({ group, field })));
+  return GROUPS.flatMap((group) =>
+    group.sections.flatMap((section) =>
+      section.fields.map((field) => ({ group, section, field }))));
 }
 
 /** A fully-populated settings object containing every schema default. */
@@ -346,7 +533,9 @@ export function cleanSettings(settings) {
     } else if (field.type === "toggle") {
       coerced = Boolean(value);
     } else if (field.type === "select") {
-      if (!field.choices.includes(value)) continue;
+      const asString = String(value);
+      if (!field.choices.includes(asString)) continue;
+      coerced = asString;
     } else {
       coerced = String(value);
     }

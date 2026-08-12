@@ -16,9 +16,13 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 120 settings across 11 tabs, labelled in ordinary
-  language — "Inner Margin", "Opening Capital", "Which Edges Are Marked" — with a
-  one-line explanation under each. No CSS is typed or shown.
+- **Everything is a GUI control.** 391 settings across 11 tabs and 68 collapsible
+  sections, labelled in ordinary language — "Top Thickness", "Opening Capital",
+  "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
+- **Nothing is collapsed into one control.** Each of the four borders has its own
+  thickness, style, and colour; each corner its own rounding; each side its own padding
+  and margin; each shadow its own offset, softness, size, and colour. A **Match** button
+  in each section copies one value across its siblings when you do want them the same.
 - **Live sample.** The editor carries a miniature journal that repaints as you drag a
   slider, and any real journal already open repaints too. Nothing is written to the world
   until you press Save.
@@ -50,6 +54,7 @@ scripts/module.mjs           Entry point; hooks and public API
 scripts/constants.mjs        Module id, setting and flag keys, logger
 scripts/settings.mjs         game.settings registration
 scripts/style-schema.mjs     THE source of truth: every style property
+scripts/migrations.mjs       Forward migration of styles saved by older versions
 scripts/style-compiler.mjs   Style data -> CSS custom properties
 scripts/style-injector.mjs   Keeps the compiled sheet and sheet tagging in sync
 scripts/style-store.mjs      CRUD over the world's styles; journal assignment
@@ -78,19 +83,39 @@ class and a data attribute change on the sheet root.
 
 Both the compiler and the entire GUI are generated from `scripts/style-schema.mjs`.
 Adding a new style property means adding one line there plus one rule in the stylesheet;
-the tab, the control, and the export format follow automatically.
+the tab, the section, the control, and the export format follow automatically.
+
+The schema is organised as **groups → sections → fields**. A group is a tab, a section
+is a collapsible block, a field is one control. Since every side and corner is its own
+field, the stylesheet reads them back through CSS shorthands, so one declaration consumes
+four variables:
+
+```css
+border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
+              var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
+```
+
+### Schema versions
+
+Splitting a compound property renames it, and `cleanSettings` discards anything it does
+not recognise — so a style saved under an older schema would silently lose those values.
+`scripts/migrations.mjs` translates old keys into new ones on the way out of the store,
+before that filter runs. Migration is not written back on read, only when the style is
+next saved, so opening a world never rewrites data on its own.
 
 ### Adding a property
 
 ```js
-// in the relevant group's `fields` array in style-schema.mjs
-color("footerColor", "#5a4326")
+// in the relevant section's `fields` array in style-schema.mjs
+col("footerColor", "#5a4326")
 ```
 
 Then add `ILLUMINUS.Field.footerColor.label` / `.hint` to `lang/en.json`, and a rule in
 `styles/illuminus.css` consuming `var(--ill-<group>-footer-color)`. A field may also
 supply an `emit` function to drive several related properties from one control — see
-how "Opening Capital" sets float, size, leading, and tint together.
+how "Opening Capital" sets float, size, leading, weight, and tint together. Builders
+already exist for the repeating families: `borderFields`, `cornerFields`,
+`spacingFields`, `shadowFields`, `textShadowFields`, and `textFields`.
 
 ## Development
 

@@ -175,10 +175,17 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
 
   /* -------------------------------------------- */
 
-  /** Open the manager, focusing an already-open window if there is one. */
-  static open() {
+  /**
+   * Open the manager, focusing an already-open window if there is one. Always
+   * resolves to the application either way.
+   * @returns {Promise<IlluminusStyleManager>}
+   */
+  static async open() {
     const existing = foundry.applications.instances.get("illuminus-style-manager");
-    if (existing) return existing.bringToFront();
+    if (existing) {
+      existing.bringToFront();
+      return existing;
+    }
     return new IlluminusStyleManager().render({ force: true });
   }
 }
