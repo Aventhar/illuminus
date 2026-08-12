@@ -3,7 +3,7 @@ import { SCHEMA_VERSION, log } from "./constants.mjs";
 /**
  * Forward migration of stored style data.
  *
- * `cleanSettings` discards anything it does not recognise, so a style saved
+ * `cleanSettings` discards anything it does not recognize, so a style saved
  * under an older schema would silently lose every renamed property. Migrations
  * run before that filter and translate old keys into their modern equivalents.
  *
@@ -42,7 +42,7 @@ const WEIGHT = { normal: "400", bold: "700" };
  *
  * Every compound property was split so each side, corner, and shadow component
  * is separately addressable: one border control became twelve, one corner
- * radius became four, on/off shadows became full offset/blur/spread/colour sets,
+ * radius became four, on/off shadows became full offset/blur/spread/color sets,
  * and normal/bold became the nine numeric weights.
  */
 function v1_to_v2(settings) {

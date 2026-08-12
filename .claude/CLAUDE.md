@@ -77,14 +77,14 @@ These are all load-bearing and none are obvious from the code.
 - **A native `<input type="color">` cannot show alpha**, and its `::-webkit-color-swatch`
   resists styling even with `appearance: none`. The editor draws its own swatch over the
   input, which is made transparent but keeps its box so it still opens the browser
-  picker. The overlay is positioned from the input's measured rect, because the colour
+  picker. The overlay is positioned from the input's measured rect, because the color
   element's internal spacing is not ours to assume — aligning to the row's edge left it
   five pixels off its click target.
 - **Some core styling is fed through element-local custom properties.** A journal
   sheet's header buttons carry `--button-text-color` on themselves, which a generic
   `button { color: var(--button-text-color) }` then resolves. Setting `color` works, but
   set the variable too — the sidebar buttons are styled that way.
-- **Buttons animate.** Reading a computed colour or size straight after a render can
+- **Buttons animate.** Reading a computed color or size straight after a render can
   return a value part-way through a transition (`14.0717px` rather than `14` or `22`).
   Freeze transitions before measuring:
   `* { transition: none !important; animation: none !important; }`. A test that
@@ -117,11 +117,11 @@ moving a file breaks them silently — `validate.mjs` resolves every
 also checks the spelling matches on-disk case, since macOS forgives a wrong case and a
 Linux-hosted server does not.
 
-Greyscale SVG textures are meant to be combined with a Fill Colour under Multiply
-blending; the colour JPEGs are meant to be used as they are. A texture that is not
-greyscale will tint twice.
+Grayscale SVG textures are meant to be combined with a Fill Color under Multiply
+blending; the color JPEGs are meant to be used as they are. A texture that is not
+grayscale will tint twice.
 
-Anything added here is redistributed under the repository's MIT licence, so only bundle
+Anything added here is redistributed under the repository's MIT license, so only bundle
 art that may be licensed that way.
 
 ## Generated files — do not hand-edit
@@ -146,6 +146,9 @@ art that may be licensed that way.
 - **Renaming a field needs a migration.** `cleanSettings` discards unknown keys, so
   without one, existing styles silently lose those values. Bump `SCHEMA_VERSION`, add the
   mapping to `scripts/migrations.mjs`, and cover it in the tests.
+- **US English throughout** — strings, comments, and identifiers alike: color, center,
+  gray, license, recognize. CSS property names are US spelling anyway, so a stray
+  `colour` in an identifier reads as a typo next to `borderTopColor`.
 - **No CSS jargon in any user-facing string.** "Top Thickness", not "border-top-width".
   The GUI is for people who do not write CSS.
 - Never hard-code the module id or a user-facing string; import `MODULE_ID` and add a

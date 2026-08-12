@@ -17,35 +17,35 @@ it to whichever journals should wear it, and export it to carry into another wor
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
 - **Everything is a GUI control.** 570 settings across 13 tabs and 83 collapsible
-  sections, labelled in ordinary language — "Top Thickness", "Opening Capital",
+  sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
 - **The whole window, not just the page.** A Sidebar tab styles the contents panel —
   page entries, the current-page marker, page numbers, sub-headings, category rows, the
   search box, and its buttons — and a Window tab styles the frame, the title bar, its
   icon buttons, and the edit pencil that appears over a page.
 - **Nothing is collapsed into one control.** Each of the four borders has its own
-  thickness, style, and colour; each corner its own rounding; each side its own padding
-  and margin; each shadow its own offset, softness, size, and colour. A **Match** button
+  thickness, style, and color; each corner its own rounding; each side its own padding
+  and margin; each shadow its own offset, softness, size, and color. A **Match** button
   in each section copies one value across its siblings when you do want them the same.
 - **Live sample.** The editor carries a miniature journal that repaints as you drag a
   slider, and any real journal already open repaints too. The sample reveals the sidebar
   while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
   is written to the world until you press Save.
-- **Transparency is visible.** Colour swatches are drawn over a chequerboard and show
-  their alpha, with a fully transparent one labelled "None" — a native colour input
+- **Transparency is visible.** Color swatches are drawn over a checkerboard and show
+  their alpha, with a fully transparent one labeled "None" — a native color input
   cannot show alpha and paints `#00000000` as solid black. Type an eight-digit hex such
   as `#00000000` for none, or `#ece0c680` for half strength.
-- **Its own colour picker.** Every colour control can copy the colour of anything in the
+- **Its own color picker.** Every color control can copy the color of anything in the
   Foundry window — fills, borders, and lettering. Point and click; a readout follows the
-  cursor showing exactly what will be taken. Hold Option/Alt for lettering colour.
-  It reads colours out of the page rather than off the screen, so unlike the operating
+  cursor showing exactly what will be taken. Hold Option/Alt for lettering color.
+  It reads colors out of the page rather than off the screen, so unlike the operating
   system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
   and it keeps transparency.
 - **Textures included.** Background pictures under `assets/Samples/textures/`, reachable
   from the Background Picture control's file browser. The SVG ones — parchment, paper
-  fibres, linen, stone, grid, hatch — are greyscale on purpose: the texture supplies the
-  grain and the Fill Colour supplies the hue, so one file suits any palette under
-  Multiply blending. The JPEG ones carry their own colour, so set Fill Colour to white
+  fibres, linen, stone, grid, hatch — are grayscale on purpose: the texture supplies the
+  grain and the Fill Color supplies the hue, so one file suits any palette under
+  Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
   and Picture Blending to Normal to see them as they are. Your own art works just as
   well.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
@@ -122,7 +122,7 @@ Both the compiler and the entire GUI are generated from `scripts/style-schema.mj
 Adding a new style property means adding one line there plus one rule in the stylesheet;
 the tab, the section, the control, and the export format follow automatically.
 
-The schema is organised as **groups → sections → fields**. A group is a tab, a section
+The schema is organized as **groups → sections → fields**. A group is a tab, a section
 is a collapsible block, a field is one control. Since every side and corner is its own
 field, the stylesheet reads them back through CSS shorthands, so one declaration consumes
 four variables:
@@ -135,7 +135,7 @@ border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width
 ### Schema versions
 
 Splitting a compound property renames it, and `cleanSettings` discards anything it does
-not recognise — so a style saved under an older schema would silently lose those values.
+not recognize — so a style saved under an older schema would silently lose those values.
 `scripts/migrations.mjs` translates old keys into new ones on the way out of the store,
 before that filter runs. Migration is not written back on read, only when the style is
 next saved, so opening a world never rewrites data on its own.

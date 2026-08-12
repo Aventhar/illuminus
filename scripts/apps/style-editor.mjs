@@ -114,7 +114,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /**
    * Label for a select option. Most choices read the same wherever they appear
-   * ("Bold", "Centred"), but a few need wording specific to their control. A
+   * ("Bold", "Centered"), but a few need wording specific to their control. A
    * field-specific key wins when one exists; otherwise the shared label is used.
    */
   #choiceLabel(fieldName, choice) {
@@ -208,11 +208,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Paint the true colour, alpha included, behind the native colour input.
+   * Paint the true color, alpha included, behind the native color input.
    *
    * A native `<input type="color">` cannot represent alpha: it renders
    * `#00000000` as solid black, so a transparent setting looks like an opaque
-   * one. The real colour is drawn over a chequerboard instead, and a fully
+   * one. The real color is drawn over a checkerboard instead, and a fully
    * transparent value is spelled out.
    * @param {HTMLElement} row
    * @param {string} value
@@ -222,7 +222,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     row.classList.toggle("is-transparent", /^#[0-9a-f]{6}00$/i.test(value));
 
     // Align the drawn swatch to the input it stands in for, rather than to the
-    // edge of the row: the colour element's internal spacing is not ours to
+    // edge of the row: the color element's internal spacing is not ours to
     // assume, and being a few pixels out puts the visual off its click target.
     const chip = row.querySelector(".illuminus-swatch");
     const input = row.querySelector('color-picker input[type="color"]');
@@ -351,15 +351,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Sample a colour by pointing at anything in the Foundry window.
+   * Sample a color by pointing at anything in the Foundry window.
    *
-   * Neither the operating system's colour panel nor the browser's EyeDropper
+   * Neither the operating system's color panel nor the browser's EyeDropper
    * API sample reliably on every machine — both go through screen capture,
-   * and when that is unavailable they return one fixed colour wherever you
-   * point. This reads the colour out of the page instead, which needs no
+   * and when that is unavailable they return one fixed color wherever you
+   * point. This reads the color out of the page instead, which needs no
    * capture permission at all and, unlike either of those, keeps transparency.
    *
-   * The trade-off is that it samples elements rather than raw pixels: colours
+   * The trade-off is that it samples elements rather than raw pixels: colors
    * from a background picture are not available this way.
    */
   static async #onPickColor(_event, target) {
@@ -372,7 +372,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /**
    * Enter pointing mode until the user clicks or presses Escape.
-   * @returns {Promise<string|null>} The chosen colour, or null if cancelled.
+   * @returns {Promise<string|null>} The chosen color, or null if canceled.
    */
   static #pickFromWindow() {
     return new Promise((resolve) => {
@@ -454,16 +454,16 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * The colour under a point, and what kind of colour it is.
+   * The color under a point, and what kind of color it is.
    *
    * Order matters: a border is painted inside the element's border box, so
-   * pointing at the line itself must yield the border colour rather than the
+   * pointing at the line itself must yield the border color rather than the
    * fill behind it. Only when the point is not on a border does this fall back
    * to the nearest ancestor that actually paints a background.
    *
    * @param {number} x
    * @param {number} y
-   * @param {boolean} wantText  Take the lettering colour instead.
+   * @param {boolean} wantText  Take the lettering color instead.
    * @returns {{hex: string, mode: "border"|"text"|"fill"}|null}
    */
   static #sampleAt(x, y, wantText) {
@@ -486,11 +486,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Whether a sampled colour paints nothing, so sampling should keep looking.
+   * Whether a sampled color paints nothing, so sampling should keep looking.
    *
    * Only an eight-digit value carries alpha: `#ff0000` is opaque red, while
    * `#ff000000` is fully transparent. Testing the last two characters without
-   * checking the length treats every blue-free colour as invisible.
+   * checking the length treats every blue-free color as invisible.
    */
   static #isInvisible(hex) {
     return hex.length === 9 && hex.endsWith("00");
@@ -498,7 +498,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /**
    * Whether a point falls on one of an element's borders, and that border's
-   * colour. Hit testing already guarantees the point is inside the border box,
+   * color. Hit testing already guarantees the point is inside the border box,
    * so this only has to work out which band it lands in.
    * @returns {{hex: string, mode: "border"}|null}
    */
@@ -521,7 +521,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return null;
   }
 
-  /** Convert a computed `rgb()` / `rgba()` colour to hex, keeping any alpha. */
+  /** Convert a computed `rgb()` / `rgba()` color to hex, keeping any alpha. */
   static #toHex(value) {
     const parts = String(value).match(/[\d.]+/g);
     if (!parts || parts.length < 3) return null;

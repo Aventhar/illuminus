@@ -96,9 +96,9 @@ const skeleton = await cdp.evaluate(`(() => {
 })()`);
 const sk = JSON.parse(skeleton);
 check(sk.declaredStyles.includes("modules/illuminus/styles/illuminus.css"), "manifest declares the stylesheet");
-check(sk.pageBg === "rgb(237, 224, 200)", `skeleton resolves the default page colour (got ${sk.pageBg})`);
+check(sk.pageBg === "rgb(237, 224, 200)", `skeleton resolves the default page color (got ${sk.pageBg})`);
 check(sk.pagePadding === "24px", `skeleton resolves the default inner margin (got ${sk.pagePadding})`);
-check(sk.bodyColor === "rgb(36, 27, 16)", `skeleton resolves the default ink colour (got ${sk.bodyColor})`);
+check(sk.bodyColor === "rgb(36, 27, 16)", `skeleton resolves the default ink color (got ${sk.bodyColor})`);
 check(sk.quoteLeft === "4px", `boxed-text edge calc() resolves (got ${sk.quoteLeft})`);
 
 console.log("\n[4] Create a journal, assign a style, verify it applies");
@@ -145,14 +145,14 @@ const applied = await cdp.evaluate(`(async () => {
 const a = JSON.parse(applied);
 check(a.hasClass, "sheet root carries .illuminus-styled");
 check(a.styleAttr, "sheet root carries the correct data-illuminus-style");
-check(a.pageBg === "rgb(236, 224, 198)", `page background is the style's parchment colour (got ${a.pageBg})`);
-check(a.bodyColor === "rgb(36, 27, 16)", `body text uses the style's ink colour (got ${a.bodyColor})`);
+check(a.pageBg === "rgb(236, 224, 198)", `page background is the style's parchment color (got ${a.pageBg})`);
+check(a.bodyColor === "rgb(36, 27, 16)", `body text uses the style's ink color (got ${a.bodyColor})`);
 check(a.bodyAlign === "justify", `body text is justified per the style (got ${a.bodyAlign})`);
-check(a.h1Bg === "rgb(94, 25, 20)", `major heading has the style's banner colour (got ${a.h1Bg})`);
-check(a.h1Color === "rgb(246, 239, 224)", `major heading text is the style's pale colour (got ${a.h1Color})`);
+check(a.h1Bg === "rgb(94, 25, 20)", `major heading has the style's banner color (got ${a.h1Bg})`);
+check(a.h1Color === "rgb(246, 239, 224)", `major heading text is the style's pale color (got ${a.h1Color})`);
 check(a.quoteBorderLeft === "5px" && a.quoteBorderTop === "0px",
   `boxed text has a left edge only (left ${a.quoteBorderLeft}, top ${a.quoteBorderTop})`);
-check(a.thBg === "rgb(94, 25, 20)", `table header uses the style's colour (got ${a.thBg})`);
+check(a.thBg === "rgb(94, 25, 20)", `table header uses the style's color (got ${a.thBg})`);
 
 console.log("\n[5] Switching styles restyles without re-render");
 const switched = await cdp.evaluate(`(async () => {
@@ -177,7 +177,7 @@ const switched = await cdp.evaluate(`(async () => {
 const s = JSON.parse(switched);
 check(s.attr, "data attribute updated to the new style");
 check(s.pageBg === "rgb(23, 26, 33)", `page repainted to the other style (got ${s.pageBg})`);
-check(s.bodyColor === "rgb(215, 219, 226)", `body text repainted to pale grey (got ${s.bodyColor})`);
+check(s.bodyColor === "rgb(215, 219, 226)", `body text repainted to pale gray (got ${s.bodyColor})`);
 
 console.log("\n[6] Clearing the style restores Foundry's default");
 const cleared = await cdp.evaluate(`(async () => {
@@ -245,7 +245,7 @@ check(e.tabs === EXPECT.tabs, `${EXPECT.tabs} tabs present, one per style group 
 check(e.activeTabs === 1, `exactly one tab is active (got ${e.activeTabs})`);
 check(e.fields === EXPECT.fields, `all ${EXPECT.fields} controls rendered (got ${e.fields})`);
 check(e.colorPickers > 0 && e.filePickers > 0 && e.rangePickers > 0,
-  `native widgets used: ${e.colorPickers} colour, ${e.filePickers} file, ${e.rangePickers} range`);
+  `native widgets used: ${e.colorPickers} color, ${e.filePickers} file, ${e.rangePickers} range`);
 check(e.previewFrame, "live sample pane is present and marked as styled");
 check(e.untranslated.length === 0, `no untranslated keys in editor${e.untranslated.length ? `: ${e.untranslated}` : ""}`);
 
@@ -273,7 +273,7 @@ const preview = await cdp.evaluate(`(async () => {
 })()`);
 const p = JSON.parse(preview);
 check(p.before !== p.after, `sample repainted live (${p.before} → ${p.after})`);
-check(p.after === "rgb(0, 255, 0)", `sample shows the new colour (got ${p.after})`);
+check(p.after === "rgb(0, 255, 0)", `sample shows the new color (got ${p.after})`);
 check(p.stored !== "#00ff00", `unsaved edit did NOT touch the stored style (stored still ${p.stored})`);
 check(await cdp.evaluate(`(() => {
   const api = game.modules.get("illuminus").api;
@@ -339,7 +339,7 @@ for (const [label, outcome] of JSON.parse(bad)) {
   check(outcome.startsWith("rejected"), `${label} → ${outcome}`);
 }
 
-// Regression: the drop-cap colour must not tint the first letter when the
+// Regression: the drop-cap color must not tint the first letter when the
 // opening capital is switched off.
 console.log("\n[12] Opening capital only applies when switched on");
 const dropCap = await cdp.evaluate(`(async () => {
@@ -422,10 +422,10 @@ check(mg.kept.heading1.paddingLeft === 12 && mg.kept.heading1.paddingTop === 6,
 check(mg.kept.heading1.borderBottomWidth === 2 && mg.kept.heading1.borderBottomStyle === "solid",
   "the heading rule became a bottom border");
 check(mg.kept.links.decorationLine === "none", `the underline toggle became a decoration line (got ${mg.kept.links.decorationLine})`);
-check(mg.kept.links.background === "#112233", "the link chip colour was carried over");
+check(mg.kept.links.background === "#112233", "the link chip color was carried over");
 check(mg.kept.boxes.borderLeftWidth === 5 && mg.kept.boxes.borderTopWidth === 0,
   `"which edges are marked" became per-side widths (left ${mg.kept.boxes.borderLeftWidth}, top ${mg.kept.boxes.borderTopWidth})`);
-check(mg.kept.boxes.color === "#2b2113", "boxed text colour was renamed, not dropped");
+check(mg.kept.boxes.color === "#2b2113", "boxed text color was renamed, not dropped");
 check(mg.kept.tables.cellPaddingLeft === 10 && mg.kept.tables.cellPaddingTop === 5,
   "table cell padding split into four sides");
 check(mg.kept.images.shadowBlur === 8, `the picture shadow toggle became a real shadow (blur ${mg.kept.images.shadowBlur})`);
@@ -491,7 +491,7 @@ const pb = JSON.parse(previewBg);
 check(pb.scrollable, `the sample is taller than its frame, so this is actually exercised (${pb.scrollHeight}px)`);
 check(pb.contentHeight >= pb.scrollHeight,
   `page covers the whole scroll height (page ${pb.contentHeight}px vs scroll ${pb.scrollHeight}px)`);
-check(pb.bg === "rgb(236, 224, 198)", `and is still painted with the style colour (got ${pb.bg})`);
+check(pb.bg === "rgb(236, 224, 198)", `and is still painted with the style color (got ${pb.bg})`);
 
 console.log("\n[16] Sidebar styling reaches a real journal sheet");
 const sidebar = await cdp.evaluate(`(async () => {
@@ -545,14 +545,14 @@ const sb = JSON.parse(sidebar);
 check(sb.activeColor !== undefined, "an entry is marked as the current page");
 check(sb.sidebarBg === "rgb(18, 21, 27)", `panel background applied over core's (got ${sb.sidebarBg})`);
 check(sb.sidebarWidth === "300px", `panel width control feeds core's variable (got ${sb.sidebarWidth})`);
-check(sb.entryColor === "rgb(200, 210, 222)", `page entry colour applied (got ${sb.entryColor})`);
-check(sb.activeColor === "rgb(232, 201, 121)", `current page colour applied (got ${sb.activeColor})`);
+check(sb.entryColor === "rgb(200, 210, 222)", `page entry color applied (got ${sb.entryColor})`);
+check(sb.activeColor === "rgb(232, 201, 121)", `current page color applied (got ${sb.activeColor})`);
 check(sb.activeWeight === "700", `current page weight applied (got ${sb.activeWeight})`);
 check((sb.activeShadow ?? "").includes("rgb(232, 201, 121)"), `current page accent bar drawn (got ${sb.activeShadow})`);
 check(sb.entryBorderBottom.startsWith("1px") && sb.entryBorderBottom.includes("38, 44, 56"),
   `entry divider beat core's own border rule (got ${sb.entryBorderBottom})`);
-check(sb.numberColor === "rgb(107, 118, 136)", `page number colour applied (got ${sb.numberColor})`);
-check(sb.searchBg === "rgb(13, 16, 21)", `search box colour applied (got ${sb.searchBg})`);
+check(sb.numberColor === "rgb(107, 118, 136)", `page number color applied (got ${sb.numberColor})`);
+check(sb.searchBg === "rgb(13, 16, 21)", `search box color applied (got ${sb.searchBg})`);
 
 console.log("\n[17] The sample shows a sidebar, but only on the Sidebar tab");
 const sample = await cdp.evaluate(`(async () => {
@@ -587,11 +587,11 @@ check(sp.onSidebarTab.display === "flex", `shown while styling the sidebar (got 
 check(sp.onPageTab.pageWidth > sp.onSidebarTab.pageWidth,
   `the page gets the full pane back on other tabs (${Math.round(sp.onPageTab.pageWidth)}px vs ${Math.round(sp.onSidebarTab.pageWidth)}px)`);
 check(sp.onSidebarTab.bg === "rgb(18, 21, 27)", `sample sidebar picks up the same style (got ${sp.onSidebarTab.bg})`);
-check(sp.onSidebarTab.activeColor === "rgb(232, 201, 121)", `sample current-page colour matches (got ${sp.onSidebarTab.activeColor})`);
+check(sp.onSidebarTab.activeColor === "rgb(232, 201, 121)", `sample current-page color matches (got ${sp.onSidebarTab.activeColor})`);
 
-// Colours are read out of the page rather than off the screen, so this can be
+// Colors are read out of the page rather than off the screen, so this can be
 // driven for real: point at a known element and click.
-console.log("\n[18] Picking a colour from the window");
+console.log("\n[18] Picking a color from the window");
 const picked = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = api.listStyles().find(s => s.name === "Aged Parchment");
@@ -600,12 +600,12 @@ const picked = await cdp.evaluate(`(async () => {
   const el = app.element;
 
   const buttons = el.querySelectorAll(".illuminus-eyedropper").length;
-  const colourFields = el.querySelectorAll('.illuminus-field[data-field] color-picker').length;
+  const colorFields = el.querySelectorAll('.illuminus-field[data-field] color-picker').length;
 
   const row = el.querySelector('[data-field="page.background"]');
   const picker = row.querySelector("color-picker");
 
-  // Aim at the sample page, whose colour we know from the preset.
+  // Aim at the sample page, whose color we know from the preset.
   const sample = el.querySelector(".illuminus-preview__frame .journal-entry-content");
   const box = sample.getBoundingClientRect();
   const x = Math.round(box.left + box.width / 2);
@@ -624,7 +624,7 @@ const picked = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 300));
 
   const out = {
-    buttons, colourFields, cursorArmed, readout,
+    buttons, colorFields, cursorArmed, readout,
     pickerValue: picker.value,
     cursorReleased: !document.documentElement.classList.contains("illuminus-picking"),
     readoutGone: !document.querySelector(".illuminus-picker-readout"),
@@ -643,18 +643,18 @@ const picked = await cdp.evaluate(`(async () => {
   return JSON.stringify(out);
 })()`);
 const pk = JSON.parse(picked);
-check(pk.buttons === pk.colourFields,
-  `every colour control has a picker (${pk.buttons} buttons, ${pk.colourFields} colour fields)`);
+check(pk.buttons === pk.colorFields,
+  `every color control has a picker (${pk.buttons} buttons, ${pk.colorFields} color fields)`);
 check(pk.cursorArmed, "clicking it arms pointing mode");
-check(pk.readout.includes("#ece0c6"), `the readout previews the colour under the pointer (got "${pk.readout}")`);
-check(pk.pickerValue.toLowerCase() === "#ece0c6", `clicking applies that colour (got ${pk.pickerValue})`);
+check(pk.readout.includes("#ece0c6"), `the readout previews the color under the pointer (got "${pk.readout}")`);
+check(pk.pickerValue.toLowerCase() === "#ece0c6", `clicking applies that color (got ${pk.pickerValue})`);
 check(pk.cursorReleased && pk.readoutGone, "pointing mode cleans up after the click");
 check(pk.stored !== "#ece0c6" || true, `saved style untouched until Save (stored ${pk.stored})`);
 check(pk.afterEscape.toLowerCase() === "#ece0c6", "Escape cancels without changing the value");
 check(pk.escapeCleanedUp, "Escape cleans up pointing mode");
 
 // Transparency is preserved, which neither screen-based sampler manages.
-console.log("\n[19] Sampled colours keep their transparency");
+console.log("\n[19] Sampled colors keep their transparency");
 const alpha = await cdp.evaluate(`(() => {
   const probe = document.createElement("div");
   probe.style.cssText = "position:fixed;left:40px;top:40px;width:120px;height:120px;z-index:99999;background:rgba(16,32,64,0.5)";
@@ -667,10 +667,10 @@ const alpha = await cdp.evaluate(`(() => {
   return JSON.stringify({bg, hex: "#" + pair(parts[0]) + pair(parts[1]) + pair(parts[2]) + pair(parts[3] * 255)});
 })()`);
 const al = JSON.parse(alpha);
-check(al.hex === "#10204080", `a half-transparent colour reads back with its alpha (got ${al.hex})`);
+check(al.hex === "#10204080", `a half-transparent color reads back with its alpha (got ${al.hex})`);
 
 // A border is painted inside the element's border box, so pointing at the line
-// must give the border colour rather than the fill behind it.
+// must give the border color rather than the fill behind it.
 console.log("\n[20] Borders are sampled where they are drawn");
 const borders = await cdp.evaluate(`(async () => {
   const probe = document.createElement("div");
@@ -838,9 +838,9 @@ check(wn.headerBg === "rgb(32, 64, 96)", `title bar fill applied (got ${wn.heade
 check(wn.titleColor === "rgb(255, 204, 0)", `title lettering applied (got ${wn.titleColor})`);
 check(wn.titleSize === "20px", `title size applied (got ${wn.titleSize})`);
 if (wn.buttonColor !== "rgb(0, 255, 136)") console.log("      diag:", JSON.stringify(wn.diag));
-check(wn.buttonColor === "rgb(0, 255, 136)", `title bar icon colour applied (got ${wn.buttonColor})`);
+check(wn.buttonColor === "rgb(0, 255, 136)", `title bar icon color applied (got ${wn.buttonColor})`);
 check(wn.buttonSize === "22px", `title bar icon size applied (got ${wn.buttonSize})`);
-check(wn.editColor === "rgb(255, 0, 255)", `edit pencil colour applied (got ${wn.editColor})`);
+check(wn.editColor === "rgb(255, 0, 255)", `edit pencil color applied (got ${wn.editColor})`);
 check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
 check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
 
@@ -916,7 +916,7 @@ check(as.presetTexture.endsWith("textures/parchment.svg"),
 check(as.sampleImagePresent && as.sampleImageLoaded, "the sample figure has an image and it loads");
 check(as.imgBorder === "5px rgb(255, 0, 0)", `the sample image takes the Pictures border (got ${as.imgBorder})`);
 check(as.imgOpacity === "0.5", `and its opacity (got ${as.imgOpacity})`);
-check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its colour (got ${as.captionColor})`);
+check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its color (got ${as.captionColor})`);
 
 // A relative url() in a stylesheet resolves against the stylesheet's own
 // folder, so a picked path must be made root-relative or it 404s.
@@ -991,9 +991,9 @@ check(es.styled.marked, "the edit window is still styled by Illuminus");
 check(es.styled.position !== "relative" && es.styled.position !== "static",
   `and stays out of normal flow (position ${es.styled.position})`);
 
-// A native colour input renders #00000000 as solid black, so the true colour
+// A native color input renders #00000000 as solid black, so the true color
 // is painted behind it and a fully transparent one is named.
-console.log("\n[25] Colour swatches show transparency honestly");
+console.log("\n[25] Color swatches show transparency honestly");
 const swatch = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Swatch Probe", settings: {
@@ -1050,15 +1050,15 @@ const swatch = await cdp.evaluate(`(async () => {
 const sw = JSON.parse(swatch);
 check(sw.clear.swatchVar === "#00000000", `a transparent fill reaches the swatch (got ${sw.clear.swatchVar})`);
 check(sw.clear.nativeValue === "#000000", `while the native input still shows black (got ${sw.clear.nativeValue})`);
-check(sw.clear.transparent && sw.clear.noneVisible, "so it is labelled None");
-check(sw.clear.layers.includes("linear-gradient"), "and drawn over a chequerboard");
-check(sw.clear.inputClickable, "the browser's own colour picker is still reachable");
+check(sw.clear.transparent && sw.clear.noneVisible, "so it is labeled None");
+check(sw.clear.layers.includes("linear-gradient"), "and drawn over a checkerboard");
+check(sw.clear.inputClickable, "the browser's own color picker is still reachable");
 check(sw.clear.chipOverlap >= 80, `and the drawn swatch sits over the click target (${sw.clear.chipOverlap}% overlap)`);
-check(sw.half.swatchVar === "#3366cc80", `a half-transparent colour keeps its alpha (got ${sw.half.swatchVar})`);
-check(!sw.half.transparent && !sw.half.noneVisible, "and is not labelled None");
-check(sw.solid.swatchVar === "#112233" && !sw.solid.noneVisible, "an opaque colour is shown plainly");
+check(sw.half.swatchVar === "#3366cc80", `a half-transparent color keeps its alpha (got ${sw.half.swatchVar})`);
+check(!sw.half.transparent && !sw.half.noneVisible, "and is not labeled None");
+check(sw.solid.swatchVar === "#112233" && !sw.solid.noneVisible, "an opaque color is shown plainly");
 check(sw.afterEdit.transparent && sw.afterEdit.noneVisible,
-  "editing a colour to transparent updates the swatch straight away");
+  "editing a color to transparent updates the swatch straight away");
 
 console.log("\n[26] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));

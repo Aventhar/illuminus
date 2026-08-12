@@ -6,7 +6,7 @@
 # against a data directory the desktop app already has open makes the two
 # contend for the LevelDB locks and can trigger a database repair on the real
 # world. The sandbox gets its own dataPath and its own port; only the module and
-# the game system are symlinked in, and the licence config is copied.
+# the game system are symlinked in, and the license config is copied.
 #
 # Usage:
 #   tools/sandbox.sh up        create (if needed) and start the sandbox

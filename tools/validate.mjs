@@ -25,7 +25,7 @@ const consumed = new Set([...css.matchAll(/var\((--ill-[a-z0-9-]+)\)/g)].map((m)
 
 // A var may legitimately be consumed indirectly, from inside a value emitted
 // for some setting other than the default — the drop-cap tint indirects through
-// the drop-cap colour, but only while a drop cap is switched on. So exercise
+// the drop-cap color, but only while a drop cap is switched on. So exercise
 // every value each field can take, not just its default.
 for (const { field } of allFields()) {
   const candidates = [field.default, ...(field.choices ?? []), true, false];

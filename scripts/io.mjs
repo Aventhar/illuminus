@@ -127,7 +127,7 @@ export async function importStylesFromFile(file) {
 
 /**
  * Open a file chooser and import the chosen file.
- * @returns {Promise<object[]|null>} The imported records, or null if cancelled.
+ * @returns {Promise<object[]|null>} The imported records, or null if canceled.
  */
 export function promptImport() {
   return new Promise((resolve) => {

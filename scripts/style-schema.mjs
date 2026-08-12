@@ -69,7 +69,7 @@ const CHOICES = {
 /*  Multi-property emitters                     */
 /* -------------------------------------------- */
 
-/** Capitalisation needs both text-transform and font-variant. */
+/** Capitalization needs both text-transform and font-variant. */
 const emitCaps = (value) => ({
   none: { transform: "none", variant: "normal" },
   uppercase: { transform: "uppercase", variant: "normal" },
@@ -95,9 +95,9 @@ const emitTexturePosition = (value) => ({
 
 /**
  * A drop cap sets float, size, leading, weight, and tint together, or
- * neutralises all of them. The tint indirects through the separate colour field
+ * neutralises all of them. The tint indirects through the separate color field
  * so that switching the drop cap off leaves the first letter looking like
- * ordinary body text rather than a stray coloured character.
+ * ordinary body text rather than a stray colored character.
  */
 const emitDropCap = (value) => {
   const lines = { two: 2, three: 3, four: 4, five: 5 }[value];
@@ -138,7 +138,7 @@ const select = (name, def, choices, opts = {}) => ({ type: "select", name, defau
 const font = (name, def, opts = {}) => ({ type: "font", name, default: def, fallback: SERIF, ...opts });
 
 /**
- * Twelve fields: width, style, and colour for each of the four sides.
+ * Twelve fields: width, style, and color for each of the four sides.
  * Default style is `solid` rather than `none` so that raising a thickness
  * produces a visible border without a second trip to the style dropdown.
  */
@@ -164,7 +164,7 @@ function spacingFields(prefix, values = 0, { min = 0, max = 200 } = {}) {
   return SIDES.map((side) => num(`${prefix}${side}`, at(side), "px", min, max, 1, { link: prefix }));
 }
 
-/** Five fields describing one box shadow. A transparent colour means none. */
+/** Five fields describing one box shadow. A transparent color means none. */
 function shadowFields(prefix, { color = "#00000000", blur = 0, offsetY = 0 } = {}) {
   return [
     num(`${prefix}OffsetX`, 0, "px", -100, 100, 1),

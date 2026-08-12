@@ -231,7 +231,7 @@
   color: var(--ill-sidebar-hover-color);
 }
 
-/* The current page. Core marks its neighbours' edges too; the accent is drawn
+/* The current page. Core marks its neighbors' edges too; the accent is drawn
    here as a left bar so it reads the same wherever the entry sits in the list. */
 .illuminus-styled .journal-sidebar .toc li.page.active {
   background-color: var(--ill-sidebar-active-background);
@@ -499,7 +499,7 @@
   line-height: var(--ill-body-drop-cap-line-height);
   font-weight: var(--ill-body-drop-cap-weight);
   padding-right: var(--ill-body-drop-cap-gap);
-  /* Resolves to the chosen colour only while a drop cap is switched on, so the
+  /* Resolves to the chosen color only while a drop cap is switched on, so the
      first letter is not tinted when there is no drop cap. */
   color: var(--ill-body-drop-cap-tint);
 }
@@ -927,7 +927,7 @@
   border-left: 3px solid var(--color-border-highlight, #ff6400);
 }
 
-/* A field still holding its schema default is de-emphasised, so at a glance
+/* A field still holding its schema default is de-emphasized, so at a glance
    the user can see what this style actually changes. */
 .illuminus-field.is-default {
   border-left-color: transparent;
@@ -971,13 +971,13 @@
   flex: 0 0 auto;
 }
 
-/* --- Colour swatches ---------------------------------------------------- */
+/* --- Color swatches ---------------------------------------------------- */
 
-/* A native colour input drops alpha: it draws #00000000 as solid black, so a
+/* A native color input drops alpha: it draws #00000000 as solid black, so a
    transparent setting is indistinguishable from an opaque one. Styling the
    browser's own swatch is unreliable, so the input is made invisible — it keeps
-   its box and still opens the browser picker when clicked — and the true colour
-   is drawn over a chequerboard in its place. */
+   its box and still opens the browser picker when clicked — and the true color
+   is drawn over a checkerboard in its place. */
 .illuminus-swatch-wrap {
   position: relative;
   display: flex;
@@ -1013,7 +1013,7 @@
   background-position: 0 0, 0 0, 4px 4px;
 }
 
-/* Spelled out, because a chequerboard alone reads as "no value set". */
+/* Spelled out, because a checkerboard alone reads as "no value set". */
 .illuminus-none-tag {
   display: none;
   flex: 0 0 auto;
@@ -1027,8 +1027,8 @@
   display: inline;
 }
 
-/* Illuminus samples colours out of the page rather than off the screen: the
-   samplers in the native colour input and the browser EyeDropper API both go
+/* Illuminus samples colors out of the page rather than off the screen: the
+   samplers in the native color input and the browser EyeDropper API both go
    through screen capture, which is not available on every machine. */
 .illuminus-eyedropper {
   flex: 0 0 auto;
@@ -1250,7 +1250,7 @@
   zoom: 0.75;
 }
 
-/* --- Colour picking mode ------------------------------------------------ */
+/* --- Color picking mode ------------------------------------------------ */
 
 /* No overlay element: a covering div would hide the very thing being pointed
    at from elementFromPoint. The cursor changes and events are intercepted in
