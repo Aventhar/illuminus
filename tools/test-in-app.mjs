@@ -517,10 +517,12 @@ const sidebar = await cdp.evaluate(`(async () => {
     ]);
   }
   await api.assignStyle(entry, style.id);
-  await entry.sheet.render({force: true});
+  // Naming the page makes it the current one at render time. Left to itself,
+  // "current" is decided by an intersection observer, which depends on the
+  // sheet being on screen and settled — reliable enough by hand, not in a run
+  // of thirty other checks.
+  await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
   await new Promise(r => setTimeout(r, 800));
-  // Which entry is "current" comes from an intersection observer, so the sheet
-  // has to actually be on screen — otherwise no page is ever marked active.
   entry.sheet.setPosition({left: 80, top: 60, width: 900, height: 700});
   for (let i = 0; i < 30; i++) {
     if (entry.sheet.element.querySelector(".toc li.page.active")) break;
@@ -1171,7 +1173,89 @@ check(pick.afterOk.closed && pick.afterOk.value === pick.afterOk.wanted,
   `OK closes and keeps the choice (${pick.afterOk.value})`);
 
 // Saving a style makes those values the new baseline for Reset.
-console.log("\n[27] Saving sets the baseline that Reset returns to");
+// Removing a saved color depends on :hover, which only real input events
+// produce — a synthetic mouseover will not reveal the control.
+console.log("\n[27] Removing a saved color");
+const forgetSetup = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Forget Probe", swatches: ["#112233", "#445566", "#778899"]});
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1100));
+  const swatch = app.element.querySelector('[data-field="page.background"] .illuminus-swatch');
+  const b = swatch.getBoundingClientRect();
+  document.elementFromPoint(Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2))?.click();
+  await new Promise(r => setTimeout(r, 350));
+  const cell = document.querySelector('.illuminus-cp__swatch[data-hex]');
+  const cb = cell.getBoundingClientRect();
+  // The row must fit the panel: a bare 1fr track will not shrink below its
+  // content's minimum and pushes the last column past the edge.
+  const cp = document.querySelector(".illuminus-cp");
+  const grid = cp.querySelector(".illuminus-cp__swatches");
+  const slots = [...cp.querySelectorAll(".illuminus-cp__slot")];
+  return JSON.stringify({
+    styleId: style.id,
+    before: (api.getStyle(style.id).swatches ?? []).length,
+    overflow: cp.scrollWidth - cp.clientWidth,
+    lastSlotBeyondGrid: Math.round(
+      slots[9].getBoundingClientRect().right - grid.getBoundingClientRect().right),
+    cellX: Math.round(cb.left + cb.width / 2),
+    cellY: Math.round(cb.top + cb.height / 2)
+  });
+})()`);
+const fs0 = JSON.parse(forgetSetup);
+check(fs0.overflow <= 0, `the picker does not scroll sideways (${fs0.overflow}px over)`);
+check(fs0.lastSlotBeyondGrid <= 0, `and the last saved-color slot stays inside it (${fs0.lastSlotBeyondGrid}px past)`);
+
+// Genuine pointer input: this is what makes :hover apply.
+await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: fs0.cellX, y: fs0.cellY, buttons: 0 });
+await new Promise((r) => setTimeout(r, 200));
+
+const forget = await cdp.evaluate(`(() => {
+  const remove = document.querySelector(".illuminus-cp__forget");
+  const box = remove.getBoundingClientRect();
+  const x = Math.round(box.left + box.width / 2);
+  const y = Math.round(box.top + box.height / 2);
+  const top = document.elementFromPoint(x, y);
+  return JSON.stringify({
+    visible: getComputedStyle(remove).display !== "none",
+    size: Math.round(box.width) + "x" + Math.round(box.height),
+    reachable: top === remove || remove.contains(top),
+    topClass: top?.className ?? null, x, y
+  });
+})()`);
+const fg = JSON.parse(forget);
+check(fg.visible, "hovering a saved color reveals its remove button");
+check(fg.size !== "0x0", `which has a real hit area (${fg.size})`);
+check(fg.reachable, `and is the topmost element at its centre (got ${fg.topClass})`);
+
+await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: fg.x, y: fg.y, buttons: 0 });
+await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: fg.x, y: fg.y, button: "left", buttons: 1, clickCount: 1 });
+await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: fg.x, y: fg.y, button: "left", buttons: 0, clickCount: 1 });
+await new Promise((r) => setTimeout(r, 400));
+
+const forgetResult = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const remaining = document.querySelectorAll('.illuminus-cp__swatch[data-hex]').length;
+  // Persisting goes through a world setting, so wait for the write rather than
+  // assuming a fixed delay covers it.
+  let stored = api.getStyle("${fs0.styleId}").swatches ?? [];
+  for (let i = 0; i < 40 && stored.length !== 2; i++) {
+    await new Promise(r => setTimeout(r, 100));
+    stored = api.getStyle("${fs0.styleId}").swatches ?? [];
+  }
+  for (const a of foundry.applications.instances.values()) {
+    if (a.id?.startsWith("illuminus-style-editor")) await a.close();
+  }
+  await api.deleteStyle("${fs0.styleId}");
+  return JSON.stringify({remaining, stored});
+})()`);
+const fr = JSON.parse(forgetResult);
+check(fs0.before === 3, `started with three saved colors (${fs0.before})`);
+check(fr.remaining === 2, `clicking it removes the swatch (${fr.remaining} left)`);
+check(!fr.stored.includes("#112233") && fr.stored.length === 2,
+  `and it is gone from the style (${fr.stored.join(", ")})`);
+
+console.log("\n[28] Saving sets the baseline that Reset returns to");
 const baseline = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Baseline Probe"});
@@ -1207,7 +1291,7 @@ check(bl.savedMarkedClean, "after saving, the changed marker clears");
 check(bl.markedChanged, "editing again marks it changed");
 check(bl.afterReset === "#123456", `Reset returns to the saved value, not the schema default (got ${bl.afterReset})`);
 
-console.log("\n[28] Console is clean");
+console.log("\n[29] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

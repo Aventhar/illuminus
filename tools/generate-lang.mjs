@@ -43,6 +43,7 @@ Object.assign(out, {
   "ILLUMINUS.ColorPicker.Hsl": "Hue, Saturation, Lightness",
   "ILLUMINUS.ColorPicker.Saved": "Saved Colors",
   "ILLUMINUS.ColorPicker.SaveColor": "Save",
+  "ILLUMINUS.ColorPicker.Forget": "Remove this color (or press Delete)",
   // The sample names each element after the setting that controls it, so it
   // reads as a legend rather than as a page of prose.
   "ILLUMINUS.Preview.WindowTitle": "Window Title",

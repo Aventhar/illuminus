@@ -100,6 +100,7 @@
   "ILLUMINUS.Choices.verticalAlign.top": "Top",
   "ILLUMINUS.Choices.wavy": "Wavy line",
   "ILLUMINUS.Color.None": "None",
+  "ILLUMINUS.ColorPicker.Forget": "Remove this color (or press Delete)",
   "ILLUMINUS.ColorPicker.Hex": "Color code",
   "ILLUMINUS.ColorPicker.Hsl": "Hue, Saturation, Lightness",
   "ILLUMINUS.ColorPicker.Open": "Choose a color",

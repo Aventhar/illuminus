@@ -201,22 +201,36 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     const slots = Math.max(SWATCH_SLOTS, Math.ceil(saved.length / 10) * 10);
     for (let i = 0; i < slots; i++) {
       const hex = saved[i];
+      // A slot wraps the two buttons: nesting one button inside another is
+      // invalid, and the remove control needs a hit area of its own.
+      const slot = document.createElement("span");
+      slot.className = "illuminus-cp__slot";
+
       const cell = document.createElement(hex ? "button" : "span");
       cell.className = `illuminus-cp__swatch${hex ? "" : " is-empty"}`;
       if (hex) {
         cell.type = "button";
         cell.dataset.cp = "use";
         cell.dataset.hex = hex;
+        cell.dataset.index = String(i);
         cell.style.setProperty("--illuminus-swatch", hex);
         cell.title = hex;
         cell.setAttribute("aria-label", hex);
-        const remove = document.createElement("i");
-        remove.className = "fa-solid fa-xmark illuminus-cp__swatch-remove";
+      }
+      slot.append(cell);
+
+      if (hex) {
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "illuminus-cp__forget";
         remove.dataset.cp = "forget";
         remove.dataset.index = String(i);
-        cell.append(remove);
+        remove.title = game.i18n.localize("ILLUMINUS.ColorPicker.Forget");
+        remove.setAttribute("aria-label", game.i18n.localize("ILLUMINUS.ColorPicker.Forget"));
+        remove.innerHTML = '<i class="fa-solid fa-xmark" inert></i>';
+        slot.append(remove);
       }
-      swatchBox.append(cell);
+      swatchBox.append(slot);
     }
   };
 
@@ -229,16 +243,19 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
   /* --- Buttons --------------------------------------------------------- */
 
   root.addEventListener("click", async (event) => {
-    const action = event.target.closest("[data-cp]")?.dataset.cp;
+    // Read from the element that carries the action, not from whatever child
+    // was clicked — an icon inside a button has no dataset of its own.
+    const control = event.target.closest("[data-cp]");
+    const action = control?.dataset.cp;
     if (!action) return;
     event.preventDefault();
 
     if (action === "forget") {
       event.stopPropagation();
-      saved.splice(Number(event.target.dataset.index), 1);
+      saved.splice(Number(control.dataset.index), 1);
       persist();
     } else if (action === "use") {
-      const value = hexToRgba(event.target.closest("[data-hex]").dataset.hex);
+      const value = hexToRgba(control.dataset.hex);
       if (!value) return;
       state.r = value.r; state.g = value.g; state.b = value.b; state.a = value.a * 100;
       emit();
@@ -276,6 +293,17 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     root.style.left = `${Math.round(left)}px`;
     root.style.top = `${Math.round(Math.max(8, top))}px`;
   };
+
+  // Delete or Backspace on a focused saved color removes it, so removal does
+  // not depend on landing a small hover target.
+  swatchBox.addEventListener("keydown", (event) => {
+    if (event.key !== "Delete" && event.key !== "Backspace") return;
+    const cell = event.target.closest("[data-cp='use']");
+    if (!cell) return;
+    event.preventDefault();
+    saved.splice(Number(cell.dataset.index), 1);
+    persist();
+  });
 
   root.querySelector(".illuminus-cp__bar").addEventListener("pointerdown", (event) => {
     if (event.target.closest("button")) return;

@@ -51,6 +51,14 @@ breaking on a Linux-hosted server. `validate.mjs` compares references against th
 spelling; when it complains, record the rename with `git mv` through a temporary name,
 since a direct `git mv` is a no-op here.
 
+**`:hover` needs real input.** A synthetic `mouseover` does not make `:hover` match, so a
+control revealed on hover cannot be tested with dispatched events — drive it with CDP
+`Input.dispatchMouseEvent`, which produces genuine hover and clicks.
+
+**`1fr` does not mean "a tenth of the width".** Grid tracks will not shrink below their
+content's minimum, and a button's minimum width pushed a ten-column row past the edge of
+its panel. Use `minmax(0, 1fr)` and give the items `min-width: 0`.
+
 **Click the way a person does.** `element.click()` skips hit testing, so a control that
 CSS has made unclickable still passes. Take the element's centre, ask
 `document.elementFromPoint`, assert it is the control, and click what comes back. A dead
