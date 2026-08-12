@@ -67,7 +67,20 @@ scripts/io.mjs               Export / import as JSON
 scripts/apps/                The GUI (library, editor, assignment dialog)
 styles/illuminus.css         Skeleton rules + GUI styling
 templates/                   Handlebars templates
+tools/                       Validation, string generation, and the test sandbox
 ```
+
+## Checks
+
+```bash
+node tools/validate.mjs        # static cross-checks; no Foundry needed
+tools/sandbox.sh up            # throwaway Foundry + headless Chrome
+node tools/test-in-app.mjs     # drives the real app and asserts computed styles
+tools/sandbox.sh down
+```
+
+The sandbox builds its own data directory so tests never touch a live world. See
+[CLAUDE.md](CLAUDE.md) for the workflow and the Foundry v14 API traps.
 
 ## How it works
 
