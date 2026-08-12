@@ -504,6 +504,22 @@
   color: var(--ill-body-drop-cap-tint);
 }
 
+/* --- Horizontal rules --------------------------------------------------- */
+
+/* Only the top edge is drawn, so thickness means what it says rather than
+   doubling. Horizontal placement comes from the alignment control. */
+.illuminus-styled .journal-page-content hr {
+  border: none;
+  border-top-width: var(--ill-body-divider-width);
+  border-top-style: var(--ill-body-divider-style);
+  border-top-color: var(--ill-body-divider-color);
+  width: var(--ill-body-divider-length);
+  margin-top: var(--ill-body-divider-margin-top);
+  margin-bottom: var(--ill-body-divider-margin-bottom);
+  margin-left: var(--ill-body-divider-align-left);
+  margin-right: var(--ill-body-divider-align-right);
+}
+
 /* --- Links -------------------------------------------------------------- */
 
 .illuminus-styled .journal-page-content a,
@@ -844,6 +860,24 @@
 
 .illuminus-editor .illuminus-tab.active {
   display: flex;
+}
+
+/* The block and picture tabs carry a picker and a rename field rather than a
+   plain hint, since one tab stands in for ten groups. */
+.illuminus-family__head {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.illuminus-family__head select {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 9rem;
+}
+
+.illuminus-family__name {
+  flex: 1;
+  min-width: 6rem;
 }
 
 .illuminus-tab__head {

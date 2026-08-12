@@ -152,6 +152,11 @@ art that may be licensed that way.
 
 ## Generated files — do not hand-edit
 
+- **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.
+  The ten blocks and ten picture treatments are identical rule sets apart from which
+  custom properties they read, and CSS cannot say that once. Property names come from
+  `cssVarFor`, so a renamed field breaks the generator rather than silently breaking a
+  rule. Re-run it after any schema change touching a block or picture field.
 - **`lang/en.json`** is written by `node tools/generate-lang.mjs`. Side, corner, and
   shadow label families are derived from the schema by naming pattern, so a new prefix
   like `entryBorder` needs no edits; anything the generator has no wording for makes it
@@ -160,6 +165,21 @@ art that may be licensed that way.
   through `scripts/migrations.mjs`. If a future schema change renames fields, regenerate
   the presets the same way rather than hand-porting them — it exercises the migration at
   the same time.
+
+## Blocks and picture treatments
+
+Ten of each, keyed `block01`..`block10` and `picture01`..`picture10`. The keys are fixed;
+their displayed names live on the style (`labels`) and are edited per style, so markup
+and exported styles stay portable when someone renames one.
+
+They share a tab each rather than taking twenty: `FAMILIES` in the editor, with a picker
+choosing which member is built. Only the member on show is rendered, which is why the
+editor holds ~670 controls rather than the schema's 1,510.
+
+Text and heading settings mean "use the page setting" by default — a size of 0
+(`zeroAs: "inherit"`), an `inherit` choice, or an empty color, all of which emit either
+the CSS keyword or nothing at all. `validate.mjs` knows a field may legitimately emit
+nothing and checks it still compiles once given a value.
 
 ## Conventions worth keeping
 

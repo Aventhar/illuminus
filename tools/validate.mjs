@@ -5,13 +5,16 @@ import path from "node:path";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
-const { GROUPS, allFields, defaultSettings, cleanSettings, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
+const { GROUPS, allFields, defaultSettings, cleanSettings, groupFields, cssVarFor } = await import(`${ROOT}/scripts/style-schema.mjs`);
 const { compileBaseRule, compileStyle, compileAll, fieldToCss } = await import(`${ROOT}/scripts/style-compiler.mjs`);
 const { PRESETS } = await import(`${ROOT}/scripts/presets.mjs`);
 
-const css = fs.readFileSync(path.join(ROOT, "styles/illuminus.css"), "utf8");
+// Both stylesheets: the hand-written skeleton and the generated block rules.
+const css = ["styles/illuminus.css", "styles/illuminus-generated.css"]
+  .map((f) => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
 const lang = JSON.parse(fs.readFileSync(path.join(ROOT, "lang/en.json"), "utf8"));
-const editorHbs = fs.readFileSync(path.join(ROOT, "templates/style-editor.hbs"), "utf8");
+const editorHbs = ["templates/style-editor.hbs", "templates/style-field.hbs"]
+  .map((f) => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
 
 let failures = 0;
 const fail = (msg) => { console.log(`  ✗ ${msg}`); failures++; };
@@ -20,8 +23,23 @@ const ok = (msg) => console.log(`  ✓ ${msg}`);
 /* 1. Every var emitted by the schema is consumed by the stylesheet, and vice versa. */
 console.log("\n[1] CSS variable wiring");
 const baseRule = compileBaseRule();
-const emitted = new Set([...baseRule.matchAll(/(--ill-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-const consumed = new Set([...css.matchAll(/var\((--ill-[a-z0-9-]+)\)/g)].map((m) => m[1]));
+// Every property the schema can emit, not only those its defaults happen to
+// produce: a field meaning "use the page setting" emits nothing until it is
+// given a value, and the stylesheet still has to name it.
+const emitted = new Set();
+for (const { group, field } of allFields()) {
+  const candidates = [field.default, ...(field.choices ?? []), true, false, 1, ""];
+  let sawSuffix = false;
+  for (const candidate of candidates) {
+    const out = fieldToCss(field, candidate);
+    for (const suffix of Object.keys(out ?? {})) {
+      emitted.add(cssVarFor(group.id, field, suffix));
+      sawSuffix = true;
+    }
+  }
+  if (!sawSuffix) emitted.add(cssVarFor(group.id, field));
+}
+const consumed = new Set([...css.matchAll(/var\((--ill-[a-z0-9-]+)\s*[,)]/g)].map((m) => m[1]));
 
 // A var may legitimately be consumed indirectly, from inside a value emitted
 // for some setting other than the default — the drop-cap tint indirects through
@@ -32,7 +50,7 @@ for (const { field } of allFields()) {
   for (const candidate of candidates) {
     const out = fieldToCss(field, candidate);
     for (const css of Object.values(out ?? {})) {
-      for (const m of String(css).matchAll(/var\((--ill-[a-z0-9-]+)\)/g)) consumed.add(m[1]);
+      for (const m of String(css).matchAll(/var\((--ill-[a-z0-9-]+)\s*[,)]/g)) consumed.add(m[1]);
     }
   }
 }
@@ -51,13 +69,23 @@ else ok(`all ${consumed.size} vars used in CSS are emitted by the schema`);
 if (unused.length) fail(`schema emits vars no CSS rule consumes: ${unused.join(", ")}`);
 else ok(`all ${emitted.size} emitted vars are consumed by CSS`);
 
-/* 2. Every field emits at least one declaration for its default value. */
+/* 2. Every field compiles — or is deliberately optional. */
 console.log("\n[2] Field defaults compile");
+let optional = 0;
 for (const { group, field } of allFields()) {
-  const result = fieldToCss(field, field.default);
-  if (!result || !Object.keys(result).length) fail(`${group.id}.${field.name} emits nothing for its default`);
+  if (Object.keys(fieldToCss(field, field.default) ?? {}).length) continue;
+  // A field whose default emits nothing means "use the page setting". It still
+  // has to produce a declaration once given a real value.
+  const sample = field.type === "color" ? "#123456" : field.choices?.[1] ?? 1;
+  if (Object.keys(fieldToCss(field, sample) ?? {}).length) {
+    optional += 1;
+    continue;
+  }
+  fail(`${group.id}.${field.name} emits nothing, for its default or for ${JSON.stringify(sample)}`);
 }
-if (!failures) ok(`all ${allFields().length} fields compile their default`);
+if (!failures) {
+  ok(`all ${allFields().length} fields compile (${optional} optional, falling back to the page setting)`);
+}
 
 /* 3. Localization coverage. */
 console.log("\n[3] Localization coverage");
@@ -89,7 +117,7 @@ else ok("every group, field, and choice has a label and hint");
 /* 4. Template localize keys all exist. */
 console.log("\n[4] Template string keys");
 const tplKeys = new Set();
-for (const file of ["style-editor.hbs", "style-manager.hbs"]) {
+for (const file of ["style-editor.hbs", "style-field.hbs", "style-manager.hbs"]) {
   const text = fs.readFileSync(path.join(ROOT, "templates", file), "utf8");
   for (const m of text.matchAll(/localize ['"]([A-Z][A-Za-z0-9._]+)['"]/g)) tplKeys.add(m[1]);
 }

@@ -16,11 +16,15 @@ const BASE = `http://127.0.0.1:${PORT}`;
 // this file stale — it can only make it fail for a real reason.
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
-const { GROUPS, allFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
+const { GROUPS, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
+// Blocks and picture treatments share one tab each and only build the member on
+// show, so the editor holds far fewer controls than the schema defines.
+const pageGroups = GROUPS.filter((g) => !g.family);
+const shown = [...pageGroups, GROUPS.find((g) => g.id === "block01"), GROUPS.find((g) => g.id === "picture01")];
 const EXPECT = {
-  tabs: GROUPS.length,
-  sections: GROUPS.reduce((n, g) => n + g.sections.length, 0),
-  fields: allFields().length
+  tabs: pageGroups.length + 2,
+  sections: shown.reduce((n, g) => n + g.sections.length, 0),
+  fields: shown.reduce((n, g) => n + groupFields(g).length, 0)
 };
 
 const cdp = await connect();

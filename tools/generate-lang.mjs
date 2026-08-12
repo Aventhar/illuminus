@@ -35,6 +35,18 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
   "ILLUMINUS.Color.None": "None",
+  "ILLUMINUS.Families.blocks": "Blocks",
+  "ILLUMINUS.Families.pictures": "Picture Styles",
+  "ILLUMINUS.Families.blocksName": "Block name",
+  "ILLUMINUS.Families.picturesName": "Treatment name",
+  "ILLUMINUS.Families.blocksHint": "Containers you wrap around content — read-aloud boxes, sidebars, encounter panels. Pick one to style, and rename it to suit your content.",
+  "ILLUMINUS.Field.blocks.color.label": "Text Color",
+  "ILLUMINUS.Field.blocks.color.hint": "Color of the lettering inside this block. Leave empty to follow the page.",
+  "ILLUMINUS.Field.blocks.size.hint": "How large the lettering is inside this block. 0 follows the page.",
+  "ILLUMINUS.Field.blocks.lineHeight.hint": "Space between lines inside this block. 0 follows the page.",
+  "ILLUMINUS.Field.pictures.captionColor.hint": "Color of this picture's caption. Leave empty to follow the Pictures tab.",
+  "ILLUMINUS.Field.pictures.captionSize.hint": "How large this picture's caption is. 0 follows the Pictures tab.",
+  "ILLUMINUS.Families.picturesHint": "Treatments you apply to a single picture, overriding the page-wide Pictures settings. Pick one to style, and rename it to suit your content.",
   "ILLUMINUS.Buttons.OK": "OK",
   "ILLUMINUS.ColorPicker.Title": "Color",
   "ILLUMINUS.ColorPicker.Open": "Choose a color",
@@ -92,6 +104,18 @@ for (const [id, [label, hint]] of Object.entries(GROUP_TEXT)) {
   put(`ILLUMINUS.Groups.${id}.hint`, hint);
 }
 
+// The ten blocks and ten picture treatments. Their displayed names are stored
+// on the style and editable; these are only the fallbacks.
+for (let i = 1; i <= 10; i++) {
+  const n = String(i).padStart(2, "0");
+  put(`ILLUMINUS.Groups.block${n}.label`, `Block${n}`);
+  put(`ILLUMINUS.Groups.block${n}.hint`,
+    "A container you wrap around content. Anything left as \"use the page setting\" follows the Body and Heading tabs.");
+  put(`ILLUMINUS.Groups.picture${n}.label`, `Picture${n}`);
+  put(`ILLUMINUS.Groups.picture${n}.hint`,
+    "A treatment you apply to one picture, overriding the page-wide Pictures settings.");
+}
+
 /* ---------- Sections ---------- */
 const SECTION_TEXT = {
   surface: ["Surface", "The color and picture behind everything else"],
@@ -116,6 +140,8 @@ const SECTION_TEXT = {
   rows: ["Rows", "The body rows of a table"],
   cellPadding: ["Cell Spacing", "Room between a cell's edges and its contents"],
   caption: ["Caption", "The text beneath a picture"],
+  dividers: ["Dividers", "Horizontal rules between passages"],
+  blockHeadings: ["Headings Inside", "Headings within this block. Leave as the page setting to follow the Heading tabs"],
   entries: ["Page Entries", "Each page listed in the contents panel"],
   entryBorder: ["Entry Borders", "Lines around each listed page. Each edge is set separately"],
   entryStates: ["Current and Hovered", "How the page you are reading, and the one under the mouse, stand out"],
@@ -283,6 +309,30 @@ const FIELD_TEXT = {
   captionAlign: ["Alignment", "Which edge a caption lines up against."],
   captionSpacing: ["Gap Above Caption", "Space between a picture and its caption."],
 
+  dividerWidth: ["Thickness", "How heavy a horizontal rule is. 0 draws nothing."],
+  dividerStyle: ["Style", "What a horizontal rule looks like."],
+  dividerColor: ["Color", "Color of a horizontal rule."],
+  dividerLength: ["Length", "How much of the width a horizontal rule spans."],
+  dividerAlign: ["Alignment", "Which side a shortened rule sits against."],
+  dividerMarginTop: ["Space Above", "Gap between a rule and what comes before it."],
+  dividerMarginBottom: ["Space Below", "Gap between a rule and what comes after it."],
+
+  float: ["Float", "Let text wrap around this, on the left or the right of the page."],
+  width: ["Width", "How much of the available width this takes up."],
+  clear: ["Start Below", "Push this down past anything already floated beside it."],
+  flip: ["Mirror", "Flip the picture, so an illustration can face into the page."],
+  headingFont: ["Typeface", "Lettering for headings inside this block."],
+  headingSize: ["Text Size", "Size of headings inside this block. 0 follows the page."],
+  headingColor: ["Text Color", "Color of headings inside this block. Leave empty to follow the page."],
+  headingWeight: ["Thickness", "How heavy headings inside this block are."],
+  headingCaps: ["Capitals", "Capitalization of headings inside this block."],
+  headingAlign: ["Alignment", "Which edge headings inside this block line up against."],
+  headingMarginTop: ["Space Above", "Gap above a heading inside this block."],
+  headingMarginBottom: ["Space Below", "Gap below a heading inside this block."],
+  headingRuleWidth: ["Rule Thickness", "A line above each heading inside this block. 0 draws nothing."],
+  headingRuleStyle: ["Rule Style", "What the line above a heading looks like."],
+  headingRuleColor: ["Rule Color", "Color of the line above a heading."],
+
   sidebarWidth: ["Panel Width", "How wide the contents panel is."],
   titleBarBackground: ["Fill Color", "Color of the strip across the top of the window."],
   headerButtonColor: ["Icon Color", "Color of the title bar's icon buttons."],
@@ -363,6 +413,9 @@ const CHOICE_TEXT = {
   bottomLeft: "Bottom left", bottom: "Bottom", bottomRight: "Bottom right",
   scroll: "Scrolls with the page", fixed: "Stays still", local: "Scrolls with the text",
   middle: "Middle",
+  inherit: "Use the page setting",
+  full: "Full width", threeQuarters: "Three quarters", half: "Half", third: "One third",
+  horizontal: "Flip left to right", vertical: "Flip top to bottom", both: "Both",
   two: "Two lines tall", three: "Three lines tall", four: "Four lines tall", five: "Five lines tall",
   underline: "Underline", overline: "Line above", lineThrough: "Strike through",
   preWrap: "Keep spacing and line breaks", nowrap: "Never wrap",

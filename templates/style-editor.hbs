@@ -38,53 +38,66 @@
         </div>
 
         {{#each section.fields as |field|}}
-        <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
-          <label for="illuminus-{{field.path}}">
-            <span class="illuminus-field__label">{{field.label}}</span>
-            <span class="illuminus-field__hint">{{field.hint}}</span>
-          </label>
+        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+        {{/each}}
+      </details>
+      {{/each}}
+    </div>
+  </section>
+  {{/each}}
 
-          <div class="illuminus-field__control">
-            {{#if (eq field.type "color")}}
-              <span class="illuminus-swatch-wrap">
-                <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
-                {{!-- Replaces the native swatch, which cannot show alpha and
-                      opens the operating system's picker rather than ours. --}}
-                <button type="button" class="illuminus-swatch" data-action="openColorPicker"
-                        data-path="{{field.path}}"
-                        data-tooltip="{{localize 'ILLUMINUS.ColorPicker.Open'}}"
-                        aria-label="{{localize 'ILLUMINUS.ColorPicker.Open'}}"></button>
-              </span>
-              <span class="illuminus-none-tag">{{localize "ILLUMINUS.Color.None"}}</span>
-              {{!-- Removed at render time when the browser has no EyeDropper API. --}}
-              <button type="button" class="illuminus-eyedropper" data-action="pickColor" data-path="{{field.path}}"
-                      data-tooltip="{{localize 'ILLUMINUS.Buttons.PickColorTooltip'}}"
-                      aria-label="{{localize 'ILLUMINUS.Buttons.PickColor'}}">
-                <i class="fa-solid fa-eye-dropper"></i>
-              </button>
+  {{#each families as |family|}}
+  <section class="tab illuminus-tab {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
 
-            {{else if (eq field.type "image")}}
-              <file-picker id="illuminus-{{field.path}}" name="{{field.path}}" type="image"
-                           value="{{field.value}}" placeholder="{{localize 'ILLUMINUS.Field.texture.placeholder'}}"></file-picker>
+    <header class="illuminus-tab__head illuminus-family__head">
+      <select data-family-picker="{{family.id}}" aria-label="{{family.nameLabel}}">
+        {{#each family.members as |member|}}
+        <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>
+        {{/each}}
+      </select>
+      <input type="text" class="illuminus-family__name" data-rename="{{family.current.id}}"
+             value="{{family.current.label}}" placeholder="{{family.nameLabel}}"
+             aria-label="{{family.nameLabel}}">
+      <button type="button" class="illuminus-reset" data-action="renameMember" data-group="{{family.current.id}}">
+        <i class="fa-solid fa-check"></i>
+        {{localize "ILLUMINUS.Buttons.Rename"}}
+      </button>
+      <button type="button" class="illuminus-reset" data-action="resetGroup" data-group="{{family.current.id}}"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
+    </header>
 
-            {{else if (eq field.type "number")}}
-              <range-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"
-                            min="{{field.min}}" max="{{field.max}}" step="{{field.step}}"></range-picker>
-              {{#if field.unit}}<span class="illuminus-unit">{{field.unit}}</span>{{/if}}
+    <p class="hint">{{family.hint}}</p>
 
-            {{else if (eq field.type "toggle")}}
-              <input type="checkbox" id="illuminus-{{field.path}}" name="{{field.path}}"
-                     data-dtype="Boolean" {{checked field.checked}}>
+    <div class="illuminus-fields scrollable">
+      {{#each family.current.sections as |section|}}
+      <details class="illuminus-section" {{#if section.open}}open{{/if}}>
+        <summary data-action="toggleSection" data-group="{{family.current.id}}" data-section="{{section.id}}">
+          <span class="illuminus-section__label">{{section.label}}</span>
+          <span class="illuminus-section__hint">{{section.hint}}</span>
+        </summary>
 
-            {{else}}
-              <select id="illuminus-{{field.path}}" name="{{field.path}}">
-                {{#each field.choices as |choice|}}
-                <option value="{{choice.value}}" {{#if choice.selected}}selected{{/if}}>{{choice.label}}</option>
-                {{/each}}
-              </select>
-            {{/if}}
-          </div>
+        <div class="illuminus-section__tools">
+          {{#if section.matchable}}
+          <button type="button" class="illuminus-reset" data-action="matchSides"
+                  data-group="{{family.current.id}}" data-section="{{section.id}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.MatchSidesTooltip'}}">
+            <i class="fa-solid fa-link"></i>
+            {{localize "ILLUMINUS.Buttons.MatchSides"}}
+          </button>
+          {{/if}}
+          <button type="button" class="illuminus-reset" data-action="resetSection"
+                  data-group="{{family.current.id}}" data-section="{{section.id}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetSectionTooltip'}}">
+            <i class="fa-solid fa-rotate-left"></i>
+            {{localize "ILLUMINUS.Buttons.ResetSection"}}
+          </button>
         </div>
+
+        {{#each section.fields as |field|}}
+        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
         {{/each}}
       </details>
       {{/each}}
@@ -154,6 +167,7 @@
               <section class="journal-page-content">
                 <p>{{localize "ILLUMINUS.Preview.Body"}}
                   <a class="content-link">{{localize "ILLUMINUS.Preview.Link"}}</a>.</p>
+                <hr>
                 <h2>{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
                 <blockquote><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
                 <h3>{{localize "ILLUMINUS.Preview.Heading3"}}</h3>

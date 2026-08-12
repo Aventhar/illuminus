@@ -60,6 +60,10 @@ const CHOICES = {
   texturePosition: ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"],
   textureAttachment: ["scroll", "fixed", "local"],
   dropCap: ["none", "two", "three", "four", "five"],
+  blockFloat: ["none", "left", "right"],
+  blockWidth: ["full", "threeQuarters", "half", "third"],
+  blockClear: ["none", "left", "right", "both"],
+  flip: ["none", "horizontal", "vertical", "both"],
   verticalAlign: ["top", "middle", "bottom"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
@@ -71,6 +75,7 @@ const CHOICES = {
 
 /** Capitalization needs both text-transform and font-variant. */
 const emitCaps = (value) => ({
+  inherit: { transform: "inherit", variant: "inherit" },
   none: { transform: "none", variant: "normal" },
   uppercase: { transform: "uppercase", variant: "normal" },
   lowercase: { transform: "lowercase", variant: "normal" },
@@ -113,6 +118,23 @@ const emitDropCap = (value) => {
     tint: "var(--ill-body-drop-cap-color)"
   };
 };
+
+/** Block width as a percentage, so floats sit side by side predictably. */
+const emitBlockWidth = (value) => ({
+  full: "100%", threeQuarters: "75%", half: "50%", third: "33%"
+}[value] ?? "100%");
+
+/** Alignment for a picture that is not floated, applied as auto margins. */
+const emitPictureAlign = (value) => ({
+  left: { left: "0", right: "auto" },
+  center: { left: "auto", right: "auto" },
+  right: { left: "auto", right: "0" }
+}[value] ?? { left: "auto", right: "auto" });
+
+/** Mirroring, which Paizo uses to face an illustration into the page. */
+const emitFlip = (value) => ({
+  none: "none", horizontal: "scaleX(-1)", vertical: "scaleY(-1)", both: "scale(-1, -1)"
+}[value] ?? "none");
 
 /** Bullet glyphs, including decorative options that need quoted strings. */
 const emitBullet = (value) => ({
@@ -200,6 +222,112 @@ function textFields(prefix, defaults = {}) {
     num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
     num(n("LineHeight"), d("lineHeight", 1.4), "", 0.5, 4, 0.05),
     select(n("Align"), d("align", "left"), d("choices", CHOICES.alignNoJustify))
+  ];
+}
+
+/**
+ * One insertable block: a container an author wraps around content.
+ *
+ * Ten of these exist, named Block01..Block10 and renameable per style. Text and
+ * heading settings default to "use the page setting" — an empty color, a size
+ * of 0, or an `inherit` choice emits nothing, so the stylesheet's fallback to
+ * the page value applies. That keeps a new block from fighting the typography
+ * already set up, which matters when ten of them are on offer.
+ */
+function blockSections() {
+  const inheritWeight = ["inherit", ...CHOICES.weight];
+  const inheritStyle = ["inherit", ...CHOICES.fontStyle];
+  const inheritCaps = ["inherit", ...CHOICES.caps];
+  const inheritAlign = ["inherit", ...CHOICES.align];
+  return [
+    {
+      id: "layout",
+      fields: [
+        select("float", "none", CHOICES.blockFloat),
+        select("width", "full", CHOICES.blockWidth, { emit: emitBlockWidth }),
+        select("clear", "none", CHOICES.blockClear)
+      ]
+    },
+    {
+      id: "text",
+      fields: [
+        font("font", ""),
+        num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
+        col("color", ""),
+        select("weight", "inherit", inheritWeight),
+        select("style", "inherit", inheritStyle),
+        select("caps", "inherit", inheritCaps, { emit: emitCaps }),
+        num("letterSpacing", 0, "px", -5, 40, 0.5),
+        num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+        select("align", "inherit", inheritAlign)
+      ]
+    },
+    {
+      id: "blockHeadings",
+      fields: [
+        font("headingFont", ""),
+        num("headingSize", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
+        col("headingColor", ""),
+        select("headingWeight", "inherit", inheritWeight),
+        select("headingCaps", "inherit", inheritCaps, { emit: emitCaps }),
+        select("headingAlign", "inherit", inheritAlign),
+        num("headingMarginTop", 0, "px", -100, 100, 1),
+        num("headingMarginBottom", 0, "px", -100, 100, 1),
+        num("headingRuleWidth", 0, "px", 0, 20, 1),
+        select("headingRuleStyle", "solid", CHOICES.lineStyle),
+        col("headingRuleColor", "#8a6a3d")
+      ]
+    },
+    { id: "background", fields: [col("background", "#00000000")] },
+    { id: "padding", fields: spacingFields("padding", 10) },
+    { id: "margin", fields: spacingFields("margin", { top: 12, right: 0, bottom: 12, left: 0 }, { min: -100 }) },
+    { id: "border", fields: borderFields("border", { color: "#8a6a3d" }) },
+    { id: "corners", fields: cornerFields("corner") },
+    { id: "shadow", fields: shadowFields("shadow") }
+  ];
+}
+
+/**
+ * One picture treatment: applied to a single image to diverge from the
+ * page-wide Pictures settings. Ten of these exist, renameable per style.
+ */
+function pictureSections() {
+  return [
+    {
+      id: "layout",
+      fields: [
+        select("float", "none", CHOICES.blockFloat),
+        select("width", "full", CHOICES.blockWidth, { emit: emitBlockWidth }),
+        select("align", "center", CHOICES.alignNoJustify, { emit: emitPictureAlign }),
+        select("clear", "none", CHOICES.blockClear),
+        select("flip", "none", CHOICES.flip, { emit: emitFlip }),
+        num("opacity", 100, "%", 0, 100, 1)
+      ]
+    },
+    { id: "background", fields: [col("background", "#00000000")] },
+    { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
+    {
+      id: "margin",
+      fields: [
+        num("marginTop", 8, "px", -100, 200, 1),
+        num("marginBottom", 8, "px", -100, 200, 1)
+      ]
+    },
+    { id: "border", fields: borderFields("border") },
+    { id: "corners", fields: cornerFields("corner") },
+    { id: "shadow", fields: shadowFields("shadow") },
+    {
+      id: "caption",
+      fields: [
+        font("captionFont", ""),
+        num("captionSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
+        col("captionColor", ""),
+        select("captionWeight", "inherit", ["inherit", ...CHOICES.weight]),
+        select("captionStyle", "inherit", ["inherit", ...CHOICES.fontStyle]),
+        select("captionAlign", "inherit", ["inherit", ...CHOICES.align]),
+        num("captionSpacing", 4, "px", 0, 60, 1)
+      ]
+    }
   ];
 }
 
@@ -462,6 +590,18 @@ export const GROUPS = [
           select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
           col("dropCapColor", "#7a2010")
         ]
+      },
+      {
+        id: "dividers",
+        fields: [
+          num("dividerWidth", 1, "px", 0, 40, 1),
+          select("dividerStyle", "solid", CHOICES.borderStyle),
+          col("dividerColor", "#8a6a3d"),
+          num("dividerLength", 100, "%", 5, 100, 1),
+          select("dividerAlign", "center", CHOICES.alignNoJustify, { emit: emitPictureAlign }),
+          num("dividerMarginTop", 12, "px", -100, 200, 1),
+          num("dividerMarginBottom", 12, "px", -100, 200, 1)
+        ]
       }
     ]
   },
@@ -580,6 +720,20 @@ export const GROUPS = [
       { id: "shadow", fields: shadowFields("shadow") }
     ]
   },
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `block${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-square-dashed",
+    family: "blocks",
+    sections: blockSections()
+  })),
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `picture${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-image",
+    family: "pictures",
+    sections: pictureSections()
+  })),
 
   {
     id: "images",

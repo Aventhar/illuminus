@@ -1,0 +1,48 @@
+{{!-- One control. Shared by the page tabs and the block and picture tabs. --}}
+      <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
+        <label for="illuminus-{{field.path}}">
+          <span class="illuminus-field__label">{{field.label}}</span>
+          <span class="illuminus-field__hint">{{field.hint}}</span>
+        </label>
+
+        <div class="illuminus-field__control">
+          {{#if (eq field.type "color")}}
+            <span class="illuminus-swatch-wrap">
+              <color-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"></color-picker>
+              {{!-- Replaces the native swatch, which cannot show alpha and
+                    opens the operating system's picker rather than ours. --}}
+              <button type="button" class="illuminus-swatch" data-action="openColorPicker"
+                      data-path="{{field.path}}"
+                      data-tooltip="{{localize 'ILLUMINUS.ColorPicker.Open'}}"
+                      aria-label="{{localize 'ILLUMINUS.ColorPicker.Open'}}"></button>
+            </span>
+            <span class="illuminus-none-tag">{{localize "ILLUMINUS.Color.None"}}</span>
+            {{!-- Removed at render time when the browser has no EyeDropper API. --}}
+            <button type="button" class="illuminus-eyedropper" data-action="pickColor" data-path="{{field.path}}"
+                    data-tooltip="{{localize 'ILLUMINUS.Buttons.PickColorTooltip'}}"
+                    aria-label="{{localize 'ILLUMINUS.Buttons.PickColor'}}">
+              <i class="fa-solid fa-eye-dropper"></i>
+            </button>
+
+          {{else if (eq field.type "image")}}
+            <file-picker id="illuminus-{{field.path}}" name="{{field.path}}" type="image"
+                         value="{{field.value}}" placeholder="{{localize 'ILLUMINUS.Field.texture.placeholder'}}"></file-picker>
+
+          {{else if (eq field.type "number")}}
+            <range-picker id="illuminus-{{field.path}}" name="{{field.path}}" value="{{field.value}}"
+                          min="{{field.min}}" max="{{field.max}}" step="{{field.step}}"></range-picker>
+            {{#if field.unit}}<span class="illuminus-unit">{{field.unit}}</span>{{/if}}
+
+          {{else if (eq field.type "toggle")}}
+            <input type="checkbox" id="illuminus-{{field.path}}" name="{{field.path}}"
+                   data-dtype="Boolean" {{checked field.checked}}>
+
+          {{else}}
+            <select id="illuminus-{{field.path}}" name="{{field.path}}">
+              {{#each field.choices as |choice|}}
+              <option value="{{choice.value}}" {{#if choice.selected}}selected{{/if}}>{{choice.label}}</option>
+              {{/each}}
+            </select>
+          {{/if}}
+        </div>
+      </div>

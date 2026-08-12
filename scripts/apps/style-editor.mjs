@@ -50,6 +50,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Sections the user has collapsed, so a re-render does not reopen them. */
   #collapsed = new Set();
 
+  /**
+   * Which member of each family is on show. Ten blocks and ten picture
+   * treatments would be twenty more tabs; instead each family gets one tab with
+   * a picker, and only the chosen member's controls are built.
+   */
+  #showing = { blocks: "block01", pictures: "picture01" };
+
   static DEFAULT_OPTIONS = {
     id: "illuminus-style-editor-{id}",
     classes: ["illuminus", "illuminus-editor"],
@@ -74,6 +81,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       revert: IlluminusStyleEditor.#onRevert,
       toggleSection: IlluminusStyleEditor.#onToggleSection,
       pickColor: IlluminusStyleEditor.#onPickColor,
+      renameMember: IlluminusStyleEditor.#onRenameMember,
       openColorPicker: IlluminusStyleEditor.#onOpenColorPicker
     }
   };
@@ -82,20 +90,43 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     tabs: { template: "templates/generic/tab-navigation.hbs" },
     body: {
       template: `modules/${MODULE_ID}/templates/style-editor.hbs`,
+      // Registered as a partial so the page tabs and the block and picture tabs
+      // render their controls from one copy.
+      templates: [`modules/${MODULE_ID}/templates/style-field.hbs`],
       classes: ["illuminus-editor__body"],
       scrollable: [".illuminus-fields"]
     },
     footer: { template: "templates/generic/form-footer.hbs" }
   };
 
+  /** Families, each shown as a single tab with a picker. */
+  static FAMILIES = [
+    { id: "blocks", icon: "fa-solid fa-square-dashed", label: "ILLUMINUS.Families.blocks" },
+    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" }
+  ];
+
+  /** Groups that get a tab of their own, in strip order. */
+  static get pageGroups() {
+    return GROUPS.filter((group) => !group.family);
+  }
+
   static TABS = {
     sheet: {
-      tabs: GROUPS.map((group) => ({ id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` })),
+      tabs: [
+        ...IlluminusStyleEditor.pageGroups.map((group) =>
+          ({ id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` })),
+        ...IlluminusStyleEditor.FAMILIES.map((f) => ({ id: f.id, icon: f.icon, label: f.label }))
+      ],
       // Named rather than taken from the first tab, so the strip can be
       // reordered without changing where the editor opens.
       initial: "page"
     }
   };
+
+  /** The display name a style gives a block or picture treatment. */
+  #labelFor(groupId) {
+    return this.style?.labels?.[groupId] || game.i18n.localize(`ILLUMINUS.Groups.${groupId}.label`);
+  }
 
   /** The stored style record. */
   get style() {
@@ -151,7 +182,20 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     context.style = this.style;
     context.styledClass = STYLED_CLASS;
     context.styleAttr = STYLE_ATTR;
-    context.groups = GROUPS.map((group) => ({
+    context.families = IlluminusStyleEditor.FAMILIES.map((family) => {
+      const members = GROUPS.filter((group) => group.family === family.id);
+      const current = members.find((m) => m.id === this.#showing[family.id]) ?? members[0];
+      return {
+        id: family.id,
+        active: this.tabGroups.sheet === family.id,
+        hint: game.i18n.localize(`ILLUMINUS.Families.${family.id}Hint`),
+        nameLabel: game.i18n.localize(`ILLUMINUS.Families.${family.id}Name`),
+        members: members.map((m) => ({ id: m.id, label: this.#labelFor(m.id), selected: m.id === current.id })),
+        current: { ...this.#groupContext(current, fonts), label: this.#labelFor(current.id) }
+      };
+    });
+
+    context.groups = IlluminusStyleEditor.pageGroups.map((group) => ({
       id: group.id,
       label: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.label`),
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
@@ -175,10 +219,38 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return context;
   }
 
+  /** Sections and controls for one group, shared by page tabs and family tabs. */
+  #groupContext(group, fonts) {
+    return {
+      id: group.id,
+      hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
+      sections: group.sections.map((section) => ({
+        id: section.id,
+        label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
+        hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
+        open: !this.#collapsed.has(`${group.id}.${section.id}`),
+        matchable: section.fields.some((field) => field.link),
+        fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
+      }))
+    };
+  }
+
   /** How many controls in a group differ from their default, for the tab badge. */
   #changedCount(group) {
     return groupFields(group)
       .filter((field) => this.#working?.[group.id]?.[field.name] !== this.#baselineFor(group.id, field)).length;
+  }
+
+  /**
+   * Wording for a control. Labels are shared by field name, but a field can
+   * mean something different in a family — an empty color on the page is "no
+   * color", while in a block it is "follow the page" — so a family-specific key
+   * wins when one exists.
+   */
+  #fieldText(group, field, part) {
+    const specific = `ILLUMINUS.Field.${group.family ?? group.id}.${field.name}.${part}`;
+    if (game.i18n.has(specific)) return game.i18n.localize(specific);
+    return game.i18n.localize(`ILLUMINUS.Field.${field.name}.${part}`);
   }
 
   /** Build the template data for one control. */
@@ -187,8 +259,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const context = {
       path: `${group.id}.${field.name}`,
       type: field.type,
-      label: game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
-      hint: game.i18n.localize(`ILLUMINUS.Field.${field.name}.hint`),
+      label: this.#fieldText(group, field, "label"),
+      hint: this.#fieldText(group, field, "hint"),
       value,
       isDefault: value === this.#baselineFor(group.id, field)
     };
@@ -217,6 +289,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const onChange = this.#onFieldChange.bind(this);
     this.element.addEventListener("change", onChange);
     this.element.addEventListener("input", onChange);
+
+    for (const picker of this.element.querySelectorAll("[data-family-picker]")) {
+      picker.addEventListener("change", () => {
+        this.#showing[picker.dataset.familyPicker] = picker.value;
+        this.render();
+      });
+    }
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
       const [groupId, fieldName] = row.dataset.field.split(".");
@@ -576,6 +655,18 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const pair = (n) => Math.round(n).toString(16).padStart(2, "0");
     const rgb = `#${pair(r)}${pair(g)}${pair(b)}`;
     return a >= 1 ? rgb : `${rgb}${pair(a * 255)}`;
+  }
+
+  /** Rename the block or picture treatment on show, for this style only. */
+  static async #onRenameMember(_event, target) {
+    const groupId = target.dataset.group;
+    const input = this.element.querySelector(`[data-rename="${groupId}"]`);
+    const labels = { ...(this.style?.labels ?? {}) };
+    const name = String(input?.value ?? "").trim();
+    if (name) labels[groupId] = name;
+    else delete labels[groupId];
+    await updateStyle(this.#styleId, { labels });
+    this.render();
   }
 
   /** Collapse or expand a section, remembering the choice across re-renders. */

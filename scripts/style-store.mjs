@@ -27,8 +27,20 @@ function cleanSwatches(swatches) {
   return [...seen];
 }
 
+/** Display names a style gives its blocks and picture treatments. */
+function cleanLabels(labels) {
+  if (!labels || typeof labels !== "object") return {};
+  const clean = {};
+  for (const [key, value] of Object.entries(labels)) {
+    if (!/^(block|picture)\d{2}$/.test(key)) continue;
+    const text = String(value).trim().slice(0, 40);
+    if (text) clean[key] = text;
+  }
+  return clean;
+}
+
 /** Shape of a stored style record. */
-function makeRecord({ id, name, description = "", settings = {}, swatches = [], preset = false }) {
+function makeRecord({ id, name, description = "", settings = {}, swatches = [], labels = {}, preset = false }) {
   return {
     id,
     name,
@@ -38,6 +50,9 @@ function makeRecord({ id, name, description = "", settings = {}, swatches = [], 
     // A style's own palette. Not part of `settings`, since it changes nothing
     // about how a journal looks — it is a convenience for whoever edits it.
     swatches: cleanSwatches(swatches),
+    // Blocks and picture treatments are named per style: the keys stay stable so
+    // markup and exported styles stay portable, only the wording travels.
+    labels: cleanLabels(labels),
     settings: cleanSettings(settings)
   };
 }
@@ -101,6 +116,7 @@ export async function createStyle(data = {}) {
     name: data.name || game.i18n.localize("ILLUMINUS.Style.NewName"),
     description: data.description ?? "",
     swatches: data.swatches ?? [],
+    labels: data.labels ?? {},
     settings: data.settings ?? defaultSettings()
   });
   styles[record.id] = record;
@@ -125,6 +141,7 @@ export async function updateStyle(id, changes = {}) {
     id,
     preset: existing.preset,
     swatches: changes.swatches ?? existing.swatches,
+    labels: changes.labels ?? existing.labels,
     settings: changes.settings ?? existing.settings
   });
   await writeStyles(styles);
@@ -160,6 +177,7 @@ export async function duplicateStyle(id) {
     name: game.i18n.format("ILLUMINUS.Style.CopyName", { name: source.name }),
     description: source.description,
     swatches: [...(source.swatches ?? [])],
+    labels: { ...(source.labels ?? {}) },
     settings: foundry.utils.deepClone(source.settings)
   });
 }
@@ -179,6 +197,7 @@ export async function importStyles(records) {
       name: incoming.name || game.i18n.localize("ILLUMINUS.Style.NewName"),
       description: incoming.description ?? "",
       swatches: incoming.swatches ?? [],
+      labels: incoming.labels ?? {},
       settings: incoming.settings ?? {}
     });
     styles[record.id] = record;
