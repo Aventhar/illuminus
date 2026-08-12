@@ -1,65 +1,565 @@
-/* Illuminus — all selectors are namespaced under .illuminus so nothing leaks
-   into core Foundry or other modules' UI. */
+/* ==========================================================================
+   Illuminus
 
-.illuminus-panel__body {
+   Two halves:
+
+   1. The journal skeleton — static rules that read the CSS custom properties
+      compiled from a style. These only ever apply inside an element carrying
+      `.illuminus-styled`, which the module adds to a journal sheet when a style
+      is assigned to that journal. Nothing here leaks into unstyled journals or
+      any other part of Foundry.
+
+   2. The module's own GUI (style manager and style editor), namespaced under
+      `.illuminus`.
+
+   Every var() below is guaranteed to resolve: the compiler emits a base rule
+   on `.illuminus-styled` carrying every schema default before any per-style
+   rule.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Journal skeleton
+   ========================================================================== */
+
+/* --- Page surface ------------------------------------------------------- */
+
+.illuminus-styled .journal-entry-content,
+.illuminus-styled.journal-entry-page {
+  background-color: var(--ill-page-background);
+  background-image: var(--ill-page-texture);
+  background-size: var(--ill-page-texture-fit-size);
+  background-repeat: var(--ill-page-texture-fit-repeat);
+  background-blend-mode: var(--ill-page-texture-blend);
+  border-style: var(--ill-page-border-style);
+  border-color: var(--ill-page-border-color);
+  border-width: var(--ill-page-border-width);
+  border-radius: var(--ill-page-radius);
+  box-shadow: var(--ill-page-inner-shadow);
+}
+
+.illuminus-styled .journal-entry-pages {
+  padding: var(--ill-page-padding);
+}
+
+/* Constrain measure without moving the page background. */
+.illuminus-styled .journal-entry-page > div {
+  max-width: var(--ill-page-max-width);
+  margin-inline: auto;
+}
+
+/* --- Journal title ------------------------------------------------------ */
+
+.illuminus-styled .journal-header .title {
+  height: auto;
+  line-height: 1.2;
+  background: none;
+  border: none;
+  box-shadow: none;
+  font-family: var(--ill-title-font);
+  font-size: var(--ill-title-size);
+  font-weight: var(--ill-title-weight);
+  font-style: var(--ill-title-style);
+  font-variant: var(--ill-title-caps-variant);
+  text-transform: var(--ill-title-caps-transform);
+  letter-spacing: var(--ill-title-letter-spacing);
+  text-align: var(--ill-title-align);
+  color: var(--ill-title-color);
+  text-shadow: var(--ill-title-shadow);
+}
+
+/* --- Headings ----------------------------------------------------------- */
+
+/* Level 1 also covers the page-title header the journal sheet renders. */
+.illuminus-styled .journal-page-header h1,
+.illuminus-styled .journal-page-header h2,
+.illuminus-styled .journal-page-header h3,
+.illuminus-styled .journal-page-content h1 {
+  font-family: var(--ill-heading1-font);
+  font-size: var(--ill-heading1-size);
+  font-weight: var(--ill-heading1-weight);
+  font-style: var(--ill-heading1-style);
+  font-variant: var(--ill-heading1-caps-variant);
+  text-transform: var(--ill-heading1-caps-transform);
+  letter-spacing: var(--ill-heading1-letter-spacing);
+  text-align: var(--ill-heading1-align);
+  color: var(--ill-heading1-color);
+  background-color: var(--ill-heading1-background);
+  margin: var(--ill-heading1-space-above) 0 var(--ill-heading1-space-below);
+  padding: var(--ill-heading1-padding-y) var(--ill-heading1-padding-x);
+  border-radius: var(--ill-heading1-radius);
+  border-bottom-style: var(--ill-heading1-rule-style);
+  border-bottom-color: var(--ill-heading1-rule-color);
+  border-bottom-width: var(--ill-heading1-rule-width);
+}
+
+.illuminus-styled .journal-page-content h2 {
+  font-family: var(--ill-heading2-font);
+  font-size: var(--ill-heading2-size);
+  font-weight: var(--ill-heading2-weight);
+  font-style: var(--ill-heading2-style);
+  font-variant: var(--ill-heading2-caps-variant);
+  text-transform: var(--ill-heading2-caps-transform);
+  letter-spacing: var(--ill-heading2-letter-spacing);
+  text-align: var(--ill-heading2-align);
+  color: var(--ill-heading2-color);
+  background-color: var(--ill-heading2-background);
+  margin: var(--ill-heading2-space-above) 0 var(--ill-heading2-space-below);
+  padding: var(--ill-heading2-padding-y) var(--ill-heading2-padding-x);
+  border-radius: var(--ill-heading2-radius);
+  border-bottom-style: var(--ill-heading2-rule-style);
+  border-bottom-color: var(--ill-heading2-rule-color);
+  border-bottom-width: var(--ill-heading2-rule-width);
+}
+
+/* Levels 4 to 6 follow level 3 rather than going unstyled. */
+.illuminus-styled .journal-page-content h3,
+.illuminus-styled .journal-page-content h4,
+.illuminus-styled .journal-page-content h5,
+.illuminus-styled .journal-page-content h6 {
+  font-family: var(--ill-heading3-font);
+  font-size: var(--ill-heading3-size);
+  font-weight: var(--ill-heading3-weight);
+  font-style: var(--ill-heading3-style);
+  font-variant: var(--ill-heading3-caps-variant);
+  text-transform: var(--ill-heading3-caps-transform);
+  letter-spacing: var(--ill-heading3-letter-spacing);
+  text-align: var(--ill-heading3-align);
+  color: var(--ill-heading3-color);
+  background-color: var(--ill-heading3-background);
+  margin: var(--ill-heading3-space-above) 0 var(--ill-heading3-space-below);
+  padding: var(--ill-heading3-padding-y) var(--ill-heading3-padding-x);
+  border-radius: var(--ill-heading3-radius);
+  border-bottom-style: var(--ill-heading3-rule-style);
+  border-bottom-color: var(--ill-heading3-rule-color);
+  border-bottom-width: var(--ill-heading3-rule-width);
+}
+
+/* --- Body text ---------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content {
+  font-family: var(--ill-body-font);
+  font-size: var(--ill-body-size);
+  line-height: var(--ill-body-line-height);
+  color: var(--ill-body-color);
+  text-align: var(--ill-body-align);
+}
+
+.illuminus-styled .journal-page-content p {
+  margin: 0 0 var(--ill-body-paragraph-spacing);
+  text-indent: var(--ill-body-first-line-indent);
+}
+
+/* The first paragraph is never indented — the drop cap sits there instead. */
+.illuminus-styled .journal-page-content > p:first-child {
+  text-indent: 0;
+}
+
+.illuminus-styled .journal-page-content > p:first-child::first-letter {
+  float: var(--ill-body-drop-cap-float);
+  font-size: var(--ill-body-drop-cap-size);
+  line-height: var(--ill-body-drop-cap-line-height);
+  font-weight: var(--ill-body-drop-cap-weight);
+  padding-right: var(--ill-body-drop-cap-gap);
+  /* Resolves to the chosen colour only while a drop cap is switched on, so the
+     first letter is not tinted when there is no drop cap. */
+  color: var(--ill-body-drop-cap-tint);
+}
+
+/* --- Links -------------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content a,
+.illuminus-styled .journal-page-content a.content-link,
+.illuminus-styled .journal-page-content a.inline-roll {
+  color: var(--ill-links-color);
+  font-weight: var(--ill-links-weight);
+  text-decoration-line: var(--ill-links-underline);
+  background: var(--ill-links-chip-background);
+  border: 1px solid var(--ill-links-chip-border-color);
+  border-radius: var(--ill-links-chip-radius);
+}
+
+.illuminus-styled .journal-page-content a:hover,
+.illuminus-styled .journal-page-content a.content-link:hover,
+.illuminus-styled .journal-page-content a.inline-roll:hover {
+  color: var(--ill-links-hover-color);
+  text-shadow: none;
+}
+
+/* --- Lists -------------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content ul,
+.illuminus-styled .journal-page-content ol {
+  padding-inline-start: var(--ill-lists-indent);
+  margin: 0 0 var(--ill-body-paragraph-spacing);
+}
+
+.illuminus-styled .journal-page-content ul {
+  list-style-type: var(--ill-lists-bullet);
+}
+
+.illuminus-styled .journal-page-content li {
+  margin-bottom: var(--ill-lists-item-spacing);
+}
+
+.illuminus-styled .journal-page-content li::marker {
+  color: var(--ill-lists-marker-color);
+}
+
+/* --- Tables ------------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  margin: 0 0 var(--ill-body-paragraph-spacing);
+  color: var(--ill-tables-text-color);
+  border: var(--ill-tables-border-width) solid var(--ill-tables-border-color);
+  border-radius: var(--ill-tables-radius);
+}
+
+.illuminus-styled .journal-page-content th {
+  font-family: var(--ill-tables-header-font);
+  background-color: var(--ill-tables-header-background);
+  color: var(--ill-tables-header-color);
+  text-align: left;
+}
+
+.illuminus-styled .journal-page-content th,
+.illuminus-styled .journal-page-content td {
+  padding: var(--ill-tables-cell-padding-y) var(--ill-tables-cell-padding-x);
+  border: var(--ill-tables-border-width) solid var(--ill-tables-border-color);
+}
+
+.illuminus-styled .journal-page-content tbody tr:nth-child(even) {
+  background-color: var(--ill-tables-stripe-color);
+}
+
+/* --- Boxed / read-aloud text -------------------------------------------- */
+
+.illuminus-styled .journal-page-content blockquote,
+.illuminus-styled .journal-page-content .illuminus-box {
+  margin: var(--ill-boxes-spacing) 0;
+  padding: var(--ill-boxes-padding);
+  background-color: var(--ill-boxes-background);
+  color: var(--ill-boxes-text-color);
+  font-family: var(--ill-boxes-font);
+  font-style: var(--ill-boxes-style);
+  border-radius: var(--ill-boxes-radius);
+  border-style: solid;
+  border-color: var(--ill-boxes-border-color);
+  /* The edge control emits 0/1 per side, multiplied by the chosen width. */
+  border-top-width: calc(var(--ill-boxes-edge-top) * var(--ill-boxes-border-width));
+  border-right-width: calc(var(--ill-boxes-edge-right) * var(--ill-boxes-border-width));
+  border-bottom-width: calc(var(--ill-boxes-edge-bottom) * var(--ill-boxes-border-width));
+  border-left-width: calc(var(--ill-boxes-edge-left) * var(--ill-boxes-border-width));
+}
+
+.illuminus-styled .journal-page-content blockquote > :last-child,
+.illuminus-styled .journal-page-content .illuminus-box > :last-child {
+  margin-bottom: 0;
+}
+
+/* --- Images ------------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content img {
+  border-style: var(--ill-images-border-style);
+  border-color: var(--ill-images-border-color);
+  border-width: var(--ill-images-border-width);
+  border-radius: var(--ill-images-radius);
+  box-shadow: var(--ill-images-shadow);
+}
+
+.illuminus-styled .journal-page-content figcaption {
+  color: var(--ill-images-caption-color);
+  font-size: var(--ill-images-caption-size);
+  font-style: var(--ill-images-caption-style);
+  text-align: var(--ill-images-caption-align);
+}
+
+/* ==========================================================================
+   2. Module GUI
+   ========================================================================== */
+
+.illuminus .hint {
+  font-size: var(--font-size-13, 13px);
+  opacity: 0.75;
+  margin: 0;
+}
+
+.illuminus .illuminus-danger {
+  --button-text-color: var(--color-level-error, #b0413e);
+}
+
+/* --- Style manager ------------------------------------------------------ */
+
+.illuminus-manager__body {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  height: 100%;
   padding: 0.5rem;
 }
 
-.illuminus-panel__intro {
-  margin: 0;
-  font-size: var(--font-size-13, 13px);
-  opacity: 0.85;
+.illuminus-manager__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.illuminus-panel__facts {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.35rem 0.75rem;
-  margin: 0;
+.illuminus-manager__toolbar button {
+  flex: 1 1 auto;
+  width: auto;
 }
 
-.illuminus-panel__facts dt {
+.illuminus-select-all {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--font-size-12, 12px);
+  opacity: 0.8;
+}
+
+.illuminus-style-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.illuminus-style-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 20%));
+  border-radius: 4px;
+}
+
+.illuminus-style-row:hover {
+  border-color: var(--color-border-highlight, #ff6400);
+}
+
+.illuminus-style-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-style-row__name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: bold;
-  opacity: 0.75;
 }
 
-.illuminus-panel__facts dd {
-  margin: 0;
+.illuminus-style-row__description,
+.illuminus-style-row__usage {
+  font-size: var(--font-size-12, 12px);
+  opacity: 0.7;
 }
 
-.illuminus-muted {
+.illuminus-style-row__usage {
+  opacity: 0.55;
+}
+
+.illuminus-style-row__buttons {
+  display: flex;
+  gap: 0.15rem;
+  flex: 0 0 auto;
+}
+
+.illuminus-style-row__buttons button {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.illuminus-tag {
+  padding: 0 0.35rem;
+  border: 1px solid currentcolor;
+  border-radius: 3px;
+  font-size: var(--font-size-10, 10px);
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+}
+
+.illuminus-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  opacity: 0.55;
+  text-align: center;
+}
+
+.illuminus-empty i {
+  font-size: 2.5rem;
+}
+
+/* --- Style editor ------------------------------------------------------- */
+
+/* ApplicationV2 requires each template part to have a single root element, so
+   the editor body wraps its tabs and preview pane in one layout container. */
+.illuminus-editor__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.illuminus-editor__layout {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.illuminus-editor .illuminus-tab {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-editor .illuminus-tab.active {
+  display: flex;
+}
+
+.illuminus-tab__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.illuminus-tab__head .hint {
+  flex: 1;
+}
+
+.illuminus-reset {
+  flex: 0 0 auto;
+  width: auto;
+  font-size: var(--font-size-12, 12px);
+}
+
+.illuminus-fields {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-right: 0.35rem;
+}
+
+.illuminus-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 3px;
+  border-left: 3px solid var(--color-border-highlight, #ff6400);
+}
+
+/* A field still holding its schema default is de-emphasised, so at a glance
+   the user can see what this style actually changes. */
+.illuminus-field.is-default {
+  border-left-color: transparent;
+}
+
+.illuminus-field:hover {
+  background: rgb(255 255 255 / 5%);
+}
+
+.illuminus-field label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  cursor: pointer;
+}
+
+.illuminus-field__label {
+  font-weight: bold;
+  font-size: var(--font-size-13, 13px);
+}
+
+.illuminus-field__hint {
+  font-size: var(--font-size-11, 11px);
+  opacity: 0.65;
+  line-height: 1.3;
+}
+
+.illuminus-field__control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.illuminus-field__control > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-field__control input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+
+.illuminus-unit {
+  flex: 0 0 auto;
+  font-size: var(--font-size-11, 11px);
   opacity: 0.6;
 }
 
-.illuminus-badge {
-  display: inline-block;
-  padding: 0.05rem 0.45rem;
-  border: 1px solid currentcolor;
-  border-radius: 3px;
-  font-size: var(--font-size-11, 11px);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
+/* --- Editor preview pane ------------------------------------------------ */
 
-.illuminus-badge--on {
-  color: #4caf50;
-}
-
-.illuminus-badge--off {
-  color: #b0413e;
-}
-
-.illuminus-panel__footer {
+.illuminus-preview {
+  flex: 0 0 320px;
   display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 20%));
-  padding-top: 0.5rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-height: 0;
 }
 
-.illuminus-panel__footer button {
-  width: auto;
-  flex: 0 0 auto;
+.illuminus-preview__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.illuminus-preview__head h4 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-13, 13px);
+}
+
+/* The preview mirrors the journal DOM, so the skeleton rules above style it
+   with no duplication. Only the framing is specific to the editor. */
+.illuminus-preview__frame {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 20%));
+  border-radius: 4px;
+}
+
+.illuminus-preview__frame .journal-entry-content {
+  display: block;
+  height: 100%;
+}
+
+.illuminus-preview__frame .journal-header {
+  margin: 0.5rem;
+}
+
+.illuminus-preview__frame .journal-entry-pages {
+  display: block;
+}
+
+.illuminus-preview__frame .journal-page-content {
+  /* Scale the sample down so a full page of elements fits the pane while
+     keeping every relative size faithful to the real thing. */
+  zoom: 0.75;
 }

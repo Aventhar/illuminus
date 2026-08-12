@@ -1,0 +1,89 @@
+<div class="illuminus-manager__body">
+
+  <p class="hint">{{localize "ILLUMINUS.Manager.Hint"}}</p>
+
+  <header class="illuminus-manager__toolbar">
+    <button type="button" data-action="create">
+      <i class="fa-solid fa-plus"></i> {{localize "ILLUMINUS.Buttons.New"}}
+    </button>
+    <button type="button" data-action="import">
+      <i class="fa-solid fa-file-import"></i> {{localize "ILLUMINUS.Buttons.Import"}}
+    </button>
+    <button type="button" data-action="exportSelected" {{disabled (eq selectedCount 0)}}>
+      <i class="fa-solid fa-file-export"></i>
+      {{localize "ILLUMINUS.Buttons.ExportSelected"}}{{#if selectedCount}} ({{selectedCount}}){{/if}}
+    </button>
+    <button type="button" data-action="exportAll" {{disabled (not hasStyles)}}>
+      <i class="fa-solid fa-box-archive"></i> {{localize "ILLUMINUS.Buttons.ExportAll"}}
+    </button>
+  </header>
+
+  {{#if hasStyles}}
+  <div class="illuminus-style-list scrollable">
+
+    <label class="illuminus-select-all">
+      <input type="checkbox" data-action="toggleAll" {{checked allSelected}}>
+      <span>{{localize "ILLUMINUS.Manager.SelectAll"}}</span>
+    </label>
+
+    {{#each styles as |style|}}
+    <div class="illuminus-style-row" data-style-id="{{style.id}}">
+
+      <input type="checkbox" data-style-id="{{style.id}}" {{checked style.selected}}
+             aria-label="{{localize 'ILLUMINUS.Manager.SelectForExport'}}">
+
+      <div class="illuminus-style-row__text">
+        <div class="illuminus-style-row__name">
+          {{style.name}}
+          {{#if style.preset}}
+          <span class="illuminus-tag" data-tooltip="{{localize 'ILLUMINUS.Manager.PresetTooltip'}}">
+            {{localize "ILLUMINUS.Manager.Preset"}}
+          </span>
+          {{/if}}
+        </div>
+        {{#if style.description}}
+        <div class="illuminus-style-row__description">{{style.description}}</div>
+        {{/if}}
+        <div class="illuminus-style-row__usage">
+          {{#if style.usage}}
+            {{localize "ILLUMINUS.Manager.UsedBy" count=style.usage}}
+          {{else}}
+            {{localize "ILLUMINUS.Manager.Unused"}}
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="illuminus-style-row__buttons">
+        <button type="button" class="icon" data-action="edit"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Edit'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Edit'}}">
+          <i class="fa-solid fa-palette"></i>
+        </button>
+        <button type="button" class="icon" data-action="rename"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Rename'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Rename'}}">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <button type="button" class="icon" data-action="duplicate"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Duplicate'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Duplicate'}}">
+          <i class="fa-solid fa-copy"></i>
+        </button>
+        <button type="button" class="icon" data-action="exportOne"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Export'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Export'}}">
+          <i class="fa-solid fa-file-export"></i>
+        </button>
+        <button type="button" class="icon illuminus-danger" data-action="remove"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Delete'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Delete'}}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  {{else}}
+  <div class="illuminus-empty">
+    <i class="fa-solid fa-swatchbook"></i>
+    <p>{{localize "ILLUMINUS.Manager.Empty"}}</p>
+  </div>
+  {{/if}}
+
+</div>

@@ -6,14 +6,34 @@
 /** Must match the `id` field in module.json. */
 export const MODULE_ID = "illuminus";
 
-/** Prefix for every localization key this module owns. */
-export const LOCALE_PREFIX = "ILLUMINUS";
-
 /** Keys for settings registered via `game.settings.register`. */
 export const SETTINGS = {
-  enabled: "enabled",
+  styles: "styles",
   debug: "debug"
 };
+
+/** Document flag keys, read as `document.getFlag(MODULE_ID, FLAGS.style)`. */
+export const FLAGS = {
+  style: "style"
+};
+
+/** Prefix for every CSS custom property this module emits. */
+export const CSS_VAR_PREFIX = "--ill";
+
+/** Class added to a journal sheet root when a style is applied to it. */
+export const STYLED_CLASS = "illuminus-styled";
+
+/** Data attribute on a styled sheet root holding the applied style's id. */
+export const STYLE_ATTR = "data-illuminus-style";
+
+/** Id of the <style> element in document.head holding compiled styles. */
+export const STYLE_ELEMENT_ID = "illuminus-compiled-styles";
+
+/** Reserved style id meaning "no style; use the Foundry default appearance". */
+export const NO_STYLE = "";
+
+/** Current schema version, stamped onto exported files for forward migration. */
+export const SCHEMA_VERSION = 1;
 
 /**
  * Console logger that stays quiet unless the `debug` setting is on.
