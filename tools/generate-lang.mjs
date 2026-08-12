@@ -37,8 +37,9 @@ Object.assign(out, {
   "ILLUMINUS.Preview.Page2": "The Drowned Choir",
   "ILLUMINUS.Preview.AddPage": "Add Page",
   "ILLUMINUS.Buttons.PickColor": "Pick a colour from the screen",
-  "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its colour. Hold Option/Alt for lettering colour, Escape to cancel.",
+  "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its colour — fills, borders, and lettering. Hold Option/Alt for lettering, Escape to cancel.",
   "ILLUMINUS.Picker.BackgroundMode": "Fill",
+  "ILLUMINUS.Picker.BorderMode": "Border",
   "ILLUMINUS.Picker.TextMode": "Lettering",
 });
 

@@ -648,7 +648,62 @@ const alpha = await cdp.evaluate(`(() => {
 const al = JSON.parse(alpha);
 check(al.hex === "#10204080", `a half-transparent colour reads back with its alpha (got ${al.hex})`);
 
-console.log("\n[20] Console is clean");
+// A border is painted inside the element's border box, so pointing at the line
+// must give the border colour rather than the fill behind it.
+console.log("\n[20] Borders are sampled where they are drawn");
+const borders = await cdp.evaluate(`(async () => {
+  const probe = document.createElement("div");
+  probe.style.cssText = [
+    "position:fixed", "left:200px", "top:200px", "width:160px", "height:160px",
+    "z-index:99999", "background:rgb(10,20,30)",
+    "border-top:6px solid rgb(255,0,0)", "border-right:6px solid rgb(0,255,0)",
+    "border-bottom:6px solid rgb(0,0,255)", "border-left:6px solid rgb(255,255,0)"
+  ].join(";");
+  document.body.append(probe);
+  const r = probe.getBoundingClientRect();
+
+  const app = await game.modules.get("illuminus").api.openEditor(
+    game.modules.get("illuminus").api.listStyles()[0].id);
+  await new Promise(res => setTimeout(res, 800));
+  const row = app.element.querySelector('[data-field="page.background"]');
+  const picker = row.querySelector("color-picker");
+
+  const sampleAt = async (x, y) => {
+    row.querySelector(".illuminus-eyedropper").click();
+    await new Promise(res => setTimeout(res, 60));
+    document.dispatchEvent(new MouseEvent("mousemove", {clientX: x, clientY: y, bubbles: true}));
+    await new Promise(res => setTimeout(res, 60));
+    const readout = document.querySelector(".illuminus-picker-readout")?.textContent ?? "";
+    document.dispatchEvent(new MouseEvent("click", {clientX: x, clientY: y, bubbles: true}));
+    await new Promise(res => setTimeout(res, 120));
+    return { value: picker.value, readout };
+  };
+
+  const mid = Math.round(r.left + r.width / 2);
+  const midY = Math.round(r.top + r.height / 2);
+  const out = {
+    top: await sampleAt(mid, Math.round(r.top + 3)),
+    right: await sampleAt(Math.round(r.right - 3), midY),
+    bottom: await sampleAt(mid, Math.round(r.bottom - 3)),
+    left: await sampleAt(Math.round(r.left + 3), midY),
+    middle: await sampleAt(mid, midY)
+  };
+
+  probe.remove();
+  await app.close();
+  return JSON.stringify(out);
+})()`);
+const bd = JSON.parse(borders);
+check(bd.top.value.toLowerCase() === "#ff0000", `top border sampled (got ${bd.top.value})`);
+check(bd.right.value.toLowerCase() === "#00ff00", `right border sampled (got ${bd.right.value})`);
+check(bd.bottom.value.toLowerCase() === "#0000ff", `bottom border sampled (got ${bd.bottom.value})`);
+check(bd.left.value.toLowerCase() === "#ffff00", `left border sampled (got ${bd.left.value})`);
+check(bd.top.readout.includes("Border"), `and the readout says so (got "${bd.top.readout}")`);
+check(bd.middle.value.toLowerCase() === "#0a141e",
+  `the middle still gives the fill, not a border (got ${bd.middle.value})`);
+check(bd.middle.readout.includes("Fill"), `and reports it as fill (got "${bd.middle.readout}")`);
+
+console.log("\n[21] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

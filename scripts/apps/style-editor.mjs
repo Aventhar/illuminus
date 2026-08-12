@@ -350,14 +350,21 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       let lastX = 0;
       let lastY = 0;
 
+      const MODE_LABEL = {
+        border: "ILLUMINUS.Picker.BorderMode",
+        text: "ILLUMINUS.Picker.TextMode",
+        fill: "ILLUMINUS.Picker.BackgroundMode"
+      };
+
       const update = () => {
-        current = IlluminusStyleEditor.#colorAt(lastX, lastY, wantText);
+        const sample = IlluminusStyleEditor.#sampleAt(lastX, lastY, wantText);
+        current = sample?.hex ?? null;
         readout.style.left = `${lastX + 16}px`;
         readout.style.top = `${lastY + 16}px`;
         readout.innerHTML = `<span class="illuminus-picker-swatch" style="background:${current ?? "transparent"}"></span>`
           + `<span>${current ?? "—"}</span>`
-          + `<span class="illuminus-picker-mode">${game.i18n.localize(wantText
-            ? "ILLUMINUS.Picker.TextMode" : "ILLUMINUS.Picker.BackgroundMode")}</span>`;
+          + `<span class="illuminus-picker-mode">${sample
+            ? game.i18n.localize(MODE_LABEL[sample.mode]) : ""}</span>`;
       };
 
       const onMove = (event) => {
@@ -411,17 +418,69 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * The colour under a point: the element's text colour when `wantText`, else
-   * the nearest ancestor that actually paints a background.
-   * @returns {string|null} A #rrggbb or #rrggbbaa string.
+   * The colour under a point, and what kind of colour it is.
+   *
+   * Order matters: a border is painted inside the element's border box, so
+   * pointing at the line itself must yield the border colour rather than the
+   * fill behind it. Only when the point is not on a border does this fall back
+   * to the nearest ancestor that actually paints a background.
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {boolean} wantText  Take the lettering colour instead.
+   * @returns {{hex: string, mode: "border"|"text"|"fill"}|null}
    */
-  static #colorAt(x, y, wantText) {
+  static #sampleAt(x, y, wantText) {
     const element = document.elementFromPoint(x, y);
     if (!element) return null;
-    if (wantText) return IlluminusStyleEditor.#toHex(getComputedStyle(element).color);
+
+    if (wantText) {
+      const hex = IlluminusStyleEditor.#toHex(getComputedStyle(element).color);
+      return hex ? { hex, mode: "text" } : null;
+    }
+
+    const border = IlluminusStyleEditor.#borderAt(element, x, y);
+    if (border) return border;
+
     for (let node = element; node instanceof Element; node = node.parentElement) {
       const hex = IlluminusStyleEditor.#toHex(getComputedStyle(node).backgroundColor);
-      if (hex && !hex.endsWith("00")) return hex;
+      if (hex && !IlluminusStyleEditor.#isInvisible(hex)) return { hex, mode: "fill" };
+    }
+    return null;
+  }
+
+  /**
+   * Whether a sampled colour paints nothing, so sampling should keep looking.
+   *
+   * Only an eight-digit value carries alpha: `#ff0000` is opaque red, while
+   * `#ff000000` is fully transparent. Testing the last two characters without
+   * checking the length treats every blue-free colour as invisible.
+   */
+  static #isInvisible(hex) {
+    return hex.length === 9 && hex.endsWith("00");
+  }
+
+  /**
+   * Whether a point falls on one of an element's borders, and that border's
+   * colour. Hit testing already guarantees the point is inside the border box,
+   * so this only has to work out which band it lands in.
+   * @returns {{hex: string, mode: "border"}|null}
+   */
+  static #borderAt(element, x, y) {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const sides = {
+      Top: y <= rect.top + parseFloat(style.borderTopWidth),
+      Right: x >= rect.right - parseFloat(style.borderRightWidth),
+      Bottom: y >= rect.bottom - parseFloat(style.borderBottomWidth),
+      Left: x <= rect.left + parseFloat(style.borderLeftWidth)
+    };
+    for (const [side, isOn] of Object.entries(sides)) {
+      if (!isOn) continue;
+      if (parseFloat(style[`border${side}Width`]) <= 0) continue;
+      if (style[`border${side}Style`] === "none") continue;
+      const hex = IlluminusStyleEditor.#toHex(style[`border${side}Color`]);
+      if (hex && !IlluminusStyleEditor.#isInvisible(hex)) return { hex, mode: "border" };
     }
     return null;
   }
