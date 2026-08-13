@@ -68,5 +68,26 @@ export async function connect(port = 9222) {
     throw new Error(`timed out waiting for: ${label}`);
   };
 
-  return { send, evaluate, goto, waitFor, logs, close: () => ws.close() };
+  /**
+   * A real mouse event from the browser's own input pipeline, so that hit
+   * testing and `:hover` apply. Dispatching a MouseEvent from a script does
+   * neither, which is how a control that CSS has made unclickable can still
+   * pass a test.
+   */
+  const mouse = async (type, x, y) => {
+    await send("Input.dispatchMouseEvent", {
+      type, x, y, button: type === "mouseMoved" ? "none" : "left",
+      clickCount: type === "mouseMoved" ? 0 : 1, buttons: 0
+    });
+    await new Promise((r) => setTimeout(r, 60));
+  };
+
+  /** Point at a spot and press it, the way a person does. */
+  const click = async (x, y) => {
+    await mouse("mouseMoved", x, y);
+    await mouse("mousePressed", x, y);
+    await mouse("mouseReleased", x, y);
+  };
+
+  return { send, evaluate, goto, waitFor, mouse, click, logs, close: () => ws.close() };
 }

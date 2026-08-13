@@ -9,6 +9,7 @@ import { exportStyles, promptImport } from "./io.mjs";
 import { IlluminusStyleManager } from "./apps/style-manager.mjs";
 import { IlluminusStyleEditor } from "./apps/style-editor.mjs";
 import { promptStyleAssignment } from "./apps/style-picker.mjs";
+import { registerEditorMenu } from "./editor-menu.mjs";
 
 /**
  * Entry point for Illuminus.
@@ -22,6 +23,7 @@ Hooks.once("init", () => {
   log.info(`initializing ${MODULE_ID}`);
 
   registerSettings();
+  registerEditorMenu();
 
   // Publish the public API for macros and other modules.
   game.modules.get(MODULE_ID).api = {

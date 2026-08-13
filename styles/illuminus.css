@@ -640,7 +640,9 @@
 
 /* --- Boxed / read-aloud text -------------------------------------------- */
 
-.illuminus-styled .journal-page-content blockquote,
+/* A block rides on a blockquote, so the page-wide Boxed Text settings have to
+   stand aside for one — otherwise two sets of rules fight over the same box. */
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-block),
 .illuminus-styled .journal-page-content .illuminus-box {
   font-family: var(--ill-boxes-font);
   font-size: var(--ill-boxes-size);
@@ -670,14 +672,14 @@
               var(--ill-boxes-shadow-blur) var(--ill-boxes-shadow-spread) var(--ill-boxes-shadow-color);
 }
 
-.illuminus-styled .journal-page-content blockquote > :last-child,
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-block) > :last-child,
 .illuminus-styled .journal-page-content .illuminus-box > :last-child {
   margin-bottom: 0;
 }
 
 /* --- Images ------------------------------------------------------------- */
 
-.illuminus-styled .journal-page-content img {
+.illuminus-styled .journal-page-content :not(.illuminus-picture) > img {
   max-width: var(--ill-images-max-width);
   opacity: var(--ill-images-opacity);
   background: var(--ill-images-background);
@@ -697,7 +699,7 @@
               var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color);
 }
 
-.illuminus-styled .journal-page-content figcaption {
+.illuminus-styled .journal-page-content :not(.illuminus-picture) > figcaption {
   font-family: var(--ill-images-caption-font);
   font-size: var(--ill-images-caption-size);
   font-weight: var(--ill-images-caption-weight);

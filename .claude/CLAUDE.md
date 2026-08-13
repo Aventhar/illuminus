@@ -125,6 +125,25 @@ These are all load-bearing and none are obvious from the code.
   an event on the inner input does nothing.
 - **`selected` is not a Handlebars helper.** `checked` and `disabled` are. Use
   `{{#if}}` for option selection.
+- **The editor's menu bar is rebuilt on every state change.** `ProseMirrorMenu.update()`
+  calls `render()`, which replaces the whole `<menu>` — so a press and a release either
+  side of a rebuild is not a click, and the drop-down silently fails to open. Clicking
+  into the prose triggers one. A test must wait for the bar to stop churning before
+  aiming at it (`watchMenu` / `menuAtRest` in `test-in-app.mjs`); a person never notices
+  because they aim at what they can see.
+- **Drop-down entries live in a detached `#prosemirror-dropdown` on `document.body`,**
+  not inside the menu, and the child entries are revealed by `:hover` — which a scripted
+  `MouseEvent` does not trigger. Only real CDP input events (`cdp.mouse` / `cdp.click`)
+  can walk the menu.
+- **`submit()` on a page editor does not close it.** Clicking Edit again then opens a
+  *second* editor over the first, and clicks aimed at the newer one can land on the
+  older. Close it explicitly, and resolve the sheet with `.pop()` rather than `.find()`.
+- **Clicking an image inside the editor opens core's `ImagePopout`,** which then covers
+  the menu bar. Aim at the caption to put the cursor inside a `figure`.
+- **Blocks and picture treatments ride on `blockquote` and `figure`.** Both already carry
+  a `classes` attribute via core's AttributeCapture, so the classes survive a save and
+  reload with no schema change of our own. `foundry.prosemirror.commands.wrapIn` takes
+  the attributes to set.
 - **Headless Chrome needs SwiftShader**: without `--use-gl=angle --use-angle=swiftshader
   --enable-unsafe-swiftshader`, PixiJS throws during init and the client never reaches
   the join screen.

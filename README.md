@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 570 settings across 13 tabs and 83 collapsible
+- **Everything is a GUI control.** 1,517 settings across 15 tabs and 254 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
 - **The whole window, not just the page.** A Sidebar tab styles the contents panel —
@@ -55,6 +55,12 @@ it to whichever journals should wear it, and export it to carry into another wor
   Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
   and Picture Blending to Normal to see them as they are. Your own art works just as
   well.
+- **Blocks and picture treatments, from the editor.** Ten of each, styled on their own
+  tabs and applied from an **Illuminus** menu in the journal page editor: put the cursor
+  in a paragraph, pick a block, and it becomes a read-aloud box, a sidebar, a stat block
+  — whatever that style makes it. The menu lists them by the names the style gives them,
+  so a style can call its first block "Read-aloud" and its second "Sidebar". "Remove
+  Illuminus styling" takes the treatment off again. No HTML is typed.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **One style included:** Aged Parchment, seeded the first time the module runs in a
   world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
@@ -90,10 +96,12 @@ scripts/style-store.mjs      CRUD over the world's styles; journal assignment
 scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
+scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
 assets/samples/textures/     Bundled background pictures
 assets/samples/pictures/     Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
+styles/illuminus-generated.css  Block and picture rules; written by a generator
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox
 ```
@@ -125,6 +133,12 @@ A style therefore supplies *values* to rules the module already ships; it can ne
 introduce a rule of its own. That is what makes importing a style file from a stranger
 safe, and it is why applying, changing, or clearing a style needs no re-render — only a
 class and a data attribute change on the sheet root.
+
+The ten blocks and ten picture treatments are twenty near-identical rule sets, which
+CSS cannot express once. Their rules live in `styles/illuminus-generated.css`, written by
+`node tools/generate-block-css.mjs` from a template with every property name taken from
+the schema — so a renamed field is a generator error rather than a rule that quietly
+stops working. Do not hand-edit that file.
 
 Both the compiler and the entire GUI are generated from `scripts/style-schema.mjs`.
 Adding a new style property means adding one line there plus one rule in the stylesheet;

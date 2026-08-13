@@ -1295,7 +1295,206 @@ check(bl.savedMarkedClean, "after saving, the changed marker clears");
 check(bl.markedChanged, "editing again marks it changed");
 check(bl.afterReset === "#123456", `Reset returns to the saved value, not the schema default (got ${bl.afterReset})`);
 
-console.log("\n[29] Console is clean");
+// Blocks and picture treatments are only reachable through this menu, and the
+// classes it writes have to survive Foundry's HTML handling on save. Driven
+// with real mouse events, because the drop-down's children are revealed by
+// :hover, which a scripted MouseEvent does not trigger.
+console.log("\n[29] The editor's Illuminus menu");
+
+/** Centre of an element, in viewport coordinates. */
+const boxOf = async (expr) => {
+  const raw = await cdp.evaluate(`(() => {
+    const el = ${expr};
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return JSON.stringify({x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height});
+  })()`);
+  return raw ? JSON.parse(raw) : null;
+};
+
+/**
+ * Where an element has come to rest. The editor rebuilds its whole menu bar on
+ * every selection change and then reflows it for overflow a frame later, so a
+ * box measured the instant after a click can be stale before the press lands —
+ * which a person never experiences, because they aim at what they can see.
+ */
+const settledBox = async (expr) => {
+  let last = null;
+  for (let i = 0; i < 20; i++) {
+    const now = await boxOf(expr);
+    if (now && last && now.x === last.x && now.y === last.y) return now;
+    last = now;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return last;
+};
+
+// The most recently opened page editor. A closing sheet lingers in the DOM for
+// its animation, so taking the first match can land on the one on its way out.
+const EDIT_SHEET = `[...foundry.applications.instances.values()].filter(
+  a => a.document?.documentName === "JournalEntryPage" && a.rendered
+    && a.element?.parentElement === document.body).pop()`;
+
+/**
+ * Count menu-bar rebuilds, so a click can wait for one to be over. Every state
+ * change replaces the whole bar, and a press and release either side of a
+ * replacement is not a click — the button that was pressed no longer exists.
+ */
+const watchMenu = () => cdp.evaluate(`(() => {
+  const bar = ${EDIT_SHEET}.element.querySelector("menu.editor-menu");
+  window.__menuChurn = 0;
+  window.__menuWatch?.disconnect();
+  window.__menuWatch = new MutationObserver(() => window.__menuChurn++);
+  window.__menuWatch.observe(bar.parentElement, {childList: true});
+})()`);
+
+/** Wait until the menu bar has stopped rebuilding itself. */
+const menuAtRest = async () => {
+  for (let i = 0; i < 30; i++) {
+    const before = await cdp.evaluate("window.__menuChurn");
+    await new Promise((r) => setTimeout(r, 250));
+    if (await cdp.evaluate("window.__menuChurn") === before) return;
+  }
+};
+
+try {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    // Nothing left open, so the sheet the clicks land on is the one under test.
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const style = await api.createStyle({name: "Menu Probe", labels: {block01: "Read-aloud"}});
+    const settings = foundry.utils.deepClone(style.settings);
+    settings.block01.background = "#123456";
+    settings.picture01.borderTopWidth = 7;
+    settings.picture01.borderTopStyle = "solid";
+    await api.updateStyle(style.id, {settings});
+    const entry = await JournalEntry.create({name: "Illuminus Menu Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text",
+      // A small image, so the caption below it stays on screen for the click.
+      text: {content: '<p>Prose to wrap.</p><figure><img src="icons/svg/book.svg" width="80"><figcaption>A caption.</figcaption></figure>'}
+    }]);
+    await api.assignStyle(entry, style.id);
+    window.__menuTest = {entryId: entry.id, styleId: style.id};
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1200));
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button").click();
+    await new Promise(r => setTimeout(r, 2500));
+  })()`);
+
+  /** Point at the prose, open the menu, and choose one of its entries. */
+  const chooseFromMenu = async (target, action) => {
+    await watchMenu();
+    const at = await settledBox(`${EDIT_SHEET}.element.querySelector(${JSON.stringify(target)})`);
+    if (at) await cdp.click(at.x, at.y);
+    // Clicking into the prose moved the selection, which rebuilds the bar.
+    await menuAtRest();
+    const button = await settledBox(`${EDIT_SHEET}.element.querySelector(".pm-dropdown.illuminus-menu")`);
+    if (!button) return { opened: false };
+    await cdp.click(button.x, button.y);
+    if (!await cdp.evaluate(`!!document.querySelector("#prosemirror-dropdown")`)) return { opened: false };
+
+    // Blocks and treatments hang off a submenu, which opens on hover.
+    const parent = action.startsWith("illuminus-picture") ? "illuminus-pictures"
+      : action.startsWith("illuminus-block") ? "illuminus-blocks" : null;
+    if (parent) {
+      const submenu = await settledBox(`document.querySelector('#prosemirror-dropdown [data-action="${parent}"]')`);
+      if (submenu) await cdp.mouse("mouseMoved", submenu.x, submenu.y);
+    }
+    const item = await settledBox(`document.querySelector('#prosemirror-dropdown [data-action="${action}"]')`);
+    if (!item?.w) return { opened: true, reachable: false };
+
+    // Through hit testing, so an entry covered by something else fails here.
+    const hit = await cdp.evaluate(
+      `document.elementFromPoint(${item.x}, ${item.y})?.closest("li")?.dataset.action ?? ""`);
+    const title = await cdp.evaluate(
+      `document.querySelector('#prosemirror-dropdown [data-action="${action}"]').textContent.trim()`);
+    await cdp.click(item.x, item.y);
+    await new Promise((r) => setTimeout(r, 400));
+    return { opened: true, reachable: true, hit, title };
+  };
+
+  const block = await chooseFromMenu(".ProseMirror p", "illuminus-block01");
+  check(block.opened, "the Illuminus drop-down opens from the editor's menu bar");
+  check(block.reachable, "its block entries are reachable once the menu is open");
+  check(block.hit === "illuminus-block01", `and hit testing lands on the entry (got ${block.hit})`);
+
+  check(block.title === "Read-aloud", `the menu calls a block what this style calls it (got "${block.title}")`);
+
+  const wrapped = await cdp.evaluate(
+    `${EDIT_SHEET}.element.querySelector(".ProseMirror blockquote")?.className ?? ""`);
+  check(wrapped === "illuminus-block illuminus-block--block01",
+    `choosing a block wraps the selection (got "${wrapped}")`);
+
+  // The caption, not the image: clicking an image in the editor opens core's
+  // image popout, which then covers the menu.
+  const picture = await chooseFromMenu(".ProseMirror figcaption", "illuminus-picture01");
+  check(picture.reachable, `its picture entries are reachable too (opened ${picture.opened}, hit ${picture.hit})`);
+  const tagged = await cdp.evaluate(
+    `${EDIT_SHEET}.element.querySelector(".ProseMirror figure")?.className ?? "(no figure)"`);
+  check(tagged === "illuminus-picture illuminus-picture--picture01",
+    `choosing a treatment tags the picture (got "${tagged}")`);
+
+  // The real question: does any of it survive Foundry's save path?
+  const saved = await cdp.evaluate(`(async () => {
+    const sheet = ${EDIT_SHEET};
+    await sheet.submit();
+    // Submitting does not close the editor, and a second one left open behind
+    // the first steals the clicks meant for it.
+    await sheet.close();
+    await new Promise(r => setTimeout(r, 1500));
+    const entry = game.journal.get(window.__menuTest.entryId);
+    const page = entry.pages.contents[0];
+    await entry.sheet.render({force: true, pageId: page.id});
+    await new Promise(r => setTimeout(r, 1200));
+    const el = entry.sheet.element.querySelector(".illuminus-block--block01");
+    const fig = entry.sheet.element.querySelector(".illuminus-picture--picture01");
+    return JSON.stringify({
+      stored: page.text.content,
+      background: el && getComputedStyle(el).backgroundColor,
+      borderTop: fig && getComputedStyle(fig).borderTopWidth
+    });
+  })()`);
+  const sv = JSON.parse(saved);
+  check(/blockquote class="illuminus-block illuminus-block--block01"/.test(sv.stored),
+    "the block's classes survive the save round trip");
+  check(/figure class="illuminus-picture illuminus-picture--picture01"/.test(sv.stored),
+    "the picture treatment's classes survive it too");
+  check(sv.background === "rgb(18, 52, 86)",
+    `and the saved page paints the block from the style (got ${sv.background})`);
+  check(sv.borderTop === "7px", `and frames the picture from the style (got ${sv.borderTop})`);
+
+  // Clearing has to leave the carrier behind: a person who wanted a plain
+  // blockquote should still have one.
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.get(window.__menuTest.entryId);
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button").click();
+  })()`);
+  await cdp.waitFor(`${EDIT_SHEET}?.element.querySelector(".ProseMirror blockquote")`,
+    { label: "the page editor to reopen" });
+  const clear = await chooseFromMenu(".ProseMirror blockquote p", "illuminus-clear");
+  check(clear.reachable, `the clear entry is reachable (opened ${clear.opened}, hit ${clear.hit})`);
+  const after = await cdp.evaluate(`(() => {
+    const bq = ${EDIT_SHEET}.element.querySelector(".ProseMirror blockquote");
+    return JSON.stringify({present: !!bq, classes: bq?.className ?? null});
+  })()`);
+  const af = JSON.parse(after);
+  check(af.present && !af.classes, `clearing takes the styling off but keeps the quote (classes "${af.classes}")`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__menuTest?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__menuTest?.styleId) await api.deleteStyle(window.__menuTest.styleId);
+  })()`);
+}
+
+console.log("\n[30] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
