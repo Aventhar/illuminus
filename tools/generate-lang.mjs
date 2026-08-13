@@ -39,7 +39,7 @@ Object.assign(out, {
   "ILLUMINUS.Menu.Blocks": "Block",
   "ILLUMINUS.Menu.Pictures": "Picture Style",
   "ILLUMINUS.Menu.Clear": "Remove Illuminus styling",
-  "ILLUMINUS.Families.blocks": "Blocks",
+  "ILLUMINUS.Families.blocks": "Block Styles",
   "ILLUMINUS.Families.pictures": "Picture Styles",
   "ILLUMINUS.Families.blocksName": "Block name",
   "ILLUMINUS.Families.picturesName": "Treatment name",

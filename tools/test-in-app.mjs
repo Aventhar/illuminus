@@ -1380,8 +1380,9 @@ try {
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     await new Promise(r => setTimeout(r, 1200));
     entry.sheet.element.querySelector(".journal-entry-page .edit-container button").click();
-    await new Promise(r => setTimeout(r, 2500));
   })()`);
+  await cdp.waitFor(`${EDIT_SHEET}?.element.querySelector(".pm-dropdown.illuminus-menu")`,
+    { label: "the page editor to open" });
 
   /** Point at the prose, open the menu, and choose one of its entries. */
   const chooseFromMenu = async (target, action) => {
@@ -1390,10 +1391,17 @@ try {
     if (at) await cdp.click(at.x, at.y);
     // Clicking into the prose moved the selection, which rebuilds the bar.
     await menuAtRest();
-    const button = await settledBox(`${EDIT_SHEET}.element.querySelector(".pm-dropdown.illuminus-menu")`);
-    if (!button) return { opened: false };
-    await cdp.click(button.x, button.y);
-    if (!await cdp.evaluate(`!!document.querySelector("#prosemirror-dropdown")`)) return { opened: false };
+    // Aim again if the press was lost: the bar can rebuild between the press and
+    // the release, and the button that was pressed then no longer exists. A
+    // person re-clicks without thinking about it.
+    let opened = false;
+    for (let attempt = 0; attempt < 3 && !opened; attempt++) {
+      const button = await settledBox(`${EDIT_SHEET}.element.querySelector(".pm-dropdown.illuminus-menu")`);
+      if (!button) break;
+      await cdp.click(button.x, button.y);
+      opened = await cdp.evaluate(`!!document.querySelector("#prosemirror-dropdown")`);
+    }
+    if (!opened) return { opened: false };
 
     // Blocks and treatments hang off a submenu, which opens on hover.
     const parent = action.startsWith("illuminus-picture") ? "illuminus-pictures"

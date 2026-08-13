@@ -136,7 +136,7 @@
   "ILLUMINUS.Errors.ImportNoStyles": "That file contained no styles Illuminus could recognize.",
   "ILLUMINUS.Errors.ImportParse": "That file could not be read as JSON: {message}",
   "ILLUMINUS.Errors.ImportShape": "That file is not an Illuminus style file. It should contain a list of styles.",
-  "ILLUMINUS.Families.blocks": "Blocks",
+  "ILLUMINUS.Families.blocks": "Block Styles",
   "ILLUMINUS.Families.blocksHint": "Containers you wrap around content — read-aloud boxes, sidebars, encounter panels. Pick one to style, and rename it to suit your content.",
   "ILLUMINUS.Families.blocksName": "Block name",
   "ILLUMINUS.Families.pictures": "Picture Styles",
