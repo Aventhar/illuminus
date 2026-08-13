@@ -818,7 +818,9 @@ const win = await cdp.evaluate(`(async () => {
   const button = cs(".window-header button.header-control");
   const edit = cs(".journal-entry-page .edit-container button");
   const out = {
-    headerBg: cs(".window-header")?.backgroundColor,
+    // The fill is painted as a layer over Foundry's own, so that a color of
+    // None leaves the window as Foundry draws it rather than erasing it.
+    headerBg: cs(".window-header")?.backgroundImage,
     titleColor: cs(".window-header .window-title")?.color,
     titleSize: cs(".window-header .window-title")?.fontSize,
     buttonColor: button?.color,
@@ -847,7 +849,7 @@ const win = await cdp.evaluate(`(async () => {
   return JSON.stringify(out);
 })()`);
 const wn = JSON.parse(win);
-check(wn.headerBg === "rgb(32, 64, 96)", `title bar fill applied (got ${wn.headerBg})`);
+check((wn.headerBg ?? "").includes("rgb(32, 64, 96)"), `title bar fill applied (got ${wn.headerBg})`);
 check(wn.titleColor === "rgb(255, 204, 0)", `title lettering applied (got ${wn.titleColor})`);
 check(wn.titleSize === "20px", `title size applied (got ${wn.titleSize})`);
 if (wn.buttonColor !== "rgb(0, 255, 136)") console.log("      diag:", JSON.stringify(wn.diag));
@@ -985,11 +987,16 @@ const editShift = await cdp.evaluate(`(async () => {
       a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
     const position = editSheet ? getComputedStyle(editSheet.element).position : null;
     const marked = editSheet ? editSheet.element.classList.contains("illuminus-styled") : false;
+    // What the prose is written on, and whether Foundry's own frame survived.
+    const surface = editSheet
+      ? getComputedStyle(editSheet.element.querySelector(":scope > .window-content")).backgroundColor : null;
+    const frame = editSheet ? getComputedStyle(editSheet.element).backgroundColor : null;
+    const pageSurface = getComputedStyle(entry.sheet.element.querySelector(".journal-entry-content")).backgroundColor;
 
     await editSheet?.close();
     await entry.delete();
     await new Promise(r => setTimeout(r, 400));
-    return {before, after, position, marked};
+    return {before, after, position, marked, surface, frame, pageSurface};
   };
 
   return JSON.stringify({plain: await run(false), styled: await run(true)});
@@ -1002,6 +1009,13 @@ check(es.styled.before === es.styled.after,
 check(es.styled.marked, "the edit window is still styled by Illuminus");
 check(es.styled.position !== "relative" && es.styled.position !== "static",
   `and stays out of normal flow (position ${es.styled.position})`);
+// The editor is where the text is written, so it has to be as readable as the
+// page. It was not: the window's own background landed on the same element as
+// the page's and won, leaving the page's ink over Foundry's dark frame.
+check(es.styled.surface === es.styled.pageSurface,
+  `the editor writes on the same surface as the page (${es.styled.surface} vs ${es.styled.pageSurface})`);
+check(es.styled.frame === es.plain.frame,
+  `and a window color of None leaves Foundry's frame alone (${es.styled.frame} vs ${es.plain.frame})`);
 
 // A native color input renders #00000000 as solid black, so the true color
 // is painted behind it and a fully transparent one is named.

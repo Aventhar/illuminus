@@ -90,7 +90,19 @@ These are all load-bearing and none are obvious from the code.
   positions itself. A rule written for the page area lands on that window too. Paint
   properties are fine there; layout properties are not. Setting `position: relative` on
   it dropped a 600px window into normal flow and shoved the whole interface sideways.
-  Foundry's file picker hands back data-root-relative paths like
+  The page surface therefore goes on that window's `.window-content`, not its root:
+  the root is an `.application` as well, so the window's own background lands on the
+  same element and wins on document order — which left the editor showing the page's
+  ink over Foundry's frame color, unreadable.
+- **A color of None must not erase what core paints.** The window frame and title bar
+  default to `#00000000`, and applying that as a `background-color` took Foundry's own
+  away: every styled journal window became see-through to the canvas — invisible on
+  the journal sheet, whose contents cover the frame, and glaring on the page editor,
+  whose title bar has nothing behind it. Paint those colors as a `linear-gradient`
+  layer over core's instead, so None means "leave it as Foundry draws it". Core sets
+  no `background-image` on either element, so the layer is free — and a test then has
+  to read `backgroundImage`, not `backgroundColor`.
+- Foundry's file picker hands back data-root-relative paths like
   `worlds/x/art/paper.webp`, which would be looked for under
   `modules/illuminus/styles/`. `sanitizePath` makes them root-relative through
   `foundry.utils.getRoute`, which also handles a server `routePrefix`. Any new

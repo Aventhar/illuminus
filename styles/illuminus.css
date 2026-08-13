@@ -26,7 +26,7 @@
 /* --- Page surface ------------------------------------------------------- */
 
 .illuminus-styled .journal-entry-content,
-.illuminus-styled.journal-entry-page {
+.illuminus-styled.journal-entry-page > .window-content {
   background-color: var(--ill-page-background);
   border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
                 var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
@@ -43,18 +43,25 @@
     var(--ill-page-inner-shadow-blur) var(--ill-page-inner-shadow-spread) var(--ill-page-inner-shadow-color);
 }
 
-/* Only the in-sheet page area needs a positioning context for the texture layer
-   below. A popped-out page sheet is an application window that Foundry has
-   already positioned, and forcing `relative` on it drops it into normal flow,
-   where it pushes the rest of the interface aside. */
-.illuminus-styled .journal-entry-content {
+/* The page surface goes on the content area, not on the window root. The root
+   of a popped-out page sheet is an `.application` as well, so the window's own
+   background lands on the same element and wins on document order — which left
+   the editor showing the texture over Foundry's frame color rather than the
+   page's, with the page's ink color on top of it. Painting inside the window
+   also keeps the frame free to take the window styling like any other.
+
+   Neither may force `relative` on the window root: Foundry has already
+   positioned it, and dropping it into normal flow pushes the rest of the
+   interface aside. The content area inside it is safe. */
+.illuminus-styled .journal-entry-content,
+.illuminus-styled.journal-entry-page > .window-content {
   position: relative;
 }
 
 /* The background picture rides on its own layer so it can carry an independent
    opacity and blend mode without affecting the text above it. */
 .illuminus-styled .journal-entry-content::before,
-.illuminus-styled.journal-entry-page::before {
+.illuminus-styled.journal-entry-page > .window-content::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -70,7 +77,8 @@
   opacity: var(--ill-page-texture-opacity);
 }
 
-.illuminus-styled .journal-entry-content > * {
+.illuminus-styled .journal-entry-content > *,
+.illuminus-styled.journal-entry-page > .window-content > * {
   position: relative;
   z-index: 1;
 }
@@ -89,9 +97,17 @@
 /* --- Window frame, title bar, and its buttons --------------------------- */
 
 /* Scoped to `.application` so the editor's sample frame, which carries the same
-   marker class but has no window around it, is left alone. */
+   marker class but has no window around it, is left alone.
+
+   The frame and title bar colors are painted as a layer over Foundry's own
+   rather than replacing it, so a color of None means "leave the window as
+   Foundry draws it" instead of erasing it. Set as a background-color, None
+   made every styled journal window see-through to the canvas — invisible on
+   the journal sheet, whose contents cover the frame, and glaring on the page
+   editor, whose title bar has nothing behind it. Core paints no image of its
+   own on either element, so the layer is free. */
 .illuminus-styled.application {
-  background-color: var(--ill-window-background);
+  background-image: linear-gradient(var(--ill-window-background), var(--ill-window-background));
   border-width: var(--ill-window-border-top-width) var(--ill-window-border-right-width)
                 var(--ill-window-border-bottom-width) var(--ill-window-border-left-width);
   border-style: var(--ill-window-border-top-style) var(--ill-window-border-right-style)
@@ -103,7 +119,8 @@
 }
 
 .illuminus-styled .window-header {
-  background-color: var(--ill-window-title-bar-background);
+  background-image: linear-gradient(var(--ill-window-title-bar-background),
+                                    var(--ill-window-title-bar-background));
   padding: var(--ill-window-padding-top) var(--ill-window-padding-right)
            var(--ill-window-padding-bottom) var(--ill-window-padding-left);
 }
