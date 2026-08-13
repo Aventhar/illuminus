@@ -210,7 +210,7 @@ export function registerEditorMenu() {
     const style = styleForEditor(menu.view);
     const state = menu.view.state;
 
-    config[MODULE_ID] = {
+    const illuminus = {
       action: MODULE_ID,
       title: game.i18n.localize("ILLUMINUS.Menu.Title"),
       cssClass: "illuminus-menu",
@@ -252,6 +252,19 @@ export function registerEditorMenu() {
         }
       ]
     };
+
+    // The bar renders drop-downs in the order of this object's keys, so simply
+    // assigning one puts it at the end. Rebuilding the object is the only way
+    // to sit next to Format, where the controls that change what a passage *is*
+    // belong, rather than out past the icon buttons.
+    const ordered = {};
+    for (const [key, value] of Object.entries(config)) {
+      ordered[key] = value;
+      if (key === "format") ordered[MODULE_ID] = illuminus;
+    }
+    if (!(MODULE_ID in ordered)) ordered[MODULE_ID] = illuminus;
+    for (const key of Object.keys(config)) delete config[key];
+    Object.assign(config, ordered);
   });
 
   log.debug("journal editor menu registered");

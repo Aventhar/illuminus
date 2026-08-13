@@ -1485,6 +1485,14 @@ try {
 
   const block = await chooseFromMenu(".ProseMirror p", "illuminus-block01");
   check(block.opened, "the Illuminus drop-down opens from the editor's menu bar");
+  // Next to Format, where the controls that change what a passage *is* live,
+  // rather than out past the icon buttons where assigning the config lands it.
+  const barOrder = await cdp.evaluate(`JSON.stringify(
+    [...${EDIT_SHEET}.element.querySelectorAll("menu.editor-menu .pm-dropdown")]
+      .map(b => b.className.split(/\\s+/).filter(c => c && c !== "pm-dropdown").join(".")))`);
+  const order = JSON.parse(barOrder);
+  check(order[0] === "format" && order[1] === "illuminus-menu",
+    `and sits immediately right of Format (got ${order.slice(0, 3).join(", ")})`);
   check(block.reachable, "its block entries are reachable once the menu is open");
   check(block.hit === "illuminus-block01", `and hit testing lands on the entry (got ${block.hit})`);
 

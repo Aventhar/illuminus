@@ -143,6 +143,9 @@ These are all load-bearing and none are obvious from the code.
   into the prose triggers one. A test must wait for the bar to stop churning before
   aiming at it (`watchMenu` / `menuAtRest` in `test-in-app.mjs`); a person never notices
   because they aim at what they can see.
+- **The menu bar renders drop-downs in the order of the config object's keys.**
+  Assigning `config[MODULE_ID]` therefore puts one at the end, past the icon buttons;
+  sitting next to Format means rebuilding the object with the key inserted after it.
 - **Drop-down entries live in a detached `#prosemirror-dropdown` on `document.body`,**
   not inside the menu, and the child entries are revealed by `:hover` — which a scripted
   `MouseEvent` does not trigger. Only real CDP input events (`cdp.mouse` / `cdp.click`)
