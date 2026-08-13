@@ -1501,7 +1501,76 @@ try {
   })()`);
 }
 
-console.log("\n[30] Console is clean");
+// A horizontal rule is drawn as a top edge only, so Thickness means what it
+// says rather than doubling, and Alignment resolves to auto margins — neither
+// of which a declaration alone proves. These assert where the line lands.
+console.log("\n[30] Horizontal rules");
+const rules = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Divider Probe", settings: {body: {
+    dividerWidth: 3, dividerStyle: "dashed", dividerColor: "#ff8800",
+    dividerLength: 50, dividerAlign: "left",
+    dividerMarginTop: 40, dividerMarginBottom: 8
+  }}});
+  const entry = await JournalEntry.create({name: "Divider Test Journal"});
+  await entry.createEmbeddedDocuments("JournalEntryPage",
+    [{name: "P", type: "text", text: {content: "<p>before</p><hr><p>after</p>"}}]);
+  await api.assignStyle(entry, style.id);
+  await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+  await new Promise(r => setTimeout(r, 1000));
+
+  const measure = () => {
+    const hr = entry.sheet.element.querySelector(".journal-page-content hr");
+    const cs = getComputedStyle(hr);
+    const line = hr.getBoundingClientRect();
+    const around = hr.parentElement.getBoundingClientRect();
+    return {
+      topWidth: cs.borderTopWidth, topStyle: cs.borderTopStyle, topColor: cs.borderTopColor,
+      otherEdges: cs.borderBottomWidth + " " + cs.borderLeftWidth + " " + cs.borderRightWidth,
+      marginTop: cs.marginTop, marginBottom: cs.marginBottom,
+      // Share of the width it spans, and where its edges sit inside it.
+      share: Math.round((line.width / around.width) * 100),
+      leftGap: Math.round(line.left - around.left),
+      rightGap: Math.round(around.right - line.right)
+    };
+  };
+
+  const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+  const restyle = async (changes) => {
+    Object.assign(settings.body, changes);
+    await api.updateStyle(style.id, {settings});
+    await new Promise(r => setTimeout(r, 500));
+    return measure();
+  };
+
+  const out = {
+    left: measure(),
+    center: await restyle({dividerAlign: "center"}),
+    right: await restyle({dividerAlign: "right"}),
+    hidden: await restyle({dividerWidth: 0})
+  };
+  await entry.delete();
+  await api.deleteStyle(style.id);
+  return JSON.stringify(out);
+})()`);
+const hr = JSON.parse(rules);
+check(hr.left.topWidth === "3px", `thickness applies to the rule (got ${hr.left.topWidth})`);
+check(hr.left.topStyle === "dashed", `style applies (got ${hr.left.topStyle})`);
+check(hr.left.topColor === "rgb(255, 136, 0)", `color applies (got ${hr.left.topColor})`);
+check(hr.left.otherEdges === "0px 0px 0px",
+  `only the top edge is drawn, so 3px means 3px (other edges ${hr.left.otherEdges})`);
+check(hr.left.marginTop === "40px" && hr.left.marginBottom === "8px",
+  `space above and below apply (got ${hr.left.marginTop} / ${hr.left.marginBottom})`);
+check(hr.left.share === 50, `length spans half the width (got ${hr.left.share}%)`);
+check(hr.left.leftGap === 0 && hr.left.rightGap > 0,
+  `left alignment puts it against the left edge (gaps ${hr.left.leftGap}/${hr.left.rightGap})`);
+check(Math.abs(hr.center.leftGap - hr.center.rightGap) <= 1,
+  `center alignment splits the slack evenly (gaps ${hr.center.leftGap}/${hr.center.rightGap})`);
+check(hr.right.rightGap === 0 && hr.right.leftGap > 0,
+  `right alignment puts it against the right edge (gaps ${hr.right.leftGap}/${hr.right.rightGap})`);
+check(hr.hidden.topWidth === "0px", `a thickness of 0 draws nothing (got ${hr.hidden.topWidth})`);
+
+console.log("\n[31] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
