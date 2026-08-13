@@ -48,8 +48,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Whether the working copy differs from what is stored. */
   #dirty = false;
 
-  /** Sections the user has collapsed, so a re-render does not reopen them. */
-  #collapsed = new Set();
+  /**
+   * Sections the user has opened, so a re-render does not close them again.
+   * Everything starts collapsed: a tab holds up to nine sections and a hundred
+   * controls, and opening the one you came for beats scrolling past the rest.
+   */
+  #expanded = new Set();
 
   /**
    * Which member of each family is on show. Ten blocks and ten picture
@@ -221,7 +225,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
         hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
-        open: !this.#collapsed.has(`${group.id}.${section.id}`),
+        open: this.#expanded.has(`${group.id}.${section.id}`),
         // Only sections whose fields repeat one property across sides or
         // corners can offer to match them.
         matchable: section.fields.some((field) => field.link),
@@ -244,7 +248,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
         hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
-        open: !this.#collapsed.has(`${group.id}.${section.id}`),
+        open: this.#expanded.has(`${group.id}.${section.id}`),
         matchable: section.fields.some((field) => field.link),
         fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
       }))
@@ -688,8 +692,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Collapse or expand a section, remembering the choice across re-renders. */
   static #onToggleSection(_event, target) {
     const key = `${target.dataset.group}.${target.dataset.section}`;
-    if (this.#collapsed.has(key)) this.#collapsed.delete(key);
-    else this.#collapsed.add(key);
+    if (this.#expanded.has(key)) this.#expanded.delete(key);
+    else this.#expanded.add(key);
   }
 
   /** Restore one section's controls to their schema defaults. */

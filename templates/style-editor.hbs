@@ -16,6 +16,7 @@
       {{#each group.sections as |section|}}
       <details class="illuminus-section" {{#if section.open}}open{{/if}}>
         <summary data-action="toggleSection" data-group="{{group.id}}" data-section="{{section.id}}">
+          <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
           <span class="illuminus-section__label">{{section.label}}</span>
           <span class="illuminus-section__hint">{{section.hint}}</span>
         </summary>
@@ -75,6 +76,7 @@
       {{#each family.current.sections as |section|}}
       <details class="illuminus-section" {{#if section.open}}open{{/if}}>
         <summary data-action="toggleSection" data-group="{{family.current.id}}" data-section="{{section.id}}">
+          <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
           <span class="illuminus-section__label">{{section.label}}</span>
           <span class="illuminus-section__hint">{{section.hint}}</span>
         </summary>

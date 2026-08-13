@@ -1125,6 +1125,11 @@ const cp = await cdp.evaluate(`(async () => {
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1100));
   const el = app.element;
+  // Sections start collapsed, so open the one holding the control first — a
+  // person cannot click what is folded away either.
+  el.querySelector('[data-field="page.background"]').closest(".illuminus-section")
+    .querySelector("summary").click();
+  await new Promise(r => setTimeout(r, 300));
   const control = el.querySelector('[data-field="page.background"] color-picker');
   const swatch = el.querySelector('[data-field="page.background"] .illuminus-swatch');
 
@@ -1235,6 +1240,10 @@ const forgetSetup = await cdp.evaluate(`(async () => {
   const style = await api.createStyle({name: "Forget Probe", swatches: ["#112233", "#445566", "#778899"]});
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1100));
+  // Sections start collapsed; open the one holding the swatch first.
+  app.element.querySelector('[data-field="page.background"]').closest(".illuminus-section")
+    .querySelector("summary").click();
+  await new Promise(r => setTimeout(r, 300));
   const swatch = app.element.querySelector('[data-field="page.background"] .illuminus-swatch');
   const b = swatch.getBoundingClientRect();
   document.elementFromPoint(Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2))?.click();
