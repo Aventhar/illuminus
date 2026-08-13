@@ -5,11 +5,6 @@
 
     <header class="illuminus-tab__head">
       <p class="hint">{{group.hint}}</p>
-      <button type="button" class="illuminus-reset" data-action="resetGroup" data-group="{{group.id}}"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
-        <i class="fa-solid fa-rotate-left"></i>
-        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
-      </button>
     </header>
 
     <div class="illuminus-fields scrollable">
@@ -56,6 +51,7 @@
         <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>
         {{/each}}
       </select>
+      {{#if family.renamable}}
       <input type="text" class="illuminus-family__name" data-rename="{{family.current.id}}"
              value="{{family.current.label}}" placeholder="{{family.nameLabel}}"
              aria-label="{{family.nameLabel}}">
@@ -63,11 +59,7 @@
         <i class="fa-solid fa-check"></i>
         {{localize "ILLUMINUS.Buttons.Rename"}}
       </button>
-      <button type="button" class="illuminus-reset" data-action="resetGroup" data-group="{{family.current.id}}"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
-        <i class="fa-solid fa-rotate-left"></i>
-        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
-      </button>
+      {{/if}}
     </header>
 
     <p class="hint">{{family.hint}}</p>
@@ -114,6 +106,11 @@
          data-tooltip="{{localize 'ILLUMINUS.Editor.ResizePreview'}}"></div>
     <header class="illuminus-preview__head">
       <h4>{{localize "ILLUMINUS.Editor.PreviewTitle"}}</h4>
+      <button type="button" class="illuminus-reset" data-action="resetGroup"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
       <button type="button" class="illuminus-reset" data-action="resetAll"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
         <i class="fa-solid fa-broom"></i>

@@ -211,8 +211,16 @@ stripe colors, where `tr` cannot host one reliably.
 
 ## Headings
 
-Six levels, `heading1`..`heading6`, all six rule sets written by
-`tools/generate-block-css.mjs`. Levels 4 to 6 used to borrow level 3's rule wholesale.
+Six levels, `heading1`..`heading6`, sharing one tab as the `headings` family. All six
+rule sets are written by `tools/generate-block-css.mjs`; levels 4 to 6 used to borrow
+level 3's rule wholesale.
+
+**The tab strip's order comes from `GROUPS`, not from `FAMILIES`.** A group gets its own
+tab where it is declared, a family gets one where its first member is declared, and
+anything marked `strip: "end"` goes last however early it appears — which is how Sidebar
+and Window sit together at the end while styling different things. `FAMILIES` supplies
+only the icon, label, and whether members can be renamed (`renamable: false` for heading
+levels, since the level is the name).
 
 **Level 1 also styles the page title**, which the sheet renders in
 `.journal-page-header` — *outside* `.journal-page-content`, so it needs naming

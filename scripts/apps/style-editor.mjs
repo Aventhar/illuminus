@@ -63,7 +63,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * treatments would be twenty more tabs; instead each family gets one tab with
    * a picker, and only the chosen member's controls are built.
    */
-  #showing = { blocks: "block01", pictures: "picture01", tags: "tag01" };
+  #showing = { headings: "heading1", blocks: "block01", pictures: "picture01", tags: "tag01" };
 
   static DEFAULT_OPTIONS = {
     id: "illuminus-style-editor-{id}",
@@ -107,9 +107,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     footer: { template: "templates/generic/form-footer.hbs" }
   };
 
-  /** Families, each shown as a single tab with a picker. */
+  /**
+   * Families, each shown as a single tab with a picker. Order comes from the
+   * schema, not from this list — a family's tab sits where its first member
+   * does, so six heading levels take one slot in the middle of the strip rather
+   * than six at the end.
+   */
   static FAMILIES = [
-    { id: "blocks", icon: "fa-solid fa-square-dashed", label: "ILLUMINUS.Families.blocks" },
+    { id: "headings", icon: "fa-solid fa-heading", label: "ILLUMINUS.Families.headings", renamable: false },
+    { id: "blocks", icon: "fa-solid fa-comment-dots", label: "ILLUMINUS.Families.blocks" },
     { id: "tags", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tags" },
     { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" }
   ];
@@ -124,21 +130,46 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return { id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` };
   }
 
+  /**
+   * The tab strip, in schema order: a group gets its own tab, and a family gets
+   * one where its first member appears. Anything marked `strip: "end"` goes
+   * last however early it is declared — the Window tab styles the frame rather
+   * than the page, so it sits after the rest.
+   */
+  static #buildStrip() {
+    const seen = new Set();
+    const strip = [];
+    for (const group of GROUPS) {
+      if (group.strip === "end") continue;
+      if (!group.family) {
+        strip.push(IlluminusStyleEditor.#tabFor(group));
+        continue;
+      }
+      if (seen.has(group.family)) continue;
+      seen.add(group.family);
+      const family = IlluminusStyleEditor.FAMILIES.find((f) => f.id === group.family);
+      if (family) strip.push({ id: family.id, icon: family.icon, label: family.label });
+    }
+    return strip.concat(GROUPS.filter((g) => g.strip === "end").map(IlluminusStyleEditor.#tabFor));
+  }
+
   static TABS = {
     sheet: {
-      // Content tabs, then the families, then anything marked for the end of
-      // the strip — the Window tab styles the frame rather than the page, so it
-      // sits after the rest rather than in front of them.
-      tabs: [
-        ...IlluminusStyleEditor.pageGroups.filter((g) => g.strip !== "end").map(IlluminusStyleEditor.#tabFor),
-        ...IlluminusStyleEditor.FAMILIES.map((f) => ({ id: f.id, icon: f.icon, label: f.label })),
-        ...IlluminusStyleEditor.pageGroups.filter((g) => g.strip === "end").map(IlluminusStyleEditor.#tabFor)
-      ],
+      tabs: IlluminusStyleEditor.#buildStrip(),
       // Named rather than taken from the first tab, so the strip can be
       // reordered without changing where the editor opens.
       initial: "page"
     }
   };
+
+  /**
+   * The group the strip is currently showing: a page tab is its own group, and
+   * a family tab is whichever member its picker names.
+   */
+  #activeGroupId() {
+    const tab = this.tabGroups.sheet;
+    return this.#showing[tab] ?? tab;
+  }
 
   /** The display name a style gives a block or picture treatment. */
   #labelFor(groupId) {
@@ -207,6 +238,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         active: this.tabGroups.sheet === family.id,
         hint: game.i18n.localize(`ILLUMINUS.Families.${family.id}Hint`),
         nameLabel: game.i18n.localize(`ILLUMINUS.Families.${family.id}Name`),
+        renamable: family.renamable !== false,
         members: members.map((m) => ({ id: m.id, label: this.#labelFor(m.id), selected: m.id === current.id })),
         current: { ...this.#groupContext(current, fonts), label: this.#labelFor(current.id) }
       };
@@ -750,7 +782,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** Restore the current tab's controls to their schema defaults. */
   static async #onResetGroup(_event, target) {
-    const group = GROUPS.find((g) => g.id === target.dataset.group);
+    // The button sits above the sample rather than inside the tab it resets, so
+    // it names no group and the current one is worked out on the click.
+    const group = GROUPS.find((g) => g.id === (target.dataset.group ?? this.#activeGroupId()));
     if (!group) return;
     const confirmed = await DialogV2.confirm({
       window: { title: "ILLUMINUS.Confirm.ResetGroupTitle" },

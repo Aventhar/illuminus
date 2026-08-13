@@ -466,90 +466,12 @@ function bannerSections(defaults = {}) {
 
 /** @type {Array<{id: string, icon: string, sections: Array<{id: string, fields: object[]}>}>} */
 export const GROUPS = [
-{
-    id: "window",
-    icon: "fa-solid fa-window-maximize",
-    // Styles the frame rather than anything on the page, so its tab sits at the
-    // end of the strip. Its position in this list is unaffected.
-    strip: "end",
-    sections: [
-      {
-        id: "frame",
-        fields: [
-          col("background", "#00000000"), ...imageFields(),
-          ...borderFields("border", { color: "#00000000" }),
-          ...cornerFields("corner")
-        ]
-      },
-      {
-        id: "titleBar",
-        fields: [
-          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
-          font("font", ""),
-          num("size", 16, "px", 6, 60, 1),
-          col("color", "#f7f3e8"),
-          textStyleField("textStyle", "700", "normal"),
-          select("caps", "none", CHOICES.caps, { emit: emitCaps }),
-          num("letterSpacing", 0, "px", -5, 40, 0.5),
-          select("align", "left", CHOICES.alignNoJustify),
-          ...spacingFields("padding", 0, { max: 60 })
-        ]
-      },
-      {
-        id: "headerButtons",
-        fields: [
-          col("headerButtonColor", "#f7f3e8"),
-          col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
-          col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
-          num("headerButtonSize", 14, "px", 6, 48, 1),
-          ...borderFields("headerButtonBorder", { color: "#00000000" }),
-          ...cornerFields("headerButtonCorner", 3)
-        ]
-      },
-      {
-        id: "pageButton",
-        fields: [
-          col("pageButtonColor", "#e7d1b1"),
-          col("pageButtonHoverColor", "#ffffff"),
-          col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
-          col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
-          num("pageButtonSize", 14, "px", 6, 48, 1),
-          ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
-          ...cornerFields("pageButtonCorner", 3)
-        ]
-      }
-    ]
-  },
-
-    {
-    id: "page",
-    icon: "fa-solid fa-scroll",
-    sections: [
-      {
-        id: "surface",
-        fields: [
-          col("background", "#ede0c8"),
-          { type: "image", name: "texture", default: "" },
-          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
-          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
-          select("textureAttachment", "scroll", CHOICES.textureAttachment),
-          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
-          num("textureOpacity", 100, "%", 0, 100, 1)
-        ]
-      },
-      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
-      { id: "padding", fields: spacingFields("padding", 24) },
-      { id: "border", fields: borderFields("border") },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", fields: shadowFields("shadow") },
-      { id: "innerShadow", fields: shadowFields("innerShadow") }
-    ]
-  },
-
   {
     id: "sidebar",
     icon: "fa-solid fa-list-tree",
+    // Styles the window's contents panel rather than anything on the page, so
+    // its tab sits with the Window tab at the end of the strip.
+    strip: "end",
     sections: [
       {
         id: "surface",
@@ -643,9 +565,91 @@ export const GROUPS = [
     ]
   },
 
+{
+    id: "window",
+    icon: "fa-solid fa-window-maximize",
+    // Styles the frame rather than anything on the page, so its tab sits at the
+    // end of the strip. Its position in this list is unaffected.
+    strip: "end",
+    sections: [
+      {
+        id: "frame",
+        fields: [
+          col("background", "#00000000"), ...imageFields(),
+          ...borderFields("border", { color: "#00000000" }),
+          ...cornerFields("corner")
+        ]
+      },
+      {
+        id: "titleBar",
+        fields: [
+          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
+          font("font", ""),
+          num("size", 16, "px", 6, 60, 1),
+          col("color", "#f7f3e8"),
+          textStyleField("textStyle", "700", "normal"),
+          select("caps", "none", CHOICES.caps, { emit: emitCaps }),
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          select("align", "left", CHOICES.alignNoJustify),
+          ...spacingFields("padding", 0, { max: 60 })
+        ]
+      },
+      {
+        id: "headerButtons",
+        fields: [
+          col("headerButtonColor", "#f7f3e8"),
+          col("headerButtonHoverColor", "#ffffff"),
+          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
+          col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
+          num("headerButtonSize", 14, "px", 6, 48, 1),
+          ...borderFields("headerButtonBorder", { color: "#00000000" }),
+          ...cornerFields("headerButtonCorner", 3)
+        ]
+      },
+      {
+        id: "pageButton",
+        fields: [
+          col("pageButtonColor", "#e7d1b1"),
+          col("pageButtonHoverColor", "#ffffff"),
+          col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
+          col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
+          num("pageButtonSize", 14, "px", 6, 48, 1),
+          ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
+          ...cornerFields("pageButtonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+    {
+    id: "page",
+    icon: "fa-solid fa-scroll",
+    sections: [
+      {
+        id: "surface",
+        fields: [
+          col("background", "#ede0c8"),
+          { type: "image", name: "texture", default: "" },
+          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
+          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
+          select("textureAttachment", "scroll", CHOICES.textureAttachment),
+          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
+          num("textureOpacity", 100, "%", 0, 100, 1)
+        ]
+      },
+      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      { id: "padding", fields: spacingFields("padding", 24) },
+      { id: "border", fields: borderFields("border") },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      { id: "innerShadow", fields: shadowFields("innerShadow") }
+    ]
+  },
+
+
   {
     id: "title",
-    icon: "fa-solid fa-signature",
+    icon: "fa-solid fa-t",
     sections: bannerSections({
       size: 36, color: "#3b2412", weight: "700", align: "center", lineHeight: 1.2
     })
@@ -654,6 +658,7 @@ export const GROUPS = [
   {
     id: "heading1",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 }
     })
@@ -661,6 +666,7 @@ export const GROUPS = [
   {
     id: "heading2",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 }
     })
@@ -668,6 +674,7 @@ export const GROUPS = [
   {
     id: "heading3",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 18, color: "#5a4326", weight: "700", style: "italic", lineHeight: 1.3,
       margin: { top: 14, bottom: 6 }
@@ -680,6 +687,7 @@ export const GROUPS = [
   {
     id: "heading4",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 16, color: "#5a4326", weight: "700", lineHeight: 1.3,
       margin: { top: 12, bottom: 5 }
@@ -688,6 +696,7 @@ export const GROUPS = [
   {
     id: "heading5",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 15, color: "#5a4326", weight: "600", caps: "smallCaps", lineHeight: 1.3,
       margin: { top: 12, bottom: 4 }
@@ -696,6 +705,7 @@ export const GROUPS = [
   {
     id: "heading6",
     icon: "fa-solid fa-heading",
+    family: "headings",
     sections: bannerSections({
       size: 14, color: "#6b5636", weight: "600", style: "italic", lineHeight: 1.3,
       margin: { top: 10, bottom: 4 }
@@ -846,7 +856,7 @@ export const GROUPS = [
 
   {
     id: "boxes",
-    icon: "fa-solid fa-comment-dots",
+    icon: "fa-solid fa-square-dashed",
     sections: [
       {
         id: "text",
@@ -867,27 +877,6 @@ export const GROUPS = [
       { id: "shadow", fields: shadowFields("shadow") }
     ]
   },
-
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `block${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-square-dashed",
-    family: "blocks",
-    sections: blockSections()
-  })),
-
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `picture${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-image",
-    family: "pictures",
-    sections: pictureSections()
-  })),
-
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `tag${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-tag",
-    family: "tags",
-    sections: tagSections()
-  })),
 
   {
     id: "images",
@@ -919,7 +908,29 @@ export const GROUPS = [
         ]
       }
     ]
-  }
+  },
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `block${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-square-dashed",
+    family: "blocks",
+    sections: blockSections()
+  })),
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `tag${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-tag",
+    family: "tags",
+    sections: tagSections()
+  })),
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `picture${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-image",
+    family: "pictures",
+    sections: pictureSections()
+  })),
+
 ];
 
 /* -------------------------------------------- */

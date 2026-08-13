@@ -17,13 +17,15 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
 const { GROUPS, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
-// Blocks and picture treatments share one tab each and only build the member on
-// show, so the editor holds far fewer controls than the schema defines.
+// Each family shares one tab and only builds the member on show, so the editor
+// holds far fewer controls than the schema defines. Derived rather than counted,
+// so adding a family or a level cannot make these expectations stale.
 const pageGroups = GROUPS.filter((g) => !g.family);
-const shown = [...pageGroups, GROUPS.find((g) => g.id === "block01"),
-  GROUPS.find((g) => g.id === "picture01"), GROUPS.find((g) => g.id === "tag01")];
+const families = [...new Set(GROUPS.filter((g) => g.family).map((g) => g.family))];
+const firstOfEach = families.map((name) => GROUPS.find((g) => g.family === name));
+const shown = [...pageGroups, ...firstOfEach];
 const EXPECT = {
-  tabs: pageGroups.length + 3,
+  tabs: pageGroups.length + families.length,
   sections: shown.reduce((n, g) => n + g.sections.length, 0),
   fields: shown.reduce((n, g) => n + groupFields(g).length, 0)
 };
@@ -2021,6 +2023,39 @@ try {
     window.__heads = undefined;
   })()`);
 }
+
+// Six levels share one tab, and it sits where the levels do rather than out
+// with the families at the end.
+const headingTab = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  for (const app of [...foundry.applications.instances.values()]) {
+    if (app.constructor.name.startsWith("Illuminus")) await app.close();
+  }
+  const app = await api.openEditor(api.listStyles()[0].id);
+  await new Promise(r => setTimeout(r, 1300));
+  app.changeTab("headings", "sheet");
+  await new Promise(r => setTimeout(r, 400));
+  const el = app.element;
+  const tabs = [...el.querySelectorAll("nav.tabs [data-tab]")].map(t => t.dataset.tab);
+  const picker = el.querySelector('[data-family-picker="headings"]');
+  const before = el.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
+
+  picker.value = "heading5";
+  picker.dispatchEvent(new Event("change"));
+  await new Promise(r => setTimeout(r, 500));
+  const after = app.element.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
+
+  await app.close();
+  return JSON.stringify({tabs, levels: picker.options.length, before, after});
+})()`);
+const ht = JSON.parse(headingTab);
+check(ht.tabs.includes("headings") && !ht.tabs.includes("heading1"),
+  "the six levels share one tab rather than taking six");
+check(ht.levels === 6, `and its picker offers every level (got ${ht.levels})`);
+check(ht.tabs.indexOf("headings") === ht.tabs.indexOf("title") + 1,
+  `which sits where the levels do, after Title (strip: ${ht.tabs.slice(0, 5).join(", ")})`);
+check(ht.before?.startsWith("heading1.") && ht.after?.startsWith("heading5."),
+  `choosing a level builds that level's controls (${ht.before} -> ${ht.after})`);
 
 // The sample pane is dragged from a strip on its left edge, and the width has
 // to outlive the re-render that every field change causes.

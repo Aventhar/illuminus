@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 2,288 settings across 19 tabs and 365 collapsible
+- **Everything is a GUI control.** 2,288 settings across 14 tabs and 365 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
