@@ -108,6 +108,10 @@
   {{/each}}
 
   <aside class="illuminus-preview">
+    {{!-- Drag to give the sample more room, or hand it back to the controls. --}}
+    <div class="illuminus-preview__grip" role="separator" aria-orientation="vertical"
+         aria-label="{{localize 'ILLUMINUS.Editor.ResizePreview'}}"
+         data-tooltip="{{localize 'ILLUMINUS.Editor.ResizePreview'}}"></div>
     <header class="illuminus-preview__head">
       <h4>{{localize "ILLUMINUS.Editor.PreviewTitle"}}</h4>
       <button type="button" class="illuminus-reset" data-action="resetAll"
@@ -173,6 +177,9 @@
                 <h2>{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
                 <blockquote><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
                 <h3>{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
+                <h4>{{localize "ILLUMINUS.Preview.Heading4"}}</h4>
+                <h5>{{localize "ILLUMINUS.Preview.Heading5"}}</h5>
+                <h6>{{localize "ILLUMINUS.Preview.Heading6"}}</h6>
                 <ul>
                   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
                   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>

@@ -1958,7 +1958,120 @@ try {
   })()`);
 }
 
-console.log("\n[34] Console is clean");
+// Levels 4 to 6 used to borrow level 3's rule wholesale. Now they have their
+// own, so the point is that they diverge from 3 rather than merely exist.
+console.log("\n[34] Heading levels 4 to 6, the opening capital, and the sample pane");
+try {
+  const later = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Heading Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    settings.heading3.color = "#111111";
+    settings.heading4.color = "#224422";
+    settings.heading5.color = "#442244";
+    settings.heading6.color = "#444422";
+    settings.heading1.background = "#5e1914";
+    settings.body.dropCap = "three";
+    settings.body.dropCapFont = "Courier New";
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Heading Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<p>Opening paragraph.</p><h3>Three</h3><h4>Four</h4><h5>Five</h5><h6>Six</h6>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const colorOf = (sel) => getComputedStyle(root.querySelector(sel)).color;
+    const out = {
+      h3: colorOf(".journal-page-content h3"),
+      h4: colorOf(".journal-page-content h4"),
+      h5: colorOf(".journal-page-content h5"),
+      h6: colorOf(".journal-page-content h6"),
+      // The page title takes level 1's look even though it sits outside the
+      // content area, which is why level 1 styles the header too.
+      titleBg: getComputedStyle(root.querySelector(".journal-page-header h1")).backgroundColor,
+      dropCapFont: getComputedStyle(root.querySelector(".journal-page-content > p:first-child"), "::first-letter").fontFamily
+    };
+    window.__heads = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify(out);
+  })()`);
+  const hd = JSON.parse(later);
+  check(hd.h4 === "rgb(34, 68, 34)", `level 4 takes its own settings (got ${hd.h4})`);
+  check(hd.h5 === "rgb(68, 34, 68)", `level 5 too (got ${hd.h5})`);
+  check(hd.h6 === "rgb(68, 68, 34)", `and level 6 (got ${hd.h6})`);
+  check(hd.h3 !== hd.h4 && hd.h4 !== hd.h5,
+    "the later levels no longer borrow level 3's rule");
+  // The page title sits outside the content area, so level 1 has to name the
+  // page header explicitly. Moving these rules into the generator once dropped
+  // that half of the selector list and left the title unstyled.
+  check(hd.titleBg === "rgb(94, 25, 20)",
+    `the page title still takes level 1's look (got ${hd.titleBg})`);
+  check(/Courier New/.test(hd.dropCapFont),
+    `the opening capital takes its own typeface (got ${hd.dropCapFont})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__heads?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__heads?.styleId) await api.deleteStyle(window.__heads.styleId);
+    window.__heads = undefined;
+  })()`);
+}
+
+// The sample pane is dragged from a strip on its left edge, and the width has
+// to outlive the re-render that every field change causes.
+const paneBox = async () => JSON.parse(await cdp.evaluate(`(() => {
+  const app = [...foundry.applications.instances.values()].find(a => a.constructor.name === "IlluminusStyleEditor");
+  const el = app.element.querySelector(".illuminus-preview");
+  const g = app.element.querySelector(".illuminus-preview__grip").getBoundingClientRect();
+  const b = el.getBoundingClientRect();
+  return JSON.stringify({width: Math.round(b.width), gripX: g.left + g.width / 2, gripY: g.top + g.height / 2});
+})()`));
+try {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const a of [...foundry.applications.instances.values()]) {
+      if (a.constructor.name.startsWith("Illuminus")) await a.close();
+    }
+    await api.openEditor(api.listStyles()[0].id);
+    await new Promise(r => setTimeout(r, 1300));
+  })()`);
+  const start = await paneBox();
+  await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: start.gripX, y: start.gripY });
+  await cdp.send("Input.dispatchMouseEvent",
+    { type: "mousePressed", x: start.gripX, y: start.gripY, button: "left", clickCount: 1 });
+  for (const step of [50, 100, 150]) {
+    await cdp.send("Input.dispatchMouseEvent",
+      { type: "mouseMoved", x: start.gripX - step, y: start.gripY, button: "left", buttons: 1 });
+    await new Promise((r) => setTimeout(r, 40));
+  }
+  await cdp.send("Input.dispatchMouseEvent",
+    { type: "mouseReleased", x: start.gripX - 150, y: start.gripY, button: "left", clickCount: 1 });
+  await new Promise((r) => setTimeout(r, 250));
+  const dragged = await paneBox();
+  await cdp.evaluate(`(async () => {
+    const app = [...foundry.applications.instances.values()].find(a => a.constructor.name === "IlluminusStyleEditor");
+    app.changeTab("body", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+  })()`);
+  const afterRender = await paneBox();
+  check(dragged.width > start.width + 100,
+    `dragging the grip widens the sample pane (${start.width}px -> ${dragged.width}px)`);
+  check(afterRender.width === dragged.width,
+    `and a re-render does not snap it back (got ${afterRender.width}px)`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close();
+    }
+  })()`);
+}
+
+console.log("\n[35] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

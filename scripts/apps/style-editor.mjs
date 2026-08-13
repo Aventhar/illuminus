@@ -55,6 +55,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    */
   #expanded = new Set();
 
+  /** Width the user has dragged the sample pane to, in pixels. */
+  #previewWidth;
+
   /**
    * Which member of each family is on show. Ten blocks and ten picture
    * treatments would be twenty more tabs; instead each family gets one tab with
@@ -303,6 +306,44 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /*  Rendering                                   */
   /* -------------------------------------------- */
 
+  /**
+   * Let the sample pane be resized by dragging the strip on its left edge.
+   *
+   * Pointer capture rather than document listeners: the pointer leaves the
+   * 11px strip on the first move otherwise, and the drag stops dead. The width
+   * is held on the instance so a re-render — which happens on every field
+   * change — does not snap the pane back.
+   */
+  #activateGrip() {
+    const pane = this.element.querySelector(".illuminus-preview");
+    const grip = this.element.querySelector(".illuminus-preview__grip");
+    if (!pane || !grip) return;
+    if (this.#previewWidth) pane.style.setProperty("--illuminus-pane-width", `${this.#previewWidth}px`);
+
+    grip.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      grip.setPointerCapture(event.pointerId);
+      grip.classList.add("is-dragging");
+      const right = pane.getBoundingClientRect().right;
+
+      const onMove = (move) => {
+        // Measured from the pane's right edge, which does not move, so the
+        // sample follows the pointer exactly however the window is laid out.
+        const width = Math.round(Math.min(Math.max(right - move.clientX, 260), 1200));
+        this.#previewWidth = width;
+        pane.style.setProperty("--illuminus-pane-width", `${width}px`);
+      };
+      const onUp = () => {
+        grip.classList.remove("is-dragging");
+        grip.releasePointerCapture(event.pointerId);
+        grip.removeEventListener("pointermove", onMove);
+        grip.removeEventListener("pointerup", onUp);
+      };
+      grip.addEventListener("pointermove", onMove);
+      grip.addEventListener("pointerup", onUp);
+    });
+  }
+
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
@@ -316,6 +357,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         this.render();
       });
     }
+    this.#activateGrip();
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
       const [groupId, fieldName] = row.dataset.field.split(".");

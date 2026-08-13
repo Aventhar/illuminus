@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 2,158 settings across 16 tabs and 344 collapsible
+- **Everything is a GUI control.** 2,288 settings across 19 tabs and 365 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
@@ -33,8 +33,8 @@ it to whichever journals should wear it, and export it to carry into another wor
 - **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.
-- **Live sample.** The editor carries a miniature journal that repaints as you drag a
-  slider, and any real journal already open repaints too. The sample follows the tab: it
+- **Live sample.** The editor carries a miniature journal, resizable by dragging the
+  strip on its left edge, that repaints as you drag a slider, and any real journal already open repaints too. The sample follows the tab: it
   reveals the sidebar while the Sidebar tab is open and gives the width back to the page
   otherwise, and Block Styles and Picture Styles take the pane over entirely, showing the
   block or picture you are editing against the prose it would interrupt — the only way a

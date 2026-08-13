@@ -56,6 +56,153 @@
   display: none;
 }
 
+/* heading1 */
+.illuminus-styled .journal-page-header h1,
+.illuminus-styled .journal-page-header h2,
+.illuminus-styled .journal-page-header h3,
+.illuminus-styled .journal-page-content h1 {
+  font-family: var(--ill-heading1-font);
+  font-size: var(--ill-heading1-size);
+  font-weight: var(--ill-heading1-text-style-weight);
+  font-style: var(--ill-heading1-text-style-slant);
+  font-variant: var(--ill-heading1-caps-variant);
+  text-transform: var(--ill-heading1-caps-transform);
+  letter-spacing: var(--ill-heading1-letter-spacing);
+  word-spacing: var(--ill-heading1-word-spacing);
+  line-height: var(--ill-heading1-line-height);
+  text-align: var(--ill-heading1-align);
+  color: var(--ill-heading1-color);
+  text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
+               var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
+  background-color: var(--ill-heading1-background);
+  margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right) var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
+  padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right) var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
+  border-width: var(--ill-heading1-border-top-width) var(--ill-heading1-border-right-width) var(--ill-heading1-border-bottom-width) var(--ill-heading1-border-left-width);
+  border-style: var(--ill-heading1-border-top-style) var(--ill-heading1-border-right-style) var(--ill-heading1-border-bottom-style) var(--ill-heading1-border-left-style);
+  border-color: var(--ill-heading1-border-top-color) var(--ill-heading1-border-right-color) var(--ill-heading1-border-bottom-color) var(--ill-heading1-border-left-color);
+  border-radius: var(--ill-heading1-corner-top-left) var(--ill-heading1-corner-top-right) var(--ill-heading1-corner-bottom-right) var(--ill-heading1-corner-bottom-left);
+}
+
+/* heading2 */
+.illuminus-styled .journal-page-content h2 {
+  font-family: var(--ill-heading2-font);
+  font-size: var(--ill-heading2-size);
+  font-weight: var(--ill-heading2-text-style-weight);
+  font-style: var(--ill-heading2-text-style-slant);
+  font-variant: var(--ill-heading2-caps-variant);
+  text-transform: var(--ill-heading2-caps-transform);
+  letter-spacing: var(--ill-heading2-letter-spacing);
+  word-spacing: var(--ill-heading2-word-spacing);
+  line-height: var(--ill-heading2-line-height);
+  text-align: var(--ill-heading2-align);
+  color: var(--ill-heading2-color);
+  text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
+               var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
+  background-color: var(--ill-heading2-background);
+  margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right) var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
+  padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right) var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
+  border-width: var(--ill-heading2-border-top-width) var(--ill-heading2-border-right-width) var(--ill-heading2-border-bottom-width) var(--ill-heading2-border-left-width);
+  border-style: var(--ill-heading2-border-top-style) var(--ill-heading2-border-right-style) var(--ill-heading2-border-bottom-style) var(--ill-heading2-border-left-style);
+  border-color: var(--ill-heading2-border-top-color) var(--ill-heading2-border-right-color) var(--ill-heading2-border-bottom-color) var(--ill-heading2-border-left-color);
+  border-radius: var(--ill-heading2-corner-top-left) var(--ill-heading2-corner-top-right) var(--ill-heading2-corner-bottom-right) var(--ill-heading2-corner-bottom-left);
+}
+
+/* heading3 */
+.illuminus-styled .journal-page-content h3 {
+  font-family: var(--ill-heading3-font);
+  font-size: var(--ill-heading3-size);
+  font-weight: var(--ill-heading3-text-style-weight);
+  font-style: var(--ill-heading3-text-style-slant);
+  font-variant: var(--ill-heading3-caps-variant);
+  text-transform: var(--ill-heading3-caps-transform);
+  letter-spacing: var(--ill-heading3-letter-spacing);
+  word-spacing: var(--ill-heading3-word-spacing);
+  line-height: var(--ill-heading3-line-height);
+  text-align: var(--ill-heading3-align);
+  color: var(--ill-heading3-color);
+  text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
+               var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
+  background-color: var(--ill-heading3-background);
+  margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right) var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
+  padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right) var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
+  border-width: var(--ill-heading3-border-top-width) var(--ill-heading3-border-right-width) var(--ill-heading3-border-bottom-width) var(--ill-heading3-border-left-width);
+  border-style: var(--ill-heading3-border-top-style) var(--ill-heading3-border-right-style) var(--ill-heading3-border-bottom-style) var(--ill-heading3-border-left-style);
+  border-color: var(--ill-heading3-border-top-color) var(--ill-heading3-border-right-color) var(--ill-heading3-border-bottom-color) var(--ill-heading3-border-left-color);
+  border-radius: var(--ill-heading3-corner-top-left) var(--ill-heading3-corner-top-right) var(--ill-heading3-corner-bottom-right) var(--ill-heading3-corner-bottom-left);
+}
+
+/* heading4 */
+.illuminus-styled .journal-page-content h4 {
+  font-family: var(--ill-heading4-font);
+  font-size: var(--ill-heading4-size);
+  font-weight: var(--ill-heading4-text-style-weight);
+  font-style: var(--ill-heading4-text-style-slant);
+  font-variant: var(--ill-heading4-caps-variant);
+  text-transform: var(--ill-heading4-caps-transform);
+  letter-spacing: var(--ill-heading4-letter-spacing);
+  word-spacing: var(--ill-heading4-word-spacing);
+  line-height: var(--ill-heading4-line-height);
+  text-align: var(--ill-heading4-align);
+  color: var(--ill-heading4-color);
+  text-shadow: var(--ill-heading4-text-shadow-offset-x) var(--ill-heading4-text-shadow-offset-y)
+               var(--ill-heading4-text-shadow-blur) var(--ill-heading4-text-shadow-color);
+  background-color: var(--ill-heading4-background);
+  margin: var(--ill-heading4-margin-top) var(--ill-heading4-margin-right) var(--ill-heading4-margin-bottom) var(--ill-heading4-margin-left);
+  padding: var(--ill-heading4-padding-top) var(--ill-heading4-padding-right) var(--ill-heading4-padding-bottom) var(--ill-heading4-padding-left);
+  border-width: var(--ill-heading4-border-top-width) var(--ill-heading4-border-right-width) var(--ill-heading4-border-bottom-width) var(--ill-heading4-border-left-width);
+  border-style: var(--ill-heading4-border-top-style) var(--ill-heading4-border-right-style) var(--ill-heading4-border-bottom-style) var(--ill-heading4-border-left-style);
+  border-color: var(--ill-heading4-border-top-color) var(--ill-heading4-border-right-color) var(--ill-heading4-border-bottom-color) var(--ill-heading4-border-left-color);
+  border-radius: var(--ill-heading4-corner-top-left) var(--ill-heading4-corner-top-right) var(--ill-heading4-corner-bottom-right) var(--ill-heading4-corner-bottom-left);
+}
+
+/* heading5 */
+.illuminus-styled .journal-page-content h5 {
+  font-family: var(--ill-heading5-font);
+  font-size: var(--ill-heading5-size);
+  font-weight: var(--ill-heading5-text-style-weight);
+  font-style: var(--ill-heading5-text-style-slant);
+  font-variant: var(--ill-heading5-caps-variant);
+  text-transform: var(--ill-heading5-caps-transform);
+  letter-spacing: var(--ill-heading5-letter-spacing);
+  word-spacing: var(--ill-heading5-word-spacing);
+  line-height: var(--ill-heading5-line-height);
+  text-align: var(--ill-heading5-align);
+  color: var(--ill-heading5-color);
+  text-shadow: var(--ill-heading5-text-shadow-offset-x) var(--ill-heading5-text-shadow-offset-y)
+               var(--ill-heading5-text-shadow-blur) var(--ill-heading5-text-shadow-color);
+  background-color: var(--ill-heading5-background);
+  margin: var(--ill-heading5-margin-top) var(--ill-heading5-margin-right) var(--ill-heading5-margin-bottom) var(--ill-heading5-margin-left);
+  padding: var(--ill-heading5-padding-top) var(--ill-heading5-padding-right) var(--ill-heading5-padding-bottom) var(--ill-heading5-padding-left);
+  border-width: var(--ill-heading5-border-top-width) var(--ill-heading5-border-right-width) var(--ill-heading5-border-bottom-width) var(--ill-heading5-border-left-width);
+  border-style: var(--ill-heading5-border-top-style) var(--ill-heading5-border-right-style) var(--ill-heading5-border-bottom-style) var(--ill-heading5-border-left-style);
+  border-color: var(--ill-heading5-border-top-color) var(--ill-heading5-border-right-color) var(--ill-heading5-border-bottom-color) var(--ill-heading5-border-left-color);
+  border-radius: var(--ill-heading5-corner-top-left) var(--ill-heading5-corner-top-right) var(--ill-heading5-corner-bottom-right) var(--ill-heading5-corner-bottom-left);
+}
+
+/* heading6 */
+.illuminus-styled .journal-page-content h6 {
+  font-family: var(--ill-heading6-font);
+  font-size: var(--ill-heading6-size);
+  font-weight: var(--ill-heading6-text-style-weight);
+  font-style: var(--ill-heading6-text-style-slant);
+  font-variant: var(--ill-heading6-caps-variant);
+  text-transform: var(--ill-heading6-caps-transform);
+  letter-spacing: var(--ill-heading6-letter-spacing);
+  word-spacing: var(--ill-heading6-word-spacing);
+  line-height: var(--ill-heading6-line-height);
+  text-align: var(--ill-heading6-align);
+  color: var(--ill-heading6-color);
+  text-shadow: var(--ill-heading6-text-shadow-offset-x) var(--ill-heading6-text-shadow-offset-y)
+               var(--ill-heading6-text-shadow-blur) var(--ill-heading6-text-shadow-color);
+  background-color: var(--ill-heading6-background);
+  margin: var(--ill-heading6-margin-top) var(--ill-heading6-margin-right) var(--ill-heading6-margin-bottom) var(--ill-heading6-margin-left);
+  padding: var(--ill-heading6-padding-top) var(--ill-heading6-padding-right) var(--ill-heading6-padding-bottom) var(--ill-heading6-padding-left);
+  border-width: var(--ill-heading6-border-top-width) var(--ill-heading6-border-right-width) var(--ill-heading6-border-bottom-width) var(--ill-heading6-border-left-width);
+  border-style: var(--ill-heading6-border-top-style) var(--ill-heading6-border-right-style) var(--ill-heading6-border-bottom-style) var(--ill-heading6-border-left-style);
+  border-color: var(--ill-heading6-border-top-color) var(--ill-heading6-border-right-color) var(--ill-heading6-border-bottom-color) var(--ill-heading6-border-left-color);
+  border-radius: var(--ill-heading6-corner-top-left) var(--ill-heading6-corner-top-right) var(--ill-heading6-corner-bottom-right) var(--ill-heading6-corner-bottom-left);
+}
+
 /* block01 */
 .illuminus-styled .journal-page-content .illuminus-block--block01 {
   float: var(--ill-block01-float);
@@ -1623,6 +1770,66 @@
   background-position: var(--ill-heading3-texture-position);
   mix-blend-mode: var(--ill-heading3-texture-blend);
   opacity: var(--ill-heading3-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h4 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h4::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading4-texture);
+  background-size: var(--ill-heading4-texture-fit-size);
+  background-repeat: var(--ill-heading4-texture-fit-repeat);
+  background-position: var(--ill-heading4-texture-position);
+  mix-blend-mode: var(--ill-heading4-texture-blend);
+  opacity: var(--ill-heading4-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h5 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h5::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading5-texture);
+  background-size: var(--ill-heading5-texture-fit-size);
+  background-repeat: var(--ill-heading5-texture-fit-repeat);
+  background-position: var(--ill-heading5-texture-position);
+  mix-blend-mode: var(--ill-heading5-texture-blend);
+  opacity: var(--ill-heading5-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h6 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h6::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading6-texture);
+  background-size: var(--ill-heading6-texture-fit-size);
+  background-repeat: var(--ill-heading6-texture-fit-repeat);
+  background-position: var(--ill-heading6-texture-position);
+  mix-blend-mode: var(--ill-heading6-texture-blend);
+  opacity: var(--ill-heading6-texture-opacity);
 }
 
 .illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll {

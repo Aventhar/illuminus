@@ -674,6 +674,34 @@ export const GROUPS = [
     })
   },
 
+  // Levels 4 to 6 carried on looking like level 3 until they got tabs of their
+  // own. Their defaults continue the same progression, so a style written
+  // before they existed keeps the look it had.
+  {
+    id: "heading4",
+    icon: "fa-solid fa-heading",
+    sections: bannerSections({
+      size: 16, color: "#5a4326", weight: "700", lineHeight: 1.3,
+      margin: { top: 12, bottom: 5 }
+    })
+  },
+  {
+    id: "heading5",
+    icon: "fa-solid fa-heading",
+    sections: bannerSections({
+      size: 15, color: "#5a4326", weight: "600", caps: "smallCaps", lineHeight: 1.3,
+      margin: { top: 12, bottom: 4 }
+    })
+  },
+  {
+    id: "heading6",
+    icon: "fa-solid fa-heading",
+    sections: bannerSections({
+      size: 14, color: "#6b5636", weight: "600", style: "italic", lineHeight: 1.3,
+      margin: { top: 10, bottom: 4 }
+    })
+  },
+
   {
     id: "body",
     icon: "fa-solid fa-paragraph",
@@ -705,6 +733,7 @@ export const GROUPS = [
         id: "dropCap",
         fields: [
           select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
+          font("dropCapFont", ""),
           col("dropCapColor", "#7a2010")
         ]
       },

@@ -193,6 +193,56 @@ const emptyRules = (group) => `
 
 /* -------------------------------------------- */
 
+/** The heading groups, paired with the element each one styles. */
+const HEADINGS = [1, 2, 3, 4, 5, 6].map((level) => ({
+  level,
+  group: GROUPS.find((g) => g.id === `heading${level}`)
+}));
+
+/**
+ * One heading level. Six of these differ only in which properties they read and
+ * which element they land on, and levels 4 to 6 used to borrow level 3's rule
+ * wholesale because writing three more by hand was not worth it.
+ */
+/**
+ * The journal sheet renders a page's title as an h1, h2, or h3 depending on the
+ * page's own title level, and all three take level 1's look — so level 1 styles
+ * the page header as well as its own element.
+ */
+const headingSelector = (level) => {
+  const own = `.illuminus-styled .journal-page-content h${level}`;
+  if (level !== 1) return own;
+  return [1, 2, 3].map((l) => `.illuminus-styled .journal-page-header h${l}`).concat(own).join(",\n");
+};
+
+const headingRules = (group, level) => `
+/* ${group.id} */
+${headingSelector(level)} {
+  font-family: ${v(group, "font")};
+  font-size: ${v(group, "size")};
+  font-weight: ${v(group, "textStyle", "weight")};
+  font-style: ${v(group, "textStyle", "slant")};
+  font-variant: ${v(group, "caps", "variant")};
+  text-transform: ${v(group, "caps", "transform")};
+  letter-spacing: ${v(group, "letterSpacing")};
+  word-spacing: ${v(group, "wordSpacing")};
+  line-height: ${v(group, "lineHeight")};
+  text-align: ${v(group, "align")};
+  color: ${v(group, "color")};
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
+  background-color: ${v(group, "background")};
+  margin: ${sides(group, "margin")};
+  padding: ${sides(group, "padding")};
+  border-width: ${sides(group, "border", "Width")};
+  border-style: ${sides(group, "border", "Style")};
+  border-color: ${sides(group, "border", "Color")};
+  border-radius: ${corners(group, "corner")};
+}
+`;
+
+/* -------------------------------------------- */
+
 /**
  * A background image behind one fill color.
  *
@@ -221,9 +271,8 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled .journal-sidebar button", group: "sidebar", prefix: "button" },
   { selector: ".illuminus-styled .journal-sidebar button:hover", group: "sidebar", prefix: "buttonHover" },
   { selector: ".illuminus-styled .journal-header .title", group: "title", prefix: "" },
-  { selector: ".illuminus-styled .journal-page-content h1", group: "heading1", prefix: "" },
-  { selector: ".illuminus-styled .journal-page-content h2", group: "heading2", prefix: "" },
-  { selector: ".illuminus-styled .journal-page-content h3", group: "heading3", prefix: "" },
+  ...HEADINGS.map(({ group, level }) =>
+    ({ selector: `.illuminus-styled .journal-page-content h${level}`, group: group.id, prefix: "" })),
   { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },
   { selector: ".illuminus-styled .journal-page-content thead th", group: "tables", prefix: "header" },
   { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-block)", group: "boxes", prefix: "" },
@@ -327,8 +376,9 @@ const blocks = blockGroups.map(blockRules).join("");
 const pictures = GROUPS.filter((g) => g.family === "pictures").map(pictureRules).join("");
 const tags = GROUPS.filter((g) => g.family === "tags").map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
+const headings = HEADINGS.map(({ group, level }) => headingRules(group, level)).join("");
 const images = IMAGE_LAYERS.map(imageLayer).join("");
-const out = `${header}${blocks}${pictures}${tags}${empties}${images}`;
+const out = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
   + `${GROUPS.filter((g) => g.family).length} groups`);

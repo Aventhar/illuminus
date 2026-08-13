@@ -384,100 +384,10 @@
 
 /* --- Headings ----------------------------------------------------------- */
 
-/* Level 1 also covers the page-title header the journal sheet renders. */
-.illuminus-styled .journal-page-header h1,
-.illuminus-styled .journal-page-header h2,
-.illuminus-styled .journal-page-header h3,
-.illuminus-styled .journal-page-content h1 {
-  font-family: var(--ill-heading1-font);
-  font-size: var(--ill-heading1-size);
-  font-weight: var(--ill-heading1-text-style-weight);
-  font-style: var(--ill-heading1-text-style-slant);
-  font-variant: var(--ill-heading1-caps-variant);
-  text-transform: var(--ill-heading1-caps-transform);
-  letter-spacing: var(--ill-heading1-letter-spacing);
-  word-spacing: var(--ill-heading1-word-spacing);
-  line-height: var(--ill-heading1-line-height);
-  text-align: var(--ill-heading1-align);
-  color: var(--ill-heading1-color);
-  text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
-               var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
-  background-color: var(--ill-heading1-background);
-  margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right)
-          var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
-  padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right)
-           var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
-  border-width: var(--ill-heading1-border-top-width) var(--ill-heading1-border-right-width)
-                var(--ill-heading1-border-bottom-width) var(--ill-heading1-border-left-width);
-  border-style: var(--ill-heading1-border-top-style) var(--ill-heading1-border-right-style)
-                var(--ill-heading1-border-bottom-style) var(--ill-heading1-border-left-style);
-  border-color: var(--ill-heading1-border-top-color) var(--ill-heading1-border-right-color)
-                var(--ill-heading1-border-bottom-color) var(--ill-heading1-border-left-color);
-  border-radius: var(--ill-heading1-corner-top-left) var(--ill-heading1-corner-top-right)
-                 var(--ill-heading1-corner-bottom-right) var(--ill-heading1-corner-bottom-left);
-}
-
-.illuminus-styled .journal-page-content h2 {
-  font-family: var(--ill-heading2-font);
-  font-size: var(--ill-heading2-size);
-  font-weight: var(--ill-heading2-text-style-weight);
-  font-style: var(--ill-heading2-text-style-slant);
-  font-variant: var(--ill-heading2-caps-variant);
-  text-transform: var(--ill-heading2-caps-transform);
-  letter-spacing: var(--ill-heading2-letter-spacing);
-  word-spacing: var(--ill-heading2-word-spacing);
-  line-height: var(--ill-heading2-line-height);
-  text-align: var(--ill-heading2-align);
-  color: var(--ill-heading2-color);
-  text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
-               var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
-  background-color: var(--ill-heading2-background);
-  margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right)
-          var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
-  padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right)
-           var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
-  border-width: var(--ill-heading2-border-top-width) var(--ill-heading2-border-right-width)
-                var(--ill-heading2-border-bottom-width) var(--ill-heading2-border-left-width);
-  border-style: var(--ill-heading2-border-top-style) var(--ill-heading2-border-right-style)
-                var(--ill-heading2-border-bottom-style) var(--ill-heading2-border-left-style);
-  border-color: var(--ill-heading2-border-top-color) var(--ill-heading2-border-right-color)
-                var(--ill-heading2-border-bottom-color) var(--ill-heading2-border-left-color);
-  border-radius: var(--ill-heading2-corner-top-left) var(--ill-heading2-corner-top-right)
-                 var(--ill-heading2-corner-bottom-right) var(--ill-heading2-corner-bottom-left);
-}
-
-/* Levels 4 to 6 follow level 3 rather than going unstyled. */
-.illuminus-styled .journal-page-content h3,
-.illuminus-styled .journal-page-content h4,
-.illuminus-styled .journal-page-content h5,
-.illuminus-styled .journal-page-content h6 {
-  font-family: var(--ill-heading3-font);
-  font-size: var(--ill-heading3-size);
-  font-weight: var(--ill-heading3-text-style-weight);
-  font-style: var(--ill-heading3-text-style-slant);
-  font-variant: var(--ill-heading3-caps-variant);
-  text-transform: var(--ill-heading3-caps-transform);
-  letter-spacing: var(--ill-heading3-letter-spacing);
-  word-spacing: var(--ill-heading3-word-spacing);
-  line-height: var(--ill-heading3-line-height);
-  text-align: var(--ill-heading3-align);
-  color: var(--ill-heading3-color);
-  text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
-               var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
-  background-color: var(--ill-heading3-background);
-  margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right)
-          var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
-  padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right)
-           var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
-  border-width: var(--ill-heading3-border-top-width) var(--ill-heading3-border-right-width)
-                var(--ill-heading3-border-bottom-width) var(--ill-heading3-border-left-width);
-  border-style: var(--ill-heading3-border-top-style) var(--ill-heading3-border-right-style)
-                var(--ill-heading3-border-bottom-style) var(--ill-heading3-border-left-style);
-  border-color: var(--ill-heading3-border-top-color) var(--ill-heading3-border-right-color)
-                var(--ill-heading3-border-bottom-color) var(--ill-heading3-border-left-color);
-  border-radius: var(--ill-heading3-corner-top-left) var(--ill-heading3-corner-top-right)
-                 var(--ill-heading3-corner-bottom-right) var(--ill-heading3-corner-bottom-left);
-}
+/* Heading levels 1 to 6 are six identical rule sets reading six sets of
+   properties, so they are written by tools/generate-block-css.mjs alongside the
+   blocks — including the page-title header, which takes level 1's look. See
+   styles/illuminus-generated.css. */
 
 /* --- Body text ---------------------------------------------------------- */
 
@@ -515,6 +425,7 @@
 
 .illuminus-styled .journal-page-content > p:first-child::first-letter {
   float: var(--ill-body-drop-cap-float);
+  font-family: var(--ill-body-drop-cap-font);
   font-size: var(--ill-body-drop-cap-size);
   line-height: var(--ill-body-drop-cap-line-height);
   font-weight: var(--ill-body-drop-cap-weight);
@@ -1190,11 +1101,45 @@
 /* --- Editor preview pane ------------------------------------------------ */
 
 .illuminus-preview {
-  flex: 0 0 400px;
+  /* Width is the user's, dragged from the grip below; the default is what the
+     pane opens at. */
+  flex: 0 0 var(--illuminus-pane-width, 400px);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   min-height: 0;
+  position: relative;
+}
+
+/* A grabbable strip on the pane's left edge. It sits outside the pane's own
+   box so it does not eat into the sample, and widens its hit area beyond the
+   line people actually see. */
+.illuminus-preview__grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.55rem;
+  width: 0.7rem;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.illuminus-preview__grip::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+  transition: background-color 120ms;
+}
+
+.illuminus-preview__grip:hover::before,
+.illuminus-preview__grip.is-dragging::before {
+  background: var(--color-border-highlight, #ff6400);
 }
 
 .illuminus-preview__head {

@@ -209,6 +209,17 @@ Two fills deliberately have no image: the `<img>` fill on the Images tab, which 
 behind a picture rather than behind content and cannot host a layer, and table row and
 stripe colors, where `tr` cannot host one reliably.
 
+## Headings
+
+Six levels, `heading1`..`heading6`, all six rule sets written by
+`tools/generate-block-css.mjs`. Levels 4 to 6 used to borrow level 3's rule wholesale.
+
+**Level 1 also styles the page title**, which the sheet renders in
+`.journal-page-header` — *outside* `.journal-page-content`, so it needs naming
+explicitly. Its three selectors sat at the head of level 1's selector list; moving the
+rules into the generator by cutting from `.journal-page-content h1 {` left them orphaned
+and the title unstyled, which is now covered by a check.
+
 ## Generated files — do not hand-edit
 
 - **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.
