@@ -424,7 +424,37 @@ check(mg.kept.page.cornerTopLeft === 3 && mg.kept.page.cornerBottomRight === 3,
 check(mg.kept.page.paddingTop === 32 && mg.kept.page.paddingLeft === 32,
   `one padding became four (got ${mg.kept.page.paddingTop})`);
 check(mg.kept.page.innerShadowBlur === 40, `the aged-edges toggle became a real inner shadow (blur ${mg.kept.page.innerShadowBlur})`);
-check(mg.kept.heading1.weight === "700", `normal/bold became a numeric weight (got ${mg.kept.heading1.weight})`);
+check(mg.kept.heading1.textStyle === "bold",
+  `normal/bold became a numeric weight and then one Text Style (got ${mg.kept.heading1.textStyle})`);
+// Thickness and Slant merged into one control, so a v2 style has to arrive with
+// the nearest combined choice rather than losing both to cleanSettings.
+const merged = await cdp.evaluate(`(async () => {
+  const mod = await import("/modules/illuminus/scripts/migrations.mjs");
+  const v2 = {
+    body: {weight: "800", style: "italic"},
+    heading1: {weight: "200", style: "normal"},
+    sidebar: {activeWeight: "700"},
+    block01: {weight: "inherit", style: "inherit"},
+    images: {captionWeight: "400", captionStyle: "oblique"}
+  };
+  const out = mod.migrateSettings(v2, 2);
+  const { cleanSettings } = await import("/modules/illuminus/scripts/style-schema.mjs");
+  return JSON.stringify({out, kept: cleanSettings(out)});
+})()`);
+const mx = JSON.parse(merged);
+check(mx.kept.body.textStyle === "boldItalic",
+  `a heavy italic becomes Bold Italic (got ${mx.kept.body.textStyle})`);
+check(mx.kept.heading1.textStyle === "light",
+  `a hairline weight becomes Light (got ${mx.kept.heading1.textStyle})`);
+check(mx.kept.sidebar.activeTextStyle === "bold",
+  `a thickness that never had a slant still converts (got ${mx.kept.sidebar.activeTextStyle})`);
+check(mx.kept.block01.textStyle === "inherit",
+  `"use the page setting" survives on both halves (got ${mx.kept.block01.textStyle})`);
+check(mx.kept.images.captionTextStyle === "normalItalic",
+  `oblique counts as italic (got ${mx.kept.images.captionTextStyle})`);
+check(mx.out.body.weight === undefined && mx.out.body.style === undefined,
+  "and the two old keys are gone");
+
 check(mg.kept.heading1.marginTop === 24 && mg.kept.heading1.marginBottom === 12,
   `heading gaps became margins (got ${mg.kept.heading1.marginTop}/${mg.kept.heading1.marginBottom})`);
 check(mg.kept.heading1.paddingLeft === 12 && mg.kept.heading1.paddingTop === 6,
@@ -508,7 +538,7 @@ const sidebar = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Sidebar Probe", settings: {sidebar: {
       background: "#12151b", color: "#c8d2de",
-      activeColor: "#e8c979", activeWeight: "700",
+      activeColor: "#e8c979", activeTextStyle: "boldItalic",
       activeAccentColor: "#e8c979", activeAccentWidth: 3,
       entryBorderBottomWidth: 1, entryBorderBottomColor: "#262c38",
       numberColor: "#6b7688", searchBackground: "#0d1015"
@@ -547,6 +577,7 @@ const sidebar = await cdp.evaluate(`(async () => {
     entryColor: cs(inactive?.querySelector(".page-title")).color,
     activeColor: cs(active?.querySelector(".page-title")).color,
     activeWeight: cs(active?.querySelector(".page-title")).fontWeight,
+    activeSlant: cs(active?.querySelector(".page-title")).fontStyle,
     activeShadow: cs(active).boxShadow,
     entryBorderBottom: cs(inactive).borderBottomWidth + " " + cs(inactive).borderBottomColor,
     numberColor: cs(root.querySelector(".toc .page-index")).color,
@@ -562,6 +593,9 @@ check(sb.sidebarWidth === "300px", `panel width control feeds core's variable (g
 check(sb.entryColor === "rgb(200, 210, 222)", `page entry color applied (got ${sb.entryColor})`);
 check(sb.activeColor === "rgb(232, 201, 121)", `current page color applied (got ${sb.activeColor})`);
 check(sb.activeWeight === "700", `current page weight applied (got ${sb.activeWeight})`);
+// A lone Thickness had no Slant beside it; the combined control carries both,
+// so the sidebar can be italic now where it could not before.
+check(sb.activeSlant === "italic", `and the slant it gained with it (got ${sb.activeSlant})`);
 check((sb.activeShadow ?? "").includes("rgb(232, 201, 121)"), `current page accent bar drawn (got ${sb.activeShadow})`);
 check(sb.entryBorderBottom.startsWith("1px") && sb.entryBorderBottom.includes("38, 44, 56"),
   `entry divider beat core's own border rule (got ${sb.entryBorderBottom})`);

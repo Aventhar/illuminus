@@ -154,9 +154,61 @@ function v1_to_v2(settings) {
   return out;
 }
 
+/**
+ * Version 2 -> 3.
+ *
+ * Thickness and Slant were two controls that are almost always set together, so
+ * they became one Text Style choice offering the six combinations people
+ * actually use. The nine numeric weights collapse to three: anything 600 or
+ * over reads as bold, 300 or under as light, the rest as normal. A style that
+ * had picked 800 comes back as bold — the nearest thing the new control can
+ * say.
+ */
+const TEXT_STYLE_PAIRS = [
+  ["weight", "style", "textStyle"],
+  ["headingWeight", "headingStyle", "headingTextStyle"],
+  ["captionWeight", "captionStyle", "captionTextStyle"],
+  ["activeWeight", null, "activeTextStyle"],
+  ["numberWeight", null, "numberTextStyle"],
+  ["categoryWeight", null, "categoryTextStyle"],
+  ["headerWeight", null, "headerTextStyle"]
+];
+
+/** The combined choice standing for an old thickness and slant. */
+function combineTextStyle(weight, slant) {
+  if (weight === undefined && slant === undefined) return undefined;
+  if (weight === "inherit" || slant === "inherit") {
+    // One half inheriting and the other not cannot be expressed any more; the
+    // half that was set is the one the author chose deliberately.
+    if (weight === "inherit" && (slant === "inherit" || slant === undefined)) return "inherit";
+    if (slant === "inherit" && weight === undefined) return "inherit";
+  }
+  const heavy = Number(weight === "inherit" ? "400" : weight ?? "400");
+  const base = heavy >= 600 ? "bold" : heavy <= 300 ? "light" : "normal";
+  const italic = slant === "italic" || slant === "oblique";
+  return italic ? `${base}Italic` : base;
+}
+
+function v2_to_v3(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  for (const group of Object.values(out)) {
+    if (!group || typeof group !== "object") continue;
+    for (const [weightKey, slantKey, combined] of TEXT_STYLE_PAIRS) {
+      const weight = group[weightKey];
+      const slant = slantKey ? group[slantKey] : undefined;
+      const value = combineTextStyle(weight, slant);
+      if (value !== undefined) group[combined] = value;
+      delete group[weightKey];
+      if (slantKey) delete group[slantKey];
+    }
+  }
+  return out;
+}
+
 /** Migrations keyed by the version they upgrade *from*. */
 const MIGRATIONS = {
-  1: v1_to_v2
+  1: v1_to_v2,
+  2: v2_to_v3
 };
 
 /**

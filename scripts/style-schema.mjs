@@ -66,6 +66,7 @@ const CHOICES = {
   flip: ["none", "horizontal", "vertical", "both"],
   verticalAlign: ["top", "middle", "bottom"],
   inlineAlign: ["baseline", "middle", "top", "bottom"],
+  textStyle: ["normal", "normalItalic", "bold", "boldItalic", "light", "lightItalic"],
   whenEmpty: ["show", "hide"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
@@ -158,6 +159,43 @@ const emitKeyword = (value) => KEYWORD[value] ?? value;
  */
 const emitWhenEmpty = (value) => (value === "hide" ? "none" : "block");
 
+/**
+ * How the lettering looks, as one choice rather than a thickness and a slant
+ * side by side. Two controls that are almost always set together read as one
+ * decision to anyone who does not think in CSS, which is who the GUI is for.
+ * Both properties still come out the other end.
+ */
+const emitTextStyle = (value) => ({
+  inherit: { weight: "inherit", slant: "inherit" },
+  normal: { weight: "400", slant: "normal" },
+  normalItalic: { weight: "400", slant: "italic" },
+  bold: { weight: "700", slant: "normal" },
+  boldItalic: { weight: "700", slant: "italic" },
+  light: { weight: "300", slant: "normal" },
+  lightItalic: { weight: "300", slant: "italic" }
+}[value] ?? { weight: "400", slant: "normal" });
+
+/**
+ * The single choice standing in for an old thickness-and-slant pair. Callers
+ * still pass the two separately as defaults, so every group keeps the look it
+ * had before the controls were merged.
+ */
+function textStyleOf(weight, slant) {
+  if (weight === "inherit" || slant === "inherit") return "inherit";
+  const heavy = Number(weight ?? 400);
+  const base = heavy >= 600 ? "bold" : heavy <= 300 ? "light" : "normal";
+  const italic = slant === "italic" || slant === "oblique";
+  return italic ? `${base}Italic` : base;
+}
+
+/** The same choice list, with "use the setting above" in front. */
+const withInherit = () => ["inherit", ...CHOICES.textStyle];
+
+/** One combined lettering control. */
+const textStyleField = (name, weight = "400", slant = "normal", { inherit = false } = {}) =>
+  select(name, textStyleOf(weight, slant), inherit ? withInherit() : CHOICES.textStyle,
+    { emit: emitTextStyle });
+
 /* -------------------------------------------- */
 /*  Field builders                              */
 /* -------------------------------------------- */
@@ -224,8 +262,7 @@ function textFields(prefix, defaults = {}) {
     font(n("Font"), d("font", "")),
     num(n("Size"), d("size", 16), "px", 6, 200, 1),
     col(n("Color"), d("color", "#241b10")),
-    select(n("Weight"), d("weight", "400"), CHOICES.weight),
-    select(n("Style"), d("style", "normal"), CHOICES.fontStyle),
+    textStyleField(n("TextStyle"), d("weight", "400"), d("style", "normal")),
     select(n("Caps"), d("caps", "none"), CHOICES.caps, { emit: emitCaps }),
     num(n("LetterSpacing"), d("letterSpacing", 0), "px", -5, 40, 0.5),
     num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
@@ -264,8 +301,7 @@ function blockSections() {
         font("font", ""),
         num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("color", ""),
-        select("weight", "inherit", inheritWeight),
-        select("style", "inherit", inheritStyle),
+        textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", inheritCaps, { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
@@ -278,7 +314,7 @@ function blockSections() {
         font("headingFont", ""),
         num("headingSize", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("headingColor", ""),
-        select("headingWeight", "inherit", inheritWeight),
+        textStyleField("headingTextStyle", "inherit", "inherit", { inherit: true }),
         select("headingCaps", "inherit", inheritCaps, { emit: emitCaps }),
         select("headingAlign", "inherit", inheritAlign),
         num("headingMarginTop", 0, "px", -100, 100, 1),
@@ -332,8 +368,7 @@ function tagSections() {
         font("font", ""),
         num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("color", ""),
-        select("weight", "inherit", ["inherit", ...CHOICES.weight]),
-        select("style", "inherit", ["inherit", ...CHOICES.fontStyle]),
+        textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
@@ -393,8 +428,7 @@ function pictureSections() {
         font("captionFont", ""),
         num("captionSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
         col("captionColor", ""),
-        select("captionWeight", "inherit", ["inherit", ...CHOICES.weight]),
-        select("captionStyle", "inherit", ["inherit", ...CHOICES.fontStyle]),
+        textStyleField("captionTextStyle", "inherit", "inherit", { inherit: true }),
         select("captionAlign", "inherit", ["inherit", ...CHOICES.align]),
         num("captionSpacing", 4, "px", 0, 60, 1)
       ]
@@ -440,8 +474,7 @@ export const GROUPS = [
           font("font", ""),
           num("size", 16, "px", 6, 60, 1),
           col("color", "#f7f3e8"),
-          select("weight", "700", CHOICES.weight),
-          select("style", "normal", CHOICES.fontStyle),
+          textStyleField("textStyle", "700", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
@@ -506,7 +539,7 @@ export const GROUPS = [
           col("activeBackground", "#00000000"),
           col("activeAccentColor", "#c9a961"),
           num("activeAccentWidth", 0, "px", 0, 20, 1),
-          select("activeWeight", "400", CHOICES.weight)
+          textStyleField("activeTextStyle", "400", "normal")
         ]
       },
       {
@@ -514,7 +547,7 @@ export const GROUPS = [
         fields: [
           col("numberColor", "#8a8a8a"),
           num("numberSize", 14, "px", 6, 60, 1),
-          select("numberWeight", "400", CHOICES.weight),
+          textStyleField("numberTextStyle", "400", "normal"),
           select("numberAlign", "center", CHOICES.alignNoJustify),
           num("numberWidth", 40, "px", 0, 120, 2)
         ]
@@ -525,8 +558,7 @@ export const GROUPS = [
           font("headingFont", ""),
           num("headingSize", 14, "px", 6, 60, 1),
           col("headingColor", "#c8c8b8"),
-          select("headingWeight", "400", CHOICES.weight),
-          select("headingStyle", "normal", CHOICES.fontStyle),
+          textStyleField("headingTextStyle", "400", "normal"),
           col("headingHoverColor", "#ffffff"),
           num("headingIndent", 16, "px", 0, 120, 2),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05)
@@ -538,7 +570,7 @@ export const GROUPS = [
           font("categoryFont", ""),
           num("categorySize", 24, "px", 6, 80, 1),
           col("categoryColor", "#f0f0e0"),
-          select("categoryWeight", "700", CHOICES.weight),
+          textStyleField("categoryTextStyle", "700", "normal"),
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
@@ -686,8 +718,7 @@ export const GROUPS = [
         fields: [
           col("color", "#7a2010"),
           col("hoverColor", "#a8341c"),
-          select("weight", "400", CHOICES.weight),
-          select("style", "normal", CHOICES.fontStyle),
+          textStyleField("textStyle", "400", "normal"),
           num("letterSpacing", 0, "px", -5, 40, 0.5)
         ]
       },
@@ -753,7 +784,7 @@ export const GROUPS = [
           col("headerColor", "#f6efe0"),
           font("headerFont", ""),
           num("headerSize", 16, "px", 6, 100, 1),
-          select("headerWeight", "700", CHOICES.weight),
+          textStyleField("headerTextStyle", "700", "normal"),
           select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("headerAlign", "left", CHOICES.align),
           num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
@@ -836,8 +867,7 @@ export const GROUPS = [
           font("captionFont", ""),
           num("captionSize", 13, "px", 6, 100, 1),
           col("captionColor", "#5a4326"),
-          select("captionWeight", "400", CHOICES.weight),
-          select("captionStyle", "italic", CHOICES.fontStyle),
+          textStyleField("captionTextStyle", "400", "italic"),
           select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("captionAlign", "center", CHOICES.alignNoJustify),
           num("captionSpacing", 4, "px", 0, 60, 1)

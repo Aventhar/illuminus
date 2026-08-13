@@ -243,7 +243,13 @@ nothing and checks it still compiles once given a value.
   safe.
 - **Renaming a field needs a migration.** `cleanSettings` discards unknown keys, so
   without one, existing styles silently lose those values. Bump `SCHEMA_VERSION`, add the
-  mapping to `scripts/migrations.mjs`, and cover it in the tests.
+  mapping to `scripts/migrations.mjs`, and cover it in the tests. **Merging two fields
+  into one needs the same treatment plus a decision about what is lost**: Thickness and
+  Slant became one Text Style choice in v3, which collapses nine numeric weights to
+  three, so the migration maps 600-and-over to bold and 300-and-under to light rather
+  than dropping the value. Regenerate `scripts/presets.mjs` by running it through the
+  migration (`migrateSettings(preset.settings, <previous version>)`) rather than editing
+  it by hand — that exercises the migration on real data.
 - **US English throughout** — strings, comments, and identifiers alike: color, center,
   gray, license, recognize. CSS property names are US spelling anyway, so a stray
   `colour` in an identifier reads as a typo next to `borderTopColor`.

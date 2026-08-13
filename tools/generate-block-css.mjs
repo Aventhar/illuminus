@@ -57,8 +57,8 @@ const blockRules = (group) => `
 ${box(group)}
   font-family: ${v(group, "font")};
   font-size: ${v(group, "size")};
-  font-weight: ${v(group, "weight")};
-  font-style: ${v(group, "style")};
+  font-weight: ${v(group, "textStyle", "weight")};
+  font-style: ${v(group, "textStyle", "slant")};
   font-variant: ${v(group, "caps", "variant")};
   text-transform: ${v(group, "caps", "transform")};
   letter-spacing: ${v(group, "letterSpacing")};
@@ -70,7 +70,8 @@ ${box(group)}
 .illuminus-styled .journal-page-content .illuminus-block--${group.id} :is(h1, h2, h3, h4, h5, h6) {
   font-family: ${v(group, "headingFont")};
   font-size: ${v(group, "headingSize")};
-  font-weight: ${v(group, "headingWeight")};
+  font-weight: ${v(group, "headingTextStyle", "weight")};
+  font-style: ${v(group, "headingTextStyle", "slant")};
   font-variant: ${v(group, "headingCaps", "variant")};
   text-transform: ${v(group, "headingCaps", "transform")};
   text-align: ${v(group, "headingAlign")};
@@ -121,8 +122,8 @@ const pictureRules = (group) => `
 .illuminus-styled .journal-page-content .illuminus-picture--${group.id} figcaption {
   font-family: ${v(group, "captionFont")};
   font-size: ${v(group, "captionSize")};
-  font-weight: ${v(group, "captionWeight")};
-  font-style: ${v(group, "captionStyle")};
+  font-weight: ${v(group, "captionTextStyle", "weight")};
+  font-style: ${v(group, "captionTextStyle", "slant")};
   text-align: ${v(group, "captionAlign")};
   color: ${vOr(group, "captionColor", "inherit")};
   margin-top: ${v(group, "captionSpacing")};
@@ -155,8 +156,8 @@ const tagRules = (group) => `
   box-shadow: ${shadow(group, "shadow")};
   font-family: ${v(group, "font")};
   font-size: ${v(group, "size")};
-  font-weight: ${v(group, "weight")};
-  font-style: ${v(group, "style")};
+  font-weight: ${v(group, "textStyle", "weight")};
+  font-style: ${v(group, "textStyle", "slant")};
   font-variant: ${v(group, "caps", "variant")};
   text-transform: ${v(group, "caps", "transform")};
   letter-spacing: ${v(group, "letterSpacing")};

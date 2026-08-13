@@ -71,8 +71,8 @@
   box-shadow: var(--ill-block01-shadow-offset-x) var(--ill-block01-shadow-offset-y) var(--ill-block01-shadow-blur) var(--ill-block01-shadow-spread) var(--ill-block01-shadow-color);
   font-family: var(--ill-block01-font);
   font-size: var(--ill-block01-size);
-  font-weight: var(--ill-block01-weight);
-  font-style: var(--ill-block01-style);
+  font-weight: var(--ill-block01-text-style-weight);
+  font-style: var(--ill-block01-text-style-slant);
   font-variant: var(--ill-block01-caps-variant);
   text-transform: var(--ill-block01-caps-transform);
   letter-spacing: var(--ill-block01-letter-spacing);
@@ -84,7 +84,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block01 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block01-heading-font);
   font-size: var(--ill-block01-heading-size);
-  font-weight: var(--ill-block01-heading-weight);
+  font-weight: var(--ill-block01-heading-text-style-weight);
+  font-style: var(--ill-block01-heading-text-style-slant);
   font-variant: var(--ill-block01-heading-caps-variant);
   text-transform: var(--ill-block01-heading-caps-transform);
   text-align: var(--ill-block01-heading-align);
@@ -111,8 +112,8 @@
   box-shadow: var(--ill-block02-shadow-offset-x) var(--ill-block02-shadow-offset-y) var(--ill-block02-shadow-blur) var(--ill-block02-shadow-spread) var(--ill-block02-shadow-color);
   font-family: var(--ill-block02-font);
   font-size: var(--ill-block02-size);
-  font-weight: var(--ill-block02-weight);
-  font-style: var(--ill-block02-style);
+  font-weight: var(--ill-block02-text-style-weight);
+  font-style: var(--ill-block02-text-style-slant);
   font-variant: var(--ill-block02-caps-variant);
   text-transform: var(--ill-block02-caps-transform);
   letter-spacing: var(--ill-block02-letter-spacing);
@@ -124,7 +125,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block02 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block02-heading-font);
   font-size: var(--ill-block02-heading-size);
-  font-weight: var(--ill-block02-heading-weight);
+  font-weight: var(--ill-block02-heading-text-style-weight);
+  font-style: var(--ill-block02-heading-text-style-slant);
   font-variant: var(--ill-block02-heading-caps-variant);
   text-transform: var(--ill-block02-heading-caps-transform);
   text-align: var(--ill-block02-heading-align);
@@ -151,8 +153,8 @@
   box-shadow: var(--ill-block03-shadow-offset-x) var(--ill-block03-shadow-offset-y) var(--ill-block03-shadow-blur) var(--ill-block03-shadow-spread) var(--ill-block03-shadow-color);
   font-family: var(--ill-block03-font);
   font-size: var(--ill-block03-size);
-  font-weight: var(--ill-block03-weight);
-  font-style: var(--ill-block03-style);
+  font-weight: var(--ill-block03-text-style-weight);
+  font-style: var(--ill-block03-text-style-slant);
   font-variant: var(--ill-block03-caps-variant);
   text-transform: var(--ill-block03-caps-transform);
   letter-spacing: var(--ill-block03-letter-spacing);
@@ -164,7 +166,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block03 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block03-heading-font);
   font-size: var(--ill-block03-heading-size);
-  font-weight: var(--ill-block03-heading-weight);
+  font-weight: var(--ill-block03-heading-text-style-weight);
+  font-style: var(--ill-block03-heading-text-style-slant);
   font-variant: var(--ill-block03-heading-caps-variant);
   text-transform: var(--ill-block03-heading-caps-transform);
   text-align: var(--ill-block03-heading-align);
@@ -191,8 +194,8 @@
   box-shadow: var(--ill-block04-shadow-offset-x) var(--ill-block04-shadow-offset-y) var(--ill-block04-shadow-blur) var(--ill-block04-shadow-spread) var(--ill-block04-shadow-color);
   font-family: var(--ill-block04-font);
   font-size: var(--ill-block04-size);
-  font-weight: var(--ill-block04-weight);
-  font-style: var(--ill-block04-style);
+  font-weight: var(--ill-block04-text-style-weight);
+  font-style: var(--ill-block04-text-style-slant);
   font-variant: var(--ill-block04-caps-variant);
   text-transform: var(--ill-block04-caps-transform);
   letter-spacing: var(--ill-block04-letter-spacing);
@@ -204,7 +207,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block04 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block04-heading-font);
   font-size: var(--ill-block04-heading-size);
-  font-weight: var(--ill-block04-heading-weight);
+  font-weight: var(--ill-block04-heading-text-style-weight);
+  font-style: var(--ill-block04-heading-text-style-slant);
   font-variant: var(--ill-block04-heading-caps-variant);
   text-transform: var(--ill-block04-heading-caps-transform);
   text-align: var(--ill-block04-heading-align);
@@ -231,8 +235,8 @@
   box-shadow: var(--ill-block05-shadow-offset-x) var(--ill-block05-shadow-offset-y) var(--ill-block05-shadow-blur) var(--ill-block05-shadow-spread) var(--ill-block05-shadow-color);
   font-family: var(--ill-block05-font);
   font-size: var(--ill-block05-size);
-  font-weight: var(--ill-block05-weight);
-  font-style: var(--ill-block05-style);
+  font-weight: var(--ill-block05-text-style-weight);
+  font-style: var(--ill-block05-text-style-slant);
   font-variant: var(--ill-block05-caps-variant);
   text-transform: var(--ill-block05-caps-transform);
   letter-spacing: var(--ill-block05-letter-spacing);
@@ -244,7 +248,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block05 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block05-heading-font);
   font-size: var(--ill-block05-heading-size);
-  font-weight: var(--ill-block05-heading-weight);
+  font-weight: var(--ill-block05-heading-text-style-weight);
+  font-style: var(--ill-block05-heading-text-style-slant);
   font-variant: var(--ill-block05-heading-caps-variant);
   text-transform: var(--ill-block05-heading-caps-transform);
   text-align: var(--ill-block05-heading-align);
@@ -271,8 +276,8 @@
   box-shadow: var(--ill-block06-shadow-offset-x) var(--ill-block06-shadow-offset-y) var(--ill-block06-shadow-blur) var(--ill-block06-shadow-spread) var(--ill-block06-shadow-color);
   font-family: var(--ill-block06-font);
   font-size: var(--ill-block06-size);
-  font-weight: var(--ill-block06-weight);
-  font-style: var(--ill-block06-style);
+  font-weight: var(--ill-block06-text-style-weight);
+  font-style: var(--ill-block06-text-style-slant);
   font-variant: var(--ill-block06-caps-variant);
   text-transform: var(--ill-block06-caps-transform);
   letter-spacing: var(--ill-block06-letter-spacing);
@@ -284,7 +289,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block06 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block06-heading-font);
   font-size: var(--ill-block06-heading-size);
-  font-weight: var(--ill-block06-heading-weight);
+  font-weight: var(--ill-block06-heading-text-style-weight);
+  font-style: var(--ill-block06-heading-text-style-slant);
   font-variant: var(--ill-block06-heading-caps-variant);
   text-transform: var(--ill-block06-heading-caps-transform);
   text-align: var(--ill-block06-heading-align);
@@ -311,8 +317,8 @@
   box-shadow: var(--ill-block07-shadow-offset-x) var(--ill-block07-shadow-offset-y) var(--ill-block07-shadow-blur) var(--ill-block07-shadow-spread) var(--ill-block07-shadow-color);
   font-family: var(--ill-block07-font);
   font-size: var(--ill-block07-size);
-  font-weight: var(--ill-block07-weight);
-  font-style: var(--ill-block07-style);
+  font-weight: var(--ill-block07-text-style-weight);
+  font-style: var(--ill-block07-text-style-slant);
   font-variant: var(--ill-block07-caps-variant);
   text-transform: var(--ill-block07-caps-transform);
   letter-spacing: var(--ill-block07-letter-spacing);
@@ -324,7 +330,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block07 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block07-heading-font);
   font-size: var(--ill-block07-heading-size);
-  font-weight: var(--ill-block07-heading-weight);
+  font-weight: var(--ill-block07-heading-text-style-weight);
+  font-style: var(--ill-block07-heading-text-style-slant);
   font-variant: var(--ill-block07-heading-caps-variant);
   text-transform: var(--ill-block07-heading-caps-transform);
   text-align: var(--ill-block07-heading-align);
@@ -351,8 +358,8 @@
   box-shadow: var(--ill-block08-shadow-offset-x) var(--ill-block08-shadow-offset-y) var(--ill-block08-shadow-blur) var(--ill-block08-shadow-spread) var(--ill-block08-shadow-color);
   font-family: var(--ill-block08-font);
   font-size: var(--ill-block08-size);
-  font-weight: var(--ill-block08-weight);
-  font-style: var(--ill-block08-style);
+  font-weight: var(--ill-block08-text-style-weight);
+  font-style: var(--ill-block08-text-style-slant);
   font-variant: var(--ill-block08-caps-variant);
   text-transform: var(--ill-block08-caps-transform);
   letter-spacing: var(--ill-block08-letter-spacing);
@@ -364,7 +371,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block08 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block08-heading-font);
   font-size: var(--ill-block08-heading-size);
-  font-weight: var(--ill-block08-heading-weight);
+  font-weight: var(--ill-block08-heading-text-style-weight);
+  font-style: var(--ill-block08-heading-text-style-slant);
   font-variant: var(--ill-block08-heading-caps-variant);
   text-transform: var(--ill-block08-heading-caps-transform);
   text-align: var(--ill-block08-heading-align);
@@ -391,8 +399,8 @@
   box-shadow: var(--ill-block09-shadow-offset-x) var(--ill-block09-shadow-offset-y) var(--ill-block09-shadow-blur) var(--ill-block09-shadow-spread) var(--ill-block09-shadow-color);
   font-family: var(--ill-block09-font);
   font-size: var(--ill-block09-size);
-  font-weight: var(--ill-block09-weight);
-  font-style: var(--ill-block09-style);
+  font-weight: var(--ill-block09-text-style-weight);
+  font-style: var(--ill-block09-text-style-slant);
   font-variant: var(--ill-block09-caps-variant);
   text-transform: var(--ill-block09-caps-transform);
   letter-spacing: var(--ill-block09-letter-spacing);
@@ -404,7 +412,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block09 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block09-heading-font);
   font-size: var(--ill-block09-heading-size);
-  font-weight: var(--ill-block09-heading-weight);
+  font-weight: var(--ill-block09-heading-text-style-weight);
+  font-style: var(--ill-block09-heading-text-style-slant);
   font-variant: var(--ill-block09-heading-caps-variant);
   text-transform: var(--ill-block09-heading-caps-transform);
   text-align: var(--ill-block09-heading-align);
@@ -431,8 +440,8 @@
   box-shadow: var(--ill-block10-shadow-offset-x) var(--ill-block10-shadow-offset-y) var(--ill-block10-shadow-blur) var(--ill-block10-shadow-spread) var(--ill-block10-shadow-color);
   font-family: var(--ill-block10-font);
   font-size: var(--ill-block10-size);
-  font-weight: var(--ill-block10-weight);
-  font-style: var(--ill-block10-style);
+  font-weight: var(--ill-block10-text-style-weight);
+  font-style: var(--ill-block10-text-style-slant);
   font-variant: var(--ill-block10-caps-variant);
   text-transform: var(--ill-block10-caps-transform);
   letter-spacing: var(--ill-block10-letter-spacing);
@@ -444,7 +453,8 @@
 .illuminus-styled .journal-page-content .illuminus-block--block10 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-block10-heading-font);
   font-size: var(--ill-block10-heading-size);
-  font-weight: var(--ill-block10-heading-weight);
+  font-weight: var(--ill-block10-heading-text-style-weight);
+  font-style: var(--ill-block10-heading-text-style-slant);
   font-variant: var(--ill-block10-heading-caps-variant);
   text-transform: var(--ill-block10-heading-caps-transform);
   text-align: var(--ill-block10-heading-align);
@@ -493,8 +503,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture01 figcaption {
   font-family: var(--ill-picture01-caption-font);
   font-size: var(--ill-picture01-caption-size);
-  font-weight: var(--ill-picture01-caption-weight);
-  font-style: var(--ill-picture01-caption-style);
+  font-weight: var(--ill-picture01-caption-text-style-weight);
+  font-style: var(--ill-picture01-caption-text-style-slant);
   text-align: var(--ill-picture01-caption-align);
   color: var(--ill-picture01-caption-color, inherit);
   margin-top: var(--ill-picture01-caption-spacing);
@@ -537,8 +547,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture02 figcaption {
   font-family: var(--ill-picture02-caption-font);
   font-size: var(--ill-picture02-caption-size);
-  font-weight: var(--ill-picture02-caption-weight);
-  font-style: var(--ill-picture02-caption-style);
+  font-weight: var(--ill-picture02-caption-text-style-weight);
+  font-style: var(--ill-picture02-caption-text-style-slant);
   text-align: var(--ill-picture02-caption-align);
   color: var(--ill-picture02-caption-color, inherit);
   margin-top: var(--ill-picture02-caption-spacing);
@@ -581,8 +591,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture03 figcaption {
   font-family: var(--ill-picture03-caption-font);
   font-size: var(--ill-picture03-caption-size);
-  font-weight: var(--ill-picture03-caption-weight);
-  font-style: var(--ill-picture03-caption-style);
+  font-weight: var(--ill-picture03-caption-text-style-weight);
+  font-style: var(--ill-picture03-caption-text-style-slant);
   text-align: var(--ill-picture03-caption-align);
   color: var(--ill-picture03-caption-color, inherit);
   margin-top: var(--ill-picture03-caption-spacing);
@@ -625,8 +635,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture04 figcaption {
   font-family: var(--ill-picture04-caption-font);
   font-size: var(--ill-picture04-caption-size);
-  font-weight: var(--ill-picture04-caption-weight);
-  font-style: var(--ill-picture04-caption-style);
+  font-weight: var(--ill-picture04-caption-text-style-weight);
+  font-style: var(--ill-picture04-caption-text-style-slant);
   text-align: var(--ill-picture04-caption-align);
   color: var(--ill-picture04-caption-color, inherit);
   margin-top: var(--ill-picture04-caption-spacing);
@@ -669,8 +679,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture05 figcaption {
   font-family: var(--ill-picture05-caption-font);
   font-size: var(--ill-picture05-caption-size);
-  font-weight: var(--ill-picture05-caption-weight);
-  font-style: var(--ill-picture05-caption-style);
+  font-weight: var(--ill-picture05-caption-text-style-weight);
+  font-style: var(--ill-picture05-caption-text-style-slant);
   text-align: var(--ill-picture05-caption-align);
   color: var(--ill-picture05-caption-color, inherit);
   margin-top: var(--ill-picture05-caption-spacing);
@@ -713,8 +723,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture06 figcaption {
   font-family: var(--ill-picture06-caption-font);
   font-size: var(--ill-picture06-caption-size);
-  font-weight: var(--ill-picture06-caption-weight);
-  font-style: var(--ill-picture06-caption-style);
+  font-weight: var(--ill-picture06-caption-text-style-weight);
+  font-style: var(--ill-picture06-caption-text-style-slant);
   text-align: var(--ill-picture06-caption-align);
   color: var(--ill-picture06-caption-color, inherit);
   margin-top: var(--ill-picture06-caption-spacing);
@@ -757,8 +767,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture07 figcaption {
   font-family: var(--ill-picture07-caption-font);
   font-size: var(--ill-picture07-caption-size);
-  font-weight: var(--ill-picture07-caption-weight);
-  font-style: var(--ill-picture07-caption-style);
+  font-weight: var(--ill-picture07-caption-text-style-weight);
+  font-style: var(--ill-picture07-caption-text-style-slant);
   text-align: var(--ill-picture07-caption-align);
   color: var(--ill-picture07-caption-color, inherit);
   margin-top: var(--ill-picture07-caption-spacing);
@@ -801,8 +811,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture08 figcaption {
   font-family: var(--ill-picture08-caption-font);
   font-size: var(--ill-picture08-caption-size);
-  font-weight: var(--ill-picture08-caption-weight);
-  font-style: var(--ill-picture08-caption-style);
+  font-weight: var(--ill-picture08-caption-text-style-weight);
+  font-style: var(--ill-picture08-caption-text-style-slant);
   text-align: var(--ill-picture08-caption-align);
   color: var(--ill-picture08-caption-color, inherit);
   margin-top: var(--ill-picture08-caption-spacing);
@@ -845,8 +855,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture09 figcaption {
   font-family: var(--ill-picture09-caption-font);
   font-size: var(--ill-picture09-caption-size);
-  font-weight: var(--ill-picture09-caption-weight);
-  font-style: var(--ill-picture09-caption-style);
+  font-weight: var(--ill-picture09-caption-text-style-weight);
+  font-style: var(--ill-picture09-caption-text-style-slant);
   text-align: var(--ill-picture09-caption-align);
   color: var(--ill-picture09-caption-color, inherit);
   margin-top: var(--ill-picture09-caption-spacing);
@@ -889,8 +899,8 @@
 .illuminus-styled .journal-page-content .illuminus-picture--picture10 figcaption {
   font-family: var(--ill-picture10-caption-font);
   font-size: var(--ill-picture10-caption-size);
-  font-weight: var(--ill-picture10-caption-weight);
-  font-style: var(--ill-picture10-caption-style);
+  font-weight: var(--ill-picture10-caption-text-style-weight);
+  font-style: var(--ill-picture10-caption-text-style-slant);
   text-align: var(--ill-picture10-caption-align);
   color: var(--ill-picture10-caption-color, inherit);
   margin-top: var(--ill-picture10-caption-spacing);
@@ -912,8 +922,8 @@
   box-shadow: var(--ill-tag01-shadow-offset-x) var(--ill-tag01-shadow-offset-y) var(--ill-tag01-shadow-blur) var(--ill-tag01-shadow-spread) var(--ill-tag01-shadow-color);
   font-family: var(--ill-tag01-font);
   font-size: var(--ill-tag01-size);
-  font-weight: var(--ill-tag01-weight);
-  font-style: var(--ill-tag01-style);
+  font-weight: var(--ill-tag01-text-style-weight);
+  font-style: var(--ill-tag01-text-style-slant);
   font-variant: var(--ill-tag01-caps-variant);
   text-transform: var(--ill-tag01-caps-transform);
   letter-spacing: var(--ill-tag01-letter-spacing);
@@ -946,8 +956,8 @@
   box-shadow: var(--ill-tag02-shadow-offset-x) var(--ill-tag02-shadow-offset-y) var(--ill-tag02-shadow-blur) var(--ill-tag02-shadow-spread) var(--ill-tag02-shadow-color);
   font-family: var(--ill-tag02-font);
   font-size: var(--ill-tag02-size);
-  font-weight: var(--ill-tag02-weight);
-  font-style: var(--ill-tag02-style);
+  font-weight: var(--ill-tag02-text-style-weight);
+  font-style: var(--ill-tag02-text-style-slant);
   font-variant: var(--ill-tag02-caps-variant);
   text-transform: var(--ill-tag02-caps-transform);
   letter-spacing: var(--ill-tag02-letter-spacing);
@@ -980,8 +990,8 @@
   box-shadow: var(--ill-tag03-shadow-offset-x) var(--ill-tag03-shadow-offset-y) var(--ill-tag03-shadow-blur) var(--ill-tag03-shadow-spread) var(--ill-tag03-shadow-color);
   font-family: var(--ill-tag03-font);
   font-size: var(--ill-tag03-size);
-  font-weight: var(--ill-tag03-weight);
-  font-style: var(--ill-tag03-style);
+  font-weight: var(--ill-tag03-text-style-weight);
+  font-style: var(--ill-tag03-text-style-slant);
   font-variant: var(--ill-tag03-caps-variant);
   text-transform: var(--ill-tag03-caps-transform);
   letter-spacing: var(--ill-tag03-letter-spacing);
@@ -1014,8 +1024,8 @@
   box-shadow: var(--ill-tag04-shadow-offset-x) var(--ill-tag04-shadow-offset-y) var(--ill-tag04-shadow-blur) var(--ill-tag04-shadow-spread) var(--ill-tag04-shadow-color);
   font-family: var(--ill-tag04-font);
   font-size: var(--ill-tag04-size);
-  font-weight: var(--ill-tag04-weight);
-  font-style: var(--ill-tag04-style);
+  font-weight: var(--ill-tag04-text-style-weight);
+  font-style: var(--ill-tag04-text-style-slant);
   font-variant: var(--ill-tag04-caps-variant);
   text-transform: var(--ill-tag04-caps-transform);
   letter-spacing: var(--ill-tag04-letter-spacing);
@@ -1048,8 +1058,8 @@
   box-shadow: var(--ill-tag05-shadow-offset-x) var(--ill-tag05-shadow-offset-y) var(--ill-tag05-shadow-blur) var(--ill-tag05-shadow-spread) var(--ill-tag05-shadow-color);
   font-family: var(--ill-tag05-font);
   font-size: var(--ill-tag05-size);
-  font-weight: var(--ill-tag05-weight);
-  font-style: var(--ill-tag05-style);
+  font-weight: var(--ill-tag05-text-style-weight);
+  font-style: var(--ill-tag05-text-style-slant);
   font-variant: var(--ill-tag05-caps-variant);
   text-transform: var(--ill-tag05-caps-transform);
   letter-spacing: var(--ill-tag05-letter-spacing);
@@ -1082,8 +1092,8 @@
   box-shadow: var(--ill-tag06-shadow-offset-x) var(--ill-tag06-shadow-offset-y) var(--ill-tag06-shadow-blur) var(--ill-tag06-shadow-spread) var(--ill-tag06-shadow-color);
   font-family: var(--ill-tag06-font);
   font-size: var(--ill-tag06-size);
-  font-weight: var(--ill-tag06-weight);
-  font-style: var(--ill-tag06-style);
+  font-weight: var(--ill-tag06-text-style-weight);
+  font-style: var(--ill-tag06-text-style-slant);
   font-variant: var(--ill-tag06-caps-variant);
   text-transform: var(--ill-tag06-caps-transform);
   letter-spacing: var(--ill-tag06-letter-spacing);
@@ -1116,8 +1126,8 @@
   box-shadow: var(--ill-tag07-shadow-offset-x) var(--ill-tag07-shadow-offset-y) var(--ill-tag07-shadow-blur) var(--ill-tag07-shadow-spread) var(--ill-tag07-shadow-color);
   font-family: var(--ill-tag07-font);
   font-size: var(--ill-tag07-size);
-  font-weight: var(--ill-tag07-weight);
-  font-style: var(--ill-tag07-style);
+  font-weight: var(--ill-tag07-text-style-weight);
+  font-style: var(--ill-tag07-text-style-slant);
   font-variant: var(--ill-tag07-caps-variant);
   text-transform: var(--ill-tag07-caps-transform);
   letter-spacing: var(--ill-tag07-letter-spacing);
@@ -1150,8 +1160,8 @@
   box-shadow: var(--ill-tag08-shadow-offset-x) var(--ill-tag08-shadow-offset-y) var(--ill-tag08-shadow-blur) var(--ill-tag08-shadow-spread) var(--ill-tag08-shadow-color);
   font-family: var(--ill-tag08-font);
   font-size: var(--ill-tag08-size);
-  font-weight: var(--ill-tag08-weight);
-  font-style: var(--ill-tag08-style);
+  font-weight: var(--ill-tag08-text-style-weight);
+  font-style: var(--ill-tag08-text-style-slant);
   font-variant: var(--ill-tag08-caps-variant);
   text-transform: var(--ill-tag08-caps-transform);
   letter-spacing: var(--ill-tag08-letter-spacing);
@@ -1184,8 +1194,8 @@
   box-shadow: var(--ill-tag09-shadow-offset-x) var(--ill-tag09-shadow-offset-y) var(--ill-tag09-shadow-blur) var(--ill-tag09-shadow-spread) var(--ill-tag09-shadow-color);
   font-family: var(--ill-tag09-font);
   font-size: var(--ill-tag09-size);
-  font-weight: var(--ill-tag09-weight);
-  font-style: var(--ill-tag09-style);
+  font-weight: var(--ill-tag09-text-style-weight);
+  font-style: var(--ill-tag09-text-style-slant);
   font-variant: var(--ill-tag09-caps-variant);
   text-transform: var(--ill-tag09-caps-transform);
   letter-spacing: var(--ill-tag09-letter-spacing);
@@ -1218,8 +1228,8 @@
   box-shadow: var(--ill-tag10-shadow-offset-x) var(--ill-tag10-shadow-offset-y) var(--ill-tag10-shadow-blur) var(--ill-tag10-shadow-spread) var(--ill-tag10-shadow-color);
   font-family: var(--ill-tag10-font);
   font-size: var(--ill-tag10-size);
-  font-weight: var(--ill-tag10-weight);
-  font-style: var(--ill-tag10-style);
+  font-weight: var(--ill-tag10-text-style-weight);
+  font-style: var(--ill-tag10-text-style-slant);
   font-variant: var(--ill-tag10-caps-variant);
   text-transform: var(--ill-tag10-caps-transform);
   letter-spacing: var(--ill-tag10-letter-spacing);

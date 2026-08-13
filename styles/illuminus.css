@@ -128,8 +128,8 @@
 .illuminus-styled .window-header .window-title {
   font-family: var(--ill-window-font);
   font-size: var(--ill-window-size);
-  font-weight: var(--ill-window-weight);
-  font-style: var(--ill-window-style);
+  font-weight: var(--ill-window-text-style-weight);
+  font-style: var(--ill-window-text-style-slant);
   font-variant: var(--ill-window-caps-variant);
   text-transform: var(--ill-window-caps-transform);
   letter-spacing: var(--ill-window-letter-spacing);
@@ -229,8 +229,8 @@
 .illuminus-styled .journal-sidebar .toc .page-title {
   font-family: var(--ill-sidebar-font);
   font-size: var(--ill-sidebar-size);
-  font-weight: var(--ill-sidebar-weight);
-  font-style: var(--ill-sidebar-style);
+  font-weight: var(--ill-sidebar-text-style-weight);
+  font-style: var(--ill-sidebar-text-style-slant);
   font-variant: var(--ill-sidebar-caps-variant);
   text-transform: var(--ill-sidebar-caps-transform);
   letter-spacing: var(--ill-sidebar-letter-spacing);
@@ -257,7 +257,8 @@
 
 .illuminus-styled .journal-sidebar .toc li.page.active .page-title {
   color: var(--ill-sidebar-active-color);
-  font-weight: var(--ill-sidebar-active-weight);
+  font-weight: var(--ill-sidebar-active-text-style-weight);
+  font-style: var(--ill-sidebar-active-text-style-slant);
 }
 
 /* Page numbers */
@@ -265,7 +266,8 @@
 .illuminus-styled .journal-sidebar .toc .page-number {
   color: var(--ill-sidebar-number-color);
   font-size: var(--ill-sidebar-number-size);
-  font-weight: var(--ill-sidebar-number-weight);
+  font-weight: var(--ill-sidebar-number-text-style-weight);
+  font-style: var(--ill-sidebar-number-text-style-slant);
   text-align: var(--ill-sidebar-number-align);
   width: var(--ill-sidebar-number-width);
 }
@@ -278,8 +280,8 @@
 .illuminus-styled .journal-sidebar .toc .heading-link {
   font-family: var(--ill-sidebar-heading-font);
   font-size: var(--ill-sidebar-heading-size);
-  font-weight: var(--ill-sidebar-heading-weight);
-  font-style: var(--ill-sidebar-heading-style);
+  font-weight: var(--ill-sidebar-heading-text-style-weight);
+  font-style: var(--ill-sidebar-heading-text-style-slant);
   line-height: var(--ill-sidebar-heading-line-height);
   color: var(--ill-sidebar-heading-color);
 }
@@ -297,7 +299,8 @@
 .illuminus-styled .journal-sidebar .toc li.category strong {
   font-family: var(--ill-sidebar-category-font);
   font-size: var(--ill-sidebar-category-size);
-  font-weight: var(--ill-sidebar-category-weight);
+  font-weight: var(--ill-sidebar-category-text-style-weight);
+  font-style: var(--ill-sidebar-category-text-style-slant);
   font-variant: var(--ill-sidebar-category-caps-variant);
   text-transform: var(--ill-sidebar-category-caps-transform);
   letter-spacing: var(--ill-sidebar-category-letter-spacing);
@@ -352,8 +355,8 @@
   height: auto;
   font-family: var(--ill-title-font);
   font-size: var(--ill-title-size);
-  font-weight: var(--ill-title-weight);
-  font-style: var(--ill-title-style);
+  font-weight: var(--ill-title-text-style-weight);
+  font-style: var(--ill-title-text-style-slant);
   font-variant: var(--ill-title-caps-variant);
   text-transform: var(--ill-title-caps-transform);
   letter-spacing: var(--ill-title-letter-spacing);
@@ -388,8 +391,8 @@
 .illuminus-styled .journal-page-content h1 {
   font-family: var(--ill-heading1-font);
   font-size: var(--ill-heading1-size);
-  font-weight: var(--ill-heading1-weight);
-  font-style: var(--ill-heading1-style);
+  font-weight: var(--ill-heading1-text-style-weight);
+  font-style: var(--ill-heading1-text-style-slant);
   font-variant: var(--ill-heading1-caps-variant);
   text-transform: var(--ill-heading1-caps-transform);
   letter-spacing: var(--ill-heading1-letter-spacing);
@@ -417,8 +420,8 @@
 .illuminus-styled .journal-page-content h2 {
   font-family: var(--ill-heading2-font);
   font-size: var(--ill-heading2-size);
-  font-weight: var(--ill-heading2-weight);
-  font-style: var(--ill-heading2-style);
+  font-weight: var(--ill-heading2-text-style-weight);
+  font-style: var(--ill-heading2-text-style-slant);
   font-variant: var(--ill-heading2-caps-variant);
   text-transform: var(--ill-heading2-caps-transform);
   letter-spacing: var(--ill-heading2-letter-spacing);
@@ -450,8 +453,8 @@
 .illuminus-styled .journal-page-content h6 {
   font-family: var(--ill-heading3-font);
   font-size: var(--ill-heading3-size);
-  font-weight: var(--ill-heading3-weight);
-  font-style: var(--ill-heading3-style);
+  font-weight: var(--ill-heading3-text-style-weight);
+  font-style: var(--ill-heading3-text-style-slant);
   font-variant: var(--ill-heading3-caps-variant);
   text-transform: var(--ill-heading3-caps-transform);
   letter-spacing: var(--ill-heading3-letter-spacing);
@@ -481,8 +484,8 @@
 .illuminus-styled .journal-page-content {
   font-family: var(--ill-body-font);
   font-size: var(--ill-body-size);
-  font-weight: var(--ill-body-weight);
-  font-style: var(--ill-body-style);
+  font-weight: var(--ill-body-text-style-weight);
+  font-style: var(--ill-body-text-style-slant);
   font-variant: var(--ill-body-caps-variant);
   text-transform: var(--ill-body-caps-transform);
   letter-spacing: var(--ill-body-letter-spacing);
@@ -543,8 +546,8 @@
 .illuminus-styled .journal-page-content a.content-link,
 .illuminus-styled .journal-page-content a.inline-roll {
   color: var(--ill-links-color);
-  font-weight: var(--ill-links-weight);
-  font-style: var(--ill-links-style);
+  font-weight: var(--ill-links-text-style-weight);
+  font-style: var(--ill-links-text-style-slant);
   letter-spacing: var(--ill-links-letter-spacing);
   text-decoration-line: var(--ill-links-decoration-line);
   text-decoration-style: var(--ill-links-decoration-style);
@@ -638,7 +641,8 @@
 .illuminus-styled .journal-page-content th {
   font-family: var(--ill-tables-header-font);
   font-size: var(--ill-tables-header-size);
-  font-weight: var(--ill-tables-header-weight);
+  font-weight: var(--ill-tables-header-text-style-weight);
+  font-style: var(--ill-tables-header-text-style-slant);
   font-variant: var(--ill-tables-header-caps-variant);
   text-transform: var(--ill-tables-header-caps-transform);
   letter-spacing: var(--ill-tables-header-letter-spacing);
@@ -663,8 +667,8 @@
 .illuminus-styled .journal-page-content .illuminus-box {
   font-family: var(--ill-boxes-font);
   font-size: var(--ill-boxes-size);
-  font-weight: var(--ill-boxes-weight);
-  font-style: var(--ill-boxes-style);
+  font-weight: var(--ill-boxes-text-style-weight);
+  font-style: var(--ill-boxes-text-style-slant);
   font-variant: var(--ill-boxes-caps-variant);
   text-transform: var(--ill-boxes-caps-transform);
   letter-spacing: var(--ill-boxes-letter-spacing);
@@ -719,8 +723,8 @@
 .illuminus-styled .journal-page-content :not(.illuminus-picture) > figcaption {
   font-family: var(--ill-images-caption-font);
   font-size: var(--ill-images-caption-size);
-  font-weight: var(--ill-images-caption-weight);
-  font-style: var(--ill-images-caption-style);
+  font-weight: var(--ill-images-caption-text-style-weight);
+  font-style: var(--ill-images-caption-text-style-slant);
   font-variant: var(--ill-images-caption-caps-variant);
   text-transform: var(--ill-images-caption-caps-transform);
   text-align: var(--ill-images-caption-align);

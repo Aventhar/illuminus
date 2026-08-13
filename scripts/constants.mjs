@@ -40,7 +40,7 @@ export const PREVIEW_ELEMENT_ID = "illuminus-preview-styles";
 export const NO_STYLE = "";
 
 /** Current schema version, stamped onto exported files for forward migration. */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /**
  * Console logger that stays quiet unless the `debug` setting is on.
