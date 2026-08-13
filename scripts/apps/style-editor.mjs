@@ -195,6 +195,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       };
     });
 
+    // Which member each family's own preview panel is built for. Taken from
+    // the same resolution as the tab above, so the panel can never end up
+    // showing a different block from the one whose controls are on screen.
+    context.preview = Object.fromEntries(context.families.map((family) =>
+      [family.id, { id: family.current.id, label: family.current.label }]));
+
     context.groups = IlluminusStyleEditor.pageGroups.map((group) => ({
       id: group.id,
       label: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.label`),

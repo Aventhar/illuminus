@@ -1167,6 +1167,37 @@
   flex: 1;
 }
 
+/* Block Styles and Picture Styles get the whole pane instead of the journal
+   mock. A block reads as a block only against the prose it interrupts, and at a
+   quarter of the pane's width — what the mock would leave it once the page
+   chrome is drawn — neither its width control nor its text wrapping means
+   anything. Each panel carries the min-height for the same reason the window
+   wrapper does: so the page background covers whatever is scrolled past. */
+.illuminus-preview__family {
+  display: none;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active) .illuminus-preview__window {
+  display: none;
+}
+
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active)
+  .illuminus-preview__family[data-family="blocks"],
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active)
+  .illuminus-preview__family[data-family="pictures"] {
+  display: flex;
+}
+
+/* The panel is the page here — no sidebar beside it, so it takes the width.
+   It grows rather than claiming a percentage height: the panel's own height
+   comes from min-height, which a percentage child resolves against as auto. */
+.illuminus-preview__family .journal-entry-content {
+  flex: 1;
+}
+
 /* Like the sidebar, the mock title bar and edit button appear only while the
    tab that styles them is open. */
 .illuminus-preview__frame .window-header,

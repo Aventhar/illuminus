@@ -31,9 +31,12 @@ it to whichever journals should wear it, and export it to carry into another wor
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.
 - **Live sample.** The editor carries a miniature journal that repaints as you drag a
-  slider, and any real journal already open repaints too. The sample reveals the sidebar
-  while the Sidebar tab is open, and gives the width back to the page otherwise. Nothing
-  is written to the world until you press Save.
+  slider, and any real journal already open repaints too. The sample follows the tab: it
+  reveals the sidebar while the Sidebar tab is open and gives the width back to the page
+  otherwise, and Block Styles and Picture Styles take the pane over entirely, showing the
+  block or picture you are editing against the prose it would interrupt — the only way a
+  half-width floated block reads as one. Nothing is written to the world until you press
+  Save.
 - **Its own color picker.** Clicking a swatch opens Illuminus's picker rather than the
   operating system's: RGB and HSL side by side with sliders and numeric boxes, opacity on
   both, the hex including its alpha, and a row of saved colors belonging to that style.

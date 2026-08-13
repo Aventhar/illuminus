@@ -528,7 +528,9 @@ const sidebar = await cdp.evaluate(`(async () => {
   await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
   await new Promise(r => setTimeout(r, 800));
   entry.sheet.setPosition({left: 80, top: 60, width: 900, height: 700});
-  for (let i = 0; i < 30; i++) {
+  // Ten seconds, not three: the marker needs a layout pass after the window is
+  // positioned, and on a loaded machine that has taken longer than three.
+  for (let i = 0; i < 100; i++) {
     if (entry.sheet.element.querySelector(".toc li.page.active")) break;
     await new Promise(r => setTimeout(r, 100));
   }
@@ -1570,7 +1572,97 @@ check(hr.right.rightGap === 0 && hr.right.leftGap > 0,
   `right alignment puts it against the right edge (gaps ${hr.right.leftGap}/${hr.right.rightGap})`);
 check(hr.hidden.topWidth === "0px", `a thickness of 0 draws nothing (got ${hr.hidden.topWidth})`);
 
-console.log("\n[31] Console is clean");
+// Blocks and picture treatments take the preview pane over, because the journal
+// mock would leave a block a sliver of the width and its own width and wrapping
+// controls would then mean nothing. The panel must show the member the tab is
+// actually editing, and take its look from the style being edited.
+console.log("\n[31] Block Styles and Picture Styles get their own preview");
+const panes = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = await api.createStyle({name: "Preview Pane Probe", labels: {block02: "Sidebar"}});
+  const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+  settings.block01.background = "#123456";
+  settings.block01.width = "half";
+  settings.block01.float = "left";
+  settings.block02.background = "#654321";
+  settings.picture01.borderTopWidth = 6;
+  settings.picture01.borderTopStyle = "solid";
+  settings.picture01.borderTopColor = "#ff8800";
+  await api.updateStyle(style.id, {settings});
+
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1000));
+  const el = app.element;
+  const mock = el.querySelector(".illuminus-preview__window");
+  const blocks = el.querySelector('.illuminus-preview__family[data-family="blocks"]');
+  const pictures = el.querySelector('.illuminus-preview__family[data-family="pictures"]');
+  const frame = el.querySelector(".illuminus-preview__frame");
+  const show = e => getComputedStyle(e).display;
+
+  const at = async (tab) => { app.changeTab(tab, "sheet"); await new Promise(r => setTimeout(r, 300)); };
+
+  await at("page");
+  const onPage = {mock: show(mock), blocks: show(blocks), pictures: show(pictures)};
+
+  await at("blocks");
+  const bq = blocks.querySelector("blockquote");
+  const onBlocks = {
+    mock: show(mock), blocks: show(blocks), pictures: show(pictures),
+    carrier: bq.className,
+    background: getComputedStyle(bq).backgroundColor,
+    float: getComputedStyle(bq).cssFloat,
+    // The page must reach the bottom of the pane, not stop at its text.
+    fill: Math.round(blocks.querySelector(".journal-entry-content").getBoundingClientRect().height)
+      >= Math.round(frame.getBoundingClientRect().height) - 4
+  };
+
+  // Choosing another member rebuilds the panel for it.
+  el.querySelector('[data-family-picker="blocks"]').value = "block02";
+  el.querySelector('[data-family-picker="blocks"]').dispatchEvent(new Event("change"));
+  await new Promise(r => setTimeout(r, 600));
+  const afterPick = {
+    carrier: el.querySelector('.illuminus-preview__family[data-family="blocks"] blockquote').className,
+    background: getComputedStyle(el.querySelector('.illuminus-preview__family[data-family="blocks"] blockquote')).backgroundColor
+  };
+
+  await at("pictures");
+  const fig = el.querySelector('.illuminus-preview__family[data-family="pictures"] figure');
+  const onPictures = {
+    mock: show(el.querySelector(".illuminus-preview__window")),
+    pictures: show(el.querySelector('.illuminus-preview__family[data-family="pictures"]')),
+    carrier: fig.className,
+    borderColor: getComputedStyle(fig).borderTopColor,
+    hasImage: !!fig.querySelector("img") && fig.querySelector("img").getBoundingClientRect().width > 0
+  };
+
+  await app.close();
+  await api.deleteStyle(style.id);
+  return JSON.stringify({onPage, onBlocks, afterPick, onPictures});
+})()`);
+const pv = JSON.parse(panes);
+check(pv.onPage.mock !== "none" && pv.onPage.blocks === "none" && pv.onPage.pictures === "none",
+  "on a page tab the journal mock is what shows");
+check(pv.onBlocks.mock === "none" && pv.onBlocks.blocks !== "none",
+  `the Block Styles tab replaces the mock (mock ${pv.onBlocks.mock}, panel ${pv.onBlocks.blocks})`);
+check(pv.onBlocks.carrier === "illuminus-block illuminus-block--block01",
+  `the panel is built for the member on show (got "${pv.onBlocks.carrier}")`);
+check(pv.onBlocks.background === "rgb(18, 52, 86)",
+  `and takes its look from the style being edited (got ${pv.onBlocks.background})`);
+check(pv.onBlocks.float === "left", `layout settings reach it too (float ${pv.onBlocks.float})`);
+check(pv.onBlocks.fill, "the sample page fills the pane rather than stopping at its text");
+check(pv.afterPick.carrier === "illuminus-block illuminus-block--block02",
+  `choosing another block rebuilds the panel for it (got "${pv.afterPick.carrier}")`);
+check(pv.afterPick.background === "rgb(101, 67, 33)",
+  `and it repaints from that member's settings (got ${pv.afterPick.background})`);
+check(pv.onPictures.mock === "none" && pv.onPictures.pictures !== "none",
+  `the Picture Styles tab replaces it as well (panel ${pv.onPictures.pictures})`);
+check(pv.onPictures.carrier === "illuminus-picture illuminus-picture--picture01",
+  `its panel carries the treatment on show (got "${pv.onPictures.carrier}")`);
+check(pv.onPictures.borderColor === "rgb(255, 136, 0)",
+  `styled from the style being edited (got ${pv.onPictures.borderColor})`);
+check(pv.onPictures.hasImage, "and the sample picture actually loads");
+
+console.log("\n[32] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
