@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 1,956 settings across 16 tabs and 344 collapsible
+- **Everything is a GUI control.** 1,958 settings across 16 tabs and 344 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
@@ -61,7 +61,7 @@ it to whichever journals should wear it, and export it to carry into another wor
   Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
   and Picture Blending to Normal to see them as they are. Your own art works just as
   well.
-- **Inline styles for a few words at a time.** Ten more treatments, applied to a
+- **Inline styles for a few words at a time.** Ten more tag styles, applied to a
   selection rather than a whole block: trait tags, rarity badges, and the rank at the end
   of a statblock title line — select the words, pick one from the same menu. Each has its
   own lettering, fill, picture, border, corners, shadow, and spacing, and can be pushed to

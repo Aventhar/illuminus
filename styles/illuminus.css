@@ -587,13 +587,20 @@
   list-style-type: var(--ill-lists-bullet);
 }
 
+.illuminus-styled .journal-page-content ol {
+  list-style-type: var(--ill-lists-number-style);
+}
+
 .illuminus-styled .journal-page-content li {
   margin-bottom: var(--ill-lists-item-spacing);
 }
 
+/* Sizing the marker rather than the item, so a big bullet does not drag the
+   text up with it. */
 .illuminus-styled .journal-page-content li::marker {
   color: var(--ill-lists-marker-color);
   font-family: var(--ill-lists-marker-font);
+  font-size: var(--ill-lists-marker-size);
 }
 
 /* --- Tables ------------------------------------------------------------- */
@@ -1120,8 +1127,28 @@
   row-gap: 0.15rem;
 }
 
+/* Each tab reads as a button: an outline it keeps whether or not it is chosen,
+   so the strip does not shift when the selection moves, and a filled, brighter
+   one for the tab being edited. */
 .illuminus-editor nav.tabs [data-tab] {
   white-space: nowrap;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+  border-radius: 4px;
+  background: rgb(0 0 0 / 10%);
+  transition: background-color 120ms, border-color 120ms;
+}
+
+.illuminus-editor nav.tabs [data-tab]:hover {
+  border-color: var(--color-border-highlight-alt, #ff9c3d);
+  background: rgb(255 255 255 / 8%);
+}
+
+.illuminus-editor nav.tabs [data-tab].active {
+  border-color: var(--color-border-highlight, #ff6400);
+  background: rgb(255 100 0 / 18%);
+  box-shadow: 0 0 6px rgb(255 100 0 / 35%);
+  font-weight: bold;
 }
 
 .illuminus-editor nav.tabs .illuminus-badge {

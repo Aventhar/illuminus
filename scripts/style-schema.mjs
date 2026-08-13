@@ -55,6 +55,8 @@ const CHOICES = {
   lineStyle: ["none", "solid", "double", "dashed", "dotted", "wavy"],
   decorationLine: ["none", "underline", "overline", "lineThrough"],
   bullet: ["disc", "circle", "square", "none", "diamond", "star", "dash", "arrow"],
+  numberStyle: ["decimal", "decimalLeadingZero", "lowerAlpha", "upperAlpha",
+                "lowerRoman", "upperRoman", "none"],
   blend: ["normal", "multiply", "overlay", "softLight", "hardLight", "screen", "luminosity", "colorBurn"],
   textureFit: ["tile", "cover", "contain", "stretch"],
   texturePosition: ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"],
@@ -148,7 +150,9 @@ const emitBullet = (value) => ({
 /** Multi-word CSS keywords that differ from their camelCase choice value. */
 const KEYWORD = {
   softLight: "soft-light", hardLight: "hard-light", colorBurn: "color-burn",
-  lineThrough: "line-through", preWrap: "pre-wrap", breakWord: "break-word", breakAll: "break-all"
+  lineThrough: "line-through", preWrap: "pre-wrap", breakWord: "break-word", breakAll: "break-all",
+  decimalLeadingZero: "decimal-leading-zero", lowerAlpha: "lower-alpha", upperAlpha: "upper-alpha",
+  lowerRoman: "lower-roman", upperRoman: "upper-roman"
 };
 const emitKeyword = (value) => KEYWORD[value] ?? value;
 
@@ -458,6 +462,9 @@ export const GROUPS = [
 {
     id: "window",
     icon: "fa-solid fa-window-maximize",
+    // Styles the frame rather than anything on the page, so its tab sits at the
+    // end of the strip. Its position in this list is unaffected.
+    strip: "end",
     sections: [
       {
         id: "frame",
@@ -505,6 +512,31 @@ export const GROUPS = [
           ...cornerFields("pageButtonCorner", 3)
         ]
       }
+    ]
+  },
+
+    {
+    id: "page",
+    icon: "fa-solid fa-scroll",
+    sections: [
+      {
+        id: "surface",
+        fields: [
+          col("background", "#ede0c8"),
+          { type: "image", name: "texture", default: "" },
+          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
+          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
+          select("textureAttachment", "scroll", CHOICES.textureAttachment),
+          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
+          num("textureOpacity", 100, "%", 0, 100, 1)
+        ]
+      },
+      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      { id: "padding", fields: spacingFields("padding", 24) },
+      { id: "border", fields: borderFields("border") },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      { id: "innerShadow", fields: shadowFields("innerShadow") }
     ]
   },
 
@@ -601,31 +633,6 @@ export const GROUPS = [
           ...cornerFields("buttonCorner", 3)
         ]
       }
-    ]
-  },
-
-    {
-    id: "page",
-    icon: "fa-solid fa-scroll",
-    sections: [
-      {
-        id: "surface",
-        fields: [
-          col("background", "#ede0c8"),
-          { type: "image", name: "texture", default: "" },
-          select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
-          select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
-          select("textureAttachment", "scroll", CHOICES.textureAttachment),
-          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
-          num("textureOpacity", 100, "%", 0, 100, 1)
-        ]
-      },
-      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
-      { id: "padding", fields: spacingFields("padding", 24) },
-      { id: "border", fields: borderFields("border") },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", fields: shadowFields("shadow") },
-      { id: "innerShadow", fields: shadowFields("innerShadow") }
     ]
   },
 
@@ -746,6 +753,8 @@ export const GROUPS = [
         id: "marker",
         fields: [
           select("bullet", "disc", CHOICES.bullet, { emit: emitBullet }),
+        select("numberStyle", "decimal", CHOICES.numberStyle, { emit: emitKeyword }),
+        num("markerSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("markerColor", "#7a2010"),
           font("markerFont", "")
         ]

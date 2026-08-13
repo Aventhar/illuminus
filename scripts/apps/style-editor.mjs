@@ -103,8 +103,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Families, each shown as a single tab with a picker. */
   static FAMILIES = [
     { id: "blocks", icon: "fa-solid fa-square-dashed", label: "ILLUMINUS.Families.blocks" },
-    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" },
-    { id: "tags", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tags" }
+    { id: "tags", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tags" },
+    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" }
   ];
 
   /** Groups that get a tab of their own, in strip order. */
@@ -112,12 +112,20 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return GROUPS.filter((group) => !group.family);
   }
 
+  /** One entry in the tab strip. */
+  static #tabFor(group) {
+    return { id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` };
+  }
+
   static TABS = {
     sheet: {
+      // Content tabs, then the families, then anything marked for the end of
+      // the strip — the Window tab styles the frame rather than the page, so it
+      // sits after the rest rather than in front of them.
       tabs: [
-        ...IlluminusStyleEditor.pageGroups.map((group) =>
-          ({ id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` })),
-        ...IlluminusStyleEditor.FAMILIES.map((f) => ({ id: f.id, icon: f.icon, label: f.label }))
+        ...IlluminusStyleEditor.pageGroups.filter((g) => g.strip !== "end").map(IlluminusStyleEditor.#tabFor),
+        ...IlluminusStyleEditor.FAMILIES.map((f) => ({ id: f.id, icon: f.icon, label: f.label })),
+        ...IlluminusStyleEditor.pageGroups.filter((g) => g.strip === "end").map(IlluminusStyleEditor.#tabFor)
       ],
       // Named rather than taken from the first tab, so the strip can be
       // reordered without changing where the editor opens.

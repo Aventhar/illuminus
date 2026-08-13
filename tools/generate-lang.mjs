@@ -36,15 +36,15 @@ Object.assign(out, {
   "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
   "ILLUMINUS.Color.None": "None",
   "ILLUMINUS.Menu.Title": "Illuminus",
-  "ILLUMINUS.Menu.Blocks": "Block",
-  "ILLUMINUS.Menu.Pictures": "Picture Style",
-  "ILLUMINUS.Menu.Tags": "Inline Style",
+  "ILLUMINUS.Menu.Blocks": "Box",
+  "ILLUMINUS.Menu.Pictures": "Image Style",
+  "ILLUMINUS.Menu.Tags": "Tag",
   "ILLUMINUS.Menu.Clear": "Remove Illuminus styling",
-  "ILLUMINUS.Families.blocks": "Block Styles",
-  "ILLUMINUS.Families.pictures": "Picture Styles",
-  "ILLUMINUS.Families.tags": "Inline Styles",
+  "ILLUMINUS.Families.blocks": "Box Styles",
+  "ILLUMINUS.Families.pictures": "Image Styles",
+  "ILLUMINUS.Families.tags": "Tag Styles",
   "ILLUMINUS.Families.tagsName": "Tag name",
-  "ILLUMINUS.Families.tagsHint": "Treatments you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
+  "ILLUMINUS.Families.tagsHint": "Styles you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
   "ILLUMINUS.Field.tags.color.label": "Text Color",
   "ILLUMINUS.Field.tags.color.hint": "Color of the lettering inside this tag. Leave empty to follow the surrounding text.",
   "ILLUMINUS.Field.tags.size.hint": "How large the lettering is inside this tag. 0 follows the surrounding text.",
@@ -53,16 +53,16 @@ Object.assign(out, {
   "ILLUMINUS.Field.tags.verticalAlign.label": "Vertical Position",
   "ILLUMINUS.Field.tags.verticalAlign.hint": "How the tag lines up with the words beside it.",
   "ILLUMINUS.Field.tags.background.hint": "The flat color behind the lettering of this tag.",
-  "ILLUMINUS.Families.blocksName": "Block name",
-  "ILLUMINUS.Families.picturesName": "Treatment name",
-  "ILLUMINUS.Families.blocksHint": "Containers you wrap around content — read-aloud boxes, sidebars, encounter panels. Pick one to style, and rename it to suit your content.",
+  "ILLUMINUS.Families.blocksName": "Box name",
+  "ILLUMINUS.Families.picturesName": "Image style name",
+  "ILLUMINUS.Families.blocksHint": "Boxes you wrap around content — read-aloud panels, sidebars, encounter blocks. Pick one to style, and rename it to suit your content.",
   "ILLUMINUS.Field.blocks.color.label": "Text Color",
-  "ILLUMINUS.Field.blocks.color.hint": "Color of the lettering inside this block. Leave empty to follow the page.",
-  "ILLUMINUS.Field.blocks.size.hint": "How large the lettering is inside this block. 0 follows the page.",
-  "ILLUMINUS.Field.blocks.lineHeight.hint": "Space between lines inside this block. 0 follows the page.",
-  "ILLUMINUS.Field.pictures.captionColor.hint": "Color of this picture's caption. Leave empty to follow the Pictures tab.",
-  "ILLUMINUS.Field.pictures.captionSize.hint": "How large this picture's caption is. 0 follows the Pictures tab.",
-  "ILLUMINUS.Families.picturesHint": "Treatments you apply to a single picture, overriding the page-wide Pictures settings. Pick one to style, and rename it to suit your content.",
+  "ILLUMINUS.Field.blocks.color.hint": "Color of the lettering inside this box. Leave empty to follow the page.",
+  "ILLUMINUS.Field.blocks.size.hint": "How large the lettering is inside this box. 0 follows the page.",
+  "ILLUMINUS.Field.blocks.lineHeight.hint": "Space between lines inside this box. 0 follows the page.",
+  "ILLUMINUS.Field.pictures.captionColor.hint": "Color of this image's caption. Leave empty to follow the Images tab.",
+  "ILLUMINUS.Field.pictures.captionSize.hint": "How large this image's caption is. 0 follows the Images tab.",
+  "ILLUMINUS.Families.picturesHint": "Styles you apply to a single image, overriding the page-wide Images settings. Pick one to style, and rename it to suit your content.",
   "ILLUMINUS.Buttons.OK": "OK",
   "ILLUMINUS.ColorPicker.Title": "Color",
   "ILLUMINUS.ColorPicker.Open": "Choose a color",
@@ -92,6 +92,12 @@ Object.assign(out, {
   "ILLUMINUS.Choices.boldItalic": "Bold Italic",
   "ILLUMINUS.Choices.light": "Light",
   "ILLUMINUS.Choices.lightItalic": "Light Italic",
+  "ILLUMINUS.Choices.decimal": "1, 2, 3",
+  "ILLUMINUS.Choices.decimalLeadingZero": "01, 02, 03",
+  "ILLUMINUS.Choices.lowerAlpha": "a, b, c",
+  "ILLUMINUS.Choices.upperAlpha": "A, B, C",
+  "ILLUMINUS.Choices.lowerRoman": "i, ii, iii",
+  "ILLUMINUS.Choices.upperRoman": "I, II, III",
   "ILLUMINUS.Choices.baseline": "On the line",
   "ILLUMINUS.Preview.TagTitle": "Sewer Haze",
   "ILLUMINUS.Preview.TagRank": "Disease 7",
@@ -101,9 +107,9 @@ Object.assign(out, {
   "ILLUMINUS.Preview.TagFlow": "A tag can also sit inside a sentence, like this",
   "ILLUMINUS.Preview.TagInline": "Uncommon",
   "ILLUMINUS.Preview.TagFlowEnd": "one, so its lettering and spacing can be judged against ordinary prose.",
-  "ILLUMINUS.Preview.Caption": "Picture caption",
-  "ILLUMINUS.Preview.BlockHeading": "Block heading",
-  "ILLUMINUS.Preview.BlockBody": "Text inside the block, run on long enough to wrap over several lines so its own spacing, padding, and lettering can be judged against the page around it.",
+  "ILLUMINUS.Preview.Caption": "Image caption",
+  "ILLUMINUS.Preview.BlockHeading": "Box heading",
+  "ILLUMINUS.Preview.BlockBody": "Text inside the box, run on long enough to wrap over several lines so its own spacing, padding, and lettering can be judged against the page around it.",
   "ILLUMINUS.Preview.Flow": "Page text around it, long enough to wrap, so anything set to half width and floated shows the prose running beside it rather than sitting alone.",
   "ILLUMINUS.Preview.Category": "Category",
   "ILLUMINUS.Preview.CurrentPage": "Current page",
@@ -120,7 +126,7 @@ Object.assign(out, {
 
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
-  page: ["Page", "The paper the text sits on: its color, any background picture, and the frame around it."],
+  page: ["Page", "The paper the text sits on: its color, any background image, and the frame around it."],
   window: ["Window", "The journal window itself: its frame, the title bar across the top, and the icon buttons."],
   sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."],
   title: ["Title", "The journal's name, shown across the top of the window."],
@@ -132,7 +138,7 @@ const GROUP_TEXT = {
   lists: ["Lists", "Bulleted and numbered lists."],
   tables: ["Tables", "Tables of results, treasure, encounters, and the like."],
   boxes: ["Boxes", "Set-apart passages, such as read-aloud description. Applies to quote blocks in the editor."],
-  images: ["Pictures", "Images placed in a page, and their captions."]
+  images: ["Images", "Images placed in a page, and their captions."]
 };
 for (const [id, [label, hint]] of Object.entries(GROUP_TEXT)) {
   put(`ILLUMINUS.Groups.${id}.label`, label);
@@ -143,24 +149,24 @@ for (const [id, [label, hint]] of Object.entries(GROUP_TEXT)) {
 // on the style and editable; these are only the fallbacks.
 for (let i = 1; i <= 10; i++) {
   const n = String(i).padStart(2, "0");
-  put(`ILLUMINUS.Groups.block${n}.label`, `Block${n}`);
+  put(`ILLUMINUS.Groups.block${n}.label`, `Box${n}`);
   put(`ILLUMINUS.Groups.block${n}.hint`,
-    "A container you wrap around content. Anything left as \"use the page setting\" follows the Body and Heading tabs.");
-  put(`ILLUMINUS.Groups.picture${n}.label`, `Picture${n}`);
+    "A box you wrap around content. Anything left as \"use the page setting\" follows the Body and Heading tabs.");
+  put(`ILLUMINUS.Groups.picture${n}.label`, `Image${n}`);
   put(`ILLUMINUS.Groups.picture${n}.hint`,
-    "A treatment you apply to one picture, overriding the page-wide Pictures settings.");
+    "A style you apply to one image, overriding the page-wide Images settings.");
   put(`ILLUMINUS.Groups.tag${n}.label`, `Tag${n}`);
   put(`ILLUMINUS.Groups.tag${n}.hint`,
-    "A treatment you apply to a few words rather than to a whole block \u2014 a trait tag, a rarity badge, "
+    "A style you apply to a few words rather than to a whole box \u2014 a trait tag, a rarity badge, "
     + "or the rank on the right of a title line.");
 }
 
 /* ---------- Sections ---------- */
 const SECTION_TEXT = {
-  surface: ["Surface", "The color and picture behind everything else"],
+  surface: ["Surface", "The color and image behind everything else"],
   layout: ["Size and Position", "How much room this takes up"],
   tagLayout: ["Placement", "Where the tag sits on the line, and how wide it is"],
-  texture: ["Picture", "A picture layered behind the contents"],
+  texture: ["Image", "An image layered behind the contents"],
   text: ["Lettering", "Typeface, size, color, and spacing"],
   textShadow: ["Text Shadow", "A shadow cast by the lettering itself"],
   padding: ["Inner Spacing", "Room between the edges and the contents"],
@@ -175,14 +181,14 @@ const SECTION_TEXT = {
   columns: ["Columns", "Split the text into newspaper-style columns"],
   dropCap: ["Opening Capital", "An enlarged first letter at the start of a page"],
   decoration: ["Underline", "The line drawn through or under a link"],
-  chip: ["Highlight", "A block of color behind a link, making it look like a button"],
-  marker: ["Bullets", "The mark in front of each item"],
+  chip: ["Highlight", "A patch of color behind a link, making it look like a button"],
+  marker: ["Bullets and Numbers", "The mark in front of each item"],
   header: ["Header Row", "The top row of a table"],
   rows: ["Rows", "The body rows of a table"],
   cellPadding: ["Cell Spacing", "Room between a cell's edges and its contents"],
-  caption: ["Caption", "The text beneath a picture"],
+  caption: ["Caption", "The text beneath an image"],
   dividers: ["Dividers", "Horizontal rules between passages"],
-  blockHeadings: ["Headings Inside", "Headings within this block. Leave as the page setting to follow the Heading tabs"],
+  blockHeadings: ["Headings Inside", "Headings within this box. Leave as the page setting to follow the Heading tabs"],
   entries: ["Page Entries", "Each page listed in the contents panel"],
   entryBorder: ["Entry Borders", "Lines around each listed page. Each edge is set separately"],
   entryStates: ["Current and Hovered", "How the page you are reading, and the one under the mouse, stand out"],
@@ -289,15 +295,15 @@ for (const name of names) {
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
   background: ["Fill Color", "The flat color behind everything else."],
-  whenEmpty: ["When Empty", "What happens if this block is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
+  whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
   minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],
-  texture: ["Background Picture", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
-  textureFit: ["Picture Fit", "How the background picture covers the area."],
-  texturePosition: ["Picture Position", "Where the background picture is anchored."],
-  textureAttachment: ["Picture Scrolling", "Whether the background picture scrolls with the text or stays put."],
-  textureBlend: ["Picture Blending", "How the picture mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through."],
-  textureOpacity: ["Picture Strength", "How strongly the background picture shows. 0 hides it entirely."],
+  texture: ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
+  textureFit: ["Image Fit", "How the background image covers the area."],
+  texturePosition: ["Image Position", "Where the background image is anchored."],
+  textureAttachment: ["Image Scrolling", "Whether the background image scrolls with the text or stays put."],
+  textureBlend: ["Image Blending", "How the image mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through."],
+  textureOpacity: ["Image Strength", "How strongly the background image shows. 0 hides it entirely."],
   maxWidth: ["Maximum Text Width", "Stops lines growing too long to read comfortably. Set to 0 for no limit."],
   font: ["Typeface", "Which lettering to use. Add more under Foundry's Configure Font Families menu."],
   size: ["Text Size", "How large the lettering is."],
@@ -331,6 +337,8 @@ const FIELD_TEXT = {
   decorationThickness: ["Line Thickness", "How heavy the link's line is."],
   decorationOffset: ["Line Distance", "How far the line sits from the lettering."],
   bullet: ["Bullet Shape", "The mark in front of each item in a bulleted list."],
+  numberStyle: ["Number Style", "How items are numbered in a numbered list."],
+  markerSize: ["Bullet Size", "How large bullets and item numbers are. 0 follows the text."],
   markerColor: ["Bullet Color", "Color of bullets and item numbers."],
   markerFont: ["Bullet Typeface", "Lettering used for bullets and item numbers."],
   indent: ["Indent", "How far a list is pushed in from the left."],
@@ -371,8 +379,8 @@ const FIELD_TEXT = {
   clear: ["Start Below", "Push this down past anything already floated beside it."],
   flip: ["Mirror", "Flip the picture, so an illustration can face into the page."],
   headingFont: ["Typeface", "Lettering for headings inside this block."],
-  headingSize: ["Text Size", "Size of headings inside this block. 0 follows the page."],
-  headingColor: ["Text Color", "Color of headings inside this block. Leave empty to follow the page."],
+  headingSize: ["Text Size", "Size of headings inside this box. 0 follows the page."],
+  headingColor: ["Text Color", "Color of headings inside this box. Leave empty to follow the page."],
   headingWeight: ["Thickness", "How heavy headings inside this block are."],
   headingCaps: ["Capitals", "Capitalization of headings inside this block."],
   headingAlign: ["Alignment", "Which edge headings inside this block line up against."],
