@@ -187,6 +187,25 @@ grayscale will tint twice.
 Anything added here is redistributed under the repository's MIT license, so only bundle
 art that may be licensed that way.
 
+## Background images
+
+Every fill color has a matching `<prefix>Texture` set — image, fit, position, blending,
+strength — built by `imageFields()` and laid out by the `IMAGE_LAYERS` table in
+`tools/generate-block-css.mjs`. Forty-odd near-identical rule sets are expanded from that
+table rather than written by hand, so a renamed field is a generator error.
+
+Each image rides on a `::before` layer at `z-index: -1` with `isolation: isolate` on the
+host, not on the element's own `background-image`. That keeps its strength and blend mode
+independent of the lettering in front of it, and keeps a blend mode mixing with that
+element's own fill rather than with the page beneath. The host also takes
+`position: relative` — **except where Foundry has already positioned it**, which the table
+marks with `host: false`; forcing `relative` on a window root drops it into normal flow
+and shoves the interface sideways.
+
+Two fills deliberately have no image: the `<img>` fill on the Images tab, which sits
+behind a picture rather than behind content and cannot host a layer, and table row and
+stripe colors, where `tr` cannot host one reliably.
+
 ## Generated files — do not hand-edit
 
 - **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.

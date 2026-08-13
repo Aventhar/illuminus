@@ -1285,3 +1285,802 @@
 .illuminus-styled section.journal-page-content .illuminus-block--block10:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
   display: var(--ill-block10-when-empty);
 }
+
+.illuminus-styled.application {
+  isolation: isolate;
+}
+
+.illuminus-styled.application::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-texture);
+  background-size: var(--ill-window-texture-fit-size);
+  background-repeat: var(--ill-window-texture-fit-repeat);
+  background-position: var(--ill-window-texture-position);
+  mix-blend-mode: var(--ill-window-texture-blend);
+  opacity: var(--ill-window-texture-opacity);
+}
+
+.illuminus-styled .window-header {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .window-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-title-bar-texture);
+  background-size: var(--ill-window-title-bar-texture-fit-size);
+  background-repeat: var(--ill-window-title-bar-texture-fit-repeat);
+  background-position: var(--ill-window-title-bar-texture-position);
+  mix-blend-mode: var(--ill-window-title-bar-texture-blend);
+  opacity: var(--ill-window-title-bar-texture-opacity);
+}
+
+.illuminus-styled .window-header button.header-control {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .window-header button.header-control::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-header-button-texture);
+  background-size: var(--ill-window-header-button-texture-fit-size);
+  background-repeat: var(--ill-window-header-button-texture-fit-repeat);
+  background-position: var(--ill-window-header-button-texture-position);
+  mix-blend-mode: var(--ill-window-header-button-texture-blend);
+  opacity: var(--ill-window-header-button-texture-opacity);
+}
+
+.illuminus-styled .window-header button.header-control:hover {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .window-header button.header-control:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-header-button-hover-texture);
+  background-size: var(--ill-window-header-button-hover-texture-fit-size);
+  background-repeat: var(--ill-window-header-button-hover-texture-fit-repeat);
+  background-position: var(--ill-window-header-button-hover-texture-position);
+  mix-blend-mode: var(--ill-window-header-button-hover-texture-blend);
+  opacity: var(--ill-window-header-button-hover-texture-opacity);
+}
+
+.illuminus-styled .journal-entry-page .edit-container button {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-entry-page .edit-container button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-page-button-texture);
+  background-size: var(--ill-window-page-button-texture-fit-size);
+  background-repeat: var(--ill-window-page-button-texture-fit-repeat);
+  background-position: var(--ill-window-page-button-texture-position);
+  mix-blend-mode: var(--ill-window-page-button-texture-blend);
+  opacity: var(--ill-window-page-button-texture-opacity);
+}
+
+.illuminus-styled .journal-entry-page .edit-container button:hover {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-entry-page .edit-container button:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-window-page-button-hover-texture);
+  background-size: var(--ill-window-page-button-hover-texture-fit-size);
+  background-repeat: var(--ill-window-page-button-hover-texture-fit-repeat);
+  background-position: var(--ill-window-page-button-hover-texture-position);
+  mix-blend-mode: var(--ill-window-page-button-hover-texture-blend);
+  opacity: var(--ill-window-page-button-hover-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-texture);
+  background-size: var(--ill-sidebar-texture-fit-size);
+  background-repeat: var(--ill-sidebar-texture-fit-repeat);
+  background-position: var(--ill-sidebar-texture-position);
+  mix-blend-mode: var(--ill-sidebar-texture-blend);
+  opacity: var(--ill-sidebar-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar .toc li.page:hover {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar .toc li.page:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-hover-texture);
+  background-size: var(--ill-sidebar-hover-texture-fit-size);
+  background-repeat: var(--ill-sidebar-hover-texture-fit-repeat);
+  background-position: var(--ill-sidebar-hover-texture-position);
+  mix-blend-mode: var(--ill-sidebar-hover-texture-blend);
+  opacity: var(--ill-sidebar-hover-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar .toc li.page.active {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar .toc li.page.active::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-active-texture);
+  background-size: var(--ill-sidebar-active-texture-fit-size);
+  background-repeat: var(--ill-sidebar-active-texture-fit-repeat);
+  background-position: var(--ill-sidebar-active-texture-position);
+  mix-blend-mode: var(--ill-sidebar-active-texture-blend);
+  opacity: var(--ill-sidebar-active-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar .toc li.category {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar .toc li.category::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-category-texture);
+  background-size: var(--ill-sidebar-category-texture-fit-size);
+  background-repeat: var(--ill-sidebar-category-texture-fit-repeat);
+  background-position: var(--ill-sidebar-category-texture-position);
+  mix-blend-mode: var(--ill-sidebar-category-texture-blend);
+  opacity: var(--ill-sidebar-category-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar search input[type="search"] {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar search input[type="search"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-search-texture);
+  background-size: var(--ill-sidebar-search-texture-fit-size);
+  background-repeat: var(--ill-sidebar-search-texture-fit-repeat);
+  background-position: var(--ill-sidebar-search-texture-position);
+  mix-blend-mode: var(--ill-sidebar-search-texture-blend);
+  opacity: var(--ill-sidebar-search-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar button {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-button-texture);
+  background-size: var(--ill-sidebar-button-texture-fit-size);
+  background-repeat: var(--ill-sidebar-button-texture-fit-repeat);
+  background-position: var(--ill-sidebar-button-texture-position);
+  mix-blend-mode: var(--ill-sidebar-button-texture-blend);
+  opacity: var(--ill-sidebar-button-texture-opacity);
+}
+
+.illuminus-styled .journal-sidebar button:hover {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar button:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-button-hover-texture);
+  background-size: var(--ill-sidebar-button-hover-texture-fit-size);
+  background-repeat: var(--ill-sidebar-button-hover-texture-fit-repeat);
+  background-position: var(--ill-sidebar-button-hover-texture-position);
+  mix-blend-mode: var(--ill-sidebar-button-hover-texture-blend);
+  opacity: var(--ill-sidebar-button-hover-texture-opacity);
+}
+
+.illuminus-styled .journal-header .title {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-header .title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-title-texture);
+  background-size: var(--ill-title-texture-fit-size);
+  background-repeat: var(--ill-title-texture-fit-repeat);
+  background-position: var(--ill-title-texture-position);
+  mix-blend-mode: var(--ill-title-texture-blend);
+  opacity: var(--ill-title-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h1 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h1::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading1-texture);
+  background-size: var(--ill-heading1-texture-fit-size);
+  background-repeat: var(--ill-heading1-texture-fit-repeat);
+  background-position: var(--ill-heading1-texture-position);
+  mix-blend-mode: var(--ill-heading1-texture-blend);
+  opacity: var(--ill-heading1-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h2 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h2::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading2-texture);
+  background-size: var(--ill-heading2-texture-fit-size);
+  background-repeat: var(--ill-heading2-texture-fit-repeat);
+  background-position: var(--ill-heading2-texture-position);
+  mix-blend-mode: var(--ill-heading2-texture-blend);
+  opacity: var(--ill-heading2-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content h3 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content h3::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-heading3-texture);
+  background-size: var(--ill-heading3-texture-fit-size);
+  background-repeat: var(--ill-heading3-texture-fit-repeat);
+  background-position: var(--ill-heading3-texture-position);
+  mix-blend-mode: var(--ill-heading3-texture-blend);
+  opacity: var(--ill-heading3-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-links-texture);
+  background-size: var(--ill-links-texture-fit-size);
+  background-repeat: var(--ill-links-texture-fit-repeat);
+  background-position: var(--ill-links-texture-position);
+  mix-blend-mode: var(--ill-links-texture-blend);
+  opacity: var(--ill-links-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content thead th {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content thead th::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-tables-header-texture);
+  background-size: var(--ill-tables-header-texture-fit-size);
+  background-repeat: var(--ill-tables-header-texture-fit-repeat);
+  background-position: var(--ill-tables-header-texture-position);
+  mix-blend-mode: var(--ill-tables-header-texture-blend);
+  opacity: var(--ill-tables-header-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-block) {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-block)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-boxes-texture);
+  background-size: var(--ill-boxes-texture-fit-size);
+  background-repeat: var(--ill-boxes-texture-fit-repeat);
+  background-position: var(--ill-boxes-texture-position);
+  mix-blend-mode: var(--ill-boxes-texture-blend);
+  opacity: var(--ill-boxes-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block01 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block01::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block01-texture);
+  background-size: var(--ill-block01-texture-fit-size);
+  background-repeat: var(--ill-block01-texture-fit-repeat);
+  background-position: var(--ill-block01-texture-position);
+  mix-blend-mode: var(--ill-block01-texture-blend);
+  opacity: var(--ill-block01-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block02 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block02::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block02-texture);
+  background-size: var(--ill-block02-texture-fit-size);
+  background-repeat: var(--ill-block02-texture-fit-repeat);
+  background-position: var(--ill-block02-texture-position);
+  mix-blend-mode: var(--ill-block02-texture-blend);
+  opacity: var(--ill-block02-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block03 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block03::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block03-texture);
+  background-size: var(--ill-block03-texture-fit-size);
+  background-repeat: var(--ill-block03-texture-fit-repeat);
+  background-position: var(--ill-block03-texture-position);
+  mix-blend-mode: var(--ill-block03-texture-blend);
+  opacity: var(--ill-block03-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block04 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block04::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block04-texture);
+  background-size: var(--ill-block04-texture-fit-size);
+  background-repeat: var(--ill-block04-texture-fit-repeat);
+  background-position: var(--ill-block04-texture-position);
+  mix-blend-mode: var(--ill-block04-texture-blend);
+  opacity: var(--ill-block04-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block05 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block05::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block05-texture);
+  background-size: var(--ill-block05-texture-fit-size);
+  background-repeat: var(--ill-block05-texture-fit-repeat);
+  background-position: var(--ill-block05-texture-position);
+  mix-blend-mode: var(--ill-block05-texture-blend);
+  opacity: var(--ill-block05-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block06 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block06::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block06-texture);
+  background-size: var(--ill-block06-texture-fit-size);
+  background-repeat: var(--ill-block06-texture-fit-repeat);
+  background-position: var(--ill-block06-texture-position);
+  mix-blend-mode: var(--ill-block06-texture-blend);
+  opacity: var(--ill-block06-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block07 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block07::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block07-texture);
+  background-size: var(--ill-block07-texture-fit-size);
+  background-repeat: var(--ill-block07-texture-fit-repeat);
+  background-position: var(--ill-block07-texture-position);
+  mix-blend-mode: var(--ill-block07-texture-blend);
+  opacity: var(--ill-block07-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block08 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block08::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block08-texture);
+  background-size: var(--ill-block08-texture-fit-size);
+  background-repeat: var(--ill-block08-texture-fit-repeat);
+  background-position: var(--ill-block08-texture-position);
+  mix-blend-mode: var(--ill-block08-texture-blend);
+  opacity: var(--ill-block08-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block09 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block09::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block09-texture);
+  background-size: var(--ill-block09-texture-fit-size);
+  background-repeat: var(--ill-block09-texture-fit-repeat);
+  background-position: var(--ill-block09-texture-position);
+  mix-blend-mode: var(--ill-block09-texture-blend);
+  opacity: var(--ill-block09-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block10 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-block--block10::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-block10-texture);
+  background-size: var(--ill-block10-texture-fit-size);
+  background-repeat: var(--ill-block10-texture-fit-repeat);
+  background-position: var(--ill-block10-texture-position);
+  mix-blend-mode: var(--ill-block10-texture-blend);
+  opacity: var(--ill-block10-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture01 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture01::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture01-texture);
+  background-size: var(--ill-picture01-texture-fit-size);
+  background-repeat: var(--ill-picture01-texture-fit-repeat);
+  background-position: var(--ill-picture01-texture-position);
+  mix-blend-mode: var(--ill-picture01-texture-blend);
+  opacity: var(--ill-picture01-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture02 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture02::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture02-texture);
+  background-size: var(--ill-picture02-texture-fit-size);
+  background-repeat: var(--ill-picture02-texture-fit-repeat);
+  background-position: var(--ill-picture02-texture-position);
+  mix-blend-mode: var(--ill-picture02-texture-blend);
+  opacity: var(--ill-picture02-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture03 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture03::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture03-texture);
+  background-size: var(--ill-picture03-texture-fit-size);
+  background-repeat: var(--ill-picture03-texture-fit-repeat);
+  background-position: var(--ill-picture03-texture-position);
+  mix-blend-mode: var(--ill-picture03-texture-blend);
+  opacity: var(--ill-picture03-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture04 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture04::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture04-texture);
+  background-size: var(--ill-picture04-texture-fit-size);
+  background-repeat: var(--ill-picture04-texture-fit-repeat);
+  background-position: var(--ill-picture04-texture-position);
+  mix-blend-mode: var(--ill-picture04-texture-blend);
+  opacity: var(--ill-picture04-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture05 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture05::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture05-texture);
+  background-size: var(--ill-picture05-texture-fit-size);
+  background-repeat: var(--ill-picture05-texture-fit-repeat);
+  background-position: var(--ill-picture05-texture-position);
+  mix-blend-mode: var(--ill-picture05-texture-blend);
+  opacity: var(--ill-picture05-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture06 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture06::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture06-texture);
+  background-size: var(--ill-picture06-texture-fit-size);
+  background-repeat: var(--ill-picture06-texture-fit-repeat);
+  background-position: var(--ill-picture06-texture-position);
+  mix-blend-mode: var(--ill-picture06-texture-blend);
+  opacity: var(--ill-picture06-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture07 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture07::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture07-texture);
+  background-size: var(--ill-picture07-texture-fit-size);
+  background-repeat: var(--ill-picture07-texture-fit-repeat);
+  background-position: var(--ill-picture07-texture-position);
+  mix-blend-mode: var(--ill-picture07-texture-blend);
+  opacity: var(--ill-picture07-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture08 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture08::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture08-texture);
+  background-size: var(--ill-picture08-texture-fit-size);
+  background-repeat: var(--ill-picture08-texture-fit-repeat);
+  background-position: var(--ill-picture08-texture-position);
+  mix-blend-mode: var(--ill-picture08-texture-blend);
+  opacity: var(--ill-picture08-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture09 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture09::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture09-texture);
+  background-size: var(--ill-picture09-texture-fit-size);
+  background-repeat: var(--ill-picture09-texture-fit-repeat);
+  background-position: var(--ill-picture09-texture-position);
+  mix-blend-mode: var(--ill-picture09-texture-blend);
+  opacity: var(--ill-picture09-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture10 {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-page-content .illuminus-picture--picture10::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-picture10-texture);
+  background-size: var(--ill-picture10-texture-fit-size);
+  background-repeat: var(--ill-picture10-texture-fit-repeat);
+  background-position: var(--ill-picture10-texture-position);
+  mix-blend-mode: var(--ill-picture10-texture-blend);
+  opacity: var(--ill-picture10-texture-opacity);
+}

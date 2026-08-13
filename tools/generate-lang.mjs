@@ -233,10 +233,38 @@ const noun = (prefix, fallback) => (prefix in NOUN ? NOUN[prefix] : fallback);
 const names = [...new Set(allFields().map(({ field }) => field.name))];
 const unmatched = [];
 
+/**
+ * Background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity). Every
+ * fill color has one, so the labels are generated rather than listed. Where two
+ * fills share a section — a button and the same button being pointed at — the
+ * qualifier keeps their labels apart.
+ */
+const IMAGE_QUALIFIER = (prefix) => {
+  if (/hover$/i.test(prefix)) return " When Pointed At";
+  if (prefix === "active") return " for the Current Page";
+  return "";
+};
+const IMAGE_TEXT = {
+  "": ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
+  Fit: ["Image Fit", "How the background image covers the area."],
+  Position: ["Image Position", "Where the background image is anchored."],
+  Blend: ["Image Blending", "How the image mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through."],
+  Opacity: ["Image Strength", "How strongly the background image shows. 0 hides it entirely."]
+};
+
 for (const name of names) {
   let m;
+  // background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity).
+  // Only prefixed ones — the Page tab's own set is worded by hand.
+  if ((m = name.match(/^(.+?)Texture(Fit|Position|Blend|Opacity)?$/))) {
+    const [, prefix, part] = m;
+    const [label, hint] = IMAGE_TEXT[part ?? ""];
+    put(`ILLUMINUS.Field.${name}.label`, label + IMAGE_QUALIFIER(prefix));
+    put(`ILLUMINUS.Field.${name}.hint`, hint);
+    continue;
+  }
   // border family: <prefix><Side><Width|Style|Color>
-  if ((m = name.match(/^(.*?)(Top|Right|Bottom|Left)(Width|Style|Color)$/))) {
+  else if ((m = name.match(/^(.*?)(Top|Right|Bottom|Left)(Width|Style|Color)$/))) {
     const [, prefix, side, part] = m;
     const what = noun(prefix, "edge");
     const lower = side.toLowerCase();

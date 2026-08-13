@@ -193,6 +193,76 @@ const emptyRules = (group) => `
 
 /* -------------------------------------------- */
 
+/**
+ * A background image behind one fill color.
+ *
+ * Every fill in the interface has one, so rather than write forty near-identical
+ * rules by hand they are expanded from this table. The image rides on a `::before`
+ * layer rather than the element's own `background-image`, so that its strength and
+ * blend mode are independent of the lettering in front of it; `isolation` keeps a
+ * blend mode mixing with the tag's own fill rather than with the page beneath.
+ *
+ * `host: false` marks an element Foundry has already positioned — forcing
+ * `position: relative` on a window root drops it into normal flow and shoves the
+ * rest of the interface sideways.
+ */
+const IMAGE_LAYERS = [
+  { selector: ".illuminus-styled.application", group: "window", prefix: "", host: false },
+  { selector: ".illuminus-styled .window-header", group: "window", prefix: "titleBar" },
+  { selector: ".illuminus-styled .window-header button.header-control", group: "window", prefix: "headerButton" },
+  { selector: ".illuminus-styled .window-header button.header-control:hover", group: "window", prefix: "headerButtonHover" },
+  { selector: ".illuminus-styled .journal-entry-page .edit-container button", group: "window", prefix: "pageButton" },
+  { selector: ".illuminus-styled .journal-entry-page .edit-container button:hover", group: "window", prefix: "pageButtonHover" },
+  { selector: ".illuminus-styled .journal-sidebar", group: "sidebar", prefix: "" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.page:hover", group: "sidebar", prefix: "hover" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.page.active", group: "sidebar", prefix: "active" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.category", group: "sidebar", prefix: "category" },
+  { selector: '.illuminus-styled .journal-sidebar search input[type="search"]', group: "sidebar", prefix: "search" },
+  { selector: ".illuminus-styled .journal-sidebar button", group: "sidebar", prefix: "button" },
+  { selector: ".illuminus-styled .journal-sidebar button:hover", group: "sidebar", prefix: "buttonHover" },
+  { selector: ".illuminus-styled .journal-header .title", group: "title", prefix: "" },
+  { selector: ".illuminus-styled .journal-page-content h1", group: "heading1", prefix: "" },
+  { selector: ".illuminus-styled .journal-page-content h2", group: "heading2", prefix: "" },
+  { selector: ".illuminus-styled .journal-page-content h3", group: "heading3", prefix: "" },
+  { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },
+  { selector: ".illuminus-styled .journal-page-content thead th", group: "tables", prefix: "header" },
+  { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-block)", group: "boxes", prefix: "" },
+  ...GROUPS.filter((g) => g.family === "blocks")
+    .map((g) => ({ selector: `.illuminus-styled .journal-page-content .illuminus-block--${g.id}`, group: g.id, prefix: "" })),
+  ...GROUPS.filter((g) => g.family === "pictures")
+    .map((g) => ({ selector: `.illuminus-styled .journal-page-content .illuminus-picture--${g.id}`, group: g.id, prefix: "" }))
+];
+
+/** The custom property one image field emits, by prefix, part, and suffix. */
+const imageVar = (layer, part, suffix = "") => {
+  const group = GROUPS.find((g) => g.id === layer.group);
+  const name = layer.prefix ? `${layer.prefix}Texture${part}` : `texture${part}`;
+  return v(group, name, suffix);
+};
+
+const imageLayer = (layer) => `
+${layer.selector} {
+${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
+}
+
+${layer.selector}::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: ${imageVar(layer, "")};
+  background-size: ${imageVar(layer, "Fit", "size")};
+  background-repeat: ${imageVar(layer, "Fit", "repeat")};
+  background-position: ${imageVar(layer, "Position")};
+  mix-blend-mode: ${imageVar(layer, "Blend")};
+  opacity: ${imageVar(layer, "Opacity")};
+}
+`;
+
+/* -------------------------------------------- */
+
 const header = `/* ==========================================================================
    Illuminus — generated block and picture rules
 
@@ -257,7 +327,8 @@ const blocks = blockGroups.map(blockRules).join("");
 const pictures = GROUPS.filter((g) => g.family === "pictures").map(pictureRules).join("");
 const tags = GROUPS.filter((g) => g.family === "tags").map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
-const out = `${header}${blocks}${pictures}${tags}${empties}`;
+const images = IMAGE_LAYERS.map(imageLayer).join("");
+const out = `${header}${blocks}${pictures}${tags}${empties}${images}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
   + `${GROUPS.filter((g) => g.family).length} groups`);

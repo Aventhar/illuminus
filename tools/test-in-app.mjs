@@ -1873,7 +1873,75 @@ try {
   })()`);
 }
 
-console.log("\n[33] Console is clean");
+// Every fill color has a background image beside it. The images ride on a
+// ::before layer so their strength is independent of the lettering in front,
+// which is only provable by reading the layer rather than the element.
+console.log("\n[33] A background image behind any fill");
+try {
+  const layers = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Image Layer Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    const IMG = "modules/illuminus/assets/samples/textures/parchment.jpg";
+    Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
+    Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
+    Object.assign(settings.sidebar, {buttonBackground: "#222222", buttonTexture: IMG});
+    settings.block01.texture = IMG;
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Image Layer Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<h1>Heading</h1><table><thead><tr><th>H</th></tr></thead><tbody><tr><td>c</td></tr></tbody></table>" +
+      '<blockquote class="illuminus-block illuminus-block--block01"><p>Block</p></blockquote>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+
+    const root = entry.sheet.element;
+    const layer = (sel) => {
+      const el = root.querySelector(sel);
+      if (!el) return {missing: true};
+      const before = getComputedStyle(el, "::before");
+      return {
+        image: /parchment\.jpg/.test(before.backgroundImage),
+        opacity: before.opacity, repeat: before.backgroundRepeat,
+        // Behind the lettering, not over it.
+        behind: before.zIndex, isolated: getComputedStyle(el).isolation
+      };
+    };
+    const out = {
+      tableHeader: layer("thead th"),
+      heading: layer(".journal-page-content h1"),
+      sidebarButton: layer(".journal-sidebar button"),
+      block: layer(".illuminus-block--block01")
+    };
+    window.__layers = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify(out);
+  })()`);
+  const ly = JSON.parse(layers);
+  check(ly.tableHeader.image, "a table header takes a background image");
+  check(ly.tableHeader.opacity === "0.6",
+    `and its strength is the layer's, not the header's (got ${ly.tableHeader.opacity})`);
+  check(ly.tableHeader.behind === "-1" && ly.tableHeader.isolated === "isolate",
+    `the layer sits behind the lettering, isolated from the page (z ${ly.tableHeader.behind}, ${ly.tableHeader.isolated})`);
+  check(ly.heading.image && ly.heading.repeat === "repeat",
+    `a heading takes one, and Image Fit reaches it (repeat ${ly.heading.repeat})`);
+  check(ly.sidebarButton.image, "so does a sidebar button");
+  check(ly.block.image, "and a box style");
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__layers?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__layers?.styleId) await api.deleteStyle(window.__layers.styleId);
+    window.__layers = undefined;
+  })()`);
+}
+
+console.log("\n[34] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

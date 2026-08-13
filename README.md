@@ -16,9 +16,9 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 1,958 settings across 16 tabs and 344 collapsible
+- **Everything is a GUI control.** 2,158 settings across 16 tabs and 344 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
-  "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
+  "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
   Bold, and Light with or without italics, rather than a thickness dropdown of nine
   numbers beside a separate slant.
@@ -54,6 +54,12 @@ it to whichever journals should wear it, and export it to carry into another wor
   It reads colors out of the page rather than off the screen, so unlike the operating
   system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
   and it keeps transparency.
+- **A picture behind anything.** Every fill color in the interface has a background
+  image beside it — the window frame, the title bar, its buttons, sidebar entries and
+  their hover states, headings, the journal title, link highlights, table headers, boxes,
+  and every box and image style — each with its own fit, position, blending, and
+  strength. The image rides on a layer behind the lettering, so turning its strength
+  down fades the picture and not the words.
 - **Textures included.** Background pictures under `assets/samples/textures/`, reachable
   from the Background Picture control's file browser. The SVG ones — parchment, paper
   fibres, linen, stone, grid, hatch — are grayscale on purpose: the texture supplies the

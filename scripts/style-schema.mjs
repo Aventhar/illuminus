@@ -328,12 +328,28 @@ function blockSections() {
         col("headingRuleColor", "#8a6a3d")
       ]
     },
-    { id: "background", fields: [col("background", "#00000000")] },
+    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 10) },
     { id: "margin", fields: spacingFields("margin", { top: 12, right: 0, bottom: 12, left: 0 }, { min: -100 }) },
     { id: "border", fields: borderFields("border", { color: "#8a6a3d" }) },
     { id: "corners", fields: cornerFields("corner") },
     { id: "shadow", fields: shadowFields("shadow") }
+  ];
+}
+
+/**
+ * A background image for one fill color, so anywhere a color can be set a
+ * picture can be laid over it. Named `<prefix>Texture` to match the two that
+ * already existed, which keeps `cssVarFor` and the generated layers uniform.
+ */
+function imageFields(prefix = "") {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    { type: "image", name: n("Texture"), default: "" },
+    select(n("TextureFit"), "cover", CHOICES.textureFit, { emit: emitTextureFit }),
+    select(n("TexturePosition"), "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
+    select(n("TextureBlend"), "normal", CHOICES.blend, { emit: emitKeyword }),
+    num(n("TextureOpacity"), 100, "%", 0, 100, 1)
   ];
 }
 
@@ -379,16 +395,7 @@ function tagSections() {
       ]
     },
     { id: "background", fields: [col("background", "#00000000")] },
-    {
-      id: "texture",
-      fields: [
-        { type: "image", name: "texture", default: "" },
-        select("textureFit", "cover", CHOICES.textureFit, { emit: emitTextureFit }),
-        select("texturePosition", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
-        select("textureBlend", "normal", CHOICES.blend, { emit: emitKeyword }),
-        num("textureOpacity", 100, "%", 0, 100, 1)
-      ]
-    },
+    { id: "texture", fields: imageFields() },
     { id: "padding", fields: spacingFields("padding", { top: 2, right: 8, bottom: 2, left: 8 }, { max: 80 }) },
     { id: "margin", fields: spacingFields("margin", { top: 0, right: 4, bottom: 0, left: 0 }, { min: -60, max: 80 }) },
     { id: "border", fields: borderFields("border") },
@@ -414,7 +421,7 @@ function pictureSections() {
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
-    { id: "background", fields: [col("background", "#00000000")] },
+    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
     {
       id: "margin",
@@ -447,7 +454,7 @@ function bannerSections(defaults = {}) {
     { id: "textShadow", fields: textShadowFields() },
     { id: "margin", fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 }) },
     { id: "padding", fields: spacingFields("padding", defaults.padding ?? 0) },
-    { id: "background", fields: [col("background", defaults.background ?? "#00000000")] },
+    { id: "background", fields: [col("background", defaults.background ?? "#00000000"), ...imageFields()] },
     { id: "border", fields: borderFields("border", defaults.border) },
     { id: "corners", fields: cornerFields("corner") }
   ];
@@ -469,7 +476,7 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"),
+          col("background", "#00000000"), ...imageFields(),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -477,7 +484,7 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "#00000000"),
+          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
           font("font", ""),
           num("size", 16, "px", 6, 60, 1),
           col("color", "#f7f3e8"),
@@ -493,8 +500,8 @@ export const GROUPS = [
         fields: [
           col("headerButtonColor", "#f7f3e8"),
           col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "#00000000"),
-          col("headerButtonHoverBackground", "#00000000"),
+          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
+          col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
           ...cornerFields("headerButtonCorner", 3)
@@ -505,8 +512,8 @@ export const GROUPS = [
         fields: [
           col("pageButtonColor", "#e7d1b1"),
           col("pageButtonHoverColor", "#ffffff"),
-          col("pageButtonBackground", "#0b0a1380"),
-          col("pageButtonHoverBackground", "#0b0a13cc"),
+          col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
+          col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
           num("pageButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
           ...cornerFields("pageButtonCorner", 3)
@@ -547,7 +554,7 @@ export const GROUPS = [
       {
         id: "surface",
         fields: [
-          col("background", "#00000000"),
+          col("background", "#00000000"), ...imageFields(),
           num("sidebarWidth", 300, "px", 120, 700, 10),
           ...spacingFields("padding", 0, { max: 80 })
         ]
@@ -566,9 +573,9 @@ export const GROUPS = [
         id: "entryStates",
         fields: [
           col("hoverColor", "#ffffff"),
-          col("hoverBackground", "#00000000"),
+          col("hoverBackground", "#00000000"), ...imageFields("hover"),
           col("activeColor", "#ffffff"),
-          col("activeBackground", "#00000000"),
+          col("activeBackground", "#00000000"), ...imageFields("active"),
           col("activeAccentColor", "#c9a961"),
           num("activeAccentWidth", 0, "px", 0, 20, 1),
           textStyleField("activeTextStyle", "400", "normal")
@@ -606,13 +613,13 @@ export const GROUPS = [
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
-          col("categoryBackground", "#00000000")
+          col("categoryBackground", "#00000000"), ...imageFields("category")
         ]
       },
       {
         id: "search",
         fields: [
-          col("searchBackground", "#00000000"),
+          col("searchBackground", "#00000000"), ...imageFields("search"),
           col("searchColor", "#f0f0e0"),
           col("searchPlaceholderColor", "#8a8a8a"),
           num("searchSize", 14, "px", 6, 40, 1),
@@ -624,10 +631,10 @@ export const GROUPS = [
         id: "buttons",
         fields: [
           col("buttonColor", "#f0f0e0"),
-          col("buttonBackground", "#00000000"),
+          col("buttonBackground", "#00000000"), ...imageFields("button"),
           col("buttonBorderColor", "#8a8a8a"),
           col("buttonHoverColor", "#ffffff"),
-          col("buttonHoverBackground", "#00000000"),
+          col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
           col("buttonHoverBorderColor", "#c9a961"),
           num("buttonBorderWidth", 1, "px", 0, 12, 1),
           ...cornerFields("buttonCorner", 3)
@@ -739,7 +746,7 @@ export const GROUPS = [
           num("decorationOffset", 2, "px", -10, 20, 0.5)
         ]
       },
-      { id: "chip", fields: [col("background", "#00000000"), ...spacingFields("padding", 0, { max: 40 })] },
+      { id: "chip", fields: [col("background", "#00000000"), ...imageFields(), ...spacingFields("padding", 0, { max: 40 })] },
       { id: "border", fields: borderFields("border", { color: "#00000000" }) },
       { id: "corners", fields: cornerFields("corner", 3) }
     ]
@@ -789,7 +796,7 @@ export const GROUPS = [
       {
         id: "header",
         fields: [
-          col("headerBackground", "#5e1914"),
+          col("headerBackground", "#5e1914"), ...imageFields("header"),
           col("headerColor", "#f6efe0"),
           font("headerFont", ""),
           num("headerSize", 16, "px", 6, 100, 1),
@@ -818,7 +825,7 @@ export const GROUPS = [
           size: 16, color: "#241b10", style: "italic", lineHeight: 1.5, choices: CHOICES.align
         })
       },
-      { id: "background", fields: [col("background", "#e3d3ad")] },
+      { id: "background", fields: [col("background", "#e3d3ad"), ...imageFields()] },
       { id: "padding", fields: spacingFields("padding", 12) },
       { id: "margin", fields: spacingFields("margin", 12, { min: -100 }) },
       {
