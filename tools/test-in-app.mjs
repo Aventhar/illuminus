@@ -869,7 +869,6 @@ const assets = await cdp.evaluate(`(async () => {
     "modules/illuminus/assets/samples/textures/stone.svg",
     "modules/illuminus/assets/samples/textures/grid.svg",
     "modules/illuminus/assets/samples/textures/hatch.svg",
-    "modules/illuminus/assets/samples/textures/ufo.svg",
     "modules/illuminus/assets/samples/textures/bricks.jpg",
     "modules/illuminus/assets/samples/textures/canvas.jpg",
     "modules/illuminus/assets/samples/textures/marble.jpg",
