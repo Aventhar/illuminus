@@ -20,9 +20,10 @@ const { GROUPS, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`)
 // Blocks and picture treatments share one tab each and only build the member on
 // show, so the editor holds far fewer controls than the schema defines.
 const pageGroups = GROUPS.filter((g) => !g.family);
-const shown = [...pageGroups, GROUPS.find((g) => g.id === "block01"), GROUPS.find((g) => g.id === "picture01")];
+const shown = [...pageGroups, GROUPS.find((g) => g.id === "block01"),
+  GROUPS.find((g) => g.id === "picture01"), GROUPS.find((g) => g.id === "tag01")];
 const EXPECT = {
-  tabs: pageGroups.length + 2,
+  tabs: pageGroups.length + 3,
   sections: shown.reduce((n, g) => n + g.sections.length, 0),
   fields: shown.reduce((n, g) => n + groupFields(g).length, 0)
 };
@@ -1676,7 +1677,169 @@ check(pv.onPictures.borderColor === "rgb(255, 136, 0)",
   `styled from the style being edited (got ${pv.onPictures.borderColor})`);
 check(pv.onPictures.hasImage, "and the sample picture actually loads");
 
-console.log("\n[32] Console is clean");
+// An inline treatment is a mark rather than a node, so it needs words to attach
+// to and it has to survive the same save. The two things it exists for are a
+// trait tag and the rank at the end of a title line, and both are checked here
+// by where they actually land, not by the declarations they carry.
+console.log("\n[32] Inline styles, and blocks that hide when empty");
+try {
+  const inline = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Inline Probe", labels: {tag01: "Rarity"}});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.tag01, {
+      background: "#5e0000", color: "#ffffff", caps: "uppercase",
+      borderLeftWidth: 5, borderLeftColor: "#e9b770", borderLeftStyle: "solid",
+      borderRightWidth: 5, borderRightColor: "#e9b770", borderRightStyle: "solid"
+    });
+    settings.tag02.float = "right";
+    settings.block01.whenEmpty = "hide";
+    settings.block02.whenEmpty = "show";
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Inline Test Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<h2>Sewer Haze <span class="illuminus-tag illuminus-tag--tag02">Disease 7</span></h2>' +
+      '<p><span class="illuminus-tag illuminus-tag--tag01">Disease</span></p>' +
+      '<blockquote class="illuminus-block illuminus-block--block01"><p></p></blockquote>' +
+      '<blockquote class="illuminus-block illuminus-block--block02"><p></p></blockquote>' +
+      '<blockquote class="illuminus-block illuminus-block--block03"><p>Kept.</p></blockquote>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+
+    const root = entry.sheet.element.querySelector("section.journal-page-content");
+    const cs = sel => { const el = root.querySelector(sel); return el ? getComputedStyle(el) : {}; };
+    const tag = cs(".illuminus-tag--tag01");
+    const heading = root.querySelector("h2").getBoundingClientRect();
+    const rank = root.querySelector(".illuminus-tag--tag02").getBoundingClientRect();
+
+    const out = {
+      // Inline-block, not inline: padding on a true inline box spills over the
+      // lines around it instead of growing its own.
+      display: tag.display,
+      background: tag.backgroundColor,
+      sideBorders: tag.borderLeftWidth + "/" + tag.borderRightWidth + " " + tag.borderLeftColor,
+      caps: tag.textTransform,
+      // The rank reaches the right-hand end of the title line it sits in.
+      rankGap: Math.round(heading.right - rank.right),
+      rankFloat: cs(".illuminus-tag--tag02").cssFloat,
+      hiddenWhenSet: cs(".illuminus-block--block01").display,
+      shownWhenNotSet: cs(".illuminus-block--block02").display,
+      filledAlwaysShown: cs(".illuminus-block--block03").display
+    };
+    window.__inline = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify(out);
+  })()`);
+  const il = JSON.parse(inline);
+  check(il.display === "inline-block",
+    `a tag lays out as an inline block, so its padding grows its own box (got ${il.display})`);
+  check(il.background === "rgb(94, 0, 0)", `tag fill applied (got ${il.background})`);
+  check(il.sideBorders === "5px/5px rgb(233, 183, 112)",
+    `side-only borders applied, which is what makes the Paizo tag shape (got ${il.sideBorders})`);
+  check(il.caps === "uppercase", `tag lettering settings applied (got ${il.caps})`);
+  check(il.rankFloat === "right" && il.rankGap >= 0 && il.rankGap <= 12,
+    `a right-pushed tag reaches the end of the title line (${il.rankGap}px short, float ${il.rankFloat})`);
+  check(il.hiddenWhenSet === "none",
+    `an empty block set to hide is not drawn (got ${il.hiddenWhenSet})`);
+  check(il.shownWhenNotSet !== "none",
+    `an empty block left on Show still is (got ${il.shownWhenNotSet})`);
+  check(il.filledAlwaysShown !== "none",
+    `and a block with content is never hidden (got ${il.filledAlwaysShown})`);
+
+  // The same round trip the blocks get, driven the way a person does it: select
+  // the words, then walk the menu. A mark needs a selection, which is the one way
+  // tagging differs from wrapping a block.
+  const wordAt = async (expr) => {
+    const at = await settledBox(expr);
+    if (!at) return false;
+    await cdp.mouse("mouseMoved", at.x, at.y);
+    // A double click selects the word under the pointer.
+    await cdp.send("Input.dispatchMouseEvent",
+      { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 2 });
+    await cdp.send("Input.dispatchMouseEvent",
+      { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 2 });
+    await new Promise((r) => setTimeout(r, 250));
+    return true;
+  };
+
+  const openTagMenu = async (action) => {
+    await menuAtRest();
+    let opened = false;
+    for (let attempt = 0; attempt < 3 && !opened; attempt++) {
+      const button = await settledBox(`${EDIT_SHEET}.element.querySelector(".pm-dropdown.illuminus-menu")`);
+      if (!button) break;
+      await cdp.click(button.x, button.y);
+      opened = await cdp.evaluate(`!!document.querySelector("#prosemirror-dropdown")`);
+    }
+    if (!opened) return { opened: false };
+    const parent = await settledBox(`document.querySelector('#prosemirror-dropdown [data-action="illuminus-tags"]')`);
+    if (parent) await cdp.mouse("mouseMoved", parent.x, parent.y);
+    const item = await settledBox(`document.querySelector('#prosemirror-dropdown [data-action="${action}"]')`);
+    if (!item?.w) return { opened: true, reachable: false };
+    const title = await cdp.evaluate(
+      `document.querySelector('#prosemirror-dropdown [data-action="${action}"]').textContent.trim()`);
+    await cdp.click(item.x, item.y);
+    await new Promise((r) => setTimeout(r, 400));
+    return { opened: true, reachable: true, title };
+  };
+
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__inline.entryId);
+    await entry.pages.contents[0].update({"text.content": "<p>Unique Artifact</p>"});
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1200));
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button").click();
+  })()`);
+  await cdp.waitFor(`${EDIT_SHEET}?.element.querySelector(".pm-dropdown.illuminus-menu")`,
+    { label: "the editor to open for tagging" });
+  await watchMenu();
+
+  // Cursor placed but nothing selected: there is nothing to tag.
+  const caret = await settledBox(`${EDIT_SHEET}.element.querySelector(".ProseMirror p")`);
+  await cdp.click(caret.x, caret.y);
+  const noSelection = await openTagMenu("illuminus-tag01");
+  const afterNoSelection = await cdp.evaluate(
+    `${EDIT_SHEET}.element.querySelector(".ProseMirror span.illuminus-tag") ? "tagged" : "untouched"`);
+  check(afterNoSelection === "untouched",
+    `with no words selected, choosing a tag changes nothing (got ${afterNoSelection})`);
+
+  await wordAt(`${EDIT_SHEET}.element.querySelector(".ProseMirror p")`);
+  const tagged = await openTagMenu("illuminus-tag01");
+  check(tagged.opened && tagged.reachable, "the Inline Style entries are reachable in the menu");
+  check(tagged.title === "Rarity", `and carry the style's own name for the tag (got "${tagged.title}")`);
+  const inEditor = await cdp.evaluate(
+    `${EDIT_SHEET}.element.querySelector(".ProseMirror span.illuminus-tag")?.outerHTML ?? ""`);
+  check(/class="illuminus-tag illuminus-tag--tag01"/.test(inEditor),
+    `tagging the selected word wraps it (got ${inEditor || "nothing"})`);
+
+  const storedTag = await cdp.evaluate(`(async () => {
+    const sheet = ${EDIT_SHEET};
+    await sheet.submit();
+    await sheet.close();
+    await new Promise(r => setTimeout(r, 1400));
+    return game.journal.get(window.__inline.entryId).pages.contents[0].text.content;
+  })()`);
+  check(/<span class="illuminus-tag illuminus-tag--tag01">/.test(storedTag),
+    `and it survives the save round trip (stored ${storedTag})`);
+} finally {
+  // A leaked style shifts the seeded-style counts that earlier checks assert on.
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__inline?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__inline?.styleId) await api.deleteStyle(window.__inline.styleId);
+    window.__inline = undefined;
+  })()`);
+}
+
+console.log("\n[33] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

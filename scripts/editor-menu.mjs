@@ -23,6 +23,9 @@ export const BLOCK_CLASS = "illuminus-block";
 /** Class marking a picture treatment, alongside `illuminus-picture--<key>`. */
 export const PICTURE_CLASS = "illuminus-picture";
 
+/** Class marking an inline treatment, alongside `illuminus-tag--<key>`. */
+export const TAG_CLASS = "illuminus-tag";
+
 /** Block and picture group ids, in schema order. */
 const membersOf = (family) => GROUPS.filter((group) => group.family === family).map((group) => group.id);
 
@@ -42,16 +45,19 @@ function labelFor(style, groupId) {
   return style?.labels?.[groupId] || game.i18n.localize(`ILLUMINUS.Groups.${groupId}.label`);
 }
 
+/** Any class this module manages, on a node or on a mark. */
+const MANAGED = /^illuminus-(block|picture|tag)/;
+
 /** Merge a class onto whatever classes a node already carries. */
 function withClasses(existing, added) {
-  const kept = String(existing ?? "").split(/\s+/).filter((c) => c && !/^illuminus-(block|picture)/.test(c));
+  const kept = String(existing ?? "").split(/\s+/).filter((c) => c && !MANAGED.test(c));
   return [...kept, ...added].join(" ").trim();
 }
 
 /** Strip only the classes this module manages, leaving the author's alone. */
 function withoutClasses(existing) {
   return String(existing ?? "").split(/\s+/)
-    .filter((c) => c && !/^illuminus-(block|picture)/.test(c)).join(" ").trim();
+    .filter((c) => c && !MANAGED.test(c)).join(" ").trim();
 }
 
 /**
@@ -116,12 +122,57 @@ function applyPicture(groupId) {
   };
 }
 
-/** Take Illuminus's classes off the block or picture the cursor is in. */
+/**
+ * Tag the selected words. Unlike a block, an inline treatment is a mark, so it
+ * needs words to attach to — with nothing selected there is nothing to tag, and
+ * the command reports that rather than doing something invisible.
+ * @param {string} groupId
+ */
+function applyTag(groupId) {
+  const classes = [TAG_CLASS, `${TAG_CLASS}--${groupId}`].join(" ");
+  return (state, dispatch) => {
+    if (state.selection.empty) return false;
+    const type = state.schema.marks.span;
+    if (!type) return false;
+    // Retag rather than nest: applying a second tag to the same words should
+    // replace the first, not bury it.
+    const tr = state.tr.removeMark(state.selection.from, state.selection.to, type)
+      .addMark(state.selection.from, state.selection.to, type.create({ classes }));
+    if (dispatch) dispatch(tr);
+    return true;
+  };
+}
+
+/** Whether the selection already carries a given inline treatment. */
+function tagIsActive(state, groupId) {
+  const { from, to, empty, $from } = state.selection;
+  const type = state.schema.marks.span;
+  if (!type) return false;
+  const marks = empty ? $from.marks() : null;
+  const has = (mark) => mark.type === type
+    && String(mark.attrs.classes ?? "").split(/\s+/).includes(`${TAG_CLASS}--${groupId}`);
+  if (marks) return marks.some(has);
+  let found = false;
+  state.doc.nodesBetween(from, to, (node) => {
+    if (node.marks?.some(has)) found = true;
+  });
+  return found;
+}
+
+/** Take Illuminus's classes off whatever the cursor or selection is in. */
 function clearStyling() {
   return (state, dispatch) => {
+    const type = state.schema.marks.span;
+    const { from, to, empty } = state.selection;
+    // An inline treatment first: it is the thing the selection is most directly
+    // on, and clearing it should not silently strip the block around it.
+    if (type && !empty && tagIsAnywhere(state)) {
+      if (dispatch) dispatch(state.tr.removeMark(from, to, type));
+      return true;
+    }
     const target = ancestorOfType(state, "blockquote") ?? ancestorOfType(state, "figure");
     if (!target) return false;
-    if (!/illuminus-(block|picture)/.test(target.node.attrs.classes ?? "")) return false;
+    if (!MANAGED.test(target.node.attrs.classes ?? "")) return false;
     if (dispatch) {
       dispatch(state.tr.setNodeMarkup(target.pos, null, {
         ...target.node.attrs,
@@ -130,6 +181,17 @@ function clearStyling() {
     }
     return true;
   };
+}
+
+/** Whether any of the selected words carry one of this module's tags. */
+function tagIsAnywhere(state) {
+  const type = state.schema.marks.span;
+  const { from, to } = state.selection;
+  let found = false;
+  state.doc.nodesBetween(from, to, (node) => {
+    if (node.marks?.some((m) => m.type === type && MANAGED.test(m.attrs.classes ?? ""))) found = true;
+  });
+  return found;
 }
 
 /** Whether the selection already sits in a given block or treatment. */
@@ -171,6 +233,16 @@ export function registerEditorMenu() {
             title: labelFor(style, groupId),
             active: isActive(state, "figure", groupId, PICTURE_CLASS),
             cmd: applyPicture(groupId)
+          }))
+        },
+        {
+          action: "illuminus-tags",
+          title: game.i18n.localize("ILLUMINUS.Menu.Tags"),
+          children: membersOf("tags").map((groupId) => ({
+            action: `illuminus-${groupId}`,
+            title: labelFor(style, groupId),
+            active: tagIsActive(state, groupId),
+            cmd: applyTag(groupId)
           }))
         },
         {

@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 1,517 settings across 15 tabs and 254 collapsible
+- **Everything is a GUI control.** 1,997 settings across 16 tabs and 344 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Picture Blending" — with a one-line explanation under each. No CSS is typed or shown.
 - **The whole window, not just the page.** A Sidebar tab styles the contents panel —
@@ -58,6 +58,13 @@ it to whichever journals should wear it, and export it to carry into another wor
   Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
   and Picture Blending to Normal to see them as they are. Your own art works just as
   well.
+- **Inline styles for a few words at a time.** Ten more treatments, applied to a
+  selection rather than a whole block: trait tags, rarity badges, and the rank at the end
+  of a statblock title line — select the words, pick one from the same menu. Each has its
+  own lettering, fill, picture, border, corners, shadow, and spacing, and can be pushed to
+  the right-hand end of the line it sits in, which is all a title line needs. A tag with
+  nothing in it is not drawn, and a block can be set to disappear when left empty, so an
+  unused slot in a template leaves no hole.
 - **Blocks and picture treatments, from the editor.** Ten of each, styled on their own
   tabs and applied from an **Illuminus** menu in the journal page editor: put the cursor
   in a paragraph, pick a block, and it becomes a read-aloud box, a sidebar, a stat block

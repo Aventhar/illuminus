@@ -65,6 +65,8 @@ const CHOICES = {
   blockClear: ["none", "left", "right", "both"],
   flip: ["none", "horizontal", "vertical", "both"],
   verticalAlign: ["top", "middle", "bottom"],
+  inlineAlign: ["baseline", "middle", "top", "bottom"],
+  whenEmpty: ["show", "hide"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
 };
@@ -148,6 +150,13 @@ const KEYWORD = {
   lineThrough: "line-through", preWrap: "pre-wrap", breakWord: "break-word", breakAll: "break-all"
 };
 const emitKeyword = (value) => KEYWORD[value] ?? value;
+
+/**
+ * Whether a block that has been left empty still takes up room. The rule that
+ * reads this only matches an empty one, so "show" has to name the display the
+ * block would have had anyway.
+ */
+const emitWhenEmpty = (value) => (value === "hide" ? "none" : "block");
 
 /* -------------------------------------------- */
 /*  Field builders                              */
@@ -245,7 +254,8 @@ function blockSections() {
       fields: [
         select("float", "none", CHOICES.blockFloat),
         select("width", "full", CHOICES.blockWidth, { emit: emitBlockWidth }),
-        select("clear", "none", CHOICES.blockClear)
+        select("clear", "none", CHOICES.blockClear),
+        select("whenEmpty", "show", CHOICES.whenEmpty, { emit: emitWhenEmpty })
       ]
     },
     {
@@ -282,6 +292,67 @@ function blockSections() {
     { id: "padding", fields: spacingFields("padding", 10) },
     { id: "margin", fields: spacingFields("margin", { top: 12, right: 0, bottom: 12, left: 0 }, { min: -100 }) },
     { id: "border", fields: borderFields("border", { color: "#8a6a3d" }) },
+    { id: "corners", fields: cornerFields("corner") },
+    { id: "shadow", fields: shadowFields("shadow") }
+  ];
+}
+
+/**
+ * One inline treatment: applied to a run of words rather than to a block.
+ *
+ * This is what a trait tag, a rarity badge, or the level on the right of a
+ * statblock title is made of. Ten exist, named Tag01..Tag10 and renameable per
+ * style, and they ride on the editor's `span` mark, which carries classes
+ * through a save exactly as `blockquote` does for a block.
+ *
+ * Two decisions are load-bearing and not obvious. A tag is laid out as an
+ * inline block, because vertical padding on a true inline box spills over the
+ * lines above and below instead of growing its own; that is why Paizo's trait
+ * tags are list items in a flex row rather than spans. And "push right" is a
+ * float, so a title line needs no cooperation from the heading around it —
+ * `<h2>Sewer Haze <span>Disease 7</span></h2>` splits on its own.
+ *
+ * Type settings mean "use the surrounding text" by default, as they do for a
+ * block: a size of 0, an `inherit` choice, or an empty color emits nothing.
+ */
+function tagSections() {
+  return [
+    {
+      id: "tagLayout",
+      fields: [
+        select("float", "none", CHOICES.blockFloat),
+        select("verticalAlign", "baseline", CHOICES.inlineAlign),
+        num("lift", 0, "px", -30, 30, 1),
+        num("minWidth", 0, "px", 0, 400, 1, { zeroAs: "auto" })
+      ]
+    },
+    {
+      id: "text",
+      fields: [
+        font("font", ""),
+        num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
+        col("color", ""),
+        select("weight", "inherit", ["inherit", ...CHOICES.weight]),
+        select("style", "inherit", ["inherit", ...CHOICES.fontStyle]),
+        select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
+        num("letterSpacing", 0, "px", -5, 40, 0.5),
+        num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
+      ]
+    },
+    { id: "background", fields: [col("background", "#00000000")] },
+    {
+      id: "texture",
+      fields: [
+        { type: "image", name: "texture", default: "" },
+        select("textureFit", "cover", CHOICES.textureFit, { emit: emitTextureFit }),
+        select("texturePosition", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
+        select("textureBlend", "normal", CHOICES.blend, { emit: emitKeyword }),
+        num("textureOpacity", 100, "%", 0, 100, 1)
+      ]
+    },
+    { id: "padding", fields: spacingFields("padding", { top: 2, right: 8, bottom: 2, left: 8 }, { max: 80 }) },
+    { id: "margin", fields: spacingFields("margin", { top: 0, right: 4, bottom: 0, left: 0 }, { min: -60, max: 80 }) },
+    { id: "border", fields: borderFields("border") },
     { id: "corners", fields: cornerFields("corner") },
     { id: "shadow", fields: shadowFields("shadow") }
   ];
@@ -733,6 +804,13 @@ export const GROUPS = [
     icon: "fa-solid fa-image",
     family: "pictures",
     sections: pictureSections()
+  })),
+
+  ...Array.from({ length: 10 }, (_, i) => ({
+    id: `tag${String(i + 1).padStart(2, "0")}`,
+    icon: "fa-solid fa-tag",
+    family: "tags",
+    sections: tagSections()
   })),
 
   {

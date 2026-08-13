@@ -9,9 +9,10 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
 /**
  * The tabbed editor for a single journal style.
  *
- * Every control on every tab is generated from `style-schema.mjs` — 391 of them
- * across 68 collapsible sections — so the GUI never needs touching when a style
- * property is added.
+ * Every control on every tab is generated from `style-schema.mjs`, so the GUI
+ * never needs touching when a style property is added. Only the family member
+ * on show is built, which is why the window holds a few hundred controls rather
+ * than the schema's two thousand.
  *
  * Edits are held in a working copy and pushed straight to the live preview, so
  * open journals and the sample pane restyle as the user drags a slider. Nothing
@@ -55,7 +56,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * treatments would be twenty more tabs; instead each family gets one tab with
    * a picker, and only the chosen member's controls are built.
    */
-  #showing = { blocks: "block01", pictures: "picture01" };
+  #showing = { blocks: "block01", pictures: "picture01", tags: "tag01" };
 
   static DEFAULT_OPTIONS = {
     id: "illuminus-style-editor-{id}",
@@ -102,7 +103,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Families, each shown as a single tab with a picker. */
   static FAMILIES = [
     { id: "blocks", icon: "fa-solid fa-square-dashed", label: "ILLUMINUS.Families.blocks" },
-    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" }
+    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" },
+    { id: "tags", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tags" }
   ];
 
   /** Groups that get a tab of their own, in strip order. */

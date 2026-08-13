@@ -38,9 +38,21 @@ Object.assign(out, {
   "ILLUMINUS.Menu.Title": "Illuminus",
   "ILLUMINUS.Menu.Blocks": "Block",
   "ILLUMINUS.Menu.Pictures": "Picture Style",
+  "ILLUMINUS.Menu.Tags": "Inline Style",
   "ILLUMINUS.Menu.Clear": "Remove Illuminus styling",
   "ILLUMINUS.Families.blocks": "Block Styles",
   "ILLUMINUS.Families.pictures": "Picture Styles",
+  "ILLUMINUS.Families.tags": "Inline Styles",
+  "ILLUMINUS.Families.tagsName": "Tag name",
+  "ILLUMINUS.Families.tagsHint": "Treatments you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
+  "ILLUMINUS.Field.tags.color.label": "Text Color",
+  "ILLUMINUS.Field.tags.color.hint": "Color of the lettering inside this tag. Leave empty to follow the surrounding text.",
+  "ILLUMINUS.Field.tags.size.hint": "How large the lettering is inside this tag. 0 follows the surrounding text.",
+  "ILLUMINUS.Field.tags.lineHeight.hint": "Space between lines inside this tag. 0 follows the surrounding text.",
+  "ILLUMINUS.Field.tags.float.hint": "Push this tag to one side of the line. Right is what puts a rank at the far end of a title line.",
+  "ILLUMINUS.Field.tags.verticalAlign.label": "Vertical Position",
+  "ILLUMINUS.Field.tags.verticalAlign.hint": "How the tag lines up with the words beside it.",
+  "ILLUMINUS.Field.tags.background.hint": "The flat color behind the lettering of this tag.",
   "ILLUMINUS.Families.blocksName": "Block name",
   "ILLUMINUS.Families.picturesName": "Treatment name",
   "ILLUMINUS.Families.blocksHint": "Containers you wrap around content — read-aloud boxes, sidebars, encounter panels. Pick one to style, and rename it to suit your content.",
@@ -73,6 +85,17 @@ Object.assign(out, {
   "ILLUMINUS.Preview.ListItem": "List item",
   "ILLUMINUS.Preview.TableHeader": "Table header",
   "ILLUMINUS.Preview.TableCell": "Table cell",
+  "ILLUMINUS.Choices.show": "Show it anyway",
+  "ILLUMINUS.Choices.hide": "Hide it",
+  "ILLUMINUS.Choices.baseline": "On the line",
+  "ILLUMINUS.Preview.TagTitle": "Sewer Haze",
+  "ILLUMINUS.Preview.TagRank": "Disease 7",
+  "ILLUMINUS.Preview.TagOne": "Disease",
+  "ILLUMINUS.Preview.TagTwo": "Virulent",
+  "ILLUMINUS.Preview.TagThree": "Rare",
+  "ILLUMINUS.Preview.TagFlow": "A tag can also sit inside a sentence, like this",
+  "ILLUMINUS.Preview.TagInline": "Uncommon",
+  "ILLUMINUS.Preview.TagFlowEnd": "one, so its lettering and spacing can be judged against ordinary prose.",
   "ILLUMINUS.Preview.Caption": "Picture caption",
   "ILLUMINUS.Preview.BlockHeading": "Block heading",
   "ILLUMINUS.Preview.BlockBody": "Text inside the block, run on long enough to wrap over several lines so its own spacing, padding, and lettering can be judged against the page around it.",
@@ -121,12 +144,18 @@ for (let i = 1; i <= 10; i++) {
   put(`ILLUMINUS.Groups.picture${n}.label`, `Picture${n}`);
   put(`ILLUMINUS.Groups.picture${n}.hint`,
     "A treatment you apply to one picture, overriding the page-wide Pictures settings.");
+  put(`ILLUMINUS.Groups.tag${n}.label`, `Tag${n}`);
+  put(`ILLUMINUS.Groups.tag${n}.hint`,
+    "A treatment you apply to a few words rather than to a whole block \u2014 a trait tag, a rarity badge, "
+    + "or the rank on the right of a title line.");
 }
 
 /* ---------- Sections ---------- */
 const SECTION_TEXT = {
   surface: ["Surface", "The color and picture behind everything else"],
   layout: ["Size and Position", "How much room this takes up"],
+  tagLayout: ["Placement", "Where the tag sits on the line, and how wide it is"],
+  texture: ["Picture", "A picture layered behind the contents"],
   text: ["Lettering", "Typeface, size, color, and spacing"],
   textShadow: ["Text Shadow", "A shadow cast by the lettering itself"],
   padding: ["Inner Spacing", "Room between the edges and the contents"],
@@ -255,6 +284,9 @@ for (const name of names) {
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
   background: ["Fill Color", "The flat color behind everything else."],
+  whenEmpty: ["When Empty", "What happens if this block is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
+  lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
+  minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],
   texture: ["Background Picture", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
   textureFit: ["Picture Fit", "How the background picture covers the area."],
   texturePosition: ["Picture Position", "Where the background picture is anchored."],

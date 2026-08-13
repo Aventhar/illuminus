@@ -1,5 +1,5 @@
 import { MODULE_ID, SETTINGS, FLAGS, NO_STYLE, SCHEMA_VERSION, getSetting, setSetting, log } from "./constants.mjs";
-import { cleanSettings, defaultSettings } from "./style-schema.mjs";
+import { GROUPS, cleanSettings, defaultSettings } from "./style-schema.mjs";
 import { migrateStyle } from "./migrations.mjs";
 import { PRESETS } from "./presets.mjs";
 
@@ -27,12 +27,19 @@ function cleanSwatches(swatches) {
   return [...seen];
 }
 
-/** Display names a style gives its blocks and picture treatments. */
+/**
+ * Display names a style gives its blocks, picture treatments, and inline tags.
+ * The keys are checked against the schema itself rather than a pattern, so a new
+ * family cannot be silently discarded here the way tags were when this read
+ * `/^(block|picture)\d{2}$/`.
+ */
+const NAMEABLE = new Set(GROUPS.filter((group) => group.family).map((group) => group.id));
+
 function cleanLabels(labels) {
   if (!labels || typeof labels !== "object") return {};
   const clean = {};
   for (const [key, value] of Object.entries(labels)) {
-    if (!/^(block|picture)\d{2}$/.test(key)) continue;
+    if (!NAMEABLE.has(key)) continue;
     const text = String(value).trim().slice(0, 40);
     if (text) clean[key] = text;
   }

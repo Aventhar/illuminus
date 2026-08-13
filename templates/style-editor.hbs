@@ -223,6 +223,28 @@
         </section>
       </div>
 
+      <div class="illuminus-preview__family" data-family="tags">
+        <section class="journal-entry-content">
+          <div class="journal-entry-pages">
+            <article class="journal-entry-page text">
+              <section class="journal-page-content">
+                {{!-- A title line and a row of tags: the two things inline
+                      treatments exist for, both built from the same tag. --}}
+                <h2>{{localize "ILLUMINUS.Preview.TagTitle"}}
+                  <span class="illuminus-tag illuminus-tag--{{preview.tags.id}}"
+                        >{{localize "ILLUMINUS.Preview.TagRank"}}</span></h2>
+                <p><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagOne"}}</span
+                  ><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagTwo"}}</span
+                  ><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagThree"}}</span></p>
+                <p>{{localize "ILLUMINUS.Preview.TagFlow"}}
+                  <span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagInline"}}</span>
+                  {{localize "ILLUMINUS.Preview.TagFlowEnd"}}</p>
+              </section>
+            </article>
+          </div>
+        </section>
+      </div>
+
       <div class="illuminus-preview__family" data-family="pictures">
         <section class="journal-entry-content">
           <div class="journal-entry-pages">

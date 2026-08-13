@@ -1197,14 +1197,17 @@
 }
 
 .illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active) .illuminus-preview__window,
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active) .illuminus-preview__window {
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="tags"].active) .illuminus-preview__window {
   display: none;
 }
 
 .illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active)
   .illuminus-preview__family[data-family="blocks"],
 .illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active)
-  .illuminus-preview__family[data-family="pictures"] {
+  .illuminus-preview__family[data-family="pictures"],
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="tags"].active)
+  .illuminus-preview__family[data-family="tags"] {
   display: flex;
 }
 

@@ -152,6 +152,12 @@ These are all load-bearing and none are obvious from the code.
   older. Close it explicitly, and resolve the sheet with `.pop()` rather than `.find()`.
 - **Clicking an image inside the editor opens core's `ImagePopout`,** which then covers
   the menu bar. Aim at the caption to put the cursor inside a `figure`.
+- **`:empty` cannot tell whether a block is empty.** The editor leaves a paragraph
+  inside, so the block has a child. `:not(:has(<contentful>:not(:empty)))` can, and
+  `:has()` is available. Two things follow: a paragraph holding only a space counts as
+  content, and the rule must be scoped to `section.journal-page-content` so it never
+  applies in the editor — the editor's content element is a `prose-mirror`, and a block
+  that vanished while its author was typing in it could not be clicked back into.
 - **Blocks and picture treatments ride on `blockquote` and `figure`.** Both already carry
   a `classes` attribute via core's AttributeCapture, so the classes survive a save and
   reload with no schema change of our own. `foundry.prosemirror.commands.wrapIn` takes
@@ -197,13 +203,28 @@ art that may be licensed that way.
   the presets the same way rather than hand-porting them — it exercises the migration at
   the same time.
 
-## Blocks and picture treatments
+## Blocks, picture treatments, and inline styles
 
-Ten of each, keyed `block01`..`block10` and `picture01`..`picture10`. The keys are fixed;
+Ten of each, keyed `block01`..`block10`, `picture01`..`picture10`, and
+`tag01`..`tag10`. The keys are fixed;
 their displayed names live on the style (`labels`) and are edited per style, so markup
 and exported styles stay portable when someone renames one.
 
-They share a tab each rather than taking twenty: `FAMILIES` in the editor, with a picker
+An inline style is a **mark**, not a node. `AttributeCapture` is applied to every node
+*and mark* in Foundry's schema, so the `span` mark carries `classes` through a save just
+as `blockquote` does — verified end to end, not assumed. Two consequences: it needs a
+selection to attach to (the command returns `false` on an empty one, so the menu entry
+simply does nothing), and it is laid out `inline-block`, because vertical padding on a
+true inline box spills over the lines above and below rather than growing its own. That
+is why Paizo's trait tags are list items in a flex row; `inline-block` gets the same
+shape while still flowing inside a heading or a sentence.
+
+**Anything that enumerates the families must be derived, not spelled out.** `cleanLabels`
+matched `/^(block|picture)\d{2}$/` and silently discarded every tag name until it was
+changed to check `GROUPS` instead. Renaming is per style, so the failure looked like the
+menu ignoring a label rather than the store dropping it.
+
+They share a tab each rather than taking thirty: `FAMILIES` in the editor, with a picker
 choosing which member is built. Only the member on show is rendered, which is why the
 editor holds ~670 controls rather than the schema's 1,510.
 
