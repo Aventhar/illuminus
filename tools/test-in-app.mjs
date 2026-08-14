@@ -444,18 +444,41 @@ const merged = await cdp.evaluate(`(async () => {
   return JSON.stringify({out, kept: cleanSettings(out)});
 })()`);
 const mx = JSON.parse(merged);
-check(mx.kept.body.textStyle === "boldItalic",
-  `a heavy italic becomes Bold Italic (got ${mx.kept.body.textStyle})`);
-check(mx.kept.heading1.textStyle === "light",
-  `a hairline weight becomes Light (got ${mx.kept.heading1.textStyle})`);
+check(mx.kept.body.textStyle === "extraBoldItalic",
+  `a heavy italic keeps its exact weight (got ${mx.kept.body.textStyle})`);
+check(mx.kept.heading1.textStyle === "extraLight",
+  `and so does a hairline one (got ${mx.kept.heading1.textStyle})`);
 check(mx.kept.sidebar.activeTextStyle === "bold",
   `a thickness that never had a slant still converts (got ${mx.kept.sidebar.activeTextStyle})`);
-check(mx.kept.block01.textStyle === "inherit",
-  `"use the page setting" survives on both halves (got ${mx.kept.block01.textStyle})`);
+check(mx.kept.box01.textStyle === "inherit",
+  `"use the page setting" survives on both halves, under the renamed group (got ${mx.kept.box01.textStyle})`);
 check(mx.kept.images.captionTextStyle === "normalItalic",
   `oblique counts as italic (got ${mx.kept.images.captionTextStyle})`);
 check(mx.out.body.weight === undefined && mx.out.body.style === undefined,
   "and the two old keys are gone");
+
+// The classes and keys were renamed to match what the GUI calls them, so a
+// style saved under the old ids has to arrive under the new ones — settings and
+// the names it gave its own boxes alike, since labels live outside `settings`.
+const renamed = await cdp.evaluate(`(async () => {
+  const mod = await import("/modules/illuminus/scripts/migrations.mjs");
+  const v3 = {block01: {background: "#123456"}, picture03: {borderTopWidth: 7}, page: {background: "#abcdef"}};
+  const out = mod.migrateSettings(v3, 3);
+  const { cleanSettings } = await import("/modules/illuminus/scripts/style-schema.mjs");
+  const style = mod.migrateStyle({
+    name: "old", schemaVersion: 3, settings: v3, labels: {block01: "Read-aloud", picture02: "Portrait"}
+  });
+  return JSON.stringify({out, kept: cleanSettings(out), labels: style.labels, version: style.schemaVersion});
+})()`);
+const rn = JSON.parse(renamed);
+check(rn.kept.box01?.background === "#123456",
+  `a block becomes a box, keeping its settings (got ${rn.kept.box01?.background})`);
+check(rn.kept.image03?.borderTopWidth === 7,
+  `a picture becomes an image (got ${rn.kept.image03?.borderTopWidth})`);
+check(rn.out.block01 === undefined && rn.out.picture03 === undefined, "and the old keys are gone");
+check(rn.kept.page?.background === "#abcdef", "groups that were not renamed are untouched");
+check(rn.labels?.box01 === "Read-aloud" && rn.labels?.image02 === "Portrait",
+  `the names a style gave them follow (got ${JSON.stringify(rn.labels)})`);
 
 check(mg.kept.heading1.marginTop === 24 && mg.kept.heading1.marginBottom === 12,
   `heading gaps became margins (got ${mg.kept.heading1.marginTop}/${mg.kept.heading1.marginBottom})`);
@@ -1425,11 +1448,11 @@ try {
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
     }
-    const style = await api.createStyle({name: "Menu Probe", labels: {block01: "Read-aloud"}});
+    const style = await api.createStyle({name: "Menu Probe", labels: {box01: "Read-aloud"}});
     const settings = foundry.utils.deepClone(style.settings);
-    settings.block01.background = "#123456";
-    settings.picture01.borderTopWidth = 7;
-    settings.picture01.borderTopStyle = "solid";
+    settings.box01.background = "#123456";
+    settings.image01.borderTopWidth = 7;
+    settings.image01.borderTopStyle = "solid";
     await api.updateStyle(style.id, {settings});
     const entry = await JournalEntry.create({name: "Illuminus Menu Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{
@@ -1466,8 +1489,8 @@ try {
     if (!opened) return { opened: false };
 
     // Blocks and treatments hang off a submenu, which opens on hover.
-    const parent = action.startsWith("illuminus-picture") ? "illuminus-pictures"
-      : action.startsWith("illuminus-block") ? "illuminus-blocks" : null;
+    const parent = action.startsWith("illuminus-image") ? "illuminus-images"
+      : action.startsWith("illuminus-box") ? "illuminus-boxes" : null;
     if (parent) {
       const submenu = await settledBox(`document.querySelector('#prosemirror-dropdown [data-action="${parent}"]')`);
       if (submenu) await cdp.mouse("mouseMoved", submenu.x, submenu.y);
@@ -1485,7 +1508,7 @@ try {
     return { opened: true, reachable: true, hit, title };
   };
 
-  const block = await chooseFromMenu(".ProseMirror p", "illuminus-block01");
+  const block = await chooseFromMenu(".ProseMirror p", "illuminus-box01");
   check(block.opened, "the Illuminus drop-down opens from the editor's menu bar");
   // Next to Format, where the controls that change what a passage *is* live,
   // rather than out past the icon buttons where assigning the config lands it.
@@ -1496,22 +1519,22 @@ try {
   check(order[0] === "format" && order[1] === "illuminus-menu",
     `and sits immediately right of Format (got ${order.slice(0, 3).join(", ")})`);
   check(block.reachable, "its block entries are reachable once the menu is open");
-  check(block.hit === "illuminus-block01", `and hit testing lands on the entry (got ${block.hit})`);
+  check(block.hit === "illuminus-box01", `and hit testing lands on the entry (got ${block.hit})`);
 
   check(block.title === "Read-aloud", `the menu calls a block what this style calls it (got "${block.title}")`);
 
   const wrapped = await cdp.evaluate(
     `${EDIT_SHEET}.element.querySelector(".ProseMirror blockquote")?.className ?? ""`);
-  check(wrapped === "illuminus-block illuminus-block--block01",
+  check(wrapped === "illuminus-box illuminus-box--box01",
     `choosing a block wraps the selection (got "${wrapped}")`);
 
   // The caption, not the image: clicking an image in the editor opens core's
   // image popout, which then covers the menu.
-  const picture = await chooseFromMenu(".ProseMirror figcaption", "illuminus-picture01");
+  const picture = await chooseFromMenu(".ProseMirror figcaption", "illuminus-image01");
   check(picture.reachable, `its picture entries are reachable too (opened ${picture.opened}, hit ${picture.hit})`);
   const tagged = await cdp.evaluate(
     `${EDIT_SHEET}.element.querySelector(".ProseMirror figure")?.className ?? "(no figure)"`);
-  check(tagged === "illuminus-picture illuminus-picture--picture01",
+  check(tagged === "illuminus-image illuminus-image--image01",
     `choosing a treatment tags the picture (got "${tagged}")`);
 
   // The real question: does any of it survive Foundry's save path?
@@ -1526,8 +1549,8 @@ try {
     const page = entry.pages.contents[0];
     await entry.sheet.render({force: true, pageId: page.id});
     await new Promise(r => setTimeout(r, 1200));
-    const el = entry.sheet.element.querySelector(".illuminus-block--block01");
-    const fig = entry.sheet.element.querySelector(".illuminus-picture--picture01");
+    const el = entry.sheet.element.querySelector(".illuminus-box--box01");
+    const fig = entry.sheet.element.querySelector(".illuminus-image--image01");
     return JSON.stringify({
       stored: page.text.content,
       background: el && getComputedStyle(el).backgroundColor,
@@ -1535,9 +1558,9 @@ try {
     });
   })()`);
   const sv = JSON.parse(saved);
-  check(/blockquote class="illuminus-block illuminus-block--block01"/.test(sv.stored),
+  check(/blockquote class="illuminus-box illuminus-box--box01"/.test(sv.stored),
     "the block's classes survive the save round trip");
-  check(/figure class="illuminus-picture illuminus-picture--picture01"/.test(sv.stored),
+  check(/figure class="illuminus-image illuminus-image--image01"/.test(sv.stored),
     "the picture treatment's classes survive it too");
   check(sv.background === "rgb(18, 52, 86)",
     `and the saved page paints the block from the style (got ${sv.background})`);
@@ -1647,23 +1670,23 @@ check(hr.hidden.topWidth === "0px", `a thickness of 0 draws nothing (got ${hr.hi
 console.log("\n[31] Block Styles and Picture Styles get their own preview");
 const panes = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const style = await api.createStyle({name: "Preview Pane Probe", labels: {block02: "Sidebar"}});
+  const style = await api.createStyle({name: "Preview Pane Probe", labels: {box02: "Sidebar"}});
   const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-  settings.block01.background = "#123456";
-  settings.block01.width = "half";
-  settings.block01.float = "left";
-  settings.block02.background = "#654321";
-  settings.picture01.borderTopWidth = 6;
-  settings.picture01.borderTopStyle = "solid";
-  settings.picture01.borderTopColor = "#ff8800";
+  settings.box01.background = "#123456";
+  settings.box01.width = "half";
+  settings.box01.float = "left";
+  settings.box02.background = "#654321";
+  settings.image01.borderTopWidth = 6;
+  settings.image01.borderTopStyle = "solid";
+  settings.image01.borderTopColor = "#ff8800";
   await api.updateStyle(style.id, {settings});
 
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1000));
   const el = app.element;
   const mock = el.querySelector(".illuminus-preview__window");
-  const blocks = el.querySelector('.illuminus-preview__family[data-family="blocks"]');
-  const pictures = el.querySelector('.illuminus-preview__family[data-family="pictures"]');
+  const blocks = el.querySelector('.illuminus-preview__family[data-family="boxStyles"]');
+  const pictures = el.querySelector('.illuminus-preview__family[data-family="imageStyles"]');
   const frame = el.querySelector(".illuminus-preview__frame");
   const show = e => getComputedStyle(e).display;
 
@@ -1672,7 +1695,7 @@ const panes = await cdp.evaluate(`(async () => {
   await at("page");
   const onPage = {mock: show(mock), blocks: show(blocks), pictures: show(pictures)};
 
-  await at("blocks");
+  await at("boxStyles");
   const bq = blocks.querySelector("blockquote");
   const onBlocks = {
     mock: show(mock), blocks: show(blocks), pictures: show(pictures),
@@ -1685,19 +1708,19 @@ const panes = await cdp.evaluate(`(async () => {
   };
 
   // Choosing another member rebuilds the panel for it.
-  el.querySelector('[data-family-picker="blocks"]').value = "block02";
-  el.querySelector('[data-family-picker="blocks"]').dispatchEvent(new Event("change"));
+  el.querySelector('[data-family-picker="boxStyles"]').value = "box02";
+  el.querySelector('[data-family-picker="boxStyles"]').dispatchEvent(new Event("change"));
   await new Promise(r => setTimeout(r, 600));
   const afterPick = {
-    carrier: el.querySelector('.illuminus-preview__family[data-family="blocks"] blockquote').className,
-    background: getComputedStyle(el.querySelector('.illuminus-preview__family[data-family="blocks"] blockquote')).backgroundColor
+    carrier: el.querySelector('.illuminus-preview__family[data-family="boxStyles"] blockquote').className,
+    background: getComputedStyle(el.querySelector('.illuminus-preview__family[data-family="boxStyles"] blockquote')).backgroundColor
   };
 
-  await at("pictures");
-  const fig = el.querySelector('.illuminus-preview__family[data-family="pictures"] figure');
+  await at("imageStyles");
+  const fig = el.querySelector('.illuminus-preview__family[data-family="imageStyles"] figure');
   const onPictures = {
     mock: show(el.querySelector(".illuminus-preview__window")),
-    pictures: show(el.querySelector('.illuminus-preview__family[data-family="pictures"]')),
+    pictures: show(el.querySelector('.illuminus-preview__family[data-family="imageStyles"]')),
     carrier: fig.className,
     borderColor: getComputedStyle(fig).borderTopColor,
     hasImage: !!fig.querySelector("img") && fig.querySelector("img").getBoundingClientRect().width > 0
@@ -1712,19 +1735,19 @@ check(pv.onPage.mock !== "none" && pv.onPage.blocks === "none" && pv.onPage.pict
   "on a page tab the journal mock is what shows");
 check(pv.onBlocks.mock === "none" && pv.onBlocks.blocks !== "none",
   `the Block Styles tab replaces the mock (mock ${pv.onBlocks.mock}, panel ${pv.onBlocks.blocks})`);
-check(pv.onBlocks.carrier === "illuminus-block illuminus-block--block01",
+check(pv.onBlocks.carrier === "illuminus-box illuminus-box--box01",
   `the panel is built for the member on show (got "${pv.onBlocks.carrier}")`);
 check(pv.onBlocks.background === "rgb(18, 52, 86)",
   `and takes its look from the style being edited (got ${pv.onBlocks.background})`);
 check(pv.onBlocks.float === "left", `layout settings reach it too (float ${pv.onBlocks.float})`);
 check(pv.onBlocks.fill, "the sample page fills the pane rather than stopping at its text");
-check(pv.afterPick.carrier === "illuminus-block illuminus-block--block02",
+check(pv.afterPick.carrier === "illuminus-box illuminus-box--box02",
   `choosing another block rebuilds the panel for it (got "${pv.afterPick.carrier}")`);
 check(pv.afterPick.background === "rgb(101, 67, 33)",
   `and it repaints from that member's settings (got ${pv.afterPick.background})`);
 check(pv.onPictures.mock === "none" && pv.onPictures.pictures !== "none",
   `the Picture Styles tab replaces it as well (panel ${pv.onPictures.pictures})`);
-check(pv.onPictures.carrier === "illuminus-picture illuminus-picture--picture01",
+check(pv.onPictures.carrier === "illuminus-image illuminus-image--image01",
   `its panel carries the treatment on show (got "${pv.onPictures.carrier}")`);
 check(pv.onPictures.borderColor === "rgb(255, 136, 0)",
   `styled from the style being edited (got ${pv.onPictures.borderColor})`);
@@ -1746,17 +1769,17 @@ try {
       borderRightWidth: 5, borderRightColor: "#e9b770", borderRightStyle: "solid"
     });
     settings.tag02.float = "right";
-    settings.block01.whenEmpty = "hide";
-    settings.block02.whenEmpty = "show";
+    settings.box01.whenEmpty = "hide";
+    settings.box02.whenEmpty = "show";
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Inline Test Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
       '<h2>Sewer Haze <span class="illuminus-tag illuminus-tag--tag02">Disease 7</span></h2>' +
       '<p><span class="illuminus-tag illuminus-tag--tag01">Disease</span></p>' +
-      '<blockquote class="illuminus-block illuminus-block--block01"><p></p></blockquote>' +
-      '<blockquote class="illuminus-block illuminus-block--block02"><p></p></blockquote>' +
-      '<blockquote class="illuminus-block illuminus-block--block03"><p>Kept.</p></blockquote>'}}]);
+      '<blockquote class="illuminus-box illuminus-box--box01"><p></p></blockquote>' +
+      '<blockquote class="illuminus-box illuminus-box--box02"><p></p></blockquote>' +
+      '<blockquote class="illuminus-box illuminus-box--box03"><p>Kept.</p></blockquote>'}}]);
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     await new Promise(r => setTimeout(r, 1400));
@@ -1777,9 +1800,9 @@ try {
       // The rank reaches the right-hand end of the title line it sits in.
       rankGap: Math.round(heading.right - rank.right),
       rankFloat: cs(".illuminus-tag--tag02").cssFloat,
-      hiddenWhenSet: cs(".illuminus-block--block01").display,
-      shownWhenNotSet: cs(".illuminus-block--block02").display,
-      filledAlwaysShown: cs(".illuminus-block--block03").display
+      hiddenWhenSet: cs(".illuminus-box--box01").display,
+      shownWhenNotSet: cs(".illuminus-box--box02").display,
+      filledAlwaysShown: cs(".illuminus-box--box03").display
     };
     window.__inline = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);
@@ -1905,13 +1928,13 @@ try {
     Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
     Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
     Object.assign(settings.sidebar, {buttonBackground: "#222222", buttonTexture: IMG});
-    settings.block01.texture = IMG;
+    settings.box01.texture = IMG;
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Image Layer Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
       "<h1>Heading</h1><table><thead><tr><th>H</th></tr></thead><tbody><tr><td>c</td></tr></tbody></table>" +
-      '<blockquote class="illuminus-block illuminus-block--block01"><p>Block</p></blockquote>'}}]);
+      '<blockquote class="illuminus-box illuminus-box--box01"><p>Block</p></blockquote>'}}]);
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     await new Promise(r => setTimeout(r, 1400));
@@ -1932,7 +1955,7 @@ try {
       tableHeader: layer("thead th"),
       heading: layer(".journal-page-content h1"),
       sidebarButton: layer(".journal-sidebar button"),
-      block: layer(".illuminus-block--block01")
+      block: layer(".illuminus-box--box01")
     };
     window.__layers = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);

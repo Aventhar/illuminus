@@ -158,11 +158,9 @@ function v1_to_v2(settings) {
  * Version 2 -> 3.
  *
  * Thickness and Slant were two controls that are almost always set together, so
- * they became one Text Style choice offering the six combinations people
- * actually use. The nine numeric weights collapse to three: anything 600 or
- * over reads as bold, 300 or under as light, the rest as normal. A style that
- * had picked 800 comes back as bold — the nearest thing the new control can
- * say.
+ * they became one Text Style choice naming a weight and a slant together. Every
+ * numeric weight has a name, so nothing is lost: 800 becomes Extra Bold, 200
+ * Extra Light.
  */
 const TEXT_STYLE_PAIRS = [
   ["weight", "style", "textStyle"],
@@ -174,6 +172,12 @@ const TEXT_STYLE_PAIRS = [
   ["headerWeight", null, "headerTextStyle"]
 ];
 
+/** Every CSS weight has a name in the combined control, so none is lost. */
+const WEIGHT_NAME = {
+  100: "thin", 200: "extraLight", 300: "light", 400: "normal", 500: "medium",
+  600: "semiBold", 700: "bold", 800: "extraBold", 900: "black"
+};
+
 /** The combined choice standing for an old thickness and slant. */
 function combineTextStyle(weight, slant) {
   if (weight === undefined && slant === undefined) return undefined;
@@ -183,8 +187,7 @@ function combineTextStyle(weight, slant) {
     if (weight === "inherit" && (slant === "inherit" || slant === undefined)) return "inherit";
     if (slant === "inherit" && weight === undefined) return "inherit";
   }
-  const heavy = Number(weight === "inherit" ? "400" : weight ?? "400");
-  const base = heavy >= 600 ? "bold" : heavy <= 300 ? "light" : "normal";
+  const base = WEIGHT_NAME[Number(weight === "inherit" ? 400 : weight ?? 400)] ?? "normal";
   const italic = slant === "italic" || slant === "oblique";
   return italic ? `${base}Italic` : base;
 }
@@ -205,10 +208,38 @@ function v2_to_v3(settings) {
   return out;
 }
 
+/**
+ * Version 3 -> 4.
+ *
+ * The GUI calls them boxes and image styles, so the data does too: `block01`
+ * became `box01` and `picture01` became `image01`. The classes written into
+ * journal pages changed with them, but the old ones keep working — the
+ * stylesheet matches both, because pages already saved cannot be rewritten.
+ */
+const GROUP_RENAMES = Object.fromEntries([
+  ...Array.from({ length: 10 }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return [`block${n}`, `box${n}`];
+  }),
+  ...Array.from({ length: 10 }, (_, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    return [`picture${n}`, `image${n}`];
+  })
+]);
+
+function v3_to_v4(settings) {
+  const out = {};
+  for (const [groupId, group] of Object.entries(settings ?? {})) {
+    out[GROUP_RENAMES[groupId] ?? groupId] = group;
+  }
+  return out;
+}
+
 /** Migrations keyed by the version they upgrade *from*. */
 const MIGRATIONS = {
   1: v1_to_v2,
-  2: v2_to_v3
+  2: v2_to_v3,
+  3: v3_to_v4
 };
 
 /**
@@ -238,5 +269,27 @@ export function migrateStyle(style) {
   const from = Number(style?.schemaVersion ?? 1);
   if (from >= SCHEMA_VERSION) return style;
   log.debug(`migrating style "${style?.name}" from schema ${from} to ${SCHEMA_VERSION}`);
-  return { ...style, schemaVersion: SCHEMA_VERSION, settings: migrateSettings(style?.settings, from) };
+  return {
+    ...style,
+    schemaVersion: SCHEMA_VERSION,
+    settings: migrateSettings(style?.settings, from),
+    // The names a style gives its boxes and image styles are keyed by group id
+    // as well, and live outside `settings` — without this they are dropped by
+    // `cleanLabels`, which only keeps keys the schema still knows.
+    labels: migrateLabels(style?.labels, from)
+  };
+}
+
+/**
+ * Bring a style's per-member names up to the current schema version.
+ * @param {object} labels
+ * @param {number} [fromVersion=1]
+ * @returns {object}
+ */
+export function migrateLabels(labels, fromVersion = 1) {
+  if (!labels || typeof labels !== "object") return labels;
+  if (Number(fromVersion) > 3) return labels;
+  const out = {};
+  for (const [key, value] of Object.entries(labels)) out[GROUP_RENAMES[key] ?? key] = value;
+  return out;
 }

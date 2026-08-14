@@ -581,7 +581,7 @@
 
 /* A block rides on a blockquote, so the page-wide Boxed Text settings have to
    stand aside for one — otherwise two sets of rules fight over the same box. */
-.illuminus-styled .journal-page-content blockquote:not(.illuminus-block),
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-box),
 .illuminus-styled .journal-page-content .illuminus-box {
   font-family: var(--ill-boxes-font);
   font-size: var(--ill-boxes-size);
@@ -611,14 +611,14 @@
               var(--ill-boxes-shadow-blur) var(--ill-boxes-shadow-spread) var(--ill-boxes-shadow-color);
 }
 
-.illuminus-styled .journal-page-content blockquote:not(.illuminus-block) > :last-child,
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-box) > :last-child,
 .illuminus-styled .journal-page-content .illuminus-box > :last-child {
   margin-bottom: 0;
 }
 
 /* --- Images ------------------------------------------------------------- */
 
-.illuminus-styled .journal-page-content :not(.illuminus-picture) > img {
+.illuminus-styled .journal-page-content :not(.illuminus-image) > img {
   max-width: var(--ill-images-max-width);
   opacity: var(--ill-images-opacity);
   background: var(--ill-images-background);
@@ -638,7 +638,7 @@
               var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color);
 }
 
-.illuminus-styled .journal-page-content :not(.illuminus-picture) > figcaption {
+.illuminus-styled .journal-page-content :not(.illuminus-image) > figcaption {
   font-family: var(--ill-images-caption-font);
   font-size: var(--ill-images-caption-size);
   font-weight: var(--ill-images-caption-text-style-weight);
@@ -1194,18 +1194,18 @@
   min-height: 100%;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active) .illuminus-preview__window,
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active) .illuminus-preview__window,
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="tags"].active) .illuminus-preview__window {
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="boxStyles"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="imageStyles"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="tagStyles"].active) .illuminus-preview__window {
   display: none;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="blocks"].active)
-  .illuminus-preview__family[data-family="blocks"],
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="pictures"].active)
-  .illuminus-preview__family[data-family="pictures"],
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="tags"].active)
-  .illuminus-preview__family[data-family="tags"] {
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="boxStyles"].active)
+  .illuminus-preview__family[data-family="boxStyles"],
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="imageStyles"].active)
+  .illuminus-preview__family[data-family="imageStyles"],
+.illuminus-editor__layout:has(.illuminus-tab[data-tab="tagStyles"].active)
+  .illuminus-preview__family[data-family="tagStyles"] {
   display: flex;
 }
 

@@ -63,7 +63,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * treatments would be twenty more tabs; instead each family gets one tab with
    * a picker, and only the chosen member's controls are built.
    */
-  #showing = { headings: "heading1", blocks: "block01", pictures: "picture01", tags: "tag01" };
+  #showing = { headings: "heading1", boxStyles: "box01", tagStyles: "tag01", imageStyles: "image01" };
 
   static DEFAULT_OPTIONS = {
     id: "illuminus-style-editor-{id}",
@@ -115,9 +115,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    */
   static FAMILIES = [
     { id: "headings", icon: "fa-solid fa-heading", label: "ILLUMINUS.Families.headings", renamable: false },
-    { id: "blocks", icon: "fa-solid fa-comment-dots", label: "ILLUMINUS.Families.blocks" },
-    { id: "tags", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tags" },
-    { id: "pictures", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.pictures" }
+    { id: "boxStyles", icon: "fa-solid fa-comment-dots", label: "ILLUMINUS.Families.boxStyles" },
+    { id: "tagStyles", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tagStyles" },
+    { id: "imageStyles", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.imageStyles" }
   ];
 
   /** Groups that get a tab of their own, in strip order. */

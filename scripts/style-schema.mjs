@@ -68,7 +68,11 @@ const CHOICES = {
   flip: ["none", "horizontal", "vertical", "both"],
   verticalAlign: ["top", "middle", "bottom"],
   inlineAlign: ["baseline", "middle", "top", "bottom"],
-  textStyle: ["normal", "normalItalic", "bold", "boldItalic", "light", "lightItalic"],
+  // Every CSS weight, each with and without a slant, ordered light to heavy so
+  // the list reads as a ramp rather than a pile.
+  textStyle: ["thin", "thinItalic", "extraLight", "extraLightItalic", "light", "lightItalic",
+              "normal", "normalItalic", "medium", "mediumItalic", "semiBold", "semiBoldItalic",
+              "bold", "boldItalic", "extraBold", "extraBoldItalic", "black", "blackItalic"],
   whenEmpty: ["show", "hide"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
@@ -169,15 +173,17 @@ const emitWhenEmpty = (value) => (value === "hide" ? "none" : "block");
  * decision to anyone who does not think in CSS, which is who the GUI is for.
  * Both properties still come out the other end.
  */
-const emitTextStyle = (value) => ({
-  inherit: { weight: "inherit", slant: "inherit" },
-  normal: { weight: "400", slant: "normal" },
-  normalItalic: { weight: "400", slant: "italic" },
-  bold: { weight: "700", slant: "normal" },
-  boldItalic: { weight: "700", slant: "italic" },
-  light: { weight: "300", slant: "normal" },
-  lightItalic: { weight: "300", slant: "italic" }
-}[value] ?? { weight: "400", slant: "normal" });
+const TEXT_STYLE_WEIGHT = {
+  thin: "100", extraLight: "200", light: "300", normal: "400", medium: "500",
+  semiBold: "600", bold: "700", extraBold: "800", black: "900"
+};
+
+const emitTextStyle = (value) => {
+  if (value === "inherit") return { weight: "inherit", slant: "inherit" };
+  const italic = String(value).endsWith("Italic");
+  const base = italic ? String(value).slice(0, -"Italic".length) : String(value);
+  return { weight: TEXT_STYLE_WEIGHT[base] ?? "400", slant: italic ? "italic" : "normal" };
+};
 
 /**
  * The single choice standing in for an old thickness-and-slant pair. Callers
@@ -186,8 +192,7 @@ const emitTextStyle = (value) => ({
  */
 function textStyleOf(weight, slant) {
   if (weight === "inherit" || slant === "inherit") return "inherit";
-  const heavy = Number(weight ?? 400);
-  const base = heavy >= 600 ? "bold" : heavy <= 300 ? "light" : "normal";
+  const base = Object.keys(TEXT_STYLE_WEIGHT).find((k) => TEXT_STYLE_WEIGHT[k] === String(weight)) ?? "normal";
   const italic = slant === "italic" || slant === "oblique";
   return italic ? `${base}Italic` : base;
 }
@@ -284,7 +289,7 @@ function textFields(prefix, defaults = {}) {
  * the page value applies. That keeps a new block from fighting the typography
  * already set up, which matters when ten of them are on offer.
  */
-function blockSections() {
+function boxSections() {
   const inheritWeight = ["inherit", ...CHOICES.weight];
   const inheritStyle = ["inherit", ...CHOICES.fontStyle];
   const inheritCaps = ["inherit", ...CHOICES.caps];
@@ -408,7 +413,7 @@ function tagSections() {
  * One picture treatment: applied to a single image to diverge from the
  * page-wide Pictures settings. Ten of these exist, renameable per style.
  */
-function pictureSections() {
+function imageSections() {
   return [
     {
       id: "layout",
@@ -911,24 +916,24 @@ export const GROUPS = [
   },
 
   ...Array.from({ length: 10 }, (_, i) => ({
-    id: `block${String(i + 1).padStart(2, "0")}`,
+    id: `box${String(i + 1).padStart(2, "0")}`,
     icon: "fa-solid fa-square-dashed",
-    family: "blocks",
-    sections: blockSections()
+    family: "boxStyles",
+    sections: boxSections()
   })),
 
   ...Array.from({ length: 10 }, (_, i) => ({
     id: `tag${String(i + 1).padStart(2, "0")}`,
     icon: "fa-solid fa-tag",
-    family: "tags",
+    family: "tagStyles",
     sections: tagSections()
   })),
 
   ...Array.from({ length: 10 }, (_, i) => ({
-    id: `picture${String(i + 1).padStart(2, "0")}`,
+    id: `image${String(i + 1).padStart(2, "0")}`,
     icon: "fa-solid fa-image",
-    family: "pictures",
-    sections: pictureSections()
+    family: "imageStyles",
+    sections: imageSections()
   })),
 
 ];

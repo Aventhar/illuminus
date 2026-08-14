@@ -9,23 +9,23 @@
    field is a generator error rather than a rule that silently stops working.
 
    Markup, as inserted by the editor's Illuminus menu:
-     <section class="illuminus-block illuminus-block--block01">…</section>
-     <figure class="illuminus-picture illuminus-picture--picture01">
+     <section class="illuminus-box illuminus-box--box01">…</section>
+     <figure class="illuminus-image illuminus-image--image01">
        <img src="…"><figcaption>…</figcaption>
      </figure>
    ========================================================================== */
 
 /* Shared: a block is a flow container, a picture treatment is a figure. */
-.illuminus-styled .journal-page-content .illuminus-block {
+.illuminus-styled .journal-page-content .illuminus-box {
   display: block;
   overflow-wrap: break-word;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block > :last-child {
+.illuminus-styled .journal-page-content .illuminus-box > :last-child {
   margin-bottom: 0;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture {
+.illuminus-styled .journal-page-content .illuminus-image {
   display: block;
   max-width: 100%;
 }
@@ -203,441 +203,441 @@
   border-radius: var(--ill-heading6-corner-top-left) var(--ill-heading6-corner-top-right) var(--ill-heading6-corner-bottom-right) var(--ill-heading6-corner-bottom-left);
 }
 
-/* block01 */
-.illuminus-styled .journal-page-content .illuminus-block--block01 {
-  float: var(--ill-block01-float);
-  width: var(--ill-block01-width);
-  clear: var(--ill-block01-clear);
-  background-color: var(--ill-block01-background);
-  margin: var(--ill-block01-margin-top) var(--ill-block01-margin-right) var(--ill-block01-margin-bottom) var(--ill-block01-margin-left);
-  padding: var(--ill-block01-padding-top) var(--ill-block01-padding-right) var(--ill-block01-padding-bottom) var(--ill-block01-padding-left);
-  border-width: var(--ill-block01-border-top-width) var(--ill-block01-border-right-width) var(--ill-block01-border-bottom-width) var(--ill-block01-border-left-width);
-  border-style: var(--ill-block01-border-top-style) var(--ill-block01-border-right-style) var(--ill-block01-border-bottom-style) var(--ill-block01-border-left-style);
-  border-color: var(--ill-block01-border-top-color) var(--ill-block01-border-right-color) var(--ill-block01-border-bottom-color) var(--ill-block01-border-left-color);
-  border-radius: var(--ill-block01-corner-top-left) var(--ill-block01-corner-top-right) var(--ill-block01-corner-bottom-right) var(--ill-block01-corner-bottom-left);
-  box-shadow: var(--ill-block01-shadow-offset-x) var(--ill-block01-shadow-offset-y) var(--ill-block01-shadow-blur) var(--ill-block01-shadow-spread) var(--ill-block01-shadow-color);
-  font-family: var(--ill-block01-font);
-  font-size: var(--ill-block01-size);
-  font-weight: var(--ill-block01-text-style-weight);
-  font-style: var(--ill-block01-text-style-slant);
-  font-variant: var(--ill-block01-caps-variant);
-  text-transform: var(--ill-block01-caps-transform);
-  letter-spacing: var(--ill-block01-letter-spacing);
-  line-height: var(--ill-block01-line-height);
-  text-align: var(--ill-block01-align);
-  color: var(--ill-block01-color, inherit);
+/* box01 */
+.illuminus-styled .journal-page-content .illuminus-box--box01 {
+  float: var(--ill-box01-float);
+  width: var(--ill-box01-width);
+  clear: var(--ill-box01-clear);
+  background-color: var(--ill-box01-background);
+  margin: var(--ill-box01-margin-top) var(--ill-box01-margin-right) var(--ill-box01-margin-bottom) var(--ill-box01-margin-left);
+  padding: var(--ill-box01-padding-top) var(--ill-box01-padding-right) var(--ill-box01-padding-bottom) var(--ill-box01-padding-left);
+  border-width: var(--ill-box01-border-top-width) var(--ill-box01-border-right-width) var(--ill-box01-border-bottom-width) var(--ill-box01-border-left-width);
+  border-style: var(--ill-box01-border-top-style) var(--ill-box01-border-right-style) var(--ill-box01-border-bottom-style) var(--ill-box01-border-left-style);
+  border-color: var(--ill-box01-border-top-color) var(--ill-box01-border-right-color) var(--ill-box01-border-bottom-color) var(--ill-box01-border-left-color);
+  border-radius: var(--ill-box01-corner-top-left) var(--ill-box01-corner-top-right) var(--ill-box01-corner-bottom-right) var(--ill-box01-corner-bottom-left);
+  box-shadow: var(--ill-box01-shadow-offset-x) var(--ill-box01-shadow-offset-y) var(--ill-box01-shadow-blur) var(--ill-box01-shadow-spread) var(--ill-box01-shadow-color);
+  font-family: var(--ill-box01-font);
+  font-size: var(--ill-box01-size);
+  font-weight: var(--ill-box01-text-style-weight);
+  font-style: var(--ill-box01-text-style-slant);
+  font-variant: var(--ill-box01-caps-variant);
+  text-transform: var(--ill-box01-caps-transform);
+  letter-spacing: var(--ill-box01-letter-spacing);
+  line-height: var(--ill-box01-line-height);
+  text-align: var(--ill-box01-align);
+  color: var(--ill-box01-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block01 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block01-heading-font);
-  font-size: var(--ill-block01-heading-size);
-  font-weight: var(--ill-block01-heading-text-style-weight);
-  font-style: var(--ill-block01-heading-text-style-slant);
-  font-variant: var(--ill-block01-heading-caps-variant);
-  text-transform: var(--ill-block01-heading-caps-transform);
-  text-align: var(--ill-block01-heading-align);
-  color: var(--ill-block01-heading-color, inherit);
-  margin-top: var(--ill-block01-heading-margin-top);
-  margin-bottom: var(--ill-block01-heading-margin-bottom);
-  border-top-width: var(--ill-block01-heading-rule-width);
-  border-top-style: var(--ill-block01-heading-rule-style);
-  border-top-color: var(--ill-block01-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box01 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box01-heading-font);
+  font-size: var(--ill-box01-heading-size);
+  font-weight: var(--ill-box01-heading-text-style-weight);
+  font-style: var(--ill-box01-heading-text-style-slant);
+  font-variant: var(--ill-box01-heading-caps-variant);
+  text-transform: var(--ill-box01-heading-caps-transform);
+  text-align: var(--ill-box01-heading-align);
+  color: var(--ill-box01-heading-color, inherit);
+  margin-top: var(--ill-box01-heading-margin-top);
+  margin-bottom: var(--ill-box01-heading-margin-bottom);
+  border-top-width: var(--ill-box01-heading-rule-width);
+  border-top-style: var(--ill-box01-heading-rule-style);
+  border-top-color: var(--ill-box01-heading-rule-color);
 }
 
-/* block02 */
-.illuminus-styled .journal-page-content .illuminus-block--block02 {
-  float: var(--ill-block02-float);
-  width: var(--ill-block02-width);
-  clear: var(--ill-block02-clear);
-  background-color: var(--ill-block02-background);
-  margin: var(--ill-block02-margin-top) var(--ill-block02-margin-right) var(--ill-block02-margin-bottom) var(--ill-block02-margin-left);
-  padding: var(--ill-block02-padding-top) var(--ill-block02-padding-right) var(--ill-block02-padding-bottom) var(--ill-block02-padding-left);
-  border-width: var(--ill-block02-border-top-width) var(--ill-block02-border-right-width) var(--ill-block02-border-bottom-width) var(--ill-block02-border-left-width);
-  border-style: var(--ill-block02-border-top-style) var(--ill-block02-border-right-style) var(--ill-block02-border-bottom-style) var(--ill-block02-border-left-style);
-  border-color: var(--ill-block02-border-top-color) var(--ill-block02-border-right-color) var(--ill-block02-border-bottom-color) var(--ill-block02-border-left-color);
-  border-radius: var(--ill-block02-corner-top-left) var(--ill-block02-corner-top-right) var(--ill-block02-corner-bottom-right) var(--ill-block02-corner-bottom-left);
-  box-shadow: var(--ill-block02-shadow-offset-x) var(--ill-block02-shadow-offset-y) var(--ill-block02-shadow-blur) var(--ill-block02-shadow-spread) var(--ill-block02-shadow-color);
-  font-family: var(--ill-block02-font);
-  font-size: var(--ill-block02-size);
-  font-weight: var(--ill-block02-text-style-weight);
-  font-style: var(--ill-block02-text-style-slant);
-  font-variant: var(--ill-block02-caps-variant);
-  text-transform: var(--ill-block02-caps-transform);
-  letter-spacing: var(--ill-block02-letter-spacing);
-  line-height: var(--ill-block02-line-height);
-  text-align: var(--ill-block02-align);
-  color: var(--ill-block02-color, inherit);
+/* box02 */
+.illuminus-styled .journal-page-content .illuminus-box--box02 {
+  float: var(--ill-box02-float);
+  width: var(--ill-box02-width);
+  clear: var(--ill-box02-clear);
+  background-color: var(--ill-box02-background);
+  margin: var(--ill-box02-margin-top) var(--ill-box02-margin-right) var(--ill-box02-margin-bottom) var(--ill-box02-margin-left);
+  padding: var(--ill-box02-padding-top) var(--ill-box02-padding-right) var(--ill-box02-padding-bottom) var(--ill-box02-padding-left);
+  border-width: var(--ill-box02-border-top-width) var(--ill-box02-border-right-width) var(--ill-box02-border-bottom-width) var(--ill-box02-border-left-width);
+  border-style: var(--ill-box02-border-top-style) var(--ill-box02-border-right-style) var(--ill-box02-border-bottom-style) var(--ill-box02-border-left-style);
+  border-color: var(--ill-box02-border-top-color) var(--ill-box02-border-right-color) var(--ill-box02-border-bottom-color) var(--ill-box02-border-left-color);
+  border-radius: var(--ill-box02-corner-top-left) var(--ill-box02-corner-top-right) var(--ill-box02-corner-bottom-right) var(--ill-box02-corner-bottom-left);
+  box-shadow: var(--ill-box02-shadow-offset-x) var(--ill-box02-shadow-offset-y) var(--ill-box02-shadow-blur) var(--ill-box02-shadow-spread) var(--ill-box02-shadow-color);
+  font-family: var(--ill-box02-font);
+  font-size: var(--ill-box02-size);
+  font-weight: var(--ill-box02-text-style-weight);
+  font-style: var(--ill-box02-text-style-slant);
+  font-variant: var(--ill-box02-caps-variant);
+  text-transform: var(--ill-box02-caps-transform);
+  letter-spacing: var(--ill-box02-letter-spacing);
+  line-height: var(--ill-box02-line-height);
+  text-align: var(--ill-box02-align);
+  color: var(--ill-box02-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block02 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block02-heading-font);
-  font-size: var(--ill-block02-heading-size);
-  font-weight: var(--ill-block02-heading-text-style-weight);
-  font-style: var(--ill-block02-heading-text-style-slant);
-  font-variant: var(--ill-block02-heading-caps-variant);
-  text-transform: var(--ill-block02-heading-caps-transform);
-  text-align: var(--ill-block02-heading-align);
-  color: var(--ill-block02-heading-color, inherit);
-  margin-top: var(--ill-block02-heading-margin-top);
-  margin-bottom: var(--ill-block02-heading-margin-bottom);
-  border-top-width: var(--ill-block02-heading-rule-width);
-  border-top-style: var(--ill-block02-heading-rule-style);
-  border-top-color: var(--ill-block02-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box02 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box02-heading-font);
+  font-size: var(--ill-box02-heading-size);
+  font-weight: var(--ill-box02-heading-text-style-weight);
+  font-style: var(--ill-box02-heading-text-style-slant);
+  font-variant: var(--ill-box02-heading-caps-variant);
+  text-transform: var(--ill-box02-heading-caps-transform);
+  text-align: var(--ill-box02-heading-align);
+  color: var(--ill-box02-heading-color, inherit);
+  margin-top: var(--ill-box02-heading-margin-top);
+  margin-bottom: var(--ill-box02-heading-margin-bottom);
+  border-top-width: var(--ill-box02-heading-rule-width);
+  border-top-style: var(--ill-box02-heading-rule-style);
+  border-top-color: var(--ill-box02-heading-rule-color);
 }
 
-/* block03 */
-.illuminus-styled .journal-page-content .illuminus-block--block03 {
-  float: var(--ill-block03-float);
-  width: var(--ill-block03-width);
-  clear: var(--ill-block03-clear);
-  background-color: var(--ill-block03-background);
-  margin: var(--ill-block03-margin-top) var(--ill-block03-margin-right) var(--ill-block03-margin-bottom) var(--ill-block03-margin-left);
-  padding: var(--ill-block03-padding-top) var(--ill-block03-padding-right) var(--ill-block03-padding-bottom) var(--ill-block03-padding-left);
-  border-width: var(--ill-block03-border-top-width) var(--ill-block03-border-right-width) var(--ill-block03-border-bottom-width) var(--ill-block03-border-left-width);
-  border-style: var(--ill-block03-border-top-style) var(--ill-block03-border-right-style) var(--ill-block03-border-bottom-style) var(--ill-block03-border-left-style);
-  border-color: var(--ill-block03-border-top-color) var(--ill-block03-border-right-color) var(--ill-block03-border-bottom-color) var(--ill-block03-border-left-color);
-  border-radius: var(--ill-block03-corner-top-left) var(--ill-block03-corner-top-right) var(--ill-block03-corner-bottom-right) var(--ill-block03-corner-bottom-left);
-  box-shadow: var(--ill-block03-shadow-offset-x) var(--ill-block03-shadow-offset-y) var(--ill-block03-shadow-blur) var(--ill-block03-shadow-spread) var(--ill-block03-shadow-color);
-  font-family: var(--ill-block03-font);
-  font-size: var(--ill-block03-size);
-  font-weight: var(--ill-block03-text-style-weight);
-  font-style: var(--ill-block03-text-style-slant);
-  font-variant: var(--ill-block03-caps-variant);
-  text-transform: var(--ill-block03-caps-transform);
-  letter-spacing: var(--ill-block03-letter-spacing);
-  line-height: var(--ill-block03-line-height);
-  text-align: var(--ill-block03-align);
-  color: var(--ill-block03-color, inherit);
+/* box03 */
+.illuminus-styled .journal-page-content .illuminus-box--box03 {
+  float: var(--ill-box03-float);
+  width: var(--ill-box03-width);
+  clear: var(--ill-box03-clear);
+  background-color: var(--ill-box03-background);
+  margin: var(--ill-box03-margin-top) var(--ill-box03-margin-right) var(--ill-box03-margin-bottom) var(--ill-box03-margin-left);
+  padding: var(--ill-box03-padding-top) var(--ill-box03-padding-right) var(--ill-box03-padding-bottom) var(--ill-box03-padding-left);
+  border-width: var(--ill-box03-border-top-width) var(--ill-box03-border-right-width) var(--ill-box03-border-bottom-width) var(--ill-box03-border-left-width);
+  border-style: var(--ill-box03-border-top-style) var(--ill-box03-border-right-style) var(--ill-box03-border-bottom-style) var(--ill-box03-border-left-style);
+  border-color: var(--ill-box03-border-top-color) var(--ill-box03-border-right-color) var(--ill-box03-border-bottom-color) var(--ill-box03-border-left-color);
+  border-radius: var(--ill-box03-corner-top-left) var(--ill-box03-corner-top-right) var(--ill-box03-corner-bottom-right) var(--ill-box03-corner-bottom-left);
+  box-shadow: var(--ill-box03-shadow-offset-x) var(--ill-box03-shadow-offset-y) var(--ill-box03-shadow-blur) var(--ill-box03-shadow-spread) var(--ill-box03-shadow-color);
+  font-family: var(--ill-box03-font);
+  font-size: var(--ill-box03-size);
+  font-weight: var(--ill-box03-text-style-weight);
+  font-style: var(--ill-box03-text-style-slant);
+  font-variant: var(--ill-box03-caps-variant);
+  text-transform: var(--ill-box03-caps-transform);
+  letter-spacing: var(--ill-box03-letter-spacing);
+  line-height: var(--ill-box03-line-height);
+  text-align: var(--ill-box03-align);
+  color: var(--ill-box03-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block03 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block03-heading-font);
-  font-size: var(--ill-block03-heading-size);
-  font-weight: var(--ill-block03-heading-text-style-weight);
-  font-style: var(--ill-block03-heading-text-style-slant);
-  font-variant: var(--ill-block03-heading-caps-variant);
-  text-transform: var(--ill-block03-heading-caps-transform);
-  text-align: var(--ill-block03-heading-align);
-  color: var(--ill-block03-heading-color, inherit);
-  margin-top: var(--ill-block03-heading-margin-top);
-  margin-bottom: var(--ill-block03-heading-margin-bottom);
-  border-top-width: var(--ill-block03-heading-rule-width);
-  border-top-style: var(--ill-block03-heading-rule-style);
-  border-top-color: var(--ill-block03-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box03 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box03-heading-font);
+  font-size: var(--ill-box03-heading-size);
+  font-weight: var(--ill-box03-heading-text-style-weight);
+  font-style: var(--ill-box03-heading-text-style-slant);
+  font-variant: var(--ill-box03-heading-caps-variant);
+  text-transform: var(--ill-box03-heading-caps-transform);
+  text-align: var(--ill-box03-heading-align);
+  color: var(--ill-box03-heading-color, inherit);
+  margin-top: var(--ill-box03-heading-margin-top);
+  margin-bottom: var(--ill-box03-heading-margin-bottom);
+  border-top-width: var(--ill-box03-heading-rule-width);
+  border-top-style: var(--ill-box03-heading-rule-style);
+  border-top-color: var(--ill-box03-heading-rule-color);
 }
 
-/* block04 */
-.illuminus-styled .journal-page-content .illuminus-block--block04 {
-  float: var(--ill-block04-float);
-  width: var(--ill-block04-width);
-  clear: var(--ill-block04-clear);
-  background-color: var(--ill-block04-background);
-  margin: var(--ill-block04-margin-top) var(--ill-block04-margin-right) var(--ill-block04-margin-bottom) var(--ill-block04-margin-left);
-  padding: var(--ill-block04-padding-top) var(--ill-block04-padding-right) var(--ill-block04-padding-bottom) var(--ill-block04-padding-left);
-  border-width: var(--ill-block04-border-top-width) var(--ill-block04-border-right-width) var(--ill-block04-border-bottom-width) var(--ill-block04-border-left-width);
-  border-style: var(--ill-block04-border-top-style) var(--ill-block04-border-right-style) var(--ill-block04-border-bottom-style) var(--ill-block04-border-left-style);
-  border-color: var(--ill-block04-border-top-color) var(--ill-block04-border-right-color) var(--ill-block04-border-bottom-color) var(--ill-block04-border-left-color);
-  border-radius: var(--ill-block04-corner-top-left) var(--ill-block04-corner-top-right) var(--ill-block04-corner-bottom-right) var(--ill-block04-corner-bottom-left);
-  box-shadow: var(--ill-block04-shadow-offset-x) var(--ill-block04-shadow-offset-y) var(--ill-block04-shadow-blur) var(--ill-block04-shadow-spread) var(--ill-block04-shadow-color);
-  font-family: var(--ill-block04-font);
-  font-size: var(--ill-block04-size);
-  font-weight: var(--ill-block04-text-style-weight);
-  font-style: var(--ill-block04-text-style-slant);
-  font-variant: var(--ill-block04-caps-variant);
-  text-transform: var(--ill-block04-caps-transform);
-  letter-spacing: var(--ill-block04-letter-spacing);
-  line-height: var(--ill-block04-line-height);
-  text-align: var(--ill-block04-align);
-  color: var(--ill-block04-color, inherit);
+/* box04 */
+.illuminus-styled .journal-page-content .illuminus-box--box04 {
+  float: var(--ill-box04-float);
+  width: var(--ill-box04-width);
+  clear: var(--ill-box04-clear);
+  background-color: var(--ill-box04-background);
+  margin: var(--ill-box04-margin-top) var(--ill-box04-margin-right) var(--ill-box04-margin-bottom) var(--ill-box04-margin-left);
+  padding: var(--ill-box04-padding-top) var(--ill-box04-padding-right) var(--ill-box04-padding-bottom) var(--ill-box04-padding-left);
+  border-width: var(--ill-box04-border-top-width) var(--ill-box04-border-right-width) var(--ill-box04-border-bottom-width) var(--ill-box04-border-left-width);
+  border-style: var(--ill-box04-border-top-style) var(--ill-box04-border-right-style) var(--ill-box04-border-bottom-style) var(--ill-box04-border-left-style);
+  border-color: var(--ill-box04-border-top-color) var(--ill-box04-border-right-color) var(--ill-box04-border-bottom-color) var(--ill-box04-border-left-color);
+  border-radius: var(--ill-box04-corner-top-left) var(--ill-box04-corner-top-right) var(--ill-box04-corner-bottom-right) var(--ill-box04-corner-bottom-left);
+  box-shadow: var(--ill-box04-shadow-offset-x) var(--ill-box04-shadow-offset-y) var(--ill-box04-shadow-blur) var(--ill-box04-shadow-spread) var(--ill-box04-shadow-color);
+  font-family: var(--ill-box04-font);
+  font-size: var(--ill-box04-size);
+  font-weight: var(--ill-box04-text-style-weight);
+  font-style: var(--ill-box04-text-style-slant);
+  font-variant: var(--ill-box04-caps-variant);
+  text-transform: var(--ill-box04-caps-transform);
+  letter-spacing: var(--ill-box04-letter-spacing);
+  line-height: var(--ill-box04-line-height);
+  text-align: var(--ill-box04-align);
+  color: var(--ill-box04-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block04 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block04-heading-font);
-  font-size: var(--ill-block04-heading-size);
-  font-weight: var(--ill-block04-heading-text-style-weight);
-  font-style: var(--ill-block04-heading-text-style-slant);
-  font-variant: var(--ill-block04-heading-caps-variant);
-  text-transform: var(--ill-block04-heading-caps-transform);
-  text-align: var(--ill-block04-heading-align);
-  color: var(--ill-block04-heading-color, inherit);
-  margin-top: var(--ill-block04-heading-margin-top);
-  margin-bottom: var(--ill-block04-heading-margin-bottom);
-  border-top-width: var(--ill-block04-heading-rule-width);
-  border-top-style: var(--ill-block04-heading-rule-style);
-  border-top-color: var(--ill-block04-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box04 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box04-heading-font);
+  font-size: var(--ill-box04-heading-size);
+  font-weight: var(--ill-box04-heading-text-style-weight);
+  font-style: var(--ill-box04-heading-text-style-slant);
+  font-variant: var(--ill-box04-heading-caps-variant);
+  text-transform: var(--ill-box04-heading-caps-transform);
+  text-align: var(--ill-box04-heading-align);
+  color: var(--ill-box04-heading-color, inherit);
+  margin-top: var(--ill-box04-heading-margin-top);
+  margin-bottom: var(--ill-box04-heading-margin-bottom);
+  border-top-width: var(--ill-box04-heading-rule-width);
+  border-top-style: var(--ill-box04-heading-rule-style);
+  border-top-color: var(--ill-box04-heading-rule-color);
 }
 
-/* block05 */
-.illuminus-styled .journal-page-content .illuminus-block--block05 {
-  float: var(--ill-block05-float);
-  width: var(--ill-block05-width);
-  clear: var(--ill-block05-clear);
-  background-color: var(--ill-block05-background);
-  margin: var(--ill-block05-margin-top) var(--ill-block05-margin-right) var(--ill-block05-margin-bottom) var(--ill-block05-margin-left);
-  padding: var(--ill-block05-padding-top) var(--ill-block05-padding-right) var(--ill-block05-padding-bottom) var(--ill-block05-padding-left);
-  border-width: var(--ill-block05-border-top-width) var(--ill-block05-border-right-width) var(--ill-block05-border-bottom-width) var(--ill-block05-border-left-width);
-  border-style: var(--ill-block05-border-top-style) var(--ill-block05-border-right-style) var(--ill-block05-border-bottom-style) var(--ill-block05-border-left-style);
-  border-color: var(--ill-block05-border-top-color) var(--ill-block05-border-right-color) var(--ill-block05-border-bottom-color) var(--ill-block05-border-left-color);
-  border-radius: var(--ill-block05-corner-top-left) var(--ill-block05-corner-top-right) var(--ill-block05-corner-bottom-right) var(--ill-block05-corner-bottom-left);
-  box-shadow: var(--ill-block05-shadow-offset-x) var(--ill-block05-shadow-offset-y) var(--ill-block05-shadow-blur) var(--ill-block05-shadow-spread) var(--ill-block05-shadow-color);
-  font-family: var(--ill-block05-font);
-  font-size: var(--ill-block05-size);
-  font-weight: var(--ill-block05-text-style-weight);
-  font-style: var(--ill-block05-text-style-slant);
-  font-variant: var(--ill-block05-caps-variant);
-  text-transform: var(--ill-block05-caps-transform);
-  letter-spacing: var(--ill-block05-letter-spacing);
-  line-height: var(--ill-block05-line-height);
-  text-align: var(--ill-block05-align);
-  color: var(--ill-block05-color, inherit);
+/* box05 */
+.illuminus-styled .journal-page-content .illuminus-box--box05 {
+  float: var(--ill-box05-float);
+  width: var(--ill-box05-width);
+  clear: var(--ill-box05-clear);
+  background-color: var(--ill-box05-background);
+  margin: var(--ill-box05-margin-top) var(--ill-box05-margin-right) var(--ill-box05-margin-bottom) var(--ill-box05-margin-left);
+  padding: var(--ill-box05-padding-top) var(--ill-box05-padding-right) var(--ill-box05-padding-bottom) var(--ill-box05-padding-left);
+  border-width: var(--ill-box05-border-top-width) var(--ill-box05-border-right-width) var(--ill-box05-border-bottom-width) var(--ill-box05-border-left-width);
+  border-style: var(--ill-box05-border-top-style) var(--ill-box05-border-right-style) var(--ill-box05-border-bottom-style) var(--ill-box05-border-left-style);
+  border-color: var(--ill-box05-border-top-color) var(--ill-box05-border-right-color) var(--ill-box05-border-bottom-color) var(--ill-box05-border-left-color);
+  border-radius: var(--ill-box05-corner-top-left) var(--ill-box05-corner-top-right) var(--ill-box05-corner-bottom-right) var(--ill-box05-corner-bottom-left);
+  box-shadow: var(--ill-box05-shadow-offset-x) var(--ill-box05-shadow-offset-y) var(--ill-box05-shadow-blur) var(--ill-box05-shadow-spread) var(--ill-box05-shadow-color);
+  font-family: var(--ill-box05-font);
+  font-size: var(--ill-box05-size);
+  font-weight: var(--ill-box05-text-style-weight);
+  font-style: var(--ill-box05-text-style-slant);
+  font-variant: var(--ill-box05-caps-variant);
+  text-transform: var(--ill-box05-caps-transform);
+  letter-spacing: var(--ill-box05-letter-spacing);
+  line-height: var(--ill-box05-line-height);
+  text-align: var(--ill-box05-align);
+  color: var(--ill-box05-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block05 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block05-heading-font);
-  font-size: var(--ill-block05-heading-size);
-  font-weight: var(--ill-block05-heading-text-style-weight);
-  font-style: var(--ill-block05-heading-text-style-slant);
-  font-variant: var(--ill-block05-heading-caps-variant);
-  text-transform: var(--ill-block05-heading-caps-transform);
-  text-align: var(--ill-block05-heading-align);
-  color: var(--ill-block05-heading-color, inherit);
-  margin-top: var(--ill-block05-heading-margin-top);
-  margin-bottom: var(--ill-block05-heading-margin-bottom);
-  border-top-width: var(--ill-block05-heading-rule-width);
-  border-top-style: var(--ill-block05-heading-rule-style);
-  border-top-color: var(--ill-block05-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box05 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box05-heading-font);
+  font-size: var(--ill-box05-heading-size);
+  font-weight: var(--ill-box05-heading-text-style-weight);
+  font-style: var(--ill-box05-heading-text-style-slant);
+  font-variant: var(--ill-box05-heading-caps-variant);
+  text-transform: var(--ill-box05-heading-caps-transform);
+  text-align: var(--ill-box05-heading-align);
+  color: var(--ill-box05-heading-color, inherit);
+  margin-top: var(--ill-box05-heading-margin-top);
+  margin-bottom: var(--ill-box05-heading-margin-bottom);
+  border-top-width: var(--ill-box05-heading-rule-width);
+  border-top-style: var(--ill-box05-heading-rule-style);
+  border-top-color: var(--ill-box05-heading-rule-color);
 }
 
-/* block06 */
-.illuminus-styled .journal-page-content .illuminus-block--block06 {
-  float: var(--ill-block06-float);
-  width: var(--ill-block06-width);
-  clear: var(--ill-block06-clear);
-  background-color: var(--ill-block06-background);
-  margin: var(--ill-block06-margin-top) var(--ill-block06-margin-right) var(--ill-block06-margin-bottom) var(--ill-block06-margin-left);
-  padding: var(--ill-block06-padding-top) var(--ill-block06-padding-right) var(--ill-block06-padding-bottom) var(--ill-block06-padding-left);
-  border-width: var(--ill-block06-border-top-width) var(--ill-block06-border-right-width) var(--ill-block06-border-bottom-width) var(--ill-block06-border-left-width);
-  border-style: var(--ill-block06-border-top-style) var(--ill-block06-border-right-style) var(--ill-block06-border-bottom-style) var(--ill-block06-border-left-style);
-  border-color: var(--ill-block06-border-top-color) var(--ill-block06-border-right-color) var(--ill-block06-border-bottom-color) var(--ill-block06-border-left-color);
-  border-radius: var(--ill-block06-corner-top-left) var(--ill-block06-corner-top-right) var(--ill-block06-corner-bottom-right) var(--ill-block06-corner-bottom-left);
-  box-shadow: var(--ill-block06-shadow-offset-x) var(--ill-block06-shadow-offset-y) var(--ill-block06-shadow-blur) var(--ill-block06-shadow-spread) var(--ill-block06-shadow-color);
-  font-family: var(--ill-block06-font);
-  font-size: var(--ill-block06-size);
-  font-weight: var(--ill-block06-text-style-weight);
-  font-style: var(--ill-block06-text-style-slant);
-  font-variant: var(--ill-block06-caps-variant);
-  text-transform: var(--ill-block06-caps-transform);
-  letter-spacing: var(--ill-block06-letter-spacing);
-  line-height: var(--ill-block06-line-height);
-  text-align: var(--ill-block06-align);
-  color: var(--ill-block06-color, inherit);
+/* box06 */
+.illuminus-styled .journal-page-content .illuminus-box--box06 {
+  float: var(--ill-box06-float);
+  width: var(--ill-box06-width);
+  clear: var(--ill-box06-clear);
+  background-color: var(--ill-box06-background);
+  margin: var(--ill-box06-margin-top) var(--ill-box06-margin-right) var(--ill-box06-margin-bottom) var(--ill-box06-margin-left);
+  padding: var(--ill-box06-padding-top) var(--ill-box06-padding-right) var(--ill-box06-padding-bottom) var(--ill-box06-padding-left);
+  border-width: var(--ill-box06-border-top-width) var(--ill-box06-border-right-width) var(--ill-box06-border-bottom-width) var(--ill-box06-border-left-width);
+  border-style: var(--ill-box06-border-top-style) var(--ill-box06-border-right-style) var(--ill-box06-border-bottom-style) var(--ill-box06-border-left-style);
+  border-color: var(--ill-box06-border-top-color) var(--ill-box06-border-right-color) var(--ill-box06-border-bottom-color) var(--ill-box06-border-left-color);
+  border-radius: var(--ill-box06-corner-top-left) var(--ill-box06-corner-top-right) var(--ill-box06-corner-bottom-right) var(--ill-box06-corner-bottom-left);
+  box-shadow: var(--ill-box06-shadow-offset-x) var(--ill-box06-shadow-offset-y) var(--ill-box06-shadow-blur) var(--ill-box06-shadow-spread) var(--ill-box06-shadow-color);
+  font-family: var(--ill-box06-font);
+  font-size: var(--ill-box06-size);
+  font-weight: var(--ill-box06-text-style-weight);
+  font-style: var(--ill-box06-text-style-slant);
+  font-variant: var(--ill-box06-caps-variant);
+  text-transform: var(--ill-box06-caps-transform);
+  letter-spacing: var(--ill-box06-letter-spacing);
+  line-height: var(--ill-box06-line-height);
+  text-align: var(--ill-box06-align);
+  color: var(--ill-box06-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block06 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block06-heading-font);
-  font-size: var(--ill-block06-heading-size);
-  font-weight: var(--ill-block06-heading-text-style-weight);
-  font-style: var(--ill-block06-heading-text-style-slant);
-  font-variant: var(--ill-block06-heading-caps-variant);
-  text-transform: var(--ill-block06-heading-caps-transform);
-  text-align: var(--ill-block06-heading-align);
-  color: var(--ill-block06-heading-color, inherit);
-  margin-top: var(--ill-block06-heading-margin-top);
-  margin-bottom: var(--ill-block06-heading-margin-bottom);
-  border-top-width: var(--ill-block06-heading-rule-width);
-  border-top-style: var(--ill-block06-heading-rule-style);
-  border-top-color: var(--ill-block06-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box06 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box06-heading-font);
+  font-size: var(--ill-box06-heading-size);
+  font-weight: var(--ill-box06-heading-text-style-weight);
+  font-style: var(--ill-box06-heading-text-style-slant);
+  font-variant: var(--ill-box06-heading-caps-variant);
+  text-transform: var(--ill-box06-heading-caps-transform);
+  text-align: var(--ill-box06-heading-align);
+  color: var(--ill-box06-heading-color, inherit);
+  margin-top: var(--ill-box06-heading-margin-top);
+  margin-bottom: var(--ill-box06-heading-margin-bottom);
+  border-top-width: var(--ill-box06-heading-rule-width);
+  border-top-style: var(--ill-box06-heading-rule-style);
+  border-top-color: var(--ill-box06-heading-rule-color);
 }
 
-/* block07 */
-.illuminus-styled .journal-page-content .illuminus-block--block07 {
-  float: var(--ill-block07-float);
-  width: var(--ill-block07-width);
-  clear: var(--ill-block07-clear);
-  background-color: var(--ill-block07-background);
-  margin: var(--ill-block07-margin-top) var(--ill-block07-margin-right) var(--ill-block07-margin-bottom) var(--ill-block07-margin-left);
-  padding: var(--ill-block07-padding-top) var(--ill-block07-padding-right) var(--ill-block07-padding-bottom) var(--ill-block07-padding-left);
-  border-width: var(--ill-block07-border-top-width) var(--ill-block07-border-right-width) var(--ill-block07-border-bottom-width) var(--ill-block07-border-left-width);
-  border-style: var(--ill-block07-border-top-style) var(--ill-block07-border-right-style) var(--ill-block07-border-bottom-style) var(--ill-block07-border-left-style);
-  border-color: var(--ill-block07-border-top-color) var(--ill-block07-border-right-color) var(--ill-block07-border-bottom-color) var(--ill-block07-border-left-color);
-  border-radius: var(--ill-block07-corner-top-left) var(--ill-block07-corner-top-right) var(--ill-block07-corner-bottom-right) var(--ill-block07-corner-bottom-left);
-  box-shadow: var(--ill-block07-shadow-offset-x) var(--ill-block07-shadow-offset-y) var(--ill-block07-shadow-blur) var(--ill-block07-shadow-spread) var(--ill-block07-shadow-color);
-  font-family: var(--ill-block07-font);
-  font-size: var(--ill-block07-size);
-  font-weight: var(--ill-block07-text-style-weight);
-  font-style: var(--ill-block07-text-style-slant);
-  font-variant: var(--ill-block07-caps-variant);
-  text-transform: var(--ill-block07-caps-transform);
-  letter-spacing: var(--ill-block07-letter-spacing);
-  line-height: var(--ill-block07-line-height);
-  text-align: var(--ill-block07-align);
-  color: var(--ill-block07-color, inherit);
+/* box07 */
+.illuminus-styled .journal-page-content .illuminus-box--box07 {
+  float: var(--ill-box07-float);
+  width: var(--ill-box07-width);
+  clear: var(--ill-box07-clear);
+  background-color: var(--ill-box07-background);
+  margin: var(--ill-box07-margin-top) var(--ill-box07-margin-right) var(--ill-box07-margin-bottom) var(--ill-box07-margin-left);
+  padding: var(--ill-box07-padding-top) var(--ill-box07-padding-right) var(--ill-box07-padding-bottom) var(--ill-box07-padding-left);
+  border-width: var(--ill-box07-border-top-width) var(--ill-box07-border-right-width) var(--ill-box07-border-bottom-width) var(--ill-box07-border-left-width);
+  border-style: var(--ill-box07-border-top-style) var(--ill-box07-border-right-style) var(--ill-box07-border-bottom-style) var(--ill-box07-border-left-style);
+  border-color: var(--ill-box07-border-top-color) var(--ill-box07-border-right-color) var(--ill-box07-border-bottom-color) var(--ill-box07-border-left-color);
+  border-radius: var(--ill-box07-corner-top-left) var(--ill-box07-corner-top-right) var(--ill-box07-corner-bottom-right) var(--ill-box07-corner-bottom-left);
+  box-shadow: var(--ill-box07-shadow-offset-x) var(--ill-box07-shadow-offset-y) var(--ill-box07-shadow-blur) var(--ill-box07-shadow-spread) var(--ill-box07-shadow-color);
+  font-family: var(--ill-box07-font);
+  font-size: var(--ill-box07-size);
+  font-weight: var(--ill-box07-text-style-weight);
+  font-style: var(--ill-box07-text-style-slant);
+  font-variant: var(--ill-box07-caps-variant);
+  text-transform: var(--ill-box07-caps-transform);
+  letter-spacing: var(--ill-box07-letter-spacing);
+  line-height: var(--ill-box07-line-height);
+  text-align: var(--ill-box07-align);
+  color: var(--ill-box07-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block07 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block07-heading-font);
-  font-size: var(--ill-block07-heading-size);
-  font-weight: var(--ill-block07-heading-text-style-weight);
-  font-style: var(--ill-block07-heading-text-style-slant);
-  font-variant: var(--ill-block07-heading-caps-variant);
-  text-transform: var(--ill-block07-heading-caps-transform);
-  text-align: var(--ill-block07-heading-align);
-  color: var(--ill-block07-heading-color, inherit);
-  margin-top: var(--ill-block07-heading-margin-top);
-  margin-bottom: var(--ill-block07-heading-margin-bottom);
-  border-top-width: var(--ill-block07-heading-rule-width);
-  border-top-style: var(--ill-block07-heading-rule-style);
-  border-top-color: var(--ill-block07-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box07 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box07-heading-font);
+  font-size: var(--ill-box07-heading-size);
+  font-weight: var(--ill-box07-heading-text-style-weight);
+  font-style: var(--ill-box07-heading-text-style-slant);
+  font-variant: var(--ill-box07-heading-caps-variant);
+  text-transform: var(--ill-box07-heading-caps-transform);
+  text-align: var(--ill-box07-heading-align);
+  color: var(--ill-box07-heading-color, inherit);
+  margin-top: var(--ill-box07-heading-margin-top);
+  margin-bottom: var(--ill-box07-heading-margin-bottom);
+  border-top-width: var(--ill-box07-heading-rule-width);
+  border-top-style: var(--ill-box07-heading-rule-style);
+  border-top-color: var(--ill-box07-heading-rule-color);
 }
 
-/* block08 */
-.illuminus-styled .journal-page-content .illuminus-block--block08 {
-  float: var(--ill-block08-float);
-  width: var(--ill-block08-width);
-  clear: var(--ill-block08-clear);
-  background-color: var(--ill-block08-background);
-  margin: var(--ill-block08-margin-top) var(--ill-block08-margin-right) var(--ill-block08-margin-bottom) var(--ill-block08-margin-left);
-  padding: var(--ill-block08-padding-top) var(--ill-block08-padding-right) var(--ill-block08-padding-bottom) var(--ill-block08-padding-left);
-  border-width: var(--ill-block08-border-top-width) var(--ill-block08-border-right-width) var(--ill-block08-border-bottom-width) var(--ill-block08-border-left-width);
-  border-style: var(--ill-block08-border-top-style) var(--ill-block08-border-right-style) var(--ill-block08-border-bottom-style) var(--ill-block08-border-left-style);
-  border-color: var(--ill-block08-border-top-color) var(--ill-block08-border-right-color) var(--ill-block08-border-bottom-color) var(--ill-block08-border-left-color);
-  border-radius: var(--ill-block08-corner-top-left) var(--ill-block08-corner-top-right) var(--ill-block08-corner-bottom-right) var(--ill-block08-corner-bottom-left);
-  box-shadow: var(--ill-block08-shadow-offset-x) var(--ill-block08-shadow-offset-y) var(--ill-block08-shadow-blur) var(--ill-block08-shadow-spread) var(--ill-block08-shadow-color);
-  font-family: var(--ill-block08-font);
-  font-size: var(--ill-block08-size);
-  font-weight: var(--ill-block08-text-style-weight);
-  font-style: var(--ill-block08-text-style-slant);
-  font-variant: var(--ill-block08-caps-variant);
-  text-transform: var(--ill-block08-caps-transform);
-  letter-spacing: var(--ill-block08-letter-spacing);
-  line-height: var(--ill-block08-line-height);
-  text-align: var(--ill-block08-align);
-  color: var(--ill-block08-color, inherit);
+/* box08 */
+.illuminus-styled .journal-page-content .illuminus-box--box08 {
+  float: var(--ill-box08-float);
+  width: var(--ill-box08-width);
+  clear: var(--ill-box08-clear);
+  background-color: var(--ill-box08-background);
+  margin: var(--ill-box08-margin-top) var(--ill-box08-margin-right) var(--ill-box08-margin-bottom) var(--ill-box08-margin-left);
+  padding: var(--ill-box08-padding-top) var(--ill-box08-padding-right) var(--ill-box08-padding-bottom) var(--ill-box08-padding-left);
+  border-width: var(--ill-box08-border-top-width) var(--ill-box08-border-right-width) var(--ill-box08-border-bottom-width) var(--ill-box08-border-left-width);
+  border-style: var(--ill-box08-border-top-style) var(--ill-box08-border-right-style) var(--ill-box08-border-bottom-style) var(--ill-box08-border-left-style);
+  border-color: var(--ill-box08-border-top-color) var(--ill-box08-border-right-color) var(--ill-box08-border-bottom-color) var(--ill-box08-border-left-color);
+  border-radius: var(--ill-box08-corner-top-left) var(--ill-box08-corner-top-right) var(--ill-box08-corner-bottom-right) var(--ill-box08-corner-bottom-left);
+  box-shadow: var(--ill-box08-shadow-offset-x) var(--ill-box08-shadow-offset-y) var(--ill-box08-shadow-blur) var(--ill-box08-shadow-spread) var(--ill-box08-shadow-color);
+  font-family: var(--ill-box08-font);
+  font-size: var(--ill-box08-size);
+  font-weight: var(--ill-box08-text-style-weight);
+  font-style: var(--ill-box08-text-style-slant);
+  font-variant: var(--ill-box08-caps-variant);
+  text-transform: var(--ill-box08-caps-transform);
+  letter-spacing: var(--ill-box08-letter-spacing);
+  line-height: var(--ill-box08-line-height);
+  text-align: var(--ill-box08-align);
+  color: var(--ill-box08-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block08 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block08-heading-font);
-  font-size: var(--ill-block08-heading-size);
-  font-weight: var(--ill-block08-heading-text-style-weight);
-  font-style: var(--ill-block08-heading-text-style-slant);
-  font-variant: var(--ill-block08-heading-caps-variant);
-  text-transform: var(--ill-block08-heading-caps-transform);
-  text-align: var(--ill-block08-heading-align);
-  color: var(--ill-block08-heading-color, inherit);
-  margin-top: var(--ill-block08-heading-margin-top);
-  margin-bottom: var(--ill-block08-heading-margin-bottom);
-  border-top-width: var(--ill-block08-heading-rule-width);
-  border-top-style: var(--ill-block08-heading-rule-style);
-  border-top-color: var(--ill-block08-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box08 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box08-heading-font);
+  font-size: var(--ill-box08-heading-size);
+  font-weight: var(--ill-box08-heading-text-style-weight);
+  font-style: var(--ill-box08-heading-text-style-slant);
+  font-variant: var(--ill-box08-heading-caps-variant);
+  text-transform: var(--ill-box08-heading-caps-transform);
+  text-align: var(--ill-box08-heading-align);
+  color: var(--ill-box08-heading-color, inherit);
+  margin-top: var(--ill-box08-heading-margin-top);
+  margin-bottom: var(--ill-box08-heading-margin-bottom);
+  border-top-width: var(--ill-box08-heading-rule-width);
+  border-top-style: var(--ill-box08-heading-rule-style);
+  border-top-color: var(--ill-box08-heading-rule-color);
 }
 
-/* block09 */
-.illuminus-styled .journal-page-content .illuminus-block--block09 {
-  float: var(--ill-block09-float);
-  width: var(--ill-block09-width);
-  clear: var(--ill-block09-clear);
-  background-color: var(--ill-block09-background);
-  margin: var(--ill-block09-margin-top) var(--ill-block09-margin-right) var(--ill-block09-margin-bottom) var(--ill-block09-margin-left);
-  padding: var(--ill-block09-padding-top) var(--ill-block09-padding-right) var(--ill-block09-padding-bottom) var(--ill-block09-padding-left);
-  border-width: var(--ill-block09-border-top-width) var(--ill-block09-border-right-width) var(--ill-block09-border-bottom-width) var(--ill-block09-border-left-width);
-  border-style: var(--ill-block09-border-top-style) var(--ill-block09-border-right-style) var(--ill-block09-border-bottom-style) var(--ill-block09-border-left-style);
-  border-color: var(--ill-block09-border-top-color) var(--ill-block09-border-right-color) var(--ill-block09-border-bottom-color) var(--ill-block09-border-left-color);
-  border-radius: var(--ill-block09-corner-top-left) var(--ill-block09-corner-top-right) var(--ill-block09-corner-bottom-right) var(--ill-block09-corner-bottom-left);
-  box-shadow: var(--ill-block09-shadow-offset-x) var(--ill-block09-shadow-offset-y) var(--ill-block09-shadow-blur) var(--ill-block09-shadow-spread) var(--ill-block09-shadow-color);
-  font-family: var(--ill-block09-font);
-  font-size: var(--ill-block09-size);
-  font-weight: var(--ill-block09-text-style-weight);
-  font-style: var(--ill-block09-text-style-slant);
-  font-variant: var(--ill-block09-caps-variant);
-  text-transform: var(--ill-block09-caps-transform);
-  letter-spacing: var(--ill-block09-letter-spacing);
-  line-height: var(--ill-block09-line-height);
-  text-align: var(--ill-block09-align);
-  color: var(--ill-block09-color, inherit);
+/* box09 */
+.illuminus-styled .journal-page-content .illuminus-box--box09 {
+  float: var(--ill-box09-float);
+  width: var(--ill-box09-width);
+  clear: var(--ill-box09-clear);
+  background-color: var(--ill-box09-background);
+  margin: var(--ill-box09-margin-top) var(--ill-box09-margin-right) var(--ill-box09-margin-bottom) var(--ill-box09-margin-left);
+  padding: var(--ill-box09-padding-top) var(--ill-box09-padding-right) var(--ill-box09-padding-bottom) var(--ill-box09-padding-left);
+  border-width: var(--ill-box09-border-top-width) var(--ill-box09-border-right-width) var(--ill-box09-border-bottom-width) var(--ill-box09-border-left-width);
+  border-style: var(--ill-box09-border-top-style) var(--ill-box09-border-right-style) var(--ill-box09-border-bottom-style) var(--ill-box09-border-left-style);
+  border-color: var(--ill-box09-border-top-color) var(--ill-box09-border-right-color) var(--ill-box09-border-bottom-color) var(--ill-box09-border-left-color);
+  border-radius: var(--ill-box09-corner-top-left) var(--ill-box09-corner-top-right) var(--ill-box09-corner-bottom-right) var(--ill-box09-corner-bottom-left);
+  box-shadow: var(--ill-box09-shadow-offset-x) var(--ill-box09-shadow-offset-y) var(--ill-box09-shadow-blur) var(--ill-box09-shadow-spread) var(--ill-box09-shadow-color);
+  font-family: var(--ill-box09-font);
+  font-size: var(--ill-box09-size);
+  font-weight: var(--ill-box09-text-style-weight);
+  font-style: var(--ill-box09-text-style-slant);
+  font-variant: var(--ill-box09-caps-variant);
+  text-transform: var(--ill-box09-caps-transform);
+  letter-spacing: var(--ill-box09-letter-spacing);
+  line-height: var(--ill-box09-line-height);
+  text-align: var(--ill-box09-align);
+  color: var(--ill-box09-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block09 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block09-heading-font);
-  font-size: var(--ill-block09-heading-size);
-  font-weight: var(--ill-block09-heading-text-style-weight);
-  font-style: var(--ill-block09-heading-text-style-slant);
-  font-variant: var(--ill-block09-heading-caps-variant);
-  text-transform: var(--ill-block09-heading-caps-transform);
-  text-align: var(--ill-block09-heading-align);
-  color: var(--ill-block09-heading-color, inherit);
-  margin-top: var(--ill-block09-heading-margin-top);
-  margin-bottom: var(--ill-block09-heading-margin-bottom);
-  border-top-width: var(--ill-block09-heading-rule-width);
-  border-top-style: var(--ill-block09-heading-rule-style);
-  border-top-color: var(--ill-block09-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box09 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box09-heading-font);
+  font-size: var(--ill-box09-heading-size);
+  font-weight: var(--ill-box09-heading-text-style-weight);
+  font-style: var(--ill-box09-heading-text-style-slant);
+  font-variant: var(--ill-box09-heading-caps-variant);
+  text-transform: var(--ill-box09-heading-caps-transform);
+  text-align: var(--ill-box09-heading-align);
+  color: var(--ill-box09-heading-color, inherit);
+  margin-top: var(--ill-box09-heading-margin-top);
+  margin-bottom: var(--ill-box09-heading-margin-bottom);
+  border-top-width: var(--ill-box09-heading-rule-width);
+  border-top-style: var(--ill-box09-heading-rule-style);
+  border-top-color: var(--ill-box09-heading-rule-color);
 }
 
-/* block10 */
-.illuminus-styled .journal-page-content .illuminus-block--block10 {
-  float: var(--ill-block10-float);
-  width: var(--ill-block10-width);
-  clear: var(--ill-block10-clear);
-  background-color: var(--ill-block10-background);
-  margin: var(--ill-block10-margin-top) var(--ill-block10-margin-right) var(--ill-block10-margin-bottom) var(--ill-block10-margin-left);
-  padding: var(--ill-block10-padding-top) var(--ill-block10-padding-right) var(--ill-block10-padding-bottom) var(--ill-block10-padding-left);
-  border-width: var(--ill-block10-border-top-width) var(--ill-block10-border-right-width) var(--ill-block10-border-bottom-width) var(--ill-block10-border-left-width);
-  border-style: var(--ill-block10-border-top-style) var(--ill-block10-border-right-style) var(--ill-block10-border-bottom-style) var(--ill-block10-border-left-style);
-  border-color: var(--ill-block10-border-top-color) var(--ill-block10-border-right-color) var(--ill-block10-border-bottom-color) var(--ill-block10-border-left-color);
-  border-radius: var(--ill-block10-corner-top-left) var(--ill-block10-corner-top-right) var(--ill-block10-corner-bottom-right) var(--ill-block10-corner-bottom-left);
-  box-shadow: var(--ill-block10-shadow-offset-x) var(--ill-block10-shadow-offset-y) var(--ill-block10-shadow-blur) var(--ill-block10-shadow-spread) var(--ill-block10-shadow-color);
-  font-family: var(--ill-block10-font);
-  font-size: var(--ill-block10-size);
-  font-weight: var(--ill-block10-text-style-weight);
-  font-style: var(--ill-block10-text-style-slant);
-  font-variant: var(--ill-block10-caps-variant);
-  text-transform: var(--ill-block10-caps-transform);
-  letter-spacing: var(--ill-block10-letter-spacing);
-  line-height: var(--ill-block10-line-height);
-  text-align: var(--ill-block10-align);
-  color: var(--ill-block10-color, inherit);
+/* box10 */
+.illuminus-styled .journal-page-content .illuminus-box--box10 {
+  float: var(--ill-box10-float);
+  width: var(--ill-box10-width);
+  clear: var(--ill-box10-clear);
+  background-color: var(--ill-box10-background);
+  margin: var(--ill-box10-margin-top) var(--ill-box10-margin-right) var(--ill-box10-margin-bottom) var(--ill-box10-margin-left);
+  padding: var(--ill-box10-padding-top) var(--ill-box10-padding-right) var(--ill-box10-padding-bottom) var(--ill-box10-padding-left);
+  border-width: var(--ill-box10-border-top-width) var(--ill-box10-border-right-width) var(--ill-box10-border-bottom-width) var(--ill-box10-border-left-width);
+  border-style: var(--ill-box10-border-top-style) var(--ill-box10-border-right-style) var(--ill-box10-border-bottom-style) var(--ill-box10-border-left-style);
+  border-color: var(--ill-box10-border-top-color) var(--ill-box10-border-right-color) var(--ill-box10-border-bottom-color) var(--ill-box10-border-left-color);
+  border-radius: var(--ill-box10-corner-top-left) var(--ill-box10-corner-top-right) var(--ill-box10-corner-bottom-right) var(--ill-box10-corner-bottom-left);
+  box-shadow: var(--ill-box10-shadow-offset-x) var(--ill-box10-shadow-offset-y) var(--ill-box10-shadow-blur) var(--ill-box10-shadow-spread) var(--ill-box10-shadow-color);
+  font-family: var(--ill-box10-font);
+  font-size: var(--ill-box10-size);
+  font-weight: var(--ill-box10-text-style-weight);
+  font-style: var(--ill-box10-text-style-slant);
+  font-variant: var(--ill-box10-caps-variant);
+  text-transform: var(--ill-box10-caps-transform);
+  letter-spacing: var(--ill-box10-letter-spacing);
+  line-height: var(--ill-box10-line-height);
+  text-align: var(--ill-box10-align);
+  color: var(--ill-box10-color, inherit);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block10 :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--ill-block10-heading-font);
-  font-size: var(--ill-block10-heading-size);
-  font-weight: var(--ill-block10-heading-text-style-weight);
-  font-style: var(--ill-block10-heading-text-style-slant);
-  font-variant: var(--ill-block10-heading-caps-variant);
-  text-transform: var(--ill-block10-heading-caps-transform);
-  text-align: var(--ill-block10-heading-align);
-  color: var(--ill-block10-heading-color, inherit);
-  margin-top: var(--ill-block10-heading-margin-top);
-  margin-bottom: var(--ill-block10-heading-margin-bottom);
-  border-top-width: var(--ill-block10-heading-rule-width);
-  border-top-style: var(--ill-block10-heading-rule-style);
-  border-top-color: var(--ill-block10-heading-rule-color);
+.illuminus-styled .journal-page-content .illuminus-box--box10 :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ill-box10-heading-font);
+  font-size: var(--ill-box10-heading-size);
+  font-weight: var(--ill-box10-heading-text-style-weight);
+  font-style: var(--ill-box10-heading-text-style-slant);
+  font-variant: var(--ill-box10-heading-caps-variant);
+  text-transform: var(--ill-box10-heading-caps-transform);
+  text-align: var(--ill-box10-heading-align);
+  color: var(--ill-box10-heading-color, inherit);
+  margin-top: var(--ill-box10-heading-margin-top);
+  margin-bottom: var(--ill-box10-heading-margin-bottom);
+  border-top-width: var(--ill-box10-heading-rule-width);
+  border-top-style: var(--ill-box10-heading-rule-style);
+  border-top-color: var(--ill-box10-heading-rule-color);
 }
 
-/* picture01 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture01 {
-  float: var(--ill-picture01-float);
-  width: var(--ill-picture01-width);
-  clear: var(--ill-picture01-clear);
-  background-color: var(--ill-picture01-background);
-  margin-top: var(--ill-picture01-margin-top);
-  margin-bottom: var(--ill-picture01-margin-bottom);
+/* image01 */
+.illuminus-styled .journal-page-content .illuminus-image--image01 {
+  float: var(--ill-image01-float);
+  width: var(--ill-image01-width);
+  clear: var(--ill-image01-clear);
+  background-color: var(--ill-image01-background);
+  margin-top: var(--ill-image01-margin-top);
+  margin-bottom: var(--ill-image01-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture01-align-left);
-  margin-right: var(--ill-picture01-align-right);
-  padding: var(--ill-picture01-padding-top) var(--ill-picture01-padding-right) var(--ill-picture01-padding-bottom) var(--ill-picture01-padding-left);
-  border-width: var(--ill-picture01-border-top-width) var(--ill-picture01-border-right-width) var(--ill-picture01-border-bottom-width) var(--ill-picture01-border-left-width);
-  border-style: var(--ill-picture01-border-top-style) var(--ill-picture01-border-right-style) var(--ill-picture01-border-bottom-style) var(--ill-picture01-border-left-style);
-  border-color: var(--ill-picture01-border-top-color) var(--ill-picture01-border-right-color) var(--ill-picture01-border-bottom-color) var(--ill-picture01-border-left-color);
-  border-radius: var(--ill-picture01-corner-top-left) var(--ill-picture01-corner-top-right) var(--ill-picture01-corner-bottom-right) var(--ill-picture01-corner-bottom-left);
-  box-shadow: var(--ill-picture01-shadow-offset-x) var(--ill-picture01-shadow-offset-y) var(--ill-picture01-shadow-blur) var(--ill-picture01-shadow-spread) var(--ill-picture01-shadow-color);
+  margin-left: var(--ill-image01-align-left);
+  margin-right: var(--ill-image01-align-right);
+  padding: var(--ill-image01-padding-top) var(--ill-image01-padding-right) var(--ill-image01-padding-bottom) var(--ill-image01-padding-left);
+  border-width: var(--ill-image01-border-top-width) var(--ill-image01-border-right-width) var(--ill-image01-border-bottom-width) var(--ill-image01-border-left-width);
+  border-style: var(--ill-image01-border-top-style) var(--ill-image01-border-right-style) var(--ill-image01-border-bottom-style) var(--ill-image01-border-left-style);
+  border-color: var(--ill-image01-border-top-color) var(--ill-image01-border-right-color) var(--ill-image01-border-bottom-color) var(--ill-image01-border-left-color);
+  border-radius: var(--ill-image01-corner-top-left) var(--ill-image01-corner-top-right) var(--ill-image01-corner-bottom-right) var(--ill-image01-corner-bottom-left);
+  box-shadow: var(--ill-image01-shadow-offset-x) var(--ill-image01-shadow-offset-y) var(--ill-image01-shadow-blur) var(--ill-image01-shadow-spread) var(--ill-image01-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture01 img {
+.illuminus-styled .journal-page-content .illuminus-image--image01 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture01-flip);
-  opacity: var(--ill-picture01-opacity);
+  transform: var(--ill-image01-flip);
+  opacity: var(--ill-image01-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -647,41 +647,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture01 figcaption {
-  font-family: var(--ill-picture01-caption-font);
-  font-size: var(--ill-picture01-caption-size);
-  font-weight: var(--ill-picture01-caption-text-style-weight);
-  font-style: var(--ill-picture01-caption-text-style-slant);
-  text-align: var(--ill-picture01-caption-align);
-  color: var(--ill-picture01-caption-color, inherit);
-  margin-top: var(--ill-picture01-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image01 figcaption {
+  font-family: var(--ill-image01-caption-font);
+  font-size: var(--ill-image01-caption-size);
+  font-weight: var(--ill-image01-caption-text-style-weight);
+  font-style: var(--ill-image01-caption-text-style-slant);
+  text-align: var(--ill-image01-caption-align);
+  color: var(--ill-image01-caption-color, inherit);
+  margin-top: var(--ill-image01-caption-spacing);
 }
 
-/* picture02 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture02 {
-  float: var(--ill-picture02-float);
-  width: var(--ill-picture02-width);
-  clear: var(--ill-picture02-clear);
-  background-color: var(--ill-picture02-background);
-  margin-top: var(--ill-picture02-margin-top);
-  margin-bottom: var(--ill-picture02-margin-bottom);
+/* image02 */
+.illuminus-styled .journal-page-content .illuminus-image--image02 {
+  float: var(--ill-image02-float);
+  width: var(--ill-image02-width);
+  clear: var(--ill-image02-clear);
+  background-color: var(--ill-image02-background);
+  margin-top: var(--ill-image02-margin-top);
+  margin-bottom: var(--ill-image02-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture02-align-left);
-  margin-right: var(--ill-picture02-align-right);
-  padding: var(--ill-picture02-padding-top) var(--ill-picture02-padding-right) var(--ill-picture02-padding-bottom) var(--ill-picture02-padding-left);
-  border-width: var(--ill-picture02-border-top-width) var(--ill-picture02-border-right-width) var(--ill-picture02-border-bottom-width) var(--ill-picture02-border-left-width);
-  border-style: var(--ill-picture02-border-top-style) var(--ill-picture02-border-right-style) var(--ill-picture02-border-bottom-style) var(--ill-picture02-border-left-style);
-  border-color: var(--ill-picture02-border-top-color) var(--ill-picture02-border-right-color) var(--ill-picture02-border-bottom-color) var(--ill-picture02-border-left-color);
-  border-radius: var(--ill-picture02-corner-top-left) var(--ill-picture02-corner-top-right) var(--ill-picture02-corner-bottom-right) var(--ill-picture02-corner-bottom-left);
-  box-shadow: var(--ill-picture02-shadow-offset-x) var(--ill-picture02-shadow-offset-y) var(--ill-picture02-shadow-blur) var(--ill-picture02-shadow-spread) var(--ill-picture02-shadow-color);
+  margin-left: var(--ill-image02-align-left);
+  margin-right: var(--ill-image02-align-right);
+  padding: var(--ill-image02-padding-top) var(--ill-image02-padding-right) var(--ill-image02-padding-bottom) var(--ill-image02-padding-left);
+  border-width: var(--ill-image02-border-top-width) var(--ill-image02-border-right-width) var(--ill-image02-border-bottom-width) var(--ill-image02-border-left-width);
+  border-style: var(--ill-image02-border-top-style) var(--ill-image02-border-right-style) var(--ill-image02-border-bottom-style) var(--ill-image02-border-left-style);
+  border-color: var(--ill-image02-border-top-color) var(--ill-image02-border-right-color) var(--ill-image02-border-bottom-color) var(--ill-image02-border-left-color);
+  border-radius: var(--ill-image02-corner-top-left) var(--ill-image02-corner-top-right) var(--ill-image02-corner-bottom-right) var(--ill-image02-corner-bottom-left);
+  box-shadow: var(--ill-image02-shadow-offset-x) var(--ill-image02-shadow-offset-y) var(--ill-image02-shadow-blur) var(--ill-image02-shadow-spread) var(--ill-image02-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture02 img {
+.illuminus-styled .journal-page-content .illuminus-image--image02 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture02-flip);
-  opacity: var(--ill-picture02-opacity);
+  transform: var(--ill-image02-flip);
+  opacity: var(--ill-image02-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -691,41 +691,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture02 figcaption {
-  font-family: var(--ill-picture02-caption-font);
-  font-size: var(--ill-picture02-caption-size);
-  font-weight: var(--ill-picture02-caption-text-style-weight);
-  font-style: var(--ill-picture02-caption-text-style-slant);
-  text-align: var(--ill-picture02-caption-align);
-  color: var(--ill-picture02-caption-color, inherit);
-  margin-top: var(--ill-picture02-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image02 figcaption {
+  font-family: var(--ill-image02-caption-font);
+  font-size: var(--ill-image02-caption-size);
+  font-weight: var(--ill-image02-caption-text-style-weight);
+  font-style: var(--ill-image02-caption-text-style-slant);
+  text-align: var(--ill-image02-caption-align);
+  color: var(--ill-image02-caption-color, inherit);
+  margin-top: var(--ill-image02-caption-spacing);
 }
 
-/* picture03 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture03 {
-  float: var(--ill-picture03-float);
-  width: var(--ill-picture03-width);
-  clear: var(--ill-picture03-clear);
-  background-color: var(--ill-picture03-background);
-  margin-top: var(--ill-picture03-margin-top);
-  margin-bottom: var(--ill-picture03-margin-bottom);
+/* image03 */
+.illuminus-styled .journal-page-content .illuminus-image--image03 {
+  float: var(--ill-image03-float);
+  width: var(--ill-image03-width);
+  clear: var(--ill-image03-clear);
+  background-color: var(--ill-image03-background);
+  margin-top: var(--ill-image03-margin-top);
+  margin-bottom: var(--ill-image03-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture03-align-left);
-  margin-right: var(--ill-picture03-align-right);
-  padding: var(--ill-picture03-padding-top) var(--ill-picture03-padding-right) var(--ill-picture03-padding-bottom) var(--ill-picture03-padding-left);
-  border-width: var(--ill-picture03-border-top-width) var(--ill-picture03-border-right-width) var(--ill-picture03-border-bottom-width) var(--ill-picture03-border-left-width);
-  border-style: var(--ill-picture03-border-top-style) var(--ill-picture03-border-right-style) var(--ill-picture03-border-bottom-style) var(--ill-picture03-border-left-style);
-  border-color: var(--ill-picture03-border-top-color) var(--ill-picture03-border-right-color) var(--ill-picture03-border-bottom-color) var(--ill-picture03-border-left-color);
-  border-radius: var(--ill-picture03-corner-top-left) var(--ill-picture03-corner-top-right) var(--ill-picture03-corner-bottom-right) var(--ill-picture03-corner-bottom-left);
-  box-shadow: var(--ill-picture03-shadow-offset-x) var(--ill-picture03-shadow-offset-y) var(--ill-picture03-shadow-blur) var(--ill-picture03-shadow-spread) var(--ill-picture03-shadow-color);
+  margin-left: var(--ill-image03-align-left);
+  margin-right: var(--ill-image03-align-right);
+  padding: var(--ill-image03-padding-top) var(--ill-image03-padding-right) var(--ill-image03-padding-bottom) var(--ill-image03-padding-left);
+  border-width: var(--ill-image03-border-top-width) var(--ill-image03-border-right-width) var(--ill-image03-border-bottom-width) var(--ill-image03-border-left-width);
+  border-style: var(--ill-image03-border-top-style) var(--ill-image03-border-right-style) var(--ill-image03-border-bottom-style) var(--ill-image03-border-left-style);
+  border-color: var(--ill-image03-border-top-color) var(--ill-image03-border-right-color) var(--ill-image03-border-bottom-color) var(--ill-image03-border-left-color);
+  border-radius: var(--ill-image03-corner-top-left) var(--ill-image03-corner-top-right) var(--ill-image03-corner-bottom-right) var(--ill-image03-corner-bottom-left);
+  box-shadow: var(--ill-image03-shadow-offset-x) var(--ill-image03-shadow-offset-y) var(--ill-image03-shadow-blur) var(--ill-image03-shadow-spread) var(--ill-image03-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture03 img {
+.illuminus-styled .journal-page-content .illuminus-image--image03 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture03-flip);
-  opacity: var(--ill-picture03-opacity);
+  transform: var(--ill-image03-flip);
+  opacity: var(--ill-image03-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -735,41 +735,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture03 figcaption {
-  font-family: var(--ill-picture03-caption-font);
-  font-size: var(--ill-picture03-caption-size);
-  font-weight: var(--ill-picture03-caption-text-style-weight);
-  font-style: var(--ill-picture03-caption-text-style-slant);
-  text-align: var(--ill-picture03-caption-align);
-  color: var(--ill-picture03-caption-color, inherit);
-  margin-top: var(--ill-picture03-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image03 figcaption {
+  font-family: var(--ill-image03-caption-font);
+  font-size: var(--ill-image03-caption-size);
+  font-weight: var(--ill-image03-caption-text-style-weight);
+  font-style: var(--ill-image03-caption-text-style-slant);
+  text-align: var(--ill-image03-caption-align);
+  color: var(--ill-image03-caption-color, inherit);
+  margin-top: var(--ill-image03-caption-spacing);
 }
 
-/* picture04 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture04 {
-  float: var(--ill-picture04-float);
-  width: var(--ill-picture04-width);
-  clear: var(--ill-picture04-clear);
-  background-color: var(--ill-picture04-background);
-  margin-top: var(--ill-picture04-margin-top);
-  margin-bottom: var(--ill-picture04-margin-bottom);
+/* image04 */
+.illuminus-styled .journal-page-content .illuminus-image--image04 {
+  float: var(--ill-image04-float);
+  width: var(--ill-image04-width);
+  clear: var(--ill-image04-clear);
+  background-color: var(--ill-image04-background);
+  margin-top: var(--ill-image04-margin-top);
+  margin-bottom: var(--ill-image04-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture04-align-left);
-  margin-right: var(--ill-picture04-align-right);
-  padding: var(--ill-picture04-padding-top) var(--ill-picture04-padding-right) var(--ill-picture04-padding-bottom) var(--ill-picture04-padding-left);
-  border-width: var(--ill-picture04-border-top-width) var(--ill-picture04-border-right-width) var(--ill-picture04-border-bottom-width) var(--ill-picture04-border-left-width);
-  border-style: var(--ill-picture04-border-top-style) var(--ill-picture04-border-right-style) var(--ill-picture04-border-bottom-style) var(--ill-picture04-border-left-style);
-  border-color: var(--ill-picture04-border-top-color) var(--ill-picture04-border-right-color) var(--ill-picture04-border-bottom-color) var(--ill-picture04-border-left-color);
-  border-radius: var(--ill-picture04-corner-top-left) var(--ill-picture04-corner-top-right) var(--ill-picture04-corner-bottom-right) var(--ill-picture04-corner-bottom-left);
-  box-shadow: var(--ill-picture04-shadow-offset-x) var(--ill-picture04-shadow-offset-y) var(--ill-picture04-shadow-blur) var(--ill-picture04-shadow-spread) var(--ill-picture04-shadow-color);
+  margin-left: var(--ill-image04-align-left);
+  margin-right: var(--ill-image04-align-right);
+  padding: var(--ill-image04-padding-top) var(--ill-image04-padding-right) var(--ill-image04-padding-bottom) var(--ill-image04-padding-left);
+  border-width: var(--ill-image04-border-top-width) var(--ill-image04-border-right-width) var(--ill-image04-border-bottom-width) var(--ill-image04-border-left-width);
+  border-style: var(--ill-image04-border-top-style) var(--ill-image04-border-right-style) var(--ill-image04-border-bottom-style) var(--ill-image04-border-left-style);
+  border-color: var(--ill-image04-border-top-color) var(--ill-image04-border-right-color) var(--ill-image04-border-bottom-color) var(--ill-image04-border-left-color);
+  border-radius: var(--ill-image04-corner-top-left) var(--ill-image04-corner-top-right) var(--ill-image04-corner-bottom-right) var(--ill-image04-corner-bottom-left);
+  box-shadow: var(--ill-image04-shadow-offset-x) var(--ill-image04-shadow-offset-y) var(--ill-image04-shadow-blur) var(--ill-image04-shadow-spread) var(--ill-image04-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture04 img {
+.illuminus-styled .journal-page-content .illuminus-image--image04 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture04-flip);
-  opacity: var(--ill-picture04-opacity);
+  transform: var(--ill-image04-flip);
+  opacity: var(--ill-image04-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -779,41 +779,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture04 figcaption {
-  font-family: var(--ill-picture04-caption-font);
-  font-size: var(--ill-picture04-caption-size);
-  font-weight: var(--ill-picture04-caption-text-style-weight);
-  font-style: var(--ill-picture04-caption-text-style-slant);
-  text-align: var(--ill-picture04-caption-align);
-  color: var(--ill-picture04-caption-color, inherit);
-  margin-top: var(--ill-picture04-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image04 figcaption {
+  font-family: var(--ill-image04-caption-font);
+  font-size: var(--ill-image04-caption-size);
+  font-weight: var(--ill-image04-caption-text-style-weight);
+  font-style: var(--ill-image04-caption-text-style-slant);
+  text-align: var(--ill-image04-caption-align);
+  color: var(--ill-image04-caption-color, inherit);
+  margin-top: var(--ill-image04-caption-spacing);
 }
 
-/* picture05 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture05 {
-  float: var(--ill-picture05-float);
-  width: var(--ill-picture05-width);
-  clear: var(--ill-picture05-clear);
-  background-color: var(--ill-picture05-background);
-  margin-top: var(--ill-picture05-margin-top);
-  margin-bottom: var(--ill-picture05-margin-bottom);
+/* image05 */
+.illuminus-styled .journal-page-content .illuminus-image--image05 {
+  float: var(--ill-image05-float);
+  width: var(--ill-image05-width);
+  clear: var(--ill-image05-clear);
+  background-color: var(--ill-image05-background);
+  margin-top: var(--ill-image05-margin-top);
+  margin-bottom: var(--ill-image05-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture05-align-left);
-  margin-right: var(--ill-picture05-align-right);
-  padding: var(--ill-picture05-padding-top) var(--ill-picture05-padding-right) var(--ill-picture05-padding-bottom) var(--ill-picture05-padding-left);
-  border-width: var(--ill-picture05-border-top-width) var(--ill-picture05-border-right-width) var(--ill-picture05-border-bottom-width) var(--ill-picture05-border-left-width);
-  border-style: var(--ill-picture05-border-top-style) var(--ill-picture05-border-right-style) var(--ill-picture05-border-bottom-style) var(--ill-picture05-border-left-style);
-  border-color: var(--ill-picture05-border-top-color) var(--ill-picture05-border-right-color) var(--ill-picture05-border-bottom-color) var(--ill-picture05-border-left-color);
-  border-radius: var(--ill-picture05-corner-top-left) var(--ill-picture05-corner-top-right) var(--ill-picture05-corner-bottom-right) var(--ill-picture05-corner-bottom-left);
-  box-shadow: var(--ill-picture05-shadow-offset-x) var(--ill-picture05-shadow-offset-y) var(--ill-picture05-shadow-blur) var(--ill-picture05-shadow-spread) var(--ill-picture05-shadow-color);
+  margin-left: var(--ill-image05-align-left);
+  margin-right: var(--ill-image05-align-right);
+  padding: var(--ill-image05-padding-top) var(--ill-image05-padding-right) var(--ill-image05-padding-bottom) var(--ill-image05-padding-left);
+  border-width: var(--ill-image05-border-top-width) var(--ill-image05-border-right-width) var(--ill-image05-border-bottom-width) var(--ill-image05-border-left-width);
+  border-style: var(--ill-image05-border-top-style) var(--ill-image05-border-right-style) var(--ill-image05-border-bottom-style) var(--ill-image05-border-left-style);
+  border-color: var(--ill-image05-border-top-color) var(--ill-image05-border-right-color) var(--ill-image05-border-bottom-color) var(--ill-image05-border-left-color);
+  border-radius: var(--ill-image05-corner-top-left) var(--ill-image05-corner-top-right) var(--ill-image05-corner-bottom-right) var(--ill-image05-corner-bottom-left);
+  box-shadow: var(--ill-image05-shadow-offset-x) var(--ill-image05-shadow-offset-y) var(--ill-image05-shadow-blur) var(--ill-image05-shadow-spread) var(--ill-image05-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture05 img {
+.illuminus-styled .journal-page-content .illuminus-image--image05 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture05-flip);
-  opacity: var(--ill-picture05-opacity);
+  transform: var(--ill-image05-flip);
+  opacity: var(--ill-image05-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -823,41 +823,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture05 figcaption {
-  font-family: var(--ill-picture05-caption-font);
-  font-size: var(--ill-picture05-caption-size);
-  font-weight: var(--ill-picture05-caption-text-style-weight);
-  font-style: var(--ill-picture05-caption-text-style-slant);
-  text-align: var(--ill-picture05-caption-align);
-  color: var(--ill-picture05-caption-color, inherit);
-  margin-top: var(--ill-picture05-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image05 figcaption {
+  font-family: var(--ill-image05-caption-font);
+  font-size: var(--ill-image05-caption-size);
+  font-weight: var(--ill-image05-caption-text-style-weight);
+  font-style: var(--ill-image05-caption-text-style-slant);
+  text-align: var(--ill-image05-caption-align);
+  color: var(--ill-image05-caption-color, inherit);
+  margin-top: var(--ill-image05-caption-spacing);
 }
 
-/* picture06 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture06 {
-  float: var(--ill-picture06-float);
-  width: var(--ill-picture06-width);
-  clear: var(--ill-picture06-clear);
-  background-color: var(--ill-picture06-background);
-  margin-top: var(--ill-picture06-margin-top);
-  margin-bottom: var(--ill-picture06-margin-bottom);
+/* image06 */
+.illuminus-styled .journal-page-content .illuminus-image--image06 {
+  float: var(--ill-image06-float);
+  width: var(--ill-image06-width);
+  clear: var(--ill-image06-clear);
+  background-color: var(--ill-image06-background);
+  margin-top: var(--ill-image06-margin-top);
+  margin-bottom: var(--ill-image06-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture06-align-left);
-  margin-right: var(--ill-picture06-align-right);
-  padding: var(--ill-picture06-padding-top) var(--ill-picture06-padding-right) var(--ill-picture06-padding-bottom) var(--ill-picture06-padding-left);
-  border-width: var(--ill-picture06-border-top-width) var(--ill-picture06-border-right-width) var(--ill-picture06-border-bottom-width) var(--ill-picture06-border-left-width);
-  border-style: var(--ill-picture06-border-top-style) var(--ill-picture06-border-right-style) var(--ill-picture06-border-bottom-style) var(--ill-picture06-border-left-style);
-  border-color: var(--ill-picture06-border-top-color) var(--ill-picture06-border-right-color) var(--ill-picture06-border-bottom-color) var(--ill-picture06-border-left-color);
-  border-radius: var(--ill-picture06-corner-top-left) var(--ill-picture06-corner-top-right) var(--ill-picture06-corner-bottom-right) var(--ill-picture06-corner-bottom-left);
-  box-shadow: var(--ill-picture06-shadow-offset-x) var(--ill-picture06-shadow-offset-y) var(--ill-picture06-shadow-blur) var(--ill-picture06-shadow-spread) var(--ill-picture06-shadow-color);
+  margin-left: var(--ill-image06-align-left);
+  margin-right: var(--ill-image06-align-right);
+  padding: var(--ill-image06-padding-top) var(--ill-image06-padding-right) var(--ill-image06-padding-bottom) var(--ill-image06-padding-left);
+  border-width: var(--ill-image06-border-top-width) var(--ill-image06-border-right-width) var(--ill-image06-border-bottom-width) var(--ill-image06-border-left-width);
+  border-style: var(--ill-image06-border-top-style) var(--ill-image06-border-right-style) var(--ill-image06-border-bottom-style) var(--ill-image06-border-left-style);
+  border-color: var(--ill-image06-border-top-color) var(--ill-image06-border-right-color) var(--ill-image06-border-bottom-color) var(--ill-image06-border-left-color);
+  border-radius: var(--ill-image06-corner-top-left) var(--ill-image06-corner-top-right) var(--ill-image06-corner-bottom-right) var(--ill-image06-corner-bottom-left);
+  box-shadow: var(--ill-image06-shadow-offset-x) var(--ill-image06-shadow-offset-y) var(--ill-image06-shadow-blur) var(--ill-image06-shadow-spread) var(--ill-image06-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture06 img {
+.illuminus-styled .journal-page-content .illuminus-image--image06 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture06-flip);
-  opacity: var(--ill-picture06-opacity);
+  transform: var(--ill-image06-flip);
+  opacity: var(--ill-image06-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -867,41 +867,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture06 figcaption {
-  font-family: var(--ill-picture06-caption-font);
-  font-size: var(--ill-picture06-caption-size);
-  font-weight: var(--ill-picture06-caption-text-style-weight);
-  font-style: var(--ill-picture06-caption-text-style-slant);
-  text-align: var(--ill-picture06-caption-align);
-  color: var(--ill-picture06-caption-color, inherit);
-  margin-top: var(--ill-picture06-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image06 figcaption {
+  font-family: var(--ill-image06-caption-font);
+  font-size: var(--ill-image06-caption-size);
+  font-weight: var(--ill-image06-caption-text-style-weight);
+  font-style: var(--ill-image06-caption-text-style-slant);
+  text-align: var(--ill-image06-caption-align);
+  color: var(--ill-image06-caption-color, inherit);
+  margin-top: var(--ill-image06-caption-spacing);
 }
 
-/* picture07 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture07 {
-  float: var(--ill-picture07-float);
-  width: var(--ill-picture07-width);
-  clear: var(--ill-picture07-clear);
-  background-color: var(--ill-picture07-background);
-  margin-top: var(--ill-picture07-margin-top);
-  margin-bottom: var(--ill-picture07-margin-bottom);
+/* image07 */
+.illuminus-styled .journal-page-content .illuminus-image--image07 {
+  float: var(--ill-image07-float);
+  width: var(--ill-image07-width);
+  clear: var(--ill-image07-clear);
+  background-color: var(--ill-image07-background);
+  margin-top: var(--ill-image07-margin-top);
+  margin-bottom: var(--ill-image07-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture07-align-left);
-  margin-right: var(--ill-picture07-align-right);
-  padding: var(--ill-picture07-padding-top) var(--ill-picture07-padding-right) var(--ill-picture07-padding-bottom) var(--ill-picture07-padding-left);
-  border-width: var(--ill-picture07-border-top-width) var(--ill-picture07-border-right-width) var(--ill-picture07-border-bottom-width) var(--ill-picture07-border-left-width);
-  border-style: var(--ill-picture07-border-top-style) var(--ill-picture07-border-right-style) var(--ill-picture07-border-bottom-style) var(--ill-picture07-border-left-style);
-  border-color: var(--ill-picture07-border-top-color) var(--ill-picture07-border-right-color) var(--ill-picture07-border-bottom-color) var(--ill-picture07-border-left-color);
-  border-radius: var(--ill-picture07-corner-top-left) var(--ill-picture07-corner-top-right) var(--ill-picture07-corner-bottom-right) var(--ill-picture07-corner-bottom-left);
-  box-shadow: var(--ill-picture07-shadow-offset-x) var(--ill-picture07-shadow-offset-y) var(--ill-picture07-shadow-blur) var(--ill-picture07-shadow-spread) var(--ill-picture07-shadow-color);
+  margin-left: var(--ill-image07-align-left);
+  margin-right: var(--ill-image07-align-right);
+  padding: var(--ill-image07-padding-top) var(--ill-image07-padding-right) var(--ill-image07-padding-bottom) var(--ill-image07-padding-left);
+  border-width: var(--ill-image07-border-top-width) var(--ill-image07-border-right-width) var(--ill-image07-border-bottom-width) var(--ill-image07-border-left-width);
+  border-style: var(--ill-image07-border-top-style) var(--ill-image07-border-right-style) var(--ill-image07-border-bottom-style) var(--ill-image07-border-left-style);
+  border-color: var(--ill-image07-border-top-color) var(--ill-image07-border-right-color) var(--ill-image07-border-bottom-color) var(--ill-image07-border-left-color);
+  border-radius: var(--ill-image07-corner-top-left) var(--ill-image07-corner-top-right) var(--ill-image07-corner-bottom-right) var(--ill-image07-corner-bottom-left);
+  box-shadow: var(--ill-image07-shadow-offset-x) var(--ill-image07-shadow-offset-y) var(--ill-image07-shadow-blur) var(--ill-image07-shadow-spread) var(--ill-image07-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture07 img {
+.illuminus-styled .journal-page-content .illuminus-image--image07 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture07-flip);
-  opacity: var(--ill-picture07-opacity);
+  transform: var(--ill-image07-flip);
+  opacity: var(--ill-image07-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -911,41 +911,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture07 figcaption {
-  font-family: var(--ill-picture07-caption-font);
-  font-size: var(--ill-picture07-caption-size);
-  font-weight: var(--ill-picture07-caption-text-style-weight);
-  font-style: var(--ill-picture07-caption-text-style-slant);
-  text-align: var(--ill-picture07-caption-align);
-  color: var(--ill-picture07-caption-color, inherit);
-  margin-top: var(--ill-picture07-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image07 figcaption {
+  font-family: var(--ill-image07-caption-font);
+  font-size: var(--ill-image07-caption-size);
+  font-weight: var(--ill-image07-caption-text-style-weight);
+  font-style: var(--ill-image07-caption-text-style-slant);
+  text-align: var(--ill-image07-caption-align);
+  color: var(--ill-image07-caption-color, inherit);
+  margin-top: var(--ill-image07-caption-spacing);
 }
 
-/* picture08 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture08 {
-  float: var(--ill-picture08-float);
-  width: var(--ill-picture08-width);
-  clear: var(--ill-picture08-clear);
-  background-color: var(--ill-picture08-background);
-  margin-top: var(--ill-picture08-margin-top);
-  margin-bottom: var(--ill-picture08-margin-bottom);
+/* image08 */
+.illuminus-styled .journal-page-content .illuminus-image--image08 {
+  float: var(--ill-image08-float);
+  width: var(--ill-image08-width);
+  clear: var(--ill-image08-clear);
+  background-color: var(--ill-image08-background);
+  margin-top: var(--ill-image08-margin-top);
+  margin-bottom: var(--ill-image08-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture08-align-left);
-  margin-right: var(--ill-picture08-align-right);
-  padding: var(--ill-picture08-padding-top) var(--ill-picture08-padding-right) var(--ill-picture08-padding-bottom) var(--ill-picture08-padding-left);
-  border-width: var(--ill-picture08-border-top-width) var(--ill-picture08-border-right-width) var(--ill-picture08-border-bottom-width) var(--ill-picture08-border-left-width);
-  border-style: var(--ill-picture08-border-top-style) var(--ill-picture08-border-right-style) var(--ill-picture08-border-bottom-style) var(--ill-picture08-border-left-style);
-  border-color: var(--ill-picture08-border-top-color) var(--ill-picture08-border-right-color) var(--ill-picture08-border-bottom-color) var(--ill-picture08-border-left-color);
-  border-radius: var(--ill-picture08-corner-top-left) var(--ill-picture08-corner-top-right) var(--ill-picture08-corner-bottom-right) var(--ill-picture08-corner-bottom-left);
-  box-shadow: var(--ill-picture08-shadow-offset-x) var(--ill-picture08-shadow-offset-y) var(--ill-picture08-shadow-blur) var(--ill-picture08-shadow-spread) var(--ill-picture08-shadow-color);
+  margin-left: var(--ill-image08-align-left);
+  margin-right: var(--ill-image08-align-right);
+  padding: var(--ill-image08-padding-top) var(--ill-image08-padding-right) var(--ill-image08-padding-bottom) var(--ill-image08-padding-left);
+  border-width: var(--ill-image08-border-top-width) var(--ill-image08-border-right-width) var(--ill-image08-border-bottom-width) var(--ill-image08-border-left-width);
+  border-style: var(--ill-image08-border-top-style) var(--ill-image08-border-right-style) var(--ill-image08-border-bottom-style) var(--ill-image08-border-left-style);
+  border-color: var(--ill-image08-border-top-color) var(--ill-image08-border-right-color) var(--ill-image08-border-bottom-color) var(--ill-image08-border-left-color);
+  border-radius: var(--ill-image08-corner-top-left) var(--ill-image08-corner-top-right) var(--ill-image08-corner-bottom-right) var(--ill-image08-corner-bottom-left);
+  box-shadow: var(--ill-image08-shadow-offset-x) var(--ill-image08-shadow-offset-y) var(--ill-image08-shadow-blur) var(--ill-image08-shadow-spread) var(--ill-image08-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture08 img {
+.illuminus-styled .journal-page-content .illuminus-image--image08 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture08-flip);
-  opacity: var(--ill-picture08-opacity);
+  transform: var(--ill-image08-flip);
+  opacity: var(--ill-image08-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -955,41 +955,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture08 figcaption {
-  font-family: var(--ill-picture08-caption-font);
-  font-size: var(--ill-picture08-caption-size);
-  font-weight: var(--ill-picture08-caption-text-style-weight);
-  font-style: var(--ill-picture08-caption-text-style-slant);
-  text-align: var(--ill-picture08-caption-align);
-  color: var(--ill-picture08-caption-color, inherit);
-  margin-top: var(--ill-picture08-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image08 figcaption {
+  font-family: var(--ill-image08-caption-font);
+  font-size: var(--ill-image08-caption-size);
+  font-weight: var(--ill-image08-caption-text-style-weight);
+  font-style: var(--ill-image08-caption-text-style-slant);
+  text-align: var(--ill-image08-caption-align);
+  color: var(--ill-image08-caption-color, inherit);
+  margin-top: var(--ill-image08-caption-spacing);
 }
 
-/* picture09 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture09 {
-  float: var(--ill-picture09-float);
-  width: var(--ill-picture09-width);
-  clear: var(--ill-picture09-clear);
-  background-color: var(--ill-picture09-background);
-  margin-top: var(--ill-picture09-margin-top);
-  margin-bottom: var(--ill-picture09-margin-bottom);
+/* image09 */
+.illuminus-styled .journal-page-content .illuminus-image--image09 {
+  float: var(--ill-image09-float);
+  width: var(--ill-image09-width);
+  clear: var(--ill-image09-clear);
+  background-color: var(--ill-image09-background);
+  margin-top: var(--ill-image09-margin-top);
+  margin-bottom: var(--ill-image09-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture09-align-left);
-  margin-right: var(--ill-picture09-align-right);
-  padding: var(--ill-picture09-padding-top) var(--ill-picture09-padding-right) var(--ill-picture09-padding-bottom) var(--ill-picture09-padding-left);
-  border-width: var(--ill-picture09-border-top-width) var(--ill-picture09-border-right-width) var(--ill-picture09-border-bottom-width) var(--ill-picture09-border-left-width);
-  border-style: var(--ill-picture09-border-top-style) var(--ill-picture09-border-right-style) var(--ill-picture09-border-bottom-style) var(--ill-picture09-border-left-style);
-  border-color: var(--ill-picture09-border-top-color) var(--ill-picture09-border-right-color) var(--ill-picture09-border-bottom-color) var(--ill-picture09-border-left-color);
-  border-radius: var(--ill-picture09-corner-top-left) var(--ill-picture09-corner-top-right) var(--ill-picture09-corner-bottom-right) var(--ill-picture09-corner-bottom-left);
-  box-shadow: var(--ill-picture09-shadow-offset-x) var(--ill-picture09-shadow-offset-y) var(--ill-picture09-shadow-blur) var(--ill-picture09-shadow-spread) var(--ill-picture09-shadow-color);
+  margin-left: var(--ill-image09-align-left);
+  margin-right: var(--ill-image09-align-right);
+  padding: var(--ill-image09-padding-top) var(--ill-image09-padding-right) var(--ill-image09-padding-bottom) var(--ill-image09-padding-left);
+  border-width: var(--ill-image09-border-top-width) var(--ill-image09-border-right-width) var(--ill-image09-border-bottom-width) var(--ill-image09-border-left-width);
+  border-style: var(--ill-image09-border-top-style) var(--ill-image09-border-right-style) var(--ill-image09-border-bottom-style) var(--ill-image09-border-left-style);
+  border-color: var(--ill-image09-border-top-color) var(--ill-image09-border-right-color) var(--ill-image09-border-bottom-color) var(--ill-image09-border-left-color);
+  border-radius: var(--ill-image09-corner-top-left) var(--ill-image09-corner-top-right) var(--ill-image09-corner-bottom-right) var(--ill-image09-corner-bottom-left);
+  box-shadow: var(--ill-image09-shadow-offset-x) var(--ill-image09-shadow-offset-y) var(--ill-image09-shadow-blur) var(--ill-image09-shadow-spread) var(--ill-image09-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture09 img {
+.illuminus-styled .journal-page-content .illuminus-image--image09 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture09-flip);
-  opacity: var(--ill-picture09-opacity);
+  transform: var(--ill-image09-flip);
+  opacity: var(--ill-image09-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -999,41 +999,41 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture09 figcaption {
-  font-family: var(--ill-picture09-caption-font);
-  font-size: var(--ill-picture09-caption-size);
-  font-weight: var(--ill-picture09-caption-text-style-weight);
-  font-style: var(--ill-picture09-caption-text-style-slant);
-  text-align: var(--ill-picture09-caption-align);
-  color: var(--ill-picture09-caption-color, inherit);
-  margin-top: var(--ill-picture09-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image09 figcaption {
+  font-family: var(--ill-image09-caption-font);
+  font-size: var(--ill-image09-caption-size);
+  font-weight: var(--ill-image09-caption-text-style-weight);
+  font-style: var(--ill-image09-caption-text-style-slant);
+  text-align: var(--ill-image09-caption-align);
+  color: var(--ill-image09-caption-color, inherit);
+  margin-top: var(--ill-image09-caption-spacing);
 }
 
-/* picture10 */
-.illuminus-styled .journal-page-content .illuminus-picture--picture10 {
-  float: var(--ill-picture10-float);
-  width: var(--ill-picture10-width);
-  clear: var(--ill-picture10-clear);
-  background-color: var(--ill-picture10-background);
-  margin-top: var(--ill-picture10-margin-top);
-  margin-bottom: var(--ill-picture10-margin-bottom);
+/* image10 */
+.illuminus-styled .journal-page-content .illuminus-image--image10 {
+  float: var(--ill-image10-float);
+  width: var(--ill-image10-width);
+  clear: var(--ill-image10-clear);
+  background-color: var(--ill-image10-background);
+  margin-top: var(--ill-image10-margin-top);
+  margin-bottom: var(--ill-image10-margin-bottom);
   /* Horizontal placement comes from the alignment control, as auto margins. */
-  margin-left: var(--ill-picture10-align-left);
-  margin-right: var(--ill-picture10-align-right);
-  padding: var(--ill-picture10-padding-top) var(--ill-picture10-padding-right) var(--ill-picture10-padding-bottom) var(--ill-picture10-padding-left);
-  border-width: var(--ill-picture10-border-top-width) var(--ill-picture10-border-right-width) var(--ill-picture10-border-bottom-width) var(--ill-picture10-border-left-width);
-  border-style: var(--ill-picture10-border-top-style) var(--ill-picture10-border-right-style) var(--ill-picture10-border-bottom-style) var(--ill-picture10-border-left-style);
-  border-color: var(--ill-picture10-border-top-color) var(--ill-picture10-border-right-color) var(--ill-picture10-border-bottom-color) var(--ill-picture10-border-left-color);
-  border-radius: var(--ill-picture10-corner-top-left) var(--ill-picture10-corner-top-right) var(--ill-picture10-corner-bottom-right) var(--ill-picture10-corner-bottom-left);
-  box-shadow: var(--ill-picture10-shadow-offset-x) var(--ill-picture10-shadow-offset-y) var(--ill-picture10-shadow-blur) var(--ill-picture10-shadow-spread) var(--ill-picture10-shadow-color);
+  margin-left: var(--ill-image10-align-left);
+  margin-right: var(--ill-image10-align-right);
+  padding: var(--ill-image10-padding-top) var(--ill-image10-padding-right) var(--ill-image10-padding-bottom) var(--ill-image10-padding-left);
+  border-width: var(--ill-image10-border-top-width) var(--ill-image10-border-right-width) var(--ill-image10-border-bottom-width) var(--ill-image10-border-left-width);
+  border-style: var(--ill-image10-border-top-style) var(--ill-image10-border-right-style) var(--ill-image10-border-bottom-style) var(--ill-image10-border-left-style);
+  border-color: var(--ill-image10-border-top-color) var(--ill-image10-border-right-color) var(--ill-image10-border-bottom-color) var(--ill-image10-border-left-color);
+  border-radius: var(--ill-image10-corner-top-left) var(--ill-image10-corner-top-right) var(--ill-image10-corner-bottom-right) var(--ill-image10-corner-bottom-left);
+  box-shadow: var(--ill-image10-shadow-offset-x) var(--ill-image10-shadow-offset-y) var(--ill-image10-shadow-blur) var(--ill-image10-shadow-spread) var(--ill-image10-shadow-color);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture10 img {
+.illuminus-styled .journal-page-content .illuminus-image--image10 img {
   display: block;
   width: 100%;
   height: auto;
-  transform: var(--ill-picture10-flip);
-  opacity: var(--ill-picture10-opacity);
+  transform: var(--ill-image10-flip);
+  opacity: var(--ill-image10-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
@@ -1043,14 +1043,14 @@
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture10 figcaption {
-  font-family: var(--ill-picture10-caption-font);
-  font-size: var(--ill-picture10-caption-size);
-  font-weight: var(--ill-picture10-caption-text-style-weight);
-  font-style: var(--ill-picture10-caption-text-style-slant);
-  text-align: var(--ill-picture10-caption-align);
-  color: var(--ill-picture10-caption-color, inherit);
-  margin-top: var(--ill-picture10-caption-spacing);
+.illuminus-styled .journal-page-content .illuminus-image--image10 figcaption {
+  font-family: var(--ill-image10-caption-font);
+  font-size: var(--ill-image10-caption-size);
+  font-weight: var(--ill-image10-caption-text-style-weight);
+  font-style: var(--ill-image10-caption-text-style-slant);
+  text-align: var(--ill-image10-caption-align);
+  color: var(--ill-image10-caption-color, inherit);
+  margin-top: var(--ill-image10-caption-spacing);
 }
 
 /* tag01 */
@@ -1393,44 +1393,44 @@
   opacity: var(--ill-tag10-texture-opacity);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block01:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block01-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box01:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box01-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block02:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block02-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box02:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box02-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block03:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block03-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box03:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box03-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block04:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block04-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box04:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box04-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block05:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block05-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box05:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box05-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block06:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block06-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box06:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box06-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block07:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block07-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box07:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box07-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block08:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block08-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box08:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box08-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block09:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block09-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box09:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box09-when-empty);
 }
 
-.illuminus-styled section.journal-page-content .illuminus-block--block10:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
-  display: var(--ill-block10-when-empty);
+.illuminus-styled section.journal-page-content .illuminus-box--box10:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
+  display: var(--ill-box10-when-empty);
 }
 
 .illuminus-styled.application {
@@ -1872,12 +1872,12 @@
   opacity: var(--ill-tables-header-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content blockquote:not(.illuminus-block) {
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-box) {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content blockquote:not(.illuminus-block)::before {
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-box)::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1892,402 +1892,402 @@
   opacity: var(--ill-boxes-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block01 {
+.illuminus-styled .journal-page-content .illuminus-box--box01 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block01::before {
+.illuminus-styled .journal-page-content .illuminus-box--box01::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block01-texture);
-  background-size: var(--ill-block01-texture-fit-size);
-  background-repeat: var(--ill-block01-texture-fit-repeat);
-  background-position: var(--ill-block01-texture-position);
-  mix-blend-mode: var(--ill-block01-texture-blend);
-  opacity: var(--ill-block01-texture-opacity);
+  background-image: var(--ill-box01-texture);
+  background-size: var(--ill-box01-texture-fit-size);
+  background-repeat: var(--ill-box01-texture-fit-repeat);
+  background-position: var(--ill-box01-texture-position);
+  mix-blend-mode: var(--ill-box01-texture-blend);
+  opacity: var(--ill-box01-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block02 {
+.illuminus-styled .journal-page-content .illuminus-box--box02 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block02::before {
+.illuminus-styled .journal-page-content .illuminus-box--box02::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block02-texture);
-  background-size: var(--ill-block02-texture-fit-size);
-  background-repeat: var(--ill-block02-texture-fit-repeat);
-  background-position: var(--ill-block02-texture-position);
-  mix-blend-mode: var(--ill-block02-texture-blend);
-  opacity: var(--ill-block02-texture-opacity);
+  background-image: var(--ill-box02-texture);
+  background-size: var(--ill-box02-texture-fit-size);
+  background-repeat: var(--ill-box02-texture-fit-repeat);
+  background-position: var(--ill-box02-texture-position);
+  mix-blend-mode: var(--ill-box02-texture-blend);
+  opacity: var(--ill-box02-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block03 {
+.illuminus-styled .journal-page-content .illuminus-box--box03 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block03::before {
+.illuminus-styled .journal-page-content .illuminus-box--box03::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block03-texture);
-  background-size: var(--ill-block03-texture-fit-size);
-  background-repeat: var(--ill-block03-texture-fit-repeat);
-  background-position: var(--ill-block03-texture-position);
-  mix-blend-mode: var(--ill-block03-texture-blend);
-  opacity: var(--ill-block03-texture-opacity);
+  background-image: var(--ill-box03-texture);
+  background-size: var(--ill-box03-texture-fit-size);
+  background-repeat: var(--ill-box03-texture-fit-repeat);
+  background-position: var(--ill-box03-texture-position);
+  mix-blend-mode: var(--ill-box03-texture-blend);
+  opacity: var(--ill-box03-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block04 {
+.illuminus-styled .journal-page-content .illuminus-box--box04 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block04::before {
+.illuminus-styled .journal-page-content .illuminus-box--box04::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block04-texture);
-  background-size: var(--ill-block04-texture-fit-size);
-  background-repeat: var(--ill-block04-texture-fit-repeat);
-  background-position: var(--ill-block04-texture-position);
-  mix-blend-mode: var(--ill-block04-texture-blend);
-  opacity: var(--ill-block04-texture-opacity);
+  background-image: var(--ill-box04-texture);
+  background-size: var(--ill-box04-texture-fit-size);
+  background-repeat: var(--ill-box04-texture-fit-repeat);
+  background-position: var(--ill-box04-texture-position);
+  mix-blend-mode: var(--ill-box04-texture-blend);
+  opacity: var(--ill-box04-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block05 {
+.illuminus-styled .journal-page-content .illuminus-box--box05 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block05::before {
+.illuminus-styled .journal-page-content .illuminus-box--box05::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block05-texture);
-  background-size: var(--ill-block05-texture-fit-size);
-  background-repeat: var(--ill-block05-texture-fit-repeat);
-  background-position: var(--ill-block05-texture-position);
-  mix-blend-mode: var(--ill-block05-texture-blend);
-  opacity: var(--ill-block05-texture-opacity);
+  background-image: var(--ill-box05-texture);
+  background-size: var(--ill-box05-texture-fit-size);
+  background-repeat: var(--ill-box05-texture-fit-repeat);
+  background-position: var(--ill-box05-texture-position);
+  mix-blend-mode: var(--ill-box05-texture-blend);
+  opacity: var(--ill-box05-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block06 {
+.illuminus-styled .journal-page-content .illuminus-box--box06 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block06::before {
+.illuminus-styled .journal-page-content .illuminus-box--box06::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block06-texture);
-  background-size: var(--ill-block06-texture-fit-size);
-  background-repeat: var(--ill-block06-texture-fit-repeat);
-  background-position: var(--ill-block06-texture-position);
-  mix-blend-mode: var(--ill-block06-texture-blend);
-  opacity: var(--ill-block06-texture-opacity);
+  background-image: var(--ill-box06-texture);
+  background-size: var(--ill-box06-texture-fit-size);
+  background-repeat: var(--ill-box06-texture-fit-repeat);
+  background-position: var(--ill-box06-texture-position);
+  mix-blend-mode: var(--ill-box06-texture-blend);
+  opacity: var(--ill-box06-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block07 {
+.illuminus-styled .journal-page-content .illuminus-box--box07 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block07::before {
+.illuminus-styled .journal-page-content .illuminus-box--box07::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block07-texture);
-  background-size: var(--ill-block07-texture-fit-size);
-  background-repeat: var(--ill-block07-texture-fit-repeat);
-  background-position: var(--ill-block07-texture-position);
-  mix-blend-mode: var(--ill-block07-texture-blend);
-  opacity: var(--ill-block07-texture-opacity);
+  background-image: var(--ill-box07-texture);
+  background-size: var(--ill-box07-texture-fit-size);
+  background-repeat: var(--ill-box07-texture-fit-repeat);
+  background-position: var(--ill-box07-texture-position);
+  mix-blend-mode: var(--ill-box07-texture-blend);
+  opacity: var(--ill-box07-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block08 {
+.illuminus-styled .journal-page-content .illuminus-box--box08 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block08::before {
+.illuminus-styled .journal-page-content .illuminus-box--box08::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block08-texture);
-  background-size: var(--ill-block08-texture-fit-size);
-  background-repeat: var(--ill-block08-texture-fit-repeat);
-  background-position: var(--ill-block08-texture-position);
-  mix-blend-mode: var(--ill-block08-texture-blend);
-  opacity: var(--ill-block08-texture-opacity);
+  background-image: var(--ill-box08-texture);
+  background-size: var(--ill-box08-texture-fit-size);
+  background-repeat: var(--ill-box08-texture-fit-repeat);
+  background-position: var(--ill-box08-texture-position);
+  mix-blend-mode: var(--ill-box08-texture-blend);
+  opacity: var(--ill-box08-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block09 {
+.illuminus-styled .journal-page-content .illuminus-box--box09 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block09::before {
+.illuminus-styled .journal-page-content .illuminus-box--box09::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block09-texture);
-  background-size: var(--ill-block09-texture-fit-size);
-  background-repeat: var(--ill-block09-texture-fit-repeat);
-  background-position: var(--ill-block09-texture-position);
-  mix-blend-mode: var(--ill-block09-texture-blend);
-  opacity: var(--ill-block09-texture-opacity);
+  background-image: var(--ill-box09-texture);
+  background-size: var(--ill-box09-texture-fit-size);
+  background-repeat: var(--ill-box09-texture-fit-repeat);
+  background-position: var(--ill-box09-texture-position);
+  mix-blend-mode: var(--ill-box09-texture-blend);
+  opacity: var(--ill-box09-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block10 {
+.illuminus-styled .journal-page-content .illuminus-box--box10 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--block10::before {
+.illuminus-styled .journal-page-content .illuminus-box--box10::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-block10-texture);
-  background-size: var(--ill-block10-texture-fit-size);
-  background-repeat: var(--ill-block10-texture-fit-repeat);
-  background-position: var(--ill-block10-texture-position);
-  mix-blend-mode: var(--ill-block10-texture-blend);
-  opacity: var(--ill-block10-texture-opacity);
+  background-image: var(--ill-box10-texture);
+  background-size: var(--ill-box10-texture-fit-size);
+  background-repeat: var(--ill-box10-texture-fit-repeat);
+  background-position: var(--ill-box10-texture-position);
+  mix-blend-mode: var(--ill-box10-texture-blend);
+  opacity: var(--ill-box10-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture01 {
+.illuminus-styled .journal-page-content .illuminus-image--image01 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture01::before {
+.illuminus-styled .journal-page-content .illuminus-image--image01::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture01-texture);
-  background-size: var(--ill-picture01-texture-fit-size);
-  background-repeat: var(--ill-picture01-texture-fit-repeat);
-  background-position: var(--ill-picture01-texture-position);
-  mix-blend-mode: var(--ill-picture01-texture-blend);
-  opacity: var(--ill-picture01-texture-opacity);
+  background-image: var(--ill-image01-texture);
+  background-size: var(--ill-image01-texture-fit-size);
+  background-repeat: var(--ill-image01-texture-fit-repeat);
+  background-position: var(--ill-image01-texture-position);
+  mix-blend-mode: var(--ill-image01-texture-blend);
+  opacity: var(--ill-image01-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture02 {
+.illuminus-styled .journal-page-content .illuminus-image--image02 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture02::before {
+.illuminus-styled .journal-page-content .illuminus-image--image02::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture02-texture);
-  background-size: var(--ill-picture02-texture-fit-size);
-  background-repeat: var(--ill-picture02-texture-fit-repeat);
-  background-position: var(--ill-picture02-texture-position);
-  mix-blend-mode: var(--ill-picture02-texture-blend);
-  opacity: var(--ill-picture02-texture-opacity);
+  background-image: var(--ill-image02-texture);
+  background-size: var(--ill-image02-texture-fit-size);
+  background-repeat: var(--ill-image02-texture-fit-repeat);
+  background-position: var(--ill-image02-texture-position);
+  mix-blend-mode: var(--ill-image02-texture-blend);
+  opacity: var(--ill-image02-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture03 {
+.illuminus-styled .journal-page-content .illuminus-image--image03 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture03::before {
+.illuminus-styled .journal-page-content .illuminus-image--image03::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture03-texture);
-  background-size: var(--ill-picture03-texture-fit-size);
-  background-repeat: var(--ill-picture03-texture-fit-repeat);
-  background-position: var(--ill-picture03-texture-position);
-  mix-blend-mode: var(--ill-picture03-texture-blend);
-  opacity: var(--ill-picture03-texture-opacity);
+  background-image: var(--ill-image03-texture);
+  background-size: var(--ill-image03-texture-fit-size);
+  background-repeat: var(--ill-image03-texture-fit-repeat);
+  background-position: var(--ill-image03-texture-position);
+  mix-blend-mode: var(--ill-image03-texture-blend);
+  opacity: var(--ill-image03-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture04 {
+.illuminus-styled .journal-page-content .illuminus-image--image04 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture04::before {
+.illuminus-styled .journal-page-content .illuminus-image--image04::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture04-texture);
-  background-size: var(--ill-picture04-texture-fit-size);
-  background-repeat: var(--ill-picture04-texture-fit-repeat);
-  background-position: var(--ill-picture04-texture-position);
-  mix-blend-mode: var(--ill-picture04-texture-blend);
-  opacity: var(--ill-picture04-texture-opacity);
+  background-image: var(--ill-image04-texture);
+  background-size: var(--ill-image04-texture-fit-size);
+  background-repeat: var(--ill-image04-texture-fit-repeat);
+  background-position: var(--ill-image04-texture-position);
+  mix-blend-mode: var(--ill-image04-texture-blend);
+  opacity: var(--ill-image04-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture05 {
+.illuminus-styled .journal-page-content .illuminus-image--image05 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture05::before {
+.illuminus-styled .journal-page-content .illuminus-image--image05::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture05-texture);
-  background-size: var(--ill-picture05-texture-fit-size);
-  background-repeat: var(--ill-picture05-texture-fit-repeat);
-  background-position: var(--ill-picture05-texture-position);
-  mix-blend-mode: var(--ill-picture05-texture-blend);
-  opacity: var(--ill-picture05-texture-opacity);
+  background-image: var(--ill-image05-texture);
+  background-size: var(--ill-image05-texture-fit-size);
+  background-repeat: var(--ill-image05-texture-fit-repeat);
+  background-position: var(--ill-image05-texture-position);
+  mix-blend-mode: var(--ill-image05-texture-blend);
+  opacity: var(--ill-image05-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture06 {
+.illuminus-styled .journal-page-content .illuminus-image--image06 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture06::before {
+.illuminus-styled .journal-page-content .illuminus-image--image06::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture06-texture);
-  background-size: var(--ill-picture06-texture-fit-size);
-  background-repeat: var(--ill-picture06-texture-fit-repeat);
-  background-position: var(--ill-picture06-texture-position);
-  mix-blend-mode: var(--ill-picture06-texture-blend);
-  opacity: var(--ill-picture06-texture-opacity);
+  background-image: var(--ill-image06-texture);
+  background-size: var(--ill-image06-texture-fit-size);
+  background-repeat: var(--ill-image06-texture-fit-repeat);
+  background-position: var(--ill-image06-texture-position);
+  mix-blend-mode: var(--ill-image06-texture-blend);
+  opacity: var(--ill-image06-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture07 {
+.illuminus-styled .journal-page-content .illuminus-image--image07 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture07::before {
+.illuminus-styled .journal-page-content .illuminus-image--image07::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture07-texture);
-  background-size: var(--ill-picture07-texture-fit-size);
-  background-repeat: var(--ill-picture07-texture-fit-repeat);
-  background-position: var(--ill-picture07-texture-position);
-  mix-blend-mode: var(--ill-picture07-texture-blend);
-  opacity: var(--ill-picture07-texture-opacity);
+  background-image: var(--ill-image07-texture);
+  background-size: var(--ill-image07-texture-fit-size);
+  background-repeat: var(--ill-image07-texture-fit-repeat);
+  background-position: var(--ill-image07-texture-position);
+  mix-blend-mode: var(--ill-image07-texture-blend);
+  opacity: var(--ill-image07-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture08 {
+.illuminus-styled .journal-page-content .illuminus-image--image08 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture08::before {
+.illuminus-styled .journal-page-content .illuminus-image--image08::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture08-texture);
-  background-size: var(--ill-picture08-texture-fit-size);
-  background-repeat: var(--ill-picture08-texture-fit-repeat);
-  background-position: var(--ill-picture08-texture-position);
-  mix-blend-mode: var(--ill-picture08-texture-blend);
-  opacity: var(--ill-picture08-texture-opacity);
+  background-image: var(--ill-image08-texture);
+  background-size: var(--ill-image08-texture-fit-size);
+  background-repeat: var(--ill-image08-texture-fit-repeat);
+  background-position: var(--ill-image08-texture-position);
+  mix-blend-mode: var(--ill-image08-texture-blend);
+  opacity: var(--ill-image08-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture09 {
+.illuminus-styled .journal-page-content .illuminus-image--image09 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture09::before {
+.illuminus-styled .journal-page-content .illuminus-image--image09::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture09-texture);
-  background-size: var(--ill-picture09-texture-fit-size);
-  background-repeat: var(--ill-picture09-texture-fit-repeat);
-  background-position: var(--ill-picture09-texture-position);
-  mix-blend-mode: var(--ill-picture09-texture-blend);
-  opacity: var(--ill-picture09-texture-opacity);
+  background-image: var(--ill-image09-texture);
+  background-size: var(--ill-image09-texture-fit-size);
+  background-repeat: var(--ill-image09-texture-fit-repeat);
+  background-position: var(--ill-image09-texture-position);
+  mix-blend-mode: var(--ill-image09-texture-blend);
+  opacity: var(--ill-image09-texture-opacity);
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture10 {
+.illuminus-styled .journal-page-content .illuminus-image--image10 {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--picture10::before {
+.illuminus-styled .journal-page-content .illuminus-image--image10::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-picture10-texture);
-  background-size: var(--ill-picture10-texture-fit-size);
-  background-repeat: var(--ill-picture10-texture-fit-repeat);
-  background-position: var(--ill-picture10-texture-position);
-  mix-blend-mode: var(--ill-picture10-texture-blend);
-  opacity: var(--ill-picture10-texture-opacity);
+  background-image: var(--ill-image10-texture);
+  background-size: var(--ill-image10-texture-fit-size);
+  background-repeat: var(--ill-image10-texture-fit-repeat);
+  background-position: var(--ill-image10-texture-position);
+  mix-blend-mode: var(--ill-image10-texture-blend);
+  opacity: var(--ill-image10-texture-opacity);
 }

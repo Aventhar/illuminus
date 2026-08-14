@@ -244,10 +244,13 @@ and the title unstyled, which is now covered by a check.
   the presets the same way rather than hand-porting them — it exercises the migration at
   the same time.
 
-## Blocks, picture treatments, and inline styles
+## Boxes, image styles, and tag styles
 
-Ten of each, keyed `block01`..`block10`, `picture01`..`picture10`, and
-`tag01`..`tag10`. The keys are fixed;
+Ten of each, keyed `box01`..`box10`, `image01`..`image10`, and `tag01`..`tag10`, in the
+families `boxStyles`, `imageStyles`, and `tagStyles`. **The family id cannot match the
+member word** — page groups already own `boxes` and `images` — and the *class* a member
+writes is derived from its id (`box01` → `illuminus-box--box01`), so the stylesheet can
+never name something the editor no longer writes. The keys are fixed;
 their displayed names live on the style (`labels`) and are edited per style, so markup
 and exported styles stay portable when someone renames one.
 
@@ -282,6 +285,10 @@ nothing and checks it still compiles once given a value.
 - **A style may only supply values, never rules.** The compiler emits custom properties
   and nothing else. Keep it that way — it is what makes importing a stranger's style file
   safe.
+- **Renaming a *group* needs a migration too, and it reaches further than settings.**
+  Per-style names for boxes and image styles are keyed by group id and live *outside*
+  `settings`, so `migrateStyle` migrates `labels` as well — without that, `cleanLabels`
+  drops every renamed key and the names silently vanish.
 - **Renaming a field needs a migration.** `cleanSettings` discards unknown keys, so
   without one, existing styles silently lose those values. Bump `SCHEMA_VERSION`, add the
   mapping to `scripts/migrations.mjs`, and cover it in the tests. **Merging two fields

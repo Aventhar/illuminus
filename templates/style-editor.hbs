@@ -212,12 +212,12 @@
       {{!-- Block Styles and Picture Styles take the pane over: a block is only
             legible next to the prose it interrupts, and the full journal mock
             would leave it a sliver of the width. --}}
-      <div class="illuminus-preview__family" data-family="blocks">
+      <div class="illuminus-preview__family" data-family="boxStyles">
         <section class="journal-entry-content">
           <div class="journal-entry-pages">
             <article class="journal-entry-page text">
               <section class="journal-page-content">
-                <blockquote class="illuminus-block illuminus-block--{{preview.blocks.id}}">
+                <blockquote class="illuminus-box illuminus-box--{{preview.boxStyles.id}}">
                   <h2>{{localize "ILLUMINUS.Preview.BlockHeading"}}</h2>
                   <p>{{localize "ILLUMINUS.Preview.BlockBody"}}</p>
                 </blockquote>
@@ -229,7 +229,7 @@
         </section>
       </div>
 
-      <div class="illuminus-preview__family" data-family="tags">
+      <div class="illuminus-preview__family" data-family="tagStyles">
         <section class="journal-entry-content">
           <div class="journal-entry-pages">
             <article class="journal-entry-page text">
@@ -237,13 +237,13 @@
                 {{!-- A title line and a row of tags: the two things inline
                       treatments exist for, both built from the same tag. --}}
                 <h2>{{localize "ILLUMINUS.Preview.TagTitle"}}
-                  <span class="illuminus-tag illuminus-tag--{{preview.tags.id}}"
+                  <span class="illuminus-tag illuminus-tag--{{preview.tagStyles.id}}"
                         >{{localize "ILLUMINUS.Preview.TagRank"}}</span></h2>
-                <p><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagOne"}}</span
-                  ><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagTwo"}}</span
-                  ><span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagThree"}}</span></p>
+                <p><span class="illuminus-tag illuminus-tag--{{preview.tagStyles.id}}">{{localize "ILLUMINUS.Preview.TagOne"}}</span
+                  ><span class="illuminus-tag illuminus-tag--{{preview.tagStyles.id}}">{{localize "ILLUMINUS.Preview.TagTwo"}}</span
+                  ><span class="illuminus-tag illuminus-tag--{{preview.tagStyles.id}}">{{localize "ILLUMINUS.Preview.TagThree"}}</span></p>
                 <p>{{localize "ILLUMINUS.Preview.TagFlow"}}
-                  <span class="illuminus-tag illuminus-tag--{{preview.tags.id}}">{{localize "ILLUMINUS.Preview.TagInline"}}</span>
+                  <span class="illuminus-tag illuminus-tag--{{preview.tagStyles.id}}">{{localize "ILLUMINUS.Preview.TagInline"}}</span>
                   {{localize "ILLUMINUS.Preview.TagFlowEnd"}}</p>
               </section>
             </article>
@@ -251,12 +251,12 @@
         </section>
       </div>
 
-      <div class="illuminus-preview__family" data-family="pictures">
+      <div class="illuminus-preview__family" data-family="imageStyles">
         <section class="journal-entry-content">
           <div class="journal-entry-pages">
             <article class="journal-entry-page text">
               <section class="journal-page-content">
-                <figure class="illuminus-picture illuminus-picture--{{preview.pictures.id}}">
+                <figure class="illuminus-image illuminus-image--{{preview.imageStyles.id}}">
                   <img src="modules/illuminus/assets/samples/images/castle.jpg"
                        alt="{{localize 'ILLUMINUS.Preview.Caption'}}">
                   <figcaption>{{localize "ILLUMINUS.Preview.Caption"}}</figcaption>

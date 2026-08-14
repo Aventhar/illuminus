@@ -48,9 +48,19 @@ const box = (group) => `  background-color: ${v(group, "background")};
 
 /* -------------------------------------------- */
 
-const blockRules = (group) => `
+/**
+ * What one member's rules hang off. The class is derived from the group id —
+ * `box01` answers to `illuminus-box--box01` — so a renamed family cannot leave
+ * the stylesheet naming something the editor no longer writes.
+ */
+const memberSelector = (group, suffix = "") => {
+  const kind = group.id.replace(/\d{2}$/, "");
+  return `.illuminus-styled .journal-page-content .illuminus-${kind}--${group.id}${suffix}`;
+};
+
+const boxRules = (group) => `
 /* ${group.id} */
-.illuminus-styled .journal-page-content .illuminus-block--${group.id} {
+${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
@@ -67,7 +77,7 @@ ${box(group)}
   color: ${vOr(group, "color", "inherit")};
 }
 
-.illuminus-styled .journal-page-content .illuminus-block--${group.id} :is(h1, h2, h3, h4, h5, h6) {
+${memberSelector(group, " :is(h1, h2, h3, h4, h5, h6)")} {
   font-family: ${v(group, "headingFont")};
   font-size: ${v(group, "headingSize")};
   font-weight: ${v(group, "headingTextStyle", "weight")};
@@ -84,9 +94,9 @@ ${box(group)}
 }
 `;
 
-const pictureRules = (group) => `
+const imageRules = (group) => `
 /* ${group.id} */
-.illuminus-styled .journal-page-content .illuminus-picture--${group.id} {
+${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
@@ -104,7 +114,7 @@ const pictureRules = (group) => `
   box-shadow: ${shadow(group, "shadow")};
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--${group.id} img {
+${memberSelector(group, " img")} {
   display: block;
   width: 100%;
   height: auto;
@@ -119,7 +129,7 @@ const pictureRules = (group) => `
   max-width: 100%;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture--${group.id} figcaption {
+${memberSelector(group, " figcaption")} {
   font-family: ${v(group, "captionFont")};
   font-size: ${v(group, "captionSize")};
   font-weight: ${v(group, "captionTextStyle", "weight")};
@@ -141,7 +151,7 @@ const pictureRules = (group) => `
  */
 const tagRules = (group) => `
 /* ${group.id} */
-.illuminus-styled .journal-page-content .illuminus-tag--${group.id} {
+${memberSelector(group)} {
   float: ${v(group, "float")};
   vertical-align: ${v(group, "verticalAlign")};
   bottom: ${v(group, "lift")};
@@ -165,7 +175,7 @@ const tagRules = (group) => `
   color: ${vOr(group, "color", "inherit")};
 }
 
-.illuminus-styled .journal-page-content .illuminus-tag--${group.id}::before {
+${memberSelector(group, "::before")} {
   background-image: ${v(group, "texture")};
   background-size: ${v(group, "texture", "fit-size")};
   background-repeat: ${v(group, "texture", "fit-repeat")};
@@ -186,7 +196,8 @@ const tagRules = (group) => `
 const CONTENTFUL = ":where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty)";
 
 const emptyRules = (group) => `
-.illuminus-styled section.journal-page-content .illuminus-block--${group.id}:not(:has(${CONTENTFUL})) {
+${memberSelector(group, `:not(:has(${CONTENTFUL}))`)
+  .replaceAll(".illuminus-styled .journal-page-content", ".illuminus-styled section.journal-page-content")} {
   display: ${v(group, "whenEmpty")};
 }
 `;
@@ -275,11 +286,11 @@ const IMAGE_LAYERS = [
     ({ selector: `.illuminus-styled .journal-page-content h${level}`, group: group.id, prefix: "" })),
   { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },
   { selector: ".illuminus-styled .journal-page-content thead th", group: "tables", prefix: "header" },
-  { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-block)", group: "boxes", prefix: "" },
-  ...GROUPS.filter((g) => g.family === "blocks")
-    .map((g) => ({ selector: `.illuminus-styled .journal-page-content .illuminus-block--${g.id}`, group: g.id, prefix: "" })),
-  ...GROUPS.filter((g) => g.family === "pictures")
-    .map((g) => ({ selector: `.illuminus-styled .journal-page-content .illuminus-picture--${g.id}`, group: g.id, prefix: "" }))
+  { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-box)", group: "boxes", prefix: "" },
+  ...GROUPS.filter((g) => g.family === "boxStyles")
+    .map((g) => ({ selector: memberSelector(g), group: g.id, prefix: "" })),
+  ...GROUPS.filter((g) => g.family === "imageStyles")
+    .map((g) => ({ selector: memberSelector(g), group: g.id, prefix: "" }))
 ];
 
 /** The custom property one image field emits, by prefix, part, and suffix. */
@@ -323,23 +334,23 @@ const header = `/* =============================================================
    field is a generator error rather than a rule that silently stops working.
 
    Markup, as inserted by the editor's Illuminus menu:
-     <section class="illuminus-block illuminus-block--block01">…</section>
-     <figure class="illuminus-picture illuminus-picture--picture01">
+     <section class="illuminus-box illuminus-box--box01">…</section>
+     <figure class="illuminus-image illuminus-image--image01">
        <img src="…"><figcaption>…</figcaption>
      </figure>
    ========================================================================== */
 
 /* Shared: a block is a flow container, a picture treatment is a figure. */
-.illuminus-styled .journal-page-content .illuminus-block {
+.illuminus-styled .journal-page-content .illuminus-box {
   display: block;
   overflow-wrap: break-word;
 }
 
-.illuminus-styled .journal-page-content .illuminus-block > :last-child {
+.illuminus-styled .journal-page-content .illuminus-box > :last-child {
   margin-bottom: 0;
 }
 
-.illuminus-styled .journal-page-content .illuminus-picture {
+.illuminus-styled .journal-page-content .illuminus-image {
   display: block;
   max-width: 100%;
 }
@@ -371,10 +382,10 @@ const header = `/* =============================================================
 }
 `;
 
-const blockGroups = GROUPS.filter((g) => g.family === "blocks");
-const blocks = blockGroups.map(blockRules).join("");
-const pictures = GROUPS.filter((g) => g.family === "pictures").map(pictureRules).join("");
-const tags = GROUPS.filter((g) => g.family === "tags").map(tagRules).join("");
+const blockGroups = GROUPS.filter((g) => g.family === "boxStyles");
+const blocks = blockGroups.map(boxRules).join("");
+const pictures = GROUPS.filter((g) => g.family === "imageStyles").map(imageRules).join("");
+const tags = GROUPS.filter((g) => g.family === "tagStyles").map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
 const headings = HEADINGS.map(({ group, level }) => headingRules(group, level)).join("");
 const images = IMAGE_LAYERS.map(imageLayer).join("");

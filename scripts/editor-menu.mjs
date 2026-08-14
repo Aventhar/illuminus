@@ -6,7 +6,7 @@ import { getStyle } from "./style-store.mjs";
  * An Illuminus menu in the journal text editor.
  *
  * The blocks and picture treatments are only reachable by hand-typing
- * `<blockquote class="illuminus-block illuminus-block--block01">` without this,
+ * `<blockquote class="illuminus-box illuminus-box--box01">` without this,
  * which rules out everyone the module is for. This adds a drop-down listing
  * them by whatever the current style calls them, wrapping the selection or
  * retagging the picture the cursor is in.
@@ -17,11 +17,11 @@ import { getStyle } from "./style-store.mjs";
  * through a save-and-reload round trip.
  */
 
-/** Class marking a block, alongside `illuminus-block--<key>`. */
-export const BLOCK_CLASS = "illuminus-block";
+/** Class marking a box, alongside `illuminus-box--<key>`. */
+export const BOX_CLASS = "illuminus-box";
 
-/** Class marking a picture treatment, alongside `illuminus-picture--<key>`. */
-export const PICTURE_CLASS = "illuminus-picture";
+/** Class marking an image style, alongside `illuminus-image--<key>`. */
+export const IMAGE_CLASS = "illuminus-image";
 
 /** Class marking an inline treatment, alongside `illuminus-tag--<key>`. */
 export const TAG_CLASS = "illuminus-tag";
@@ -46,7 +46,7 @@ function labelFor(style, groupId) {
 }
 
 /** Any class this module manages, on a node or on a mark. */
-const MANAGED = /^illuminus-(block|picture|tag)/;
+const MANAGED = /^illuminus-(box|image|tag)/;
 
 /** Merge a class onto whatever classes a node already carries. */
 function withClasses(existing, added) {
@@ -82,7 +82,7 @@ function ancestorOfType(state, typeName) {
  * @param {string} groupId
  */
 function applyBlock(groupId) {
-  const classes = [BLOCK_CLASS, `${BLOCK_CLASS}--${groupId}`];
+  const classes = [BOX_CLASS, `${BOX_CLASS}--${groupId}`];
   return (state, dispatch) => {
     const existing = ancestorOfType(state, "blockquote");
     if (existing) {
@@ -105,7 +105,7 @@ function applyBlock(groupId) {
  * @param {string} groupId
  */
 function applyPicture(groupId) {
-  const classes = [PICTURE_CLASS, `${PICTURE_CLASS}--${groupId}`];
+  const classes = [IMAGE_CLASS, `${IMAGE_CLASS}--${groupId}`];
   return (state, dispatch) => {
     const figure = ancestorOfType(state, "figure");
     if (figure) {
@@ -216,29 +216,29 @@ export function registerEditorMenu() {
       cssClass: "illuminus-menu",
       entries: [
         {
-          action: "illuminus-blocks",
+          action: "illuminus-boxes",
           title: game.i18n.localize("ILLUMINUS.Menu.Blocks"),
-          children: membersOf("blocks").map((groupId) => ({
+          children: membersOf("boxStyles").map((groupId) => ({
             action: `illuminus-${groupId}`,
             title: labelFor(style, groupId),
-            active: isActive(state, "blockquote", groupId, BLOCK_CLASS),
+            active: isActive(state, "blockquote", groupId, BOX_CLASS),
             cmd: applyBlock(groupId)
           }))
         },
         {
-          action: "illuminus-pictures",
+          action: "illuminus-images",
           title: game.i18n.localize("ILLUMINUS.Menu.Pictures"),
-          children: membersOf("pictures").map((groupId) => ({
+          children: membersOf("imageStyles").map((groupId) => ({
             action: `illuminus-${groupId}`,
             title: labelFor(style, groupId),
-            active: isActive(state, "figure", groupId, PICTURE_CLASS),
+            active: isActive(state, "figure", groupId, IMAGE_CLASS),
             cmd: applyPicture(groupId)
           }))
         },
         {
           action: "illuminus-tags",
           title: game.i18n.localize("ILLUMINUS.Menu.Tags"),
-          children: membersOf("tags").map((groupId) => ({
+          children: membersOf("tagStyles").map((groupId) => ({
             action: `illuminus-${groupId}`,
             title: labelFor(style, groupId),
             active: tagIsActive(state, groupId),
