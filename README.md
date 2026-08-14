@@ -90,6 +90,13 @@ it to whichever journals should wear it, and export it to carry into another wor
   whatever that style makes it. The menu lists them by the names the style gives them, so
   a style can call its first box "Read-aloud" and its second "Sidebar". "Remove Illuminus
   styling" takes it off again. No HTML is typed.
+- **Page templates.** Ready-made structures — a stat block frame, a read-aloud box, a
+  location entry, a player handout, a GM aside — dropped into a page from the same
+  Illuminus menu. Select anything you have built and "Save selection as template" keeps
+  it for next time. Templates carry *structure*, never colors or sizes, so the same
+  template looks like a Pathfinder hazard under one style and a starship manifest under
+  another. They import and export as JSON like styles do, and an imported one is parsed
+  through Foundry's own editor rules, so it can carry no more than a person could type.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **One style included:** Aged Parchment, seeded the first time the module runs in a
   world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
@@ -126,6 +133,8 @@ scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
+scripts/template-store.mjs   CRUD over the world's page templates
+scripts/template-presets.mjs The bundled templates
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
 assets/samples/textures/     Bundled background images
 assets/samples/images/       Bundled artwork, and the sample shown in the editor

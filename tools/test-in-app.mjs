@@ -2343,7 +2343,109 @@ try {
   })()`);
 }
 
-console.log("\n[38] Console is clean");
+// Templates carry structure rather than styling: a stat block frame, a handout.
+// They are parsed through Foundry's own schema on the way in, which is what
+// makes an imported one safe, and they name Illuminus's keys rather than colors,
+// which is what makes them work under any style.
+console.log("\n[38] Page templates");
+try {
+  const tpl = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const out = {seeded: api.listTemplates().length};
+
+    Hooks.on("getProseMirrorMenuDropDowns", (menu) => { window.__tplMenu = menu; });
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = await JournalEntry.create({name: "Template Test Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>Start.</p>"}}]);
+    await api.assignStyle(entry, api.listStyles()[0].id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1200));
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button").click();
+    await new Promise(r => setTimeout(r, 2800));
+    window.__tpl = {entryId: entry.id};
+
+    const menu = window.__tplMenu;
+    const view = menu.view;
+    let item, saveItem;
+    menu.dropdowns.forEach(d => d.forEachItem(i => {
+      if (i.title === "Stat Block") item = i;
+      if (i.action === "illuminus-template-save") saveItem = i;
+    }));
+    out.listedInMenu = !!item;
+
+    // Capturing needs a selection, exactly as tagging does.
+    const {TextSelection} = foundry.prosemirror;
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 1)));
+    out.captureRefused = saveItem.cmd(view.state, null) === false;
+
+    out.inserted = item.cmd(view.state, view.dispatch, view);
+    await new Promise(r => setTimeout(r, 400));
+
+    const sheet = [...foundry.applications.instances.values()].filter(
+      a => a.document?.documentName === "JournalEntryPage" && a.rendered
+        && a.element?.parentElement === document.body).pop();
+    await sheet.submit();
+    await sheet.close();
+    await new Promise(r => setTimeout(r, 1300));
+    const stored = entry.pages.contents[0].text.content;
+    out.keptBox = /illuminus-box--box01/.test(stored);
+    out.keptTag = /illuminus-tag--tag01/.test(stored);
+    out.keptStructure = /<dl>/.test(stored);
+    // Templates must not carry styling of their own.
+    out.carriesNoStyling = !/style=|background|color:/i.test(stored);
+
+    // An import is parsed and stored; a file of the wrong kind is refused.
+    const io = await import("/modules/illuminus/scripts/io.mjs");
+    const made = await io.importTemplates(io.normalizeTemplateImport({
+      templates: [{name: "Imported", markup: "<p>From a friend.</p>"}]
+    }));
+    out.imported = made.length;
+    try {
+      io.normalizeTemplateImport({styles: [{name: "not a template"}]});
+      out.refusedWrongKind = false;
+    } catch { out.refusedWrongKind = true; }
+
+    // Restoring puts back a bundled one that was deleted, and leaves the rest.
+    const statblock = api.listTemplates().find(t => t.name === "Stat Block");
+    await api.deleteTemplate(statblock.id);
+    out.afterDelete = api.listTemplates().length;
+    out.restored = await api.restoreTemplatePresets();
+    out.afterRestore = api.listTemplates().length;
+
+    window.__tpl.made = made.map(m => m.id);
+    return JSON.stringify(out);
+  })()`);
+  const tp = JSON.parse(tpl);
+  check(tp.seeded >= 5, `templates are seeded into a new world (got ${tp.seeded})`);
+  check(tp.listedInMenu, "and listed in the editor's Illuminus menu");
+  check(tp.captureRefused, "capturing a template refuses when nothing is selected");
+  check(tp.inserted, "choosing one inserts it");
+  check(tp.keptBox && tp.keptTag && tp.keptStructure,
+    "and its box, tag, and structure survive the save");
+  check(tp.carriesNoStyling,
+    "a template carries structure only — no colors, no sizes, so any style can dress it");
+  check(tp.imported === 1, `an imported template is stored (got ${tp.imported})`);
+  check(tp.refusedWrongKind, "and a file of the wrong kind is refused");
+  check(tp.restored === 1 && tp.afterRestore === tp.afterDelete + 1,
+    `restoring puts back only what is missing (${tp.afterDelete} -> ${tp.afterRestore})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const entry = game.journal.get(window.__tpl?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const id of window.__tpl?.made ?? []) await api.deleteTemplate(id);
+    window.__tpl = undefined;
+  })()`);
+}
+
+console.log("\n[39] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

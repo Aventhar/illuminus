@@ -1,6 +1,7 @@
 import { MODULE_ID, SCHEMA_VERSION, log } from "./constants.mjs";
 import { cleanSettings } from "./style-schema.mjs";
 import { getStyle, importStyles } from "./style-store.mjs";
+import { getTemplate, listTemplates, createTemplate, cleanTemplate } from "./template-store.mjs";
 
 /**
  * Export and import of journal styles as JSON, so a look built in one world can
@@ -151,3 +152,99 @@ export function promptImport() {
     input.click();
   });
 }
+
+
+/* -------------------------------------------- */
+/*  Templates                                   */
+/* -------------------------------------------- */
+
+/**
+ * Download the given templates as a JSON file.
+ *
+ * Templates carry markup rather than settings, so the payload says so — an
+ * import reads the marker and refuses a file of the wrong kind rather than
+ * silently producing empty templates.
+ * @param {string[]} ids
+ * @returns {boolean} Whether a file was produced.
+ */
+export function exportTemplates(ids) {
+  const templates = ids
+    .map((id) => getTemplate(id))
+    .filter(Boolean)
+    .map(({ name, description, markup }) => ({ name, description, markup }));
+  if (!templates.length) {
+    ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NothingToExport"));
+    return false;
+  }
+  const payload = {
+    module: MODULE_ID,
+    kind: "templates",
+    exportedAt: new Date().toISOString(),
+    templates
+  };
+  const filename = templates.length === 1
+    ? `illuminus-template-${slugify(templates[0].name)}.json`
+    : `illuminus-templates-${templates.length}.json`;
+  foundry.utils.saveDataToFile(JSON.stringify(payload, null, 2), "application/json", filename);
+  log.info(`exported ${templates.length} template(s) to ${filename}`);
+  return true;
+}
+
+/**
+ * Validate a parsed template payload.
+ *
+ * The markup itself is not inspected here: it is parsed through Foundry's own
+ * editor schema when it is inserted, which drops anything the editor does not
+ * recognise. Checking it twice, in two different ways, would only invite the
+ * two checks to disagree.
+ * @param {any} parsed
+ * @returns {object[]}
+ * @throws {Error} When the payload holds no usable templates.
+ */
+export function normalizeTemplateImport(parsed) {
+  const list = Array.isArray(parsed) ? parsed : parsed?.templates;
+  if (!Array.isArray(list)) throw new Error(game.i18n.localize("ILLUMINUS.Errors.ImportShape"));
+  const templates = list
+    .filter((entry) => entry && typeof entry === "object" && typeof entry.markup === "string" && entry.markup.trim())
+    .map((entry) => cleanTemplate({ ...entry, id: undefined, preset: undefined }));
+  if (!templates.length) throw new Error(game.i18n.localize("ILLUMINUS.Errors.ImportNoTemplates"));
+  return templates;
+}
+
+/** Store an imported set of templates. */
+export async function importTemplates(templates) {
+  const created = [];
+  for (const template of templates) {
+    const record = await createTemplate(template);
+    if (record) created.push(record);
+  }
+  return created;
+}
+
+/** Open a file chooser and import the chosen template file. */
+export function promptTemplateImport() {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json,.json";
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      if (!file) return resolve(null);
+      try {
+        const parsed = JSON.parse(await file.text());
+        const created = await importTemplates(normalizeTemplateImport(parsed));
+        ui.notifications.info(game.i18n.format("ILLUMINUS.Notifications.ImportedTemplates", { count: created.length }));
+        resolve(created);
+      } catch (error) {
+        log.error(error);
+        ui.notifications.error(error.message);
+        resolve(null);
+      }
+    }, { once: true });
+    input.addEventListener("cancel", () => resolve(null), { once: true });
+    input.click();
+  });
+}
+
+/** Every template id, for "export all". */
+export const allTemplateIds = () => listTemplates().map((template) => template.id);

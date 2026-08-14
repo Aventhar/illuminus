@@ -9,6 +9,7 @@ export const MODULE_ID = "illuminus";
 /** Keys for settings registered via `game.settings.register`. */
 export const SETTINGS = {
   styles: "styles",
+  templates: "templates",
   debug: "debug"
 };
 

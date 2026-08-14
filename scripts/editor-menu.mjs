@@ -1,6 +1,7 @@
 import { MODULE_ID, STYLE_ATTR, log } from "./constants.mjs";
 import { GROUPS } from "./style-schema.mjs";
 import { getStyle } from "./style-store.mjs";
+import { listTemplates, createTemplate } from "./template-store.mjs";
 
 /**
  * An Illuminus menu in the journal text editor.
@@ -200,6 +201,72 @@ function isActive(state, typeName, groupId, prefix) {
   return Boolean(target?.node.attrs.classes?.split(/\s+/).includes(`${prefix}--${groupId}`));
 }
 
+/**
+ * Drop a stored template in at the cursor.
+ *
+ * The markup is parsed through Foundry's own schema rather than injected, so
+ * anything the editor does not recognise is dropped on the way in — an imported
+ * template cannot carry more than a person could have typed.
+ * @param {string} markup
+ */
+function insertTemplate(markup) {
+  return (state, dispatch) => {
+    let content;
+    try {
+      content = foundry.prosemirror.dom.parseString(markup, state.schema).content;
+    } catch (error) {
+      log.warn("could not parse template markup", error);
+      return false;
+    }
+    if (!content?.childCount) return false;
+    if (dispatch) {
+      const { from, to } = state.selection;
+      dispatch(state.tr.replaceWith(from, to, content));
+    }
+    return true;
+  };
+}
+
+/**
+ * Store whatever is selected as a template of its own.
+ *
+ * The selection is serialized with the same serializer the editor saves through,
+ * so what comes back out is what was on the page — classes and all.
+ */
+function saveSelectionAsTemplate() {
+  return (state, dispatch) => {
+    const { from, to, empty } = state.selection;
+    if (empty) return false;
+    if (!dispatch) return true;
+
+    const slice = state.doc.slice(from, to);
+    const markup = foundry.prosemirror.dom.serializeString(slice.content);
+    // Asked for after the command reports success, so the menu closes first.
+    promptForTemplateName(markup);
+    return true;
+  };
+}
+
+/** Ask what to call a captured template, then store it. */
+async function promptForTemplateName(markup) {
+  const { DialogV2 } = foundry.applications.api;
+  const name = await DialogV2.prompt({
+    window: { title: game.i18n.localize("ILLUMINUS.Templates.SaveTitle") },
+    content: `<p>${game.i18n.localize("ILLUMINUS.Templates.SaveBody")}</p>`
+      + `<input type="text" name="name" autofocus placeholder="${game.i18n.localize("ILLUMINUS.Templates.NamePlaceholder")}">`,
+    ok: {
+      label: "ILLUMINUS.Buttons.Save",
+      callback: (_event, button) => button.form.elements.name.value
+    },
+    rejectClose: false
+  });
+  if (!name) return;
+  const template = await createTemplate({ name, markup });
+  if (template) {
+    ui.notifications.info(game.i18n.format("ILLUMINUS.Templates.Saved", { name: template.name }));
+  }
+}
+
 /* -------------------------------------------- */
 /*  Menu                                        */
 /* -------------------------------------------- */
@@ -244,6 +311,22 @@ export function registerEditorMenu() {
             active: tagIsActive(state, groupId),
             cmd: applyTag(groupId)
           }))
+        },
+        {
+          action: "illuminus-templates",
+          title: game.i18n.localize("ILLUMINUS.Menu.Templates"),
+          children: [
+            ...listTemplates().map((template) => ({
+              action: `illuminus-template-${template.id}`,
+              title: template.name,
+              cmd: insertTemplate(template.markup)
+            })),
+            {
+              action: "illuminus-template-save",
+              title: game.i18n.localize("ILLUMINUS.Menu.SaveTemplate"),
+              cmd: saveSelectionAsTemplate()
+            }
+          ]
         },
         {
           action: "illuminus-clear",

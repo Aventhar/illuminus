@@ -1,5 +1,6 @@
 import { MODULE_ID, SETTINGS, log } from "./constants.mjs";
 import { IlluminusStyleManager } from "./apps/style-manager.mjs";
+import { IlluminusTemplateManager } from "./apps/template-manager.mjs";
 import { refreshStyles } from "./style-injector.mjs";
 
 /**
@@ -17,12 +18,29 @@ export function registerSettings() {
     onChange: () => refreshStyles()
   });
 
+  // The template library. Edited through its own manager, like the styles.
+  game.settings.register(MODULE_ID, SETTINGS.templates, {
+    scope: "world",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
   game.settings.registerMenu(MODULE_ID, "styleManager", {
     name: "ILLUMINUS.Settings.Manager.Name",
     label: "ILLUMINUS.Settings.Manager.Label",
     hint: "ILLUMINUS.Settings.Manager.Hint",
     icon: "fa-solid fa-swatchbook",
     type: IlluminusStyleManager,
+    restricted: true
+  });
+
+  game.settings.registerMenu(MODULE_ID, "templateManager", {
+    name: "ILLUMINUS.Settings.Templates.Name",
+    label: "ILLUMINUS.Settings.Templates.Label",
+    hint: "ILLUMINUS.Settings.Templates.Hint",
+    icon: "fa-solid fa-file-lines",
+    type: IlluminusTemplateManager,
     restricted: true
   });
 

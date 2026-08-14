@@ -1411,6 +1411,33 @@
   display: none;
 }
 
+/* --- Template library --------------------------------------------------- */
+
+.illuminus-template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 0;
+}
+
+.illuminus-manager__empty {
+  padding: 1rem;
+  opacity: 0.75;
+  text-align: center;
+}
+
+/* Marks a template as one that came with the module. Named apart from
+   `.illuminus-tag`, which is a journal treatment rather than GUI furniture. */
+.illuminus-badge-text {
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  border-radius: 3px;
+  background: var(--color-border-highlight, #ff6400);
+  color: var(--color-dark-1, #111);
+  font-size: var(--font-size-10, 10px);
+  font-weight: bold;
+}
+
 /* --- Editor preview pane ------------------------------------------------ */
 
 .illuminus-preview {

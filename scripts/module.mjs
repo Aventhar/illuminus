@@ -10,6 +10,11 @@ import { IlluminusStyleManager } from "./apps/style-manager.mjs";
 import { IlluminusStyleEditor } from "./apps/style-editor.mjs";
 import { promptStyleAssignment } from "./apps/style-picker.mjs";
 import { registerEditorMenu } from "./editor-menu.mjs";
+import {
+  getTemplates, getTemplate, listTemplates, createTemplate, updateTemplate, deleteTemplate,
+  seedTemplatesIfEmpty, restoreTemplatePresets
+} from "./template-store.mjs";
+import { IlluminusTemplateManager } from "./apps/template-manager.mjs";
 
 /**
  * Entry point for Illuminus.
@@ -36,12 +41,16 @@ Hooks.once("init", () => {
     getAssignedStyle, getAssignedStyleId, assignStyle,
     exportStyles, promptImport,
     refreshStyles,
+    openTemplates: () => IlluminusTemplateManager.open(),
+    getTemplates, getTemplate, listTemplates,
+    createTemplate, updateTemplate, deleteTemplate, restoreTemplatePresets,
     getSetting, setSetting
   };
 });
 
 Hooks.once("ready", async () => {
   await seedPresetsIfEmpty();
+  await seedTemplatesIfEmpty();
   refreshStyles();
   log.info(`ready — Foundry ${game.version}, system ${game.system.id}`);
 });
@@ -110,6 +119,12 @@ Hooks.on("renderJournalDirectory", (app, element) => {
   button.innerHTML = `<i class="fa-solid fa-swatchbook"></i> ${game.i18n.localize("ILLUMINUS.Manager.SidebarButton")}`;
   button.addEventListener("click", () => IlluminusStyleManager.open());
 
+  const templates = document.createElement("button");
+  templates.type = "button";
+  templates.className = "illuminus-open-templates";
+  templates.innerHTML = `<i class="fa-solid fa-file-lines"></i> ${game.i18n.localize("ILLUMINUS.Templates.SidebarButton")}`;
+  templates.addEventListener("click", () => IlluminusTemplateManager.open());
+
   const footer = root.querySelector(".directory-footer") ?? root.querySelector(".header-actions") ?? root;
-  footer.append(button);
+  footer.append(button, templates);
 });

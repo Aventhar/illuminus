@@ -178,6 +178,21 @@ These are all load-bearing and none are obvious from the code.
   application classes, `templates/` for Handlebars, `public/less2/` for styles. Check
   there rather than guessing at the API.
 
+## Templates
+
+A template is stored markup, not styling. Two properties are load-bearing:
+
+- **It is parsed, never injected.** `foundry.prosemirror.dom.parseString(markup, schema)`
+  drops anything the editor does not recognise, so an imported template can carry no more
+  than a person could have typed. Do not add a second sanitizer — two checks that can
+  disagree are worse than one that cannot be bypassed.
+- **It names keys, not colors.** `illuminus-box--box01`, never `background: #5e1914`.
+  That is what lets one template work under every style, and a check asserts a bundled
+  template carries no styling at all.
+
+Insertion is `tr.replaceWith(from, to, doc.content)`; capture is
+`dom.serializeString(state.doc.slice(from, to).content)`.
+
 ## Bundled assets
 
 `assets/samples/textures/` and `assets/samples/images/` ship with the module and are

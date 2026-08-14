@@ -1,0 +1,72 @@
+<div class="illuminus-manager__body">
+
+  <p class="hint">{{localize "ILLUMINUS.Templates.Hint"}}</p>
+
+  <header class="illuminus-manager__toolbar">
+    <button type="button" data-action="import">
+      <i class="fa-solid fa-file-import"></i> {{localize "ILLUMINUS.Buttons.Import"}}
+    </button>
+    <button type="button" data-action="exportSelected" {{disabled empty}}>
+      <i class="fa-solid fa-file-export"></i> {{localize "ILLUMINUS.Buttons.ExportSelected"}}
+    </button>
+    <button type="button" data-action="exportAll" {{disabled empty}}>
+      <i class="fa-solid fa-box-archive"></i> {{localize "ILLUMINUS.Buttons.ExportAll"}}
+    </button>
+    <button type="button" data-action="restore"
+            data-tooltip="{{localize 'ILLUMINUS.Templates.RestoreTooltip'}}">
+      <i class="fa-solid fa-rotate-left"></i> {{localize "ILLUMINUS.Templates.Restore"}}
+    </button>
+  </header>
+
+  {{#if empty}}
+  <p class="illuminus-manager__empty">{{localize "ILLUMINUS.Templates.Empty"}}</p>
+  {{else}}
+  <div class="illuminus-template-list scrollable">
+
+    <label class="illuminus-select-all">
+      <input type="checkbox" data-action="toggleAll">
+      <span>{{localize "ILLUMINUS.Manager.SelectAll"}}</span>
+    </label>
+
+    {{#each templates as |template|}}
+    <div class="illuminus-style-row" data-template-id="{{template.id}}">
+
+      <input type="checkbox" name="pick" value="{{template.id}}"
+             aria-label="{{localize 'ILLUMINUS.Manager.SelectForExport'}}">
+
+      <div class="illuminus-style-row__text">
+        <div class="illuminus-style-row__name">
+          {{template.name}}
+          {{#if template.bundled}}
+          <span class="illuminus-badge-text" data-tooltip="{{localize 'ILLUMINUS.Templates.Bundled'}}">
+            {{localize "ILLUMINUS.Manager.Preset"}}
+          </span>
+          {{/if}}
+        </div>
+        {{#if template.description}}
+        <div class="illuminus-style-row__description">{{template.description}}</div>
+        {{/if}}
+        {{!-- The tags it holds, counted rather than rendered: a stranger's
+              markup never reaches this window's own DOM. --}}
+        <div class="illuminus-style-row__description">{{template.summary}}</div>
+      </div>
+
+      <div class="illuminus-style-row__buttons">
+        <button type="button" data-action="rename" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Rename'}}">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <button type="button" data-action="exportOne" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Export'}}">
+          <i class="fa-solid fa-file-export"></i>
+        </button>
+        <button type="button" data-action="remove" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Delete'}}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{/if}}
+</div>
