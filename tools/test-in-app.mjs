@@ -2302,10 +2302,17 @@ try {
     const style = await api.createStyle({name: "Unsaved Probe"});
     window.__unsaved = {styleId: style.id};
     const out = {};
+    // Waits for the control rather than guessing at a delay: the editor builds
+    // a few hundred of them, and a fixed wait that was long enough once stops
+    // being long enough as the schema grows.
     const dirty = async () => {
       const app = await api.openEditor(style.id);
-      await new Promise(r => setTimeout(r, 900));
-      app.element.querySelector('[data-field="page.background"] color-picker').value = "#123456";
+      let control = null;
+      for (let i = 0; i < 60 && !control; i++) {
+        await new Promise(r => setTimeout(r, 100));
+        control = app.element?.querySelector('[data-field="page.background"] color-picker');
+      }
+      control.value = "#123456";
       await new Promise(r => setTimeout(r, 250));
       return app;
     };
@@ -2686,7 +2693,83 @@ try {
   })()`);
 }
 
-console.log("\n[42] Console is clean");
+// Every element that can be painted can be painted differently under the
+// pointer. Driven with a real mouse move: `:hover` does not match for a
+// dispatched event, so this could not be checked any other way.
+console.log("\n[42] Hovered states reach the page");
+try {
+  const setUp = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Hover Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    settings.heading1.hoverColor = "#00ff00";
+    settings.boxes.hoverBackground = "#123456";
+    settings.heading2.hoverBorderTopColor = "#ff8800";
+    settings.heading2.borderTopWidth = 3;
+    settings.heading2.borderTopStyle = "solid";
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Hover Test Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<h1>Heading one</h1><h2>Heading two</h2><blockquote><p>Boxed</p></blockquote>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    entry.sheet.setPosition({left: 60, top: 60, width: 900, height: 700});
+    await new Promise(r => setTimeout(r, 1400));
+    window.__hover = {entryId: entry.id, styleId: style.id};
+    const box = (sel) => {
+      const el = entry.sheet.element.querySelector(sel);
+      const b = el.getBoundingClientRect();
+      return {x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2)};
+    };
+    return JSON.stringify({
+      h1: box(".journal-page-content h1"),
+      h2: box(".journal-page-content h2"),
+      quote: box(".journal-page-content blockquote"),
+      restColor: getComputedStyle(entry.sheet.element.querySelector(".journal-page-content h1")).color
+    });
+  })()`);
+  const at = JSON.parse(setUp);
+
+  const readAfterHover = async (point, sel, property) => {
+    await cdp.mouse("mouseMoved", point.x, point.y);
+    await new Promise((r) => setTimeout(r, 200));
+    return cdp.evaluate(`(() => {
+      const entry = game.journal.get(window.__hover.entryId);
+      return getComputedStyle(entry.sheet.element.querySelector(${JSON.stringify(sel)})).${property};
+    })()`);
+  };
+
+  const h1Hovered = await readAfterHover(at.h1, ".journal-page-content h1", "color");
+  const quoteHovered = await readAfterHover(at.quote, ".journal-page-content blockquote", "backgroundColor");
+  const h2Hovered = await readAfterHover(at.h2, ".journal-page-content h2", "borderTopColor");
+  // Move away and the ordinary color comes back.
+  await cdp.mouse("mouseMoved", 5, 5);
+  await new Promise((r) => setTimeout(r, 200));
+  const h1Rested = await cdp.evaluate(`(() => {
+    const entry = game.journal.get(window.__hover.entryId);
+    return getComputedStyle(entry.sheet.element.querySelector(".journal-page-content h1")).color;
+  })()`);
+
+  check(h1Hovered === "rgb(0, 255, 0)", `a heading takes its hovered lettering (got ${h1Hovered})`);
+  check(quoteHovered === "rgb(18, 52, 86)", `a box takes its hovered fill (got ${quoteHovered})`);
+  check(h2Hovered === "rgb(255, 136, 0)", `and an edge takes its hovered color (got ${h2Hovered})`);
+  check(h1Rested === at.restColor,
+    `moving away puts the ordinary color back (${h1Rested} vs ${at.restColor})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__hover?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__hover?.styleId) await api.deleteStyle(window.__hover.styleId);
+    window.__hover = undefined;
+  })()`);
+}
+
+console.log("\n[43] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

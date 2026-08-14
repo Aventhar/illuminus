@@ -255,6 +255,72 @@ ${headingSelector(level)} {
 /* -------------------------------------------- */
 
 /**
+ * Where each element's hovered paint lands.
+ *
+ * The schema derives a hovered counterpart for every lettering color, fill, and
+ * edge color it defines; this says which element each group is. A group with no
+ * entry here simply has no hovered rule — the sidebar and the window state
+ * theirs by hand, and a family member's selector comes from its own id.
+ */
+const HOVER_TARGETS = {
+  page: ".illuminus-styled .journal-entry-content",
+  title: ".illuminus-styled .journal-header .title",
+  heading1: ".illuminus-styled .journal-page-content h1",
+  heading2: ".illuminus-styled .journal-page-content h2",
+  heading3: ".illuminus-styled .journal-page-content h3",
+  heading4: ".illuminus-styled .journal-page-content h4",
+  heading5: ".illuminus-styled .journal-page-content h5",
+  heading6: ".illuminus-styled .journal-page-content h6",
+  // Ordinary text wherever it appears, so a list item or a table cell is
+  // covered by the Body tab rather than needing a hovered state of its own.
+  body: ["p", "li", "dd", "dt", "td"]
+    .map((tag) => `.illuminus-styled .journal-page-content ${tag}`).join(", "),
+  tables: ".illuminus-styled .journal-page-content table",
+  boxes: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-box)",
+  secrets: ".illuminus-styled .journal-page-content section.secret",
+  images: ".illuminus-styled .journal-page-content figure",
+  links: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll"
+};
+
+/** The paint a hovered element can change, and the property each one sets. */
+const HOVER_PROPS = [
+  { name: "color", property: "color" },
+  { name: "background", property: "background-color" },
+  ...["Top", "Right", "Bottom", "Left"].map((side) => ({
+    name: `border${side}Color`,
+    property: `border-${side.toLowerCase()}-color`
+  }))
+];
+
+/**
+ * One element's hovered rule.
+ *
+ * Each declaration falls back to the ordinary value, so a hovered color that
+ * was never set changes nothing at all rather than resetting the element to
+ * some default.
+ */
+const hoverRules = (group, selector) => {
+  const fields = groupFields(group);
+  const lines = HOVER_PROPS
+    .filter(({ name }) => fields.some((field) => field.name === `hover${name[0].toUpperCase()}${name.slice(1)}`))
+    .map(({ name, property }) => {
+      const hovered = `hover${name[0].toUpperCase()}${name.slice(1)}`;
+      return `  ${property}: var(${varFor(group, hovered)}, var(${varFor(group, name)}));`;
+    });
+  if (!lines.length) return "";
+  // Appended per selector: a comma-joined list would otherwise hover only its
+  // last member, which is the kind of thing that half-works in silence.
+  const hovered = selector.split(",").map((one) => `${one.trim()}:hover`).join(",\n");
+  return `
+${hovered} {
+${lines.join("\n")}
+}
+`;
+};
+
+/* -------------------------------------------- */
+
+/**
  * A background image behind one fill color.
  *
  * Every fill in the interface has one, so rather than write forty near-identical
@@ -388,8 +454,13 @@ const pictures = GROUPS.filter((g) => g.family === "imageStyles").map(imageRules
 const tags = GROUPS.filter((g) => g.family === "tagStyles").map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
 const headings = HEADINGS.map(({ group, level }) => headingRules(group, level)).join("");
+const hovers = GROUPS.map((group) => {
+  const selector = HOVER_TARGETS[group.id]
+    ?? (group.family ? memberSelector(group) : null);
+  return selector ? hoverRules(group, selector) : "";
+}).join("");
 const images = IMAGE_LAYERS.map(imageLayer).join("");
-const out = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}`;
+const out = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}${hovers}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
   + `${GROUPS.filter((g) => g.family).length} groups`);

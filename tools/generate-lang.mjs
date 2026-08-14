@@ -38,7 +38,7 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSection": "Reset",
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.StateNormal": "Normal",
-  "ILLUMINUS.Editor.StateHover": "Pointed at",
+  "ILLUMINUS.Editor.StateHover": "Hovered",
   "ILLUMINUS.Editor.StateActive": "Current page",
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting\u2026",
   "ILLUMINUS.Editor.FilterCount": "{count} match(es)",
@@ -365,6 +365,15 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, `How the ${words} lettering looks — its weight and whether it is italic.`);
     continue;
   }
+  // hovered edges: hoverBorder<Side>Color
+  if ((m = name.match(/^hoverBorder(Top|Right|Bottom|Left)Color$/))) {
+    const side = m[1];
+    put(`ILLUMINUS.Field.${name}.label`, `${side} Color`);
+    put(`ILLUMINUS.Field.${name}.hint`,
+      `Color of the ${side.toLowerCase()} edge while the mouse is over this. `
+      + "Leave empty to keep the ordinary color.");
+    continue;
+  }
   // border family: <prefix><Side><Width|Style|Color>
   else if ((m = name.match(/^(.*?)(Top|Right|Bottom|Left)(Width|Style|Color)$/))) {
     const [, prefix, side, part] = m;
@@ -424,6 +433,8 @@ for (const name of names) {
 
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
+  hoverColor: ["Text Color", "Lettering color while the mouse is over this. Leave empty to keep the ordinary color."],
+  hoverBackground: ["Fill Color", "The color behind this while the mouse is over it. Leave empty to keep the ordinary fill."],
   background: ["Fill Color", "The flat color behind everything else."],
   highlightBackground: ["Highlight Color", "The color behind highlighted words."],
   highlightColor: ["Highlight Text Color", "Lettering color of highlighted words."],
@@ -513,7 +524,7 @@ const FIELD_TEXT = {
   dropCap: ["Opening Capital", "Enlarges the first letter of the page so it spans several lines."],
   dropCapFont: ["Opening Capital Typeface", "Lettering used for the opening capital. Leave as the journal's normal typeface to match the body."],
   dropCapColor: ["Opening Capital Color", "Color of that enlarged first letter."],
-  hoverColor: ["Color When Pointed At", "Color a link turns when the mouse is over it."],
+
   decorationLine: ["Line", "Whether links are underlined, struck through, or left plain."],
   decorationStyle: ["Line Style", "What the link's line looks like."],
   decorationColor: ["Line Color", "Color of the link's line. May differ from the text itself."],

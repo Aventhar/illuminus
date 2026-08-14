@@ -16,7 +16,7 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 2,469 settings across 15 tabs and 380 collapsible
+- **Everything is a GUI control.** 2,717 settings across 15 tabs and 381 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
@@ -43,6 +43,11 @@ it to whichever journals should wear it, and export it to carry into another wor
   the ones with nothing in them, so the strip itself answers "which tab has the shadow
   settings?". Where a control has a pointed-at twin, the pair shares one switch instead
   of taking two rows — and a search still reaches the half that is folded away.
+- **Everything has a hovered state.** Any lettering color, fill, or edge can be given a
+  second value that takes over while the mouse is over it — headings, boxes, tags,
+  pictures, table cells, links, sidebar entries. Each starts empty, meaning "leave it
+  alone", so nothing changes until you say so. Sizes and spacing are deliberately not
+  shadowed: changing those under the pointer makes the page slide out from under it.
 - **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.

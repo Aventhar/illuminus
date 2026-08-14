@@ -2291,3 +2291,385 @@
   mix-blend-mode: var(--ill-image10-texture-blend);
   opacity: var(--ill-image10-texture-opacity);
 }
+
+.illuminus-styled .journal-entry-content:hover {
+  background-color: var(--ill-page-hover-background, var(--ill-page-background));
+  border-top-color: var(--ill-page-hover-border-top-color, var(--ill-page-border-top-color));
+  border-right-color: var(--ill-page-hover-border-right-color, var(--ill-page-border-right-color));
+  border-bottom-color: var(--ill-page-hover-border-bottom-color, var(--ill-page-border-bottom-color));
+  border-left-color: var(--ill-page-hover-border-left-color, var(--ill-page-border-left-color));
+}
+
+.illuminus-styled .journal-header .title:hover {
+  color: var(--ill-title-hover-color, var(--ill-title-color));
+  background-color: var(--ill-title-hover-background, var(--ill-title-background));
+  border-top-color: var(--ill-title-hover-border-top-color, var(--ill-title-border-top-color));
+  border-right-color: var(--ill-title-hover-border-right-color, var(--ill-title-border-right-color));
+  border-bottom-color: var(--ill-title-hover-border-bottom-color, var(--ill-title-border-bottom-color));
+  border-left-color: var(--ill-title-hover-border-left-color, var(--ill-title-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h1:hover {
+  color: var(--ill-heading1-hover-color, var(--ill-heading1-color));
+  background-color: var(--ill-heading1-hover-background, var(--ill-heading1-background));
+  border-top-color: var(--ill-heading1-hover-border-top-color, var(--ill-heading1-border-top-color));
+  border-right-color: var(--ill-heading1-hover-border-right-color, var(--ill-heading1-border-right-color));
+  border-bottom-color: var(--ill-heading1-hover-border-bottom-color, var(--ill-heading1-border-bottom-color));
+  border-left-color: var(--ill-heading1-hover-border-left-color, var(--ill-heading1-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h2:hover {
+  color: var(--ill-heading2-hover-color, var(--ill-heading2-color));
+  background-color: var(--ill-heading2-hover-background, var(--ill-heading2-background));
+  border-top-color: var(--ill-heading2-hover-border-top-color, var(--ill-heading2-border-top-color));
+  border-right-color: var(--ill-heading2-hover-border-right-color, var(--ill-heading2-border-right-color));
+  border-bottom-color: var(--ill-heading2-hover-border-bottom-color, var(--ill-heading2-border-bottom-color));
+  border-left-color: var(--ill-heading2-hover-border-left-color, var(--ill-heading2-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h3:hover {
+  color: var(--ill-heading3-hover-color, var(--ill-heading3-color));
+  background-color: var(--ill-heading3-hover-background, var(--ill-heading3-background));
+  border-top-color: var(--ill-heading3-hover-border-top-color, var(--ill-heading3-border-top-color));
+  border-right-color: var(--ill-heading3-hover-border-right-color, var(--ill-heading3-border-right-color));
+  border-bottom-color: var(--ill-heading3-hover-border-bottom-color, var(--ill-heading3-border-bottom-color));
+  border-left-color: var(--ill-heading3-hover-border-left-color, var(--ill-heading3-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h4:hover {
+  color: var(--ill-heading4-hover-color, var(--ill-heading4-color));
+  background-color: var(--ill-heading4-hover-background, var(--ill-heading4-background));
+  border-top-color: var(--ill-heading4-hover-border-top-color, var(--ill-heading4-border-top-color));
+  border-right-color: var(--ill-heading4-hover-border-right-color, var(--ill-heading4-border-right-color));
+  border-bottom-color: var(--ill-heading4-hover-border-bottom-color, var(--ill-heading4-border-bottom-color));
+  border-left-color: var(--ill-heading4-hover-border-left-color, var(--ill-heading4-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h5:hover {
+  color: var(--ill-heading5-hover-color, var(--ill-heading5-color));
+  background-color: var(--ill-heading5-hover-background, var(--ill-heading5-background));
+  border-top-color: var(--ill-heading5-hover-border-top-color, var(--ill-heading5-border-top-color));
+  border-right-color: var(--ill-heading5-hover-border-right-color, var(--ill-heading5-border-right-color));
+  border-bottom-color: var(--ill-heading5-hover-border-bottom-color, var(--ill-heading5-border-bottom-color));
+  border-left-color: var(--ill-heading5-hover-border-left-color, var(--ill-heading5-border-left-color));
+}
+
+.illuminus-styled .journal-page-content h6:hover {
+  color: var(--ill-heading6-hover-color, var(--ill-heading6-color));
+  background-color: var(--ill-heading6-hover-background, var(--ill-heading6-background));
+  border-top-color: var(--ill-heading6-hover-border-top-color, var(--ill-heading6-border-top-color));
+  border-right-color: var(--ill-heading6-hover-border-right-color, var(--ill-heading6-border-right-color));
+  border-bottom-color: var(--ill-heading6-hover-border-bottom-color, var(--ill-heading6-border-bottom-color));
+  border-left-color: var(--ill-heading6-hover-border-left-color, var(--ill-heading6-border-left-color));
+}
+
+.illuminus-styled .journal-page-content p:hover,
+.illuminus-styled .journal-page-content li:hover,
+.illuminus-styled .journal-page-content dd:hover,
+.illuminus-styled .journal-page-content dt:hover,
+.illuminus-styled .journal-page-content td:hover {
+  color: var(--ill-body-hover-color, var(--ill-body-color));
+}
+
+.illuminus-styled .journal-page-content a.content-link:hover,
+.illuminus-styled .journal-page-content a.inline-roll:hover {
+  color: var(--ill-links-hover-color, var(--ill-links-color));
+  background-color: var(--ill-links-hover-background, var(--ill-links-background));
+  border-top-color: var(--ill-links-hover-border-top-color, var(--ill-links-border-top-color));
+  border-right-color: var(--ill-links-hover-border-right-color, var(--ill-links-border-right-color));
+  border-bottom-color: var(--ill-links-hover-border-bottom-color, var(--ill-links-border-bottom-color));
+  border-left-color: var(--ill-links-hover-border-left-color, var(--ill-links-border-left-color));
+}
+
+.illuminus-styled .journal-page-content table:hover {
+  border-top-color: var(--ill-tables-hover-border-top-color, var(--ill-tables-border-top-color));
+  border-right-color: var(--ill-tables-hover-border-right-color, var(--ill-tables-border-right-color));
+  border-bottom-color: var(--ill-tables-hover-border-bottom-color, var(--ill-tables-border-bottom-color));
+  border-left-color: var(--ill-tables-hover-border-left-color, var(--ill-tables-border-left-color));
+}
+
+.illuminus-styled .journal-page-content blockquote:not(.illuminus-box):hover {
+  color: var(--ill-boxes-hover-color, var(--ill-boxes-color));
+  background-color: var(--ill-boxes-hover-background, var(--ill-boxes-background));
+  border-top-color: var(--ill-boxes-hover-border-top-color, var(--ill-boxes-border-top-color));
+  border-right-color: var(--ill-boxes-hover-border-right-color, var(--ill-boxes-border-right-color));
+  border-bottom-color: var(--ill-boxes-hover-border-bottom-color, var(--ill-boxes-border-bottom-color));
+  border-left-color: var(--ill-boxes-hover-border-left-color, var(--ill-boxes-border-left-color));
+}
+
+.illuminus-styled .journal-page-content section.secret:hover {
+  color: var(--ill-secrets-hover-color, var(--ill-secrets-color));
+  background-color: var(--ill-secrets-hover-background, var(--ill-secrets-background));
+  border-top-color: var(--ill-secrets-hover-border-top-color, var(--ill-secrets-border-top-color));
+  border-right-color: var(--ill-secrets-hover-border-right-color, var(--ill-secrets-border-right-color));
+  border-bottom-color: var(--ill-secrets-hover-border-bottom-color, var(--ill-secrets-border-bottom-color));
+  border-left-color: var(--ill-secrets-hover-border-left-color, var(--ill-secrets-border-left-color));
+}
+
+.illuminus-styled .journal-page-content figure:hover {
+  background-color: var(--ill-images-hover-background, var(--ill-images-background));
+  border-top-color: var(--ill-images-hover-border-top-color, var(--ill-images-border-top-color));
+  border-right-color: var(--ill-images-hover-border-right-color, var(--ill-images-border-right-color));
+  border-bottom-color: var(--ill-images-hover-border-bottom-color, var(--ill-images-border-bottom-color));
+  border-left-color: var(--ill-images-hover-border-left-color, var(--ill-images-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box01:hover {
+  color: var(--ill-box01-hover-color, var(--ill-box01-color));
+  background-color: var(--ill-box01-hover-background, var(--ill-box01-background));
+  border-top-color: var(--ill-box01-hover-border-top-color, var(--ill-box01-border-top-color));
+  border-right-color: var(--ill-box01-hover-border-right-color, var(--ill-box01-border-right-color));
+  border-bottom-color: var(--ill-box01-hover-border-bottom-color, var(--ill-box01-border-bottom-color));
+  border-left-color: var(--ill-box01-hover-border-left-color, var(--ill-box01-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box02:hover {
+  color: var(--ill-box02-hover-color, var(--ill-box02-color));
+  background-color: var(--ill-box02-hover-background, var(--ill-box02-background));
+  border-top-color: var(--ill-box02-hover-border-top-color, var(--ill-box02-border-top-color));
+  border-right-color: var(--ill-box02-hover-border-right-color, var(--ill-box02-border-right-color));
+  border-bottom-color: var(--ill-box02-hover-border-bottom-color, var(--ill-box02-border-bottom-color));
+  border-left-color: var(--ill-box02-hover-border-left-color, var(--ill-box02-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box03:hover {
+  color: var(--ill-box03-hover-color, var(--ill-box03-color));
+  background-color: var(--ill-box03-hover-background, var(--ill-box03-background));
+  border-top-color: var(--ill-box03-hover-border-top-color, var(--ill-box03-border-top-color));
+  border-right-color: var(--ill-box03-hover-border-right-color, var(--ill-box03-border-right-color));
+  border-bottom-color: var(--ill-box03-hover-border-bottom-color, var(--ill-box03-border-bottom-color));
+  border-left-color: var(--ill-box03-hover-border-left-color, var(--ill-box03-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box04:hover {
+  color: var(--ill-box04-hover-color, var(--ill-box04-color));
+  background-color: var(--ill-box04-hover-background, var(--ill-box04-background));
+  border-top-color: var(--ill-box04-hover-border-top-color, var(--ill-box04-border-top-color));
+  border-right-color: var(--ill-box04-hover-border-right-color, var(--ill-box04-border-right-color));
+  border-bottom-color: var(--ill-box04-hover-border-bottom-color, var(--ill-box04-border-bottom-color));
+  border-left-color: var(--ill-box04-hover-border-left-color, var(--ill-box04-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box05:hover {
+  color: var(--ill-box05-hover-color, var(--ill-box05-color));
+  background-color: var(--ill-box05-hover-background, var(--ill-box05-background));
+  border-top-color: var(--ill-box05-hover-border-top-color, var(--ill-box05-border-top-color));
+  border-right-color: var(--ill-box05-hover-border-right-color, var(--ill-box05-border-right-color));
+  border-bottom-color: var(--ill-box05-hover-border-bottom-color, var(--ill-box05-border-bottom-color));
+  border-left-color: var(--ill-box05-hover-border-left-color, var(--ill-box05-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box06:hover {
+  color: var(--ill-box06-hover-color, var(--ill-box06-color));
+  background-color: var(--ill-box06-hover-background, var(--ill-box06-background));
+  border-top-color: var(--ill-box06-hover-border-top-color, var(--ill-box06-border-top-color));
+  border-right-color: var(--ill-box06-hover-border-right-color, var(--ill-box06-border-right-color));
+  border-bottom-color: var(--ill-box06-hover-border-bottom-color, var(--ill-box06-border-bottom-color));
+  border-left-color: var(--ill-box06-hover-border-left-color, var(--ill-box06-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box07:hover {
+  color: var(--ill-box07-hover-color, var(--ill-box07-color));
+  background-color: var(--ill-box07-hover-background, var(--ill-box07-background));
+  border-top-color: var(--ill-box07-hover-border-top-color, var(--ill-box07-border-top-color));
+  border-right-color: var(--ill-box07-hover-border-right-color, var(--ill-box07-border-right-color));
+  border-bottom-color: var(--ill-box07-hover-border-bottom-color, var(--ill-box07-border-bottom-color));
+  border-left-color: var(--ill-box07-hover-border-left-color, var(--ill-box07-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box08:hover {
+  color: var(--ill-box08-hover-color, var(--ill-box08-color));
+  background-color: var(--ill-box08-hover-background, var(--ill-box08-background));
+  border-top-color: var(--ill-box08-hover-border-top-color, var(--ill-box08-border-top-color));
+  border-right-color: var(--ill-box08-hover-border-right-color, var(--ill-box08-border-right-color));
+  border-bottom-color: var(--ill-box08-hover-border-bottom-color, var(--ill-box08-border-bottom-color));
+  border-left-color: var(--ill-box08-hover-border-left-color, var(--ill-box08-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box09:hover {
+  color: var(--ill-box09-hover-color, var(--ill-box09-color));
+  background-color: var(--ill-box09-hover-background, var(--ill-box09-background));
+  border-top-color: var(--ill-box09-hover-border-top-color, var(--ill-box09-border-top-color));
+  border-right-color: var(--ill-box09-hover-border-right-color, var(--ill-box09-border-right-color));
+  border-bottom-color: var(--ill-box09-hover-border-bottom-color, var(--ill-box09-border-bottom-color));
+  border-left-color: var(--ill-box09-hover-border-left-color, var(--ill-box09-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box10:hover {
+  color: var(--ill-box10-hover-color, var(--ill-box10-color));
+  background-color: var(--ill-box10-hover-background, var(--ill-box10-background));
+  border-top-color: var(--ill-box10-hover-border-top-color, var(--ill-box10-border-top-color));
+  border-right-color: var(--ill-box10-hover-border-right-color, var(--ill-box10-border-right-color));
+  border-bottom-color: var(--ill-box10-hover-border-bottom-color, var(--ill-box10-border-bottom-color));
+  border-left-color: var(--ill-box10-hover-border-left-color, var(--ill-box10-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag01:hover {
+  color: var(--ill-tag01-hover-color, var(--ill-tag01-color));
+  background-color: var(--ill-tag01-hover-background, var(--ill-tag01-background));
+  border-top-color: var(--ill-tag01-hover-border-top-color, var(--ill-tag01-border-top-color));
+  border-right-color: var(--ill-tag01-hover-border-right-color, var(--ill-tag01-border-right-color));
+  border-bottom-color: var(--ill-tag01-hover-border-bottom-color, var(--ill-tag01-border-bottom-color));
+  border-left-color: var(--ill-tag01-hover-border-left-color, var(--ill-tag01-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag02:hover {
+  color: var(--ill-tag02-hover-color, var(--ill-tag02-color));
+  background-color: var(--ill-tag02-hover-background, var(--ill-tag02-background));
+  border-top-color: var(--ill-tag02-hover-border-top-color, var(--ill-tag02-border-top-color));
+  border-right-color: var(--ill-tag02-hover-border-right-color, var(--ill-tag02-border-right-color));
+  border-bottom-color: var(--ill-tag02-hover-border-bottom-color, var(--ill-tag02-border-bottom-color));
+  border-left-color: var(--ill-tag02-hover-border-left-color, var(--ill-tag02-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag03:hover {
+  color: var(--ill-tag03-hover-color, var(--ill-tag03-color));
+  background-color: var(--ill-tag03-hover-background, var(--ill-tag03-background));
+  border-top-color: var(--ill-tag03-hover-border-top-color, var(--ill-tag03-border-top-color));
+  border-right-color: var(--ill-tag03-hover-border-right-color, var(--ill-tag03-border-right-color));
+  border-bottom-color: var(--ill-tag03-hover-border-bottom-color, var(--ill-tag03-border-bottom-color));
+  border-left-color: var(--ill-tag03-hover-border-left-color, var(--ill-tag03-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag04:hover {
+  color: var(--ill-tag04-hover-color, var(--ill-tag04-color));
+  background-color: var(--ill-tag04-hover-background, var(--ill-tag04-background));
+  border-top-color: var(--ill-tag04-hover-border-top-color, var(--ill-tag04-border-top-color));
+  border-right-color: var(--ill-tag04-hover-border-right-color, var(--ill-tag04-border-right-color));
+  border-bottom-color: var(--ill-tag04-hover-border-bottom-color, var(--ill-tag04-border-bottom-color));
+  border-left-color: var(--ill-tag04-hover-border-left-color, var(--ill-tag04-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag05:hover {
+  color: var(--ill-tag05-hover-color, var(--ill-tag05-color));
+  background-color: var(--ill-tag05-hover-background, var(--ill-tag05-background));
+  border-top-color: var(--ill-tag05-hover-border-top-color, var(--ill-tag05-border-top-color));
+  border-right-color: var(--ill-tag05-hover-border-right-color, var(--ill-tag05-border-right-color));
+  border-bottom-color: var(--ill-tag05-hover-border-bottom-color, var(--ill-tag05-border-bottom-color));
+  border-left-color: var(--ill-tag05-hover-border-left-color, var(--ill-tag05-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag06:hover {
+  color: var(--ill-tag06-hover-color, var(--ill-tag06-color));
+  background-color: var(--ill-tag06-hover-background, var(--ill-tag06-background));
+  border-top-color: var(--ill-tag06-hover-border-top-color, var(--ill-tag06-border-top-color));
+  border-right-color: var(--ill-tag06-hover-border-right-color, var(--ill-tag06-border-right-color));
+  border-bottom-color: var(--ill-tag06-hover-border-bottom-color, var(--ill-tag06-border-bottom-color));
+  border-left-color: var(--ill-tag06-hover-border-left-color, var(--ill-tag06-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag07:hover {
+  color: var(--ill-tag07-hover-color, var(--ill-tag07-color));
+  background-color: var(--ill-tag07-hover-background, var(--ill-tag07-background));
+  border-top-color: var(--ill-tag07-hover-border-top-color, var(--ill-tag07-border-top-color));
+  border-right-color: var(--ill-tag07-hover-border-right-color, var(--ill-tag07-border-right-color));
+  border-bottom-color: var(--ill-tag07-hover-border-bottom-color, var(--ill-tag07-border-bottom-color));
+  border-left-color: var(--ill-tag07-hover-border-left-color, var(--ill-tag07-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag08:hover {
+  color: var(--ill-tag08-hover-color, var(--ill-tag08-color));
+  background-color: var(--ill-tag08-hover-background, var(--ill-tag08-background));
+  border-top-color: var(--ill-tag08-hover-border-top-color, var(--ill-tag08-border-top-color));
+  border-right-color: var(--ill-tag08-hover-border-right-color, var(--ill-tag08-border-right-color));
+  border-bottom-color: var(--ill-tag08-hover-border-bottom-color, var(--ill-tag08-border-bottom-color));
+  border-left-color: var(--ill-tag08-hover-border-left-color, var(--ill-tag08-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag09:hover {
+  color: var(--ill-tag09-hover-color, var(--ill-tag09-color));
+  background-color: var(--ill-tag09-hover-background, var(--ill-tag09-background));
+  border-top-color: var(--ill-tag09-hover-border-top-color, var(--ill-tag09-border-top-color));
+  border-right-color: var(--ill-tag09-hover-border-right-color, var(--ill-tag09-border-right-color));
+  border-bottom-color: var(--ill-tag09-hover-border-bottom-color, var(--ill-tag09-border-bottom-color));
+  border-left-color: var(--ill-tag09-hover-border-left-color, var(--ill-tag09-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-tag--tag10:hover {
+  color: var(--ill-tag10-hover-color, var(--ill-tag10-color));
+  background-color: var(--ill-tag10-hover-background, var(--ill-tag10-background));
+  border-top-color: var(--ill-tag10-hover-border-top-color, var(--ill-tag10-border-top-color));
+  border-right-color: var(--ill-tag10-hover-border-right-color, var(--ill-tag10-border-right-color));
+  border-bottom-color: var(--ill-tag10-hover-border-bottom-color, var(--ill-tag10-border-bottom-color));
+  border-left-color: var(--ill-tag10-hover-border-left-color, var(--ill-tag10-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image01:hover {
+  background-color: var(--ill-image01-hover-background, var(--ill-image01-background));
+  border-top-color: var(--ill-image01-hover-border-top-color, var(--ill-image01-border-top-color));
+  border-right-color: var(--ill-image01-hover-border-right-color, var(--ill-image01-border-right-color));
+  border-bottom-color: var(--ill-image01-hover-border-bottom-color, var(--ill-image01-border-bottom-color));
+  border-left-color: var(--ill-image01-hover-border-left-color, var(--ill-image01-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image02:hover {
+  background-color: var(--ill-image02-hover-background, var(--ill-image02-background));
+  border-top-color: var(--ill-image02-hover-border-top-color, var(--ill-image02-border-top-color));
+  border-right-color: var(--ill-image02-hover-border-right-color, var(--ill-image02-border-right-color));
+  border-bottom-color: var(--ill-image02-hover-border-bottom-color, var(--ill-image02-border-bottom-color));
+  border-left-color: var(--ill-image02-hover-border-left-color, var(--ill-image02-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image03:hover {
+  background-color: var(--ill-image03-hover-background, var(--ill-image03-background));
+  border-top-color: var(--ill-image03-hover-border-top-color, var(--ill-image03-border-top-color));
+  border-right-color: var(--ill-image03-hover-border-right-color, var(--ill-image03-border-right-color));
+  border-bottom-color: var(--ill-image03-hover-border-bottom-color, var(--ill-image03-border-bottom-color));
+  border-left-color: var(--ill-image03-hover-border-left-color, var(--ill-image03-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image04:hover {
+  background-color: var(--ill-image04-hover-background, var(--ill-image04-background));
+  border-top-color: var(--ill-image04-hover-border-top-color, var(--ill-image04-border-top-color));
+  border-right-color: var(--ill-image04-hover-border-right-color, var(--ill-image04-border-right-color));
+  border-bottom-color: var(--ill-image04-hover-border-bottom-color, var(--ill-image04-border-bottom-color));
+  border-left-color: var(--ill-image04-hover-border-left-color, var(--ill-image04-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image05:hover {
+  background-color: var(--ill-image05-hover-background, var(--ill-image05-background));
+  border-top-color: var(--ill-image05-hover-border-top-color, var(--ill-image05-border-top-color));
+  border-right-color: var(--ill-image05-hover-border-right-color, var(--ill-image05-border-right-color));
+  border-bottom-color: var(--ill-image05-hover-border-bottom-color, var(--ill-image05-border-bottom-color));
+  border-left-color: var(--ill-image05-hover-border-left-color, var(--ill-image05-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image06:hover {
+  background-color: var(--ill-image06-hover-background, var(--ill-image06-background));
+  border-top-color: var(--ill-image06-hover-border-top-color, var(--ill-image06-border-top-color));
+  border-right-color: var(--ill-image06-hover-border-right-color, var(--ill-image06-border-right-color));
+  border-bottom-color: var(--ill-image06-hover-border-bottom-color, var(--ill-image06-border-bottom-color));
+  border-left-color: var(--ill-image06-hover-border-left-color, var(--ill-image06-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image07:hover {
+  background-color: var(--ill-image07-hover-background, var(--ill-image07-background));
+  border-top-color: var(--ill-image07-hover-border-top-color, var(--ill-image07-border-top-color));
+  border-right-color: var(--ill-image07-hover-border-right-color, var(--ill-image07-border-right-color));
+  border-bottom-color: var(--ill-image07-hover-border-bottom-color, var(--ill-image07-border-bottom-color));
+  border-left-color: var(--ill-image07-hover-border-left-color, var(--ill-image07-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image08:hover {
+  background-color: var(--ill-image08-hover-background, var(--ill-image08-background));
+  border-top-color: var(--ill-image08-hover-border-top-color, var(--ill-image08-border-top-color));
+  border-right-color: var(--ill-image08-hover-border-right-color, var(--ill-image08-border-right-color));
+  border-bottom-color: var(--ill-image08-hover-border-bottom-color, var(--ill-image08-border-bottom-color));
+  border-left-color: var(--ill-image08-hover-border-left-color, var(--ill-image08-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image09:hover {
+  background-color: var(--ill-image09-hover-background, var(--ill-image09-background));
+  border-top-color: var(--ill-image09-hover-border-top-color, var(--ill-image09-border-top-color));
+  border-right-color: var(--ill-image09-hover-border-right-color, var(--ill-image09-border-right-color));
+  border-bottom-color: var(--ill-image09-hover-border-bottom-color, var(--ill-image09-border-bottom-color));
+  border-left-color: var(--ill-image09-hover-border-left-color, var(--ill-image09-border-left-color));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image10:hover {
+  background-color: var(--ill-image10-hover-background, var(--ill-image10-background));
+  border-top-color: var(--ill-image10-hover-border-top-color, var(--ill-image10-border-top-color));
+  border-right-color: var(--ill-image10-hover-border-right-color, var(--ill-image10-border-right-color));
+  border-bottom-color: var(--ill-image10-hover-border-bottom-color, var(--ill-image10-border-bottom-color));
+  border-left-color: var(--ill-image10-hover-border-left-color, var(--ill-image10-border-left-color));
+}

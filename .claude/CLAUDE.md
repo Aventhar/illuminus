@@ -316,6 +316,16 @@ hover half occur — `hoverBackground` as well as `buttonHoverBackground` — so
 case-insensitive, and a control whose twin lives in a *different section* is left alone
 rather than half-hidden.
 
+**Hovered controls are derived, not written.** `HOVERABLE` in the schema shadows every
+lettering color, fill, and edge color with a `hover…` counterpart, and the generator
+emits the matching `:hover` rule with the ordinary value as its fallback — so an unset
+hovered color changes nothing rather than resetting the element. Paint only: shadowing a
+size or a padding would reflow the page under the pointer. `NO_HOVER` skips the window
+frame and the contents panel, which are not hovered as objects.
+
+When a selector is a comma-joined list, `:hover` must be appended to **each** member —
+`a, b:hover` hovers only `b`, which half-works in silence.
+
 The switch offers **whatever states a section actually has**, from a `STATES` table
 matched against field names. A section with no ordinary controls of its own offers only
 the named ones — the sidebar's Entry States holds pointed-at and current-page controls,

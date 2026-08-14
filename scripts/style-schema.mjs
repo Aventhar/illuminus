@@ -1099,6 +1099,61 @@ export const GROUPS = [
 ];
 
 /* -------------------------------------------- */
+/*  Hovered states                              */
+/* -------------------------------------------- */
+
+/**
+ * Every element that can be painted can be painted differently under the
+ * pointer.
+ *
+ * Rather than write these out forty times, each is derived from the control it
+ * shadows: wherever a section sets a lettering color, a fill, or an edge color,
+ * it gains a hovered counterpart beside it. The editor pairs them by name, so
+ * the section gets its Normal / Hovered switch for free.
+ *
+ * **Paint only, deliberately.** Sizes, padding, and typefaces are not shadowed:
+ * changing those under the pointer reflows the page, so text slides out from
+ * under the cursor as you reach for it. Color, fill, and edges can change
+ * without moving anything.
+ *
+ * Each defaults to empty, which emits nothing — so until someone sets one, a
+ * hovered element looks exactly like an unhovered one.
+ */
+const HOVERABLE = [
+  "color",
+  "background",
+  ...SIDES.map((side) => `border${side}Color`)
+];
+
+/** Hovered name for a control, e.g. `borderTopColor` -> `hoverBorderTopColor`. */
+export function hoverNameFor(name) {
+  return `hover${name[0].toUpperCase()}${name.slice(1)}`;
+}
+
+/**
+ * The window frame and the contents panel are not hovered as objects — their
+ * hovered states belong to the things inside them, which they already state by
+ * hand. Deriving more would offer controls that could never do anything.
+ */
+const NO_HOVER = new Set(["window", "sidebar"]);
+
+for (const group of GROUPS) {
+  if (NO_HOVER.has(group.id)) continue;
+  const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
+  for (const section of group.sections) {
+    for (const name of HOVERABLE) {
+      if (!section.fields.some((field) => field.name === name)) continue;
+      const hovered = hoverNameFor(name);
+      // Never shadow a control the schema already spells out itself — the
+      // sidebar and the window state their hovered colors by hand.
+      if (taken.has(hovered)) continue;
+      taken.add(hovered);
+      section.fields.push(col(hovered, ""));
+    }
+  }
+}
+
+/* -------------------------------------------- */
 /*  Derived helpers                             */
 /* -------------------------------------------- */
 
