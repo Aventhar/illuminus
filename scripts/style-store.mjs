@@ -15,16 +15,23 @@ import { PRESETS } from "./presets.mjs";
 /** How many saved colors a style may keep. */
 const MAX_SWATCHES = 40;
 
-/** Keep only well-formed hex colors, without duplicates. */
+/**
+ * Keep only well-formed hex colors, without duplicates, each with the name its
+ * style gave it.
+ *
+ * Accepts the bare strings styles used to store as well as the named form, so a
+ * palette saved before names existed keeps every color it had.
+ */
 function cleanSwatches(swatches) {
   if (!Array.isArray(swatches)) return [];
-  const seen = new Set();
+  const seen = new Map();
   for (const value of swatches) {
-    const hex = String(value).trim().toLowerCase();
-    if (/^#[0-9a-f]{6}([0-9a-f]{2})?$/.test(hex)) seen.add(hex);
+    const hex = String(value?.hex ?? value).trim().toLowerCase();
+    if (!/^#[0-9a-f]{6}([0-9a-f]{2})?$/.test(hex)) continue;
+    if (!seen.has(hex)) seen.set(hex, { hex, name: String(value?.name ?? "").trim().slice(0, 40) });
     if (seen.size >= MAX_SWATCHES) break;
   }
-  return [...seen];
+  return [...seen.values()];
 }
 
 /**

@@ -1756,6 +1756,83 @@
   zoom: 0.75;
 }
 
+/* --- Color picker ramp -------------------------------------------------- */
+
+.illuminus-cp__ramp {
+  display: flex;
+  gap: 0.5rem;
+  height: 140px;
+}
+
+/* Saturation across, brightness down, over the current hue. */
+.illuminus-cp__sv {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: none;
+  background:
+    linear-gradient(to top, #000, rgb(0 0 0 / 0)),
+    linear-gradient(to right, #fff, var(--illuminus-cp-hue, #f00));
+}
+
+.illuminus-cp__hue {
+  position: relative;
+  flex: 0 0 16px;
+  border-radius: 4px;
+  cursor: ns-resize;
+  touch-action: none;
+  background: linear-gradient(to bottom, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+
+.illuminus-cp__sv:focus-visible,
+.illuminus-cp__hue:focus-visible {
+  outline: 2px solid var(--color-border-highlight, #ff6400);
+  outline-offset: 2px;
+}
+
+/* Knobs are drawn over the ramp and must never eat its pointer events. */
+.illuminus-cp__sv-knob,
+.illuminus-cp__hue-knob {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 55%);
+}
+
+.illuminus-cp__sv-knob {
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+}
+
+.illuminus-cp__hue-knob {
+  left: 50%;
+  width: 14px;
+  height: 6px;
+  border-radius: 3px;
+  transform: translate(-50%, -50%);
+}
+
+/* The saved row is a grid of square slots; the recent row has no slots to
+   size its cells, so it says so itself rather than letting them stretch. */
+.illuminus-cp__recents {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+
+.illuminus-cp__recents .illuminus-cp__swatch {
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.illuminus-cp__swatch.is-dragging {
+  opacity: 0.4;
+}
+
 /* --- Color picking mode ------------------------------------------------ */
 
 /* No overlay element: a covering div would hide the very thing being pointed

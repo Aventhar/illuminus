@@ -1,4 +1,7 @@
-import { hexToRgba, rgbaToHex, rgbToHsl, hslToRgb, pickFromWindow } from "../color-tools.mjs";
+import {
+  hexToRgba, rgbaToHex, rgbToHsl, hslToRgb, rgbToHsv, hsvToRgb, pickFromWindow
+} from "../color-tools.mjs";
+import { SETTINGS, getSetting, setSetting } from "../constants.mjs";
 
 /**
  * Illuminus's own color picker, replacing the operating system panel that a
@@ -25,12 +28,11 @@ const CHANNELS = [
   { group: "rgb", key: "r", label: "R", min: 0, max: 255, step: 1, unit: "" },
   { group: "rgb", key: "g", label: "G", min: 0, max: 255, step: 1, unit: "" },
   { group: "rgb", key: "b", label: "B", min: 0, max: 255, step: 1, unit: "" },
-  { group: "rgb", key: "a", label: "A", min: 0, max: 100, step: 1, unit: "%" },
-  { group: "hsl", key: "h", label: "H", min: 0, max: 360, step: 1, unit: "°" },
-  { group: "hsl", key: "s", label: "S", min: 0, max: 100, step: 1, unit: "%" },
-  { group: "hsl", key: "l", label: "L", min: 0, max: 100, step: 1, unit: "%" },
-  { group: "hsl", key: "a", label: "A", min: 0, max: 100, step: 1, unit: "%" }
+  { group: "rgb", key: "a", label: "A", min: 0, max: 100, step: 1, unit: "%" }
 ];
+
+/** How many recently used colors to offer back. */
+const RECENT_SLOTS = 10;
 
 /**
  * Open the picker beside an anchor element.
@@ -75,9 +77,20 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
         </button>
       </div>
 
-      ${["rgb", "hsl"].map((group) => `
+      <section class="illuminus-cp__group illuminus-cp__ramp">
+        <div class="illuminus-cp__sv" tabindex="0"
+             aria-label="${game.i18n.localize("ILLUMINUS.ColorPicker.Ramp")}">
+          <span class="illuminus-cp__sv-knob"></span>
+        </div>
+        <div class="illuminus-cp__hue" tabindex="0"
+             aria-label="${game.i18n.localize("ILLUMINUS.ColorPicker.Hue")}">
+          <span class="illuminus-cp__hue-knob"></span>
+        </div>
+      </section>
+
+      ${["rgb"].map((group) => `
         <section class="illuminus-cp__group" data-group="${group}">
-          <h4>${game.i18n.localize(`ILLUMINUS.ColorPicker.${group === "rgb" ? "Rgb" : "Hsl"}`)}</h4>
+          <h4>${game.i18n.localize("ILLUMINUS.ColorPicker.Rgb")}</h4>
           ${CHANNELS.filter((c) => c.group === group).map((c) => `
             <div class="illuminus-cp__channel" data-channel="${group}-${c.key}">
               <label for="illuminus-cp-${group}-${c.key}">${c.label}</label>
@@ -100,6 +113,11 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
         </h4>
         <div class="illuminus-cp__swatches"></div>
       </section>
+
+      <section class="illuminus-cp__group illuminus-cp__recent">
+        <h4>${game.i18n.localize("ILLUMINUS.ColorPicker.Recent")}</h4>
+        <div class="illuminus-cp__recents"></div>
+      </section>
     </div>
 
     <footer class="illuminus-cp__foot">
@@ -115,11 +133,17 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
   const currentHex = () => rgbaToHex({ r: state.r, g: state.g, b: state.b, a: state.a / 100 });
 
   /** Values for one group, derived from the shared colour. */
-  const valuesFor = (group) => {
-    if (group === "rgb") return { r: state.r, g: state.g, b: state.b, a: state.a };
-    const { h, s, l } = rgbToHsl(state);
-    return { h, s, l, a: state.a };
-  };
+  const valuesFor = (group) => ({ r: state.r, g: state.g, b: state.b, a: state.a });
+
+  /**
+   * Hue is kept beside the color rather than read back from it.
+   *
+   * Every grey has the same red-green-blue, so a color picked at zero
+   * saturation has no hue to recover — reading it back would snap the ramp to
+   * red the moment the knob touched the left edge, and the shade under the
+   * pointer would change while the pointer stood still.
+   */
+  let hue = rgbToHsv(state).h;
 
   /** Redraw every control from the shared color. */
   const refresh = ({ skipHex = false, skipNumbers = false } = {}) => {
@@ -137,6 +161,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       row.style.setProperty("--illuminus-cp-track", trackFor(channel, hsl));
     }
 
+    drawRamp();
     preview.style.setProperty("--illuminus-swatch", hex);
     root.style.setProperty("--illuminus-cp-current", opaque);
     if (!skipHex) hexInput.value = hex;
@@ -150,10 +175,6 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       case "rgb.r": return `linear-gradient(to right, ${at({ r: 0 })}, ${at({ r: 255 })})`;
       case "rgb.g": return `linear-gradient(to right, ${at({ g: 0 })}, ${at({ g: 255 })})`;
       case "rgb.b": return `linear-gradient(to right, ${at({ b: 0 })}, ${at({ b: 255 })})`;
-      case "hsl.h": return "linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)";
-      case "hsl.s": return `linear-gradient(to right, ${rgbaToHex({ ...hslToRgb({ ...hsl, s: 0 }), a: 1 })}, `
-        + `${rgbaToHex({ ...hslToRgb({ ...hsl, s: 100 }), a: 1 })})`;
-      case "hsl.l": return `linear-gradient(to right, #000, ${rgbaToHex({ ...hslToRgb({ ...hsl, l: 50 }), a: 1 })}, #fff)`;
       default: return `linear-gradient(to right, ${rgbaToHex({ ...state, a: 0 })}, ${rgbaToHex({ ...state, a: 1 })})`;
     }
   };
@@ -167,12 +188,9 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     if (!Number.isFinite(value)) return;
 
     if (key === "a") state.a = value;
-    else if (group === "rgb") state[key] = value;
-    else {
-      // Editing HSL means recomputing RGB from all three, not just this one.
-      const hsl = { ...rgbToHsl(state), [key]: value };
-      Object.assign(state, hslToRgb(hsl));
-    }
+    else state[key] = value;
+    // Typing an RGB value moves the ramp with it.
+    hue = rgbToHsv(state).h;
     emit(options);
   };
 
@@ -200,7 +218,9 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     swatchBox.replaceChildren();
     const slots = Math.max(SWATCH_SLOTS, Math.ceil(saved.length / 10) * 10);
     for (let i = 0; i < slots; i++) {
-      const hex = saved[i];
+      const entry = saved[i];
+      const hex = entry?.hex ?? entry;
+      const name = entry?.name ?? "";
       // A slot wraps the two buttons: nesting one button inside another is
       // invalid, and the remove control needs a hit area of its own.
       const slot = document.createElement("span");
@@ -214,8 +234,12 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
         cell.dataset.hex = hex;
         cell.dataset.index = String(i);
         cell.style.setProperty("--illuminus-swatch", hex);
-        cell.title = hex;
-        cell.setAttribute("aria-label", hex);
+        cell.draggable = true;
+        // The name is what a palette is for: "Rust heading" beats "#7a2010"
+        // when there are twenty of them.
+        cell.title = name ? `${name} — ${hex}` : hex;
+        cell.setAttribute("aria-label", name || hex);
+        if (name) cell.dataset.name = name;
       }
       slot.append(cell);
 
@@ -238,6 +262,95 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     saved = saved.slice(0, 40);
     onSwatches?.([...saved]);
     drawSwatches();
+  };
+
+  /* --- Reordering and naming ------------------------------------------- */
+
+  let dragFrom = null;
+
+  swatchBox.addEventListener("dragstart", (event) => {
+    const cell = event.target.closest(".illuminus-cp__swatch[data-index]");
+    if (!cell) return;
+    dragFrom = Number(cell.dataset.index);
+    event.dataTransfer.effectAllowed = "move";
+    // Firefox will not start a drag without data on the transfer.
+    event.dataTransfer.setData("text/plain", cell.dataset.hex ?? "");
+    cell.classList.add("is-dragging");
+  });
+
+  swatchBox.addEventListener("dragover", (event) => {
+    if (dragFrom === null) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  });
+
+  swatchBox.addEventListener("drop", (event) => {
+    if (dragFrom === null) return;
+    event.preventDefault();
+    const slot = event.target.closest(".illuminus-cp__slot");
+    const cells = [...swatchBox.querySelectorAll(".illuminus-cp__slot")];
+    const to = Math.min(slot ? cells.indexOf(slot) : saved.length - 1, saved.length - 1);
+    if (to >= 0 && to !== dragFrom) {
+      const [moved] = saved.splice(dragFrom, 1);
+      saved.splice(to, 0, moved);
+      persist();
+    }
+    dragFrom = null;
+  });
+
+  swatchBox.addEventListener("dragend", () => {
+    dragFrom = null;
+    for (const cell of swatchBox.querySelectorAll(".is-dragging")) cell.classList.remove("is-dragging");
+  });
+
+  swatchBox.addEventListener("dblclick", async (event) => {
+    const cell = event.target.closest(".illuminus-cp__swatch[data-index]");
+    if (!cell) return;
+    event.preventDefault();
+    const index = Number(cell.dataset.index);
+    const entry = saved[index];
+    if (!entry) return;
+    const name = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize("ILLUMINUS.ColorPicker.NameTitle") },
+      content: `<input type="text" name="name" autofocus value="${foundry.utils.escapeHTML(entry.name ?? "")}"`
+        + ` placeholder="${game.i18n.localize("ILLUMINUS.ColorPicker.NamePlaceholder")}">`,
+      ok: { label: "ILLUMINUS.Buttons.Save", callback: (_e, button) => button.form.elements.name.value },
+      rejectClose: false
+    });
+    if (name === null || name === undefined) return;
+    saved[index] = { hex: entry.hex ?? entry, name: String(name).trim().slice(0, 40) };
+    persist();
+  });
+
+  /* --- Recently used --------------------------------------------------- */
+
+  const recentBox = root.querySelector(".illuminus-cp__recents");
+
+  const drawRecents = () => {
+    const recents = (getSetting(SETTINGS.recentColors) ?? []).slice(0, RECENT_SLOTS);
+    recentBox.replaceChildren();
+    for (let i = 0; i < RECENT_SLOTS; i++) {
+      const hex = recents[i];
+      const cell = document.createElement(hex ? "button" : "span");
+      cell.className = `illuminus-cp__swatch${hex ? "" : " is-empty"}`;
+      if (hex) {
+        cell.type = "button";
+        cell.dataset.cp = "use";
+        cell.dataset.hex = hex;
+        cell.style.setProperty("--illuminus-swatch", hex);
+        cell.title = hex;
+        cell.setAttribute("aria-label", hex);
+      }
+      recentBox.append(cell);
+    }
+  };
+
+  /** Remember a color that was actually chosen, most recent first. */
+  const rememberRecent = async (hex) => {
+    const recents = (getSetting(SETTINGS.recentColors) ?? []).filter((c) => c !== hex);
+    recents.unshift(hex);
+    await setSetting(SETTINGS.recentColors, recents.slice(0, RECENT_SLOTS));
+    drawRecents();
   };
 
   /* --- Buttons --------------------------------------------------------- */
@@ -273,12 +386,104 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       emit();
     } else if (action === "ok") {
       const hex = currentHex();
+      // Only a color someone actually kept is worth offering back.
+      await rememberRecent(hex);
       onCommit?.(hex);
       closeColorPicker();
     } else if (action === "cancel") {
       onChange(initial);
       closeColorPicker();
     }
+  });
+
+  /* --- The ramp -------------------------------------------------------- */
+
+  const svBox = root.querySelector(".illuminus-cp__sv");
+  const svKnob = root.querySelector(".illuminus-cp__sv-knob");
+  const hueBox = root.querySelector(".illuminus-cp__hue");
+  const hueKnob = root.querySelector(".illuminus-cp__hue-knob");
+
+  /** Put the knobs where the current color sits, and tint the square. */
+  function drawRamp() {
+    const { s: sat, v } = rgbToHsv(state);
+    svBox.style.setProperty("--illuminus-cp-hue",
+      rgbaToHex({ ...hsvToRgb({ h: hue, s: 1, v: 1 }), a: 1 }));
+    svKnob.style.left = `${sat * 100}%`;
+    svKnob.style.top = `${(1 - v) * 100}%`;
+    hueKnob.style.top = `${(hue / 360) * 100}%`;
+  }
+
+  /** Read a pointer position as a 0..1 pair within an element. */
+  const positionIn = (element, event) => {
+    const box = element.getBoundingClientRect();
+    return {
+      x: Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)),
+      y: Math.min(1, Math.max(0, (event.clientY - box.top) / box.height))
+    };
+  };
+
+  /**
+   * Drag anywhere in a ramp, including outside it.
+   *
+   * Pointer capture rather than document listeners: without it the drag stops
+   * the moment the pointer leaves the square, which is exactly when someone is
+   * reaching for full saturation.
+   */
+  const dragRamp = (element, apply) => {
+    element.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      element.setPointerCapture(event.pointerId);
+      apply(positionIn(element, event));
+      const onMove = (move) => apply(positionIn(element, move));
+      const onUp = () => {
+        element.releasePointerCapture(event.pointerId);
+        element.removeEventListener("pointermove", onMove);
+        element.removeEventListener("pointerup", onUp);
+      };
+      element.addEventListener("pointermove", onMove);
+      element.addEventListener("pointerup", onUp);
+    });
+  };
+
+  dragRamp(svBox, ({ x, y }) => {
+    Object.assign(state, hsvToRgb({ h: hue, s: x, v: 1 - y }));
+    emit();
+  });
+
+  dragRamp(hueBox, ({ y }) => {
+    hue = y * 360;
+    const { s: sat, v } = rgbToHsv(state);
+    Object.assign(state, hsvToRgb({ h: hue, s: sat, v }));
+    emit();
+  });
+
+  // Arrow keys nudge, so the ramp is usable without a mouse.
+  svBox.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 0.1 : 0.02;
+    const { s: sat, v } = rgbToHsv(state);
+    const moves = {
+      ArrowLeft: { s: sat - step, v }, ArrowRight: { s: sat + step, v },
+      ArrowUp: { s: sat, v: v + step }, ArrowDown: { s: sat, v: v - step }
+    };
+    const next = moves[event.key];
+    if (!next) return;
+    event.preventDefault();
+    Object.assign(state, hsvToRgb({
+      h: hue,
+      s: Math.min(1, Math.max(0, next.s)),
+      v: Math.min(1, Math.max(0, next.v))
+    }));
+    emit();
+  });
+
+  hueBox.addEventListener("keydown", (event) => {
+    const step = event.shiftKey ? 30 : 5;
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    event.preventDefault();
+    hue = (hue + (event.key === "ArrowDown" ? step : -step) + 360) % 360;
+    const { s: sat, v } = rgbToHsv(state);
+    Object.assign(state, hsvToRgb({ h: hue, s: sat, v }));
+    emit();
   });
 
   /* --- Placement and dragging ------------------------------------------ */
@@ -334,6 +539,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
   };
 
   drawSwatches();
+  drawRecents();
   refresh();
   place();
   document.addEventListener("keydown", onKey, true);

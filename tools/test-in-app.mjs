@@ -1188,20 +1188,34 @@ const cp = await cdp.evaluate(`(async () => {
   const pb = cp.getBoundingClientRect();
   out.toTheRight = pb.left >= sb.right - 1;
 
-  // Editing RGB updates HSL, and the hex carries alpha.
+  // Editing RGB moves the ramp with it: the hue knob tracks the color.
   set(cp, '[data-channel="rgb-r"] input[type=range]', 255);
   await new Promise(r => setTimeout(r, 120));
-  out.afterRed = {hex: cp.querySelector(".illuminus-cp__hex").value, h: num("hsl","h"), l: num("hsl","l")};
+  out.afterRed = {
+    hex: cp.querySelector(".illuminus-cp__hex").value,
+    hueKnob: parseFloat(cp.querySelector(".illuminus-cp__hue-knob").style.top)
+  };
 
-  // Editing HSL updates RGB.
-  set(cp, '[data-channel="hsl-h"] input[type=range]', 120);
-  await new Promise(r => setTimeout(r, 120));
-  out.afterHue = {r: num("rgb","r"), g: num("rgb","g"), hex: cp.querySelector(".illuminus-cp__hex").value};
+  // Dragging the shade square writes back through RGB. Pointer capture is
+  // stubbed because a synthetic PointerEvent carries no real pointer to capture.
+  const sv = cp.querySelector(".illuminus-cp__sv");
+  sv.setPointerCapture = () => {};
+  sv.releasePointerCapture = () => {};
+  const svBox = sv.getBoundingClientRect();
+  sv.dispatchEvent(new PointerEvent("pointerdown", {
+    clientX: svBox.right - 1, clientY: svBox.top + 1, bubbles: true, pointerId: 1
+  }));
+  await new Promise(r => setTimeout(r, 150));
+  const rampHex = cp.querySelector(".illuminus-cp__hex").value;
+  out.afterRamp = {
+    hex: rampHex,
+    minChannel: Math.min(...[1, 3, 5].map(i => parseInt(rampHex.slice(i, i + 2), 16)))
+  };
 
-  // Alpha appears in the hex, and both alpha sliders track together.
+  // Alpha appears in the hex.
   set(cp, '[data-channel="rgb-a"] input[type=range]', 50);
   await new Promise(r => setTimeout(r, 120));
-  out.afterAlpha = {hex: cp.querySelector(".illuminus-cp__hex").value, hslAlpha: num("hsl","a")};
+  out.afterAlpha = {hex: cp.querySelector(".illuminus-cp__hex").value};
 
   // Live while open, but the stored style must not move yet.
   out.liveValue = control.value;
@@ -1243,10 +1257,13 @@ check(pick.swatchReachable, `the swatch is what the pointer actually hits (topmo
 check(pick.opened, "clicking it opens the picker");
 check(pick.toTheRight, "it appears to the right of the swatch");
 check(pick.afterRed.hex.toLowerCase().startsWith("#ff"), `editing RGB updates the hex (got ${pick.afterRed.hex})`);
-check(Number(pick.afterRed.h) > 0 || Number(pick.afterRed.l) > 0, "and the HSL fields follow");
-check(Number(pick.afterHue.g) > Number(pick.afterHue.r), `editing HSL updates RGB (r ${pick.afterHue.r}, g ${pick.afterHue.g})`);
+check(Number.isFinite(pick.afterRed.hueKnob),
+  `and the ramp's hue knob follows it (at ${pick.afterRed.hueKnob}%)`);
+// Dragging to the right edge means "as saturated as this hue gets", which is a
+// color with one channel at the floor — not one exact value.
+check(pick.afterRamp.minChannel <= 8,
+  `dragging the shade square drives it to full saturation (got ${pick.afterRamp.hex})`);
 check(pick.afterAlpha.hex.length === 9, `alpha shows in the hex (got ${pick.afterAlpha.hex})`);
-check(pick.afterAlpha.hslAlpha === "50", `both alpha controls track together (HSL alpha ${pick.afterAlpha.hslAlpha})`);
 check(pick.liveValue === pick.afterAlpha.hex, "the control follows live while the picker is open");
 check(pick.storedDuring === "#3366cc", `the saved style is untouched meanwhile (stored ${pick.storedDuring})`);
 check(pick.swatchSlots >= 20, `at least 20 saved-color slots (got ${pick.swatchSlots})`);
@@ -1323,7 +1340,9 @@ await new Promise((r) => setTimeout(r, 400));
 
 const forgetResult = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const remaining = document.querySelectorAll('.illuminus-cp__swatch[data-hex]').length;
+  // Scoped to the saved row: the recently-used row below it holds swatches too,
+  // and counting both would make a removal look like it had not happened.
+  const remaining = document.querySelectorAll('.illuminus-cp__swatches .illuminus-cp__swatch[data-hex]').length;
   // Persisting goes through a world setting, so wait for the write rather than
   // assuming a fixed delay covers it.
   let stored = api.getStyle("${fs0.styleId}").swatches ?? [];
@@ -2526,7 +2545,73 @@ try {
   })()`);
 }
 
-console.log("\n[40] Console is clean");
+// The picker replaced the operating system's panel, so the palette has to earn
+// its keep: names, an order, and the colors most recently chosen.
+console.log("\n[40] The palette");
+try {
+  const pal = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Palette Probe", swatches: [
+      {hex: "#112233", name: "Ink"}, {hex: "#445566", name: "Slate"}, "#778899"
+    ]});
+    window.__pal = {styleId: style.id};
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1000));
+    app.element.querySelector('[data-field="page.background"]')
+      .closest(".illuminus-section").querySelector("summary").click();
+    await new Promise(r => setTimeout(r, 250));
+    const swatch = app.element.querySelector('[data-field="page.background"] .illuminus-swatch');
+    const box = swatch.getBoundingClientRect();
+    document.elementFromPoint(Math.round(box.left + box.width / 2),
+                             Math.round(box.top + box.height / 2))?.click();
+    await new Promise(r => setTimeout(r, 400));
+    const cp = document.querySelector(".illuminus-cp");
+    const cells = () => [...cp.querySelectorAll(".illuminus-cp__swatches .illuminus-cp__swatch[data-hex]")];
+    const out = {
+      names: cells().map(c => c.dataset.name ?? ""),
+      // A color saved before names existed keeps its place rather than vanishing.
+      keptUnnamed: cells().length
+    };
+
+    // Dragging the third onto the first reorders the stored palette.
+    const from = cells()[2];
+    const target = cp.querySelectorAll(".illuminus-cp__slot")[0];
+    const data = new DataTransfer();
+    from.dispatchEvent(new DragEvent("dragstart", {bubbles: true, dataTransfer: data}));
+    target.dispatchEvent(new DragEvent("dragover", {bubbles: true, dataTransfer: data}));
+    target.dispatchEvent(new DragEvent("drop", {bubbles: true, dataTransfer: data}));
+    await new Promise(r => setTimeout(r, 400));
+    out.orderAfterDrag = (api.getStyle(style.id).swatches ?? []).map(sw => sw.hex ?? sw);
+
+    // Keeping a color remembers it; cancelling would not.
+    await setSettingSafe();
+    cp.querySelector('[data-cp="ok"]').click();
+    await new Promise(r => setTimeout(r, 500));
+    out.recent = (game.settings.get("illuminus", "recentColors") ?? [])[0];
+
+    async function setSettingSafe() { await game.settings.set("illuminus", "recentColors", []); }
+    return JSON.stringify(out);
+  })()`);
+  const pl = JSON.parse(pal);
+  check(pl.names[0] === "Ink" && pl.names[1] === "Slate",
+    `a saved color keeps the name its style gave it (got ${pl.names.slice(0, 2).join(", ")})`);
+  check(pl.keptUnnamed === 3, `and one saved before names existed is still there (${pl.keptUnnamed})`);
+  check(pl.orderAfterDrag[0] === "#778899",
+    `dragging one onto another reorders the palette (got ${pl.orderAfterDrag.join(", ")})`);
+  check(typeof pl.recent === "string" && pl.recent.startsWith("#"),
+    `keeping a color remembers it for next time (got ${pl.recent})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const api = game.modules.get("illuminus").api;
+    if (window.__pal?.styleId) await api.deleteStyle(window.__pal.styleId);
+    window.__pal = undefined;
+  })()`);
+}
+
+console.log("\n[41] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

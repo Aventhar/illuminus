@@ -55,9 +55,11 @@ it to whichever journals should wear it, and export it to carry into another wor
   way a half-width floated box reads as one. Nothing is written to the world until you
   press Save.
 - **Its own color picker.** Clicking a swatch opens Illuminus's picker rather than the
-  operating system's: RGB and HSL side by side with sliders and numeric boxes, opacity on
-  both, the hex including its alpha, and a row of saved colors belonging to that style.
-  It is free-floating and draggable, and only OK keeps a change.
+  operating system's: a shade square and hue strip to pick by eye, RGB sliders and numeric
+  boxes to be exact, opacity, and the hex including its alpha. Saved colors belong to the
+  style and can be named — "Parchment", "Rust heading" — dragged into the order you want,
+  and there is a row of the colors you last kept. It is free-floating and draggable, and
+  only OK keeps a change.
 - **Transparency is visible.** Color swatches are drawn over a checkerboard and show
   their alpha, with a fully transparent one labeled "None" — a native color input
   cannot show alpha and paints `#00000000` as solid black. Type an eight-digit hex such

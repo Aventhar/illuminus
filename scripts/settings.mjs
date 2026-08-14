@@ -44,6 +44,15 @@ export function registerSettings() {
     restricted: true
   });
 
+  // Colors picked recently, offered back in the picker. Per person rather than
+  // per world: it is a record of what someone has been doing, not part of a style.
+  game.settings.register(MODULE_ID, SETTINGS.recentColors, {
+    scope: "client",
+    config: false,
+    type: Array,
+    default: []
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "ILLUMINUS.Settings.Debug.Name",
     hint: "ILLUMINUS.Settings.Debug.Hint",

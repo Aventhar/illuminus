@@ -10,6 +10,7 @@ export const MODULE_ID = "illuminus";
 export const SETTINGS = {
   styles: "styles",
   templates: "templates",
+  recentColors: "recentColors",
   debug: "debug"
 };
 
