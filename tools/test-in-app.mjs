@@ -518,7 +518,7 @@ const matched = await cdp.evaluate(`(async () => {
   const after = ["Top","Right","Bottom","Left"].map(s =>
     getComputedStyle(el.querySelector(".illuminus-preview__frame .journal-entry-content"))["border" + s + "Width"]);
 
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify({before, after});
 })()`);
 const mt = JSON.parse(matched);
@@ -549,7 +549,7 @@ const previewBg = await cdp.evaluate(`(async () => {
     contentHeight: content.offsetHeight,
     bg: getComputedStyle(content).backgroundColor
   };
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify(out);
 })()`);
 const pb = JSON.parse(previewBg);
@@ -650,7 +650,7 @@ const sample = await cdp.evaluate(`(async () => {
     pageWidth: page.getBoundingClientRect().width
   };
 
-  await app.close();
+  await app.close({force: true});
   await api.deleteStyle(style.id);
   return JSON.stringify({onPageTab, onSidebarTab});
 })()`);
@@ -712,7 +712,7 @@ const picked = await cdp.evaluate(`(async () => {
   out.afterEscape = picker.value;
   out.escapeCleanedUp = !document.documentElement.classList.contains("illuminus-picking");
 
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify(out);
 })()`);
 const pk = JSON.parse(picked);
@@ -784,7 +784,7 @@ const borders = await cdp.evaluate(`(async () => {
   };
 
   probe.remove();
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify(out);
 })()`);
 const bd = JSON.parse(borders);
@@ -827,7 +827,7 @@ const tabs = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 400));
   const narrow = measure();
 
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify({wide, narrow});
 })()`);
 const tb = JSON.parse(tabs);
@@ -976,7 +976,7 @@ const assets = await cdp.evaluate(`(async () => {
   };
   zoomed.style.zoom = priorZoom;
   freeze.remove();
-  await app.close();
+  await app.close({force: true});
   await api.deleteStyle(style.id);
   return JSON.stringify(out);
 })()`);
@@ -1053,7 +1053,7 @@ const editShift = await cdp.evaluate(`(async () => {
     const frame = editSheet ? getComputedStyle(editSheet.element).backgroundColor : null;
     const pageSurface = getComputedStyle(entry.sheet.element.querySelector(".journal-entry-content")).backgroundColor;
 
-    await editSheet?.close();
+    await editSheet?.close({force: true});
     await entry.delete();
     await new Promise(r => setTimeout(r, 400));
     return {before, after, position, marked, surface, frame, pageSurface};
@@ -1121,7 +1121,7 @@ const swatch = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 300));
   out.afterEdit = read("body.color");
 
-  await app.close();
+  await app.close({force: true});
   await api.deleteStyle(style.id);
   return JSON.stringify(out);
 })()`);
@@ -1172,7 +1172,7 @@ const cp = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 300));
   const cp = document.querySelector(".illuminus-cp");
   const out = {opened: !!cp, swatchReachable: swatchHit.reachable, topAtSwatch: swatchHit.top};
-  if (!cp) { await app.close(); return JSON.stringify(out); }
+  if (!cp) { await app.close({force: true}); return JSON.stringify(out); }
 
   // Take the picker element as an argument: reopening makes a new one, and
   // writing to the old detached copy still drives its listeners.
@@ -1229,11 +1229,11 @@ const cp = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 250));
   out.afterOk = {value: control.value, wanted, closed: !document.querySelector(".illuminus-cp")};
 
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify(out);
   } finally {
     for (const a of foundry.applications.instances.values()) {
-      if (a.id?.startsWith("illuminus-style-editor")) await a.close();
+      if (a.id?.startsWith("illuminus-style-editor")) await a.close({force: true});
     }
     await api.deleteStyle(style.id);
   }
@@ -1332,7 +1332,7 @@ const forgetResult = await cdp.evaluate(`(async () => {
     stored = api.getStyle("${fs0.styleId}").swatches ?? [];
   }
   for (const a of foundry.applications.instances.values()) {
-    if (a.id?.startsWith("illuminus-style-editor")) await a.close();
+    if (a.id?.startsWith("illuminus-style-editor")) await a.close({force: true});
   }
   await api.deleteStyle("${fs0.styleId}");
   return JSON.stringify({remaining, stored});
@@ -1369,7 +1369,7 @@ const baseline = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 400));
   const afterReset = el.querySelector('[data-field="page.background"] color-picker').value;
 
-  await app.close();
+  await app.close({force: true});
   await api.deleteStyle(style.id);
   return JSON.stringify({schemaDefault, savedMarkedClean, markedChanged, afterReset});
 })()`);
@@ -1446,7 +1446,7 @@ try {
     const api = game.modules.get("illuminus").api;
     // Nothing left open, so the sheet the clicks land on is the one under test.
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const style = await api.createStyle({name: "Menu Probe", labels: {box01: "Read-aloud"}});
     const settings = foundry.utils.deepClone(style.settings);
@@ -1585,7 +1585,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__menuTest?.entryId);
     if (entry) await entry.delete();
@@ -1726,7 +1726,7 @@ const panes = await cdp.evaluate(`(async () => {
     hasImage: !!fig.querySelector("img") && fig.querySelector("img").getBoundingClientRect().width > 0
   };
 
-  await app.close();
+  await app.close({force: true});
   await api.deleteStyle(style.id);
   return JSON.stringify({onPage, onBlocks, afterPick, onPictures});
 })()`);
@@ -1862,7 +1862,7 @@ try {
 
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__inline.entryId);
     await entry.pages.contents[0].update({"text.content": "<p>Unique Artifact</p>"});
@@ -1905,7 +1905,7 @@ try {
   // A leaked style shifts the seeded-style counts that earlier checks assert on.
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__inline?.entryId);
     if (entry) await entry.delete();
@@ -1973,7 +1973,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__layers?.entryId);
     if (entry) await entry.delete();
@@ -2037,7 +2037,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__heads?.entryId);
     if (entry) await entry.delete();
@@ -2052,7 +2052,7 @@ try {
 const headingTab = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   for (const app of [...foundry.applications.instances.values()]) {
-    if (app.constructor.name.startsWith("Illuminus")) await app.close();
+    if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
   }
   const app = await api.openEditor(api.listStyles()[0].id);
   await new Promise(r => setTimeout(r, 1300));
@@ -2068,7 +2068,7 @@ const headingTab = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 500));
   const after = app.element.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
 
-  await app.close();
+  await app.close({force: true});
   return JSON.stringify({tabs, levels: picker.options.length, before, after});
 })()`);
 const ht = JSON.parse(headingTab);
@@ -2093,7 +2093,7 @@ try {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     for (const a of [...foundry.applications.instances.values()]) {
-      if (a.constructor.name.startsWith("Illuminus")) await a.close();
+      if (a.constructor.name.startsWith("Illuminus")) await a.close({force: true});
     }
     await api.openEditor(api.listStyles()[0].id);
     await new Promise(r => setTimeout(r, 1300));
@@ -2124,7 +2124,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.constructor.name.startsWith("Illuminus")) await app.close();
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
     }
   })()`);
 }
@@ -2184,7 +2184,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__secrets?.entryId);
     if (entry) await entry.delete();
@@ -2261,7 +2261,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__cov?.entryId);
     if (entry) await entry.delete();
@@ -2271,7 +2271,79 @@ try {
   })()`);
 }
 
-console.log("\n[37] Console is clean");
+// The editor holds every change in a working copy until Save, so closing the
+// window is the one click that can lose an afternoon's work.
+console.log("\n[37] Closing with unsaved changes asks first");
+try {
+  const unsaved = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Unsaved Probe"});
+    window.__unsaved = {styleId: style.id};
+    const out = {};
+    const dirty = async () => {
+      const app = await api.openEditor(style.id);
+      await new Promise(r => setTimeout(r, 900));
+      app.element.querySelector('[data-field="page.background"] color-picker').value = "#123456";
+      await new Promise(r => setTimeout(r, 250));
+      return app;
+    };
+    const prompt = () => [...foundry.applications.instances.values()]
+      .find(a => a.constructor.name.includes("Dialog"));
+    const answer = async (action) => {
+      prompt()?.element.querySelector(\`button[data-action="\${action}"]\`)?.click();
+      await new Promise(r => setTimeout(r, 700));
+    };
+
+    // Nothing changed: closing must not nag.
+    let app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 900));
+    await app.close();
+    await new Promise(r => setTimeout(r, 400));
+    out.cleanAsked = !!prompt();
+    out.cleanClosed = !app.rendered;
+
+    app = await dirty();
+    app.close();
+    await new Promise(r => setTimeout(r, 600));
+    out.asked = !!prompt();
+    await answer("cancel");
+    out.keptOpen = app.rendered;
+
+    app.close();
+    await new Promise(r => setTimeout(r, 600));
+    await answer("discard");
+    out.discardClosed = !app.rendered;
+    out.afterDiscard = api.getStyle(style.id).settings.page.background;
+
+    app = await dirty();
+    app.close();
+    await new Promise(r => setTimeout(r, 600));
+    await answer("save");
+    await new Promise(r => setTimeout(r, 700));
+    out.saveClosed = !app.rendered;
+    out.afterSave = api.getStyle(style.id).settings.page.background;
+    return JSON.stringify(out);
+  })()`);
+  const un = JSON.parse(unsaved);
+  check(!un.cleanAsked && un.cleanClosed, "closing an unchanged style just closes");
+  check(un.asked, "closing a changed one asks first");
+  check(un.keptOpen, "Keep Editing leaves the editor open");
+  check(un.discardClosed && un.afterDiscard !== "#123456",
+    `Discard closes and throws the change away (stored ${un.afterDiscard})`);
+  check(un.saveClosed && un.afterSave === "#123456",
+    `Save and Close keeps it (stored ${un.afterSave})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const api = game.modules.get("illuminus").api;
+    if (window.__unsaved?.styleId) await api.deleteStyle(window.__unsaved.styleId);
+    window.__unsaved = undefined;
+  })()`);
+}
+
+console.log("\n[38] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

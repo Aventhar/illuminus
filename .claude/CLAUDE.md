@@ -127,6 +127,11 @@ These are all load-bearing and none are obvious from the code.
   Freeze transitions before measuring:
   `* { transition: none !important; animation: none !important; }`. A test that
   mysteriously reads the old value is usually this, not a cascade problem.
+- **Closing the style editor can now decline to close.** It prompts when there are
+  unsaved changes, so any *programmatic* `close()` — the manager closing an editor whose
+  style is being deleted, a test cleaning up — must pass `{ force: true }` or it will sit
+  on a dialog forever. This is the trap it caused: every check that closed a dirty editor
+  hung, and the suite stalled at an unrelated one.
 - **Render hooks fire for the whole inheritance chain.** `renderJournalEntrySheet` fires
   for system subclasses too, so hooking the core class is enough.
 - **An ApplicationV2 part template must have exactly one root element.** More than one

@@ -143,7 +143,9 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
 
     await deleteStyle(id);
     this.#selected.delete(id);
-    foundry.applications.instances.get(`illuminus-style-editor-${id}`)?.close();
+    // Forced: the style is going away, so there is nothing to offer to save
+    // into, and the unsaved-changes prompt would have nowhere to put it.
+    foundry.applications.instances.get(`illuminus-style-editor-${id}`)?.close({ force: true });
     this.render();
     log.debug("deleted style", id);
   }

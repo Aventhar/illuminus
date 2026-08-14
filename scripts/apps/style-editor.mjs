@@ -431,6 +431,37 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     for (const group of GROUPS) this.#updateTabBadge(group.id);
   }
 
+  /**
+   * Closing with unsaved work asks first.
+   *
+   * The editor holds every change in a working copy until Save, so closing the
+   * window is the one way to lose an afternoon's styling in a single click.
+   * `close()` rather than `_onClose`, because only this can decline to close;
+   * `force` still closes without asking, which is what Foundry uses when the
+   * world shuts down.
+   * @override
+   */
+  async close(options = {}) {
+    if (!this.#dirty || options.force) return super.close(options);
+
+    const choice = await DialogV2.wait({
+      window: { title: game.i18n.localize("ILLUMINUS.Editor.UnsavedTitle") },
+      content: `<p>${game.i18n.format("ILLUMINUS.Editor.UnsavedBody", { name: this.style?.name ?? "" })}</p>`,
+      buttons: [
+        { action: "save", icon: "fa-solid fa-floppy-disk", label: "ILLUMINUS.Buttons.SaveAndClose", default: true },
+        { action: "discard", icon: "fa-solid fa-trash", label: "ILLUMINUS.Buttons.Discard" },
+        { action: "cancel", icon: "fa-solid fa-xmark", label: "ILLUMINUS.Buttons.KeepEditing" }
+      ],
+      // Dismissing the prompt is not a decision to throw the work away.
+      rejectClose: false,
+      close: () => "cancel"
+    });
+
+    if (choice === "cancel" || choice === null) return this;
+    if (choice === "save") await this.submit();
+    return super.close(options);
+  }
+
   /** @override */
   _onClose(options) {
     super._onClose(options);
