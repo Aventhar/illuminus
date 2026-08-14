@@ -132,13 +132,13 @@
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}
     <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
       <div class="illuminus-preview__window">
-      <header class="window-header">
+      <header class="window-header" data-part="window">
         <h1 class="window-title">{{localize "ILLUMINUS.Preview.WindowTitle"}}</h1>
         <button type="button" class="header-control icon fa-solid fa-palette" disabled></button>
         <button type="button" class="header-control icon fa-solid fa-xmark" disabled></button>
       </header>
       <div class="illuminus-preview__sheet">
-      <aside class="sidebar journal-sidebar flexcol">
+      <aside class="sidebar journal-sidebar flexcol" data-part="sidebar">
         <search>
           <input type="search" placeholder="{{localize 'ILLUMINUS.Preview.Search'}}" disabled>
         </search>
@@ -169,47 +169,47 @@
       </aside>
 
       <section class="journal-entry-content">
-        <header class="journal-header">
+        <header class="journal-header" data-part="title">
           <div class="title">{{localize "ILLUMINUS.Preview.JournalTitle"}}</div>
         </header>
         <div class="journal-entry-pages">
           <article class="journal-entry-page text">
             <div>
               <header class="journal-page-header">
-                <h1>{{localize "ILLUMINUS.Preview.Heading1"}}</h1>
+                <h1 data-part="heading1">{{localize "ILLUMINUS.Preview.Heading1"}}</h1>
               </header>
               <section class="journal-page-content">
-                <p>{{localize "ILLUMINUS.Preview.Body"}}
-                  <a class="content-link">{{localize "ILLUMINUS.Preview.Link"}}</a>.</p>
-                <hr>
+                <p data-part="body">{{localize "ILLUMINUS.Preview.Body"}}
+                  <a class="content-link" data-part="links">{{localize "ILLUMINUS.Preview.Link"}}</a>.</p>
+                <hr data-part="body">
                 {{!-- Mirrors what Foundry renders, Reveal button and all. --}}
-                <section class="secret">
+                <section class="secret" data-part="secrets">
                   <button type="button" class="reveal" disabled>{{localize "ILLUMINUS.Preview.Reveal"}}</button>
                   <p>{{localize "ILLUMINUS.Preview.Secret"}}</p>
                 </section>
-                <h2>{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
-                <blockquote><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
-                <h3>{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
-                <h4>{{localize "ILLUMINUS.Preview.Heading4"}}</h4>
-                <h5>{{localize "ILLUMINUS.Preview.Heading5"}}</h5>
-                <h6>{{localize "ILLUMINUS.Preview.Heading6"}}</h6>
-                <ul>
+                <h2 data-part="heading2">{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
+                <blockquote data-part="boxes"><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
+                <h3 data-part="heading3">{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
+                <h4 data-part="heading4">{{localize "ILLUMINUS.Preview.Heading4"}}</h4>
+                <h5 data-part="heading5">{{localize "ILLUMINUS.Preview.Heading5"}}</h5>
+                <h6 data-part="heading6">{{localize "ILLUMINUS.Preview.Heading6"}}</h6>
+                <ul data-part="lists">
                   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
                   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
                 </ul>
-                <dl>
+                <dl data-part="lists">
                   <dt>{{localize "ILLUMINUS.Preview.Term"}}</dt>
                   <dd>{{localize "ILLUMINUS.Preview.Definition"}}</dd>
                 </dl>
-                <p>{{localize "ILLUMINUS.Preview.MarksLead"}}
+                <p data-part="body">{{localize "ILLUMINUS.Preview.MarksLead"}}
                   <mark>{{localize "ILLUMINUS.Preview.Highlight"}}</mark>,
                   <code>{{localize "ILLUMINUS.Preview.Code"}}</code>, and
                   <abbr title="{{localize 'ILLUMINUS.Preview.Abbr'}}">{{localize "ILLUMINUS.Preview.Abbr"}}</abbr>.</p>
-                <details open>
+                <details open data-part="boxes">
                   <summary>{{localize "ILLUMINUS.Preview.Collapsible"}}</summary>
                   <p>{{localize "ILLUMINUS.Preview.CollapsibleBody"}}</p>
                 </details>
-                <table>
+                <table data-part="tables">
                   <caption>{{localize "ILLUMINUS.Preview.TableCaption"}}</caption>
                   <thead>
                     <tr>
@@ -222,7 +222,7 @@
                     <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
                   </tbody>
                 </table>
-                <figure>
+                <figure data-part="images">
                   <img src="modules/illuminus/assets/samples/images/castle.jpg"
                        alt="{{localize 'ILLUMINUS.Preview.Caption'}}">
                   <figcaption>{{localize "ILLUMINUS.Preview.Caption"}}</figcaption>

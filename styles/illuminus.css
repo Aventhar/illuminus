@@ -1484,6 +1484,20 @@
   display: none;
 }
 
+/* --- Focusing the sample ------------------------------------------------ */
+
+/* While a tab is open, the parts of the sample it does not style step back.
+   Dimmed rather than hidden: a heading alone on a blank page says nothing about
+   how it sits against the text around it. */
+.illuminus-preview__frame [data-part] {
+  transition: opacity 140ms ease, filter 140ms ease;
+}
+
+.illuminus-preview__frame [data-part].is-dimmed {
+  opacity: 0.3;
+  filter: saturate(0.35);
+}
+
 /* --- Settings filter ---------------------------------------------------- */
 
 .illuminus-filter {

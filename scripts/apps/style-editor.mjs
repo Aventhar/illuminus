@@ -380,6 +380,47 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /* -------------------------------------------- */
 
   /**
+   * Bring the part of the sample the open tab styles forward, and let the rest
+   * fall back.
+   *
+   * Dimmed rather than hidden: a heading alone on a blank page says nothing
+   * about whether it sits well against the text around it, and the sample is
+   * worth having precisely because it is a whole page. A tab the sample has no
+   * piece for — the families, which take the pane over entirely — leaves it be.
+   */
+  #focusSample() {
+    const frame = this.element.querySelector(".illuminus-preview__frame");
+    if (!frame) return;
+    const parts = [...frame.querySelectorAll("[data-part]")];
+    if (!parts.length) return;
+
+    // A family tab focuses the member its picker names, not the family itself.
+    const active = this.#activeGroupId();
+    const known = parts.some((part) => part.dataset.part === active);
+    for (const part of parts) {
+      part.classList.toggle("is-dimmed", known && part.dataset.part !== active);
+    }
+    if (known) this.#scrollSampleTo(parts.find((part) => part.dataset.part === active), frame);
+  }
+
+  /**
+   * Put the focused piece of the sample where it can be seen.
+   *
+   * Dimming the rest is no help if the piece in question is below the fold —
+   * the Tables tab would show a greyed page and no table. The frame is scrolled
+   * by hand rather than with `scrollIntoView`, which would scroll the editor
+   * window as well.
+   */
+  #scrollSampleTo(part, frame) {
+    if (!part) return;
+    const target = part.getBoundingClientRect();
+    const view = frame.getBoundingClientRect();
+    if (target.top >= view.top && target.bottom <= view.bottom) return;
+    const offset = target.top - view.top + frame.scrollTop;
+    frame.scrollTo({ top: Math.max(0, offset - 16), behavior: "smooth" });
+  }
+
+  /**
    * Fold each "when pointed at" control behind a switch.
    *
    * A button's ordinary colors and its hover colors sit side by side in the
@@ -609,6 +650,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       });
     }
     this.#activateGrip();
+    this.#focusSample();
     this.#activateStates();
     this.#activateFilter();
     this.#renderTabBadges();
@@ -653,6 +695,16 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
+   * Following the strip, which switches tabs without a re-render.
+   * @override
+   */
+  changeTab(...args) {
+    const result = super.changeTab(...args);
+    this.#focusSample();
+    return result;
+  }
+
+  /**
    * Closing with unsaved work asks first.
    *
    * The editor holds every change in a working copy until Save, so closing the
@@ -679,7 +731,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     });
 
     if (choice === "cancel" || choice === null) return this;
-    if (choice === "save") await this.submit();
+    if (choice === "save") await this.#save();
     return super.close(options);
   }
 
@@ -759,6 +811,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * the focused control where the user left them.
    */
   #refreshBaselineMarkers() {
+    // Saving can happen on the way out, when there is no longer a window to
+    // mark up: the markers are for the person still looking at it.
+    if (!this.element) return;
     for (const group of GROUPS) {
       for (const field of groupFields(group)) {
         const row = this.element.querySelector(`[data-field="${group.id}.${field.name}"]`);
@@ -788,6 +843,19 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** Save the working copy to the world. */
   static async #onSubmit() {
+    await this.#save();
+  }
+
+  /**
+   * Write the working copy to the style.
+   *
+   * Separate from the form handler because the form is not where the values
+   * live — every control writes into the working copy as it changes, and this
+   * only stores it. Going through `submit()` would make Foundry serialize a few
+   * thousand fields to reach the same result, and serializing a form while a
+   * re-render is in flight can throw on a field that has just been replaced.
+   */
+  async #save() {
     await updateStyle(this.#styleId, { settings: this.#working });
     this.#baseline = foundry.utils.deepClone(this.#working);
     this.#dirty = false;

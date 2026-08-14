@@ -51,7 +51,10 @@ it to whichever journals should wear it, and export it to carry into another wor
 - **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.
-- **Live sample.** The editor carries a miniature journal that repaints as you drag a
+- **Live sample.** The editor carries a miniature journal that follows the tab you are
+  on — open Tables and the table comes forward while the rest of the page steps back,
+  dimmed rather than hidden, because a heading alone on a blank page tells you nothing
+  about how it sits in the text. It repaints as you drag a
   slider, and any real journal already open repaints too. Drag the strip on its left edge
   to give it more room or hand the room back to the controls. The sample follows the tab:
   it reveals the sidebar while the Sidebar tab is open and gives the width back to the

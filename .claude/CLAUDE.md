@@ -309,6 +309,12 @@ nothing and checks it still compiles once given a value.
 
 ## Editor chrome
 
+The sample **follows the open tab**: pieces of it carry `data-part="<group id>"`, and
+the editor dims the rest and scrolls the focused one into view. `changeTab` is overridden
+to do it, because switching tabs does not re-render. A family tab focuses the member its
+picker names, via `#activeGroupId()`, and a tab the sample has no piece for leaves it
+alone.
+
 The filter and the per-state switch are both **derived from what is already in the DOM**,
 not from new schema. The filter reads each control's own label and hint text; the switch
 pairs `buttonHoverBackground` with `buttonBackground` by name. Both spellings of the

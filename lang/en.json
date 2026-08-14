@@ -1199,7 +1199,7 @@
   "ILLUMINUS.Manager.RestoreTooltip": "Put back any style that came with Illuminus and is no longer here",
   "ILLUMINUS.Manager.SelectAll": "Select all",
   "ILLUMINUS.Manager.SelectForExport": "Select this style for export",
-  "ILLUMINUS.Manager.SidebarButton": "Journal Styles",
+  "ILLUMINUS.Manager.SidebarButton": "Illuminus Styles",
   "ILLUMINUS.Manager.Title": "Journal Style Library",
   "ILLUMINUS.Manager.Unused": "Not used by any journal yet",
   "ILLUMINUS.Manager.UsedBy": "Used by {count} journal(s)",
@@ -1387,7 +1387,7 @@
   "ILLUMINUS.Templates.SaveBody": "What should this template be called?",
   "ILLUMINUS.Templates.Saved": "Saved \"{name}\" to the template library.",
   "ILLUMINUS.Templates.SaveTitle": "Save as Template",
-  "ILLUMINUS.Templates.SidebarButton": "Templates",
+  "ILLUMINUS.Templates.SidebarButton": "Illuminus Templates",
   "ILLUMINUS.Templates.Title": "Template Library",
   "ILLUMINUS.Templates.Untitled": "Untitled template"
 }

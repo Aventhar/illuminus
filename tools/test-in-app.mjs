@@ -2308,10 +2308,11 @@ try {
     const dirty = async () => {
       const app = await api.openEditor(style.id);
       let control = null;
-      for (let i = 0; i < 60 && !control; i++) {
+      for (let i = 0; i < 200 && !control; i++) {
         await new Promise(r => setTimeout(r, 100));
         control = app.element?.querySelector('[data-field="page.background"] color-picker');
       }
+      if (!control) throw new Error("the editor did not render its controls in twenty seconds");
       control.value = "#123456";
       await new Promise(r => setTimeout(r, 250));
       return app;
@@ -2769,7 +2770,88 @@ try {
   })()`);
 }
 
-console.log("\n[43] Console is clean");
+// The sample is a whole page, which is what makes it useful — so the tab you
+// are on brings its own part forward rather than the sample showing that part
+// alone. A heading in isolation says nothing about how it sits in the text.
+console.log("\n[43] The sample follows the open tab");
+try {
+  const focus = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const app = await api.openEditor(api.listStyles()[0].id);
+    await new Promise(r => setTimeout(r, 1300));
+    const el = app.element;
+    // Re-queried every time: choosing another family member re-renders, and a
+    // frame captured once is a detached node from then on.
+    const parts = () => [...app.element.querySelectorAll(".illuminus-preview__frame [data-part]")];
+    const lit = () => parts().filter(p => !p.classList.contains("is-dimmed")).map(p => p.dataset.part);
+    const dimmed = () => parts().filter(p => p.classList.contains("is-dimmed")).length;
+    const frame = el.querySelector(".illuminus-preview__frame");
+    const visit = async (tab) => {
+      app.changeTab(tab, "sheet");
+      await new Promise(r => setTimeout(r, 500));
+      return {lit: lit(), dimmed: dimmed()};
+    };
+
+    const out = {tables: await visit("tables"), body: await visit("body")};
+    // Scrolled to, not merely lit: dimming the rest is no help if the piece is
+    // below the fold.
+    await visit("tables");
+    // Polled, not waited on: the scroll is animated, and a fixed delay either
+    // races it or pads every run to the slowest machine.
+    const inView = () => {
+      const table = app.element.querySelector('.illuminus-preview__frame [data-part="tables"]');
+      const box = app.element.querySelector(".illuminus-preview__frame").getBoundingClientRect();
+      const seen = table.getBoundingClientRect();
+      return seen.top < box.bottom && seen.bottom > box.top;
+    };
+    out.scrolledIntoView = false;
+    for (let i = 0; i < 30 && !out.scrolledIntoView; i++) {
+      out.scrolledIntoView = inView();
+      if (!out.scrolledIntoView) await new Promise(r => setTimeout(r, 100));
+    }
+
+    // A family replaces the pane outright, so nothing there should be dimmed.
+    out.family = await visit("boxStyles");
+
+    // And the focus follows the level the picker names.
+    app.changeTab("headings", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    const picker = el.querySelector('[data-family-picker="headings"]');
+    picker.value = "heading3";
+    picker.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 700));
+    out.afterPick = lit();
+
+    // The two ways in are named for the module they belong to. Found by their
+    // own classes rather than by guessing where Foundry puts the footer.
+    out.buttons = [".illuminus-open-manager", ".illuminus-open-templates"]
+      .map(sel => document.querySelector(sel)?.textContent.trim() ?? "");
+
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`);
+  const fc = JSON.parse(focus);
+  check(JSON.stringify(fc.tables.lit) === JSON.stringify(["tables"]) && fc.tables.dimmed > 10,
+    `opening a tab brings its own part forward (lit ${fc.tables.lit.join(", ")}, ${fc.tables.dimmed} dimmed)`);
+  check(fc.body.lit.every((part) => part === "body") && fc.body.lit.length > 1,
+    `a tab with several pieces lights them all (${fc.body.lit.length} lit)`);
+  check(fc.scrolledIntoView, "and the sample scrolls so that part can be seen");
+  check(fc.family.dimmed === 0,
+    `a family tab, which replaces the pane outright, dims nothing (${fc.family.dimmed})`);
+  check(JSON.stringify(fc.afterPick) === JSON.stringify(["heading3"]),
+    `the focus follows the member the picker names (lit ${fc.afterPick.join(", ")})`);
+  check(fc.buttons.some((t) => /Illuminus Styles/.test(t))
+    && fc.buttons.some((t) => /Illuminus Templates/.test(t)),
+    `both sidebar buttons name the module (got ${fc.buttons.join(", ")})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+  })()`);
+}
+
+console.log("\n[44] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
