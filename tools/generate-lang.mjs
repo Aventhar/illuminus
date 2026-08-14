@@ -121,6 +121,8 @@ Object.assign(out, {
   "ILLUMINUS.Choices.upperAlpha": "A, B, C",
   "ILLUMINUS.Choices.lowerRoman": "i, ii, iii",
   "ILLUMINUS.Choices.upperRoman": "I, II, III",
+  "ILLUMINUS.Choices.captionSide.top": "Above the table",
+  "ILLUMINUS.Choices.captionSide.bottom": "Below the table",
   "ILLUMINUS.Choices.baseline": "On the line",
   "ILLUMINUS.Preview.TagTitle": "Sewer Haze",
   "ILLUMINUS.Preview.TagRank": "Disease 7",
@@ -132,6 +134,15 @@ Object.assign(out, {
   "ILLUMINUS.Preview.TagFlowEnd": "one, so its lettering and spacing can be judged against ordinary prose.",
   "ILLUMINUS.Preview.Secret": "A secret passage, which only the GM can read until it is revealed.",
   "ILLUMINUS.Preview.Reveal": "Reveal",
+  "ILLUMINUS.Preview.Term": "Term",
+  "ILLUMINUS.Preview.Definition": "The explanation that sits under a term in a definition list.",
+  "ILLUMINUS.Preview.MarksLead": "Marked text, such as",
+  "ILLUMINUS.Preview.Highlight": "a highlight",
+  "ILLUMINUS.Preview.Code": "code",
+  "ILLUMINUS.Preview.Abbr": "an abbreviation",
+  "ILLUMINUS.Preview.Collapsible": "A collapsible passage",
+  "ILLUMINUS.Preview.CollapsibleBody": "What the reader sees once it is opened.",
+  "ILLUMINUS.Preview.TableCaption": "Table caption",
   "ILLUMINUS.Preview.Caption": "Image caption",
   "ILLUMINUS.Preview.BlockHeading": "Box heading",
   "ILLUMINUS.Preview.BlockBody": "Text inside the box, run on long enough to wrap over several lines so its own spacing, padding, and lettering can be judged against the page around it.",
@@ -210,6 +221,12 @@ const SECTION_TEXT = {
   columns: ["Columns", "Split the text into newspaper-style columns"],
   dropCap: ["Opening Capital", "An enlarged first letter at the start of a page"],
   decoration: ["Underline", "The line drawn through or under a link"],
+  marks: ["Marked Text", "Highlighting, strike-through, underline, and the rest of the toolbar's marks"],
+  code: ["Code", "Fixed-width text, inline and as a block"],
+  definitions: ["Definition Lists", "A term with its explanation beneath"],
+  tableCaption: ["Caption", "The title printed above or below a table"],
+  collapsible: ["Collapsible", "A passage the reader can fold away"],
+  media: ["Sound and Video", "Embedded players and pages"],
   revealed: ["Once Revealed", "How the passage looks after it has been shown to the table"],
   revealButton: ["Reveal Button", "The button Foundry prints inside a secret passage"],
   chip: ["Highlight", "A patch of color behind a link, making it look like a button"],
@@ -253,7 +270,10 @@ const NOUN = {
   headerButtonCorner: "button", pageButtonCorner: "button",
   padding: "contents", cellPadding: "cell's contents", entryPadding: "entry's contents",
   margin: "", corner: "", searchCorner: "search box", buttonCorner: "button",
-  shadow: "shadow", innerShadow: "inner shading", textShadow: "text shadow"
+  codePadding: "code", codeBlockPadding: "block of code", summaryPadding: "heading",
+  collapsiblePadding: "contents",
+  shadow: "shadow", innerShadow: "inner shading", textShadow: "text shadow",
+  mediaShadow: "shadow"
 };
 const SIDE_PHRASE = { Top: "above", Right: "to the right of", Bottom: "below", Left: "to the left of" };
 const CORNER_WORD = {
@@ -294,6 +314,13 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, hint);
     continue;
   }
+  // lettering family: <prefix>TextStyle
+  if ((m = name.match(/^(.+)TextStyle$/))) {
+    const words = m[1].replace(/([A-Z])/g, " $1").toLowerCase().trim();
+    put(`ILLUMINUS.Field.${name}.label`, "Text Style");
+    put(`ILLUMINUS.Field.${name}.hint`, `How the ${words} lettering looks — its weight and whether it is italic.`);
+    continue;
+  }
   // border family: <prefix><Side><Width|Style|Color>
   else if ((m = name.match(/^(.*?)(Top|Right|Bottom|Left)(Width|Style|Color)$/))) {
     const [, prefix, side, part] = m;
@@ -321,7 +348,7 @@ for (const name of names) {
     continue;
   }
   // shadow family: <prefix><OffsetX|OffsetY|Blur|Spread|Color>
-  if ((m = name.match(/^(shadow|innerShadow|textShadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
+  if ((m = name.match(/^(shadow|innerShadow|textShadow|mediaShadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
     const [, prefix, part] = m;
     const what = NOUN[prefix];
     const text = {
@@ -336,7 +363,7 @@ for (const name of names) {
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
     if (prefix === "margin") {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Gap`);
@@ -354,6 +381,51 @@ for (const name of names) {
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
   background: ["Fill Color", "The flat color behind everything else."],
+  highlightBackground: ["Highlight Color", "The color behind highlighted words."],
+  highlightColor: ["Highlight Text Color", "Lettering color of highlighted words."],
+  strikeColor: ["Strike-Through Color", "Color of the line through struck-out words."],
+  strikeThickness: ["Strike-Through Thickness", "How heavy the line through struck-out words is."],
+  underlineColor: ["Underline Color", "Color of an underline."],
+  underlineThickness: ["Underline Thickness", "How heavy an underline is."],
+  underlineOffset: ["Underline Distance", "How far an underline sits below the words."],
+  abbrColor: ["Abbreviation Color", "Lettering color of an abbreviation."],
+  abbrLine: ["Abbreviation Underline", "What the line under an abbreviation looks like."],
+  quoteFont: ["Quotation Typeface", "Lettering used for a short quotation."],
+  quoteStyle: ["Quotation Slant", "Whether a short quotation is italic."],
+  quoteColor: ["Quotation Color", "Lettering color of a short quotation. Leave empty to follow the page."],
+  codeFont: ["Code Typeface", "Lettering used for code. A fixed-width face keeps columns lined up."],
+  codeSize: ["Code Text Size", "How large code lettering is. 0 follows the page."],
+  codeColor: ["Code Text Color", "Lettering color of code."],
+  codeBackground: ["Code Fill Color", "The color behind code."],
+  codeBorderColor: ["Code Border Color", "Outline color around code."],
+  codeBorderWidth: ["Code Border Thickness", "How heavy the outline around code is. 0 draws nothing."],
+  codeBlockMarginTop: ["Code Block Top Gap", "Empty space above a block of code."],
+  codeBlockMarginBottom: ["Code Block Bottom Gap", "Empty space below a block of code."],
+  termFont: ["Term Typeface", "Lettering used for the term being defined."],
+  termSize: ["Term Text Size", "How large the term is. 0 follows the page."],
+  termColor: ["Term Color", "Lettering color of the term being defined."],
+  termCaps: ["Term Capitals", "Force capital letters on the term."],
+  termSpacingAbove: ["Space Above Term", "Empty space above each term."],
+  detailFont: ["Explanation Typeface", "Lettering used for the explanation under a term."],
+  detailSize: ["Explanation Text Size", "How large the explanation is. 0 follows the page."],
+  detailColor: ["Explanation Color", "Lettering color of the explanation under a term."],
+  detailIndent: ["Explanation Indent", "How far the explanation is pushed in from the left."],
+  detailSpacingBelow: ["Space Below Explanation", "Empty space under each explanation."],
+  captionSide: ["Caption Position", "Whether the caption sits above or below the table."],
+  captionCaps: ["Caption Capitals", "Force capital letters on the caption."],
+  summaryFont: ["Heading Typeface", "Lettering used for the line you click to open it."],
+  summarySize: ["Heading Text Size", "How large that line is. 0 follows the page."],
+  summaryColor: ["Heading Color", "Lettering color of the line you click to open it."],
+  summaryCaps: ["Heading Capitals", "Force capital letters on that line."],
+  summaryBackground: ["Heading Fill Color", "The color behind the line you click to open it."],
+  collapsibleBackground: ["Fill Color", "The color behind the contents once opened."],
+  collapsibleBorderColor: ["Border Color", "Outline color around a collapsible passage."],
+  collapsibleBorderWidth: ["Border Thickness", "How heavy that outline is. 0 draws nothing."],
+  collapsibleMarginTop: ["Top Gap", "Empty space above a collapsible passage."],
+  collapsibleMarginBottom: ["Bottom Gap", "Empty space below a collapsible passage."],
+  mediaMaxWidth: ["Maximum Width", "How much of the text width a player or embedded page may take."],
+  mediaMarginTop: ["Top Gap", "Empty space above a player or embedded page."],
+  mediaMarginBottom: ["Bottom Gap", "Empty space below a player or embedded page."],
   revealedBackground: ["Fill Color Once Revealed", "The color behind a secret passage after it has been shown."],
   buttonSize: ["Button Text Size", "How large the lettering on the button is."],
   buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],

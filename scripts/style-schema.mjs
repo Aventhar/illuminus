@@ -745,6 +745,41 @@ export const GROUPS = [
         ]
       },
       {
+        // What the editor's own toolbar buttons produce. Highlight arrives as
+        // Foundry's yellow-on-black until it is set here.
+        id: "marks",
+        fields: [
+          col("highlightBackground", "#e8c979"),
+          col("highlightColor", "#241b10"),
+          col("strikeColor", "#7a2010"),
+          num("strikeThickness", 1, "px", 0, 12, 1),
+          col("underlineColor", "#8a6a3d"),
+          num("underlineThickness", 1, "px", 0, 12, 1),
+          num("underlineOffset", 2, "px", 0, 20, 1),
+          col("abbrColor", "#5a4326"),
+          select("abbrLine", "dotted", CHOICES.lineStyle),
+          font("quoteFont", ""),
+          select("quoteStyle", "italic", CHOICES.fontStyle),
+          col("quoteColor", "")
+        ]
+      },
+      {
+        id: "code",
+        fields: [
+          font("codeFont", "monospace"),
+          num("codeSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+          col("codeColor", "#3a2c18"),
+          col("codeBackground", "#00000012"), ...imageFields("code"),
+          ...spacingFields("codePadding", { top: 1, right: 4, bottom: 1, left: 4 }, { max: 60 }),
+          ...cornerFields("codeCorner", 3),
+          col("codeBorderColor", "#8a6a3d"),
+          num("codeBorderWidth", 0, "px", 0, 12, 1),
+          ...spacingFields("codeBlockPadding", 10, { max: 80 }),
+          num("codeBlockMarginTop", 10, "px", -60, 120, 1),
+          num("codeBlockMarginBottom", 10, "px", -60, 120, 1)
+        ]
+      },
+      {
         id: "dropCap",
         fields: [
           select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
@@ -811,6 +846,25 @@ export const GROUPS = [
         ]
       },
       {
+        // dt and dd inherit Foundry's own colors, which are light — on a
+        // parchment page they are close to invisible until set here.
+        id: "definitions",
+        fields: [
+          font("termFont", ""),
+          num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+          col("termColor", "#5e1914"),
+          textStyleField("termTextStyle", "700", "normal"),
+          select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
+          num("termSpacingAbove", 8, "px", 0, 100, 1),
+          font("detailFont", ""),
+          num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+          col("detailColor", "#241b10"),
+          textStyleField("detailTextStyle", "400", "normal"),
+          num("detailIndent", 24, "px", 0, 200, 2),
+          num("detailSpacingBelow", 6, "px", 0, 100, 1)
+        ]
+      },
+      {
         id: "layout",
         fields: [
           num("indent", 24, "px", 0, 200, 2),
@@ -850,6 +904,19 @@ export const GROUPS = [
           num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
         ]
       },
+      {
+        id: "tableCaption",
+        fields: [
+          select("captionSide", "top", ["top", "bottom"]),
+          font("captionFont", ""),
+          num("captionSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+          col("captionColor", "#5a4326"),
+          textStyleField("captionTextStyle", "700", "italic"),
+          select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
+          select("captionAlign", "center", CHOICES.alignNoJustify),
+          num("captionSpacing", 6, "px", 0, 60, 1)
+        ]
+      },
       { id: "rows", fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
       { id: "cellPadding", fields: spacingFields("cellPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 80 }) },
       { id: "cellBorder", fields: borderFields("cellBorder", { width: 1 }) },
@@ -879,7 +946,27 @@ export const GROUPS = [
           field.name === "borderLeftWidth" ? { ...field, default: 4 } : field)
       },
       { id: "corners", fields: cornerFields("corner", 2) },
-      { id: "shadow", fields: shadowFields("shadow") }
+      { id: "shadow", fields: shadowFields("shadow") },
+      {
+        // Foundry's disclosure widget: a <details> the reader can fold away.
+        id: "collapsible",
+        fields: [
+          font("summaryFont", ""),
+          num("summarySize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+          col("summaryColor", "#5e1914"),
+          textStyleField("summaryTextStyle", "700", "normal"),
+          select("summaryCaps", "none", CHOICES.caps, { emit: emitCaps }),
+          col("summaryBackground", "#00000000"), ...imageFields("summary"),
+          ...spacingFields("summaryPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 60 }),
+          col("collapsibleBackground", "#00000000"),
+          col("collapsibleBorderColor", "#8a6a3d"),
+          num("collapsibleBorderWidth", 1, "px", 0, 12, 1),
+          ...cornerFields("collapsibleCorner", 3),
+          ...spacingFields("collapsiblePadding", { top: 0, right: 8, bottom: 4, left: 8 }, { max: 80 }),
+          num("collapsibleMarginTop", 10, "px", -60, 120, 1),
+          num("collapsibleMarginBottom", 10, "px", -60, 120, 1)
+        ]
+      }
     ]
   },
 
@@ -950,6 +1037,18 @@ export const GROUPS = [
       { id: "border", fields: borderFields("border") },
       { id: "corners", fields: cornerFields("corner") },
       { id: "shadow", fields: shadowFields("shadow") },
+      {
+        // Sound, video, and embedded pages, which take a frame of their own.
+        id: "media",
+        fields: [
+          num("mediaMaxWidth", 100, "%", 5, 100, 1),
+          ...borderFields("mediaBorder"),
+          ...cornerFields("mediaCorner", 3),
+          ...shadowFields("mediaShadow"),
+          num("mediaMarginTop", 8, "px", -60, 120, 1),
+          num("mediaMarginBottom", 8, "px", -60, 120, 1)
+        ]
+      },
       {
         id: "caption",
         fields: [

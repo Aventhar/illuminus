@@ -2194,7 +2194,84 @@ try {
   })()`);
 }
 
-console.log("\n[36] Console is clean");
+// Everything a journal page can hold that had no rule until now. `dt` and `dd`
+// were the worst of it: they inherit Foundry's own light colors, so on a pale
+// page they were nearly invisible rather than merely unstyled.
+console.log("\n[36] The rest of what a page can hold");
+try {
+  const cov = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Coverage Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.lists, {termColor: "#5e1914", detailColor: "#241b10", detailIndent: 30});
+    Object.assign(settings.tables, {captionColor: "#7a3b16", captionSide: "bottom"});
+    Object.assign(settings.body, {
+      highlightBackground: "#e8c979", highlightColor: "#241b10",
+      codeColor: "#3a2c18", abbrColor: "#5a4326"
+    });
+    Object.assign(settings.boxes, {
+      summaryColor: "#5e1914", collapsibleBorderColor: "#8a6a3d", collapsibleBorderWidth: 2
+    });
+    Object.assign(settings.images, {
+      mediaBorderTopWidth: 3, mediaBorderTopColor: "#8a6a3d", mediaBorderTopStyle: "solid"
+    });
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Coverage Test Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<dl><dt>Term</dt><dd>Definition</dd></dl>" +
+      "<table><caption>Cap</caption><thead><tr><th>H</th></tr></thead><tbody><tr><td>c</td></tr></tbody></table>" +
+      '<p><mark>hi</mark> <code>code</code> <abbr title="x">abbr</abbr></p>' +
+      "<details open><summary>Sum</summary><p>Body</p></details>" +
+      '<video src="x.webm"></video>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+
+    const root = entry.sheet.element.querySelector("section.journal-page-content");
+    const cs = (sel) => { const el = root.querySelector(sel); return el ? getComputedStyle(el) : {}; };
+    window.__cov = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify({
+      term: cs("dt").color,
+      detail: cs("dd").color,
+      detailIndent: cs("dd").marginLeft,
+      caption: cs("caption").color,
+      captionSide: cs("caption").captionSide,
+      highlight: cs("mark").backgroundColor,
+      highlightInk: cs("mark").color,
+      abbr: cs("abbr").color,
+      summary: cs("summary").color,
+      collapsible: cs("details").borderTopWidth + " " + cs("details").borderTopColor,
+      media: cs("video").borderTopWidth + " " + cs("video").borderTopColor
+    });
+  })()`);
+  const cv = JSON.parse(cov);
+  check(cv.term === "rgb(94, 25, 20)", `a definition term takes the style (got ${cv.term})`);
+  check(cv.detail === "rgb(36, 27, 16)",
+    `and its explanation, which was Foundry's near-white before (got ${cv.detail})`);
+  check(cv.detailIndent === "30px", `the explanation's indent applies (got ${cv.detailIndent})`);
+  check(cv.caption === "rgb(122, 59, 22)", `a table caption takes the style (got ${cv.caption})`);
+  check(cv.captionSide === "bottom", `and can be moved under the table (got ${cv.captionSide})`);
+  check(cv.highlight === "rgb(232, 201, 121)" && cv.highlightInk === "rgb(36, 27, 16)",
+    `highlighting is the style's, not Foundry's yellow on black (got ${cv.highlight})`);
+  check(cv.abbr === "rgb(90, 67, 38)", `an abbreviation takes the style (got ${cv.abbr})`);
+  check(cv.summary === "rgb(94, 25, 20)", `a collapsible's heading takes it (got ${cv.summary})`);
+  check(cv.collapsible === "2px rgb(138, 106, 61)", `and its frame (got ${cv.collapsible})`);
+  check(cv.media === "3px rgb(138, 106, 61)", `embedded media takes a frame (got ${cv.media})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__cov?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__cov?.styleId) await api.deleteStyle(window.__cov.styleId);
+    window.__cov = undefined;
+  })()`);
+}
+
+console.log("\n[37] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

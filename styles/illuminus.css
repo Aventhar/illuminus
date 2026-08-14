@@ -435,6 +435,202 @@
   color: var(--ill-body-drop-cap-tint);
 }
 
+/* --- Definition lists --------------------------------------------------- */
+
+/* `dt` and `dd` inherit Foundry's own colors, which are light — unset, they are
+   nearly invisible on a pale page. */
+.illuminus-styled .journal-page-content dl {
+  margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right)
+          var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
+}
+
+.illuminus-styled .journal-page-content dt {
+  font-family: var(--ill-lists-term-font);
+  font-size: var(--ill-lists-term-size);
+  color: var(--ill-lists-term-color);
+  font-weight: var(--ill-lists-term-text-style-weight);
+  font-style: var(--ill-lists-term-text-style-slant);
+  font-variant: var(--ill-lists-term-caps-variant);
+  text-transform: var(--ill-lists-term-caps-transform);
+  margin-top: var(--ill-lists-term-spacing-above);
+}
+
+.illuminus-styled .journal-page-content dd {
+  font-family: var(--ill-lists-detail-font);
+  font-size: var(--ill-lists-detail-size);
+  color: var(--ill-lists-detail-color);
+  font-weight: var(--ill-lists-detail-text-style-weight);
+  font-style: var(--ill-lists-detail-text-style-slant);
+  margin-left: var(--ill-lists-detail-indent);
+  margin-bottom: var(--ill-lists-detail-spacing-below);
+}
+
+/* --- Table captions ----------------------------------------------------- */
+
+.illuminus-styled .journal-page-content table > caption {
+  caption-side: var(--ill-tables-caption-side);
+  font-family: var(--ill-tables-caption-font);
+  font-size: var(--ill-tables-caption-size);
+  color: var(--ill-tables-caption-color);
+  font-weight: var(--ill-tables-caption-text-style-weight);
+  font-style: var(--ill-tables-caption-text-style-slant);
+  font-variant: var(--ill-tables-caption-caps-variant);
+  text-transform: var(--ill-tables-caption-caps-transform);
+  text-align: var(--ill-tables-caption-align);
+  padding-bottom: var(--ill-tables-caption-spacing);
+}
+
+/* --- Inline marks ------------------------------------------------------- */
+
+/* What the editor's own buttons produce. Highlight is Foundry's yellow on black
+   until it is set here, which on parchment reads as a printing error. */
+.illuminus-styled .journal-page-content mark {
+  background-color: var(--ill-body-highlight-background);
+  color: var(--ill-body-highlight-color);
+}
+
+.illuminus-styled .journal-page-content s,
+.illuminus-styled .journal-page-content del,
+.illuminus-styled .journal-page-content strike {
+  text-decoration-color: var(--ill-body-strike-color);
+  text-decoration-thickness: var(--ill-body-strike-thickness);
+}
+
+.illuminus-styled .journal-page-content u,
+.illuminus-styled .journal-page-content ins {
+  text-decoration-color: var(--ill-body-underline-color);
+  text-decoration-thickness: var(--ill-body-underline-thickness);
+  text-underline-offset: var(--ill-body-underline-offset);
+}
+
+.illuminus-styled .journal-page-content abbr {
+  color: var(--ill-body-abbr-color);
+  text-decoration-line: underline;
+  text-decoration-style: var(--ill-body-abbr-line);
+}
+
+.illuminus-styled .journal-page-content q,
+.illuminus-styled .journal-page-content cite {
+  font-family: var(--ill-body-quote-font);
+  font-style: var(--ill-body-quote-style);
+  color: var(--ill-body-quote-color, inherit);
+}
+
+/* --- Code --------------------------------------------------------------- */
+
+.illuminus-styled .journal-page-content code {
+  position: relative;
+  isolation: isolate;
+  font-family: var(--ill-body-code-font);
+  font-size: var(--ill-body-code-size);
+  color: var(--ill-body-code-color);
+  background-color: var(--ill-body-code-background);
+  padding: var(--ill-body-code-padding-top) var(--ill-body-code-padding-right)
+           var(--ill-body-code-padding-bottom) var(--ill-body-code-padding-left);
+  border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
+                 var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
+  border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
+}
+
+.illuminus-styled .journal-page-content code::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-body-code-texture);
+  background-size: var(--ill-body-code-texture-fit-size);
+  background-repeat: var(--ill-body-code-texture-fit-repeat);
+  background-position: var(--ill-body-code-texture-position);
+  mix-blend-mode: var(--ill-body-code-texture-blend);
+  opacity: var(--ill-body-code-texture-opacity);
+}
+
+/* A code block gets its own room; the code inside it keeps the same skin. */
+.illuminus-styled .journal-page-content pre {
+  padding: var(--ill-body-code-block-padding-top) var(--ill-body-code-block-padding-right)
+           var(--ill-body-code-block-padding-bottom) var(--ill-body-code-block-padding-left);
+  margin-top: var(--ill-body-code-block-margin-top);
+  margin-bottom: var(--ill-body-code-block-margin-bottom);
+  background-color: var(--ill-body-code-background);
+  color: var(--ill-body-code-color);
+  border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
+                 var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
+  border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
+}
+
+.illuminus-styled .journal-page-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* --- Collapsible passages ----------------------------------------------- */
+
+/* Foundry's disclosure widget: a <details> the reader can fold away. */
+.illuminus-styled .journal-page-content details {
+  background-color: var(--ill-boxes-collapsible-background);
+  border: var(--ill-boxes-collapsible-border-width) solid var(--ill-boxes-collapsible-border-color);
+  border-radius: var(--ill-boxes-collapsible-corner-top-left) var(--ill-boxes-collapsible-corner-top-right)
+                 var(--ill-boxes-collapsible-corner-bottom-right) var(--ill-boxes-collapsible-corner-bottom-left);
+  padding: var(--ill-boxes-collapsible-padding-top) var(--ill-boxes-collapsible-padding-right)
+           var(--ill-boxes-collapsible-padding-bottom) var(--ill-boxes-collapsible-padding-left);
+  margin-top: var(--ill-boxes-collapsible-margin-top);
+  margin-bottom: var(--ill-boxes-collapsible-margin-bottom);
+}
+
+.illuminus-styled .journal-page-content details > summary {
+  position: relative;
+  isolation: isolate;
+  font-family: var(--ill-boxes-summary-font);
+  font-size: var(--ill-boxes-summary-size);
+  color: var(--ill-boxes-summary-color);
+  font-weight: var(--ill-boxes-summary-text-style-weight);
+  font-style: var(--ill-boxes-summary-text-style-slant);
+  font-variant: var(--ill-boxes-summary-caps-variant);
+  text-transform: var(--ill-boxes-summary-caps-transform);
+  background-color: var(--ill-boxes-summary-background);
+  padding: var(--ill-boxes-summary-padding-top) var(--ill-boxes-summary-padding-right)
+           var(--ill-boxes-summary-padding-bottom) var(--ill-boxes-summary-padding-left);
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.illuminus-styled .journal-page-content details > summary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-boxes-summary-texture);
+  background-size: var(--ill-boxes-summary-texture-fit-size);
+  background-repeat: var(--ill-boxes-summary-texture-fit-repeat);
+  background-position: var(--ill-boxes-summary-texture-position);
+  mix-blend-mode: var(--ill-boxes-summary-texture-blend);
+  opacity: var(--ill-boxes-summary-texture-opacity);
+}
+
+/* --- Embedded media ----------------------------------------------------- */
+
+.illuminus-styled .journal-page-content :is(video, audio, iframe) {
+  max-width: var(--ill-images-media-max-width);
+  border-width: var(--ill-images-media-border-top-width) var(--ill-images-media-border-right-width)
+                var(--ill-images-media-border-bottom-width) var(--ill-images-media-border-left-width);
+  border-style: var(--ill-images-media-border-top-style) var(--ill-images-media-border-right-style)
+                var(--ill-images-media-border-bottom-style) var(--ill-images-media-border-left-style);
+  border-color: var(--ill-images-media-border-top-color) var(--ill-images-media-border-right-color)
+                var(--ill-images-media-border-bottom-color) var(--ill-images-media-border-left-color);
+  border-radius: var(--ill-images-media-corner-top-left) var(--ill-images-media-corner-top-right)
+                 var(--ill-images-media-corner-bottom-right) var(--ill-images-media-corner-bottom-left);
+  box-shadow: var(--ill-images-media-shadow-offset-x) var(--ill-images-media-shadow-offset-y)
+              var(--ill-images-media-shadow-blur) var(--ill-images-media-shadow-spread)
+              var(--ill-images-media-shadow-color);
+  margin-top: var(--ill-images-media-margin-top);
+  margin-bottom: var(--ill-images-media-margin-bottom);
+}
+
 /* --- Secret blocks ------------------------------------------------------ */
 
 /* GM-only passages. Foundry tints them and prints a Reveal button inside;

@@ -228,6 +228,16 @@ explicitly. Its three selectors sat at the head of level 1's selector list; movi
 rules into the generator by cutting from `.journal-page-content h1 {` left them orphaned
 and the title unstyled, which is now covered by a check.
 
+## Coverage
+
+The set of things a journal page can hold is **Foundry's ProseMirror node and mark list**
+(`nodes` / `marks` in `public/scripts/foundry.mjs`), not guesswork — anything there with
+no rule is a gap. Two were worse than unstyled: `dt`/`dd` inherit core's near-white
+lettering, and `mark` arrives yellow-on-black, both unreadable on a pale page.
+
+Still uncovered on purpose: `fieldset`/`legend`, `ruby`, and `small`, which the editor
+cannot produce without pasted HTML.
+
 ## Generated files — do not hand-edit
 
 - **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.
