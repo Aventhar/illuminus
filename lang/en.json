@@ -167,6 +167,7 @@
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting…",
   "ILLUMINUS.Editor.PreviewTitle": "Live Sample",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",
+  "ILLUMINUS.Editor.StateActive": "Current page",
   "ILLUMINUS.Editor.StateHover": "Pointed at",
   "ILLUMINUS.Editor.StateNormal": "Normal",
   "ILLUMINUS.Editor.Title": "Edit Style",

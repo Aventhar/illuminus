@@ -316,6 +316,13 @@ hover half occur — `hoverBackground` as well as `buttonHoverBackground` — so
 case-insensitive, and a control whose twin lives in a *different section* is left alone
 rather than half-hidden.
 
+The switch offers **whatever states a section actually has**, from a `STATES` table
+matched against field names. A section with no ordinary controls of its own offers only
+the named ones — the sidebar's Entry States holds pointed-at and current-page controls,
+because the ordinary entry is styled in the section above it, and offering it a "Normal"
+that showed nothing would be a lie. A control with no counterpart in another state
+belongs to all of them: a button's corner rounding does not change when pointed at.
+
 Filtering and the switch can hide the same control for different reasons, so they use
 different classes: a filter hit un-hides a state-folded control (`is-state-suppressed`)
 rather than the filter lying about what exists.

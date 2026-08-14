@@ -39,6 +39,7 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.StateNormal": "Normal",
   "ILLUMINUS.Editor.StateHover": "Pointed at",
+  "ILLUMINUS.Editor.StateActive": "Current page",
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting\u2026",
   "ILLUMINUS.Editor.FilterCount": "{count} match(es)",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",

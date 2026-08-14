@@ -2518,6 +2518,23 @@ try {
       .filter(f => f.dataset.field.endsWith(".buttonColor"))
       .every(f => f.classList.contains("is-state-hidden"));
 
+    // A section whose states are all named — no ordinary one among them — offers
+    // exactly those. The sidebar's entry states are pointed-at and current-page;
+    // the ordinary entry is styled in the section above.
+    const entryStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+      .find(s => s.querySelector("summary")?.dataset.section === "entryStates");
+    entryStates.querySelector("summary").click();
+    await new Promise(r => setTimeout(r, 300));
+    out.entryStateOptions = [...entryStates.querySelectorAll(".illuminus-state__option")]
+      .map(b => b.dataset.state);
+    const entryShown = () => [...entryStates.querySelectorAll(".illuminus-field")]
+      .filter(f => !f.classList.contains("is-state-hidden")).length;
+    out.entryTotal = entryStates.querySelectorAll(".illuminus-field").length;
+    out.entryFirst = entryShown();
+    entryStates.querySelector('.illuminus-state__option[data-state="active"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    out.entryOnActive = entryShown();
+
     // Searching must reach a control the switch has folded away.
     buttons.querySelector('.illuminus-state__option[data-state="normal"]').click();
     await new Promise(r => setTimeout(r, 250));
@@ -2540,6 +2557,10 @@ try {
   check(f.hoverHiddenNormally, "whose pointed-at controls are folded away by default");
   check(f.hoverShownAfter && f.normalHiddenAfter, "and swap in when it is switched");
   check(f.filterReachesHidden, "searching still reaches a control the switch folded away");
+  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["hover", "active"]),
+    `a section with no ordinary state offers only the ones it has (got ${f.entryStateOptions.join(", ")})`);
+  check(f.entryFirst + f.entryOnActive === f.entryTotal && f.entryFirst > 0 && f.entryOnActive > 0,
+    `and splits its controls between them (${f.entryFirst} + ${f.entryOnActive} of ${f.entryTotal})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {

@@ -19,16 +19,37 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
  * is written to the world until Save, and closing without saving discards.
  */
 /**
- * A field name with its "hover" removed, or "" when it has none. Both spellings
- * occur — `buttonHoverBackground` and `hoverBackground` — so the match is
- * case-insensitive and the leading capital it leaves behind is put back down.
- * @param {string} name
- * @returns {string}
+ * The states a control can belong to, in the order they are offered.
+ *
+ * A section declares its states simply by what its controls are called, so
+ * `buttonHoverBackground` and `activeColor` need no registration beyond the
+ * word itself.
  */
-function withoutHover(name) {
-  if (!/hover/i.test(name)) return "";
-  const stripped = name.replace(/hover/i, "");
-  if (!stripped) return "";
+const STATES = [
+  { id: "normal", label: "ILLUMINUS.Editor.StateNormal" },
+  { id: "hover", label: "ILLUMINUS.Editor.StateHover", match: /hover/i },
+  { id: "active", label: "ILLUMINUS.Editor.StateActive", match: /^active|Active/ }
+];
+
+/** Which state a control belongs to. Anything unmarked is the ordinary one. */
+function stateOf(name) {
+  return STATES.find((state) => state.match?.test(name))?.id ?? "normal";
+}
+
+/**
+ * A field name with its state word removed, so counterparts can be matched.
+ *
+ * Both spellings occur — `buttonHoverBackground` and `hoverBackground` — so the
+ * match is case-insensitive and the leading capital it leaves behind is put
+ * back down.
+ * @param {string} name
+ * @returns {string} The shared stem, or the name itself when it has no state.
+ */
+function stateBase(name) {
+  const state = STATES.find((entry) => entry.match?.test(name));
+  if (!state) return name;
+  const stripped = name.replace(state.match, "");
+  if (!stripped) return name;
   return /[a-z]/.test(name[0]) ? stripped[0].toLowerCase() + stripped.slice(1) : stripped;
 }
 
@@ -369,13 +390,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    */
   #activateStates() {
     for (const section of this.element.querySelectorAll(".illuminus-section")) {
-      const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];
-      const named = (field) => field.dataset.field.split(".")[1] ?? "";
-      const pairs = fields.filter((field) => {
-        const base = withoutHover(named(field));
-        return base && fields.some((other) => named(other) === base);
-      });
-      if (!pairs.length) continue;
+      const present = this.#statesIn(section);
+      if (present.length < 2) continue;
 
       const key = section.querySelector("summary")?.dataset;
       const id = key ? `${key.group}.${key.section}` : section.dataset.section;
@@ -384,15 +400,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
       const wrap = document.createElement("div");
       wrap.className = "illuminus-state";
-      for (const [state, label] of [["normal", "ILLUMINUS.Editor.StateNormal"],
-                                    ["hover", "ILLUMINUS.Editor.StateHover"]]) {
+      for (const state of present) {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "illuminus-state__option";
-        button.dataset.state = state;
-        button.textContent = game.i18n.localize(label);
+        button.dataset.state = state.id;
+        button.textContent = game.i18n.localize(state.label);
         button.addEventListener("click", () => {
-          this.#states.set(id, state);
+          this.#states.set(id, state.id);
           this.#applyStates();
           this.#applyFilter();
         });
@@ -403,6 +418,30 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.#applyStates();
   }
 
+  /**
+   * The states one section actually offers.
+   *
+   * A control belongs to a state either by being named for one or by having a
+   * counterpart that is. The ordinary state only counts when something in the
+   * section belongs to it — the sidebar's Entry States section holds nothing
+   * but pointed-at and current-page controls, because the ordinary entry is
+   * styled in the section above it.
+   */
+  #statesIn(section) {
+    const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];
+    const named = (field) => field.dataset.field.split(".")[1] ?? "";
+    const bases = new Map();
+    for (const field of fields) {
+      const base = stateBase(named(field));
+      bases.set(base, (bases.get(base) ?? new Set()).add(stateOf(named(field))));
+    }
+    const found = new Set();
+    for (const states of bases.values()) {
+      for (const state of states) if (states.size > 1 || state !== "normal") found.add(state);
+    }
+    return STATES.filter((state) => found.has(state.id));
+  }
+
   /** Show one state's controls per section, hiding the other's. */
   #applyStates() {
     for (const section of this.element.querySelectorAll(".illuminus-section")) {
@@ -410,24 +449,29 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       if (!wrap) continue;
       const key = section.querySelector("summary")?.dataset;
       const id = key ? `${key.group}.${key.section}` : section.dataset.section;
-      const state = this.#states.get(id) ?? "normal";
+      const present = this.#statesIn(section);
+      const chosen = this.#states.get(id)
+        ?? (present.some((state) => state.id === "normal") ? "normal" : present[0]?.id);
 
       for (const option of wrap.querySelectorAll(".illuminus-state__option")) {
-        option.classList.toggle("is-on", option.dataset.state === state);
+        option.classList.toggle("is-on", option.dataset.state === chosen);
       }
+
       const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];
       const named = (field) => field.dataset.field.split(".")[1] ?? "";
-      const names = new Set(fields.map(named));
+      const kinds = new Map();
+      for (const field of fields) {
+        const base = stateBase(named(field));
+        kinds.set(base, (kinds.get(base) ?? new Set()).add(stateOf(named(field))));
+      }
       for (const field of fields) {
         const name = named(field);
-        const base = withoutHover(name);
-        // A control with no counterpart in this section belongs to both states
-        // — the sidebar's current-page colors, for instance, which have no
-        // ordinary twin beside them.
-        const isHover = Boolean(base) && names.has(base);
-        const hasHoverTwin = [...names].some((other) => withoutHover(other) === name);
-        if (!isHover && !hasHoverTwin) continue;
-        field.classList.toggle("is-state-hidden", isHover !== (state === "hover"));
+        const state = stateOf(name);
+        // A control with no counterpart in another state belongs to all of
+        // them: a button's corner rounding does not change when pointed at.
+        const managed = state !== "normal" || kinds.get(stateBase(name))?.size > 1;
+        if (!managed) continue;
+        field.classList.toggle("is-state-hidden", state !== chosen);
       }
     }
   }
