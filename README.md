@@ -33,13 +33,14 @@ it to whichever journals should wear it, and export it to carry into another wor
 - **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.
-- **Live sample.** The editor carries a miniature journal, resizable by dragging the
-  strip on its left edge, that repaints as you drag a slider, and any real journal already open repaints too. The sample follows the tab: it
-  reveals the sidebar while the Sidebar tab is open and gives the width back to the page
-  otherwise, and Block Styles and Picture Styles take the pane over entirely, showing the
-  block or picture you are editing against the prose it would interrupt — the only way a
-  half-width floated block reads as one. Nothing is written to the world until you press
-  Save.
+- **Live sample.** The editor carries a miniature journal that repaints as you drag a
+  slider, and any real journal already open repaints too. Drag the strip on its left edge
+  to give it more room or hand the room back to the controls. The sample follows the tab:
+  it reveals the sidebar while the Sidebar tab is open and gives the width back to the
+  page otherwise, and Box Styles, Tag Styles, and Image Styles take the pane over
+  entirely, showing what you are editing against the prose it would interrupt — the only
+  way a half-width floated box reads as one. Nothing is written to the world until you
+  press Save.
 - **Its own color picker.** Clicking a swatch opens Illuminus's picker rather than the
   operating system's: RGB and HSL side by side with sliders and numeric boxes, opacity on
   both, the hex including its alpha, and a row of saved colors belonging to that style.
@@ -54,32 +55,32 @@ it to whichever journals should wear it, and export it to carry into another wor
   It reads colors out of the page rather than off the screen, so unlike the operating
   system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
   and it keeps transparency.
-- **A picture behind anything.** Every fill color in the interface has a background
+- **An image behind anything.** Every fill color in the interface has a background
   image beside it — the window frame, the title bar, its buttons, sidebar entries and
   their hover states, headings, the journal title, link highlights, table headers, boxes,
   and every box and image style — each with its own fit, position, blending, and
   strength. The image rides on a layer behind the lettering, so turning its strength
-  down fades the picture and not the words.
-- **Textures included.** Background pictures under `assets/samples/textures/`, reachable
-  from the Background Picture control's file browser. The SVG ones — parchment, paper
+  down fades the image and not the words.
+- **Textures included.** Background images under `assets/samples/textures/`, reachable
+  from the Background Image control's file browser. The SVG ones — parchment, paper
   fibres, linen, stone, grid, hatch — are grayscale on purpose: the texture supplies the
   grain and the Fill Color supplies the hue, so one file suits any palette under
   Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
-  and Picture Blending to Normal to see them as they are. Your own art works just as
+  and Image Blending to Normal to see them as they are. Your own art works just as
   well.
-- **Inline styles for a few words at a time.** Ten more tag styles, applied to a
-  selection rather than a whole block: trait tags, rarity badges, and the rank at the end
-  of a statblock title line — select the words, pick one from the same menu. Each has its
-  own lettering, fill, picture, border, corners, shadow, and spacing, and can be pushed to
-  the right-hand end of the line it sits in, which is all a title line needs. A tag with
-  nothing in it is not drawn, and a block can be set to disappear when left empty, so an
-  unused slot in a template leaves no hole.
-- **Blocks and picture treatments, from the editor.** Ten of each, styled on their own
-  tabs and applied from an **Illuminus** menu in the journal page editor: put the cursor
-  in a paragraph, pick a block, and it becomes a read-aloud box, a sidebar, a stat block
-  — whatever that style makes it. The menu lists them by the names the style gives them,
-  so a style can call its first block "Read-aloud" and its second "Sidebar". "Remove
-  Illuminus styling" takes the treatment off again. No HTML is typed.
+- **Tag styles for a few words at a time.** Ten of them, applied to a selection rather
+  than a whole box: trait tags, rarity badges, and the rank at the end of a statblock
+  title line — select the words, pick one from the same menu. Each has its own lettering,
+  fill, image, border, corners, shadow, and spacing, and can be pushed to the right-hand
+  end of the line it sits in, which is all a title line needs. A tag with nothing in it
+  is not drawn, and a box can be set to disappear when left empty, so an unused slot in a
+  template leaves no hole.
+- **Box and image styles, from the editor.** Ten of each, styled on their own tabs and
+  applied from an **Illuminus** menu in the journal page editor: put the cursor in a
+  paragraph, pick a box, and it becomes a read-aloud panel, a sidebar, a stat block —
+  whatever that style makes it. The menu lists them by the names the style gives them, so
+  a style can call its first box "Read-aloud" and its second "Sidebar". "Remove Illuminus
+  styling" takes it off again. No HTML is typed.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **One style included:** Aged Parchment, seeded the first time the module runs in a
   world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
@@ -117,10 +118,10 @@ scripts/io.mjs               Export / import as JSON
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
-assets/samples/textures/     Bundled background pictures
+assets/samples/textures/     Bundled background images
 assets/samples/pictures/     Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
-styles/illuminus-generated.css  Block and picture rules; written by a generator
+styles/illuminus-generated.css  Heading, box, tag, and image rules; from a generator
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox
 ```
@@ -153,11 +154,12 @@ introduce a rule of its own. That is what makes importing a style file from a st
 safe, and it is why applying, changing, or clearing a style needs no re-render — only a
 class and a data attribute change on the sheet root.
 
-The ten blocks and ten picture treatments are twenty near-identical rule sets, which
-CSS cannot express once. Their rules live in `styles/illuminus-generated.css`, written by
-`node tools/generate-block-css.mjs` from a template with every property name taken from
-the schema — so a renamed field is a generator error rather than a rule that quietly
-stops working. Do not hand-edit that file.
+Six heading levels, ten box styles, ten tag styles, ten image styles, and a background
+image layer behind every fill color are all sets of near-identical rules, which CSS
+cannot express once. They live in `styles/illuminus-generated.css`, written by `node
+tools/generate-block-css.mjs` from templates with every property name taken from the
+schema — so a renamed field is a generator error rather than a rule that quietly stops
+working. Do not hand-edit that file.
 
 Both the compiler and the entire GUI are generated from `scripts/style-schema.mjs`.
 Adding a new style property means adding one line there plus one rule in the stylesheet;
