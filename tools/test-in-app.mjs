@@ -2129,7 +2129,72 @@ try {
   })()`);
 }
 
-console.log("\n[35] Console is clean");
+// A secret is GM-only text Foundry tints purple and prints a Reveal button
+// inside. Both states and the button take the style now.
+console.log("\n[35] Secret passages");
+try {
+  const sec = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Secret Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.secrets, {
+      background: "#2b1d12", revealedBackground: "#123d1a", color: "#f0e6d2",
+      borderTopWidth: 2, borderTopColor: "#c9a961",
+      buttonColor: "#1a1008", buttonBackground: "#c9a961", buttonSize: 14
+    });
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Secret Test Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<section class="secret"><p>Hidden.</p></section>' +
+      '<section class="secret revealed"><p>Shown.</p></section>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+
+    const root = entry.sheet.element.querySelector("section.journal-page-content");
+    const hidden = root.querySelector("section.secret:not(.revealed)");
+    const shown = root.querySelector("section.secret.revealed");
+    const button = hidden.querySelector("button.reveal");
+    const cs = (el) => el ? getComputedStyle(el) : {};
+    window.__secrets = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify({
+      hiddenBg: cs(hidden).backgroundColor,
+      revealedBg: cs(shown).backgroundColor,
+      ink: cs(hidden).color,
+      border: cs(hidden).borderTopWidth + " " + cs(hidden).borderTopColor,
+      // Foundry prints this button itself; it has to take the style too.
+      buttonFound: !!button,
+      buttonColor: cs(button).color,
+      buttonBg: cs(button).backgroundColor,
+      buttonSize: cs(button).fontSize
+    });
+  })()`);
+  const sc = JSON.parse(sec);
+  check(sc.hiddenBg === "rgb(43, 29, 18)",
+    `an unrevealed passage takes the style's fill, not Foundry's purple (got ${sc.hiddenBg})`);
+  check(sc.revealedBg === "rgb(18, 61, 26)",
+    `a revealed one takes its own fill (got ${sc.revealedBg})`);
+  check(sc.ink === "rgb(240, 230, 210)", `lettering applies (got ${sc.ink})`);
+  check(sc.border === "2px rgb(201, 169, 97)", `and the edge (got ${sc.border})`);
+  check(sc.buttonFound, "Foundry's Reveal button is there");
+  check(sc.buttonColor === "rgb(26, 16, 8)" && sc.buttonBg === "rgb(201, 169, 97)",
+    `and takes the style's colors (got ${sc.buttonColor} on ${sc.buttonBg})`);
+  check(sc.buttonSize === "14px", `and its size (got ${sc.buttonSize})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__secrets?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__secrets?.styleId) await api.deleteStyle(window.__secrets.styleId);
+    window.__secrets = undefined;
+  })()`);
+}
+
+console.log("\n[36] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

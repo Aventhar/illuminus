@@ -16,12 +16,16 @@ it to whichever journals should wear it, and export it to carry into another wor
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 2,288 settings across 14 tabs and 365 collapsible
+- **Everything is a GUI control.** 2,360 settings across 15 tabs and 374 collapsible
   sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
   Bold, and Light with or without italics, rather than a thickness dropdown of nine
   numbers beside a separate slant.
+- **Secret passages are styled too.** Foundry's GM-only blocks arrive tinted purple with
+  a Reveal button inside, which fights any page you build. They get their own tab: a fill
+  before revealing and a second one after, so a GM can see at a glance what the table has
+  already been shown, plus the lettering, the edge, and the button itself.
 - **The whole window, not just the page.** A Sidebar tab styles the contents panel —
   page entries, the current-page marker, page numbers, sub-headings, category rows, the
   search box, and its buttons — and a Window tab styles the frame, the title bar, its

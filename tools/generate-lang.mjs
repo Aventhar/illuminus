@@ -49,6 +49,10 @@ Object.assign(out, {
   "ILLUMINUS.Families.tagStyles": "Tag Styles",
   "ILLUMINUS.Families.tagStylesName": "Tag name",
   "ILLUMINUS.Families.tagStylesHint": "Styles you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
+  "ILLUMINUS.Field.secrets.color.label": "Text Color",
+  "ILLUMINUS.Field.secrets.color.hint": "Color of the lettering inside a secret passage. Leave empty to follow the page.",
+  "ILLUMINUS.Field.secrets.size.hint": "How large the lettering is inside a secret passage. 0 follows the page.",
+  "ILLUMINUS.Field.secrets.background.hint": "The color behind a secret passage before it has been revealed.",
   "ILLUMINUS.Field.tagStyles.color.label": "Text Color",
   "ILLUMINUS.Field.tagStyles.color.hint": "Color of the lettering inside this tag. Leave empty to follow the surrounding text.",
   "ILLUMINUS.Field.tagStyles.size.hint": "How large the lettering is inside this tag. 0 follows the surrounding text.",
@@ -126,6 +130,8 @@ Object.assign(out, {
   "ILLUMINUS.Preview.TagFlow": "A tag can also sit inside a sentence, like this",
   "ILLUMINUS.Preview.TagInline": "Uncommon",
   "ILLUMINUS.Preview.TagFlowEnd": "one, so its lettering and spacing can be judged against ordinary prose.",
+  "ILLUMINUS.Preview.Secret": "A secret passage, which only the GM can read until it is revealed.",
+  "ILLUMINUS.Preview.Reveal": "Reveal",
   "ILLUMINUS.Preview.Caption": "Image caption",
   "ILLUMINUS.Preview.BlockHeading": "Box heading",
   "ILLUMINUS.Preview.BlockBody": "Text inside the box, run on long enough to wrap over several lines so its own spacing, padding, and lettering can be judged against the page around it.",
@@ -159,6 +165,7 @@ const GROUP_TEXT = {
   links: ["Links", "Clickable references to other documents, rolls, and web pages."],
   lists: ["Lists", "Bulleted and numbered lists."],
   tables: ["Tables", "Tables of results, treasure, encounters, and the like."],
+  secrets: ["Secrets", "GM-only passages, and the button that reveals them to the table."],
   boxes: ["Boxes", "Set-apart passages, such as read-aloud description. Applies to quote blocks in the editor."],
   images: ["Images", "Images placed in a page, and their captions."]
 };
@@ -203,6 +210,8 @@ const SECTION_TEXT = {
   columns: ["Columns", "Split the text into newspaper-style columns"],
   dropCap: ["Opening Capital", "An enlarged first letter at the start of a page"],
   decoration: ["Underline", "The line drawn through or under a link"],
+  revealed: ["Once Revealed", "How the passage looks after it has been shown to the table"],
+  revealButton: ["Reveal Button", "The button Foundry prints inside a secret passage"],
   chip: ["Highlight", "A patch of color behind a link, making it look like a button"],
   marker: ["Bullets and Numbers", "The mark in front of each item"],
   header: ["Header Row", "The top row of a table"],
@@ -345,6 +354,9 @@ for (const name of names) {
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
   background: ["Fill Color", "The flat color behind everything else."],
+  revealedBackground: ["Fill Color Once Revealed", "The color behind a secret passage after it has been shown."],
+  buttonSize: ["Button Text Size", "How large the lettering on the button is."],
+  buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
   minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],

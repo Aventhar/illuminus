@@ -884,6 +884,56 @@ export const GROUPS = [
   },
 
   {
+    id: "secrets",
+    icon: "fa-solid fa-user-secret",
+    sections: [
+      { id: "background", fields: [col("background", "#3500790d"), ...imageFields()] },
+      {
+        id: "revealed",
+        fields: [col("revealedBackground", "#0035000d"), ...imageFields("revealed")]
+      },
+      {
+        id: "text",
+        fields: [
+          font("font", ""),
+          num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
+          col("color", ""),
+          textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
+          select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+          select("align", "inherit", ["inherit", ...CHOICES.align])
+        ]
+      },
+      { id: "padding", fields: spacingFields("padding", { top: 4, right: 8, bottom: 4, left: 8 }) },
+      { id: "margin", fields: spacingFields("margin", { top: 10, right: 0, bottom: 10, left: 0 }, { min: -100 }) },
+      {
+        id: "border",
+        // Top and bottom only by default, as Foundry draws them.
+        fields: borderFields("border", { color: "#7a6a58" }).map((field) =>
+          ["borderTopWidth", "borderBottomWidth"].includes(field.name) ? { ...field, default: 1 } : field)
+      },
+      { id: "corners", fields: cornerFields("corner") },
+      { id: "shadow", fields: shadowFields("shadow") },
+      {
+        id: "revealButton",
+        fields: [
+          col("buttonColor", "#f0f0e0"),
+          col("buttonBackground", "#00000000"), ...imageFields("button"),
+          col("buttonBorderColor", "#8a8a8a"),
+          col("buttonHoverColor", "#ffffff"),
+          col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
+          col("buttonHoverBorderColor", "#c9a961"),
+          num("buttonSize", 13, "px", 6, 40, 1),
+          num("buttonBorderWidth", 1, "px", 0, 12, 1),
+          select("buttonBorderStyle", "dashed", CHOICES.borderStyle),
+          ...cornerFields("buttonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+  {
     id: "images",
     icon: "fa-solid fa-image",
     sections: [

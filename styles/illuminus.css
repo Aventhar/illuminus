@@ -435,6 +435,123 @@
   color: var(--ill-body-drop-cap-tint);
 }
 
+/* --- Secret blocks ------------------------------------------------------ */
+
+/* GM-only passages. Foundry tints them and prints a Reveal button inside;
+   without these they keep that purple wash whatever the page is made of. The
+   image layer rides on ::before, like every other fill. */
+.illuminus-styled .journal-page-content section.secret {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--ill-secrets-background);
+  padding: var(--ill-secrets-padding-top) var(--ill-secrets-padding-right)
+           var(--ill-secrets-padding-bottom) var(--ill-secrets-padding-left);
+  margin: var(--ill-secrets-margin-top) var(--ill-secrets-margin-right)
+          var(--ill-secrets-margin-bottom) var(--ill-secrets-margin-left);
+  border-width: var(--ill-secrets-border-top-width) var(--ill-secrets-border-right-width)
+                var(--ill-secrets-border-bottom-width) var(--ill-secrets-border-left-width);
+  border-style: var(--ill-secrets-border-top-style) var(--ill-secrets-border-right-style)
+                var(--ill-secrets-border-bottom-style) var(--ill-secrets-border-left-style);
+  border-color: var(--ill-secrets-border-top-color) var(--ill-secrets-border-right-color)
+                var(--ill-secrets-border-bottom-color) var(--ill-secrets-border-left-color);
+  border-radius: var(--ill-secrets-corner-top-left) var(--ill-secrets-corner-top-right)
+                 var(--ill-secrets-corner-bottom-right) var(--ill-secrets-corner-bottom-left);
+  box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
+              var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
+              var(--ill-secrets-shadow-color);
+  font-family: var(--ill-secrets-font);
+  font-size: var(--ill-secrets-size);
+  font-weight: var(--ill-secrets-text-style-weight);
+  font-style: var(--ill-secrets-text-style-slant);
+  font-variant: var(--ill-secrets-caps-variant);
+  text-transform: var(--ill-secrets-caps-transform);
+  letter-spacing: var(--ill-secrets-letter-spacing);
+  line-height: var(--ill-secrets-line-height);
+  text-align: var(--ill-secrets-align);
+  color: var(--ill-secrets-color, inherit);
+}
+
+.illuminus-styled .journal-page-content section.secret::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-secrets-texture);
+  background-size: var(--ill-secrets-texture-fit-size);
+  background-repeat: var(--ill-secrets-texture-fit-repeat);
+  background-position: var(--ill-secrets-texture-position);
+  mix-blend-mode: var(--ill-secrets-texture-blend);
+  opacity: var(--ill-secrets-texture-opacity);
+}
+
+/* Once revealed, a second fill so a GM can tell at a glance which passages the
+   table has already been shown. */
+.illuminus-styled .journal-page-content section.secret.revealed {
+  background-color: var(--ill-secrets-revealed-background);
+}
+
+.illuminus-styled .journal-page-content section.secret.revealed::before {
+  background-image: var(--ill-secrets-revealed-texture);
+  background-size: var(--ill-secrets-revealed-texture-fit-size);
+  background-repeat: var(--ill-secrets-revealed-texture-fit-repeat);
+  background-position: var(--ill-secrets-revealed-texture-position);
+  mix-blend-mode: var(--ill-secrets-revealed-texture-blend);
+  opacity: var(--ill-secrets-revealed-texture-opacity);
+}
+
+/* The button Foundry prints inside the block. Core feeds its colors through
+   element-local custom properties, so both are set. */
+.illuminus-styled .journal-page-content section.secret > button.reveal {
+  --button-text-color: var(--ill-secrets-button-color);
+  --button-background-color: var(--ill-secrets-button-background);
+  --button-border-color: var(--ill-secrets-button-border-color);
+  position: relative;
+  isolation: isolate;
+  color: var(--ill-secrets-button-color);
+  background-color: var(--ill-secrets-button-background);
+  border-color: var(--ill-secrets-button-border-color);
+  border-width: var(--ill-secrets-button-border-width);
+  border-style: var(--ill-secrets-button-border-style);
+  border-radius: var(--ill-secrets-button-corner-top-left) var(--ill-secrets-button-corner-top-right)
+                 var(--ill-secrets-button-corner-bottom-right) var(--ill-secrets-button-corner-bottom-left);
+  font-size: var(--ill-secrets-button-size);
+}
+
+.illuminus-styled .journal-page-content section.secret > button.reveal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-secrets-button-texture);
+  background-size: var(--ill-secrets-button-texture-fit-size);
+  background-repeat: var(--ill-secrets-button-texture-fit-repeat);
+  background-position: var(--ill-secrets-button-texture-position);
+  mix-blend-mode: var(--ill-secrets-button-texture-blend);
+  opacity: var(--ill-secrets-button-texture-opacity);
+}
+
+.illuminus-styled .journal-page-content section.secret > button.reveal:hover {
+  --button-text-color: var(--ill-secrets-button-hover-color);
+  --button-background-color: var(--ill-secrets-button-hover-background);
+  --button-border-color: var(--ill-secrets-button-hover-border-color);
+  color: var(--ill-secrets-button-hover-color);
+  background-color: var(--ill-secrets-button-hover-background);
+  border-color: var(--ill-secrets-button-hover-border-color);
+}
+
+.illuminus-styled .journal-page-content section.secret > button.reveal:hover::before {
+  background-image: var(--ill-secrets-button-hover-texture);
+  background-size: var(--ill-secrets-button-hover-texture-fit-size);
+  background-repeat: var(--ill-secrets-button-hover-texture-fit-repeat);
+  background-position: var(--ill-secrets-button-hover-texture-position);
+  mix-blend-mode: var(--ill-secrets-button-hover-texture-blend);
+  opacity: var(--ill-secrets-button-hover-texture-opacity);
+}
+
 /* --- Horizontal rules --------------------------------------------------- */
 
 /* Only the top edge is drawn, so thickness means what it says rather than
