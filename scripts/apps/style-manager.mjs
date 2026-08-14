@@ -1,5 +1,7 @@
 import { MODULE_ID, FLAGS, log } from "../constants.mjs";
-import { listStyles, createStyle, duplicateStyle, deleteStyle, updateStyle } from "../style-store.mjs";
+import {
+  listStyles, createStyle, duplicateStyle, deleteStyle, updateStyle, restorePresets
+} from "../style-store.mjs";
 import { exportStyles, promptImport } from "../io.mjs";
 import { IlluminusStyleEditor } from "./style-editor.mjs";
 
@@ -32,6 +34,7 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
       exportSelected: IlluminusStyleManager.#onExportSelected,
       exportAll: IlluminusStyleManager.#onExportAll,
       import: IlluminusStyleManager.#onImport,
+      restore: IlluminusStyleManager.#onRestore,
       toggleAll: IlluminusStyleManager.#onToggleAll
     }
   };
@@ -161,6 +164,15 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
 
   static #onExportAll() {
     exportStyles(listStyles().map((s) => s.id));
+  }
+
+  /** Put back any bundled style this world no longer has. */
+  static async #onRestore() {
+    const restored = await restorePresets();
+    ui.notifications.info(restored
+      ? game.i18n.format("ILLUMINUS.Manager.Restored", { count: restored })
+      : game.i18n.localize("ILLUMINUS.Manager.RestoredNone"));
+    this.render();
   }
 
   static async #onImport() {

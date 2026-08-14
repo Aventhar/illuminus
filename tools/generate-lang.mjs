@@ -29,6 +29,10 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 
 /* ---------- New chrome strings ---------- */
 Object.assign(out, {
+  "ILLUMINUS.Manager.Restore": "Restore Samples",
+  "ILLUMINUS.Manager.RestoreTooltip": "Put back any style that came with Illuminus and is no longer here",
+  "ILLUMINUS.Manager.Restored": "Restored {count} sample style(s).",
+  "ILLUMINUS.Manager.RestoredNone": "Every sample style is already here.",
   "ILLUMINUS.Buttons.MatchSides": "Match",
   "ILLUMINUS.Buttons.MatchSidesTooltip": "Copy the first value in this section across the other sides or corners",
   "ILLUMINUS.Buttons.ResetSection": "Reset",
@@ -264,6 +268,7 @@ const SECTION_TEXT = {
   definitions: ["Definition Lists", "A term with its explanation beneath"],
   tableCaption: ["Caption", "The title printed above or below a table"],
   collapsible: ["Collapsible", "A passage the reader can fold away"],
+  glow: ["Glow", "A halo that follows the picture's shape"],
   media: ["Sound and Video", "Embedded players and pages"],
   revealed: ["Once Revealed", "How the passage looks after it has been shown to the table"],
   revealButton: ["Reveal Button", "The button Foundry prints inside a secret passage"],
@@ -461,6 +466,10 @@ const FIELD_TEXT = {
   collapsibleBorderWidth: ["Border Thickness", "How heavy that outline is. 0 draws nothing."],
   collapsibleMarginTop: ["Top Gap", "Empty space above a collapsible passage."],
   collapsibleMarginBottom: ["Bottom Gap", "Empty space below a collapsible passage."],
+  glowColor: ["Glow Color", "A glow that follows the picture's own edges, not its box. Fully transparent means none."],
+  glowSize: ["Glow Size", "How far the glow spreads. 0 draws nothing."],
+  glowOffsetX: ["Glow Sideways Offset", "How far the glow sits to the right. Negative moves it left."],
+  glowOffsetY: ["Glow Downward Offset", "How far the glow sits below. Negative moves it up."],
   mediaMaxWidth: ["Maximum Width", "How much of the text width a player or embedded page may take."],
   mediaMarginTop: ["Top Gap", "Empty space above a player or embedded page."],
   mediaMarginBottom: ["Bottom Gap", "Empty space below a player or embedded page."],

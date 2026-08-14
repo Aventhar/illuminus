@@ -16,6 +16,10 @@
     <button type="button" data-action="exportAll" {{disabled (not hasStyles)}}>
       <i class="fa-solid fa-box-archive"></i> {{localize "ILLUMINUS.Buttons.ExportAll"}}
     </button>
+    <button type="button" data-action="restore"
+            data-tooltip="{{localize 'ILLUMINUS.Manager.RestoreTooltip'}}">
+      <i class="fa-solid fa-rotate-left"></i> {{localize "ILLUMINUS.Manager.Restore"}}
+    </button>
   </header>
 
   {{#if hasStyles}}

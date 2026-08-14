@@ -218,8 +218,11 @@ const manager = await cdp.evaluate(`(async () => {
 const m = JSON.parse(manager);
 check(m.rendered, "style manager renders");
 check(m.rows === 1, `manager lists the seeded style (got ${m.rows})`);
-check(JSON.stringify(m.toolbarButtons) === JSON.stringify(["create", "import", "exportSelected", "exportAll"]),
-  `toolbar has create/import/export buttons (got ${m.toolbarButtons.join(",")})`);
+// Named rather than counted, so adding a button is a deliberate edit here
+// rather than a number that quietly drifts.
+check(JSON.stringify(m.toolbarButtons)
+  === JSON.stringify(["create", "import", "exportSelected", "exportAll", "restore"]),
+  `toolbar has create/import/export/restore buttons (got ${m.toolbarButtons.join(",")})`);
 check(m.untranslated.length === 0, `no untranslated keys in manager${m.untranslated.length ? `: ${m.untranslated.slice(0,3)}` : ""}`);
 
 console.log("\n[8] Style editor GUI renders with all tabs and controls");
@@ -2611,7 +2614,58 @@ try {
   })()`);
 }
 
-console.log("\n[41] Console is clean");
+// Two small things with a common thread: a way back from a mistake, and a glow
+// that follows a cut-out picture rather than the box around it.
+console.log("\n[41] Restoring samples, and picture glow");
+try {
+  const extras = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const out = {};
+
+    // Deleting the bundled style used to be a one-way door.
+    const parchment = api.listStyles().find(s => s.preset);
+    out.hadPreset = !!parchment;
+    await api.deleteStyle(parchment.id);
+    out.afterDelete = api.listStyles().some(s => s.preset);
+    out.restored = await api.restorePresets();
+    out.afterRestore = api.listStyles().some(s => s.preset);
+    // Restoring again must not pile up duplicates.
+    out.secondRestore = await api.restorePresets();
+
+    const style = await api.createStyle({name: "Glow Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.images, {glowColor: "#ffcc00", glowSize: 12});
+    await api.updateStyle(style.id, {settings});
+    const entry = await JournalEntry.create({name: "Glow Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: '<p><img src="icons/svg/book.svg"></p>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1300));
+    out.filter = getComputedStyle(entry.sheet.element.querySelector(".journal-page-content img")).filter;
+    window.__glow = {entryId: entry.id, styleId: style.id};
+    return JSON.stringify(out);
+  })()`);
+  const ex = JSON.parse(extras);
+  check(ex.hadPreset && !ex.afterDelete, "a sample style can be deleted");
+  check(ex.restored === 1 && ex.afterRestore, `and put back again (${ex.restored} restored)`);
+  check(ex.secondRestore === 0, "restoring twice does not pile up duplicates");
+  check(/drop-shadow/.test(ex.filter) && /204/.test(ex.filter),
+    `a picture glow follows its own edges rather than its box (got ${ex.filter})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+    }
+    const entry = game.journal.get(window.__glow?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__glow?.styleId) await api.deleteStyle(window.__glow.styleId);
+    window.__glow = undefined;
+  })()`);
+}
+
+console.log("\n[42] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

@@ -253,6 +253,27 @@ export async function assignStyle(entry, styleId) {
  * Populate the store with the bundled presets the first time the module runs in
  * a world. Presets are ordinary styles afterwards — editable and deletable.
  */
+/**
+ * Put back any bundled style the world no longer has.
+ *
+ * Seeding only happens into an empty library, so a GM who deleted Aged
+ * Parchment had no way back to it short of reinstalling. This leaves their own
+ * styles alone, and leaves an edited preset alone too unless asked.
+ * @param {boolean} [overwrite=false] Also restore ones that have been edited.
+ * @returns {Promise<number>} How many were restored.
+ */
+export async function restorePresets(overwrite = false) {
+  const styles = getStyles();
+  let restored = 0;
+  for (const preset of PRESETS) {
+    if (styles[preset.id] && !overwrite) continue;
+    styles[preset.id] = makeRecord({ ...preset, preset: true });
+    restored += 1;
+  }
+  if (restored) await writeStyles(styles);
+  return restored;
+}
+
 export async function seedPresetsIfEmpty() {
   if (!game.user.isGM) return;
   if (Object.keys(getStyles()).length) return;

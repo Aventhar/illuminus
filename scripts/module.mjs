@@ -3,7 +3,7 @@ import { registerSettings } from "./settings.mjs";
 import { refreshStyles, refreshOpenSheets, applyToElement, resolveEntry } from "./style-injector.mjs";
 import {
   getStyles, getStyle, listStyles, createStyle, updateStyle, deleteStyle, duplicateStyle,
-  getAssignedStyle, getAssignedStyleId, assignStyle, seedPresetsIfEmpty
+  getAssignedStyle, getAssignedStyleId, assignStyle, seedPresetsIfEmpty, restorePresets
 } from "./style-store.mjs";
 import { exportStyles, promptImport } from "./io.mjs";
 import { IlluminusStyleManager } from "./apps/style-manager.mjs";
@@ -38,7 +38,7 @@ Hooks.once("init", () => {
     pickStyleFor: (entry) => promptStyleAssignment(entry),
     getStyles, getStyle, listStyles,
     createStyle, updateStyle, deleteStyle, duplicateStyle,
-    getAssignedStyle, getAssignedStyleId, assignStyle,
+    getAssignedStyle, getAssignedStyleId, assignStyle, restorePresets,
     exportStyles, promptImport,
     refreshStyles,
     openTemplates: () => IlluminusTemplateManager.open(),

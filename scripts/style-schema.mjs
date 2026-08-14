@@ -1038,6 +1038,17 @@ export const GROUPS = [
       { id: "corners", fields: cornerFields("corner") },
       { id: "shadow", fields: shadowFields("shadow") },
       {
+        // A box-shadow glows the rectangle a picture sits in; drop-shadow
+        // follows the alpha, so a cut-out rune glows around the rune.
+        id: "glow",
+        fields: [
+          col("glowColor", "#00000000"),
+          num("glowSize", 0, "px", 0, 80, 1),
+          num("glowOffsetX", 0, "px", -60, 60, 1),
+          num("glowOffsetY", 0, "px", -60, 60, 1)
+        ]
+      },
+      {
         // Sound, video, and embedded pages, which take a frame of their own.
         id: "media",
         fields: [

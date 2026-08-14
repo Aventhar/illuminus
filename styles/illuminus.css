@@ -931,6 +931,13 @@
 
 /* --- Images ------------------------------------------------------------- */
 
+/* A glow that follows the picture's own edges rather than its box: a cut-out
+   PNG glows around the shape, which `box-shadow` cannot do. */
+.illuminus-styled .journal-page-content img {
+  filter: drop-shadow(var(--ill-images-glow-offset-x) var(--ill-images-glow-offset-y)
+                      var(--ill-images-glow-size) var(--ill-images-glow-color));
+}
+
 .illuminus-styled .journal-page-content :not(.illuminus-image) > img {
   max-width: var(--ill-images-max-width);
   opacity: var(--ill-images-opacity);
