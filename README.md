@@ -119,7 +119,7 @@ scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
 assets/samples/textures/     Bundled background images
-assets/samples/pictures/     Bundled artwork, and the sample shown in the editor
+assets/samples/images/       Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
 styles/illuminus-generated.css  Heading, box, tag, and image rules; from a generator
 templates/                   Handlebars templates

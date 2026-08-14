@@ -175,7 +175,7 @@ These are all load-bearing and none are obvious from the code.
 
 ## Bundled assets
 
-`assets/samples/textures/` and `assets/samples/pictures/` ship with the module and are
+`assets/samples/textures/` and `assets/samples/images/` ship with the module and are
 referenced by path from `scripts/presets.mjs` (the seeded style's texture) and
 `templates/style-editor.hbs` (the picture in the sample). Those paths are strings, so
 moving a file breaks them silently — `validate.mjs` resolves every

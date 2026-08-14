@@ -903,7 +903,7 @@ const assets = await cdp.evaluate(`(async () => {
   // Every bundled asset, so a move that misses a reference fails here rather
   // than silently 404ing in someone's game.
   const paths = [
-    "modules/illuminus/assets/samples/pictures/castle.jpg",
+    "modules/illuminus/assets/samples/images/castle.jpg",
     "modules/illuminus/assets/samples/textures/parchment.svg",
     "modules/illuminus/assets/samples/textures/paper-fibres.svg",
     "modules/illuminus/assets/samples/textures/linen.svg",
