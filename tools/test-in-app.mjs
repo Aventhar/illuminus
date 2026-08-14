@@ -2445,7 +2445,88 @@ try {
   })()`);
 }
 
-console.log("\n[39] Console is clean");
+// Two answers to "there are two thousand settings": search across every tab,
+// and fold the pointed-at half of each pair away until it is wanted.
+console.log("\n[39] Finding a setting among thousands");
+try {
+  const ui = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const app = await api.openEditor(api.listStyles()[0].id);
+    await new Promise(r => setTimeout(r, 1300));
+    const el = app.element;
+    const out = {};
+    const type = async (text) => {
+      const box = el.querySelector(".illuminus-filter__input");
+      box.value = text;
+      box.dispatchEvent(new Event("input"));
+      await new Promise(r => setTimeout(r, 250));
+    };
+    const visible = () => [...el.querySelectorAll(".illuminus-tab.active .illuminus-field")]
+      .filter(f => !f.classList.contains("is-filtered-out")).length;
+
+    out.beforeFilter = visible();
+    await type("shadow");
+    out.afterFilter = visible();
+    out.dimmedTabs = [...el.querySelectorAll("nav.tabs [data-tab]")]
+      .filter(t => t.classList.contains("is-filtered-out")).length;
+    // A section whose own name matches opens even when its controls are worded
+    // differently — Inner Shadow's are all "shading".
+    out.openSections = [...el.querySelectorAll(".illuminus-tab.active .illuminus-section")]
+      .filter(s => s.open).length;
+    await type("");
+    out.restored = visible();
+    out.noneDimmed = [...el.querySelectorAll("nav.tabs [data-tab]")]
+      .every(t => !t.classList.contains("is-filtered-out"));
+
+    // The pointed-at half of a pair.
+    app.changeTab("sidebar", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const buttons = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+      .find(s => s.querySelector("summary")?.dataset.section === "buttons");
+    buttons.querySelector("summary").click();
+    await new Promise(r => setTimeout(r, 300));
+    const hoverFields = () => [...buttons.querySelectorAll(".illuminus-field[data-field]")]
+      .filter(f => /hover/i.test(f.dataset.field));
+    out.hasSwitch = !!buttons.querySelector(".illuminus-state");
+    out.hoverHiddenNormally = hoverFields().every(f => f.classList.contains("is-state-hidden"));
+    buttons.querySelector('.illuminus-state__option[data-state="hover"]').click();
+    await new Promise(r => setTimeout(r, 300));
+    out.hoverShownAfter = hoverFields().every(f => !f.classList.contains("is-state-hidden"));
+    out.normalHiddenAfter = [...buttons.querySelectorAll(".illuminus-field[data-field]")]
+      .filter(f => f.dataset.field.endsWith(".buttonColor"))
+      .every(f => f.classList.contains("is-state-hidden"));
+
+    // Searching must reach a control the switch has folded away.
+    buttons.querySelector('.illuminus-state__option[data-state="normal"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    await type("pointed at");
+    out.filterReachesHidden = hoverFields().some(f => !f.classList.contains("is-filtered-out")
+      && f.classList.contains("is-state-suppressed"));
+    await type("");
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`);
+  const f = JSON.parse(ui);
+  check(f.afterFilter < f.beforeFilter && f.afterFilter > 0,
+    `the filter narrows a tab to what matches (${f.beforeFilter} -> ${f.afterFilter})`);
+  check(f.dimmedTabs > 0, `and dims the tabs with nothing in them (${f.dimmedTabs} dimmed)`);
+  check(f.openSections >= 2,
+    `a section whose own name matches opens too (${f.openSections} open)`);
+  check(f.restored === f.beforeFilter && f.noneDimmed,
+    `clearing it puts everything back (${f.restored})`);
+  check(f.hasSwitch, "a section with pointed-at colors gets a switch");
+  check(f.hoverHiddenNormally, "whose pointed-at controls are folded away by default");
+  check(f.hoverShownAfter && f.normalHiddenAfter, "and swap in when it is switched");
+  check(f.filterReachesHidden, "searching still reaches a control the switch folded away");
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+  })()`);
+}
+
+console.log("\n[40] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

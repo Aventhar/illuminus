@@ -39,6 +39,10 @@ it to whichever journals should wear it, and export it to carry into another wor
   thickness, style, and color; each corner its own rounding; each side its own padding
   and margin; each shadow its own offset, softness, size, and color. A **Match** button
   in each section copies one value across its siblings when you do want them the same.
+- **Finding a setting.** A search box across the top narrows every tab at once and dims
+  the ones with nothing in them, so the strip itself answers "which tab has the shadow
+  settings?". Where a control has a pointed-at twin, the pair shares one switch instead
+  of taking two rows — and a search still reaches the half that is folded away.
 - **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
   the values the style was last saved with, and the per-tab badges count what has changed
   since then.

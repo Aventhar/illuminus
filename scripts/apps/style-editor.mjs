@@ -18,6 +18,20 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
  * open journals and the sample pane restyle as the user drags a slider. Nothing
  * is written to the world until Save, and closing without saving discards.
  */
+/**
+ * A field name with its "hover" removed, or "" when it has none. Both spellings
+ * occur — `buttonHoverBackground` and `hoverBackground` — so the match is
+ * case-insensitive and the leading capital it leaves behind is put back down.
+ * @param {string} name
+ * @returns {string}
+ */
+function withoutHover(name) {
+  if (!/hover/i.test(name)) return "";
+  const stripped = name.replace(/hover/i, "");
+  if (!stripped) return "";
+  return /[a-z]/.test(name[0]) ? stripped[0].toLowerCase() + stripped.slice(1) : stripped;
+}
+
 export class IlluminusStyleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Give each editor window an id derived from the style it edits, so `open()`
@@ -57,6 +71,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** Width the user has dragged the sample pane to, in pixels. */
   #previewWidth;
+
+  /** What the filter box holds, kept across re-renders. */
+  #filter = "";
+
+  /** Which state each section is showing: "normal" or "hover". */
+  #states = new Map();
 
   /**
    * Which member of each family is on show. Ten blocks and ten picture
@@ -339,6 +359,161 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /* -------------------------------------------- */
 
   /**
+   * Fold each "when pointed at" control behind a switch.
+   *
+   * A button's ordinary colors and its hover colors sit side by side in the
+   * same section, which is most of why the Window and Sidebar tabs are the
+   * heaviest in the editor. The pairs are found by name — `buttonHoverBackground`
+   * beside `buttonBackground` — so no schema change is needed and a new pair
+   * gets the switch for free.
+   */
+  #activateStates() {
+    for (const section of this.element.querySelectorAll(".illuminus-section")) {
+      const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];
+      const named = (field) => field.dataset.field.split(".")[1] ?? "";
+      const pairs = fields.filter((field) => {
+        const base = withoutHover(named(field));
+        return base && fields.some((other) => named(other) === base);
+      });
+      if (!pairs.length) continue;
+
+      const key = section.querySelector("summary")?.dataset;
+      const id = key ? `${key.group}.${key.section}` : section.dataset.section;
+      const tools = section.querySelector(".illuminus-section__tools");
+      if (!tools || tools.querySelector(".illuminus-state")) continue;
+
+      const wrap = document.createElement("div");
+      wrap.className = "illuminus-state";
+      for (const [state, label] of [["normal", "ILLUMINUS.Editor.StateNormal"],
+                                    ["hover", "ILLUMINUS.Editor.StateHover"]]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "illuminus-state__option";
+        button.dataset.state = state;
+        button.textContent = game.i18n.localize(label);
+        button.addEventListener("click", () => {
+          this.#states.set(id, state);
+          this.#applyStates();
+          this.#applyFilter();
+        });
+        wrap.append(button);
+      }
+      tools.prepend(wrap);
+    }
+    this.#applyStates();
+  }
+
+  /** Show one state's controls per section, hiding the other's. */
+  #applyStates() {
+    for (const section of this.element.querySelectorAll(".illuminus-section")) {
+      const wrap = section.querySelector(".illuminus-state");
+      if (!wrap) continue;
+      const key = section.querySelector("summary")?.dataset;
+      const id = key ? `${key.group}.${key.section}` : section.dataset.section;
+      const state = this.#states.get(id) ?? "normal";
+
+      for (const option of wrap.querySelectorAll(".illuminus-state__option")) {
+        option.classList.toggle("is-on", option.dataset.state === state);
+      }
+      const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];
+      const named = (field) => field.dataset.field.split(".")[1] ?? "";
+      const names = new Set(fields.map(named));
+      for (const field of fields) {
+        const name = named(field);
+        const base = withoutHover(name);
+        // A control with no counterpart in this section belongs to both states
+        // — the sidebar's current-page colors, for instance, which have no
+        // ordinary twin beside them.
+        const isHover = Boolean(base) && names.has(base);
+        const hasHoverTwin = [...names].some((other) => withoutHover(other) === name);
+        if (!isHover && !hasHoverTwin) continue;
+        field.classList.toggle("is-state-hidden", isHover !== (state === "hover"));
+      }
+    }
+  }
+
+  /**
+   * A filter across every control in every tab.
+   *
+   * With well over two thousand settings, "where is the drop shadow for a
+   * heading?" is the question the editor is worst at answering. Typing narrows
+   * the open tab to matching controls and dims the tabs that have none, so the
+   * strip itself says where to look.
+   */
+  #activateFilter() {
+    const box = this.element.querySelector(".illuminus-filter__input");
+    if (!box) return;
+    box.value = this.#filter;
+    this.#applyFilter();
+    box.addEventListener("input", () => {
+      this.#filter = box.value;
+      this.#applyFilter();
+    });
+    // Escape clears rather than closing the window, which is what a search box
+    // in a dialog is expected to do.
+    box.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      if (!box.value) return;
+      event.preventDefault();
+      box.value = "";
+      this.#filter = "";
+      this.#applyFilter();
+    });
+  }
+
+  /** Show only the controls matching the filter, and say where the rest are. */
+  #applyFilter() {
+    const term = this.#filter.trim().toLowerCase();
+    const root = this.element;
+    const counts = new Map();
+
+    // Searching for a hover color and being shown nothing because the section
+    // is set to Normal would be the filter lying about what exists.
+    for (const field of root.querySelectorAll(".illuminus-field.is-state-hidden")) {
+      field.classList.toggle("is-state-suppressed", Boolean(term));
+    }
+
+    for (const tab of root.querySelectorAll(".illuminus-tab")) {
+      let tabMatches = 0;
+      for (const section of tab.querySelectorAll(".illuminus-section")) {
+        let sectionMatches = 0;
+        // A section whose own name matches shows everything in it. Searching
+        // "shadow" should find Inner Shadow, whose controls are worded
+        // "shading" and would otherwise all miss.
+        const summary = section.querySelector("summary")?.textContent.toLowerCase() ?? "";
+        const wholeSection = Boolean(term) && summary.includes(term);
+        for (const field of section.querySelectorAll(".illuminus-field")) {
+          const hit = !term || wholeSection || field.textContent.toLowerCase().includes(term);
+          field.classList.toggle("is-filtered-out", !hit);
+          if (hit) sectionMatches += 1;
+        }
+        section.classList.toggle("is-filtered-out", Boolean(term) && !sectionMatches);
+        // Open what matched, and hand the author's own open/closed state back
+        // when the box is cleared.
+        const key = section.querySelector("summary")?.dataset;
+        const wasOpen = key ? this.#expanded.has(`${key.group}.${key.section}`) : false;
+        section.open = term ? sectionMatches > 0 : wasOpen;
+        tabMatches += sectionMatches;
+      }
+      counts.set(tab.dataset.tab, tabMatches);
+    }
+
+    for (const item of root.querySelectorAll("nav.tabs [data-tab]")) {
+      const hits = counts.get(item.dataset.tab) ?? 0;
+      item.classList.toggle("is-filtered-out", Boolean(term) && hits === 0);
+    }
+
+    const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
+    const readout = root.querySelector(".illuminus-filter__count");
+    if (readout) {
+      readout.textContent = term
+        ? game.i18n.format("ILLUMINUS.Editor.FilterCount", { count: total })
+        : "";
+    }
+  }
+
+  /**
    * Let the sample pane be resized by dragging the strip on its left edge.
    *
    * Pointer capture rather than document listeners: the pointer leaves the
@@ -390,6 +565,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       });
     }
     this.#activateGrip();
+    this.#activateStates();
+    this.#activateFilter();
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
       const [groupId, fieldName] = row.dataset.field.split(".");

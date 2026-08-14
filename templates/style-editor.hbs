@@ -1,4 +1,15 @@
 <div class="illuminus-editor__layout">
+  {{!-- Spans the window above both columns: a search that only looked in the
+        open tab would not answer "which tab has the shadow settings?" --}}
+  <div class="illuminus-filter">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="illuminus-filter__input" autocomplete="off"
+           placeholder="{{localize 'ILLUMINUS.Editor.FilterPlaceholder'}}"
+           aria-label="{{localize 'ILLUMINUS.Editor.FilterPlaceholder'}}">
+    <span class="illuminus-filter__count" aria-live="polite"></span>
+  </div>
+
+  <div class="illuminus-editor__columns">
 
   {{#each groups as |group|}}
   <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
@@ -289,4 +300,5 @@
     </div>
   </aside>
 
+  </div>
 </div>

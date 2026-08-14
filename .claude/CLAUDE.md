@@ -307,6 +307,19 @@ Text and heading settings mean "use the page setting" by default — a size of 0
 the CSS keyword or nothing at all. `validate.mjs` knows a field may legitimately emit
 nothing and checks it still compiles once given a value.
 
+## Editor chrome
+
+The filter and the per-state switch are both **derived from what is already in the DOM**,
+not from new schema. The filter reads each control's own label and hint text; the switch
+pairs `buttonHoverBackground` with `buttonBackground` by name. Both spellings of the
+hover half occur — `hoverBackground` as well as `buttonHoverBackground` — so the match is
+case-insensitive, and a control whose twin lives in a *different section* is left alone
+rather than half-hidden.
+
+Filtering and the switch can hide the same control for different reasons, so they use
+different classes: a filter hit un-hides a state-folded control (`is-state-suppressed`)
+rather than the filter lying about what exists.
+
 ## Conventions worth keeping
 
 - **Every schema change is three edits**: the field in `scripts/style-schema.mjs`, a rule
