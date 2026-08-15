@@ -258,6 +258,71 @@ lettering, and `mark` arrives yellow-on-black, both unreadable on a pale page.
 Still uncovered on purpose: `fieldset`/`legend`, `ruby`, and `small`, which the editor
 cannot produce without pasted HTML.
 
+## Exporting journals as web pages
+
+`scripts/export-html.mjs` writes a folder of standalone pages. One decision carries the
+whole feature: **the export mirrors Foundry's own markup** — `.sheet.journal-entry` with
+a `.journal-sidebar` beside a `.journal-entry-content`, holding `article.journal-entry-page`
+elements — so every rule in `illuminus.css` applies to it unchanged. There is no second
+set of selectors to drift. When something looks wrong in an export, the fix almost always
+belongs in `illuminus.css`, not in `styles/illuminus-export.css`, which holds only what
+the application itself was providing (the ground behind the window, the flex row, the
+panel entry's layout).
+
+Traps found building it, all of which cost a round of debugging:
+
+- **`.sheet` is load-bearing on the export root.** Core hangs the sidebar width off
+  `--sidebar-width-expanded`, and the module feeds the width control into it on
+  `.illuminus-styled.sheet.journal-entry`. Drop `sheet` from the exported root's classes
+  and the panel silently falls back to its default width.
+- **Most text settings mean "use the journal's own"**, which resolves against *Foundry's*
+  stylesheet. An export therefore has to carry the default typeface as well as the ones
+  the style names, or every page comes out in the browser's default serif. Take the whole
+  stack from `getComputedStyle(document.body).fontFamily` rather than naming a fallback,
+  or the computed value will differ from the app's in the tail.
+- **Foundry ships no zip library** — `scripts/zip.mjs` writes the format directly, using
+  `CompressionStream("deflate-raw")` for method 8 and storing when it is missing.
+  `validate.mjs` proves an archive by running the operating system's `unzip` over it,
+  because our own reader agreeing with our own writer would prove nothing.
+- **A non-ASCII filename makes `unzip` prompt** rather than fail, which hangs a
+  non-interactive run. Asset names are slugified on the way in.
+- `CONFIG.ux.TextEditor.enrichHTML(content, {secrets: false})` **drops unrevealed secret
+  sections itself**, so "do not leak GM text" costs nothing.
+- The in-app check renders the exported file in a second browser tab over CDP and
+  compares computed styles against the live page. That is the only thing that proves the
+  feature works, and it caught both the missing fonts and the panel width.
+
+## The two library windows
+
+The style library and the template library are the same window with different
+contents, and are kept that way deliberately: same size, same tick boxes
+(`input[name="pick"]`), same toolbar semantics, same empty state. **Selection is read
+from the DOM when something asks for it, never mirrored in a field.** The style library
+used to keep a `Set` and re-render on every tick to show a count in the button, which
+threw away the scroll position and made ticking four styles in a row a fight. If a
+count is ever wanted again, write it without re-rendering.
+
+The preset badge in the style library wore `illuminus-tag` — the same class a journal's
+inline tag styles now write, which a style can paint. It is `illuminus-badge-text`, as
+in the template library.
+
+## Testing traps found the hard way
+
+- **A lost protocol call used to stop a run dead and quietly.** `tools/cdp.mjs` now
+  rejects anything in flight when the socket closes, and times a call out at 90s, so the
+  failure names the call instead of leaving "fewer checks passed, none failed" — which
+  reads as a truncated file rather than a hang. `waitFor` swallows page errors but
+  rethrows protocol ones, or a dead socket spends the whole timeout blaming whatever was
+  being waited for.
+- **`close({force: true})` is the rule, except where the prompt is the point.**
+  Check [37] exists to exercise the unsaved-changes prompt; forcing its closes made it
+  pass by skipping what it tests. Every *other* programmatic close needs the flag.
+- **A crashed run leaves fixtures behind**, and a stray style breaks the seeded-style
+  counts three checks in — which looks like a bug in those checks. When counts are wrong
+  in section [2], the world is dirty: `tools/sandbox.sh reset`.
+- **Never kill a run mid-flight** (a foreground timeout does exactly that). Run it in the
+  background and wait, or it will die between creating a fixture and its `finally`.
+
 ## Generated files — do not hand-edit
 
 - **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.

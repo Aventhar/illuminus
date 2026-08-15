@@ -4,6 +4,7 @@ import {
 } from "../style-store.mjs";
 import { exportStyles, promptImport } from "../io.mjs";
 import { IlluminusStyleEditor } from "./style-editor.mjs";
+import { IlluminusExportDialog } from "./export-dialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -34,6 +35,7 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
       exportSelected: IlluminusStyleManager.#onExportSelected,
       exportAll: IlluminusStyleManager.#onExportAll,
       import: IlluminusStyleManager.#onImport,
+      advancedExport: IlluminusStyleManager.#onAdvancedExport,
       restore: IlluminusStyleManager.#onRestore,
       toggleAll: IlluminusStyleManager.#onToggleAll
     }
@@ -43,8 +45,18 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
     body: { template: `modules/${MODULE_ID}/templates/style-manager.hbs`, scrollable: [".illuminus-style-list"] }
   };
 
-  /** Ids ticked for export, kept across re-renders. */
-  #selected = new Set();
+  /**
+   * The ids ticked in the list.
+   *
+   * Read from the boxes when something asks, rather than mirrored in a field:
+   * keeping a copy meant re-rendering the whole window on every tick to show a
+   * count, which threw away the scroll position and made ticking four styles in
+   * a row feel like fighting the list. The template library never did this, and
+   * the two windows now work the same way.
+   */
+  #selected() {
+    return [...this.element.querySelectorAll("input[name='pick']:checked")].map((box) => box.value);
+  }
 
   /* -------------------------------------------- */
 
@@ -54,25 +66,10 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
     const styles = listStyles();
     context.styles = styles.map((style) => ({
       ...style,
-      selected: this.#selected.has(style.id),
       usage: game.journal.filter((j) => j.getFlag(MODULE_ID, FLAGS.style) === style.id).length
     }));
     context.hasStyles = styles.length > 0;
-    context.allSelected = styles.length > 0 && styles.every((s) => this.#selected.has(s.id));
-    context.selectedCount = this.#selected.size;
     return context;
-  }
-
-  /** @override */
-  _onRender(context, options) {
-    super._onRender(context, options);
-    for (const box of this.element.querySelectorAll("input[data-style-id]")) {
-      box.addEventListener("change", () => {
-        if (box.checked) this.#selected.add(box.dataset.styleId);
-        else this.#selected.delete(box.dataset.styleId);
-        this.render();
-      });
-    }
   }
 
   /** The style id for the row a clicked button sits in. */
@@ -145,7 +142,6 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
     if (!confirmed) return;
 
     await deleteStyle(id);
-    this.#selected.delete(id);
     // Forced: the style is going away, so there is nothing to offer to save
     // into, and the unsaved-changes prompt would have nowhere to put it.
     foundry.applications.instances.get(`illuminus-style-editor-${id}`)?.close({ force: true });
@@ -159,11 +155,21 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
   }
 
   static #onExportSelected() {
-    exportStyles([...this.#selected]);
+    const ids = this.#selected();
+    if (!ids.length) return ui.notifications.warn(game.i18n.localize("ILLUMINUS.Errors.NothingSelected"));
+    exportStyles(ids);
   }
 
   static #onExportAll() {
     exportStyles(listStyles().map((s) => s.id));
+  }
+
+  /**
+   * Export journals as web pages, under one style. A ticked style is taken as
+   * the one meant; otherwise the dialog opens on the first.
+   */
+  static #onAdvancedExport() {
+    IlluminusExportDialog.open({ styleId: this.#selected()[0] });
   }
 
   /** Put back any bundled style this world no longer has. */
@@ -181,10 +187,8 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
   }
 
   static #onToggleAll(_event, target) {
-    const styles = listStyles();
-    if (target.checked) for (const style of styles) this.#selected.add(style.id);
-    else this.#selected.clear();
-    this.render();
+    const on = target.checked ?? true;
+    for (const box of this.element.querySelectorAll("input[name='pick']")) box.checked = on;
   }
 
   /* -------------------------------------------- */

@@ -24,7 +24,7 @@ export class IlluminusTemplateManager extends HandlebarsApplicationMixin(Applica
       icon: "fa-solid fa-file-lines",
       resizable: true
     },
-    position: { width: 620, height: 520 },
+    position: { width: 620, height: 560 },
     actions: {
       rename: IlluminusTemplateManager.#onRename,
       remove: IlluminusTemplateManager.#onDelete,

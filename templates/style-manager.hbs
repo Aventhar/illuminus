@@ -9,12 +9,15 @@
     <button type="button" data-action="import">
       <i class="fa-solid fa-file-import"></i> {{localize "ILLUMINUS.Buttons.Import"}}
     </button>
-    <button type="button" data-action="exportSelected" {{disabled (eq selectedCount 0)}}>
-      <i class="fa-solid fa-file-export"></i>
-      {{localize "ILLUMINUS.Buttons.ExportSelected"}}{{#if selectedCount}} ({{selectedCount}}){{/if}}
+    <button type="button" data-action="exportSelected" {{disabled (not hasStyles)}}>
+      <i class="fa-solid fa-file-export"></i> {{localize "ILLUMINUS.Buttons.ExportSelected"}}
     </button>
     <button type="button" data-action="exportAll" {{disabled (not hasStyles)}}>
       <i class="fa-solid fa-box-archive"></i> {{localize "ILLUMINUS.Buttons.ExportAll"}}
+    </button>
+    <button type="button" data-action="advancedExport" {{disabled (not hasStyles)}}
+            data-tooltip="{{localize 'ILLUMINUS.Export.Tooltip'}}">
+      <i class="fa-solid fa-globe"></i> {{localize "ILLUMINUS.Export.Button"}}
     </button>
     <button type="button" data-action="restore"
             data-tooltip="{{localize 'ILLUMINUS.Manager.RestoreTooltip'}}">
@@ -26,21 +29,21 @@
   <div class="illuminus-style-list scrollable">
 
     <label class="illuminus-select-all">
-      <input type="checkbox" data-action="toggleAll" {{checked allSelected}}>
+      <input type="checkbox" data-action="toggleAll">
       <span>{{localize "ILLUMINUS.Manager.SelectAll"}}</span>
     </label>
 
     {{#each styles as |style|}}
     <div class="illuminus-style-row" data-style-id="{{style.id}}">
 
-      <input type="checkbox" data-style-id="{{style.id}}" {{checked style.selected}}
+      <input type="checkbox" name="pick" value="{{style.id}}"
              aria-label="{{localize 'ILLUMINUS.Manager.SelectForExport'}}">
 
       <div class="illuminus-style-row__text">
         <div class="illuminus-style-row__name">
           {{style.name}}
           {{#if style.preset}}
-          <span class="illuminus-tag" data-tooltip="{{localize 'ILLUMINUS.Manager.PresetTooltip'}}">
+          <span class="illuminus-badge-text" data-tooltip="{{localize 'ILLUMINUS.Manager.PresetTooltip'}}">
             {{localize "ILLUMINUS.Manager.Preset"}}
           </span>
           {{/if}}

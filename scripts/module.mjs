@@ -15,6 +15,8 @@ import {
   seedTemplatesIfEmpty, restoreTemplatePresets
 } from "./template-store.mjs";
 import { IlluminusTemplateManager } from "./apps/template-manager.mjs";
+import { IlluminusExportDialog } from "./apps/export-dialog.mjs";
+import { buildHtmlExport } from "./export-html.mjs";
 
 /**
  * Entry point for Illuminus.
@@ -42,6 +44,8 @@ Hooks.once("init", () => {
     exportStyles, promptImport,
     refreshStyles,
     openTemplates: () => IlluminusTemplateManager.open(),
+    openExport: (options) => IlluminusExportDialog.open(options),
+    buildJournalExport: (options) => buildHtmlExport(options),
     getTemplates, getTemplate, listTemplates,
     createTemplate, updateTemplate, deleteTemplate, restoreTemplatePresets,
     getSetting, setSetting
@@ -104,6 +108,27 @@ Hooks.on("getJournalEntryContextOptions", (_directory, options) => {
     visible: () => game.user.isGM,
     callback: (target) => promptStyleAssignment(game.journal.get(target.dataset.entryId)),
     onClick: (target) => promptStyleAssignment(game.journal.get(target.dataset.entryId))
+  });
+});
+
+/**
+ * And an export from the same menu, with this journal already ticked and the
+ * style it is wearing already chosen — which is the whole choice, most times.
+ */
+Hooks.on("getJournalEntryContextOptions", (_directory, options) => {
+  if (!game.user.isGM) return;
+  const open = (target) => {
+    const entry = game.journal.get(target.dataset.entryId);
+    IlluminusExportDialog.open({ styleId: getAssignedStyleId(entry), entryIds: [entry?.id] });
+  };
+  options.push({
+    name: "ILLUMINUS.Export.ContextEntry",
+    label: "ILLUMINUS.Export.ContextEntry",
+    icon: '<i class="fa-solid fa-file-export"></i>',
+    condition: () => game.user.isGM,
+    visible: () => game.user.isGM,
+    callback: open,
+    onClick: open
   });
 });
 

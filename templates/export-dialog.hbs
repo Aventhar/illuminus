@@ -1,0 +1,57 @@
+<div class="illuminus-export-dialog">
+
+  <p class="hint">{{localize "ILLUMINUS.Export.Hint"}}</p>
+
+  <fieldset>
+    <legend>{{localize "ILLUMINUS.Export.StyleLegend"}}</legend>
+    <select name="styleId">
+      {{#each styles as |style|}}
+      {{#if style.selected}}
+      <option value="{{style.id}}" selected>{{style.name}}</option>
+      {{else}}
+      <option value="{{style.id}}">{{style.name}}</option>
+      {{/if}}
+      {{/each}}
+    </select>
+    <p class="hint">{{localize "ILLUMINUS.Export.StyleHint"}}</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "ILLUMINUS.Export.JournalsLegend"}}</legend>
+
+    <div class="illuminus-export-dialog__tools">
+      <button type="button" data-action="pickAll">{{localize "ILLUMINUS.Manager.SelectAll"}}</button>
+      <button type="button" data-action="pickNone">{{localize "ILLUMINUS.Export.SelectNone"}}</button>
+      <button type="button" data-action="pickStyled">{{localize "ILLUMINUS.Export.SelectStyled"}}</button>
+    </div>
+
+    {{#if journals.length}}
+    <div class="illuminus-export-dialog__list scrollable">
+      {{#each journals as |journal|}}
+      <label class="illuminus-export-dialog__row">
+        {{#if journal.selected}}
+        <input type="checkbox" name="entryIds" value="{{journal.id}}" checked>
+        {{else}}
+        <input type="checkbox" name="entryIds" value="{{journal.id}}">
+        {{/if}}
+        <span class="illuminus-export-dialog__name">{{journal.name}}</span>
+        <span class="illuminus-export-dialog__pages">{{journal.pages}}</span>
+      </label>
+      {{/each}}
+    </div>
+    {{else}}
+    <p class="illuminus-manager__empty">{{localize "ILLUMINUS.Export.NoJournals"}}</p>
+    {{/if}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "ILLUMINUS.Export.OptionsLegend"}}</legend>
+    <label class="illuminus-export-dialog__option">
+      <input type="checkbox" name="secrets">
+      <span>
+        {{localize "ILLUMINUS.Export.Secrets"}}
+        <span class="hint">{{localize "ILLUMINUS.Export.SecretsHint"}}</span>
+      </span>
+    </label>
+  </fieldset>
+</div>

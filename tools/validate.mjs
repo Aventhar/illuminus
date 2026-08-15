@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import os from "node:os";
+import { execFileSync } from "node:child_process";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
@@ -217,6 +219,48 @@ for (const type of types) {
   if (!editorHbs.includes(`"${type}"`)) fail(`editor template has no branch for field type "${type}"`);
 }
 ok(`template handles field types: ${[...types].join(", ")}`);
+
+/* 9. The export: a real archive, and the files it names. */
+console.log("\n[9] Export");
+const { makeZip } = await import(`${ROOT}/scripts/zip.mjs`);
+
+// Every stylesheet the exporter reads has to be where it says it is. These are
+// strings in the source, so nothing else would notice a rename.
+const exporter = fs.readFileSync(path.join(ROOT, "scripts/export-html.mjs"), "utf8");
+const named = [...exporter.matchAll(/moduleFile\("([^"]+)"\)/g)].map((m) => m[1]);
+if (!named.length) fail("no stylesheets found in the exporter — has moduleFile been renamed?");
+for (const file of named) {
+  if (!fs.existsSync(path.join(ROOT, file))) fail(`the exporter reads ${file}, which does not exist`);
+}
+ok(`the exporter's ${named.length} stylesheets all exist`);
+
+// The archive is checked by something that is not us: an unzipper either reads
+// it or it does not, and our own reader agreeing with our own writer would
+// prove nothing.
+const payload = "<p>The stair descends past the waterline.</p>\n".repeat(400);
+const binary = new Uint8Array(512).map((_, i) => i % 256);
+const zip = await makeZip([
+  { path: "index.html", data: payload },
+  { path: "styles/aged-parchment.css", data: ":root { --x: 1 }" },
+  { path: "assets/images/paper.bin", data: binary }
+]);
+const bytes = Buffer.from(await zip.arrayBuffer());
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), "illuminus-zip-"));
+try {
+  fs.writeFileSync(path.join(dir, "out.zip"), bytes);
+  execFileSync("unzip", ["-q", "-o", "out.zip", "-d", "out"], { cwd: dir });
+  const html = fs.readFileSync(path.join(dir, "out/index.html"), "utf8");
+  const back = fs.readFileSync(path.join(dir, "out/assets/images/paper.bin"));
+  if (html !== payload) fail("text did not survive the round trip through the archive");
+  else if (!back.equals(Buffer.from(binary))) fail("binary data did not survive the round trip");
+  else ok(`an unzipper reads the archive back byte for byte (${payload.length} bytes stored in ${bytes.length})`);
+  if (bytes.length >= payload.length) fail("the archive is no smaller than its contents — is deflate working?");
+  else ok("and it is compressed, not merely stored");
+} catch (error) {
+  fail(`could not verify the archive with unzip: ${error.message}`);
+} finally {
+  fs.rmSync(dir, { recursive: true, force: true });
+}
 
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

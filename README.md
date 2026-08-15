@@ -111,6 +111,13 @@ it to whichever journals should wear it, and export it to carry into another wor
   template looks like a Pathfinder hazard under one style and a starship manifest under
   another. They import and export as JSON like styles do, and an imported one is parsed
   through Foundry's own editor rules, so it can carry no more than a person could type.
+- **Export as web pages.** Save styled journals as a folder of ordinary web pages that
+  open in any browser, with no Foundry and no Illuminus needed — a handout to hand a
+  player, or an adventure to put on a website. The export carries its own stylesheet,
+  the pictures and fonts it uses, and a contents panel to move between pages, and it
+  looks like the journal did, down to the window frame. Hidden passages stay out unless
+  you ask for them, and links to things that did not come along — an actor, an item —
+  become plain text rather than links that go nowhere.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **One style included:** Aged Parchment, seeded the first time the module runs in a
   world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
@@ -125,6 +132,8 @@ Three ways in, all GM-only:
 | Right-click a journal in the sidebar → **Journal Style** | Assigns a style to that journal |
 | A journal's window header → palette icon | Assigns a style to that journal |
 | Configure Settings → Illuminus → **Open Style Library** | Opens the style library |
+| Style library → **Export Journals…** | Saves journals as web pages |
+| Right-click a journal in the sidebar → **Export as Web Pages…** | The same, for that journal |
 
 Adding fonts: Illuminus offers whatever font families Foundry knows about, so install
 custom fonts through Foundry's **Configure Font Families** menu and they appear in every

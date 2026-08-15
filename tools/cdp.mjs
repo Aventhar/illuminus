@@ -18,6 +18,25 @@ export async function connect(port = 9222) {
   let id = 0;
   const pending = new Map();
   const logs = [];
+
+  /**
+   * Fail everything still in flight.
+   *
+   * A message that never comes back is the worst failure this harness has: the
+   * await never settles, node runs out of work, and the process exits *quietly*
+   * part way through the suite — which reads as "fewer checks passed and none
+   * failed" and sends you looking for a bug in whatever check happened to be
+   * last. Better a loud error naming the call that went missing.
+   */
+  const abandon = (why) => {
+    for (const [msgId, { reject, method }] of pending) {
+      pending.delete(msgId);
+      reject(new Error(`${method} never answered: ${why}`));
+    }
+  };
+  ws.onclose = () => abandon("the devtools socket closed");
+  ws.onerror = () => abandon("the devtools socket errored");
+
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     if (msg.id && pending.has(msg.id)) {
@@ -32,9 +51,21 @@ export async function connect(port = 9222) {
     }
   };
 
+  /** How long any one protocol call may take before it counts as lost. */
+  const CALL_TIMEOUT = 90000;
+
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const msgId = ++id;
-    pending.set(msgId, { resolve, reject });
+    const timer = setTimeout(() => {
+      if (!pending.has(msgId)) return;
+      pending.delete(msgId);
+      reject(new Error(`${method} did not answer within ${CALL_TIMEOUT / 1000}s`));
+    }, CALL_TIMEOUT);
+    pending.set(msgId, {
+      method,
+      resolve: (value) => { clearTimeout(timer); resolve(value); },
+      reject: (error) => { clearTimeout(timer); reject(error); }
+    });
     ws.send(JSON.stringify({ id: msgId, method, params }));
   });
 
@@ -56,13 +87,23 @@ export async function connect(port = 9222) {
     await new Promise((r) => setTimeout(r, 1500));
   };
 
-  /** Poll an expression until it returns true. */
+  /**
+   * Poll an expression until it returns true.
+   *
+   * Errors from the page are swallowed on purpose — the thing being waited for
+   * usually does not exist yet, and saying so thirty times is noise. Errors
+   * from the *protocol* are not: a socket that has gone away would otherwise
+   * spend the whole timeout failing silently and then blame whatever was being
+   * waited for, which is a long way to walk to the wrong conclusion.
+   */
   const waitFor = async (expression, { timeout = 60000, label = expression } = {}) => {
     const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
       try {
         if (await evaluate(`(() => { try { return !!(${expression}); } catch { return false; } })()`)) return true;
-      } catch {}
+      } catch (error) {
+        if (/never answered|did not answer within/.test(error.message)) throw error;
+      }
       await new Promise((r) => setTimeout(r, 500));
     }
     throw new Error(`timed out waiting for: ${label}`);

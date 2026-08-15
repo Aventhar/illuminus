@@ -21,6 +21,8 @@ scripts/style-injector.mjs   Keeps the compiled sheet and sheet tagging in sync
 scripts/style-store.mjs      CRUD over the world's styles; journal assignment
 scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
+scripts/export-html.mjs      Journals -> a folder of standalone web pages
+scripts/zip.mjs              A zip writer, since Foundry ships no archiver
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
 scripts/template-store.mjs   CRUD over the world's page templates
@@ -31,6 +33,7 @@ assets/samples/textures/     Bundled background images
 assets/samples/images/       Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
 styles/illuminus-generated.css  Heading, box, tag, and image rules; from a generator
+styles/illuminus-export.css  The little Foundry provides that an exported page needs
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox
 ```
@@ -132,6 +135,10 @@ illuminus.pickStyleFor(journalEntry);           // the assignment dialog
 illuminus.listStyles();                         // every style, sorted by name
 illuminus.assignStyle(journalEntry, styleId);   // apply ("" to clear)
 illuminus.exportStyles([styleId]);              // download as JSON
+illuminus.openExport({styleId, entryIds});      // the web-page export dialog
+await illuminus.buildJournalExport({            // the archive itself, unsaved
+  styleId, entryIds, secrets: false             // -> {blob, filename, report}
+});
 ```
 
 ## Conventions

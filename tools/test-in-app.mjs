@@ -1,4 +1,8 @@
 import { fileURLToPath } from "node:url";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { connect } from "./cdp.mjs";
 
 /**
@@ -221,7 +225,7 @@ check(m.rows === 1, `manager lists the seeded style (got ${m.rows})`);
 // Named rather than counted, so adding a button is a deliberate edit here
 // rather than a number that quietly drifts.
 check(JSON.stringify(m.toolbarButtons)
-  === JSON.stringify(["create", "import", "exportSelected", "exportAll", "restore"]),
+  === JSON.stringify(["create", "import", "exportSelected", "exportAll", "advancedExport", "restore"]),
   `toolbar has create/import/export/restore buttons (got ${m.toolbarButtons.join(",")})`);
 check(m.untranslated.length === 0, `no untranslated keys in manager${m.untranslated.length ? `: ${m.untranslated.slice(0,3)}` : ""}`);
 
@@ -1565,7 +1569,7 @@ try {
     await sheet.submit();
     // Submitting does not close the editor, and a second one left open behind
     // the first steals the clicks meant for it.
-    await sheet.close();
+    await sheet.close({force: true});
     await new Promise(r => setTimeout(r, 1500));
     const entry = game.journal.get(window.__menuTest.entryId);
     const page = entry.pages.contents[0];
@@ -1917,7 +1921,7 @@ try {
   const storedTag = await cdp.evaluate(`(async () => {
     const sheet = ${EDIT_SHEET};
     await sheet.submit();
-    await sheet.close();
+    await sheet.close({force: true});
     await new Promise(r => setTimeout(r, 1400));
     return game.journal.get(window.__inline.entryId).pages.contents[0].text.content;
   })()`);
@@ -2327,11 +2331,12 @@ try {
     // Nothing changed: closing must not nag.
     let app = await api.openEditor(style.id);
     await new Promise(r => setTimeout(r, 900));
-    await app.close();
+    await app.close({force: true});
     await new Promise(r => setTimeout(r, 400));
     out.cleanAsked = !!prompt();
     out.cleanClosed = !app.rendered;
 
+    // Deliberately unforced from here on: the prompt is what is under test.
     app = await dirty();
     app.close();
     await new Promise(r => setTimeout(r, 600));
@@ -2385,7 +2390,7 @@ try {
 
     Hooks.on("getProseMirrorMenuDropDowns", (menu) => { window.__tplMenu = menu; });
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = await JournalEntry.create({name: "Template Test Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage",
@@ -2418,7 +2423,7 @@ try {
       a => a.document?.documentName === "JournalEntryPage" && a.rendered
         && a.element?.parentElement === document.body).pop();
     await sheet.submit();
-    await sheet.close();
+    await sheet.close({force: true});
     await new Promise(r => setTimeout(r, 1300));
     const stored = entry.pages.contents[0].text.content;
     out.keptBox = /illuminus-box--box01/.test(stored);
@@ -2464,7 +2469,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
       if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__tpl?.entryId);
@@ -2684,7 +2689,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__glow?.entryId);
     if (entry) await entry.delete();
@@ -2760,7 +2765,7 @@ try {
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close();
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const entry = game.journal.get(window.__hover?.entryId);
     if (entry) await entry.delete();
@@ -2805,9 +2810,14 @@ try {
       return seen.top < box.bottom && seen.bottom > box.top;
     };
     out.scrolledIntoView = false;
-    for (let i = 0; i < 30 && !out.scrolledIntoView; i++) {
+    for (let i = 0; i < 80 && !out.scrolledIntoView; i++) {
       out.scrolledIntoView = inView();
-      if (!out.scrolledIntoView) await new Promise(r => setTimeout(r, 100));
+      if (out.scrolledIntoView) break;
+      // A smooth scroll is animated and can be cancelled by whatever the
+      // browser was doing at the time — so ask once more, half way through,
+      // rather than declaring a failure the next tab switch would have fixed.
+      if (i === 30) app.changeTab("tables", "sheet");
+      await new Promise(r => setTimeout(r, 100));
     }
 
     // A family replaces the pane outright, so nothing there should be dimmed.
@@ -2949,7 +2959,226 @@ try {
   })()`);
 }
 
-console.log("\n[45] Console is clean");
+// The flagship of the export work: a styled journal has to survive leaving
+// Foundry entirely. Checked by unzipping the archive with the operating
+// system's own unzipper and rendering the result in a tab that has never heard
+// of Foundry, then reading computed styles there and comparing them with the
+// live page. Nothing less proves the promise.
+console.log("\n[45] A journal exports as web pages");
+const exportDir = fs.mkdtempSync(path.join(os.tmpdir(), "illuminus-export-"));
+try {
+  const built = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = api.listStyles()[0];
+
+    for (const name of ["Illuminus Export Test", "Illuminus Export Outside"]) {
+      const old = game.journal.getName(name);
+      if (old) await old.delete();
+    }
+
+    // A second journal, deliberately left out of the export, to link to.
+    const outside = await JournalEntry.create({name: "Illuminus Export Outside"});
+    const entry = await JournalEntry.create({name: "Illuminus Export Test"});
+    const [second] = await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "The Vault", type: "text", sort: 200,
+      text: {content: "<p>What is behind the door.</p>", format: 1}
+    }]);
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "The Map", type: "image", sort: 300,
+      src: "icons/svg/door-closed.svg", image: {caption: "The way in."}
+    }]);
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "The Stair", type: "text", sort: 100,
+      text: {content: "<h2>Down</h2>"
+        + "<blockquote><p>Read aloud text.</p></blockquote>"
+        + "<ul><li>An item</li></ul>"
+        + "<table><thead><tr><th>Attack</th></tr></thead><tbody><tr><td>Slam</td></tr></tbody></table>"
+        + "<p>A page link: @UUID[" + second.uuid + "]{The Vault}.</p>"
+        + "<p>An outside link: @UUID[" + outside.uuid + "]{Elsewhere}.</p>"
+        + "<section class=\\"secret\\"><p>PRIVATE-GM-TEXT</p></section>", format: 1}
+    }]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1200));
+
+    // What the live page looks like, to compare the export against.
+    const root = entry.sheet.element;
+    const read = (sel, prop) => getComputedStyle(root.querySelector(sel))[prop];
+    const live = {
+      surface: read(".journal-entry-content", "backgroundColor"),
+      body: read(".journal-page-content p", "color"),
+      quote: read(".journal-page-content blockquote", "backgroundColor"),
+      header: read(".journal-page-content th", "backgroundColor"),
+      // Lettering counts: most text settings mean "use the journal's own",
+      // which resolves against a stylesheet the export does not have.
+      face: read(".journal-page-content p", "fontFamily"),
+      size: read(".journal-page-content p", "fontSize")
+    };
+
+    const out = await api.buildJournalExport({styleId: style.id, entryIds: [entry.id]});
+    const bytes = new Uint8Array(await out.blob.arrayBuffer());
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+
+    await entry.sheet.close({force: true});
+    return JSON.stringify({
+      live, report: out.report, filename: out.filename, base64: btoa(binary),
+      entryId: entry.id, outsideId: outside.id, secondId: second.id
+    });
+  })()`);
+
+  const ex = JSON.parse(built);
+  fs.writeFileSync(path.join(exportDir, "export.zip"), Buffer.from(ex.base64, "base64"));
+  execFileSync("unzip", ["-q", "-o", "export.zip", "-d", "site"], { cwd: exportDir });
+  const site = path.join(exportDir, "site");
+  const files = fs.readdirSync(site, { recursive: true }).map(String).filter((f) => !fs.statSync(path.join(site, f)).isDirectory());
+  const html = fs.readFileSync(path.join(site, "index.html"), "utf8");
+
+  check(files.includes("index.html") && files.some((f) => f.startsWith("styles/") && f.endsWith(".css")),
+    `the archive holds a page and its stylesheet (${files.length} files)`);
+  check(files.some((f) => f.startsWith("assets/")),
+    `and the pictures the style names (${files.filter((f) => f.startsWith("assets/")).join(", ") || "none"})`);
+  check(!/<script|data-uuid=|javascript:/i.test(html),
+    "the exported page carries no scripts and no Foundry ids");
+  check(/href="#page-/.test(html) && new RegExp(`href="#page-${ex.secondId}"`).test(html),
+    "a link to a page in the export points at it");
+  check(/class="illuminus-ref/.test(html) && !/>Elsewhere<\/a>/.test(html),
+    "a link to something left out is text, not a dead link");
+  check(!html.includes("PRIVATE-GM-TEXT"),
+    "and a hidden passage stays hidden");
+  // A picture page carries no markup of its own, so it took its own branch —
+  // and before that branch existed it was dropped without a word.
+  check(/<figure class="journal-page-content">/.test(html) && /<figcaption>The way in\.<\/figcaption>/.test(html)
+    && files.some((f) => f.startsWith("assets/images/door")),
+    "a picture page travels as a picture, file and caption together");
+
+  // Now render it where Foundry has never been.
+  const { targetId } = await cdp.send("Target.createTarget", { url: `file://${site}/index.html` });
+  await new Promise((r) => setTimeout(r, 2000));
+  const tabs = await (await fetch(`http://127.0.0.1:9222/json`)).json();
+  const socket = new WebSocket(tabs.find((t) => t.id === targetId).webSocketDebuggerUrl);
+  await new Promise((res, rej) => { socket.onopen = res; socket.onerror = rej; });
+  const away = await new Promise((resolve) => {
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.id === 1) resolve(message.result?.result?.value);
+    };
+    socket.send(JSON.stringify({ id: 1, method: "Runtime.evaluate", params: { returnByValue: true, expression: `(() => {
+      const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
+      return JSON.stringify({
+        surface: read(".journal-entry-content", "backgroundColor"),
+        body: read(".journal-page-content p", "color"),
+        quote: read(".journal-page-content blockquote", "backgroundColor"),
+        header: read(".journal-page-content th", "backgroundColor"),
+        face: read(".journal-page-content p", "fontFamily"),
+        size: read(".journal-page-content p", "fontSize"),
+        sidebar: Boolean(document.querySelector(".journal-sidebar .toc li.page")),
+        panel: document.querySelector(".journal-sidebar").getBoundingClientRect().width
+      });
+    })()` } }));
+  });
+  socket.close();
+  await cdp.send("Target.closeTarget", { targetId });
+
+  const there = JSON.parse(away);
+  const compared = ["surface", "body", "quote", "header", "face", "size"];
+  const same = compared.filter((key) => there[key] === ex.live[key]);
+  check(same.length === compared.length,
+    `outside Foundry it computes the same styles (${same.length}/${compared.length} matched`
+    + `${same.length === compared.length ? "" : `; ${compared
+      .filter((k) => !same.includes(k)).map((k) => `${k}: ${there[k]} vs ${ex.live[k]}`).join(", ")}`})`);
+  check(there.sidebar && there.panel > 100,
+    `and the contents panel travels with it, at the width the style gives it (${Math.round(there.panel)}px)`);
+} finally {
+  fs.rmSync(exportDir, { recursive: true, force: true });
+  await cdp.evaluate(`(async () => {
+    for (const name of ["Illuminus Export Test", "Illuminus Export Outside"]) {
+      const entry = game.journal.getName(name);
+      if (entry) { await entry.sheet?.close({force: true}); await entry.delete(); }
+    }
+  })()`);
+}
+
+// The two libraries are the same window with different contents, and should
+// feel like it: the same size, the same names, and the same answer to ticking a
+// box — which the style library used to get wrong by re-rendering itself.
+console.log("\n[46] The two libraries work alike");
+try {
+  const alike = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const warned = [];
+    const realWarn = ui.notifications.warn.bind(ui.notifications);
+    ui.notifications.warn = (message) => { warned.push(String(message)); return realWarn(message); };
+
+    const open = async (opener, id) => {
+      opener();
+      for (let i = 0; i < 100 && !foundry.applications.instances.get(id)?.element; i++) {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return foundry.applications.instances.get(id);
+    };
+    const styles = await open(() => api.openManager(), "illuminus-style-manager");
+    const templates = await open(() => api.openTemplates(), "illuminus-template-manager");
+    await new Promise(r => setTimeout(r, 600));
+
+    const out = {
+      titles: [styles.title, templates.title],
+      sizes: [
+        [styles.position.width, styles.position.height].join("x"),
+        [templates.position.width, templates.position.height].join("x")
+      ],
+      // The same tick box, named the same way, in both.
+      boxes: [
+        styles.element.querySelectorAll("input[name='pick']").length > 0,
+        templates.element.querySelectorAll("input[name='pick']").length > 0
+      ]
+    };
+
+    // Ticking must not rebuild the list: a rebuilt row is a new node, and the
+    // scroll position and every other tick went with the old one.
+    const survives = (app) => {
+      const row = app.element.querySelector(".illuminus-style-row");
+      const box = app.element.querySelector("input[name='pick']");
+      box.click();
+      return new Promise((resolve) => setTimeout(() => resolve({
+        connected: row.isConnected, ticked: box.checked
+      }), 500));
+    };
+    out.styleTick = await survives(styles);
+    out.templateTick = await survives(templates);
+
+    // And with nothing ticked, both say so rather than exporting nothing.
+    for (const app of [styles, templates]) {
+      for (const box of app.element.querySelectorAll("input[name='pick']")) box.checked = false;
+      warned.length = 0;
+      app.element.querySelector('[data-action="exportSelected"]').click();
+      await new Promise(r => setTimeout(r, 300));
+      (out.warnings ??= []).push(warned.length);
+    }
+
+    ui.notifications.warn = realWarn;
+    await styles.close({force: true});
+    await templates.close({force: true});
+    return JSON.stringify(out);
+  })()`);
+  const al = JSON.parse(alike);
+  check(al.titles.every((t) => /^Illuminus /.test(t)),
+    `both libraries are named for the module (${al.titles.join(" / ")})`);
+  check(al.sizes[0] === al.sizes[1], `and open at the same size (${al.sizes.join(" vs ")})`);
+  check(al.boxes.every(Boolean), "both pick what to export the same way");
+  check(al.styleTick.connected && al.styleTick.ticked && al.templateTick.connected && al.templateTick.ticked,
+    `ticking a box in either leaves the list alone (styles ${al.styleTick.connected}, templates ${al.templateTick.connected})`);
+  check(al.warnings?.every((n) => n === 1),
+    `and exporting nothing says so in both (${(al.warnings ?? []).join(", ")} warnings)`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+  })()`);
+}
+
+console.log("\n[47] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

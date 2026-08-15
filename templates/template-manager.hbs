@@ -19,7 +19,10 @@
   </header>
 
   {{#if empty}}
-  <p class="illuminus-manager__empty">{{localize "ILLUMINUS.Templates.Empty"}}</p>
+  <div class="illuminus-empty">
+    <i class="fa-solid fa-file-lines"></i>
+    <p>{{localize "ILLUMINUS.Templates.Empty"}}</p>
+  </div>
   {{else}}
   <div class="illuminus-template-list scrollable">
 
