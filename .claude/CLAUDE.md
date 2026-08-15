@@ -345,6 +345,14 @@ rather than the filter lying about what exists.
 
 ## Conventions worth keeping
 
+- **Where a control appears is decided in one place.** `SECTION_ORDER` and
+  `FIELD_ORDER` at the foot of `style-schema.mjs` sort every tab after it is built,
+  so each tab reads the same way: text, fill, inner spacing, border, corners, shadow,
+  outer spacing, size, then the parts inside. A section the list does not name throws
+  at import rather than falling quietly to the end. Hovered controls are moved to sit
+  against the ordinary control they replace, which is what keeps the two states in the
+  same order. Order the sections wherever it reads best in the source; the pass settles
+  the rest.
 - **Every schema change is three edits**: the field in `scripts/style-schema.mjs`, a rule
   in `styles/illuminus.css` consuming its custom property, and a re-run of the lang
   generator. `validate.mjs` fails if you miss any of them.

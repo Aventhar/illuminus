@@ -1387,7 +1387,7 @@ const baseline = await cdp.evaluate(`(async () => {
   const markedChanged = !el.querySelector('[data-field="page.background"]').classList.contains("is-default");
 
   // Reset the section and see which value comes back.
-  el.querySelector('[data-action="resetSection"][data-group="page"][data-section="surface"]').click();
+  el.querySelector('[data-action="resetSection"][data-group="page"][data-section="background"]').click();
   await new Promise(r => setTimeout(r, 400));
   const afterReset = el.querySelector('[data-field="page.background"] color-picker').value;
 
@@ -2851,7 +2851,105 @@ try {
   })()`);
 }
 
-console.log("\n[44] Console is clean");
+// Knowing where a control lives on one tab should be knowing where it lives on
+// all of them. The schema settles that order; this checks the editor renders it,
+// and that switching to Hovered hides controls without shuffling the rest.
+console.log("\n[44] Every tab reads in the same order");
+try {
+  const shape = await cdp.evaluate(`(async () => {
+    const schema = await import("/modules/illuminus/scripts/style-schema.mjs");
+    const api = game.modules.get("illuminus").api;
+    const app = await api.openEditor(api.listStyles()[0].id);
+    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+
+    // Grouped by the group each section was rendered for: a family tab renders
+    // one member, so its sections are filed under that member's own id.
+    const rendered = new Map();
+    for (const summary of app.element.querySelectorAll("summary[data-section]")) {
+      const list = rendered.get(summary.dataset.group) ?? [];
+      list.push(summary.dataset.section);
+      rendered.set(summary.dataset.group, list);
+    }
+
+    const out = {tabs: rendered.size, wrongOrder: [], textNotFirst: []};
+    for (const [id, sections] of rendered) {
+      const group = schema.GROUPS.find(g => g.id === id);
+      const wanted = group.sections.map(s => s.id);
+      if (sections.join() !== wanted.join()) out.wrongOrder.push(id + ": " + sections.join() + " vs " + wanted.join());
+      if (sections.includes("text") && sections[0] !== "text") out.textNotFirst.push(id);
+    }
+
+    // The convention itself, stated once rather than inferred from the schema
+    // it is checking: what a box and a tag open with.
+    out.boxes = (rendered.get("boxes") ?? []).slice(0, 4);
+    out.tag = (rendered.get("tag01") ?? []).slice(0, 4);
+    out.lettering = app.element.textContent.includes("Lettering");
+
+    // Hovered hides, never reorders. The section is left closed and re-found
+    // each time: opening one re-renders, and a node held across that is a
+    // detached copy that accepts clicks and shows nothing.
+    const border = () => app.element
+      .querySelector('summary[data-group="boxes"][data-section="border"]').closest(".illuminus-section");
+    const showing = () => [...border().querySelectorAll(".illuminus-field[data-field]")]
+      .filter(f => !f.classList.contains("is-state-hidden"))
+      .map(f => f.dataset.field.split(".")[1]);
+    out.normal = showing();
+
+    // Reached the way a person reaches it: the switch lives in a section's
+    // header, which is not drawn at all until the section is open, and hit
+    // testing means nothing on a tab that is not the one showing.
+    app.changeTab("boxes", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const hit = (element) => {
+      const spot = element.getBoundingClientRect();
+      return document.elementFromPoint(spot.left + spot.width / 2, spot.top + spot.height / 2);
+    };
+    const summary = border().querySelector("summary");
+    summary.scrollIntoView({ block: "center" });
+    await new Promise(r => setTimeout(r, 300));
+    hit(summary).click();
+    await new Promise(r => setTimeout(r, 300));
+
+    const button = border().querySelector('.illuminus-state__option[data-state="hover"]');
+    const under = hit(button);
+    out.reachable = button.contains(under) || under === button;
+    under.click();
+    await new Promise(r => setTimeout(r, 200));
+    out.hovered = showing();
+
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`);
+  const sh = JSON.parse(shape);
+  check(sh.tabs >= 15 && sh.wrongOrder.length === 0,
+    `all ${sh.tabs} tabs list their sections in the schema's order${sh.wrongOrder.length ? `:\n      ${sh.wrongOrder.join("\n      ")}` : ""}`);
+  check(sh.textNotFirst.length === 0,
+    `Text comes first wherever it exists${sh.textNotFirst.length ? ` (not on ${sh.textNotFirst.join(", ")})` : ""}`);
+  check(sh.boxes.join() === "text,background,padding,border" && sh.tag.join() === sh.boxes.join(),
+    `a box and a tag open the same way (${sh.boxes.join(" > ")})`);
+  check(!sh.lettering, "and nothing is called Lettering any more");
+  // With the state word taken off, the hovered controls must read as the
+  // ordinary ones do — in the same order, and with the controls that have no
+  // hovered twin (a thickness does not change when pointed at) still in place.
+  const bases = sh.hovered.map((name) => name.replace(/^hover/, "").replace(/^./, (c) => c.toLowerCase()));
+  const places = bases.map((name) => sh.normal.indexOf(name));
+  check(sh.reachable, "the state switch is where it looks like it is");
+  const swapped = sh.hovered.filter((name) => /^hover/.test(name)).length;
+  check(swapped === 4 && bases.length === sh.normal.length
+    && places.every((at, i) => at >= 0 && (!i || at > places[i - 1])),
+    `switching to Hovered swaps ${swapped} controls and leaves the other `
+    + `${bases.length - swapped} where they were`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+  })()`);
+}
+
+console.log("\n[45] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

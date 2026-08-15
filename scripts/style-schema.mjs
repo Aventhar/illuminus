@@ -399,8 +399,7 @@ function tagSections() {
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
       ]
     },
-    { id: "background", fields: [col("background", "#00000000")] },
-    { id: "texture", fields: imageFields() },
+    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", { top: 2, right: 8, bottom: 2, left: 8 }, { max: 80 }) },
     { id: "margin", fields: spacingFields("margin", { top: 0, right: 4, bottom: 0, left: 0 }, { min: -60, max: 80 }) },
     { id: "border", fields: borderFields("border") },
@@ -478,14 +477,9 @@ export const GROUPS = [
     // its tab sits with the Window tab at the end of the strip.
     strip: "end",
     sections: [
-      {
-        id: "surface",
-        fields: [
-          col("background", "#00000000"), ...imageFields(),
-          num("sidebarWidth", 300, "px", 120, 700, 10),
-          ...spacingFields("padding", 0, { max: 80 })
-        ]
-      },
+      { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
+      { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
+      { id: "layout", fields: [num("sidebarWidth", 300, "px", 120, 700, 10)] },
       { id: "border", fields: borderFields("border", { color: "#00000000" }) },
       { id: "corners", fields: cornerFields("corner") },
       {
@@ -631,7 +625,7 @@ export const GROUPS = [
     icon: "fa-solid fa-scroll",
     sections: [
       {
-        id: "surface",
+        id: "background",
         fields: [
           col("background", "#ede0c8"),
           { type: "image", name: "texture", default: "" },
@@ -865,11 +859,14 @@ export const GROUPS = [
         ]
       },
       {
+        id: "margin",
+        fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+      },
+      {
         id: "layout",
         fields: [
           num("indent", 24, "px", 0, 200, 2),
-          num("itemSpacing", 4, "px", 0, 60, 1),
-          ...spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+          num("itemSpacing", 4, "px", 0, 60, 1)
         ]
       }
     ]
@@ -1024,12 +1021,12 @@ export const GROUPS = [
     id: "images",
     icon: "fa-solid fa-image",
     sections: [
+      { id: "margin", fields: spacingFields("margin", 0, { min: -100 }) },
       {
         id: "layout",
         fields: [
           num("maxWidth", 100, "%", 5, 100, 1),
-          num("opacity", 100, "%", 0, 100, 1),
-          ...spacingFields("margin", 0, { min: -100 })
+          num("opacity", 100, "%", 0, 100, 1)
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
@@ -1130,6 +1127,11 @@ export function hoverNameFor(name) {
   return `hover${name[0].toUpperCase()}${name.slice(1)}`;
 }
 
+/** Whether a name is the hovered twin of some other control. */
+function isHoverName(name) {
+  return /^hover[A-Z]/.test(name);
+}
+
 /**
  * The window frame and the contents panel are not hovered as objects — their
  * hovered states belong to the things inside them, which they already state by
@@ -1151,6 +1153,103 @@ for (const group of GROUPS) {
       section.fields.push(col(hovered, ""));
     }
   }
+}
+
+/* -------------------------------------------- */
+/*  One order, everywhere                       */
+/* -------------------------------------------- */
+
+/**
+ * Every tab reads the same way, so that knowing where a control lives on one of
+ * them is knowing where it lives on all of them: what the element is made of
+ * first — its text, then its fill, its inner spacing, its edges, its shadow,
+ * the room around it, and how much room it takes — and after that the parts
+ * that live inside it, roughly in the order you meet them reading down the page.
+ *
+ * A tab lists whichever of these it has and skips the rest, and the two
+ * decorations that belong to lettering rather than to a box — a link's
+ * underline, a body's opening capital — sit up with the text instead of down
+ * with the paint.
+ *
+ * A section missing from this list throws rather than falling to the end
+ * unnoticed: where a new one belongs is a decision, not a default.
+ */
+const SECTION_ORDER = [
+  // Text, and what is done to it
+  "text", "textShadow", "decoration", "paragraph", "columns", "dropCap",
+  "marks", "code", "marker", "definitions",
+  // The element itself, from the inside out
+  "background", "padding", "border", "corners", "shadow", "innerShadow",
+  "glow", "margin", "layout", "tagLayout",
+  // The parts inside it
+  "chip", "blockHeadings", "header", "rows", "cellPadding", "cellBorder",
+  "tableCaption", "caption", "media", "collapsible", "revealed",
+  "revealButton", "dividers",
+  // The contents panel, then the window
+  "entries", "entryBorder", "entryStates", "number", "subHeadings",
+  "category", "search", "buttons",
+  "frame", "titleBar", "headerButtons", "pageButton"
+];
+
+/**
+ * And within a section that more than one tab carries, the controls come in one
+ * order too. Only the shared sections are listed: a section that exists on a
+ * single tab has nothing to be consistent with, and its author's order is
+ * usually the meaningful one.
+ *
+ * Sections built by `spacingFields`, `borderFields` and their like are already
+ * identical wherever they appear, and are left out.
+ */
+const FIELD_ORDER = {
+  text: [
+    "font", "size", "color", "textColor", "textStyle", "caps",
+    "letterSpacing", "wordSpacing", "lineHeight", "align", "verticalAlign",
+    "width"
+  ],
+  background: [
+    "background", "texture", "textureFit", "texturePosition",
+    "textureAttachment", "textureBlend", "textureOpacity"
+  ],
+  layout: [
+    "float", "width", "maxWidth", "sidebarWidth", "align", "clear", "flip",
+    "opacity", "indent", "itemSpacing", "whenEmpty"
+  ],
+  tagLayout: ["float", "minWidth", "verticalAlign", "lift"],
+  caption: [
+    "captionFont", "captionSize", "captionColor", "captionTextStyle",
+    "captionCaps", "captionAlign", "captionSpacing"
+  ]
+};
+
+for (const group of GROUPS) {
+  for (const section of group.sections) {
+    if (!SECTION_ORDER.includes(section.id)) {
+      throw new Error(`${group.id}: section "${section.id}" has no place in SECTION_ORDER`);
+    }
+    const order = FIELD_ORDER[section.id];
+    if (order) {
+      for (const field of section.fields) {
+        // A hovered control is placed against its own below, not by this list.
+        if (order.includes(field.name) || isHoverName(field.name)) continue;
+        throw new Error(`${group.id}.${section.id}: "${field.name}" has no place in FIELD_ORDER.${section.id}`);
+      }
+      section.fields.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+    }
+
+    // A hovered color sits against the ordinary one it replaces, so that the
+    // two states read alike: switching to Hovered hides controls but never
+    // shuffles the ones that stay.
+    const twins = new Map(section.fields.map((field) => [hoverNameFor(field.name), field.name]));
+    const ordered = [];
+    for (const field of section.fields) {
+      if (twins.has(field.name)) continue;
+      ordered.push(field);
+      const hovered = section.fields.find((other) => twins.get(other.name) === field.name);
+      if (hovered) ordered.push(hovered);
+    }
+    section.fields = ordered;
+  }
+  group.sections.sort((a, b) => SECTION_ORDER.indexOf(a.id) - SECTION_ORDER.indexOf(b.id));
 }
 
 /* -------------------------------------------- */
