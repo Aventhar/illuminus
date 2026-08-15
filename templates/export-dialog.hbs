@@ -14,6 +14,10 @@
       {{/each}}
     </select>
     <p class="hint">{{localize "ILLUMINUS.Export.StyleHint"}}</p>
+    <label class="illuminus-export-dialog__option">
+      <input type="checkbox" name="onlyStyled" checked>
+      <span>{{localize "ILLUMINUS.Export.OnlyStyled"}}</span>
+    </label>
   </fieldset>
 
   <fieldset>
@@ -22,13 +26,12 @@
     <div class="illuminus-export-dialog__tools">
       <button type="button" data-action="pickAll">{{localize "ILLUMINUS.Manager.SelectAll"}}</button>
       <button type="button" data-action="pickNone">{{localize "ILLUMINUS.Export.SelectNone"}}</button>
-      <button type="button" data-action="pickStyled">{{localize "ILLUMINUS.Export.SelectStyled"}}</button>
     </div>
 
     {{#if journals.length}}
     <div class="illuminus-export-dialog__list scrollable">
       {{#each journals as |journal|}}
-      <label class="illuminus-export-dialog__row">
+      <label class="illuminus-export-dialog__row" data-style-id="{{journal.styleId}}">
         {{#if journal.selected}}
         <input type="checkbox" name="entryIds" value="{{journal.id}}" checked>
         {{else}}
@@ -42,6 +45,7 @@
     {{else}}
     <p class="illuminus-manager__empty">{{localize "ILLUMINUS.Export.NoJournals"}}</p>
     {{/if}}
+    <p class="illuminus-export-dialog__none hint">{{localize "ILLUMINUS.Export.NoneInStyle"}}</p>
   </fieldset>
 
   <fieldset>

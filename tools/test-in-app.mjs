@@ -3147,6 +3147,14 @@ try {
     out.styleTick = await survives(styles);
     out.templateTick = await survives(templates);
 
+    // Delete is the one button that should look dangerous, in both windows.
+    // Read as a color rather than as a class name: the class only matters if
+    // something paints it.
+    out.deleteColors = [styles, templates].map((app) => {
+      const button = app.element.querySelector('[data-action="remove"]');
+      return button ? getComputedStyle(button).color : "";
+    });
+
     // And with nothing ticked, both say so rather than exporting nothing.
     for (const app of [styles, templates]) {
       for (const box of app.element.querySelectorAll("input[name='pick']")) box.checked = false;
@@ -3170,6 +3178,12 @@ try {
     `ticking a box in either leaves the list alone (styles ${al.styleTick.connected}, templates ${al.templateTick.connected})`);
   check(al.warnings?.every((n) => n === 1),
     `and exporting nothing says so in both (${(al.warnings ?? []).join(", ")} warnings)`);
+  const reddish = (color) => {
+    const [r, g, b] = (color.match(/\d+/g) ?? []).map(Number);
+    return r > 120 && r > g * 1.5 && r > b * 1.5;
+  };
+  check(al.deleteColors.length === 2 && al.deleteColors.every(reddish),
+    `delete is red in both (${al.deleteColors.join(" / ")})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -3178,7 +3192,96 @@ try {
   })()`);
 }
 
-console.log("\n[47] Console is clean");
+// The export window has to be honest about what it will export: the list is
+// filtered by the style, and what is hidden is not quietly exported anyway.
+console.log("\n[47] The export window shows what it will export");
+try {
+  const dialog = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = api.listStyles()[0];
+    const made = [];
+    for (const [name, styled] of [["Export Filter Styled", true], ["Export Filter Plain", false]]) {
+      const old = game.journal.getName(name);
+      if (old) await old.delete();
+      const entry = await JournalEntry.create({name});
+      await entry.createEmbeddedDocuments("JournalEntryPage", [{
+        name: "P", type: "text", text: {content: "<p>x</p>", format: 1}
+      }]);
+      if (styled) await api.assignStyle(entry, style.id);
+      made.push(entry.id);
+    }
+
+    api.openExport({});
+    for (let i = 0; i < 100 && !foundry.applications.instances.get("illuminus-export-dialog")?.element; i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    const app = foundry.applications.instances.get("illuminus-export-dialog");
+    await new Promise(r => setTimeout(r, 800));
+    const el = app.element;
+
+    const named = (name) => [...el.querySelectorAll(".illuminus-export-dialog__row")]
+      .find(row => row.textContent.includes(name));
+    const showing = () => [...el.querySelectorAll(".illuminus-export-dialog__row")]
+      .filter(row => row.offsetParent !== null).length;
+
+    const out = {};
+    // The button at the foot of the window used to be squeezed against the
+    // section above it and pushed past the bottom edge.
+    const window = el.getBoundingClientRect();
+    const footer = el.querySelector(".form-footer").getBoundingClientRect();
+    const body = el.querySelector(".illuminus-export-dialog").getBoundingClientRect();
+    out.footerInside = footer.bottom <= window.bottom + 1 && footer.width > 0;
+    out.footerGap = Math.round(footer.top - body.bottom);
+
+    out.filtered = {
+      styled: named("Export Filter Styled")?.offsetParent !== null,
+      plain: named("Export Filter Plain")?.offsetParent !== null
+    };
+
+    // A journal ticked and then hidden must not travel: tick it, hide it, and
+    // see what the window would actually export.
+    const filter = el.querySelector('input[name="onlyStyled"]');
+    filter.checked = false;
+    filter.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 200));
+    out.allShown = showing();
+    named("Export Filter Plain").querySelector("input").checked = true;
+    filter.checked = true;
+    filter.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 200));
+    out.hiddenStaysUnticked = !named("Export Filter Plain").querySelector("input").checked;
+
+    // Select All takes what is in front of you, not what the filter is hiding.
+    el.querySelector('[data-action="pickAll"]').click();
+    out.pickedAll = [...el.querySelectorAll('input[name="entryIds"]:checked')].length;
+    out.showingNow = showing();
+
+    await app.close({force: true});
+    for (const id of made) await game.journal.get(id)?.delete();
+    return JSON.stringify(out);
+  })()`);
+  const dl = JSON.parse(dialog);
+  check(dl.footerInside && dl.footerGap >= 0,
+    `the export button sits inside the window, clear of the section above (${dl.footerGap}px)`);
+  check(dl.filtered.styled && !dl.filtered.plain,
+    "the style picker filters the list to journals using it");
+  check(dl.allShown >= 2, `turning the filter off shows every journal (${dl.allShown})`);
+  check(dl.hiddenStaysUnticked, "a journal the filter hides is unticked as it goes");
+  check(dl.pickedAll === dl.showingNow,
+    `Select All takes what is showing, not what is hidden (${dl.pickedAll} of ${dl.showingNow})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    for (const name of ["Export Filter Styled", "Export Filter Plain"]) {
+      const entry = game.journal.getName(name);
+      if (entry) await entry.delete();
+    }
+  })()`);
+}
+
+console.log("\n[48] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

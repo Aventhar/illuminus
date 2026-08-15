@@ -55,16 +55,16 @@
       </div>
 
       <div class="illuminus-style-row__buttons">
-        <button type="button" data-action="rename" data-id="{{template.id}}"
-                data-tooltip="{{localize 'ILLUMINUS.Buttons.Rename'}}">
+        <button type="button" class="icon" data-action="rename" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Rename'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Rename'}}">
           <i class="fa-solid fa-pen"></i>
         </button>
-        <button type="button" data-action="exportOne" data-id="{{template.id}}"
-                data-tooltip="{{localize 'ILLUMINUS.Buttons.Export'}}">
+        <button type="button" class="icon" data-action="exportOne" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Export'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Export'}}">
           <i class="fa-solid fa-file-export"></i>
         </button>
-        <button type="button" data-action="remove" data-id="{{template.id}}"
-                data-tooltip="{{localize 'ILLUMINUS.Buttons.Delete'}}">
+        <button type="button" class="icon illuminus-danger" data-action="remove" data-id="{{template.id}}"
+                data-tooltip="{{localize 'ILLUMINUS.Buttons.Delete'}}" aria-label="{{localize 'ILLUMINUS.Buttons.Delete'}}">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>

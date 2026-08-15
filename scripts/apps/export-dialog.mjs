@@ -33,8 +33,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     },
     actions: {
       pickAll: IlluminusExportDialog.#onPickAll,
-      pickNone: IlluminusExportDialog.#onPickNone,
-      pickStyled: IlluminusExportDialog.#onPickStyled
+      pickNone: IlluminusExportDialog.#onPickNone
     }
   };
 
@@ -92,9 +91,17 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     return context;
   }
 
-  /** Every journal tick box, for the three quick pickers. */
+  /**
+   * The journal rows a person can actually see. Select All means the ones in
+   * front of you, not the ones the filter is hiding.
+   */
+  #rows() {
+    return [...this.element.querySelectorAll(".illuminus-export-dialog__row")]
+      .filter((row) => !row.classList.contains("is-filtered-out"));
+  }
+
   #boxes() {
-    return [...this.element.querySelectorAll('input[name="entryIds"]')];
+    return this.#rows().map((row) => row.querySelector('input[name="entryIds"]'));
   }
 
   static #onPickAll() {
@@ -106,20 +113,46 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
   }
 
   /**
-   * Tick the journals already wearing the chosen style, which is what an
-   * author usually means by "export my adventure".
+   * Show only the journals already wearing the chosen style.
+   *
+   * A hidden journal is unticked as it goes: leaving it ticked would export
+   * something the list is no longer showing, which is the kind of surprise an
+   * export should never spring on anyone.
+   *
+   * The filter can be turned off, because dressing an unstyled journal in a
+   * style is half the point of choosing one here — the tick box decides which
+   * of the two jobs this window is doing.
    */
-  static #onPickStyled() {
-    const styleId = this.element.querySelector('select[name="styleId"]').value;
-    for (const box of this.#boxes()) {
-      const entry = game.journal.get(box.value);
-      box.checked = Boolean(entry) && getAssignedStyleId(entry) === styleId;
+  #applyFilter() {
+    const wanted = this.element.querySelector('select[name="styleId"]')?.value ?? "";
+    const only = this.element.querySelector('input[name="onlyStyled"]')?.checked ?? false;
+    let showing = 0;
+    for (const row of this.element.querySelectorAll(".illuminus-export-dialog__row")) {
+      const hide = only && row.dataset.styleId !== wanted;
+      row.classList.toggle("is-filtered-out", hide);
+      if (hide) row.querySelector('input[name="entryIds"]').checked = false;
+      else showing += 1;
     }
+    // Saying "none of your journals use this style" beats an empty box.
+    const empty = this.element.querySelector(".illuminus-export-dialog__none");
+    if (empty) empty.classList.toggle("is-shown", showing === 0);
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    for (const control of ['select[name="styleId"]', 'input[name="onlyStyled"]']) {
+      this.element.querySelector(control)?.addEventListener("change", () => this.#applyFilter());
+    }
+    this.#applyFilter();
   }
 
   static async #onSubmit(_event, _form, formData) {
     const data = formData.object;
-    const entryIds = [data.entryIds ?? []].flat().filter(Boolean);
+    // Only what is on show: a filtered-out journal is unticked as it is hidden,
+    // but a form remembers what it was told, not what it last displayed.
+    const visible = new Set(this.#boxes().filter((box) => box.checked).map((box) => box.value));
+    const entryIds = [data.entryIds ?? []].flat().filter((id) => visible.has(id));
     if (!entryIds.length) {
       ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PickOne"));
       return;
