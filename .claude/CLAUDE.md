@@ -195,20 +195,21 @@ Insertion is `tr.replaceWith(from, to, doc.content)`; capture is
 
 ## Bundled assets
 
-`assets/samples/textures/` and `assets/samples/images/` ship with the module and are
-referenced by path from `scripts/presets.mjs` (the seeded style's texture) and
-`templates/style-editor.hbs` (the picture in the sample). Those paths are strings, so
-moving a file breaks them silently — `validate.mjs` resolves every
-`modules/illuminus/assets/...` reference found in the source against the filesystem, and
-also checks the spelling matches on-disk case, since macOS forgives a wrong case and a
-Linux-hosted server does not.
+**There are none.** The module ships no artwork and no styles: the samples that will come
+with it are being made, and what was here before was placeholder material of unclear
+provenance. Two consequences worth keeping in mind.
 
-Grayscale SVG textures are meant to be combined with a Fill Color under Multiply
-blending; the color JPEGs are meant to be used as they are. A texture that is not
-grayscale will tint twice.
+The editor's sample picture and every texture the checks use point at Foundry's own icons
+(`icons/svg/...`), which are always present and are not ours to redistribute or to lose.
+`validate.mjs` still resolves every `modules/illuminus/assets/...` reference in the source
+against the filesystem — so the moment something is bundled again, a wrong path or a
+renamed folder fails there rather than 404ing in somebody's game, and the on-disk spelling
+is checked too, since macOS forgives a wrong case and a Linux-hosted server does not.
 
-Anything added here is redistributed under the repository's MIT license, so only bundle
-art that may be licensed that way.
+And the checks no longer have a seeded style to lean on. `tools/fixtures/sample-style.mjs`
+holds the style they work with, and section [2] creates it — so a run starts by making its
+own world state rather than trusting what it finds. Anything bundled later is redistributed
+under the repository's MIT license, so only bundle art that may be licensed that way.
 
 ## Background images
 

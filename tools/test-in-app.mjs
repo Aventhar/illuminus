@@ -86,16 +86,28 @@ check(await cdp.evaluate(`!!game.modules.get("illuminus")?.active`), "module is 
 check(errorsBefore.length === 0, `no exceptions from illuminus during boot${errorsBefore.length ? `: ${errorsBefore[0].text}` : ""}`);
 check(await cdp.evaluate(`!!game.modules.get("illuminus")?.api?.openManager`), "public API is published");
 
-console.log("\n[2] Presets seeded and compiled");
+// The module ships no styles, so the suite makes the one it needs. Everything
+// after this looks it up the same way — the first style in the world — so a run
+// that starts dirty fails here, loudly, rather than three checks later.
+console.log("\n[2] A style to work with");
+const { SAMPLE_STYLES } = await import(`${ROOT}/tools/fixtures/sample-style.mjs`);
+await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  for (const style of api.listStyles()) await api.deleteStyle(style.id);
+  const sample = ${JSON.stringify(SAMPLE_STYLES[0])};
+  await api.createStyle({name: sample.name, description: sample.description, settings: sample.settings});
+})()`);
+
 const styleInfo = await cdp.evaluate(`JSON.stringify({
   count: Object.keys(game.settings.get("illuminus","styles")).length,
   names: game.modules.get("illuminus").api.listStyles().map(s => s.name),
+  bundled: ${JSON.stringify(0)},
   sheetPresent: !!document.getElementById("illuminus-compiled-styles"),
   cssLength: document.getElementById("illuminus-compiled-styles")?.textContent.length ?? 0,
   ruleCount: document.getElementById("illuminus-compiled-styles")?.sheet?.cssRules.length ?? 0
 })`);
 const styles = JSON.parse(styleInfo);
-check(styles.count === 1, `1 preset style seeded (got ${styles.count}: ${styles.names.join(", ")})`);
+check(styles.count === 1, `the world holds the one style this run made (got ${styles.count}: ${styles.names.join(", ")})`);
 check(styles.sheetPresent, "compiled <style> element is in document.head");
 check(styles.ruleCount === 2, `stylesheet parsed into ${styles.ruleCount} rules (1 base + 1 style) — no CSS syntax errors`);
 
@@ -941,34 +953,12 @@ check(wn.editColor === "rgb(255, 0, 255)", `edit pencil color applied (got ${wn.
 check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
 check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
 
-// Bundled assets have to be reachable at the paths the presets and the sample
-// reference, and the sample image must take the Pictures settings.
-console.log("\n[23] Bundled textures and the sample image");
+// The module bundles no artwork of its own, so what matters here is that the
+// sample in the editor still shows a picture and that the picture takes the
+// Images settings.
+console.log("\n[23] The sample picture");
 const assets = await cdp.evaluate(`(async () => {
-  // Every bundled asset, so a move that misses a reference fails here rather
-  // than silently 404ing in someone's game.
-  const paths = [
-    "modules/illuminus/assets/samples/images/castle.jpg",
-    "modules/illuminus/assets/samples/textures/parchment.svg",
-    "modules/illuminus/assets/samples/textures/paper-fibres.svg",
-    "modules/illuminus/assets/samples/textures/linen.svg",
-    "modules/illuminus/assets/samples/textures/stone.svg",
-    "modules/illuminus/assets/samples/textures/grid.svg",
-    "modules/illuminus/assets/samples/textures/hatch.svg",
-    "modules/illuminus/assets/samples/textures/bricks.jpg",
-    "modules/illuminus/assets/samples/textures/canvas.jpg",
-    "modules/illuminus/assets/samples/textures/marble.jpg",
-    "modules/illuminus/assets/samples/textures/parchment.jpg",
-    "modules/illuminus/assets/samples/textures/stars.jpg"
-  ];
-  const fetched = {};
-  for (const path of paths) {
-    const res = await fetch("/" + path);
-    fetched[path] = {ok: res.ok, type: res.headers.get("content-type")};
-  }
-
   const api = game.modules.get("illuminus").api;
-  const parchment = api.listStyles().find(s => s.name === "Aged Parchment");
 
   const style = await api.createStyle({name: "Picture Probe", settings: {
     images: {borderTopWidth: 5, borderTopColor: "#ff0000", opacity: 50, captionColor: "#00ff00"}
@@ -988,8 +978,6 @@ const assets = await cdp.evaluate(`(async () => {
   const img = app.element.querySelector(".illuminus-preview__frame figure img");
   const cap = app.element.querySelector(".illuminus-preview__frame figcaption");
   const out = {
-    fetched,
-    presetTexture: parchment.settings.page?.texture ?? "(none)",
     sampleImagePresent: !!img,
     sampleImageLoaded: img ? img.naturalWidth > 0 : false,
     imgBorder: img ? getComputedStyle(img).borderTopWidth + " " + getComputedStyle(img).borderTopColor : null,
@@ -1003,12 +991,6 @@ const assets = await cdp.evaluate(`(async () => {
   return JSON.stringify(out);
 })()`);
 const as = JSON.parse(assets);
-const missing = Object.entries(as.fetched).filter(([, v]) => !v.ok).map(([k]) => k);
-check(missing.length === 0, `all ${Object.keys(as.fetched).length} bundled assets are served${missing.length ? ": missing " + missing.join(", ") : ""}`);
-check(Object.values(as.fetched).every((v) => /svg|jpeg|png|webp/.test(v.type ?? "")),
-  "and are served as images");
-check(as.presetTexture.endsWith("textures/parchment.svg"),
-  `Aged Parchment ships pointing at a bundled texture (${as.presetTexture})`);
 check(as.sampleImagePresent && as.sampleImageLoaded, "the sample figure has an image and it loads");
 check(as.imgBorder === "5px rgb(255, 0, 0)", `the sample image takes the Pictures border (got ${as.imgBorder})`);
 check(as.imgOpacity === "0.5", `and its opacity (got ${as.imgOpacity})`);
@@ -1019,7 +1001,7 @@ check(as.captionColor === "rgb(0, 255, 0)", `and the caption takes its color (go
 const texture = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Texture Probe", settings: {
-    page: {texture: "modules/illuminus/assets/samples/textures/linen.svg"}
+    page: {texture: "icons/svg/mystery-man.svg"}
   }});
   const entry = await JournalEntry.create({name: "Texture Probe Journal"});
   await entry.createEmbeddedDocuments("JournalEntryPage",
@@ -2057,7 +2039,7 @@ try {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Image Layer Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-    const IMG = "modules/illuminus/assets/samples/textures/parchment.jpg";
+    const IMG = "icons/svg/mystery-man.svg";
     Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
     Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
     Object.assign(settings.sidebar, {buttonBackground: "#222222", buttonTexture: IMG});
@@ -2078,7 +2060,7 @@ try {
       if (!el) return {missing: true};
       const before = getComputedStyle(el, "::before");
       return {
-        image: /parchment\.jpg/.test(before.backgroundImage),
+        image: /mystery-man/.test(before.backgroundImage),
         opacity: before.opacity, repeat: before.backgroundRepeat,
         // Behind the lettering, not over it.
         behind: before.zIndex, isolated: getComputedStyle(el).isolation
@@ -2763,15 +2745,17 @@ try {
     const api = game.modules.get("illuminus").api;
     const out = {};
 
-    // Deleting the bundled style used to be a one-way door.
-    const parchment = api.listStyles().find(s => s.preset);
-    out.hadPreset = !!parchment;
-    await api.deleteStyle(parchment.id);
-    out.afterDelete = api.listStyles().some(s => s.preset);
-    out.restored = await api.restorePresets();
-    out.afterRestore = api.listStyles().some(s => s.preset);
-    // Restoring again must not pile up duplicates.
-    out.secondRestore = await api.restorePresets();
+    // The way back from deleting a sample. The module bundles none at the
+    // moment, so what is checked is that asking says so plainly instead of
+    // throwing or quietly claiming to have done something — and the same call
+    // still works for templates, which are bundled.
+    out.styleRestore = await api.restorePresets();
+    out.templatesBefore = api.listTemplates().length;
+    const template = api.listTemplates().find(t => t.preset);
+    out.hadTemplate = !!template;
+    if (template) await api.deleteTemplate(template.id);
+    out.templateRestore = await api.restoreTemplatePresets();
+    out.templatesAfter = api.listTemplates().length;
 
     const style = await api.createStyle({name: "Glow Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
@@ -2788,9 +2772,11 @@ try {
     return JSON.stringify(out);
   })()`);
   const ex = JSON.parse(extras);
-  check(ex.hadPreset && !ex.afterDelete, "a sample style can be deleted");
-  check(ex.restored === 1 && ex.afterRestore, `and put back again (${ex.restored} restored)`);
-  check(ex.secondRestore === 0, "restoring twice does not pile up duplicates");
+  check(ex.styleRestore === 0,
+    `with no sample styles bundled, restoring them puts nothing back (${ex.styleRestore})`);
+  check(ex.hadTemplate && ex.templateRestore === 1 && ex.templatesAfter === ex.templatesBefore,
+    `a deleted sample template comes back, once (${ex.templateRestore} restored, `
+    + `${ex.templatesBefore} before and ${ex.templatesAfter} after)`);
   check(/drop-shadow/.test(ex.filter) && /204/.test(ex.filter),
     `a picture glow follows its own edges rather than its box (got ${ex.filter})`);
 } finally {

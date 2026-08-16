@@ -19,7 +19,7 @@ scripts/migrations.mjs       Forward migration of styles saved by older versions
 scripts/style-compiler.mjs   Style data -> CSS custom properties
 scripts/style-injector.mjs   Keeps the compiled sheet and sheet tagging in sync
 scripts/style-store.mjs      CRUD over the world's styles; journal assignment
-scripts/presets.mjs          The bundled styles
+scripts/presets.mjs          The bundled styles (none yet)
 scripts/io.mjs               Export / import as JSON
 scripts/export-html.mjs      Journals -> a folder of standalone web pages
 scripts/zip.mjs              A zip writer, since Foundry ships no archiver
@@ -31,13 +31,12 @@ scripts/template-store.mjs   CRUD over the world's page templates
 scripts/template-presets.mjs The bundled templates
 scripts/apps/template-manager.mjs  The template library window
 scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
-assets/samples/textures/     Bundled background images
-assets/samples/images/       Bundled artwork, and the sample shown in the editor
 styles/illuminus.css         Skeleton rules + GUI styling
 styles/illuminus-generated.css  Heading, box, tag, and image rules; from a generator
 styles/illuminus-export.css  The little Foundry provides that an exported page needs
 templates/                   Handlebars templates
 tools/                       Validation, string generation, and the test sandbox
+tools/fixtures/              Test data, including the style the checks work with
 ```
 
 ## Checks

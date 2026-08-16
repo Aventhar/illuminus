@@ -25,6 +25,10 @@ suite that drives a real Foundry instance and checks what the styling actually c
 to, rather than what it looks like it ought to do. That is what I lean on instead of
 trusting either of us.
 
+No artwork ships with the module today. The images that will — artwork, photography, and
+textures alike — are being made by hand with digital tools, without generative AI, and
+this note will say so plainly once they are here.
+
 Bugs, misjudgements, and anything that misbehaves in your world are mine to answer for.
 Please do [report them](https://github.com/Aventhar/illuminus/issues).
 
@@ -100,51 +104,14 @@ Please do [report them](https://github.com/Aventhar/illuminus/issues).
   and every box and image style — each with its own fit, position, blending, and
   strength. The image rides on a layer behind the lettering, so turning its strength
   down fades the image and not the words.
-- **Textures included.** Background images under `assets/samples/textures/`, reachable
-  from the Background Image control's file browser. The SVG ones — parchment, paper
-  fibres, linen, stone, grid, hatch — are grayscale on purpose: the texture supplies the
-  grain and the Fill Color supplies the hue, so one file suits any palette under
-  Multiply blending. The JPEG ones carry their own color, so set Fill Color to white
-  and Image Blending to Normal to see them as they are. Your own art works just as
-  well.
-- **Tag styles for a few words at a time.** Ten of them, applied to a selection rather
-  than a whole box: trait tags, rarity badges, and the rank at the end of a statblock
-  title line — select the words, pick one from the same menu. Each has its own lettering,
-  fill, image, border, corners, shadow, and spacing, and can be pushed to the right-hand
-  end of the line it sits in, which is all a title line needs. A tag with nothing in it
-  is not drawn, and a box can be set to disappear when left empty, so an unused slot in a
-  template leaves no hole.
-- **Box and image styles, from the editor.** Ten of each, styled on their own tabs and
-  applied from an **Illuminus** menu in the journal page editor: put the cursor in a
-  paragraph, pick a box, and it becomes a read-aloud panel, a sidebar, a stat block —
-  whatever that style makes it. The menu lists them by the names the style gives them, so
-  a style can call its first box "Read-aloud" and its second "Sidebar". "Remove Illuminus
-  styling" takes it off again. No HTML is typed.
-- **Page templates.** Ready-made structures — a stat block frame, a read-aloud box, a
-  location entry, a player handout, a GM aside — dropped into a page from the same
-  Illuminus menu. Select anything you have built and "Save selection as template" keeps
-  it for next time. Templates carry *structure*, never colors or sizes, so the same
-  template looks like a dungeon hazard under one style and a starship manifest under
-  another. They import and export as JSON like styles do, and an imported one is parsed
-  through Foundry's own editor rules, so it can carry no more than a person could type.
-- **Export as a PDF, or as web pages.** Save journals with no Foundry and no Illuminus
-  needed — a handout for a player, a printout for the table, or an adventure to put on a
-  website. Export them wearing an Illuminus style, or exactly as they look in Foundry
-  now, which carries whatever is painting them, a game system's look included. Three
-  ways to save it: straight to the print dialog, where any browser will save a PDF; a
-  folder of pages for a website; or one self-contained file to email. The export carries
-  its own stylesheet, the pictures and fonts it uses, and a contents panel to move
-  between pages, and it looks like the journal did, down to the window frame. A PDF or a
-  single file opens with a contents page, tiered by the document's own headings and
-  styled like them, and every line of it stays a working link in a PDF a browser saves.
-  (Safari and the desktop app print through your operating system’s panel, whose PDF
-  writer flattens links; Chrome writes its own and keeps them.) Hidden passages
-  stay out unless you ask for them, the page's own background is left off a printout
-  unless you want it, and links to things that did not come along — an actor, an item —
-  become plain text rather than links that go nowhere.
-- **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
-- **One style included:** Aged Parchment, seeded the first time the module runs in a
-  world. It is an ordinary style once seeded — edit, duplicate, or delete it freely.
+- **Background images from anywhere.** Point the Background Image control at any picture
+  in your Foundry data — your own art, a system's, another module's. A grayscale texture
+  is best combined with a Fill Color under Multiply blending, so the texture supplies the
+  grain and the color supplies the hue; a picture carrying its own color wants Fill Color
+  set to white and Image Blending set to Normal.
+- **No artwork or styles included — yet.** The sample textures and the sample styles that
+  will ship with the module are being made. Until then a world starts empty, and the style
+  library is where you make your first one.
 
 ## Using it
 
