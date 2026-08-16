@@ -376,11 +376,13 @@ only get a worse answer.
   identifier. Fragment links and `:target` do not care; `querySelector("#" + id)` throws.
   Exported anchors are prefixed with a letter, and anything looking one up uses
   `getElementById`.
-- **Who writes the PDF decides whether its links survive.** A browser's own Save as PDF
-  keeps them; the desktop app hands the job to the operating system's print panel, whose
-  PDF writer flattens them. Nothing in the document can change that — printing a written
-  window and printing a loaded file produce identical annotations, so the difference is
-  entirely downstream. The export says so when it is running in Electron.
+- **Who writes the PDF decides whether its links survive.** Chromium writes its own from
+  the print preview and keeps a document's internal links. Safari and Foundry's desktop
+  application have none of their own: they hand the job to the operating system's print
+  panel, whose Save as PDF flattens the links and will not let a filename be typed.
+  Nothing in the document changes it — printing a written window and printing a loaded
+  file produce identical annotations, so the difference is entirely downstream. The
+  export says so unless it can see it is running in Chromium.
 - **A PDF's internal links are named destinations**, and a name nothing defines is a link
   that does nothing. Counting `/Subtype /Link` is not enough; the check resolves every
   `/Dest` against the `/Dests` dictionary.

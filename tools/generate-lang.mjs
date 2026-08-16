@@ -121,7 +121,7 @@ Object.assign(out, {
   "ILLUMINUS.Export.FormatPrint": "Print to printer or PDF",
   "ILLUMINUS.Export.ManyTitle": "{count} Journals",
   "ILLUMINUS.Export.PopupBlocked": "Your browser would not start printing, so the page has been saved instead. Open it and print from there.",
-  "ILLUMINUS.Export.DesktopLinks": "Saving as a PDF from the desktop app goes through your operating system\u2019s print panel, which drops the contents page\u2019s links. Open this world in a browser and export from there for a PDF you can click through.",
+  "ILLUMINUS.Export.DesktopLinks": "This browser saves a PDF through your operating system\u2019s print panel, which flattens the contents page\u2019s links and will not let you type a filename. Chrome writes its own PDF and keeps them, if you want one you can click through.",
   "ILLUMINUS.Export.Printing": "Preparing the printable pages\u2026 your browser\u2019s print window will open.",
   "ILLUMINUS.Export.OptionsLegend": "What to Include",
   "ILLUMINUS.Export.Secrets": "Include hidden passages",

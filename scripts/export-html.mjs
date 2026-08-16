@@ -784,16 +784,22 @@ export async function buildHtmlExport({
  * is never lost to a failed dialog.
  */
 /**
- * Whether this is Foundry's own desktop application rather than a browser tab.
+ * Whether whatever is printing will write the PDF itself.
  *
- * It matters for one reason: what happens after the print dialog. A browser
- * writes the PDF itself and keeps a document's internal links; the desktop app
- * hands the job to the operating system's print panel, whose "Save as PDF" is a
- * different writer that flattens them. The contents page still reads, but its
- * entries stop being links — so the reader is told where to get them back.
+ * This decides one thing and nothing else: whether the contents page's entries
+ * are still links in the file that comes out. Chromium writes its own PDF from
+ * the print preview and keeps a document's internal links. Safari and Foundry's
+ * desktop application have no writer of their own — they hand the job to the
+ * operating system's print panel, and its "Save as PDF" flattens the links (and
+ * is also why the filename cannot be typed there).
+ *
+ * Nothing in the document changes this: the same markup printed both ways
+ * produces the same annotations, so the difference is entirely downstream.
  */
-function inDesktopApp() {
-  return /Electron/i.test(navigator.userAgent);
+function keepsPdfLinks() {
+  const agent = navigator.userAgent;
+  if (/Electron/i.test(agent)) return false;
+  return /Chrome\/\d/.test(agent);
 }
 
 function printDocument(built, target) {
@@ -876,7 +882,7 @@ export async function exportJournalsAsHtml(options) {
   // warning reads as something having gone wrong.
   if (options.format === "print") {
     ui.notifications.info(game.i18n.localize("ILLUMINUS.Export.Printing"));
-    if (inDesktopApp()) ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.DesktopLinks"));
+    if (!keepsPdfLinks()) ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.DesktopLinks"));
     printDocument(built, options.target);
   }
   else saveFile(built.blob, built.filename);
