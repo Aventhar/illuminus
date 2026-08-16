@@ -166,6 +166,7 @@ function documentLabel(uuid) {
 async function rewriteContent(html, { pageLinks, assets, report, headings, prefix = "" }) {
   const doc = new DOMParser().parseFromString(`<body>${html}</body>`, "text/html");
   const root = doc.body;
+  let pictures = 0;
 
   // Every heading gets a name, so a contents page has somewhere to point.
   // Numbered rather than slugged alone: two sections called "Treasure" are
@@ -213,19 +214,43 @@ async function rewriteContent(html, { pageLinks, assets, report, headings, prefi
     element.setAttribute("src", path);
 
     // Clicking a picture in Foundry opens it at its full size, so clicking one
-    // here opens the file itself. Left alone if it is already inside a link,
+    // here opens it over the page. Left alone if it is already inside a link,
     // which the author put there on purpose.
+    //
+    // It opens *in the document* rather than in a tab of its own, and that is
+    // not a preference: in a single-file export the picture is a `data:` URI,
+    // and browsers refuse to navigate to one at the top level — the tab opens
+    // blank. A link to an anchor works in every export, needs no script, and
+    // is closer to what Foundry does anyway.
     if (element.tagName !== "IMG" || element.closest("a")) continue;
+    const host = element.closest("figure") ?? wrap(doc, element, "span", "illuminus-picture");
+    host.id ||= `${prefix}picture-${++pictures}`;
+
     const link = doc.createElement("a");
     link.className = "illuminus-picture-link";
-    link.setAttribute("href", path);
-    link.setAttribute("target", "_blank");
-    link.setAttribute("rel", "noopener");
+    link.setAttribute("href", `#${host.id}`);
     element.replaceWith(link);
     link.append(element);
+
+    // A backdrop behind the opened picture: clicking anywhere puts it away.
+    // `#!` matches nothing, which closes it without jumping to the top.
+    const close = doc.createElement("a");
+    close.className = "illuminus-picture-close";
+    close.setAttribute("href", "#!");
+    close.setAttribute("aria-label", game.i18n.localize("ILLUMINUS.Buttons.Close"));
+    host.append(close);
   }
 
   return root.innerHTML;
+}
+
+/** Put an element inside a new one, in its place. */
+function wrap(doc, element, tag, className) {
+  const wrapper = doc.createElement(tag);
+  wrapper.className = className;
+  element.replaceWith(wrapper);
+  wrapper.append(element);
+  return wrapper;
 }
 
 /** One page, as the sheet renders it: a header carrying the name, then content. */
@@ -251,9 +276,13 @@ ${content}
 async function imagePageMarkup(page, assets) {
   const src = page.src ? await assets.add(new URL(page.src, document.baseURI).href, "images") : null;
   const caption = page.image?.caption;
+  const id = `picture-${esc(page.id)}`;
   return [
-    src ? `<a class="illuminus-picture-link" href="${esc(src)}" target="_blank" rel="noopener">`
-      + `<img src="${esc(src)}" alt="${esc(page.name)}"></a>` : "",
+    src ? `<span class="illuminus-picture" id="${id}">`
+      + `<a class="illuminus-picture-link" href="#${id}">`
+      + `<img src="${esc(src)}" alt="${esc(page.name)}"></a>`
+      + `<a class="illuminus-picture-close" href="#!" aria-label="${
+        esc(game.i18n.localize("ILLUMINUS.Buttons.Close"))}"></a></span>` : "",
     caption ? `<figcaption>${esc(caption)}</figcaption>` : ""
   ].filter(Boolean).join("\n");
 }
@@ -310,14 +339,15 @@ ${parts.join("\n")}
  * anchor into a real PDF link, so the contents page works on paper as well as
  * on screen — which is most of what bookmarks would have been for.
  */
-function contentsMarkup(plan, { depth = 3 } = {}) {
+function contentsMarkup(plan, { depth = 3, link = (_journal, id) => `#${id}` } = {}) {
   const entries = [];
   for (const journal of plan.journals) {
     if (plan.journals.length > 1) {
-      entries.push({ level: 1, text: journal.entry.name, id: `journal-${journal.entry.id}` });
+      entries.push({ journal, level: 1, text: journal.entry.name, id: `journal-${journal.entry.id}` });
     }
     for (const { page, found } of journal.headings ?? []) {
       entries.push({
+        journal,
         level: page.title?.level ?? 1,
         text: page.name,
         id: `page-${page.id}`,
@@ -325,15 +355,15 @@ function contentsMarkup(plan, { depth = 3 } = {}) {
       });
       for (const heading of found) {
         if (heading.level > depth) continue;
-        entries.push({ ...heading, level: Math.min(6, heading.level + 1) });
+        entries.push({ ...heading, journal, level: Math.min(6, heading.level + 1) });
       }
     }
   }
   if (entries.length < 2) return "";
 
-  const lines = entries.map(({ level, text, id }) =>
+  const lines = entries.map(({ level, text, id, journal }) =>
     `<h${level} class="illuminus-contents__entry" data-depth="${level}">`
-    + `<a href="#${esc(id)}">${esc(text)}</a></h${level}>`).join("\n");
+    + `<a href="${esc(link(journal, id))}">${esc(text)}</a></h${level}>`).join("\n");
 
   return `<article class="journal-entry-page text illuminus-contents">
 <header class="journal-page-header"><h1>${esc(game.i18n.localize("ILLUMINUS.Export.Contents"))}</h1></header>
@@ -702,14 +732,15 @@ export async function buildHtmlExport({
   }
 
   if (!single) {
+    // The same contents page a printed document opens with, pointing at files
+    // rather than at anchors — one list, written once, styled by the style.
+    const contents = contentsMarkup(plan, { link: (journal, id) => `${journal.file}#${id}` });
     files.push({
       path: "index.html",
       data: page(
         game.i18n.localize("ILLUMINUS.Export.Contents"), plan.journals[0]?.entry, sidebarMarkup(plan, null),
-        `<article class="journal-entry-page text"><section class="journal-page-content">`
-          + `<h1>${esc(game.i18n.localize("ILLUMINUS.Export.Contents"))}</h1>\n<ul>`
-          + plan.journals.map((j) => `<li><a href="${j.file}">${esc(j.entry.name)}</a></li>`).join("\n")
-          + `</ul></section></article>`
+        contents || `<article class="journal-entry-page text"><section class="journal-page-content">`
+          + `<h1>${esc(game.i18n.localize("ILLUMINUS.Export.Contents"))}</h1></section></article>`
       )
     });
   }
@@ -732,7 +763,7 @@ export async function buildHtmlExport({
 }
 
 /**
- * Open a built document in a tab of its own and ask the browser to print it.
+ * Print a built document, without opening a window to do it.
  *
  * This is the whole of the PDF export, and deliberately so: every browser
  * already prints to PDF, and the print dialog is where a person chooses paper
@@ -740,23 +771,49 @@ export async function buildHtmlExport({
  * would mean laying the pages out a second time, in a second engine, and
  * getting a worse answer.
  *
- * The tab is opened from the click that asked for it, so a pop-up blocker
- * treats it as wanted. If one stops it anyway, the file is downloaded instead
- * rather than silently doing nothing.
+ * It prints a frame rather than a new tab, which is not a detail: building the
+ * export takes seconds and asks a question first, so by the time there is
+ * anything to show, the click that asked for it is long over and a pop-up
+ * blocker refuses — and Foundry's desktop app refuses whatever the timing. A
+ * frame needs no permission and shows the same print preview.
+ *
+ * If printing cannot be started at all, the file is saved instead, so the work
+ * is never lost to a failed dialog.
  */
 function printDocument(built) {
   const url = URL.createObjectURL(built.blob);
-  const tab = window.open(url, "_blank");
-  if (!tab) {
-    saveFile(built.blob, built.filename);
-    ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PopupBlocked"));
-    return;
-  }
-  tab.addEventListener("load", () => {
+  const frame = document.createElement("iframe");
+  frame.className = "illuminus-print-frame";
+  frame.setAttribute("aria-hidden", "true");
+  frame.src = url;
+
+  const done = () => {
+    frame.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  frame.addEventListener("load", () => {
+    const view = frame.contentWindow;
+    const print = () => {
+      try {
+        view.focus();
+        view.print();
+      } catch (error) {
+        log.warn("export: printing was refused", error);
+        saveFile(built.blob, built.filename);
+        ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PopupBlocked"));
+        done();
+      }
+    };
     // Fonts decide the line breaks, and line breaks decide the page breaks.
-    tab.document.fonts?.ready.then(() => tab.print());
+    (view.document.fonts?.ready ?? Promise.resolve()).then(print, print);
+    // The frame has to outlive the dialog, which is modal and gives no promise:
+    // taken away when printing ends, and on a long timer in case it never does.
+    view.addEventListener("afterprint", done, { once: true });
+    setTimeout(() => { if (frame.isConnected) done(); }, 300000);
   }, { once: true });
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+  document.body.append(frame);
 }
 
 /**
@@ -770,7 +827,12 @@ export async function exportJournalsAsHtml(options) {
     ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NothingToExport"));
     return null;
   }
-  if (options.format === "print") printDocument(built);
+  // Said before the dialog appears, because a modal print window with no
+  // warning reads as something having gone wrong.
+  if (options.format === "print") {
+    ui.notifications.info(game.i18n.localize("ILLUMINUS.Export.Printing"));
+    printDocument(built);
+  }
   else saveFile(built.blob, built.filename);
   ui.notifications.info(game.i18n.format("ILLUMINUS.Export.Done", {
     pages: built.report.pages,

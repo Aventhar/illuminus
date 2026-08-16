@@ -125,13 +125,63 @@ body {
   padding: 0;
 }
 
-/* A picture opens at its own size when clicked, which is the nearest thing an
-   exported page has to the viewer Foundry pops up. The link must not restyle
-   the picture it wraps. */
+/* A picture opens over the page when clicked, which is the nearest thing an
+   exported page has to the viewer Foundry pops up — and it is done with an
+   anchor and `:target` rather than a script, so it works in a file opened from
+   a disk with nothing else beside it.
+
+   The link must not restyle the picture it wraps, and the wrapper must not
+   change how it sits in the text until it is opened. */
 .illuminus-export a.illuminus-picture-link {
   display: contents;
   color: inherit;
   text-decoration: none;
+  cursor: zoom-in;
+}
+
+.illuminus-export .illuminus-picture {
+  display: contents;
+}
+
+.illuminus-export .illuminus-picture-close {
+  display: none;
+}
+
+/* Opened: the picture's own container becomes the overlay, so nothing is
+   duplicated — a second copy of an embedded picture would double the size of a
+   single-file export. */
+.illuminus-export figure:target,
+.illuminus-export .illuminus-picture:target {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.9);
+  isolation: isolate;
+}
+
+.illuminus-export figure:target img,
+.illuminus-export .illuminus-picture:target img {
+  max-width: 94vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* The backdrop is a link that closes it, sitting behind the picture so a click
+   anywhere else puts it away. */
+.illuminus-export figure:target .illuminus-picture-close,
+.illuminus-export .illuminus-picture:target .illuminus-picture-close {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  cursor: zoom-out;
 }
 
 /* A reference to something that did not come with the export — an actor, an
@@ -170,6 +220,17 @@ body {
 }
 
 @media print {
+  /* A picture left open on screen is not a page of a printout. */
+  .illuminus-export figure:target,
+  .illuminus-export .illuminus-picture:target {
+    position: static;
+    display: block;
+    padding: 0;
+    background: none;
+  }
+
+  .illuminus-export .illuminus-picture-close { display: none; }
+
   /* No page margin, so the surface reaches the paper's edge — a handout that
      stops an inch short looks like a mistake. The room around the text comes
      from the page's own inner spacing, which the style already sets. */

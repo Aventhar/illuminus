@@ -30,6 +30,11 @@ SANDBOX_DIR="${SANDBOX_DIR:-${TMPDIR:-/tmp}/illuminus-sandbox}"
 PORT="${PORT:-30002}"
 SYSTEM="${SYSTEM:-pf2e}"
 WORLD="illuminus-sandbox"
+# Taken from the installed Foundry rather than written down: a world built for
+# an older build will not auto-launch after an update — it wants a migration
+# nobody is there to confirm — and the failure looks like a broken sandbox
+# rather than like Foundry having moved on.
+CORE_VERSION="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1] + "/package.json"))["version"].rsplit(".", 1)[0])' "$FOUNDRY_APP" 2>/dev/null || echo 14)"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 CDP_PORT="${CDP_PORT:-9222}"
 
@@ -60,9 +65,9 @@ PY
   "id": "$WORLD",
   "title": "Illuminus Sandbox",
   "system": "$SYSTEM",
-  "coreVersion": "14.365",
+  "coreVersion": "$CORE_VERSION",
   "description": "Disposable world for automated Illuminus tests. Safe to delete.",
-  "compatibility": { "minimum": "14", "verified": "14.365" }
+  "compatibility": { "minimum": "14", "verified": "$CORE_VERSION" }
 }
 EOF
   echo "sandbox built at $SANDBOX_DIR"

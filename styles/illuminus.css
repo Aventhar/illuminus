@@ -1005,6 +1005,19 @@
   width: auto;
 }
 
+/* The frame a printout is prepared in. Present in the page but never seen: it
+   exists only so the browser has a document to print. */
+.illuminus-print-frame {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* --- Export dialog ------------------------------------------------------ */
 
 /* The window holds this and a footer. Claiming the full height pushed the

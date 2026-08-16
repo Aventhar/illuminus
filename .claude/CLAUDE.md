@@ -342,6 +342,16 @@ only get a worse answer.
   printout stopped there too. `illuminus-export.css` states `position: static`, `height:
   auto`, and `overflow: visible` for `html, body`. Only a long journal shows this: every
   export in the checks fitted on one screen until one did not.
+- **A picture opens in the document, not in a tab.** A link to the file works in a folder
+  export and not in a single-file one, where the picture is a `data:` URI — browsers
+  refuse to navigate to one at the top level and the tab opens blank. It is an anchor and
+  `:target` instead, with the picture's own container becoming the overlay so nothing is
+  duplicated; a second copy of an embedded picture would double the file. The link is
+  `display: contents`, so it has no box: hit tests must aim at the picture.
+- **Printing is done in a frame, not a new window.** The export takes seconds to build
+  and asks a question first, so the click that asked for it is long over by the time
+  there is anything to show — a pop-up blocker refuses, and Foundry's desktop app refuses
+  regardless. A frame needs no permission and gives the same print preview.
 - **Do not judge a PDF by macOS's thumbnailer.** `qlmanage` rendered a heavy text-shadow
   as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
   in a browser before believing a rendering bug.
@@ -371,6 +381,12 @@ in the template library.
 - **`close({force: true})` is the rule, except where the prompt is the point.**
   Check [37] exists to exercise the unsaved-changes prompt; forcing its closes made it
   pass by skipping what it tests. Every *other* programmatic close needs the flag.
+- **A Foundry update can look like a broken sandbox.** `sandbox.sh` writes the world's
+  `coreVersion`, and a world built for an older build will not auto-launch after an
+  update — it wants a migration nobody is there to confirm, and the join page reads
+  "Critical Failure". The version is taken from the installed app now. Build 366 also
+  replaced the join screen's user *list* with a *name field*, which `joinAndWait` handles
+  both of.
 - **A crashed run leaves fixtures behind**, and a stray style breaks the seeded-style
   counts three checks in — which looks like a bug in those checks. When counts are wrong
   in section [2], the world is dirty: `tools/sandbox.sh reset`.

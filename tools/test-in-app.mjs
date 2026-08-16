@@ -40,13 +40,28 @@ const ok = (m) => console.log(`  ✓ ${m}`);
 const fail = (m) => { console.log(`  ✗ ${m}`); failures++; };
 const check = (cond, m) => cond ? ok(m) : fail(m);
 
+/**
+ * Join the sandbox world.
+ *
+ * Two forms, because Foundry changed its own: older builds offer a list of
+ * users to pick from, newer ones a name to type. Handling both means an update
+ * to Foundry does not read as the whole suite being broken.
+ */
 const joinAndWait = async () => {
   await cdp.goto(`${BASE}/join`);
-  await cdp.waitFor("document.querySelector('select[name=userid]')", { label: "join form" });
+  await cdp.waitFor(`document.querySelector('select[name=userid], input[name=username]')`,
+    { label: "join form" });
   await cdp.evaluate(`(() => {
-    const sel = document.querySelector('select[name="userid"]');
-    sel.value = [...sel.options].find(o => o.value).value;
-    document.querySelector('button[name="join"], button[type="submit"]').click();
+    const picker = document.querySelector('select[name="userid"]');
+    if (picker) picker.value = [...picker.options].find(o => o.value).value;
+    else {
+      const name = document.querySelector('input[name="username"]');
+      name.value = "Gamemaster";
+      name.dispatchEvent(new Event("input", {bubbles: true}));
+    }
+    const form = (picker ?? document.querySelector('input[name="username"]')).closest("form");
+    (form?.querySelector('button[type="submit"], button[name="join"]')
+      ?? document.querySelector('button[name="join"], button[type="submit"]')).click();
   })()`);
   await cdp.waitFor("window.game && game.ready", { label: "game.ready", timeout: 120000 });
 };
@@ -3106,6 +3121,12 @@ try {
     };
 
     const out = await api.buildJournalExport({styleId: style.id, entryIds: [entry.id]});
+    // A second export holding both journals, so there is an index page to look
+    // at: a folder of several journals opens on a contents page.
+    const many = await api.buildJournalExport({styleId: style.id, entryIds: [entry.id, outside.id]});
+    const manyBytes = new Uint8Array(await many.blob.arrayBuffer());
+    let manyBinary = "";
+    for (const byte of manyBytes) manyBinary += String.fromCharCode(byte);
     const bytes = new Uint8Array(await out.blob.arrayBuffer());
     let binary = "";
     for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -3113,6 +3134,7 @@ try {
     await entry.sheet.close({force: true});
     return JSON.stringify({
       live, report: out.report, filename: out.filename, base64: btoa(binary),
+      manyBase64: btoa(manyBinary),
       entryId: entry.id, outsideId: outside.id, secondId: second.id
     });
   })()`);
@@ -3140,6 +3162,27 @@ try {
   // nearest thing is the file itself.
   check(/<a[^>]*class="illuminus-picture-link"[^>]*>\s*<img/.test(html),
     "a picture opens when it is clicked");
+  // It must open in the document. A link to the file itself works in a folder
+  // but not in a single file, where the picture is a data: URI and browsers
+  // refuse to navigate to one — the tab opens blank.
+  const pictureHref = html.match(/class="illuminus-picture-link" href="([^"]+)"/)?.[1] ?? "";
+  check(pictureHref.startsWith("#"),
+    `pointing into the page rather than out of it (${pictureHref.slice(0, 24)})`);
+
+  // The contents page of a folder holding several journals.
+  const manyDir = path.join(exportDir, "many");
+  fs.mkdirSync(manyDir);
+  fs.writeFileSync(path.join(manyDir, "many.zip"), Buffer.from(ex.manyBase64, "base64"));
+  execFileSync("unzip", ["-q", "-o", "many.zip", "-d", "site"], { cwd: manyDir });
+  const index = fs.readFileSync(path.join(manyDir, "site/index.html"), "utf8");
+  const indexEntries = [...index.matchAll(/class="illuminus-contents__entry"[^>]*>\s*<a href="([^"]+)"/g)]
+    .map((m) => m[1]);
+  check(indexEntries.length >= 2,
+    `a folder of journals opens on a contents page (${indexEntries.length} entries)`);
+  check(indexEntries.every((href) => /^[^#]+\.html#/.test(href)),
+    `whose entries point into the files beside it (${indexEntries[0] ?? "none"})`);
+  check(/<h[1-6] class="illuminus-contents__entry"/.test(index),
+    "written as headings, so the style paints them");
   // A picture page carries no markup of its own, so it took its own branch —
   // and before that branch existed it was dropped without a word.
   check(/<figure class="journal-page-content">/.test(html) && /<figcaption>The way in\.<\/figcaption>/.test(html)
@@ -3195,7 +3238,8 @@ try {
       name: "The Stair", type: "text",
       text: {content: "<h1>Down</h1><p>Body text.</p>"
         + "<ul><li>An item</li></ul>"
-        + "<table><thead><tr><th>Attack</th></tr></thead><tbody><tr><td>Slam</td></tr></tbody></table>", format: 1}
+        + "<table><thead><tr><th>Attack</th></tr></thead><tbody><tr><td>Slam</td></tr></tbody></table>"
+        + "<figure><img src=\\"icons/svg/mystery-man.svg\\"><figcaption>Art</figcaption></figure>", format: 1}
     }]);
     // Deliberately no style: this is the "as it looks now" case.
     await entry.sheet.render({force: true});
@@ -3230,6 +3274,36 @@ try {
     const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
     const panel = document.querySelector(".journal-sidebar").getBoundingClientRect();
     const content = document.querySelector(".journal-entry-content").getBoundingClientRect();
+    // A picture opens over the page and closes again. Checked here rather than
+    // in the printing section, where print rules put the overlay away on
+    // purpose — paper has no clicking.
+    const picture = document.querySelector(".journal-page-content img");
+    const opening = { linked: false };
+    if (picture) {
+      const link = picture.closest("a.illuminus-picture-link");
+      const host = link ? document.querySelector(link.getAttribute("href")) : null;
+      opening.linked = Boolean(host);
+      opening.inward = Boolean(link?.getAttribute("href")?.startsWith("#"));
+      if (host) {
+        picture.scrollIntoView({ block: "center" });
+        const small = picture.getBoundingClientRect().width;
+        const box = picture.getBoundingClientRect();
+        const under = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+        opening.reachable = Boolean(under) && (under === picture || picture.contains(under));
+        (under ?? picture).click();
+        opening.opened = getComputedStyle(host).position === "fixed";
+        // Covering the page is the point, not growing: a small picture shows
+        // at its own size over the backdrop, which is what Foundry's own
+        // viewer does with one.
+        const overlay = host.getBoundingClientRect();
+        opening.covers = overlay.width >= innerWidth - 1 && overlay.height >= innerHeight - 1;
+        opening.fits = picture.getBoundingClientRect().width <= innerWidth;
+        opening.wide = small > 0;
+        host.querySelector(".illuminus-picture-close")?.click();
+        opening.closed = getComputedStyle(host).position !== "fixed";
+      }
+    }
+
     // Foundry pins its own body open so the application scrolls its panels
     // rather than the document. Carried into an export, that clips the journal
     // to one screenful — and takes the rest out of any printout.
@@ -3253,7 +3327,7 @@ try {
       // that mirrors the markup but not the state lists numbers and nothing else.
       panelTitles: [...document.querySelectorAll(".journal-sidebar .page-title")]
         .filter(title => title.getBoundingClientRect().width > 0).map(title => title.textContent),
-      scrolls,
+      scrolls, opening,
       bodyPinned: getComputedStyle(document.body).position === "fixed"
     });
   })()`));
@@ -3267,6 +3341,10 @@ try {
   check(there.besideThePage, "and the contents panel sits beside the page rather than above it");
   check(there.panelTitles.includes("The Stair"),
     `its entries are readable, not bare numbers (${there.panelTitles.join(", ") || "none"})`);
+  check(there.opening.linked && there.opening.inward && there.opening.reachable
+    && there.opening.opened && there.opening.covers && there.opening.fits,
+    `a picture opens over the page when clicked (${JSON.stringify(there.opening)})`);
+  check(there.opening.closed, "and closes again from the backdrop behind it");
   check(there.scrolls && !there.bodyPinned,
     `and the page scrolls like a web page rather than being pinned open (${there.bodyPinned ? "body is fixed" : "scrolls"})`);
   // Kept rules, not copied stylesheets: the whole of Foundry's CSS is tens of
