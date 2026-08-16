@@ -138,6 +138,9 @@ illuminus.listStyles();                         // every style, sorted by name
 illuminus.assignStyle(journalEntry, styleId);   // apply ("" to clear)
 illuminus.exportStyles([styleId]);              // download as JSON
 illuminus.openExport({styleId, entryIds});      // the web-page export dialog
+illuminus.exportJournals({                      // build and hand it over
+  styleId, entryIds, format: "print"            // "folder" | "file" | "print"
+});
 await illuminus.buildJournalExport({            // the archive itself, unsaved
   styleId, entryIds, secrets: false             // -> {blob, filename, report}
 });

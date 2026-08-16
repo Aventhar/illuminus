@@ -3503,6 +3503,43 @@ try {
     `whose every entry points at something really there (${one.contents.filter((e) => !e.found).map((e) => e.text).join(", ") || "all found"})`);
   check(one.contents.some((entry) => entry.tag === "H1") && one.contents.some((entry) => entry.tag !== "H1"),
     `tiered by the document's own headings (${[...new Set(one.contents.map((e) => e.tag))].join(", ")})`);
+  // Printing needs no window of its own. This is the part a pop-up blocker
+  // broke, and the frame is the whole of the fix, so it is worth asserting
+  // rather than trusting: no window is opened, and what is printed is a
+  // document of our own making.
+  const printing = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const old = game.journal.getName("Illuminus Print Frame");
+    if (old) await old.delete();
+    const entry = await JournalEntry.create({name: "Illuminus Print Frame"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<p>Paper.</p>", format: 1}
+    }]);
+
+    let opened = 0;
+    const realOpen = window.open;
+    window.open = (...args) => { opened += 1; return realOpen.apply(window, args); };
+    try {
+      await api.exportJournals({styleId: api.listStyles()[0].id, entryIds: [entry.id], format: "print"});
+      await new Promise(r => setTimeout(r, 1200));
+      const frame = document.querySelector("iframe.illuminus-print-frame");
+      const out = {
+        opened,
+        framed: Boolean(frame),
+        ownDocument: Boolean(frame?.src?.startsWith("blob:")),
+        hidden: frame ? frame.getBoundingClientRect().width === 0 : false
+      };
+      frame?.remove();
+      return JSON.stringify(out);
+    } finally {
+      window.open = realOpen;
+      await entry.delete();
+    }
+  })()`);
+  const pt = JSON.parse(printing);
+  check(pt.framed && pt.ownDocument && pt.opened === 0,
+    `printing needs no window of its own (${JSON.stringify(pt)})`);
+
   const linked = (pdf.toString("latin1").match(/\/Subtype\s*\/Link/g) ?? []).length;
   check(linked >= one.contents.length - 1,
     `and its entries are still links once printed (${linked} links in the PDF)`);

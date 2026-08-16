@@ -16,7 +16,7 @@ import {
 } from "./template-store.mjs";
 import { IlluminusTemplateManager } from "./apps/template-manager.mjs";
 import { IlluminusExportDialog } from "./apps/export-dialog.mjs";
-import { buildHtmlExport } from "./export-html.mjs";
+import { buildHtmlExport, exportJournalsAsHtml } from "./export-html.mjs";
 
 /**
  * Entry point for Illuminus.
@@ -46,6 +46,7 @@ Hooks.once("init", () => {
     openTemplates: () => IlluminusTemplateManager.open(),
     openExport: (options) => IlluminusExportDialog.open(options),
     buildJournalExport: (options) => buildHtmlExport(options),
+    exportJournals: (options) => exportJournalsAsHtml(options),
     getTemplates, getTemplate, listTemplates,
     createTemplate, updateTemplate, deleteTemplate, restoreTemplatePresets,
     getSetting, setSetting
