@@ -781,70 +781,68 @@ export async function buildHtmlExport({
  * is never lost to a failed dialog.
  */
 function printDocument(built, target) {
-  const url = URL.createObjectURL(built.blob);
+  // Written into the document rather than loaded from a blob URL, and that is
+  // the fix for a whole family of failures rather than a preference. A print
+  // preview is rendered by a *second* renderer, which reads the page again — so
+  // a document that lives at a URL we later revoke, or at a blob URL a browser
+  // will not navigate a top-level window to, produces a PDF that will not open.
+  // A document written straight in has no URL to lose.
+  const write = (view) => {
+    view.document.open();
+    view.document.write(built.html);
+    view.document.close();
+  };
 
   // A window of its own, when one could be had. The document being printed is
   // then the top-level one, which is what makes a browser name the file after
   // it and keep the contents page's links working in the PDF.
   if (target && !target.closed) {
-    target.location.replace(url);
+    write(target);
     const start = () => {
-      const view = target;
-      (view.document.fonts?.ready ?? Promise.resolve()).then(() => view.print(), () => view.print());
+      if (target.closed) return;
+      target.focus();
+      target.print();
     };
-    // `replace` on a window that has already written a page does not always
-    // fire load again, so the arrival is watched for rather than waited on.
-    let waited = 0;
-    const ready = setInterval(() => {
-      waited += 100;
-      const arrived = target.closed || target.document?.querySelector(".illuminus-export");
-      if (!arrived && waited < 20000) return;
-      clearInterval(ready);
-      if (!target.closed) start();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-    }, 100);
+    // Fonts decide the line breaks, and line breaks decide the page breaks.
+    (target.document.fonts?.ready ?? Promise.resolve()).then(start, start);
     return;
   }
 
+  // No window to be had: print a frame instead, which needs no permission.
   const frame = document.createElement("iframe");
   frame.className = "illuminus-print-frame";
   frame.setAttribute("aria-hidden", "true");
-  frame.src = url;
-
-  const done = () => {
-    frame.remove();
-    URL.revokeObjectURL(url);
-    document.title = ownTitle;
-  };
 
   // Printing a frame names the job after *this* document rather than the one
   // being printed, which leaves a reader with Foundry's title where the
   // journal's name should be. Lent for the duration and given back after.
   const ownTitle = document.title;
-
-  frame.addEventListener("load", () => {
-    const view = frame.contentWindow;
-    const print = () => {
-      try {
-        document.title = view.document.title || ownTitle;
-        view.focus();
-        view.print();
-      } catch (error) {
-        log.warn("export: printing was refused", error);
-        saveFile(built.blob, built.filename);
-        ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PopupBlocked"));
-        done();
-      }
-    };
-    // Fonts decide the line breaks, and line breaks decide the page breaks.
-    (view.document.fonts?.ready ?? Promise.resolve()).then(print, print);
-    // The frame has to outlive the dialog, which is modal and gives no promise:
-    // taken away when printing ends, and on a long timer in case it never does.
-    view.addEventListener("afterprint", done, { once: true });
-    setTimeout(() => { if (frame.isConnected) done(); }, 300000);
-  }, { once: true });
+  const done = () => {
+    frame.remove();
+    document.title = ownTitle;
+  };
 
   document.body.append(frame);
+  const view = frame.contentWindow;
+  write(view);
+
+  const print = () => {
+    try {
+      document.title = view.document.title || ownTitle;
+      view.focus();
+      view.print();
+    } catch (error) {
+      log.warn("export: printing was refused", error);
+      saveFile(built.blob, built.filename);
+      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PopupBlocked"));
+      done();
+    }
+  };
+  (view.document.fonts?.ready ?? Promise.resolve()).then(print, print);
+  // The frame has to outlive the dialog, which is modal and gives no promise:
+  // taken away when printing ends, and on a long timer in case it never does.
+  view.addEventListener("afterprint", done, { once: true });
+  setTimeout(() => { if (frame.isConnected) done(); }, 300000);
 }
 
 /**

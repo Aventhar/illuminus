@@ -355,6 +355,12 @@ only get a worse answer.
   instead), and the contents page's links survive. A frame is the fallback when a window
   is refused, and it lends `document.title` for the duration so the filename is still
   right.
+- **The printable document is written into the window, not loaded from a URL.** A print
+  preview is rendered by a *second* renderer that reads the page again, so a document
+  living at a blob URL — which is revoked eventually, and which a browser may refuse to
+  navigate a top-level window to — produces a PDF that will not open. `document.write`
+  leaves nothing to lose. The sandbox's Chrome runs with `--disable-popup-blocking` so
+  the window path can be checked at all; without it the check passes by skipping.
 - **A browser's print dialog leaves "background graphics" off.** That drops every fill in
   the document — not the page's surface only, but the bar behind each heading and the
   panel behind each read-aloud box, leaving an outline of a document. `print-color-adjust:

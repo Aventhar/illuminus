@@ -3542,7 +3542,11 @@ try {
       const out = {
         opened,
         framed: Boolean(frame),
-        ownDocument: Boolean(frame?.src?.startsWith("blob:")),
+        // Written into the frame rather than fetched from a URL: a print
+        // preview reads the page again in a second renderer, and a document at
+        // a URL that has been revoked prints as a file that will not open.
+        wrote: Boolean(frame?.contentDocument?.querySelector(".illuminus-export")),
+        noSource: !frame?.getAttribute("src"),
         hidden: frame ? frame.getBoundingClientRect().width === 0 : false
       };
       frame?.remove();
@@ -3553,8 +3557,39 @@ try {
     }
   })()`);
   const pt = JSON.parse(printing);
-  check(pt.framed && pt.ownDocument && pt.opened === 0,
+  check(pt.framed && pt.wrote && pt.noSource && pt.opened === 0,
     `with no window to print into, it prints a frame instead (${JSON.stringify(pt)})`);
+
+  // And with a window, the document being printed is the top-level one — which
+  // is what names the file and keeps the contents page's links alive.
+  const windowed = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const old = game.journal.getName("Illuminus Print Window");
+    if (old) await old.delete();
+    const entry = await JournalEntry.create({name: "Illuminus Print Window"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<p>Paper.</p>", format: 1}
+    }]);
+    const view = window.open("", "_blank");
+    if (!view) { await entry.delete(); return JSON.stringify({noWindow: true}); }
+    try {
+      await api.exportJournals({
+        styleId: api.listStyles()[0].id, entryIds: [entry.id], format: "print", target: view
+      });
+      await new Promise(r => setTimeout(r, 1500));
+      return JSON.stringify({
+        printed: Boolean(view.document.querySelector(".illuminus-export")),
+        titled: view.document.title,
+        frames: document.querySelectorAll("iframe.illuminus-print-frame").length
+      });
+    } finally {
+      view.close();
+      await entry.delete();
+    }
+  })()`);
+  const pw = JSON.parse(windowed);
+  check(pw.noWindow || (pw.printed && pw.titled === "Illuminus Print Window" && pw.frames === 0),
+    `given a window, it prints that instead, named for the journal (${JSON.stringify(pw)})`);
 
   // Links in a PDF are named destinations, and a name nothing defines is a
   // link that does nothing when clicked — which is how they behaved when the

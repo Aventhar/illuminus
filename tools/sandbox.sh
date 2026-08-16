@@ -89,6 +89,10 @@ start() {
     --user-data-dir="$SANDBOX_DIR/chrome-profile" --no-first-run --no-default-browser-check \
     --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader \
     --ignore-gpu-blocklist --enable-webgl --window-size=1600,1000 \
+    `# The export opens a window to print from, which a person's browser allows
+     # because they asked for it. Without this the check for that path has
+     # nothing to check.` \
+    --disable-popup-blocking \
     about:blank > "$SANDBOX_DIR/chrome.log" 2>&1 < /dev/null & disown
 
   for _ in $(seq 1 60); do
