@@ -27,7 +27,9 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       icon: "fa-solid fa-file-export",
       resizable: true
     },
-    position: { width: 560, height: 620 },
+    // Tall enough for every section at once: a window that opens with its last
+    // fieldset cut off reads as a mistake, and this one has five.
+    position: { width: 560, height: 780 },
     form: {
       handler: IlluminusExportDialog.#onSubmit,
       closeOnSubmit: true
@@ -87,9 +89,9 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     // One window, three ways out. A folder is the fullest, one page is the one
     // you can email, and printing is the one that becomes a PDF.
     context.formats = [
-      { id: "folder", label: "ILLUMINUS.Export.FormatFolder", hint: "ILLUMINUS.Export.FormatFolderHint", checked: true },
-      { id: "file", label: "ILLUMINUS.Export.FormatFile", hint: "ILLUMINUS.Export.FormatFileHint" },
-      { id: "print", label: "ILLUMINUS.Export.FormatPrint", hint: "ILLUMINUS.Export.FormatPrintHint" }
+      { id: "folder", label: "ILLUMINUS.Export.FormatFolder", checked: true },
+      { id: "file", label: "ILLUMINUS.Export.FormatFile" },
+      { id: "print", label: "ILLUMINUS.Export.FormatPrint" }
     ];
     context.journals = game.journal.contents
       .filter((entry) => entry.testUserPermission(game.user, "OBSERVER"))
@@ -157,13 +159,29 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     if (empty) empty.classList.toggle("is-shown", rows > 0 && showing === 0);
   }
 
+  /**
+   * Some choices only mean something for one way of saving. Whether the page's
+   * own surface is printed is a question about paper, so it is asked when a PDF
+   * is what is being made and not before.
+   */
+  #applyFormat() {
+    const format = this.element.querySelector('input[name="format"]:checked')?.value ?? "folder";
+    for (const only of this.element.querySelectorAll(".illuminus-export-dialog__pdf-only")) {
+      only.classList.toggle("is-hidden", format !== "print");
+    }
+  }
+
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
     for (const control of ['select[name="styleId"]', 'input[name="onlyStyled"]']) {
       this.element.querySelector(control)?.addEventListener("change", () => this.#applyFilter());
     }
+    for (const radio of this.element.querySelectorAll('input[name="format"]')) {
+      radio.addEventListener("change", () => this.#applyFormat());
+    }
     this.#applyFilter();
+    this.#applyFormat();
   }
 
   /** Read the notice again, whenever somebody wants to. */
@@ -192,6 +210,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       styleId: data.styleId,
       entryIds,
       secrets: Boolean(data.secrets),
+      pageBackground: Boolean(data.pageBackground),
       format
     });
   }

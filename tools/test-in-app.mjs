@@ -1452,7 +1452,7 @@ const EDIT_SHEET = `[...foundry.applications.instances.values()].filter(
  * checked away from Foundry: a second tab, a second socket, and no module
  * loaded anywhere near it. Anything read here was read from a plain web page.
  */
-const inCleanTab = async (url, expression, { pdf = false } = {}) => {
+const inCleanTab = async (url, expression, { pdf = false, printMedia = false } = {}) => {
   const { targetId } = await cdp.send("Target.createTarget", { url });
   try {
     await new Promise((r) => setTimeout(r, 500));
@@ -1481,6 +1481,19 @@ const inCleanTab = async (url, expression, { pdf = false } = {}) => {
       if (!ready) await new Promise((r) => setTimeout(r, 250));
     }
     if (!ready) throw new Error(`the exported page never finished loading: ${url}`);
+
+    // Print rules decide what a PDF costs in ink, and they are invisible on
+    // screen — so the page is asked while it believes it is being printed.
+    if (printMedia) {
+      await new Promise((resolve) => {
+        socket.onmessage = (event) => {
+          if (JSON.parse(event.data).id === 99) resolve();
+        };
+        socket.send(JSON.stringify({
+          id: 99, method: "Emulation.setEmulatedMedia", params: { media: "print" }
+        }));
+      });
+    }
     const answer = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error(`the exported page never answered: ${url}`)), 30000);
       socket.onmessage = (event) => {
@@ -3071,6 +3084,7 @@ try {
         + "<table><thead><tr><th>Attack</th></tr></thead><tbody><tr><td>Slam</td></tr></tbody></table>"
         + "<p>A page link: @UUID[" + second.uuid + "]{The Vault}.</p>"
         + "<p>An outside link: @UUID[" + outside.uuid + "]{Elsewhere}.</p>"
+        + "<figure><img src=\\"icons/svg/mystery-man.svg\\"><figcaption>Art</figcaption></figure>"
         + "<section class=\\"secret\\"><p>PRIVATE-GM-TEXT</p></section>", format: 1}
     }]);
     await api.assignStyle(entry, style.id);
@@ -3122,6 +3136,10 @@ try {
     "a link to something left out is text, not a dead link");
   check(!html.includes("PRIVATE-GM-TEXT"),
     "and a hidden passage stays hidden");
+  // Clicking a picture in Foundry opens it at full size; in an export the
+  // nearest thing is the file itself.
+  check(/<a[^>]*class="illuminus-picture-link"[^>]*>\s*<img/.test(html),
+    "a picture opens when it is clicked");
   // A picture page carries no markup of its own, so it took its own branch —
   // and before that branch existed it was dropped without a word.
   check(/<figure class="journal-page-content">/.test(html) && /<figcaption>The way in\.<\/figcaption>/.test(html)
@@ -3212,6 +3230,15 @@ try {
     const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
     const panel = document.querySelector(".journal-sidebar").getBoundingClientRect();
     const content = document.querySelector(".journal-entry-content").getBoundingClientRect();
+    // Foundry pins its own body open so the application scrolls its panels
+    // rather than the document. Carried into an export, that clips the journal
+    // to one screenful — and takes the rest out of any printout.
+    document.body.style.minHeight = "0";
+    const tall = document.createElement("div");
+    tall.style.height = "4000px";
+    document.body.append(tall);
+    const scrolls = document.scrollingElement.scrollHeight > innerHeight + 1000;
+    tall.remove();
     return JSON.stringify({
       surface: read(".journal-entry-content", "backgroundColor"),
       body: read(".journal-page-content p", "color"),
@@ -3225,7 +3252,9 @@ try {
       // Core hides these unless the sheet says its panel is open, so an export
       // that mirrors the markup but not the state lists numbers and nothing else.
       panelTitles: [...document.querySelectorAll(".journal-sidebar .page-title")]
-        .filter(title => title.getBoundingClientRect().width > 0).map(title => title.textContent)
+        .filter(title => title.getBoundingClientRect().width > 0).map(title => title.textContent),
+      scrolls,
+      bodyPinned: getComputedStyle(document.body).position === "fixed"
     });
   })()`));
 
@@ -3238,6 +3267,8 @@ try {
   check(there.besideThePage, "and the contents panel sits beside the page rather than above it");
   check(there.panelTitles.includes("The Stair"),
     `its entries are readable, not bare numbers (${there.panelTitles.join(", ") || "none"})`);
+  check(there.scrolls && !there.bodyPinned,
+    `and the page scrolls like a web page rather than being pinned open (${there.bodyPinned ? "body is fixed" : "scrolls"})`);
   // Kept rules, not copied stylesheets: the whole of Foundry's CSS is tens of
   // thousands of rules, and an export that carried them all would say so here.
   check(px.report.rules > 20 && px.report.rules < 2000,
@@ -3279,8 +3310,19 @@ try {
     }
 
     const out = await api.buildJournalExport({styleId: style.id, entryIds: made, format: "file"});
+    // The same export with the page picture asked for, to see that the choice
+    // reaches the document rather than being a tick box that does nothing.
+    const inked = await api.buildJournalExport({
+      styleId: style.id, entryIds: made, format: "print", pageBackground: true
+    });
     for (const id of made) await game.journal.get(id).delete();
-    return JSON.stringify({html: out.html, filename: out.filename, report: out.report});
+    return JSON.stringify({
+      html: out.html, inkedHtml: inked.html, filename: out.filename, report: out.report,
+      // Matched on the root element rather than anywhere in the file: the
+      // stylesheet travels inside the document and names the class itself.
+      plainMarked: /<div class="[^"]*illuminus-print-background/.test(out.html),
+      inkedMarked: /<div class="[^"]*illuminus-print-background/.test(inked.html)
+    });
   })()`);
 
   const pr = JSON.parse(built);
@@ -3304,12 +3346,22 @@ try {
   check(pr.html.includes("Illuminus Print A") && pr.html.includes("Illuminus Print B"),
     "with every journal in the one document");
 
-  const { answer, printed } = await inCleanTab(`file://${file}`, `(() => JSON.stringify({
-    pages: document.querySelectorAll(".journal-entry-page").length,
-    surface: getComputedStyle(document.querySelector(".journal-entry-content")).backgroundColor,
-    pictures: [...document.images].filter(img => img.complete && img.naturalWidth > 0).length,
-    images: document.images.length
-  }))()`, { pdf: true });
+  const { answer, printed } = await inCleanTab(`file://${file}`, `(() => {
+    const surface = document.querySelector(".journal-entry-content");
+    return JSON.stringify({
+      pages: document.querySelectorAll(".journal-entry-page").length,
+      surface: getComputedStyle(surface).backgroundColor,
+      pictures: [...document.images].filter(img => img.complete && img.naturalWidth > 0).length,
+      images: document.images.length,
+      // Read while the page believes it is printing. The height asked for is
+      // what is checked, not the height reached: a document four pages long is
+      // taller than a sheet whether or not anything asked it to be.
+      sheetHigh: parseInt(getComputedStyle(surface).minHeight, 10) || 0,
+      sheet: innerHeight,
+      texture: getComputedStyle(surface, "::before").display,
+      fill: getComputedStyle(surface).backgroundColor
+    });
+  })()`, { pdf: true, printMedia: true });
 
   const one = JSON.parse(answer);
   check(one.pictures === one.images,
@@ -3320,6 +3372,29 @@ try {
   // Each journal page starts a sheet, so two pages cannot come out as one.
   const sheets = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
   check(sheets >= 2, `each journal page starting a new sheet (${sheets} sheets for ${one.pages} pages)`);
+  // Left out by default: white paper, and the headings and boxes still inked.
+  const bare = one.texture === "none"
+    && ["rgba(0, 0, 0, 0)", "transparent"].includes(one.fill);
+  check(bare && !pr.plainMarked && one.sheetHigh === 0,
+    `a PDF leaves the page surface out unless it is asked for (${one.fill}, picture ${one.texture})`);
+
+  // And asked for: the surface is there, and fills the sheet.
+  const inkedFile = path.join(printDir, "inked.html");
+  fs.writeFileSync(inkedFile, pr.inkedHtml);
+  const inked = JSON.parse(await inCleanTab(`file://${inkedFile}`, `(() => {
+    const surface = document.querySelector(".journal-entry-content");
+    return JSON.stringify({
+      sheetHigh: parseInt(getComputedStyle(surface).minHeight, 10) || 0,
+      sheet: innerHeight,
+      texture: getComputedStyle(surface, "::before").display,
+      fill: getComputedStyle(surface).backgroundColor
+    });
+  })()`, { printMedia: true }));
+  check(pr.inkedMarked && inked.texture !== "none"
+    && !["rgba(0, 0, 0, 0)", "transparent"].includes(inked.fill),
+    `asking for it puts the surface back (${inked.fill}, picture ${inked.texture})`);
+  check(inked.sheetHigh >= inked.sheet - 1,
+    `filling the sheet rather than stopping where the words do (${inked.sheetHigh}px of ${inked.sheet}px)`);
 } finally {
   fs.rmSync(printDir, { recursive: true, force: true });
   await cdp.evaluate(`(async () => {

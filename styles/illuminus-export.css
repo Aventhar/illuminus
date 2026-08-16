@@ -16,6 +16,24 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Foundry pins its own page open — the body is `position: fixed`, full height,
+   and `overflow: hidden`, because the application scrolls its own panels rather
+   than the document. An export that carries Foundry's CSS carries that too, and
+   a fixed body is out of flow: the document has nothing to scroll, the journal
+   is clipped to one screenful, and the printout stops there as well.
+
+   A web page scrolls. Stated unlayered, so it wins without out-specifying. */
+html, body {
+  position: static;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+body {
+  display: block;
+}
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
@@ -107,6 +125,15 @@ body {
   padding: 0;
 }
 
+/* A picture opens at its own size when clicked, which is the nearest thing an
+   exported page has to the viewer Foundry pops up. The link must not restyle
+   the picture it wraps. */
+.illuminus-export a.illuminus-picture-link {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}
+
 /* A reference to something that did not come with the export — an actor, an
    item, a scene. It reads as the marked-up name of a thing, because that is
    what it is: a link that cannot be followed would only invite a click. */
@@ -120,7 +147,31 @@ body {
 }
 
 @media print {
+  /* No page margin, so the surface reaches the paper's edge — a handout that
+     stops an inch short looks like a mistake. The room around the text comes
+     from the page's own inner spacing, which the style already sets. */
+  @page { margin: 0; }
+
   body { background: none; padding: 0; }
+
+  /* Asked for: the page's own surface, filling the sheet rather than stopping
+     where the words do. Each page of a journal starts a sheet, so each one is
+     at least a sheet tall. */
+  .illuminus-export.illuminus-print-background .journal-entry-content {
+    min-height: 100vh;
+  }
+
+  /* Left out by default, colour and picture alike: it is the most expensive
+     thing on the page to print, and the headings, boxes, and tables still come
+     out in colour without it. */
+  .illuminus-export:not(.illuminus-print-background) .journal-entry-content {
+    background-color: transparent;
+  }
+
+  .illuminus-export:not(.illuminus-print-background) .journal-entry-content::before {
+    display: none;
+  }
+
   .illuminus-export {
     display: block;
     max-width: none;

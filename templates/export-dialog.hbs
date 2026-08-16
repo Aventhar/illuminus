@@ -68,7 +68,6 @@
       {{/if}}
       <span>
         {{localize format.label}}
-        <span class="hint">{{localize format.hint}}</span>
       </span>
     </label>
     {{/each}}
@@ -80,7 +79,12 @@
       <input type="checkbox" name="secrets">
       <span>
         {{localize "ILLUMINUS.Export.Secrets"}}
-        <span class="hint">{{localize "ILLUMINUS.Export.SecretsHint"}}</span>
+      </span>
+    </label>
+    <label class="illuminus-export-dialog__option illuminus-export-dialog__pdf-only">
+      <input type="checkbox" name="pageBackground">
+      <span>
+        {{localize "ILLUMINUS.Export.PageTexture"}}
       </span>
     </label>
   </fieldset>

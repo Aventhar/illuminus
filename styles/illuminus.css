@@ -1163,8 +1163,16 @@
 
 /* Room between the style picker and the filter that follows it, so the two do
    not read as one control. */
-.illuminus-export-dialog select[name="styleId"] + .illuminus-export-dialog__option {
+.illuminus-export-dialog select[name="styleId"] + .illuminus-export-dialog__option.is-hidden {
+  display: none;
+}
+
+.illuminus-export-dialog__option {
   margin-top: 0.5rem;
+}
+
+.illuminus-export-dialog__option.is-hidden {
+  display: none;
 }
 
 .illuminus-export-dialog__option {

@@ -200,7 +200,20 @@ async function rewriteContent(html, { pageLinks, assets, report }) {
     if (!source) continue;
     const folder = element.tagName === "IMG" ? "images" : "media";
     const path = await assets.add(new URL(source, document.baseURI).href, folder);
-    if (path) element.setAttribute("src", path);
+    if (!path) continue;
+    element.setAttribute("src", path);
+
+    // Clicking a picture in Foundry opens it at its full size, so clicking one
+    // here opens the file itself. Left alone if it is already inside a link,
+    // which the author put there on purpose.
+    if (element.tagName !== "IMG" || element.closest("a")) continue;
+    const link = doc.createElement("a");
+    link.className = "illuminus-picture-link";
+    link.setAttribute("href", path);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener");
+    element.replaceWith(link);
+    link.append(element);
   }
 
   return root.innerHTML;
@@ -230,7 +243,8 @@ async function imagePageMarkup(page, assets) {
   const src = page.src ? await assets.add(new URL(page.src, document.baseURI).href, "images") : null;
   const caption = page.image?.caption;
   return [
-    src ? `<img src="${esc(src)}" alt="${esc(page.name)}">` : "",
+    src ? `<a class="illuminus-picture-link" href="${esc(src)}" target="_blank" rel="noopener">`
+      + `<img src="${esc(src)}" alt="${esc(page.name)}"></a>` : "",
     caption ? `<figcaption>${esc(caption)}</figcaption>` : ""
   ].filter(Boolean).join("\n");
 }
@@ -484,13 +498,17 @@ function skippedPages(entry) {
  *   journal's own look, taken from whatever is painting it in Foundry.
  * @param {string[]} options.entryIds   Journals to export.
  * @param {boolean} [options.secrets]   Include unrevealed secret passages.
+ * @param {boolean} [options.pageBackground]  Print the page's own surface —
+ *   its colour and its picture — rather than leaving the paper white.
  * @param {"folder"|"file"|"print"} [options.format]  A folder of pages, one
  *   self-contained page, or one page built to be printed. The last two are the
  *   same document: a thing you can print is a thing you can email, and a
  *   printer will not go looking for a folder of pictures beside the file.
  * @returns {Promise<{blob: Blob, filename: string, report: object, html?: string}|null>}
  */
-export async function buildHtmlExport({ styleId, entryIds, secrets = false, format = "folder" }) {
+export async function buildHtmlExport({
+  styleId, entryIds, secrets = false, format = "folder", pageBackground = false
+}) {
   const onePage = format !== "folder";
   // No style means "as it looks now", which is a different question: the CSS is
   // gathered from the page rather than compiled from a style.
@@ -538,6 +556,9 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false, form
   const chrome = style
     ? { root: STYLED_CLASS, html: "", body: "" }
     : { root: themeClasses(), ...rootClasses() };
+  // Only printing leaves it out, but the class is written whatever the format:
+  // a saved page is one somebody may print later.
+  if (pageBackground) chrome.root = `${chrome.root} illuminus-print-background`.trim();
 
   /**
    * Which style a document wears. With one chosen, all of them wear it; with

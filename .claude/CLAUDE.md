@@ -325,6 +325,13 @@ only get a worse answer.
 - **`Page.printToPDF` over CDP proves printability** — same engine, same print
   stylesheet a person's Save as PDF uses. The check asserts the bytes start `%PDF-` and
   counts sheets, which is how the page-break rule is covered.
+- **Foundry pins its own page open**, and an export carrying its CSS carries that: the
+  body is `position: fixed`, full height, `overflow: hidden`, because the application
+  scrolls its panels rather than the document. A fixed body is out of flow, so the
+  exported page had nothing to scroll — the journal was clipped to one screenful and the
+  printout stopped there too. `illuminus-export.css` states `position: static`, `height:
+  auto`, and `overflow: visible` for `html, body`. Only a long journal shows this: every
+  export in the checks fitted on one screen until one did not.
 - **Do not judge a PDF by macOS's thumbnailer.** `qlmanage` rendered a heavy text-shadow
   as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
   in a browser before believing a rendering bug.
