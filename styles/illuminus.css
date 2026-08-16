@@ -938,7 +938,11 @@
                       var(--ill-images-glow-size) var(--ill-images-glow-color));
 }
 
-.illuminus-styled .journal-page-content :not(.illuminus-image) > img {
+/* "Not inside a treated figure", said as that rather than as "not the child of
+   one". A picture can have something between it and its figure — a link, which
+   the editor can make and which an export always makes — and a parent test then
+   sends a treated picture back to the default frame. */
+.illuminus-styled .journal-page-content img:not(.illuminus-image img) {
   max-width: var(--ill-images-max-width);
   opacity: var(--ill-images-opacity);
   background: var(--ill-images-background);

@@ -372,6 +372,11 @@ only get a worse answer.
   padding did it again for the same reason. Nothing paints into a printed margin either:
   the root element's background stops at the page area exactly as the page's own does, so
   a margin means a border of paper and the surface fills what is left.
+- **Do not style a picture by asking who its parent is.** The default frame was written
+  `:not(.illuminus-image) > img`, so anything between a figure and its picture — a link,
+  which the editor can make and an export always makes — sent a treated picture back to
+  the default frame, borders and all. It reads `img:not(.illuminus-image img)` now, which
+  is what it always meant.
 - **A Foundry id may start with a digit**, which is a valid HTML id and an invalid CSS
   identifier. Fragment links and `:target` do not care; `querySelector("#" + id)` throws.
   Exported anchors are prefixed with a letter, and anything looking one up uses

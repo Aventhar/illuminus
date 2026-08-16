@@ -3165,6 +3165,35 @@ try {
   // nearest thing is the file itself.
   check(/<a[^>]*class="illuminus-picture-link"[^>]*>\s*<img/.test(html),
     "a picture opens when it is clicked");
+  // The link sits between a figure and its picture, so anything that styles a
+  // picture by asking who its parent is stops working. The treatment has to
+  // survive that, in the app as well as in an export.
+  const framed = await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Illuminus Export Test") ?? await JournalEntry.create({name: "Illuminus Framed"});
+    const page = await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "Framed", type: "text",
+      text: {content: '<figure class="illuminus-image illuminus-image--image01">'
+        + '<a href="#x"><img src="icons/svg/mystery-man.svg"></a><figcaption>c</figcaption></figure>'
+        + '<figure><img src="icons/svg/mystery-man.svg"><figcaption>d</figcaption></figure>', format: 1}
+    }]);
+    await entry.sheet.render({force: true, pageId: page[0].id});
+    await new Promise(r => setTimeout(r, 1200));
+    const root = entry.sheet.element;
+    const read = (sel) => {
+      const el = root.querySelector(sel);
+      return el ? getComputedStyle(el).borderTopWidth : "?";
+    };
+    const out = {
+      treated: read(".illuminus-image--image01 img"),
+      plain: read("figure:not(.illuminus-image) img")
+    };
+    await entry.sheet.close({force: true});
+    await page[0].delete();
+    return JSON.stringify(out);
+  })()`);
+  const fr = JSON.parse(framed);
+  check(fr.treated !== fr.plain,
+    `a linked picture keeps its own treatment rather than the default frame (${fr.treated} vs ${fr.plain})`);
   // It must open in the document. A link to the file itself works in a folder
   // but not in a single file, where the picture is a data: URI and browsers
   // refuse to navigate to one — the tab opens blank.

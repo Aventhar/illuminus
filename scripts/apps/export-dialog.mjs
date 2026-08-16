@@ -222,21 +222,20 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     }
     const format = data.format ?? "print";
 
-    // Opened here, on the click itself, and only then: a browser allows a new
-    // window while it can still see the gesture that asked for it, and by the
-    // time the pages are built — seconds later, with a notice in between — it
-    // no longer can. The window waits, empty, while the work is done.
-    //
-    // It matters beyond the blocking. A browser names a print job after the
-    // top-level document and keeps a printed document's internal links, so
-    // printing a page in its own window is what gives the reader a sensible
-    // filename and a contents page that still works on paper.
-    const target = format === "print" ? openWaitingWindow() : null;
+    // The notice first, and the window after it. A browser allows a new window
+    // while it can still see the click that asked for one — and the notice is
+    // answered with a click of its own, so the permission survives being asked
+    // a question. Opening the window first put a blank tab in front of a notice
+    // waiting behind it, which is a good way to make somebody think the export
+    // has hung.
+    if (!await confirmExportTerms({ carrying: whatTravels() })) return;
 
-    if (!await confirmExportTerms({ carrying: whatTravels() })) {
-      target?.close();
-      return;
-    }
+    // Printing a page in a window of its own is what gives the reader a
+    // sensible filename and a contents page that still works on paper: a
+    // browser names a print job after the top-level document, and keeps that
+    // document's internal links. The window waits, saying so, while the pages
+    // are built.
+    const target = format === "print" ? openWaitingWindow() : null;
 
     log.debug(`exporting ${entryIds.length} journal(s) as ${format}`);
     await exportJournalsAsHtml({

@@ -132,10 +132,18 @@ body {
 
    The link must not restyle the picture it wraps, and the wrapper must not
    change how it sits in the text until it is opened. */
+/* Laid out as nothing at all: the link is a way to click a picture, not
+   something to be seen, and the Links tab's borders and fills have no business
+   being drawn around a picture. */
+.illuminus-export .journal-page-content a.illuminus-picture-link,
 .illuminus-export a.illuminus-picture-link {
   display: contents;
   color: inherit;
   text-decoration: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
   cursor: zoom-in;
 }
 
