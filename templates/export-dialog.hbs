@@ -68,6 +68,9 @@
       {{/if}}
       <span>
         {{localize format.label}}
+        {{#if format.note}}
+        <span class="hint">{{localize format.note}}</span>
+        {{/if}}
       </span>
     </label>
     {{/each}}

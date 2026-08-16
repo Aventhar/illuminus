@@ -116,6 +116,7 @@ Object.assign(out, {
   "ILLUMINUS.Export.PageCountOne": "1 page",
   "ILLUMINUS.Export.NoJournals": "There are no journals to export.",
   "ILLUMINUS.Export.FormatLegend": "How to Save It",
+  "ILLUMINUS.Export.FormatPrintNote": "Use in Chrome browser for best results.",
   "ILLUMINUS.Export.FormatFolder": "Website directory structure",
   "ILLUMINUS.Export.FormatFile": "Single file website",
   "ILLUMINUS.Export.FormatPrint": "Print to printer or PDF",

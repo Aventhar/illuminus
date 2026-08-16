@@ -198,6 +198,7 @@
   "ILLUMINUS.Export.FormatFolder": "Website directory structure",
   "ILLUMINUS.Export.FormatLegend": "How to Save It",
   "ILLUMINUS.Export.FormatPrint": "Print to printer or PDF",
+  "ILLUMINUS.Export.FormatPrintNote": "Use in Chrome browser for best results.",
   "ILLUMINUS.Export.Hint": "Saves the journals you pick, wearing the style you pick, as a PDF or as web pages that open in any browser — with no Foundry and no Illuminus needed. Hand a player a handout, print one for the table, or put an adventure on a website.",
   "ILLUMINUS.Export.JournalsLegend": "Journals",
   "ILLUMINUS.Export.ManyTitle": "{count} Journals",

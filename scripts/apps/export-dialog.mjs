@@ -110,7 +110,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     // The PDF leads, and is what the window offers unless told otherwise: it is
     // the one most people are here for, and the only one that ends at a table.
     context.formats = [
-      { id: "print", label: "ILLUMINUS.Export.FormatPrint", checked: true },
+      { id: "print", label: "ILLUMINUS.Export.FormatPrint", note: "ILLUMINUS.Export.FormatPrintNote", checked: true },
       { id: "folder", label: "ILLUMINUS.Export.FormatFolder" },
       { id: "file", label: "ILLUMINUS.Export.FormatFile" }
     ];
