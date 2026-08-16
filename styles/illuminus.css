@@ -1099,9 +1099,12 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* A button that reads as a link, for something to open rather than to do. */
+/* A button that reads as a link, for something to open rather than to do. It
+   takes the same yellow as the notice it opens, and grows a little when pointed
+   at — the box it sits in does not move, since the growth is drawn rather than
+   laid out. */
 .illuminus .illuminus-link-button {
-  display: inline;
+  display: inline-block;
   width: auto;
   margin: 0;
   padding: 0;
@@ -1109,8 +1112,16 @@
   background: none;
   line-height: inherit;
   font-size: inherit;
+  color: #ffd21f;
   text-decoration: underline;
   cursor: pointer;
+  transform-origin: left center;
+  transition: transform 120ms ease-out;
+}
+
+.illuminus .illuminus-link-button:hover {
+  color: #ffd21f;
+  transform: scale(1.08);
 }
 
 .illuminus-terms h3 {

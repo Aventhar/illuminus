@@ -163,9 +163,18 @@ function documentLabel(uuid) {
  * @param {object} context.report
  * @returns {Promise<string>}
  */
-async function rewriteContent(html, { pageLinks, assets, report }) {
+async function rewriteContent(html, { pageLinks, assets, report, headings, prefix = "" }) {
   const doc = new DOMParser().parseFromString(`<body>${html}</body>`, "text/html");
   const root = doc.body;
+
+  // Every heading gets a name, so a contents page has somewhere to point.
+  // Numbered rather than slugged alone: two sections called "Treasure" are
+  // common and would otherwise share an anchor.
+  for (const [index, heading] of [...root.querySelectorAll("h1, h2, h3, h4, h5, h6")].entries()) {
+    const text = heading.textContent.trim();
+    if (!heading.id) heading.id = `${prefix}h${index + 1}-${slug(text, "heading")}`;
+    headings?.push({ level: Number(heading.tagName[1]), text, id: heading.id });
+  }
 
   // Anything that only does something in Foundry: reveal buttons, copy buttons,
   // the controls core prints inside collapsible sections.
@@ -283,6 +292,57 @@ ${parts.join("\n")}
 </ol>
 </nav>
 </aside>`;
+}
+
+/**
+ * A contents page, for a document that has to stand on its own.
+ *
+ * The contents panel is navigation, and navigation does not print — so a single
+ * document opens with a list instead. Two decisions make it worth having:
+ *
+ * Each entry is written as *the same heading tag as the thing it points at*, so
+ * the style paints it without a single rule of its own: a page title styled as a
+ * heading 1 is listed as a heading 1, and a section inside it as whatever it is.
+ * The list therefore looks like the document it precedes, and its tiers are the
+ * document's own tiers rather than an invented set.
+ *
+ * And every entry is a link. A browser printing to PDF turns a link to an
+ * anchor into a real PDF link, so the contents page works on paper as well as
+ * on screen — which is most of what bookmarks would have been for.
+ */
+function contentsMarkup(plan, { depth = 3 } = {}) {
+  const entries = [];
+  for (const journal of plan.journals) {
+    if (plan.journals.length > 1) {
+      entries.push({ level: 1, text: journal.entry.name, id: `journal-${journal.entry.id}` });
+    }
+    for (const { page, found } of journal.headings ?? []) {
+      entries.push({
+        level: page.title?.level ?? 1,
+        text: page.name,
+        id: `page-${page.id}`,
+        page: true
+      });
+      for (const heading of found) {
+        if (heading.level > depth) continue;
+        entries.push({ ...heading, level: Math.min(6, heading.level + 1) });
+      }
+    }
+  }
+  if (entries.length < 2) return "";
+
+  const lines = entries.map(({ level, text, id }) =>
+    `<h${level} class="illuminus-contents__entry" data-depth="${level}">`
+    + `<a href="#${esc(id)}">${esc(text)}</a></h${level}>`).join("\n");
+
+  return `<article class="journal-entry-page text illuminus-contents">
+<header class="journal-page-header"><h1>${esc(game.i18n.localize("ILLUMINUS.Export.Contents"))}</h1></header>
+<section class="journal-page-content">
+<nav class="illuminus-contents__list">
+${lines}
+</nav>
+</section>
+</article>`;
 }
 
 /**
@@ -592,7 +652,11 @@ export async function buildHtmlExport({
       const local = new Map([...pageLinks].map(([uuid, href]) => [
         uuid, href.startsWith(journal.file) ? href.slice(journal.file.length) : href
       ]));
-      rendered.push(pageMarkup(page, await rewriteContent(enriched, { pageLinks: local, assets, report })));
+      const found = [];
+      rendered.push(pageMarkup(page, await rewriteContent(enriched, {
+        pageLinks: local, assets, report, headings: found, prefix: `${page.id}-`
+      })));
+      journal.headings = (journal.headings ?? []).concat({ page, found });
       report.pages += 1;
     }
 
@@ -615,11 +679,14 @@ export async function buildHtmlExport({
     const sidebar = sidebarMarkup(plan, null);
     // Each journal keeps its own name above its pages, which is the only thing
     // the contents panel was saying that the page itself was not.
-    const body = plan.journals.map((journal) => (plan.journals.length > 1
-      ? `<article class="journal-entry-page text illuminus-export__journal">`
-        + `<header class="journal-page-header"><h1>${esc(journal.entry.name)}</h1></header></article>\n`
-        + journal.rendered.join("\n")
-      : journal.rendered.join("\n"))).join("\n");
+    const body = [
+      contentsMarkup(plan),
+      ...plan.journals.map((journal) => (plan.journals.length > 1
+        ? `<article class="journal-entry-page text illuminus-export__journal" id="journal-${esc(journal.entry.id)}">`
+          + `<header class="journal-page-header"><h1>${esc(journal.entry.name)}</h1></header></article>\n`
+          + journal.rendered.join("\n")
+        : journal.rendered.join("\n")))
+    ].filter(Boolean).join("\n");
 
     // Built twice: the stylesheet is chosen by what the markup contains, and
     // the markup then carries the stylesheet.

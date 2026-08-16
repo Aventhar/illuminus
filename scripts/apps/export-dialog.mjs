@@ -88,10 +88,12 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     context.carrying = whatTravels().join(" ");
     // One window, three ways out. A folder is the fullest, one page is the one
     // you can email, and printing is the one that becomes a PDF.
+    // The PDF leads, and is what the window offers unless told otherwise: it is
+    // the one most people are here for, and the only one that ends at a table.
     context.formats = [
-      { id: "folder", label: "ILLUMINUS.Export.FormatFolder", checked: true },
-      { id: "file", label: "ILLUMINUS.Export.FormatFile" },
-      { id: "print", label: "ILLUMINUS.Export.FormatPrint" }
+      { id: "print", label: "ILLUMINUS.Export.FormatPrint", checked: true },
+      { id: "folder", label: "ILLUMINUS.Export.FormatFolder" },
+      { id: "file", label: "ILLUMINUS.Export.FormatFile" }
     ];
     context.journals = game.journal.contents
       .filter((entry) => entry.testUserPermission(game.user, "OBSERVER"))
@@ -204,7 +206,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     // is made, so the notice belongs on all of them.
     if (!await confirmExportTerms({ carrying: whatTravels() })) return;
 
-    const format = data.format ?? "folder";
+    const format = data.format ?? "print";
     log.debug(`exporting ${entryIds.length} journal(s) as ${format}`);
     await exportJournalsAsHtml({
       styleId: data.styleId,

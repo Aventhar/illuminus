@@ -141,6 +141,29 @@ body {
   font-style: italic;
 }
 
+/* The contents page. Its entries are heading tags so that the style paints
+   them, which means the only thing left to say is how they are laid out: no
+   space above each line, stepped in by their own level, and not looking like
+   links, since every one of them is. */
+.illuminus-contents__entry {
+  margin-top: 0;
+}
+
+/* Written long enough to beat the link color, which is set on
+   `.journal-page-content a` and would otherwise paint a contents entry as a
+   link rather than as the heading it is standing in for. */
+.illuminus-export .journal-page-content .illuminus-contents__entry a {
+  color: inherit;
+  text-decoration: none;
+  background: none;
+}
+
+.illuminus-contents__entry[data-depth="2"] { margin-left: 1.5rem; }
+.illuminus-contents__entry[data-depth="3"] { margin-left: 3rem; }
+.illuminus-contents__entry[data-depth="4"] { margin-left: 4.5rem; }
+.illuminus-contents__entry[data-depth="5"] { margin-left: 6rem; }
+.illuminus-contents__entry[data-depth="6"] { margin-left: 7.5rem; }
+
 /* Pages sit one after another rather than one at a time. */
 .illuminus-export .journal-entry-page + .journal-entry-page {
   margin-top: 2rem;

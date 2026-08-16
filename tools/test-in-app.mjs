@@ -3348,7 +3348,27 @@ try {
 
   const { answer, printed } = await inCleanTab(`file://${file}`, `(() => {
     const surface = document.querySelector(".journal-entry-content");
+    // The contents page: every entry has to point at something that is really
+    // there, and to be written as the heading it stands in for — which is what
+    // makes the style paint it without a rule of its own.
+    const entries = [...document.querySelectorAll(".illuminus-contents__entry")];
+    const contents = entries.map(entry => {
+      const href = entry.querySelector("a")?.getAttribute("href") ?? "";
+      const target = href.startsWith("#") ? document.getElementById(href.slice(1)) : null;
+      return {
+        tag: entry.tagName,
+        text: entry.textContent.trim(),
+        found: Boolean(target),
+        // A page's entry should be written as that page's own title heading.
+        sameAsTarget: target
+          ? (target.tagName === entry.tagName
+            || target.querySelector(entry.tagName.toLowerCase()) !== null)
+          : false
+      };
+    });
     return JSON.stringify({
+      contents,
+      contentsIsFirst: document.querySelector(".journal-entry-page")?.classList.contains("illuminus-contents"),
       pages: document.querySelectorAll(".journal-entry-page").length,
       surface: getComputedStyle(surface).backgroundColor,
       pictures: [...document.images].filter(img => img.complete && img.naturalWidth > 0).length,
@@ -3395,6 +3415,19 @@ try {
     `asking for it puts the surface back (${inked.fill}, picture ${inked.texture})`);
   check(inked.sheetHigh >= inked.sheet - 1,
     `filling the sheet rather than stopping where the words do (${inked.sheetHigh}px of ${inked.sheet}px)`);
+
+  // The contents page, which is what a printed document has instead of the
+  // panel — and what it has instead of bookmarks, which a browser's print
+  // dialog cannot be asked for.
+  check(one.contentsIsFirst && one.contents.length >= 4,
+    `a single document opens with a contents page (${one.contents.length} entries)`);
+  check(one.contents.every((entry) => entry.found),
+    `whose every entry points at something really there (${one.contents.filter((e) => !e.found).map((e) => e.text).join(", ") || "all found"})`);
+  check(one.contents.some((entry) => entry.tag === "H1") && one.contents.some((entry) => entry.tag !== "H1"),
+    `tiered by the document's own headings (${[...new Set(one.contents.map((e) => e.tag))].join(", ")})`);
+  const linked = (pdf.toString("latin1").match(/\/Subtype\s*\/Link/g) ?? []).length;
+  check(linked >= one.contents.length - 1,
+    `and its entries are still links once printed (${linked} links in the PDF)`);
 } finally {
   fs.rmSync(printDir, { recursive: true, force: true });
   await cdp.evaluate(`(async () => {

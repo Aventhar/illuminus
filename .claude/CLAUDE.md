@@ -322,6 +322,16 @@ only get a worse answer.
 - **A `data:` URI must not be made relative.** Stylesheet paths get `../` because the
   sheet lives in `styles/`; prefixing a data URI breaks the picture instead. The texture
   vanished from every printed page until a check compared what the document points at.
+- **A printed document opens with a contents page**, because the panel is navigation and
+  navigation does not print. Each entry is written as *the same heading tag as its
+  target*, so the style paints it with no rule of its own and the tiers are the
+  document's own. Every entry is a link, and a browser turns a link to an anchor into a
+  real PDF link — which is most of what bookmarks would have been for. Bookmarks proper
+  are out of reach: Chrome only writes an outline when `printToPDF` is asked with
+  `generateDocumentOutline`, and its print dialog does not offer that.
+- **A contents entry needs a long selector.** `.journal-page-content a` sets the link
+  color and out-specifies anything shorter, which painted the entries as links rather
+  than as the headings they stand in for.
 - **`Page.printToPDF` over CDP proves printability** — same engine, same print
   stylesheet a person's Save as PDF uses. The check asserts the bytes start `%PDF-` and
   counts sheets, which is how the page-break rule is covered.

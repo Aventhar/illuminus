@@ -111,16 +111,18 @@ it to whichever journals should wear it, and export it to carry into another wor
   template looks like a Pathfinder hazard under one style and a starship manifest under
   another. They import and export as JSON like styles do, and an imported one is parsed
   through Foundry's own editor rules, so it can carry no more than a person could type.
-- **Export as web pages.** Save journals as a folder of ordinary web pages that
-  open in any browser, with no Foundry and no Illuminus needed — a handout to hand a
-  player, or an adventure to put on a website. Export them wearing an Illuminus style,
-  or exactly as they look in Foundry now, which carries whatever is painting them —
-  a game system's look included. Three ways to save it: a folder of pages for a
-  website, one self-contained file to email a player, or straight to the print
-  dialog, where any browser will save it as a PDF. The export carries its own stylesheet,
-  the pictures and fonts it uses, and a contents panel to move between pages, and it
-  looks like the journal did, down to the window frame. Hidden passages stay out unless
-  you ask for them, and links to things that did not come along — an actor, an item —
+- **Export as a PDF, or as web pages.** Save journals with no Foundry and no Illuminus
+  needed — a handout for a player, a printout for the table, or an adventure to put on a
+  website. Export them wearing an Illuminus style, or exactly as they look in Foundry
+  now, which carries whatever is painting them, a game system's look included. Three
+  ways to save it: straight to the print dialog, where any browser will save a PDF; a
+  folder of pages for a website; or one self-contained file to email. The export carries
+  its own stylesheet, the pictures and fonts it uses, and a contents panel to move
+  between pages, and it looks like the journal did, down to the window frame. A PDF or a
+  single file opens with a contents page, tiered by the document's own headings and
+  styled like them, every line of it still a working link once printed. Hidden passages
+  stay out unless you ask for them, the page's own background is left off a printout
+  unless you want it, and links to things that did not come along — an actor, an item —
   become plain text rather than links that go nowhere.
 - **Portable.** Export all or selected styles to a JSON file and import them elsewhere.
 - **One style included:** Aged Parchment, seeded the first time the module runs in a
