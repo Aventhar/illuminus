@@ -780,8 +780,32 @@ export async function buildHtmlExport({
  * If printing cannot be started at all, the file is saved instead, so the work
  * is never lost to a failed dialog.
  */
-function printDocument(built) {
+function printDocument(built, target) {
   const url = URL.createObjectURL(built.blob);
+
+  // A window of its own, when one could be had. The document being printed is
+  // then the top-level one, which is what makes a browser name the file after
+  // it and keep the contents page's links working in the PDF.
+  if (target && !target.closed) {
+    target.location.replace(url);
+    const start = () => {
+      const view = target;
+      (view.document.fonts?.ready ?? Promise.resolve()).then(() => view.print(), () => view.print());
+    };
+    // `replace` on a window that has already written a page does not always
+    // fire load again, so the arrival is watched for rather than waited on.
+    let waited = 0;
+    const ready = setInterval(() => {
+      waited += 100;
+      const arrived = target.closed || target.document?.querySelector(".illuminus-export");
+      if (!arrived && waited < 20000) return;
+      clearInterval(ready);
+      if (!target.closed) start();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }, 100);
+    return;
+  }
+
   const frame = document.createElement("iframe");
   frame.className = "illuminus-print-frame";
   frame.setAttribute("aria-hidden", "true");
@@ -790,12 +814,19 @@ function printDocument(built) {
   const done = () => {
     frame.remove();
     URL.revokeObjectURL(url);
+    document.title = ownTitle;
   };
+
+  // Printing a frame names the job after *this* document rather than the one
+  // being printed, which leaves a reader with Foundry's title where the
+  // journal's name should be. Lent for the duration and given back after.
+  const ownTitle = document.title;
 
   frame.addEventListener("load", () => {
     const view = frame.contentWindow;
     const print = () => {
       try {
+        document.title = view.document.title || ownTitle;
         view.focus();
         view.print();
       } catch (error) {
@@ -831,7 +862,7 @@ export async function exportJournalsAsHtml(options) {
   // warning reads as something having gone wrong.
   if (options.format === "print") {
     ui.notifications.info(game.i18n.localize("ILLUMINUS.Export.Printing"));
-    printDocument(built);
+    printDocument(built, options.target);
   }
   else saveFile(built.blob, built.filename);
   ui.notifications.info(game.i18n.format("ILLUMINUS.Export.Done", {

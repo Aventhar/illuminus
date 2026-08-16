@@ -1537,8 +1537,11 @@ const inCleanTab = async (url, expression, { pdf = false, printMedia = false } =
           clearTimeout(timer);
           resolve(message.result?.data ?? "");
         };
+        // Printed as a person's dialog would: "background graphics" is off by
+        // default there, which is why the document has to say its colors are
+        // content rather than decoration.
         socket.send(JSON.stringify({
-          id: 2, method: "Page.printToPDF", params: { printBackground: true, preferCSSPageSize: false }
+          id: 2, method: "Page.printToPDF", params: { printBackground: false, preferCSSPageSize: false }
         }));
       });
     }
@@ -3457,7 +3460,15 @@ try {
       sheetHigh: parseInt(getComputedStyle(surface).minHeight, 10) || 0,
       sheet: innerHeight,
       texture: getComputedStyle(surface, "::before").display,
-      fill: getComputedStyle(surface).backgroundColor
+      fill: getComputedStyle(surface).backgroundColor,
+      // A margin the reader sees, put on each page so it repeats on every
+      // sheet — the page's own inner spacing is set once around the whole
+      // journal, and the second sheet would start against the paper's edge.
+      pageInset: parseInt(getComputedStyle(document.querySelector(".journal-entry-page")).paddingTop, 10) || 0,
+      // Said out loud, or a browser prints an outline of the document: its
+      // dialog leaves background graphics off unless told otherwise.
+      inks: getComputedStyle(surface).printColorAdjust
+        ?? getComputedStyle(surface).webkitPrintColorAdjust
     });
   })()`, { pdf: true, printMedia: true });
 
@@ -3497,16 +3508,21 @@ try {
   // The contents page, which is what a printed document has instead of the
   // panel — and what it has instead of bookmarks, which a browser's print
   // dialog cannot be asked for.
+  check(one.pageInset >= 30,
+    `each printed page keeps a margin of its own (${one.pageInset}px)`);
+  check(one.inks === "exact",
+    `and asks to be printed in colour rather than as an outline (${one.inks})`);
   check(one.contentsIsFirst && one.contents.length >= 4,
     `a single document opens with a contents page (${one.contents.length} entries)`);
   check(one.contents.every((entry) => entry.found),
     `whose every entry points at something really there (${one.contents.filter((e) => !e.found).map((e) => e.text).join(", ") || "all found"})`);
   check(one.contents.some((entry) => entry.tag === "H1") && one.contents.some((entry) => entry.tag !== "H1"),
     `tiered by the document's own headings (${[...new Set(one.contents.map((e) => e.tag))].join(", ")})`);
-  // Printing needs no window of its own. This is the part a pop-up blocker
-  // broke, and the frame is the whole of the fix, so it is worth asserting
-  // rather than trusting: no window is opened, and what is printed is a
-  // document of our own making.
+  // Printing with no window to print into. The export window opens one on the
+  // click that asks for it, because a browser names the file after the
+  // top-level document and keeps a printed document's links — but when a
+  // browser refuses one, printing still has to happen, and it happens in a
+  // frame without asking permission for anything.
   const printing = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     const old = game.journal.getName("Illuminus Print Frame");
@@ -3538,11 +3554,19 @@ try {
   })()`);
   const pt = JSON.parse(printing);
   check(pt.framed && pt.ownDocument && pt.opened === 0,
-    `printing needs no window of its own (${JSON.stringify(pt)})`);
+    `with no window to print into, it prints a frame instead (${JSON.stringify(pt)})`);
 
-  const linked = (pdf.toString("latin1").match(/\/Subtype\s*\/Link/g) ?? []).length;
+  // Links in a PDF are named destinations, and a name nothing defines is a
+  // link that does nothing when clicked — which is how they behaved when the
+  // printing was done from a frame rather than from a window of its own.
+  const bytes = pdf.toString("latin1");
+  const linked = (bytes.match(/\/Subtype\s*\/Link/g) ?? []).length;
+  const wanted = [...new Set([...bytes.matchAll(/\/Dest\s*\/([A-Za-z0-9_.-]+)/g)].map((m) => m[1]))];
+  const defined = wanted.filter((name) => new RegExp(`/${name}\\s*\\[`).test(bytes));
   check(linked >= one.contents.length - 1,
     `and its entries are still links once printed (${linked} links in the PDF)`);
+  check(wanted.length > 0 && defined.length === wanted.length,
+    `pointing at places the document really defines (${defined.length}/${wanted.length})`);
 } finally {
   fs.rmSync(printDir, { recursive: true, force: true });
   await cdp.evaluate(`(async () => {

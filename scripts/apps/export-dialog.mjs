@@ -5,6 +5,25 @@ import { confirmExportTerms, showExportTerms, whatTravels } from "../export-term
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
+/**
+ * A window to print into, opened while the click that asked for it is still
+ * fresh, and given something to say while the pages are made.
+ *
+ * Returns null when the browser refuses, which is not a failure: the export
+ * falls back to printing a frame instead.
+ */
+function openWaitingWindow() {
+  const view = window.open("", "_blank");
+  if (!view) return null;
+  view.document.write(`<!doctype html><meta charset="utf-8">`
+    + `<title>${foundry.utils.escapeHTML(game.i18n.localize("ILLUMINUS.Export.Title"))}</title>`
+    + `<style>body{font-family:system-ui,sans-serif;background:#16130f;color:#e8e0d0;`
+    + `display:grid;place-items:center;height:100vh;margin:0}</style>`
+    + `<p>${foundry.utils.escapeHTML(game.i18n.localize("ILLUMINUS.Export.Printing"))}</p>`);
+  view.document.close();
+  return view;
+}
+
 /** "1 page" rather than "1 pages": Foundry's formatter does not decline. */
 function pageCount(count) {
   return game.i18n.format(count === 1 ? "ILLUMINUS.Export.PageCountOne" : "ILLUMINUS.Export.PageCount", { count });
@@ -201,19 +220,32 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PickOne"));
       return;
     }
-    // Shown before anything is built, and before anything is written: an
-    // export copies a publisher's words and a system's styling whichever way it
-    // is made, so the notice belongs on all of them.
-    if (!await confirmExportTerms({ carrying: whatTravels() })) return;
-
     const format = data.format ?? "print";
+
+    // Opened here, on the click itself, and only then: a browser allows a new
+    // window while it can still see the gesture that asked for it, and by the
+    // time the pages are built — seconds later, with a notice in between — it
+    // no longer can. The window waits, empty, while the work is done.
+    //
+    // It matters beyond the blocking. A browser names a print job after the
+    // top-level document and keeps a printed document's internal links, so
+    // printing a page in its own window is what gives the reader a sensible
+    // filename and a contents page that still works on paper.
+    const target = format === "print" ? openWaitingWindow() : null;
+
+    if (!await confirmExportTerms({ carrying: whatTravels() })) {
+      target?.close();
+      return;
+    }
+
     log.debug(`exporting ${entryIds.length} journal(s) as ${format}`);
     await exportJournalsAsHtml({
       styleId: data.styleId,
       entryIds,
       secrets: Boolean(data.secrets),
       pageBackground: Boolean(data.pageBackground),
-      format
+      format,
+      target
     });
   }
 }

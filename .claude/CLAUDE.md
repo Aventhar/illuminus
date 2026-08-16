@@ -348,10 +348,26 @@ only get a worse answer.
   `:target` instead, with the picture's own container becoming the overlay so nothing is
   duplicated; a second copy of an embedded picture would double the file. The link is
   `display: contents`, so it has no box: hit tests must aim at the picture.
-- **Printing is done in a frame, not a new window.** The export takes seconds to build
-  and asks a question first, so the click that asked for it is long over by the time
-  there is anything to show — a pop-up blocker refuses, and Foundry's desktop app refuses
-  regardless. A frame needs no permission and gives the same print preview.
+- **Printing happens in a window opened on the click itself**, before the notice and
+  before the build — a browser allows one while it can still see the gesture, and seconds
+  later it cannot. Two things depend on printing a *top-level* document rather than a
+  frame: the file is named after the document being printed (a frame gets Foundry's title
+  instead), and the contents page's links survive. A frame is the fallback when a window
+  is refused, and it lends `document.title` for the duration so the filename is still
+  right.
+- **A browser's print dialog leaves "background graphics" off.** That drops every fill in
+  the document — not the page's surface only, but the bar behind each heading and the
+  panel behind each read-aloud box, leaving an outline of a document. `print-color-adjust:
+  exact` is how a page says its colors are content. The checks print with
+  `printBackground: false` for exactly this reason; passing `true` hides the bug.
+- **A margin has to be on each page, not on the sheet.** `@page { margin: 0 }` lets the
+  page surface bleed to the paper's edge, but the page's own inner spacing is set once
+  around the whole journal — so the second sheet and every sheet after it started hard
+  against the edge. The margin sits on `.journal-entry-page`, which repeats wherever a
+  break falls.
+- **A PDF's internal links are named destinations**, and a name nothing defines is a link
+  that does nothing. Counting `/Subtype /Link` is not enough; the check resolves every
+  `/Dest` against the `/Dests` dictionary.
 - **Do not judge a PDF by macOS's thumbnailer.** `qlmanage` rendered a heavy text-shadow
   as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
   in a browser before believing a rendering bug.

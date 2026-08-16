@@ -118,7 +118,7 @@ Object.assign(out, {
   "ILLUMINUS.Export.FormatLegend": "How to Save It",
   "ILLUMINUS.Export.FormatFolder": "Website directory structure",
   "ILLUMINUS.Export.FormatFile": "Single file website",
-  "ILLUMINUS.Export.FormatPrint": "PDF file, or send to printer",
+  "ILLUMINUS.Export.FormatPrint": "Print to printer or PDF",
   "ILLUMINUS.Export.ManyTitle": "{count} Journals",
   "ILLUMINUS.Export.PopupBlocked": "Your browser would not start printing, so the page has been saved instead. Open it and print from there.",
   "ILLUMINUS.Export.Printing": "Preparing the printable pages\u2026 your browser\u2019s print window will open.",
