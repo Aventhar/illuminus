@@ -2,6 +2,7 @@ import { MODULE_ID, STYLE_ATTR, log } from "./constants.mjs";
 import { GROUPS } from "./style-schema.mjs";
 import { getStyle } from "./style-store.mjs";
 import { listTemplates, createTemplate } from "./template-store.mjs";
+import { promptDetails } from "./apps/details-dialog.mjs";
 
 /**
  * An Illuminus menu in the journal text editor.
@@ -247,21 +248,15 @@ function saveSelectionAsTemplate() {
   };
 }
 
-/** Ask what to call a captured template, then store it. */
+/** Ask what to call a captured template, and what it is for, then store it. */
 async function promptForTemplateName(markup) {
-  const { DialogV2 } = foundry.applications.api;
-  const name = await DialogV2.prompt({
-    window: { title: game.i18n.localize("ILLUMINUS.Templates.SaveTitle") },
-    content: `<p>${game.i18n.localize("ILLUMINUS.Templates.SaveBody")}</p>`
-      + `<input type="text" name="name" autofocus placeholder="${game.i18n.localize("ILLUMINUS.Templates.NamePlaceholder")}">`,
-    ok: {
-      label: "ILLUMINUS.Buttons.Save",
-      callback: (_event, button) => button.form.elements.name.value
-    },
-    rejectClose: false
+  const details = await promptDetails({
+    title: game.i18n.localize("ILLUMINUS.Templates.SaveTitle"),
+    body: game.i18n.localize("ILLUMINUS.Templates.SaveBody"),
+    placeholder: game.i18n.localize("ILLUMINUS.Templates.NamePlaceholder")
   });
-  if (!name) return;
-  const template = await createTemplate({ name, markup });
+  if (!details) return;
+  const template = await createTemplate({ ...details, markup });
   if (template) {
     ui.notifications.info(game.i18n.format("ILLUMINUS.Templates.Saved", { name: template.name }));
   }

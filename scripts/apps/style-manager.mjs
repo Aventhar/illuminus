@@ -5,6 +5,7 @@ import {
 import { exportStyles, promptImport } from "../io.mjs";
 import { IlluminusStyleEditor } from "./style-editor.mjs";
 import { IlluminusExportDialog } from "./export-dialog.mjs";
+import { promptDetails } from "./details-dialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -97,27 +98,13 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
     const style = listStyles().find((s) => s.id === id);
     if (!style) return;
 
-    const content = `
-      <div class="form-group">
-        <label>${game.i18n.localize("ILLUMINUS.Manager.NameLabel")}</label>
-        <input type="text" name="name" value="${foundry.utils.escapeHTML(style.name)}" autofocus>
-      </div>
-      <div class="form-group">
-        <label>${game.i18n.localize("ILLUMINUS.Manager.DescriptionLabel")}</label>
-        <textarea name="description" rows="3">${foundry.utils.escapeHTML(style.description ?? "")}</textarea>
-      </div>`;
-
-    const result = await DialogV2.prompt({
-      window: { title: "ILLUMINUS.Manager.RenameTitle" },
-      content,
-      ok: {
-        label: "ILLUMINUS.Buttons.Save",
-        callback: (_event, button) => new foundry.applications.ux.FormDataExtended(button.form).object
-      },
-      rejectClose: false
+    const details = await promptDetails({
+      title: game.i18n.localize("ILLUMINUS.Manager.RenameTitle"),
+      name: style.name,
+      description: style.description ?? ""
     });
-    if (!result) return;
-    await updateStyle(id, { name: String(result.name).trim() || style.name, description: String(result.description) });
+    if (!details) return;
+    await updateStyle(id, details);
     this.render();
   }
 

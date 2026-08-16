@@ -1446,6 +1446,42 @@ const EDIT_SHEET = `[...foundry.applications.instances.values()].filter(
     && a.element?.parentElement === document.body).pop()`;
 
 /**
+ * Open a file in a tab of its own and ask it a question.
+ *
+ * The whole promise of the export is that it works away from Foundry, so it is
+ * checked away from Foundry: a second tab, a second socket, and no module
+ * loaded anywhere near it. Anything read here was read from a plain web page.
+ */
+const inCleanTab = async (url, expression) => {
+  const { targetId } = await cdp.send("Target.createTarget", { url });
+  try {
+    // The page has to have laid out before anything is worth measuring.
+    await new Promise((r) => setTimeout(r, 2000));
+    const tabs = await (await fetch("http://127.0.0.1:9222/json")).json();
+    const socket = new WebSocket(tabs.find((t) => t.id === targetId).webSocketDebuggerUrl);
+    await new Promise((res, rej) => { socket.onopen = res; socket.onerror = rej; });
+    const answer = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`the exported page never answered: ${url}`)), 30000);
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.id !== 1) return;
+        clearTimeout(timer);
+        if (message.result?.exceptionDetails) {
+          reject(new Error(message.result.exceptionDetails.exception?.description ?? "page threw"));
+        } else resolve(message.result?.result?.value);
+      };
+      socket.send(JSON.stringify({
+        id: 1, method: "Runtime.evaluate", params: { returnByValue: true, expression }
+      }));
+    });
+    socket.close();
+    return answer;
+  } finally {
+    await cdp.send("Target.closeTarget", { targetId });
+  }
+};
+
+/**
  * Count menu-bar rebuilds, so a click can wait for one to be over. Every state
  * change replaces the whole bar, and a press and release either side of a
  * replacement is not a click — the button that was pressed no longer exists.
@@ -3053,32 +3089,19 @@ try {
     "a picture page travels as a picture, file and caption together");
 
   // Now render it where Foundry has never been.
-  const { targetId } = await cdp.send("Target.createTarget", { url: `file://${site}/index.html` });
-  await new Promise((r) => setTimeout(r, 2000));
-  const tabs = await (await fetch(`http://127.0.0.1:9222/json`)).json();
-  const socket = new WebSocket(tabs.find((t) => t.id === targetId).webSocketDebuggerUrl);
-  await new Promise((res, rej) => { socket.onopen = res; socket.onerror = rej; });
-  const away = await new Promise((resolve) => {
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.id === 1) resolve(message.result?.result?.value);
-    };
-    socket.send(JSON.stringify({ id: 1, method: "Runtime.evaluate", params: { returnByValue: true, expression: `(() => {
-      const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
-      return JSON.stringify({
-        surface: read(".journal-entry-content", "backgroundColor"),
-        body: read(".journal-page-content p", "color"),
-        quote: read(".journal-page-content blockquote", "backgroundColor"),
-        header: read(".journal-page-content th", "backgroundColor"),
-        face: read(".journal-page-content p", "fontFamily"),
-        size: read(".journal-page-content p", "fontSize"),
-        sidebar: Boolean(document.querySelector(".journal-sidebar .toc li.page")),
-        panel: document.querySelector(".journal-sidebar").getBoundingClientRect().width
-      });
-    })()` } }));
-  });
-  socket.close();
-  await cdp.send("Target.closeTarget", { targetId });
+  const away = await inCleanTab(`file://${site}/index.html`, `(() => {
+    const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
+    return JSON.stringify({
+      surface: read(".journal-entry-content", "backgroundColor"),
+      body: read(".journal-page-content p", "color"),
+      quote: read(".journal-page-content blockquote", "backgroundColor"),
+      header: read(".journal-page-content th", "backgroundColor"),
+      face: read(".journal-page-content p", "fontFamily"),
+      size: read(".journal-page-content p", "fontSize"),
+      sidebar: Boolean(document.querySelector(".journal-sidebar .toc li.page")),
+      panel: document.querySelector(".journal-sidebar").getBoundingClientRect().width
+    });
+  })()`);
 
   const there = JSON.parse(away);
   const compared = ["surface", "body", "quote", "header", "face", "size"];
@@ -3099,10 +3122,99 @@ try {
   })()`);
 }
 
+// The other half of the export: a journal with no Illuminus style at all still
+// looks like itself, because the CSS painting it is gathered from the page
+// rather than compiled from a style. This is what carries a game system's look.
+console.log("\n[46] A journal exports as it looks in Foundry");
+const plainDir = fs.mkdtempSync(path.join(os.tmpdir(), "illuminus-plain-"));
+try {
+  const built = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const old = game.journal.getName("Illuminus Plain Export");
+    if (old) await old.delete();
+    const entry = await JournalEntry.create({name: "Illuminus Plain Export"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "The Stair", type: "text",
+      text: {content: "<h1>Down</h1><p>Body text.</p>"
+        + "<ul><li>An item</li></ul>"
+        + "<table><thead><tr><th>Attack</th></tr></thead><tbody><tr><td>Slam</td></tr></tbody></table>", format: 1}
+    }]);
+    // Deliberately no style: this is the "as it looks now" case.
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1500));
+
+    const root = entry.sheet.element;
+    const read = (sel, prop) => getComputedStyle(root.querySelector(sel))[prop];
+    const live = {
+      surface: read(".journal-entry-content", "backgroundColor"),
+      body: read(".journal-page-content p", "color"),
+      face: read(".journal-page-content p", "fontFamily"),
+      size: read(".journal-page-content p", "fontSize"),
+      heading: read(".journal-page-content h1", "color"),
+      header: read(".journal-page-content th", "backgroundColor")
+    };
+
+    const out = await api.buildJournalExport({styleId: "", entryIds: [entry.id]});
+    const bytes = new Uint8Array(await out.blob.arrayBuffer());
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    await entry.sheet.close({force: true});
+    await entry.delete();
+    return JSON.stringify({live, report: out.report, base64: btoa(binary)});
+  })()`);
+
+  const px = JSON.parse(built);
+  fs.writeFileSync(path.join(plainDir, "export.zip"), Buffer.from(px.base64, "base64"));
+  execFileSync("unzip", ["-q", "-o", "export.zip", "-d", "site"], { cwd: plainDir });
+  const site = path.join(plainDir, "site");
+
+  const there = JSON.parse(await inCleanTab(`file://${site}/index.html`, `(() => {
+    const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
+    const panel = document.querySelector(".journal-sidebar").getBoundingClientRect();
+    const content = document.querySelector(".journal-entry-content").getBoundingClientRect();
+    return JSON.stringify({
+      surface: read(".journal-entry-content", "backgroundColor"),
+      body: read(".journal-page-content p", "color"),
+      face: read(".journal-page-content p", "fontFamily"),
+      size: read(".journal-page-content p", "fontSize"),
+      heading: read(".journal-page-content h1", "color"),
+      header: read(".journal-page-content th", "backgroundColor"),
+      // Beside the page, not stacked above it: Foundry's own rules lay a
+      // window out in a column, and an export is not a window.
+      besideThePage: panel.right <= content.left + 1 && panel.width > 40,
+      // Core hides these unless the sheet says its panel is open, so an export
+      // that mirrors the markup but not the state lists numbers and nothing else.
+      panelTitles: [...document.querySelectorAll(".journal-sidebar .page-title")]
+        .filter(title => title.getBoundingClientRect().width > 0).map(title => title.textContent)
+    });
+  })()`));
+
+  const keys = ["surface", "body", "face", "size", "heading", "header"];
+  const same = keys.filter((key) => there[key] === px.live[key]);
+  check(same.length === keys.length,
+    `an unstyled journal exports as it looks (${same.length}/${keys.length} matched`
+    + `${same.length === keys.length ? "" : `; ${keys.filter((k) => !same.includes(k))
+      .map((k) => `${k}: ${there[k]} vs ${px.live[k]}`).join(", ")}`})`);
+  check(there.besideThePage, "and the contents panel sits beside the page rather than above it");
+  check(there.panelTitles.includes("The Stair"),
+    `its entries are readable, not bare numbers (${there.panelTitles.join(", ") || "none"})`);
+  // Kept rules, not copied stylesheets: the whole of Foundry's CSS is tens of
+  // thousands of rules, and an export that carried them all would say so here.
+  check(px.report.rules > 20 && px.report.rules < 2000,
+    `it carries the rules that apply and no more (${px.report.rules} rules from ${px.report.sources.join(", ")})`);
+  check(px.report.sources.length > 0, `and says where they came from (${px.report.sources.join(", ")})`);
+} finally {
+  fs.rmSync(plainDir, { recursive: true, force: true });
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Illuminus Plain Export");
+    if (entry) { await entry.sheet?.close({force: true}); await entry.delete(); }
+  })()`);
+}
+
 // The two libraries are the same window with different contents, and should
 // feel like it: the same size, the same names, and the same answer to ticking a
 // box — which the style library used to get wrong by re-rendering itself.
-console.log("\n[46] The two libraries work alike");
+console.log("\n[47] The two libraries work alike");
 try {
   const alike = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3147,6 +3259,20 @@ try {
     out.styleTick = await survives(styles);
     out.templateTick = await survives(templates);
 
+    // Naming something of your own asks the same two questions in both: the
+    // samples arrive with a line saying what they are for, and a library of
+    // home-made ones is unreadable without them.
+    out.details = [];
+    for (const app of [styles, templates]) {
+      app.element.querySelector('[data-action="rename"]').click();
+      await new Promise(r => setTimeout(r, 700));
+      const prompt = [...foundry.applications.instances.values()]
+        .filter(a => a.constructor.name === "DialogV2").pop();
+      out.details.push([...(prompt?.element.querySelectorAll("[name]") ?? [])].map(field => field.name));
+      await prompt?.close({force: true});
+      await new Promise(r => setTimeout(r, 300));
+    }
+
     // Delete is the one button that should look dangerous, in both windows.
     // Read as a color rather than as a class name: the class only matters if
     // something paints it.
@@ -3178,6 +3304,8 @@ try {
     `ticking a box in either leaves the list alone (styles ${al.styleTick.connected}, templates ${al.templateTick.connected})`);
   check(al.warnings?.every((n) => n === 1),
     `and exporting nothing says so in both (${(al.warnings ?? []).join(", ")} warnings)`);
+  check(al.details?.every((set) => set.includes("name") && set.includes("description")),
+    `both libraries name and describe the same way (${(al.details ?? []).map((d) => d.join("+")).join(" / ")})`);
   const reddish = (color) => {
     const [r, g, b] = (color.match(/\d+/g) ?? []).map(Number);
     return r > 120 && r > g * 1.5 && r > b * 1.5;
@@ -3194,7 +3322,7 @@ try {
 
 // The export window has to be honest about what it will export: the list is
 // filtered by the style, and what is hidden is not quietly exported anyway.
-console.log("\n[47] The export window shows what it will export");
+console.log("\n[48] The export window shows what it will export");
 try {
   const dialog = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3281,7 +3409,91 @@ try {
   })()`);
 }
 
-console.log("\n[48] Console is clean");
+// The notice is a gate, so it is checked as one: it appears, it defaults to not
+// going ahead, it stays dismissed once dismissed, and it can be read again.
+console.log("\n[49] The personal-use notice");
+try {
+  const notice = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    await api.setSetting("exportTermsSeen", false);
+    const dialogs = () => [...foundry.applications.instances.values()]
+      .filter(app => app.constructor.name === "DialogV2");
+
+    const old = game.journal.getName("Illuminus Notice Journal");
+    if (old) await old.delete();
+    const entry = await JournalEntry.create({name: "Illuminus Notice Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<p>x</p>", format: 1}
+    }]);
+
+    api.openExport({entryIds: [entry.id]});
+    for (let i = 0; i < 100 && !foundry.applications.instances.get("illuminus-export-dialog")?.element; i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    const dialog = foundry.applications.instances.get("illuminus-export-dialog");
+    await new Promise(r => setTimeout(r, 600));
+
+    const out = {};
+    // Read on demand, whether or not it has ever been shown.
+    dialog.element.querySelector('[data-action="terms"]').click();
+    await new Promise(r => setTimeout(r, 700));
+    let shown = dialogs().pop();
+    out.onDemand = Boolean(shown?.element.querySelector(".illuminus-terms"));
+    out.iconColor = shown ? getComputedStyle(shown.element.querySelector(".illuminus-terms h3 i")).color : "";
+    await shown?.close({force: true});
+    await new Promise(r => setTimeout(r, 400));
+
+    // And before an export: tick a journal, press Export, and it stands in the way.
+    const box = [...dialog.element.querySelectorAll('input[name="entryIds"]')]
+      .find(input => input.value === entry.id);
+    dialog.element.querySelector('input[name="onlyStyled"]').checked = false;
+    dialog.element.querySelector('input[name="onlyStyled"]').dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 200));
+    box.checked = true;
+    dialog.element.querySelector('button[type="submit"]').click();
+    await new Promise(r => setTimeout(r, 900));
+    shown = dialogs().pop();
+    out.beforeExport = Boolean(shown?.element.querySelector(".illuminus-terms"));
+    // Going ahead should take a deliberate click, so the focused button is the
+    // one that does nothing.
+    out.defaultAction = shown?.element.querySelector("button[autofocus], .form-footer button")?.dataset.action ?? "";
+    out.offersDismiss = Boolean(shown?.element.querySelector('input[name="dismiss"]'));
+
+    // Accept, with "do not show again" ticked.
+    shown.element.querySelector('input[name="dismiss"]').checked = true;
+    shown.element.querySelector('button[data-action="accept"]').click();
+    await new Promise(r => setTimeout(r, 1200));
+    out.remembered = api.getSetting("exportTermsSeen");
+
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name === "DialogV2" || app.constructor.name.startsWith("Illuminus")) {
+        await app.close({force: true});
+      }
+    }
+    await entry.delete();
+    return JSON.stringify(out);
+  })()`);
+  const nt = JSON.parse(notice);
+  check(nt.beforeExport, "the notice stands in front of an export");
+  check(nt.defaultAction === "cancel",
+    `and the button with focus is the one that does not export (${nt.defaultAction || "none"})`);
+  check(nt.offersDismiss && nt.remembered === true,
+    `dismissing it is remembered (${nt.remembered})`);
+  check(nt.onDemand, "and it can be read again whenever somebody asks");
+  check(nt.iconColor === "rgb(255, 210, 31)", `its warning is yellow (${nt.iconColor})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name === "DialogV2" || app.constructor.name.startsWith("Illuminus")) {
+        await app.close({force: true});
+      }
+    }
+    const entry = game.journal.getName("Illuminus Notice Journal");
+    if (entry) await entry.delete();
+  })()`);
+}
+
+console.log("\n[50] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

@@ -1,6 +1,7 @@
 import { MODULE_ID, log } from "../constants.mjs";
 import { listStyles, getAssignedStyleId } from "../style-store.mjs";
 import { exportJournalsAsHtml } from "../export-html.mjs";
+import { confirmExportTerms, showExportTerms, whatTravels } from "../export-terms.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -33,7 +34,8 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     },
     actions: {
       pickAll: IlluminusExportDialog.#onPickAll,
-      pickNone: IlluminusExportDialog.#onPickNone
+      pickNone: IlluminusExportDialog.#onPickNone,
+      terms: IlluminusExportDialog.#onShowTerms
     }
   };
 
@@ -70,11 +72,18 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
   /** @override */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-    context.styles = listStyles().map((style) => ({
-      id: style.id,
-      name: style.name,
-      selected: style.id === this.#styleId
-    }));
+    // "As it looks now" comes first, because it is the one choice that needs no
+    // styles set up at all — a world that has never opened Illuminus can still
+    // export what is on the screen.
+    context.styles = [
+      { id: "", name: game.i18n.localize("ILLUMINUS.Export.OwnLook"), selected: !this.#styleId },
+      ...listStyles().map((style) => ({
+        id: style.id,
+        name: style.name,
+        selected: style.id === this.#styleId
+      }))
+    ];
+    context.carrying = whatTravels().join(" ");
     context.journals = game.journal.contents
       .filter((entry) => entry.testUserPermission(game.user, "OBSERVER"))
       .map((entry) => ({
@@ -133,9 +142,12 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       if (hide) row.querySelector('input[name="entryIds"]').checked = false;
       else showing += 1;
     }
-    // Saying "none of your journals use this style" beats an empty box.
+    // Saying "none of your journals use this style" beats an empty box — but
+    // only when there are journals to filter. A world with none of its own
+    // already says so, and two empty messages at once say neither.
+    const rows = this.element.querySelectorAll(".illuminus-export-dialog__row").length;
     const empty = this.element.querySelector(".illuminus-export-dialog__none");
-    if (empty) empty.classList.toggle("is-shown", showing === 0);
+    if (empty) empty.classList.toggle("is-shown", rows > 0 && showing === 0);
   }
 
   /** @override */
@@ -145,6 +157,11 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       this.element.querySelector(control)?.addEventListener("change", () => this.#applyFilter());
     }
     this.#applyFilter();
+  }
+
+  /** Read the notice again, whenever somebody wants to. */
+  static #onShowTerms() {
+    showExportTerms(whatTravels());
   }
 
   static async #onSubmit(_event, _form, formData) {
@@ -157,6 +174,11 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PickOne"));
       return;
     }
+    // Shown before anything is built, and before anything is written: an
+    // export copies a publisher's words and a system's styling whichever way it
+    // is made, so the notice belongs on all of them.
+    if (!await confirmExportTerms({ carrying: whatTravels() })) return;
+
     log.debug(`exporting ${entryIds.length} journal(s) as HTML`);
     await exportJournalsAsHtml({
       styleId: data.styleId,

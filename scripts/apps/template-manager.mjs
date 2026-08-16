@@ -3,6 +3,7 @@ import {
   listTemplates, updateTemplate, deleteTemplate, restoreTemplatePresets
 } from "../template-store.mjs";
 import { exportTemplates, promptTemplateImport } from "../io.mjs";
+import { promptDetails } from "./details-dialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -77,14 +78,13 @@ export class IlluminusTemplateManager extends HandlebarsApplicationMixin(Applica
     const id = target.dataset.id;
     const template = listTemplates().find((t) => t.id === id);
     if (!template) return;
-    const name = await DialogV2.prompt({
-      window: { title: game.i18n.localize("ILLUMINUS.Templates.SaveTitle") },
-      content: `<input type="text" name="name" autofocus value="${foundry.utils.escapeHTML(template.name)}">`,
-      ok: { label: "ILLUMINUS.Buttons.Save", callback: (_e, button) => button.form.elements.name.value },
-      rejectClose: false
+    const details = await promptDetails({
+      title: game.i18n.localize("ILLUMINUS.Manager.RenameTitle"),
+      name: template.name,
+      description: template.description ?? ""
     });
-    if (!name) return;
-    await updateTemplate(id, { name });
+    if (!details) return;
+    await updateTemplate(id, details);
     this.render();
   }
 

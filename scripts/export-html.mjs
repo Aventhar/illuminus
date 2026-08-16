@@ -1,8 +1,9 @@
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
 import { allFields } from "./style-schema.mjs";
 import { compileBaseRule, compileStyle } from "./style-compiler.mjs";
-import { getStyle } from "./style-store.mjs";
+import { getStyle, getAssignedStyleId } from "./style-store.mjs";
 import { makeZip, saveZip } from "./zip.mjs";
+import { collectAppliedCss, rootClasses, themeClasses } from "./export-css.mjs";
 
 /**
  * Export styled journals as a folder of web pages that owe nothing to Foundry
@@ -245,10 +246,14 @@ ${parts.join("\n")}
  * The outer element carries both the marker class and the `application` class,
  * because that is what the window styling attaches to — an export of a style
  * with a green window frame has a green frame.
+ *
+ * It also carries `expanded`, which is a *state* rather than a structure: core
+ * hides the page titles in the contents panel unless the sheet says its panel
+ * is open, so an export without it lists page numbers and nothing else.
  */
-function documentMarkup({ title, styleId, sidebar, pages, cssHref, lang }) {
+function documentMarkup({ title, styleId, sidebar, pages, cssHref, lang, chrome }) {
   return `<!doctype html>
-<html lang="${esc(lang)}">
+<html lang="${esc(lang)}"${chrome.html ? ` class="${esc(chrome.html)}"` : ""}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -256,8 +261,9 @@ function documentMarkup({ title, styleId, sidebar, pages, cssHref, lang }) {
 <title>${esc(title)}</title>
 <link rel="stylesheet" href="${esc(cssHref)}">
 </head>
-<body>
-<div class="illuminus-export sheet journal-entry application ${STYLED_CLASS}" ${STYLE_ATTR}="${esc(styleId)}">
+<body${chrome.body ? ` class="${esc(chrome.body)}"` : ""}>
+<div class="illuminus-export sheet journal-entry application expanded ${esc(chrome.root)}"${
+  styleId ? ` ${STYLE_ATTR}="${esc(styleId)}"` : ""}>
 ${sidebar}
 <section class="journal-entry-content flexcol">
 <header class="journal-header"><h1 class="title">${esc(title)}</h1></header>
@@ -356,20 +362,59 @@ async function buildStylesheet(style, assets, report) {
     compileStyle(style)
   ];
 
-  let css = parts.filter(Boolean).join("\n\n");
+  return carryPictures(parts.filter(Boolean).join("\n\n"), assets);
+}
 
-  // Textures and background pictures are named inside the values, so they are
-  // gathered from the finished stylesheet rather than from the schema — that
-  // way a picture reaches the archive however it got into the CSS.
+/**
+ * Every picture a stylesheet names, pulled into the archive.
+ *
+ * Gathered from the finished CSS rather than from the schema, so a picture
+ * reaches the export however it got into the rules — a style's texture, a game
+ * system's border, an icon behind a heading.
+ */
+async function carryPictures(css, assets) {
   const sources = new Set();
   for (const [, , source] of css.matchAll(/url\((["']?)([^"')]+)\1\)/g)) sources.add(source);
   for (const source of sources) {
-    if (source.startsWith("data:")) continue;
-    const path = await assets.add(new URL(source, document.baseURI).href, "images");
+    if (source.startsWith("data:") || source.startsWith("#")) continue;
+    let resolved;
+    try {
+      resolved = new URL(source, document.baseURI).href;
+    } catch {
+      continue;
+    }
+    const folder = /\.(woff2?|ttf|otf|eot)(\?|$)/i.test(source) ? "fonts" : "images";
+    const path = await assets.add(resolved, folder);
     // One level down from the stylesheet, which lives in styles/.
     if (path) css = css.replaceAll(source, `../${path}`);
   }
   return css;
+}
+
+/**
+ * The stylesheet for an export with no style chosen: whatever is painting these
+ * journals right now, gathered from every sheet the page has loaded and cut
+ * down to the rules that touch the exported markup.
+ *
+ * This is what carries a game system's look — the reason a Pathfinder module
+ * exports looking like a Pathfinder module rather than like plain HTML.
+ */
+async function buildAppliedStylesheet(documents, assets, report) {
+  const found = collectAppliedCss(documents);
+  report.sources = found.sources;
+  report.rules = found.rules;
+  log.debug(`export: kept ${found.rules} rules from ${found.sources.length} source(s)`);
+  // Everything gathered goes inside one cascade layer, and the module's own
+  // export rules stay outside it. An unlayered rule beats a layered one however
+  // specific the layered one is, which is the only way to win against selectors
+  // like `.sheet.journal-entry.application .journal-sidebar` without writing
+  // longer selectors here than there — the same mechanism Foundry uses to let
+  // modules override core.
+  const css = [
+    `@layer illuminus-source {\n${found.css}\n}`,
+    await moduleFile("styles/illuminus-export.css")
+  ].join("\n\n");
+  return carryPictures(css, assets);
 }
 
 /* -------------------------------------------- */
@@ -401,14 +446,17 @@ function skippedPages(entry) {
  * Build a standalone web copy of one or more journals.
  *
  * @param {object} options
- * @param {string} options.styleId      The style to bake in.
+ * @param {string} [options.styleId]    The style to bake in. Empty for each
+ *   journal's own look, taken from whatever is painting it in Foundry.
  * @param {string[]} options.entryIds   Journals to export.
  * @param {boolean} [options.secrets]   Include unrevealed secret passages.
  * @returns {Promise<{blob: Blob, filename: string, report: object}|null>}
  */
 export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
-  const style = getStyle(styleId);
-  if (!style) return null;
+  // No style means "as it looks now", which is a different question: the CSS is
+  // gathered from the page rather than compiled from a style.
+  const style = styleId ? getStyle(styleId) : null;
+  if (styleId && !style) return null;
 
   const entries = entryIds.map((id) => game.journal.get(id)).filter(Boolean);
   if (!entries.length) return null;
@@ -442,6 +490,29 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
   };
   const files = [];
 
+  // One name and one set of classes for every file in the export.
+  const sheetName = `styles/${slug(style?.name ?? "journal", "style")}.css`;
+  // Without a chosen style the export leans on the page's own CSS, which hangs
+  // its colors off the theme classes Foundry keeps on html and body.
+  const chrome = style
+    ? { root: STYLED_CLASS, html: "", body: "" }
+    : { root: themeClasses(), ...rootClasses() };
+
+  /**
+   * Which style a document wears. With one chosen, all of them wear it; with
+   * none, each journal keeps its own — a styled journal looks styled in Foundry,
+   * so it should look styled in the export.
+   */
+  const styleFor = (entry) => (style ? style.id : (entry ? getAssignedStyleId(entry) ?? "" : ""));
+  const page = (title, entry, sidebar, pages) => {
+    const id = styleFor(entry);
+    return documentMarkup({
+      title, sidebar, pages, cssHref: sheetName, lang: game.i18n.lang ?? "en",
+      styleId: id,
+      chrome: { ...chrome, root: [chrome.root, id ? STYLED_CLASS : ""].filter(Boolean).join(" ") }
+    });
+  };
+
   for (const journal of plan.journals) {
     const sidebar = sidebarMarkup(plan, journal.entry.id);
     const rendered = [];
@@ -465,43 +536,37 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
 
     files.push({
       path: journal.file,
-      data: documentMarkup({
-        title: journal.entry.name,
-        styleId: style.id,
-        sidebar,
-        pages: rendered.join("\n"),
-        cssHref: `styles/${slug(style.name, "style")}.css`,
-        lang: game.i18n.lang ?? "en"
-      })
+      data: page(journal.entry.name, journal.entry, sidebar, rendered.join("\n"))
     });
   }
-
-  // The stylesheet is built last: gathering the pages is what fills the archive
-  // with pictures, and the fonts are named by the style itself.
-  files.push({ path: `styles/${slug(style.name, "style")}.css`, data: await buildStylesheet(style, assets, report) });
 
   if (!single) {
     files.push({
       path: "index.html",
-      data: documentMarkup({
-        title: game.i18n.localize("ILLUMINUS.Export.Contents"),
-        styleId: style.id,
-        sidebar: sidebarMarkup(plan, null),
-        pages: `<article class="journal-entry-page text"><section class="journal-page-content">`
+      data: page(
+        game.i18n.localize("ILLUMINUS.Export.Contents"), plan.journals[0]?.entry, sidebarMarkup(plan, null),
+        `<article class="journal-entry-page text"><section class="journal-page-content">`
           + `<h1>${esc(game.i18n.localize("ILLUMINUS.Export.Contents"))}</h1>\n<ul>`
           + plan.journals.map((j) => `<li><a href="${j.file}">${esc(j.entry.name)}</a></li>`).join("\n")
-          + `</ul></section></article>`,
-        cssHref: `styles/${slug(style.name, "style")}.css`,
-        lang: game.i18n.lang ?? "en"
-      })
+          + `</ul></section></article>`
+      )
     });
   }
+
+  // The stylesheet is built last: gathering the pages is what fills the archive
+  // with pictures, and — without a style — what there is to match rules against.
+  files.push({
+    path: sheetName,
+    data: style
+      ? await buildStylesheet(style, assets, report)
+      : await buildAppliedStylesheet(files.map((file) => file.data), assets, report)
+  });
 
   report.assets = assets.count;
   const blob = await makeZip([...files, ...assets.files]);
   const filename = single
     ? `${slug(entries[0].name, "journal")}.zip`
-    : `${slug(style.name, "illuminus")}-journals.zip`;
+    : `${slug(style?.name ?? "journals", "illuminus")}-journals.zip`;
   return { blob, filename, report };
 }
 

@@ -23,6 +23,8 @@ scripts/presets.mjs          The bundled styles
 scripts/io.mjs               Export / import as JSON
 scripts/export-html.mjs      Journals -> a folder of standalone web pages
 scripts/zip.mjs              A zip writer, since Foundry ships no archiver
+scripts/export-css.mjs       The CSS actually painting a page, for style-less exports
+scripts/export-terms.mjs     The personal-use notice shown before an export
 scripts/color-tools.mjs      Color conversion, and sampling colors from the page
 scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
 scripts/template-store.mjs   CRUD over the world's page templates

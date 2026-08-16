@@ -29,7 +29,11 @@ body {
 .illuminus-export {
   max-width: 76rem;
   margin: 0 auto;
+  /* Stated in full, and not merely as `display: flex`: an export that carries
+     Foundry's own CSS inherits `.application { flex-flow: column }` from it,
+     which stacks the contents panel on top of the page instead of beside it. */
   display: flex;
+  flex-flow: row nowrap;
   overflow: hidden;
 }
 
@@ -64,6 +68,29 @@ body {
 .illuminus-export > .journal-entry-content {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* An export that carries Foundry's own CSS carries its window rules too, and
+   those describe a floating box of a fixed size that clips what it holds. On a
+   web page there is no window: the article is as tall as it is, and the panel
+   scrolls with the document rather than inside itself. Written unlayered, so it
+   wins against core's layered rules without having to out-specify them. */
+.illuminus-export,
+.illuminus-export .journal-entry-content,
+.illuminus-export .journal-entry-pages,
+.illuminus-export .journal-sidebar,
+.illuminus-export .journal-entry-page {
+  position: static;
+  inset: auto;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+  transform: none;
+}
+
+.illuminus-export {
+  width: auto;
 }
 
 /* A panel entry is a link here rather than something the application selects,

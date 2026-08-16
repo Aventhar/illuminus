@@ -53,6 +53,16 @@ export function registerSettings() {
     default: []
   });
 
+  // Whether this person has read the personal-use notice and asked not to be
+  // shown it again. Per person rather than per world: it is about what someone
+  // has read, and a second GM has not read it just because the first one did.
+  game.settings.register(MODULE_ID, SETTINGS.exportTermsSeen, {
+    scope: "client",
+    config: false,
+    type: Boolean,
+    default: false
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "ILLUMINUS.Settings.Debug.Name",
     hint: "ILLUMINUS.Settings.Debug.Hint",

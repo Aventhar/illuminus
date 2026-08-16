@@ -269,7 +269,26 @@ belongs in `illuminus.css`, not in `styles/illuminus-export.css`, which holds on
 the application itself was providing (the ground behind the window, the flex row, the
 panel entry's layout).
 
+**Without a style, the export carries the CSS that is actually painting the page.**
+`scripts/export-css.mjs` walks every loaded stylesheet and keeps the rules whose
+selectors match the exported markup — a hundred-odd rules out of Foundry's tens of
+thousands — which is what makes a game system's look travel. State pseudo-classes are
+stripped for the *test* only, so `:hover` rules survive; anything unparseable is kept
+rather than lost.
+
 Traps found building it, all of which cost a round of debugging:
+
+- **The export must mirror the app's *state*, not only its structure.** Core hides the
+  contents panel's page titles unless the sheet root carries `expanded`, so an export
+  without it lists page numbers and nothing else. Computed colors all matched while this
+  was broken — only a screenshot showed it.
+- **`display: flex` is not enough on the export root.** Core's `.application` sets
+  `flex-flow: column`, which stacks the panel on top of the page; the shim states
+  `flex-flow: row nowrap` in full.
+- **Gathered CSS goes inside `@layer`, and the module's export rules stay outside it.**
+  An unlayered rule beats a layered one however specific, which is the only way to win
+  against selectors like `.sheet.journal-entry.application .journal-sidebar` without
+  writing longer ones — the same mechanism Foundry uses to let modules override core.
 
 - **`.sheet` is load-bearing on the export root.** Core hangs the sidebar width off
   `--sidebar-width-expanded`, and the module feeds the width control into it on
@@ -322,6 +341,10 @@ in the template library.
   in section [2], the world is dirty: `tools/sandbox.sh reset`.
 - **Never kill a run mid-flight** (a foreground timeout does exactly that). Run it in the
   background and wait, or it will die between creating a fixture and its `finally`.
+- **And nothing else may touch the sandbox while it runs.** A one-off script that
+  navigates the page pulls the world out from under the suite, which then fails with
+  `foundry is not defined` in whatever check happened to be running — a confusing way to
+  learn you were driving the same browser from two places.
 
 ## Generated files — do not hand-edit
 

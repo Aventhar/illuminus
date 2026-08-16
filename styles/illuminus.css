@@ -1090,6 +1090,62 @@
   opacity: 0.6;
 }
 
+/* What an export carries, said in the window rather than only in the notice. */
+.illuminus-export-dialog__carrying {
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #ffd21f;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* A button that reads as a link, for something to open rather than to do. */
+.illuminus .illuminus-link-button {
+  display: inline;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: inherit;
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.illuminus-terms h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0;
+}
+
+/* Stated rather than themed: a caution icon that changes color with the theme
+   is a caution icon somebody misses. */
+.illuminus-terms h3 i,
+.illuminus-export-dialog__carrying i {
+  color: #ffd21f;
+}
+
+.illuminus-terms__carrying {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #ffd21f;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.illuminus-terms ul {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.illuminus-terms__again {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
 /* Hidden by the style filter rather than by the search: two reasons to be out
    of sight, so two classes, and neither can lie about the other. */
 .illuminus-export-dialog__row.is-filtered-out {
@@ -1103,6 +1159,12 @@
 
 .illuminus-export-dialog__none.is-shown {
   display: block;
+}
+
+/* Room between the style picker and the filter that follows it, so the two do
+   not read as one control. */
+.illuminus-export-dialog select[name="styleId"] + .illuminus-export-dialog__option {
+  margin-top: 0.5rem;
 }
 
 .illuminus-export-dialog__option {
