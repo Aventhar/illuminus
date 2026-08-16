@@ -276,7 +276,7 @@ ${content}
 async function imagePageMarkup(page, assets) {
   const src = page.src ? await assets.add(new URL(page.src, document.baseURI).href, "images") : null;
   const caption = page.image?.caption;
-  const id = `picture-${esc(page.id)}`;
+  const id = `picture-p${esc(page.id)}`;
   return [
     src ? `<span class="illuminus-picture" id="${id}">`
       + `<a class="illuminus-picture-link" href="#${id}">`
@@ -684,7 +684,10 @@ export async function buildHtmlExport({
       ]));
       const found = [];
       rendered.push(pageMarkup(page, await rewriteContent(enriched, {
-        pageLinks: local, assets, report, headings: found, prefix: `${page.id}-`
+        // Started with a letter: a Foundry id may begin with a digit, which is
+        // a perfectly good HTML id and not a valid CSS identifier — so anything
+        // that later wants to name one in a selector would quietly fail.
+        pageLinks: local, assets, report, headings: found, prefix: `p${page.id}-`
       })));
       journal.headings = (journal.headings ?? []).concat({ page, found });
       report.pages += 1;

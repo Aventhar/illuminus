@@ -3284,7 +3284,9 @@ try {
     const opening = { linked: false };
     if (picture) {
       const link = picture.closest("a.illuminus-picture-link");
-      const host = link ? document.querySelector(link.getAttribute("href")) : null;
+      // Looked up by id rather than as a selector: an id is free to start with
+      // a digit, and a selector is not.
+      const host = link ? document.getElementById(link.getAttribute("href").slice(1)) : null;
       opening.linked = Boolean(host);
       opening.inward = Boolean(link?.getAttribute("href")?.startsWith("#"));
       if (host) {
@@ -3461,10 +3463,15 @@ try {
       sheet: innerHeight,
       texture: getComputedStyle(surface, "::before").display,
       fill: getComputedStyle(surface).backgroundColor,
-      // A margin the reader sees, put on each page so it repeats on every
-      // sheet — the page's own inner spacing is set once around the whole
-      // journal, and the second sheet would start against the paper's edge.
-      pageInset: parseInt(getComputedStyle(document.querySelector(".journal-entry-page")).paddingTop, 10) || 0,
+      // The margin has to be the sheet's own. Padding on a page applies where
+      // that page starts and ends, so a page running over three sheets leaves
+      // the middle one with words against the paper's edge — only @page
+      // repeats. Read from the rules, since no element carries it.
+      sheetMargin: [...document.styleSheets].flatMap(sheet => {
+        try { return [...sheet.cssRules]; } catch { return []; }
+      }).flatMap(rule => rule.cssRules ? [...rule.cssRules] : [rule])
+        .filter(rule => rule.constructor.name === "CSSPageRule")
+        .map(rule => rule.style.margin).find(Boolean) ?? "",
       // Said out loud, or a browser prints an outline of the document: its
       // dialog leaves background graphics off unless told otherwise.
       inks: getComputedStyle(surface).printColorAdjust
@@ -3508,8 +3515,8 @@ try {
   // The contents page, which is what a printed document has instead of the
   // panel — and what it has instead of bookmarks, which a browser's print
   // dialog cannot be asked for.
-  check(one.pageInset >= 30,
-    `each printed page keeps a margin of its own (${one.pageInset}px)`);
+  check(/\d/.test(one.sheetMargin) && !/^0\w*(\s+0\w*)*$/.test(one.sheetMargin),
+    `every sheet keeps a margin of its own (@page margin: ${one.sheetMargin || "none"})`);
   check(one.inks === "exact",
     `and asks to be printed in colour rather than as an outline (${one.inks})`);
   check(one.contentsIsFirst && one.contents.length >= 4,

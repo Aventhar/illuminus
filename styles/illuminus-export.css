@@ -226,6 +226,8 @@ body {
      behind every read-aloud box, leaving an outline of a document. Saying
      `exact` is how a page states that its colors are the point rather than
      decoration a reader would rather not spend ink on. */
+  html,
+  body,
   .illuminus-export,
   .illuminus-export *,
   .illuminus-export *::before,
@@ -245,10 +247,16 @@ body {
 
   .illuminus-export .illuminus-picture-close { display: none; }
 
-  /* No margin on the sheet itself, so a page's surface can reach the paper's
-     edge — a parchment handout that stops an inch short looks like a mistake.
-     The margin the reader actually sees is put on each page instead, below. */
-  @page { margin: 0; }
+  /* A real margin on the sheet, because it is the only kind that repeats.
+     Padding on a page applies where the page starts and where it ends — so a
+     page that runs over three sheets gets a margin on the first and the last
+     and none in between, with the words running into the paper's edge.
+
+     The surface fills the printable area rather than bleeding past it. Nothing
+     a browser offers can paint into a printed margin — the root element's
+     background stops at the same place — so a margin means a border of paper,
+     and that is what a printed handout has anyway. */
+  @page { margin: 14mm 16mm; }
 
   body { background: none; padding: 0; }
 
@@ -284,14 +292,13 @@ body {
      printout opens with a blank sheet. */
   .illuminus-export .journal-entry-page + .journal-entry-page { break-before: page; }
 
-  /* The margin, put on each page rather than on the sheet: the page's own inner
-     spacing is set once around the whole journal, so on the second sheet and
-     every sheet after it the words would start hard against the paper's edge.
-     This repeats wherever a break falls, and leaves room a printer can hold. */
-  .illuminus-export .journal-entry-page {
-    break-inside: auto;
-    padding: 14mm 16mm;
-  }
+  .illuminus-export .journal-entry-page { break-inside: auto; }
+
+  /* The surface stays on the page rather than moving to the sheet. Painting the
+     root element instead would seem to promise a background that reaches into
+     the margins, and it does not: a printed page paints the root's background
+     over the page area only, exactly as the page itself does — while losing the
+     layer that carries the picture's strength and blending. */
 
   /* Nothing should be orphaned from what it introduces or belongs to. */
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }

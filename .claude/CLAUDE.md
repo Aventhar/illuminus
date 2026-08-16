@@ -366,11 +366,16 @@ only get a worse answer.
   panel behind each read-aloud box, leaving an outline of a document. `print-color-adjust:
   exact` is how a page says its colors are content. The checks print with
   `printBackground: false` for exactly this reason; passing `true` hides the bug.
-- **A margin has to be on each page, not on the sheet.** `@page { margin: 0 }` lets the
-  page surface bleed to the paper's edge, but the page's own inner spacing is set once
-  around the whole journal — so the second sheet and every sheet after it started hard
-  against the edge. The margin sits on `.journal-entry-page`, which repeats wherever a
-  break falls.
+- **Only `@page` gives a margin on every sheet.** Padding applies where a box starts and
+  where it ends, so a page running over three sheets leaves the middle one with words
+  against the paper's edge — first `@page { margin: 0 }` did that, and then per-page
+  padding did it again for the same reason. Nothing paints into a printed margin either:
+  the root element's background stops at the page area exactly as the page's own does, so
+  a margin means a border of paper and the surface fills what is left.
+- **A Foundry id may start with a digit**, which is a valid HTML id and an invalid CSS
+  identifier. Fragment links and `:target` do not care; `querySelector("#" + id)` throws.
+  Exported anchors are prefixed with a letter, and anything looking one up uses
+  `getElementById`.
 - **A PDF's internal links are named destinations**, and a name nothing defines is a link
   that does nothing. Counting `/Subtype /Link` is not enough; the check resolves every
   `/Dest` against the `/Dests` dictionary.
