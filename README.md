@@ -12,6 +12,22 @@ it to whichever journals should wear it, and export it to carry into another wor
 - **Game system:** system-agnostic — core Foundry APIs only
 - **Build step:** none. Plain ES modules and CSS, loaded directly by Foundry.
 
+## How this was made
+
+Illuminus was built with the help of an AI assistant (Anthropic's Claude), working to my
+direction. The idea, the design decisions, the priorities, and the artwork are mine; much
+of the code, the tests, and this documentation were drafted by the assistant and shaped
+over many rounds of use and correction.
+
+I mention it because I think you deserve to know how the software you install was made,
+and because the way it was made shows in the result: the module carries an automated
+suite that drives a real Foundry instance and checks what the styling actually computes
+to, rather than what it looks like it ought to do. That is what I lean on instead of
+trusting either of us.
+
+Bugs, misjudgements, and anything that misbehaves in your world are mine to answer for.
+Please do [report them](https://github.com/Aventhar/illuminus/issues).
+
 ## What it does
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
