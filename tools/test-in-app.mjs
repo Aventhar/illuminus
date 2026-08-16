@@ -1452,14 +1452,35 @@ const EDIT_SHEET = `[...foundry.applications.instances.values()].filter(
  * checked away from Foundry: a second tab, a second socket, and no module
  * loaded anywhere near it. Anything read here was read from a plain web page.
  */
-const inCleanTab = async (url, expression) => {
+const inCleanTab = async (url, expression, { pdf = false } = {}) => {
   const { targetId } = await cdp.send("Target.createTarget", { url });
   try {
-    // The page has to have laid out before anything is worth measuring.
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 500));
     const tabs = await (await fetch("http://127.0.0.1:9222/json")).json();
     const socket = new WebSocket(tabs.find((t) => t.id === targetId).webSocketDebuggerUrl);
     await new Promise((res, rej) => { socket.onopen = res; socket.onerror = rej; });
+
+    // Waited for rather than slept through: a single page carrying its pictures
+    // inside it is half a megabyte, and a fixed delay either races it on a busy
+    // machine or pads every run to suit the slowest one.
+    const ask = (id, expression) => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`the exported page never answered: ${url}`)), 30000);
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.id !== id) return;
+        clearTimeout(timer);
+        resolve(message.result);
+      };
+      socket.send(JSON.stringify({ id, method: "Runtime.evaluate", params: { returnByValue: true, expression } }));
+    });
+    let ready = false;
+    for (let i = 0; i < 60 && !ready; i++) {
+      const said = await ask(100 + i, `document.readyState === "complete"
+        && !!document.querySelector(".journal-entry-content")`);
+      ready = said?.result?.value === true;
+      if (!ready) await new Promise((r) => setTimeout(r, 250));
+    }
+    if (!ready) throw new Error(`the exported page never finished loading: ${url}`);
     const answer = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error(`the exported page never answered: ${url}`)), 30000);
       socket.onmessage = (event) => {
@@ -1474,8 +1495,27 @@ const inCleanTab = async (url, expression) => {
         id: 1, method: "Runtime.evaluate", params: { returnByValue: true, expression }
       }));
     });
+
+    // Printing is asked of the browser rather than of the page: this is the
+    // same engine, and the same print stylesheet, that a person's Save as PDF
+    // would use.
+    let printed = null;
+    if (pdf) {
+      printed = await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("printing never finished")), 30000);
+        socket.onmessage = (event) => {
+          const message = JSON.parse(event.data);
+          if (message.id !== 2) return;
+          clearTimeout(timer);
+          resolve(message.result?.data ?? "");
+        };
+        socket.send(JSON.stringify({
+          id: 2, method: "Page.printToPDF", params: { printBackground: true, preferCSSPageSize: false }
+        }));
+      });
+    }
     socket.close();
-    return answer;
+    return pdf ? { answer, printed } : answer;
   } finally {
     await cdp.send("Target.closeTarget", { targetId });
   }
@@ -3211,10 +3251,89 @@ try {
   })()`);
 }
 
+// One file rather than a folder, and that same file printed. The three formats
+// are one pipeline, so what is checked here is what the other two cannot show:
+// that nothing is left pointing outside the document, and that a browser can
+// turn it into paper.
+console.log("\n[47] One page, and a page that prints");
+const printDir = fs.mkdtempSync(path.join(os.tmpdir(), "illuminus-print-"));
+try {
+  const built = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const name of ["Illuminus Print A", "Illuminus Print B"]) {
+      const old = game.journal.getName(name);
+      if (old) await old.delete();
+    }
+    const style = api.listStyles()[0];
+    const made = [];
+    for (const name of ["Illuminus Print A", "Illuminus Print B"]) {
+      const entry = await JournalEntry.create({name});
+      await entry.createEmbeddedDocuments("JournalEntryPage", [{
+        name: \`\${name} page\`, type: "text",
+        text: {content: "<h1>Heading</h1><p>Body text.</p>"
+          + "<blockquote><p>Read aloud.</p></blockquote>"
+          + "<figure><img src=\\"icons/svg/mystery-man.svg\\"><figcaption>Art</figcaption></figure>", format: 1}
+      }]);
+      await api.assignStyle(entry, style.id);
+      made.push(entry.id);
+    }
+
+    const out = await api.buildJournalExport({styleId: style.id, entryIds: made, format: "file"});
+    for (const id of made) await game.journal.get(id).delete();
+    return JSON.stringify({html: out.html, filename: out.filename, report: out.report});
+  })()`);
+
+  const pr = JSON.parse(built);
+  const file = path.join(printDir, "one-page.html");
+  fs.writeFileSync(file, pr.html);
+
+  check(pr.filename.endsWith(".html") && !pr.filename.endsWith(".zip"),
+    `one page comes out as one file (${pr.filename})`);
+  // Nothing may point outside the document: no stylesheet beside it, no folder
+  // of pictures, since neither travels in an email or into a printer. The
+  // markup and the stylesheet are asked separately — a CSS comment can hold
+  // what looks like markup, and one in this module's own stylesheet does.
+  const markup = pr.html.replace(/<style>[\s\S]*?<\/style>/g, "");
+  const outward = [...markup.matchAll(/(?:src|href)="([^"#]+)"/g)]
+    .map((m) => m[1]).filter((url) => !url.startsWith("data:"));
+  const styling = pr.html.match(/<style>[\s\S]*?<\/style>/)?.[0] ?? "";
+  const outwardCss = [...styling.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/url\((["']?)([^"')]+)\1\)/g)]
+    .map((m) => m[2]).filter((url) => !url.startsWith("data:") && !url.startsWith("#"));
+  check(outward.length === 0 && outwardCss.length === 0,
+    `and carries everything inside it (${[...outward, ...outwardCss].slice(0, 3).join(", ") || "nothing points out"})`);
+  check(pr.html.includes("Illuminus Print A") && pr.html.includes("Illuminus Print B"),
+    "with every journal in the one document");
+
+  const { answer, printed } = await inCleanTab(`file://${file}`, `(() => JSON.stringify({
+    pages: document.querySelectorAll(".journal-entry-page").length,
+    surface: getComputedStyle(document.querySelector(".journal-entry-content")).backgroundColor,
+    pictures: [...document.images].filter(img => img.complete && img.naturalWidth > 0).length,
+    images: document.images.length
+  }))()`, { pdf: true });
+
+  const one = JSON.parse(answer);
+  check(one.pictures === one.images,
+    `its pictures load with no folder beside it (${one.pictures}/${one.images})`);
+  const pdf = Buffer.from(printed, "base64");
+  check(pdf.subarray(0, 5).toString() === "%PDF-" && pdf.length > 20000,
+    `and a browser prints it to a PDF (${(pdf.length / 1024).toFixed(0)}KB)`);
+  // Each journal page starts a sheet, so two pages cannot come out as one.
+  const sheets = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+  check(sheets >= 2, `each journal page starting a new sheet (${sheets} sheets for ${one.pages} pages)`);
+} finally {
+  fs.rmSync(printDir, { recursive: true, force: true });
+  await cdp.evaluate(`(async () => {
+    for (const name of ["Illuminus Print A", "Illuminus Print B"]) {
+      const entry = game.journal.getName(name);
+      if (entry) await entry.delete();
+    }
+  })()`);
+}
+
 // The two libraries are the same window with different contents, and should
 // feel like it: the same size, the same names, and the same answer to ticking a
 // box — which the style library used to get wrong by re-rendering itself.
-console.log("\n[47] The two libraries work alike");
+console.log("\n[48] The two libraries work alike");
 try {
   const alike = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3322,7 +3441,7 @@ try {
 
 // The export window has to be honest about what it will export: the list is
 // filtered by the style, and what is hidden is not quietly exported anyway.
-console.log("\n[48] The export window shows what it will export");
+console.log("\n[49] The export window shows what it will export");
 try {
   const dialog = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3411,7 +3530,7 @@ try {
 
 // The notice is a gate, so it is checked as one: it appears, it defaults to not
 // going ahead, it stays dismissed once dismissed, and it can be read again.
-console.log("\n[49] The personal-use notice");
+console.log("\n[50] The personal-use notice");
 try {
   const notice = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3493,7 +3612,7 @@ try {
   })()`);
 }
 
-console.log("\n[50] Console is clean");
+console.log("\n[51] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

@@ -413,11 +413,17 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    */
   #scrollSampleTo(part, frame) {
     if (!part) return;
-    const target = part.getBoundingClientRect();
-    const view = frame.getBoundingClientRect();
-    if (target.top >= view.top && target.bottom <= view.bottom) return;
-    const offset = target.top - view.top + frame.scrollTop;
-    frame.scrollTo({ top: Math.max(0, offset - 16), behavior: "smooth" });
+    // Measured on the next frame: switching tabs is what asks for this, and a
+    // pane that was hidden a moment ago has no size yet — every rectangle
+    // reads as zero, and scrolling to zero is scrolling nowhere.
+    requestAnimationFrame(() => {
+      const target = part.getBoundingClientRect();
+      const view = frame.getBoundingClientRect();
+      if (!view.height) return;
+      if (target.top >= view.top && target.bottom <= view.bottom) return;
+      const offset = target.top - view.top + frame.scrollTop;
+      frame.scrollTo({ top: Math.max(0, offset - 16), behavior: "smooth" });
+    });
   }
 
   /**

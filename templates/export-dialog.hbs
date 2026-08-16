@@ -58,6 +58,23 @@
   </fieldset>
 
   <fieldset>
+    <legend>{{localize "ILLUMINUS.Export.FormatLegend"}}</legend>
+    {{#each formats as |format|}}
+    <label class="illuminus-export-dialog__option">
+      {{#if format.checked}}
+      <input type="radio" name="format" value="{{format.id}}" checked>
+      {{else}}
+      <input type="radio" name="format" value="{{format.id}}">
+      {{/if}}
+      <span>
+        {{localize format.label}}
+        <span class="hint">{{localize format.hint}}</span>
+      </span>
+    </label>
+    {{/each}}
+  </fieldset>
+
+  <fieldset>
     <legend>{{localize "ILLUMINUS.Export.OptionsLegend"}}</legend>
     <label class="illuminus-export-dialog__option">
       <input type="checkbox" name="secrets">

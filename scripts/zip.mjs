@@ -148,8 +148,8 @@ export async function makeZip(entries, now = new Date()) {
   return new Blob([body.join(), directory.join(), end.join()], { type: "application/zip" });
 }
 
-/** Hand a built archive to the browser as a download. */
-export function saveZip(blob, filename) {
+/** Hand a built file to the browser as a download. */
+export function saveFile(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

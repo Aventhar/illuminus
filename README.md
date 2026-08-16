@@ -115,7 +115,9 @@ it to whichever journals should wear it, and export it to carry into another wor
   open in any browser, with no Foundry and no Illuminus needed — a handout to hand a
   player, or an adventure to put on a website. Export them wearing an Illuminus style,
   or exactly as they look in Foundry now, which carries whatever is painting them —
-  a game system's look included. The export carries its own stylesheet,
+  a game system's look included. Three ways to save it: a folder of pages for a
+  website, one self-contained file to email a player, or straight to the print
+  dialog, where any browser will save it as a PDF. The export carries its own stylesheet,
   the pictures and fonts it uses, and a contents panel to move between pages, and it
   looks like the journal did, down to the window frame. Hidden passages stay out unless
   you ask for them, and links to things that did not come along — an actor, an item —

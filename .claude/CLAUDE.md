@@ -311,6 +311,24 @@ Traps found building it, all of which cost a round of debugging:
   compares computed styles against the live page. That is the only thing that proves the
   feature works, and it caught both the missing fonts and the panel width.
 
+**Three formats, one pipeline.** A folder of pages, one self-contained page, and a page
+opened for printing are the same build: `format: "file"` and `"print"` inline the assets
+as `data:` URIs and put the stylesheet in a `<style>`, because neither an emailed file
+nor a printer goes looking for a folder beside it. Printing is the whole of the PDF
+export — every browser prints to PDF, and its dialog is where paper size, margins, and
+background ink are chosen. Laying the pages out a second time in a second engine would
+only get a worse answer.
+
+- **A `data:` URI must not be made relative.** Stylesheet paths get `../` because the
+  sheet lives in `styles/`; prefixing a data URI breaks the picture instead. The texture
+  vanished from every printed page until a check compared what the document points at.
+- **`Page.printToPDF` over CDP proves printability** — same engine, same print
+  stylesheet a person's Save as PDF uses. The check asserts the bytes start `%PDF-` and
+  counts sheets, which is how the page-break rule is covered.
+- **Do not judge a PDF by macOS's thumbnailer.** `qlmanage` rendered a heavy text-shadow
+  as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
+  in a browser before believing a rendering bug.
+
 ## The two library windows
 
 The style library and the template library are the same window with different

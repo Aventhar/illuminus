@@ -2,7 +2,7 @@ import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
 import { allFields } from "./style-schema.mjs";
 import { compileBaseRule, compileStyle } from "./style-compiler.mjs";
 import { getStyle, getAssignedStyleId } from "./style-store.mjs";
-import { makeZip, saveZip } from "./zip.mjs";
+import { makeZip, saveFile } from "./zip.mjs";
 import { collectAppliedCss, rootClasses, themeClasses } from "./export-css.mjs";
 
 /**
@@ -56,9 +56,19 @@ function esc(text) {
 class AssetBag {
   #bySource = new Map();
   #taken = new Set();
+  #inline;
 
   /** @type {string[]} Sources that could not be read. */
   missing = [];
+
+  /**
+   * @param {boolean} [inline]  Return each file as a `data:` URI rather than a
+   *   path. One printable document has to carry its pictures inside it: a
+   *   browser printing a page does not go looking for a folder beside it.
+   */
+  constructor({ inline = false } = {}) {
+    this.#inline = inline;
+  }
 
   get files() {
     return [...this.#bySource.values()].map(({ path, bytes }) => ({ path, data: bytes }));
@@ -100,11 +110,32 @@ class AssetBag {
       name = `${slug(dot > 0 ? raw.slice(0, dot) : raw, "file")}-${n}${extension ? `.${extension}` : ""}`;
     }
 
-    const path = `assets/${folder}/${name}`;
+    const path = this.#inline
+      ? `data:${mimeOf(extension)};base64,${base64(bytes)}`
+      : `assets/${folder}/${name}`;
     this.#taken.add(`${folder}/${name}`);
     this.#bySource.set(clean, { path, bytes });
     return path;
   }
+}
+
+/** Enough of a MIME table for the things a journal actually holds. */
+function mimeOf(extension) {
+  return {
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif",
+    webp: "image/webp", avif: "image/avif", svg: "image/svg+xml",
+    woff: "font/woff", woff2: "font/woff2", ttf: "font/ttf", otf: "font/otf",
+    mp3: "audio/mpeg", ogg: "audio/ogg", webm: "video/webm", mp4: "video/mp4"
+  }[extension] ?? "application/octet-stream";
+}
+
+/** Bytes as base64, in chunks so a large picture cannot blow the stack. */
+function base64(bytes) {
+  let binary = "";
+  for (let at = 0; at < bytes.length; at += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(at, at + 8192));
+  }
+  return btoa(binary);
 }
 
 /* -------------------------------------------- */
@@ -251,7 +282,7 @@ ${parts.join("\n")}
  * hides the page titles in the contents panel unless the sheet says its panel
  * is open, so an export without it lists page numbers and nothing else.
  */
-function documentMarkup({ title, styleId, sidebar, pages, cssHref, lang, chrome }) {
+function documentMarkup({ title, styleId, sidebar, pages, cssHref, css, lang, chrome }) {
   return `<!doctype html>
 <html lang="${esc(lang)}"${chrome.html ? ` class="${esc(chrome.html)}"` : ""}>
 <head>
@@ -259,7 +290,7 @@ function documentMarkup({ title, styleId, sidebar, pages, cssHref, lang, chrome 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="${esc(MODULE_ID)}">
 <title>${esc(title)}</title>
-<link rel="stylesheet" href="${esc(cssHref)}">
+${css ? `<style>\n${css}\n</style>` : `<link rel="stylesheet" href="${esc(cssHref)}">`}
 </head>
 <body${chrome.body ? ` class="${esc(chrome.body)}"` : ""}>
 <div class="illuminus-export sheet journal-entry application expanded ${esc(chrome.root)}"${
@@ -385,8 +416,11 @@ async function carryPictures(css, assets) {
     }
     const folder = /\.(woff2?|ttf|otf|eot)(\?|$)/i.test(source) ? "fonts" : "images";
     const path = await assets.add(resolved, folder);
-    // One level down from the stylesheet, which lives in styles/.
-    if (path) css = css.replaceAll(source, `../${path}`);
+    if (!path) continue;
+    // A file is one level down from the stylesheet, which lives in styles/. A
+    // picture carried inside the document is not anywhere, and prefixing it
+    // turns a working data: URI into a broken relative path.
+    css = css.replaceAll(source, path.startsWith("data:") ? path : `../${path}`);
   }
   return css;
 }
@@ -450,9 +484,14 @@ function skippedPages(entry) {
  *   journal's own look, taken from whatever is painting it in Foundry.
  * @param {string[]} options.entryIds   Journals to export.
  * @param {boolean} [options.secrets]   Include unrevealed secret passages.
- * @returns {Promise<{blob: Blob, filename: string, report: object}|null>}
+ * @param {"folder"|"file"|"print"} [options.format]  A folder of pages, one
+ *   self-contained page, or one page built to be printed. The last two are the
+ *   same document: a thing you can print is a thing you can email, and a
+ *   printer will not go looking for a folder of pictures beside the file.
+ * @returns {Promise<{blob: Blob, filename: string, report: object, html?: string}|null>}
  */
-export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
+export async function buildHtmlExport({ styleId, entryIds, secrets = false, format = "folder" }) {
+  const onePage = format !== "folder";
   // No style means "as it looks now", which is a different question: the CSS is
   // gathered from the page rather than compiled from a style.
   const style = styleId ? getStyle(styleId) : null;
@@ -467,8 +506,10 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
   const single = entries.length === 1;
   const plan = { journals: [] };
   for (const entry of entries) {
-    let file = single ? "index.html" : `${slug(entry.name, "journal")}.html`;
-    for (let n = 2; taken.has(file); n++) file = `${slug(entry.name, "journal")}-${n}.html`;
+    // One page means one file, so nothing is named after anything: every link
+    // is an anchor within the document.
+    let file = onePage ? "" : (single ? "index.html" : `${slug(entry.name, "journal")}.html`);
+    for (let n = 2; file && taken.has(file); n++) file = `${slug(entry.name, "journal")}-${n}.html`;
     taken.add(file);
     plan.journals.push({ entry, file, pages: exportablePages(entry) });
   }
@@ -480,7 +521,7 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
     }
   }
 
-  const assets = new AssetBag();
+  const assets = new AssetBag({ inline: onePage });
   const report = {
     flattened: 0,
     journals: plan.journals.length,
@@ -504,10 +545,10 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
    * so it should look styled in the export.
    */
   const styleFor = (entry) => (style ? style.id : (entry ? getAssignedStyleId(entry) ?? "" : ""));
-  const page = (title, entry, sidebar, pages) => {
+  const page = (title, entry, sidebar, pages, css) => {
     const id = styleFor(entry);
     return documentMarkup({
-      title, sidebar, pages, cssHref: sheetName, lang: game.i18n.lang ?? "en",
+      title, sidebar, pages, css, cssHref: sheetName, lang: game.i18n.lang ?? "en",
       styleId: id,
       chrome: { ...chrome, root: [chrome.root, id ? STYLED_CLASS : ""].filter(Boolean).join(" ") }
     });
@@ -534,10 +575,42 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
       report.pages += 1;
     }
 
+    if (onePage) {
+      // Kept for the second pass rather than written: a single document is
+      // built once its whole contents are known.
+      journal.rendered = rendered;
+      continue;
+    }
     files.push({
       path: journal.file,
       data: page(journal.entry.name, journal.entry, sidebar, rendered.join("\n"))
     });
+  }
+
+  if (onePage) {
+    const title = single
+      ? entries[0].name
+      : game.i18n.format("ILLUMINUS.Export.ManyTitle", { count: entries.length });
+    const sidebar = sidebarMarkup(plan, null);
+    // Each journal keeps its own name above its pages, which is the only thing
+    // the contents panel was saying that the page itself was not.
+    const body = plan.journals.map((journal) => (plan.journals.length > 1
+      ? `<article class="journal-entry-page text illuminus-export__journal">`
+        + `<header class="journal-page-header"><h1>${esc(journal.entry.name)}</h1></header></article>\n`
+        + journal.rendered.join("\n")
+      : journal.rendered.join("\n"))).join("\n");
+
+    // Built twice: the stylesheet is chosen by what the markup contains, and
+    // the markup then carries the stylesheet.
+    const probe = page(title, plan.journals[0]?.entry, sidebar, body);
+    const css = style
+      ? await buildStylesheet(style, assets, report)
+      : await buildAppliedStylesheet([probe], assets, report);
+    const html = page(title, plan.journals[0]?.entry, sidebar, body, css);
+
+    report.assets = assets.count;
+    const name = `${slug(single ? entries[0].name : (style?.name ?? "journals"), "journals")}.html`;
+    return { blob: new Blob([html], { type: "text/html" }), filename: name, report, html };
   }
 
   if (!single) {
@@ -571,6 +644,34 @@ export async function buildHtmlExport({ styleId, entryIds, secrets = false }) {
 }
 
 /**
+ * Open a built document in a tab of its own and ask the browser to print it.
+ *
+ * This is the whole of the PDF export, and deliberately so: every browser
+ * already prints to PDF, and the print dialog is where a person chooses paper
+ * size, margins, and whether backgrounds are inked. Producing a PDF ourselves
+ * would mean laying the pages out a second time, in a second engine, and
+ * getting a worse answer.
+ *
+ * The tab is opened from the click that asked for it, so a pop-up blocker
+ * treats it as wanted. If one stops it anyway, the file is downloaded instead
+ * rather than silently doing nothing.
+ */
+function printDocument(built) {
+  const url = URL.createObjectURL(built.blob);
+  const tab = window.open(url, "_blank");
+  if (!tab) {
+    saveFile(built.blob, built.filename);
+    ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.PopupBlocked"));
+    return;
+  }
+  tab.addEventListener("load", () => {
+    // Fonts decide the line breaks, and line breaks decide the page breaks.
+    tab.document.fonts?.ready.then(() => tab.print());
+  }, { once: true });
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+/**
  * Build an export and hand it to the browser, saying afterwards what did not
  * survive the trip — an author should not have to open the archive to find out
  * that fourteen references are text now.
@@ -581,7 +682,8 @@ export async function exportJournalsAsHtml(options) {
     ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NothingToExport"));
     return null;
   }
-  saveZip(built.blob, built.filename);
+  if (options.format === "print") printDocument(built);
+  else saveFile(built.blob, built.filename);
   ui.notifications.info(game.i18n.format("ILLUMINUS.Export.Done", {
     pages: built.report.pages,
     assets: built.report.assets

@@ -121,10 +121,26 @@ body {
 
 @media print {
   body { background: none; padding: 0; }
-  .illuminus-export { display: block; max-width: none; }
+  .illuminus-export {
+    display: block;
+    max-width: none;
+    border: none;
+    box-shadow: none;
+  }
+
   /* The contents panel is navigation, and navigation does not print. */
   .illuminus-export > .journal-sidebar { display: none; }
+
+  /* A page of a journal starts a page of paper. The first does not, or every
+     printout opens with a blank sheet. */
+  .illuminus-export .journal-entry-page + .journal-entry-page { break-before: page; }
   .illuminus-export .journal-entry-page { break-inside: auto; }
+
+  /* Nothing should be orphaned from what it introduces or belongs to. */
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
-  figure, blockquote, table { break-inside: avoid; }
+  figure, blockquote, table, .illuminus-box { break-inside: avoid; }
+  p, li { orphans: 2; widows: 2; }
+
+  /* A link that cannot be clicked should at least not look like one. */
+  a { text-decoration: none; }
 }
