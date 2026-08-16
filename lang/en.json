@@ -190,6 +190,7 @@
   "ILLUMINUS.Export.CarriesText": "An export copies the text and images in these journals, and the fonts they use.",
   "ILLUMINUS.Export.Contents": "Contents",
   "ILLUMINUS.Export.ContextEntry": "Export as Web Pages…",
+  "ILLUMINUS.Export.DesktopLinks": "Saving as a PDF from the desktop app goes through your operating system’s print panel, which drops the contents page’s links. Open this world in a browser and export from there for a PDF you can click through.",
   "ILLUMINUS.Export.Done": "Exported {pages} pages and {assets} files.",
   "ILLUMINUS.Export.Flattened": "{count} links to things outside these journals are now plain text.",
   "ILLUMINUS.Export.Fonts": "{count} font files were copied. Check what you are allowed to pass on before publishing them.",

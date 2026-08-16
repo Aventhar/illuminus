@@ -783,6 +783,19 @@ export async function buildHtmlExport({
  * If printing cannot be started at all, the file is saved instead, so the work
  * is never lost to a failed dialog.
  */
+/**
+ * Whether this is Foundry's own desktop application rather than a browser tab.
+ *
+ * It matters for one reason: what happens after the print dialog. A browser
+ * writes the PDF itself and keeps a document's internal links; the desktop app
+ * hands the job to the operating system's print panel, whose "Save as PDF" is a
+ * different writer that flattens them. The contents page still reads, but its
+ * entries stop being links — so the reader is told where to get them back.
+ */
+function inDesktopApp() {
+  return /Electron/i.test(navigator.userAgent);
+}
+
 function printDocument(built, target) {
   // Written into the document rather than loaded from a blob URL, and that is
   // the fix for a whole family of failures rather than a preference. A print
@@ -863,6 +876,7 @@ export async function exportJournalsAsHtml(options) {
   // warning reads as something having gone wrong.
   if (options.format === "print") {
     ui.notifications.info(game.i18n.localize("ILLUMINUS.Export.Printing"));
+    if (inDesktopApp()) ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.DesktopLinks"));
     printDocument(built, options.target);
   }
   else saveFile(built.blob, built.filename);

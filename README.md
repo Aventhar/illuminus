@@ -120,7 +120,9 @@ it to whichever journals should wear it, and export it to carry into another wor
   its own stylesheet, the pictures and fonts it uses, and a contents panel to move
   between pages, and it looks like the journal did, down to the window frame. A PDF or a
   single file opens with a contents page, tiered by the document's own headings and
-  styled like them, every line of it still a working link once printed. Hidden passages
+  styled like them, and every line of it stays a working link in a PDF a browser saves.
+  (Foundry's desktop app prints through your operating system’s panel, whose PDF writer
+  flattens links — open the world in a browser if you want a PDF you can click through.) Hidden passages
   stay out unless you ask for them, the page's own background is left off a printout
   unless you want it, and links to things that did not come along — an actor, an item —
   become plain text rather than links that go nowhere.

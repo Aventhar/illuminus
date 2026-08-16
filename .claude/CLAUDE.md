@@ -376,6 +376,11 @@ only get a worse answer.
   identifier. Fragment links and `:target` do not care; `querySelector("#" + id)` throws.
   Exported anchors are prefixed with a letter, and anything looking one up uses
   `getElementById`.
+- **Who writes the PDF decides whether its links survive.** A browser's own Save as PDF
+  keeps them; the desktop app hands the job to the operating system's print panel, whose
+  PDF writer flattens them. Nothing in the document can change that — printing a written
+  window and printing a loaded file produce identical annotations, so the difference is
+  entirely downstream. The export says so when it is running in Electron.
 - **A PDF's internal links are named destinations**, and a name nothing defines is a link
   that does nothing. Counting `/Subtype /Link` is not enough; the check resolves every
   `/Dest` against the `/Dests` dictionary.
