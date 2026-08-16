@@ -140,7 +140,7 @@ const emitPictureAlign = (value) => ({
   right: { left: "auto", right: "0" }
 }[value] ?? { left: "auto", right: "auto" });
 
-/** Mirroring, which Paizo uses to face an illustration into the page. */
+/** Mirroring, used to face an illustration into the page. */
 const emitFlip = (value) => ({
   none: "none", horizontal: "scaleX(-1)", vertical: "scaleY(-1)", both: "scale(-1, -1)"
 }[value] ?? "none");
@@ -368,8 +368,8 @@ function imageFields(prefix = "") {
  *
  * Two decisions are load-bearing and not obvious. A tag is laid out as an
  * inline block, because vertical padding on a true inline box spills over the
- * lines above and below instead of growing its own; that is why Paizo's trait
- * tags are list items in a flex row rather than spans. And "push right" is a
+ * lines above and below instead of growing its own; that is why a published
+ * adventure sets its trait tags as list items in a flex row rather than as spans. And "push right" is a
  * float, so a title line needs no cooperation from the heading around it —
  * `<h2>Sewer Haze <span>Disease 7</span></h2>` splits on its own.
  *

@@ -468,7 +468,8 @@ as `blockquote` does — verified end to end, not assumed. Two consequences: it 
 selection to attach to (the command returns `false` on an empty one, so the menu entry
 simply does nothing), and it is laid out `inline-block`, because vertical padding on a
 true inline box spills over the lines above and below rather than growing its own. That
-is why Paizo's trait tags are list items in a flex row; `inline-block` gets the same
+is why a published adventure sets its trait tags as list items in a flex row;
+`inline-block` gets the same
 shape while still flowing inside a heading or a sentence.
 
 **Anything that enumerates the families must be derived, not spelled out.** `cleanLabels`

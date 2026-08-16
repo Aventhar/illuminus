@@ -19,7 +19,7 @@
 #                  symlink the game system
 #   SANDBOX_DIR    where to build the throwaway data directory
 #   PORT           port for the sandbox server (default 30002)
-#   SYSTEM         game system id to link in (default pf2e)
+#   SYSTEM         game system id to link in (default: whichever is installed)
 
 set -euo pipefail
 
@@ -28,7 +28,11 @@ FOUNDRY_APP="${FOUNDRY_APP:-/Applications/Foundry Virtual Tabletop.app/Contents/
 FOUNDRY_DATA="${FOUNDRY_DATA:-$HOME/Documents/FoundryVTT}"
 SANDBOX_DIR="${SANDBOX_DIR:-${TMPDIR:-/tmp}/illuminus-sandbox}"
 PORT="${PORT:-30002}"
-SYSTEM="${SYSTEM:-pf2e}"
+# Whichever game system is installed, rather than a named one: the sandbox needs
+# *a* system to make a world with, and naming a particular one in the repository
+# says something about this module that is not true — it works with any of them.
+SYSTEM="${SYSTEM:-$(ls "${FOUNDRY_DATA:-$HOME/Documents/FoundryVTT}/Data/systems" 2>/dev/null \
+  | grep -v '^README' | head -1)}"
 WORLD="illuminus-sandbox"
 # Taken from the installed Foundry rather than written down: a world built for
 # an older build will not auto-launch after an update — it wants a migration

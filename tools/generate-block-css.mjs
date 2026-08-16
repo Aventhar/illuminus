@@ -145,7 +145,8 @@ ${memberSelector(group, " figcaption")} {
 /**
  * One inline treatment. A tag is an inline block because vertical padding on a
  * true inline box spills over the lines above and below rather than growing its
- * own — the reason Paizo's trait tags are list items in a flex row. Its picture
+ * own — the reason a published adventure sets its trait tags as list items in a
+ * flex row. Its picture
  * rides on a layer behind the lettering, isolated so that a blend mode mixes
  * with the tag's own fill rather than with the page beneath it.
  */

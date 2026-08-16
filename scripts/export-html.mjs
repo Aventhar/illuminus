@@ -534,8 +534,8 @@ async function carryPictures(css, assets) {
  * journals right now, gathered from every sheet the page has loaded and cut
  * down to the rules that touch the exported markup.
  *
- * This is what carries a game system's look — the reason a Pathfinder module
- * exports looking like a Pathfinder module rather than like plain HTML.
+ * This is what carries a game system's look — the reason a published adventure
+ * exports looking like itself rather than like plain HTML.
  */
 async function buildAppliedStylesheet(documents, assets, report) {
   const found = collectAppliedCss(documents);

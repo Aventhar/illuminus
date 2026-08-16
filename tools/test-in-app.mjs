@@ -1945,7 +1945,7 @@ try {
     `a tag lays out as an inline block, so its padding grows its own box (got ${il.display})`);
   check(il.background === "rgb(94, 0, 0)", `tag fill applied (got ${il.background})`);
   check(il.sideBorders === "5px/5px rgb(233, 183, 112)",
-    `side-only borders applied, which is what makes the Paizo tag shape (got ${il.sideBorders})`);
+    `side-only borders applied, which is what makes the trait-tag shape (got ${il.sideBorders})`);
   check(il.caps === "uppercase", `tag lettering settings applied (got ${il.caps})`);
   check(il.rankFloat === "right" && il.rankGap >= 0 && il.rankGap <= 12,
     `a right-pushed tag reaches the end of the title line (${il.rankGap}px short, float ${il.rankFloat})`);

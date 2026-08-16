@@ -4,9 +4,9 @@ import { log } from "./constants.mjs";
  * Gather the CSS that is actually painting a journal, for an export that has no
  * Illuminus style to bake in.
  *
- * A Pathfinder module does not look like a Pathfinder module because of Foundry
- * — it looks that way because of the game system's stylesheet, and often the
- * module's own on top of that. "Export it as it looks" therefore means carrying
+ * A published adventure does not look the way it does because of Foundry — it
+ * looks that way because of the game system's stylesheet, and often the module's
+ * own on top of that. "Export it as it looks" therefore means carrying
  * whatever is applied at the time, from wherever it came.
  *
  * Copying every loaded stylesheet would work and would be megabytes of rules

@@ -4,7 +4,7 @@
  *
  * Every one of these is written against Illuminus's *keys* — `box01`, `tag01`,
  * `image01` — and never against a color or a size. That is what lets the same
- * template look like a Pathfinder hazard under one style and a starship manifest
+ * template look like a dungeon hazard under one style and a starship manifest
  * under another. It also means a template only looks finished if the style
  * being used has set those slots up; the first two or three are used here
  * deliberately, since a style is most likely to have configured those.
@@ -53,7 +53,7 @@ export const TEMPLATE_PRESETS = [
     name: "Location Entry",
     description: "A heading, a tag row, an illustration, and room for the description.",
     markup: html(
-      "<h2>Room Name <span class=\"illuminus-tag illuminus-tag--tag03\">Moderate 3</span></h2>",
+      "<h2>Room Name <span class=\"illuminus-tag illuminus-tag--tag03\">Level 3</span></h2>",
       '<p><span class="illuminus-tag illuminus-tag--tag01">Trap</span>',
       '<span class="illuminus-tag illuminus-tag--tag02">Magical</span></p>',
       '<figure class="illuminus-image illuminus-image--image01">',

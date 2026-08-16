@@ -108,7 +108,7 @@ it to whichever journals should wear it, and export it to carry into another wor
   location entry, a player handout, a GM aside — dropped into a page from the same
   Illuminus menu. Select anything you have built and "Save selection as template" keeps
   it for next time. Templates carry *structure*, never colors or sizes, so the same
-  template looks like a Pathfinder hazard under one style and a starship manifest under
+  template looks like a dungeon hazard under one style and a starship manifest under
   another. They import and export as JSON like styles do, and an imported one is parsed
   through Foundry's own editor rules, so it can carry no more than a person could type.
 - **Export as a PDF, or as web pages.** Save journals with no Foundry and no Illuminus
