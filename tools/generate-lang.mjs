@@ -497,6 +497,7 @@ for (const name of names) {
 
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
+  hoverOff: ["Disable Hovered State", "Nothing on this tab changes when the mouse is over it. Turn this off to set how it looks when pointed at."],
   outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
   outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
   hoverColor: ["Text Color", "Text color while the mouse is over this. Leave empty to keep the ordinary color."],

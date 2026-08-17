@@ -373,12 +373,25 @@ const imageVar = (layer, part, suffix = "") => {
   return v(group, name, suffix);
 };
 
+/**
+ * `::before` on every member of a comma-joined selector, not only the last.
+ *
+ * `a, b::before` attaches the pseudo-element to `b` alone and applies the rule's
+ * declarations to `a` itself — which put `position: absolute; inset: 0` on every
+ * content link in a styled journal and took them out of the flow entirely. The
+ * same trap as appending `:hover` to a list, and it fails just as quietly.
+ */
+const eachBefore = (selector) => selector
+  .split(",")
+  .map((one) => `${one.trim()}::before`)
+  .join(",\n");
+
 const imageLayer = (layer) => `
 ${layer.selector} {
 ${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
 }
 
-${layer.selector}::before {
+${eachBefore(layer.selector)} {
   content: "";
   position: absolute;
   inset: 0;

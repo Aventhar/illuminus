@@ -122,7 +122,16 @@ export function fieldToCss(field, value) {
  */
 export function compileDeclarations(settings, { withDefaults = false } = {}) {
   const lines = [];
+  // A tab whose hovered state is switched off emits none of its hovered values,
+  // and the `:hover` rules then fall through to the ordinary ones — which is
+  // exactly what "nothing happens when you point at it" means. Done here rather
+  // than in the stylesheet because CSS cannot decline to apply a rule.
+  const hoverOff = (groupId) => {
+    const stored = settings?.[groupId]?.hoverOff;
+    return stored === undefined ? withDefaults : Boolean(stored);
+  };
   for (const { group, field } of allFields()) {
+    if (/^hover[A-Z]/.test(field.name) && hoverOff(group.id)) continue;
     const raw = settings?.[group.id]?.[field.name];
     const value = raw === undefined ? (withDefaults ? field.default : undefined) : raw;
     if (value === undefined) continue;

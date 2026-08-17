@@ -29,7 +29,13 @@ const baseRule = compileBaseRule();
 // produce: a field meaning "use the page setting" emits nothing until it is
 // given a value, and the stylesheet still has to name it.
 const emitted = new Set();
-for (const { group, field } of allFields()) {
+// A chrome field is stored with a style and exported with it, but drives the
+// editor rather than the stylesheet — "is this tab's hovered state switched
+// off" is a question for the compiler, not a value any rule reads. It is
+// therefore exempt from both directions of the check below, and from the one
+// after it that insists every field can produce a declaration.
+const paints = ({ field }) => !field.chrome;
+for (const { group, field } of allFields().filter(paints)) {
   const candidates = [field.default, ...(field.choices ?? []), true, false, 1, ""];
   let sawSuffix = false;
   for (const candidate of candidates) {
@@ -47,7 +53,7 @@ const consumed = new Set([...css.matchAll(/var\((--ill-[a-z0-9-]+)\s*[,)]/g)].ma
 // for some setting other than the default — the drop-cap tint indirects through
 // the drop-cap color, but only while a drop cap is switched on. So exercise
 // every value each field can take, not just its default.
-for (const { field } of allFields()) {
+for (const { field } of allFields().filter(paints)) {
   const candidates = [field.default, ...(field.choices ?? []), true, false];
   for (const candidate of candidates) {
     const out = fieldToCss(field, candidate);
@@ -74,7 +80,7 @@ else ok(`all ${emitted.size} emitted vars are consumed by CSS`);
 /* 2. Every field compiles — or is deliberately optional. */
 console.log("\n[2] Field defaults compile");
 let optional = 0;
-for (const { group, field } of allFields()) {
+for (const { group, field } of allFields().filter(paints)) {
   if (Object.keys(fieldToCss(field, field.default) ?? {}).length) continue;
   // A field whose default emits nothing means "use the page setting". It still
   // has to produce a declaration once given a real value.
@@ -86,7 +92,8 @@ for (const { group, field } of allFields()) {
   fail(`${group.id}.${field.name} emits nothing, for its default or for ${JSON.stringify(sample)}`);
 }
 if (!failures) {
-  ok(`all ${allFields().length} fields compile (${optional} optional, falling back to the page setting)`);
+  ok(`all ${allFields().filter(paints).length} fields compile `
+    + `(${optional} optional, falling back to the page setting)`);
 }
 
 /* 3. Localization coverage. */

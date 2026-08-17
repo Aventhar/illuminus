@@ -524,7 +524,20 @@ size or a padding would reflow the page under the pointer. `NO_HOVER` skips the 
 frame and the contents panel, which are not hovered as objects.
 
 When a selector is a comma-joined list, `:hover` must be appended to **each** member —
-`a, b:hover` hovers only `b`, which half-works in silence.
+`a, b:hover` hovers only `b`, which half-works in silence. **The same is true of
+`::before`**, and it fails far worse: `a, b::before` attaches the pseudo-element to `b`
+alone and applies the whole rule to `a` itself, so the links layer put `position:
+absolute; inset: 0` on every content link in a styled journal and took them out of the
+flow. `eachBefore()` in the generator exists for that.
+
+**A hovered state is off until it is asked for.** Each tab that has hovered controls
+carries a `hoverOff` toggle, default true, and the compiler emits none of that tab's
+hovered values while it is on — the `:hover` rules then fall through to the ordinary
+ones, which is what "nothing happens when you point at it" means in CSS, since a rule
+cannot decline to apply. The control is `chrome: true`: stored and exported like any
+other value, drawn beside the tab's name rather than in the list, and exempt from
+`validate.mjs`'s "every field emits a property" checks because it drives the compiler
+rather than the stylesheet.
 
 The switch offers **whatever states a section actually has**, from a `STATES` table
 matched against field names. A section with no ordinary controls of its own offers only

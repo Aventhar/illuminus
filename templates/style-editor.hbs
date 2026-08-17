@@ -16,6 +16,13 @@
 
     <header class="illuminus-tab__head">
       <p class="hint">{{group.hint}}</p>
+      {{#if group.hoverOff}}
+      <label class="illuminus-hover-off">
+        <input type="checkbox" name="{{group.hoverOff.path}}" data-dtype="Boolean"
+               {{checked group.hoverOff.checked}}>
+        <span>{{group.hoverOff.label}}</span>
+      </label>
+      {{/if}}
     </header>
 
     <div class="illuminus-fields scrollable">
@@ -57,6 +64,13 @@
   <section class="tab illuminus-tab {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
 
     <header class="illuminus-tab__head illuminus-family__head">
+      {{#if family.current.hoverOff}}
+      <label class="illuminus-hover-off">
+        <input type="checkbox" name="{{family.current.hoverOff.path}}" data-dtype="Boolean"
+               {{checked family.current.hoverOff.checked}}>
+        <span>{{family.current.hoverOff.label}}</span>
+      </label>
+      {{/if}}
       <select data-family-picker="{{family.id}}" aria-label="{{family.nameLabel}}">
         {{#each family.members as |member|}}
         <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>

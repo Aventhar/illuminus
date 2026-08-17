@@ -1849,7 +1849,8 @@
   isolation: isolate;
 }
 
-.illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll::before {
+.illuminus-styled .journal-page-content a.content-link::before,
+.illuminus-styled .journal-page-content a.inline-roll::before {
   content: "";
   position: absolute;
   inset: 0;

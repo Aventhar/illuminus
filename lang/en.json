@@ -764,6 +764,8 @@
   "ILLUMINUS.Field.hoverBorderTopColor.label": "Top Color",
   "ILLUMINUS.Field.hoverColor.hint": "Text color while the mouse is over this. Leave empty to keep the ordinary color.",
   "ILLUMINUS.Field.hoverColor.label": "Text Color",
+  "ILLUMINUS.Field.hoverOff.hint": "Nothing on this tab changes when the mouse is over it. Turn this off to set how it looks when pointed at.",
+  "ILLUMINUS.Field.hoverOff.label": "Disable Hovered State",
   "ILLUMINUS.Field.hoverTexture.hint": "An image laid over the fill color, such as a parchment scan. Leave empty for none.",
   "ILLUMINUS.Field.hoverTexture.label": "Background Image When Pointed At",
   "ILLUMINUS.Field.hoverTextureBlend.hint": "How the image mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through.",

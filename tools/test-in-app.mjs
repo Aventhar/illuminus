@@ -31,7 +31,9 @@ const shown = [...pageGroups, ...firstOfEach];
 const EXPECT = {
   tabs: pageGroups.length + families.length,
   sections: shown.reduce((n, g) => n + g.sections.length, 0),
-  fields: shown.reduce((n, g) => n + groupFields(g).length, 0)
+  // Chrome fields are stored with the style but drawn beside the tab's name
+  // rather than in the list — the switch that turns a hovered state off.
+  fields: shown.reduce((n, g) => n + groupFields(g).filter((f) => !f.chrome).length, 0)
 };
 
 const cdp = await connect();
@@ -2746,10 +2748,72 @@ try {
   })()`);
 }
 
+// Hovered states are off until asked for, and a link is the control that proves
+// the layer selector is right: `a, b::before` attaches the pseudo-element to b
+// alone and puts its declarations on a itself, which took every content link
+// out of the flow of the page.
+console.log("\n[54] Hovered states are off until asked for");
+try {
+  const off = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Hover Off Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.boxes, {background: "#123456", hoverBackground: "#ff0000"});
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Hover Off Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<blockquote><p>Boxed</p></blockquote><p>A <a class=\\"content-link\\">link</a> in a line.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1300));
+
+    const root = entry.sheet.element;
+    const sheet = document.getElementById("illuminus-compiled-styles").textContent;
+    const link = root.querySelector(".journal-page-content a.content-link");
+    const out = {
+      // Switched off by default, so the hovered value is never emitted.
+      offByDefault: !/--ill-boxes-hover-background/.test(sheet),
+      // A content link stays in the line it was written in.
+      linkPosition: getComputedStyle(link).position,
+      linkInline: getComputedStyle(link).display
+    };
+
+    // Turned on, the value reaches the stylesheet.
+    settings.boxes.hoverOff = false;
+    await api.updateStyle(style.id, {settings});
+    await new Promise(r => setTimeout(r, 400));
+    out.onWhenAsked = /--ill-boxes-hover-background/
+      .test(document.getElementById("illuminus-compiled-styles").textContent);
+
+    await entry.sheet.close({force: true});
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`);
+  const ho = JSON.parse(off);
+  check(ho.offByDefault, "a tab's hovered values stay out of the stylesheet until the state is switched on");
+  check(ho.onWhenAsked, "and reach it once it is");
+  check(ho.linkPosition !== "absolute" && ho.linkInline === "inline",
+    `a content link stays in its line (${ho.linkPosition}, ${ho.linkInline})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.getName("Hover Off Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Hover Off Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 // A hovered color is usually the ordinary one with a change, so it can start as
 // a copy of it. The button belongs to the state switch and only appears where
 // there is something to copy from.
-console.log("\n[54] Filling a hovered state from the ordinary one");
+console.log("\n[55] Filling a hovered state from the ordinary one");
 try {
   const copying = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -2998,6 +3062,10 @@ try {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    // Hovered states are off until asked for, so this asks.
+    settings.heading1.hoverOff = false;
+    settings.boxes.hoverOff = false;
+    settings.heading2.hoverOff = false;
     settings.heading1.hoverColor = "#00ff00";
     settings.boxes.hoverBackground = "#123456";
     settings.heading2.hoverBorderTopColor = "#ff8800";
@@ -3186,6 +3254,15 @@ try {
     out.boxes = (rendered.get("boxes") ?? []).slice(0, 4);
     out.tag = (rendered.get("tag01") ?? []).slice(0, 4);
     out.lettering = app.element.textContent.includes("Lettering");
+
+    // Turned on first: a tab whose hovered state is switched off greys the
+    // switch, and rightly — there is nothing to look at behind it.
+    const enable = app.element.querySelector('[data-tab="boxes"] .illuminus-hover-off input');
+    if (enable?.checked) {
+      enable.checked = false;
+      enable.dispatchEvent(new Event("change", {bubbles: true}));
+      await new Promise(r => setTimeout(r, 500));
+    }
 
     // Hovered hides, never reorders. The section is left closed and re-found
     // each time: opening one re-renders, and a node held across that is a

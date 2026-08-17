@@ -1153,6 +1153,7 @@ const NO_HOVER = new Set(["window", "sidebar"]);
 for (const group of GROUPS) {
   if (NO_HOVER.has(group.id)) continue;
   const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
+  let derived = 0;
   for (const section of group.sections) {
     for (const name of HOVERABLE) {
       if (!section.fields.some((field) => field.name === name)) continue;
@@ -1162,8 +1163,19 @@ for (const group of GROUPS) {
       if (taken.has(hovered)) continue;
       taken.add(hovered);
       section.fields.push(col(hovered, ""));
+      derived += 1;
     }
   }
+
+  // A switch for the whole tab, off by default: most things a reader points at
+  // should not move under the pointer, and a hovered state nobody asked for is
+  // a hovered state half filled in. It rides in the first section as chrome —
+  // stored and exported like any other value, but drawn beside the tab's name
+  // rather than in the list, because it governs the list.
+  if (!derived) continue;
+  group.sections[0].fields.push({
+    type: "toggle", name: "hoverOff", default: true, chrome: true, emit: () => null
+  });
 }
 
 /* -------------------------------------------- */

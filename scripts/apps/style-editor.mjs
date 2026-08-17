@@ -307,6 +307,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
       active: this.tabGroups.sheet === group.id,
       changedCount: this.#changedCount(group),
+      hoverOff: this.#groupContext(group, fonts).hoverOff,
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
@@ -318,7 +319,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         // Only sections whose fields repeat one property across sides or
         // corners can offer to match them.
         matchable: section.fields.some((field) => field.link),
-        fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
+        fields: section.fields
+          .filter((field) => !field.chrome)
+          .map((field) => this.#fieldContext(group, field, fonts))
       }))
     }));
     context.buttons = [
@@ -330,9 +333,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** Sections and controls for one group, shared by page tabs and family tabs. */
   #groupContext(group, fonts) {
+    // A chrome field is stored with the style but drawn beside the tab's name
+    // rather than in the list, because it governs the list.
+    const chrome = groupFields(group).find((field) => field.chrome && field.name === "hoverOff");
     return {
       id: group.id,
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
+      hoverOff: chrome ? this.#fieldContext(group, chrome, fonts) : null,
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
@@ -342,7 +349,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         matchable: section.fields.some((field) => field.link),
-        fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
+        fields: section.fields
+          .filter((field) => !field.chrome)
+          .map((field) => this.#fieldContext(group, field, fonts))
       }))
     };
   }
@@ -552,6 +561,34 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return STATES.filter((state) => found.has(state.id));
   }
 
+  /**
+   * Grey out a tab's hovered controls while its hovered state is switched off.
+   *
+   * Left in place rather than hidden: a control that vanishes when you turn
+   * something off leaves you wondering what you have lost, and the switch is
+   * right there to turn back on.
+   */
+  #applyHoverOff() {
+    for (const box of this.element.querySelectorAll('input[name$=".hoverOff"]')) {
+      const [groupId] = box.name.split(".");
+      const off = box.checked;
+      const tab = box.closest(".illuminus-tab");
+      for (const field of tab?.querySelectorAll(".illuminus-field[data-field]") ?? []) {
+        const [, name] = field.dataset.field.split(".");
+        if (stateOf(name) === "normal") continue;
+        field.classList.toggle("is-hover-off", off);
+      }
+      // The switch that chooses which state to show has nothing to choose while
+      // the hovered one is off.
+      for (const wrap of tab?.querySelectorAll(".illuminus-state") ?? []) {
+        wrap.classList.toggle("is-hover-off", off);
+      }
+      if (!tab) continue;
+      tab.dataset.hoverOff = String(off);
+      void groupId;
+    }
+  }
+
   /** Show one state's controls per section, hiding the other's. */
   #applyStates() {
     for (const section of this.element.querySelectorAll(".illuminus-section")) {
@@ -732,6 +769,10 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.#focusSample();
     this.#activateStates();
     this.#activateFilter();
+    this.#applyHoverOff();
+    for (const box of this.element.querySelectorAll('input[name$=".hoverOff"]')) {
+      box.addEventListener("change", () => this.#applyHoverOff());
+    }
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
       const [groupId, fieldName] = row.dataset.field.split(".");
