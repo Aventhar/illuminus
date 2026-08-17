@@ -4,6 +4,8 @@
   "ILLUMINUS.Buttons.Close": "Close",
   "ILLUMINUS.Buttons.CopyFrom": "Copy {name}",
   "ILLUMINUS.Buttons.CopyFromTooltip": "Take every setting from the level above, as a starting point to change",
+  "ILLUMINUS.Buttons.CopyNormal": "Copy Normal",
+  "ILLUMINUS.Buttons.CopyNormalTooltip": "Fill these from the ordinary controls, as a starting point to change",
   "ILLUMINUS.Buttons.Delete": "Delete",
   "ILLUMINUS.Buttons.Details": "Name and Description",
   "ILLUMINUS.Buttons.Discard": "Discard Changes",

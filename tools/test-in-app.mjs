@@ -2746,6 +2746,66 @@ try {
   })()`);
 }
 
+// A hovered color is usually the ordinary one with a change, so it can start as
+// a copy of it. The button belongs to the state switch and only appears where
+// there is something to copy from.
+console.log("\n[54] Filling a hovered state from the ordinary one");
+try {
+  const copying = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "State Copy Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.boxes, {background: "#123456", hoverBackground: "#000000"});
+    await api.updateStyle(style.id, {settings});
+
+    const app = await api.openEditor(style.id);
+    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    app.changeTab("boxes", "sheet");
+    await new Promise(r => setTimeout(r, 500));
+
+    const fill = () => app.element
+      .querySelector('summary[data-group="boxes"][data-section="background"]').closest(".illuminus-section");
+    const button = () => fill().querySelector(".illuminus-state__copy");
+    const out = {};
+
+    // While the ordinary controls are on show there is nothing to copy from.
+    out.hiddenAtFirst = button()?.classList.contains("is-hidden") ?? "missing";
+    fill().querySelector('.illuminus-state__option[data-state="hover"]').click();
+    await new Promise(r => setTimeout(r, 300));
+    out.shownForHover = !button()?.classList.contains("is-hidden");
+
+    button().click();
+    await new Promise(r => setTimeout(r, 800));
+    out.hovered = api.getStyle(style.id).settings.boxes.hoverBackground;
+    const working = app.element
+      .querySelector('[data-field="boxes.hoverBackground"] color-picker')?.value;
+    out.control = working;
+
+    await app.close({force: true});
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`);
+  const sc = JSON.parse(copying);
+  check(sc.hiddenAtFirst === true, `nothing to copy while the ordinary controls are on show (${sc.hiddenAtFirst})`);
+  check(sc.shownForHover, "the button appears with the hovered ones");
+  check((sc.control ?? "").toLowerCase().startsWith("#123456"),
+    `and fills them from the ordinary values (${sc.control})`);
+  check(sc.hovered === "#000000",
+    `leaving the saved style alone until it is saved (${sc.hovered})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "State Copy Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 // Six heading levels means setting the same twenty values six times unless a
 // level can start as a copy of the one above it.
 console.log("\n[53] Copying a heading level from the one above");

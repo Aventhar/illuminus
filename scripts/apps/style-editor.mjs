@@ -476,9 +476,56 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         });
         wrap.append(button);
       }
+      // Setting a hovered color usually means "the ordinary one, but darker",
+      // and typing every value twice is how a state ends up half-set. The
+      // button sits with the switch and only shows while a state other than
+      // the ordinary one is on.
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.className = "illuminus-reset illuminus-state__copy";
+      copy.innerHTML = `<i class="fa-solid fa-copy"></i> `
+        + game.i18n.localize("ILLUMINUS.Buttons.CopyNormal");
+      copy.dataset.tooltip = game.i18n.localize("ILLUMINUS.Buttons.CopyNormalTooltip");
+      copy.addEventListener("click", () => this.#copyStateFromNormal(section));
+      wrap.append(copy);
+
       tools.prepend(wrap);
     }
     this.#applyStates();
+  }
+
+  /**
+   * Fill a section's controls for the state on show from the ordinary ones.
+   *
+   * Only the controls that have an ordinary counterpart move: a thickness with
+   * no hovered twin is already shared, and nothing in another section is
+   * touched — the sidebar keeps its hovered entry colors beside the entry they
+   * belong to, and copying one section should not reach into another.
+   */
+  #copyStateFromNormal(sectionElement) {
+    const key = sectionElement.querySelector("summary")?.dataset;
+    if (!key) return;
+    const group = GROUPS.find((candidate) => candidate.id === key.group);
+    const section = group?.sections.find((candidate) => candidate.id === key.section);
+    if (!section) return;
+
+    const chosen = this.#states.get(`${key.group}.${key.section}`) ?? "normal";
+    if (chosen === "normal") return;
+
+    const names = new Set(section.fields.map((field) => field.name));
+    let copied = 0;
+    for (const field of section.fields) {
+      if (stateOf(field.name) !== chosen) continue;
+      const ordinary = stateBase(field.name);
+      if (ordinary === field.name || !names.has(ordinary)) continue;
+      this.#working[key.group][field.name] = this.#working[key.group][ordinary];
+      copied += 1;
+    }
+    if (!copied) return;
+
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
   }
 
   /**
@@ -518,6 +565,16 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
       for (const option of wrap.querySelectorAll(".illuminus-state__option")) {
         option.classList.toggle("is-on", option.dataset.state === chosen);
+      }
+
+      // Nothing to copy from while the ordinary controls are the ones on show,
+      // and nothing to copy into where a state's controls have no ordinary
+      // counterpart in this section — the sidebar's Entry States is all of one
+      // and none of the other.
+      const copy = wrap.querySelector(".illuminus-state__copy");
+      if (copy) {
+        const twinned = present.some((state) => state.id === "normal") && chosen !== "normal";
+        copy.classList.toggle("is-hidden", !twinned);
       }
 
       const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];

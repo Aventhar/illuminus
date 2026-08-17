@@ -92,6 +92,8 @@ Object.assign(out, {
   "ILLUMINUS.Export.SelectNone": "Select None",
   "ILLUMINUS.Buttons.Close": "Close",
   "ILLUMINUS.Buttons.CopyFrom": "Copy {name}",
+  "ILLUMINUS.Buttons.CopyNormal": "Copy Normal",
+  "ILLUMINUS.Buttons.CopyNormalTooltip": "Fill these from the ordinary controls, as a starting point to change",
   "ILLUMINUS.Buttons.CopyFromTooltip": "Take every setting from the level above, as a starting point to change",
   // Named for what the window does rather than for the pen on the button: the
   // dialog behind it sets a description as well, which "Rename" hides.
