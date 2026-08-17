@@ -487,6 +487,20 @@ Text and heading settings mean "use the page setting" by default — a size of 0
 the CSS keyword or nothing at all. `validate.mjs` knows a field may legitimately emit
 nothing and checks it still compiles once given a value.
 
+## The journal title is an `<input>`
+
+Foundry renders a journal's name as `<input class="title">`, and a replaced element can
+carry no `::before` — so the Title tab's Background Image had nowhere to paint and did
+nothing at all. The picture now rides on `.journal-header` around it, which means the
+input must carry no fill of its own or it covers what is behind it: the box (fill,
+picture, edges, corners, spacing) is on the header, the lettering on the input. The
+export writes `<header class="journal-header"><h1 class="title">`, so one rule serves
+both.
+
+The same reasoning covers the Page tab's Outer Shadow, which the window clips: it is
+kept because an *export* shows it, and its hint says so. A section may name its own hint
+key in the schema for cases like that.
+
 ## Editor chrome
 
 The sample **follows the open tab**: pieces of it carry `data-part="<group id>"`, and

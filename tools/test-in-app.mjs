@@ -2043,6 +2043,7 @@ try {
     Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
     Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
     Object.assign(settings.sidebar, {buttonBackground: "#222222", buttonTexture: IMG});
+    Object.assign(settings.title, {background: "#2b1d12", texture: IMG});
     settings.box01.texture = IMG;
     await api.updateStyle(style.id, {settings});
 
@@ -2070,7 +2071,12 @@ try {
       tableHeader: layer("thead th"),
       heading: layer(".journal-page-content h1"),
       sidebarButton: layer(".journal-sidebar button"),
-      block: layer(".illuminus-box--box01")
+      block: layer(".illuminus-box--box01"),
+      // The journal's name is an <input>, which can carry no ::before at all —
+      // so its picture goes on the header around it, and the input must keep no
+      // fill of its own or it covers what is painted behind it.
+      title: layer(".journal-header"),
+      titleFill: getComputedStyle(root.querySelector(".journal-header .title")).backgroundColor
     };
     window.__layers = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);
@@ -2085,6 +2091,9 @@ try {
     `a heading takes one, and Image Fit reaches it (repeat ${ly.heading.repeat})`);
   check(ly.sidebarButton.image, "so does a sidebar button");
   check(ly.block.image, "and a box style");
+  check(ly.title.image, "and the journal title, whose picture rides on the header around it");
+  check(["rgba(0, 0, 0, 0)", "transparent"].includes(ly.titleFill),
+    `with the name itself carrying no fill to cover it (${ly.titleFill})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -2734,6 +2743,134 @@ try {
     const api = game.modules.get("illuminus").api;
     if (window.__pal?.styleId) await api.deleteStyle(window.__pal.styleId);
     window.__pal = undefined;
+  })()`);
+}
+
+// Six heading levels means setting the same twenty values six times unless a
+// level can start as a copy of the one above it.
+console.log("\n[53] Copying a heading level from the one above");
+try {
+  const copied = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Copy Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.heading2, {size: 41, color: "#abcdef", letterSpacing: 3});
+    await api.updateStyle(style.id, {settings});
+
+    const app = await api.openEditor(style.id);
+    for (let i = 0; i < 200 && !app.element?.querySelector("[data-family-picker]"); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    app.changeTab("headings", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+
+    const picker = app.element.querySelector('[data-family-picker="headings"]');
+    picker.value = "heading3";
+    picker.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 800));
+
+    const sizeOf = () => app.element
+      .querySelector('[data-field="heading3.size"] range-picker, [data-field="heading3.size"] input')?.value;
+    const out = { before: sizeOf() };
+
+    const button = app.element.querySelector('[data-action="copyFromAbove"]');
+    out.offered = Boolean(button);
+    out.says = button?.textContent.trim();
+    button?.click();
+    await new Promise(r => setTimeout(r, 900));
+    out.after = sizeOf();
+
+    // The first level has nothing above it to copy.
+    picker.value = "heading1";
+    picker.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 700));
+    out.firstOffersNone = !app.element.querySelector('[data-action="copyFromAbove"]');
+
+    await app.close({force: true});
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`);
+  const cp = JSON.parse(copied);
+  check(cp.offered && /Heading 2/.test(cp.says ?? ""),
+    `a heading level offers to copy the one above it (${cp.says})`);
+  check(String(cp.after) === "41" && String(cp.before) !== "41",
+    `and copying brings its settings over (${cp.before} -> ${cp.after})`);
+  check(cp.firstOffersNone, "the first level, having nothing above it, offers nothing");
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Copy Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// An outline is the one lettering control that has to be drawn behind the
+// letters rather than over them, so both halves are checked: that it arrives,
+// and that it is painted underneath.
+console.log("\n[52] An outline around the title and the headings");
+try {
+  const outline = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Outline Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.title, {outlineWidth: 3, outlineColor: "#ff00ff"});
+    Object.assign(settings.heading2, {outlineWidth: 2, outlineColor: "#00ff00"});
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Outline Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<h2>Heading</h2><p>Body.</p>"}
+    }]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1300));
+
+    const root = entry.sheet.element;
+    const read = (sel) => {
+      const el = root.querySelector(sel);
+      if (!el) return {missing: true};
+      const cs = getComputedStyle(el);
+      return {
+        width: cs.webkitTextStrokeWidth,
+        color: cs.webkitTextStrokeColor,
+        order: cs.paintOrder
+      };
+    };
+    const out = {title: read(".journal-header .title"), heading: read(".journal-page-content h2")};
+    // A level left alone keeps none of it.
+    out.untouched = read(".journal-page-content h2") && (() => {
+      const el = root.querySelector(".journal-page-content p");
+      return getComputedStyle(el).webkitTextStrokeWidth;
+    })();
+    await entry.sheet.close({force: true});
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`);
+  const ol = JSON.parse(outline);
+  check(ol.title.width === "3px" && ol.title.color === "rgb(255, 0, 255)",
+    `the journal title takes an outline (${ol.title.width} ${ol.title.color})`);
+  check(ol.heading.width === "2px" && ol.heading.color === "rgb(0, 255, 0)",
+    `and so does a heading level of its own (${ol.heading.width} ${ol.heading.color})`);
+  check(/stroke/.test(ol.title.order) && /stroke/.test(ol.heading.order),
+    `painted behind the letters rather than over them (${ol.title.order})`);
+  check(ol.untouched === "0px",
+    `body text is left alone (${ol.untouched})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.getName("Outline Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Outline Probe") await api.deleteStyle(style.id);
+    }
   })()`);
 }
 

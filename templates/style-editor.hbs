@@ -62,6 +62,14 @@
         <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>
         {{/each}}
       </select>
+      {{#if family.copyFrom}}
+      <button type="button" class="illuminus-reset" data-action="copyFromAbove"
+              data-group="{{family.copyFrom.id}}" data-into="{{family.current.id}}"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.CopyFromTooltip'}}">
+        <i class="fa-solid fa-copy"></i>
+        {{localize "ILLUMINUS.Buttons.CopyFrom" name=family.copyFrom.label}}
+      </button>
+      {{/if}}
       {{#if family.renamable}}
       <input type="text" class="illuminus-family__name" data-rename="{{family.current.id}}"
              value="{{family.current.label}}" placeholder="{{family.nameLabel}}"

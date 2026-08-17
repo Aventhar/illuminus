@@ -454,7 +454,18 @@ function imageSections() {
 /** The section set shared by heading levels and the journal title. */
 function bannerSections(defaults = {}) {
   return [
-    { id: "text", fields: textFields("", defaults) },
+    {
+      id: "text",
+      // An outline is drawn *behind* the letterform rather than centred on its
+      // edge, which is what `paint-order` in the stylesheet is for: a stroke
+      // painted over the fill eats into the shapes and thickens a display face
+      // until it closes up.
+      fields: [
+        ...textFields("", defaults),
+        num("outlineWidth", 0, "px", 0, 8, 0.5),
+        col("outlineColor", "#000000")
+      ]
+    },
     { id: "textShadow", fields: textShadowFields() },
     { id: "margin", fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 }) },
     { id: "padding", fields: spacingFields("padding", defaults.padding ?? 0) },
@@ -640,7 +651,7 @@ export const GROUPS = [
       { id: "padding", fields: spacingFields("padding", 24) },
       { id: "border", fields: borderFields("border") },
       { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", fields: shadowFields("shadow") },
+      { id: "shadow", hint: "ILLUMINUS.Sections.pageShadow.hint", fields: shadowFields("shadow") },
       { id: "innerShadow", fields: shadowFields("innerShadow") }
     ]
   },
@@ -1202,9 +1213,9 @@ const SECTION_ORDER = [
  */
 const FIELD_ORDER = {
   text: [
-    "font", "size", "color", "textColor", "textStyle", "caps",
-    "letterSpacing", "wordSpacing", "lineHeight", "align", "verticalAlign",
-    "width"
+    "font", "size", "color", "textColor", "textStyle", "outlineWidth",
+    "outlineColor", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+    "align", "verticalAlign", "width"
   ],
   background: [
     "background", "texture", "textureFit", "texturePosition",

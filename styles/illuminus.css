@@ -351,6 +351,28 @@
 
 /* --- Journal title ------------------------------------------------------ */
 
+/* The title's box goes on the header and its lettering on the input inside it.
+   Foundry renders a journal's name as an `<input>`, and a replaced element can
+   carry no `::before` — so a picture had nowhere to paint, and the input's own
+   fill covered anything painted behind it. Split this way the Title tab behaves
+   like every other tab: one real element carrying fill, picture, edges, and
+   spacing, with the lettering on top. */
+.illuminus-styled .journal-header {
+  margin: var(--ill-title-margin-top) var(--ill-title-margin-right)
+          var(--ill-title-margin-bottom) var(--ill-title-margin-left);
+  padding: var(--ill-title-padding-top) var(--ill-title-padding-right)
+           var(--ill-title-padding-bottom) var(--ill-title-padding-left);
+  background: var(--ill-title-background);
+  border-width: var(--ill-title-border-top-width) var(--ill-title-border-right-width)
+                var(--ill-title-border-bottom-width) var(--ill-title-border-left-width);
+  border-style: var(--ill-title-border-top-style) var(--ill-title-border-right-style)
+                var(--ill-title-border-bottom-style) var(--ill-title-border-left-style);
+  border-color: var(--ill-title-border-top-color) var(--ill-title-border-right-color)
+                var(--ill-title-border-bottom-color) var(--ill-title-border-left-color);
+  border-radius: var(--ill-title-corner-top-left) var(--ill-title-corner-top-right)
+                 var(--ill-title-corner-bottom-right) var(--ill-title-corner-bottom-left);
+}
+
 .illuminus-styled .journal-header .title {
   height: auto;
   font-family: var(--ill-title-font);
@@ -366,19 +388,15 @@
   color: var(--ill-title-color);
   text-shadow: var(--ill-title-text-shadow-offset-x) var(--ill-title-text-shadow-offset-y)
                var(--ill-title-text-shadow-blur) var(--ill-title-text-shadow-color);
-  margin: var(--ill-title-margin-top) var(--ill-title-margin-right)
-          var(--ill-title-margin-bottom) var(--ill-title-margin-left);
-  padding: var(--ill-title-padding-top) var(--ill-title-padding-right)
-           var(--ill-title-padding-bottom) var(--ill-title-padding-left);
-  background: var(--ill-title-background);
-  border-width: var(--ill-title-border-top-width) var(--ill-title-border-right-width)
-                var(--ill-title-border-bottom-width) var(--ill-title-border-left-width);
-  border-style: var(--ill-title-border-top-style) var(--ill-title-border-right-style)
-                var(--ill-title-border-bottom-style) var(--ill-title-border-left-style);
-  border-color: var(--ill-title-border-top-color) var(--ill-title-border-right-color)
-                var(--ill-title-border-bottom-color) var(--ill-title-border-left-color);
-  border-radius: var(--ill-title-corner-top-left) var(--ill-title-corner-top-right)
-                 var(--ill-title-corner-bottom-right) var(--ill-title-corner-bottom-left);
+  /* Behind the fill, so an outline thickens the letters rather than eating
+     into them. A width of 0 draws nothing at all. */
+  -webkit-text-stroke: var(--ill-title-outline-width) var(--ill-title-outline-color);
+  paint-order: stroke fill;
+  /* The box is the header's now, so the input carries none of its own. */
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
   box-shadow: none;
 }
 

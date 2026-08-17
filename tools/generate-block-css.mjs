@@ -243,6 +243,8 @@ ${headingSelector(level)} {
   color: ${v(group, "color")};
   text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
                ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
   background-color: ${v(group, "background")};
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
@@ -348,7 +350,11 @@ const IMAGE_LAYERS = [
   { selector: '.illuminus-styled .journal-sidebar search input[type="search"]', group: "sidebar", prefix: "search" },
   { selector: ".illuminus-styled .journal-sidebar button", group: "sidebar", prefix: "button" },
   { selector: ".illuminus-styled .journal-sidebar button:hover", group: "sidebar", prefix: "buttonHover" },
-  { selector: ".illuminus-styled .journal-header .title", group: "title", prefix: "" },
+  // The layer goes on the header, not on the title inside it: Foundry renders a
+  // journal's name as an `<input>`, and a replaced element has no `::before` to
+  // put a picture on — so the Title tab's Background Image had nowhere to paint
+  // and silently did nothing. The header is the same width and a real element.
+  { selector: ".illuminus-styled .journal-header", group: "title", prefix: "" },
   ...HEADINGS.map(({ group, level }) =>
     ({ selector: `.illuminus-styled .journal-page-content h${level}`, group: group.id, prefix: "" })),
   { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },

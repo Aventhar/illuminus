@@ -74,6 +74,8 @@
   color: var(--ill-heading1-color);
   text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
                var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading1-outline-width) var(--ill-heading1-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading1-background);
   margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right) var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
   padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right) var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
@@ -98,6 +100,8 @@
   color: var(--ill-heading2-color);
   text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
                var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading2-outline-width) var(--ill-heading2-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading2-background);
   margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right) var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
   padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right) var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
@@ -122,6 +126,8 @@
   color: var(--ill-heading3-color);
   text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
                var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading3-outline-width) var(--ill-heading3-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading3-background);
   margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right) var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
   padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right) var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
@@ -146,6 +152,8 @@
   color: var(--ill-heading4-color);
   text-shadow: var(--ill-heading4-text-shadow-offset-x) var(--ill-heading4-text-shadow-offset-y)
                var(--ill-heading4-text-shadow-blur) var(--ill-heading4-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading4-outline-width) var(--ill-heading4-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading4-background);
   margin: var(--ill-heading4-margin-top) var(--ill-heading4-margin-right) var(--ill-heading4-margin-bottom) var(--ill-heading4-margin-left);
   padding: var(--ill-heading4-padding-top) var(--ill-heading4-padding-right) var(--ill-heading4-padding-bottom) var(--ill-heading4-padding-left);
@@ -170,6 +178,8 @@
   color: var(--ill-heading5-color);
   text-shadow: var(--ill-heading5-text-shadow-offset-x) var(--ill-heading5-text-shadow-offset-y)
                var(--ill-heading5-text-shadow-blur) var(--ill-heading5-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading5-outline-width) var(--ill-heading5-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading5-background);
   margin: var(--ill-heading5-margin-top) var(--ill-heading5-margin-right) var(--ill-heading5-margin-bottom) var(--ill-heading5-margin-left);
   padding: var(--ill-heading5-padding-top) var(--ill-heading5-padding-right) var(--ill-heading5-padding-bottom) var(--ill-heading5-padding-left);
@@ -194,6 +204,8 @@
   color: var(--ill-heading6-color);
   text-shadow: var(--ill-heading6-text-shadow-offset-x) var(--ill-heading6-text-shadow-offset-y)
                var(--ill-heading6-text-shadow-blur) var(--ill-heading6-text-shadow-color);
+  -webkit-text-stroke: var(--ill-heading6-outline-width) var(--ill-heading6-outline-color);
+  paint-order: stroke fill;
   background-color: var(--ill-heading6-background);
   margin: var(--ill-heading6-margin-top) var(--ill-heading6-margin-right) var(--ill-heading6-margin-bottom) var(--ill-heading6-margin-left);
   padding: var(--ill-heading6-padding-top) var(--ill-heading6-padding-right) var(--ill-heading6-padding-bottom) var(--ill-heading6-padding-left);
@@ -1692,12 +1704,12 @@
   opacity: var(--ill-sidebar-button-hover-texture-opacity);
 }
 
-.illuminus-styled .journal-header .title {
+.illuminus-styled .journal-header {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-header .title::before {
+.illuminus-styled .journal-header::before {
   content: "";
   position: absolute;
   inset: 0;

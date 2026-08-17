@@ -131,6 +131,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       toggleSection: IlluminusStyleEditor.#onToggleSection,
       pickColor: IlluminusStyleEditor.#onPickColor,
       renameMember: IlluminusStyleEditor.#onRenameMember,
+      copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
       openColorPicker: IlluminusStyleEditor.#onOpenColorPicker
     }
   };
@@ -281,6 +282,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         nameLabel: game.i18n.localize(`ILLUMINUS.Families.${family.id}Name`),
         renamable: family.renamable !== false,
         members: members.map((m) => ({ id: m.id, label: this.#labelFor(m.id), selected: m.id === current.id })),
+        // The member one place above this one in its own list, offered as
+        // something to copy. Setting six heading levels by hand means setting
+        // the same twenty values six times; most styles want each level to be
+        // the one above it with a smaller size or a lighter weight.
+        copyFrom: (() => {
+          const at = members.findIndex((m) => m.id === current.id);
+          const above = at > 0 ? members[at - 1] : null;
+          return above ? { id: above.id, label: this.#labelFor(above.id) } : null;
+        })(),
         current: { ...this.#groupContext(current, fonts), label: this.#labelFor(current.id) }
       };
     });
@@ -300,7 +310,10 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
-        hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
+        // A section may name its own wording, for the rare case where the same
+        // section means something different on one tab — the page's shadow,
+        // which Foundry's window clips and only an export ever shows.
+        hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         // Only sections whose fields repeat one property across sides or
         // corners can offer to match them.
@@ -323,7 +336,10 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
-        hint: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.hint`),
+        // A section may name its own wording, for the rare case where the same
+        // section means something different on one tab — the page's shadow,
+        // which Foundry's window clips and only an export ever shows.
+        hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         matchable: section.fields.some((field) => field.link),
         fields: section.fields.map((field) => this.#fieldContext(group, field, fonts))
@@ -891,6 +907,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       }
     }
 
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
+  }
+
+  /**
+   * Take every setting from the member above this one.
+   *
+   * Copied rather than linked, deliberately: the point is a starting place to
+   * change, not a level that follows another one about. Nothing is saved by
+   * this — it lands in the working copy like any other edit, so Undo Changes
+   * still puts it back.
+   */
+  static #onCopyFromAbove(_event, target) {
+    const { group: from } = target.dataset;
+    const to = target.dataset.into;
+    if (!from || !to || !this.#working[from]) return;
+    this.#working[to] = foundry.utils.deepClone(this.#working[from]);
     this.#dirty = true;
     this.#applyPreview();
     this.render();

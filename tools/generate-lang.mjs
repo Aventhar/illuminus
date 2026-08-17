@@ -91,6 +91,8 @@ Object.assign(out, {
   "ILLUMINUS.Export.JournalsLegend": "Journals",
   "ILLUMINUS.Export.SelectNone": "Select None",
   "ILLUMINUS.Buttons.Close": "Close",
+  "ILLUMINUS.Buttons.CopyFrom": "Copy {name}",
+  "ILLUMINUS.Buttons.CopyFromTooltip": "Take every setting from the level above, as a starting point to change",
   // Named for what the window does rather than for the pen on the button: the
   // dialog behind it sets a description as well, which "Rename" hides.
   "ILLUMINUS.Buttons.Details": "Name and Description",
@@ -316,6 +318,9 @@ const SECTION_TEXT = {
   cellBorder: ["Lines Between Cells", "The grid inside the table. Each edge of every cell is set separately"],
   corners: ["Corner Rounding", "Each corner is set separately"],
   shadow: ["Outer Shadow", "A shadow cast outwards. A fully transparent color means no shadow"],
+  // The page's own is a special case: the window clips it, so it is a control
+  // that only earns its keep outside Foundry.
+  pageShadow: ["Outer Shadow", "A shadow cast outwards. Foundry\u2019s window clips it, so this shows in exported pages rather than at the table"],
   innerShadow: ["Inner Shadow", "Shading inside the edges, for an aged or lit-from-within look"],
   paragraph: ["Paragraphs", "Spacing and indentation between paragraphs"],
   columns: ["Columns", "Split the text into newspaper-style columns"],
@@ -490,6 +495,8 @@ for (const name of names) {
 
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
+  outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
+  outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
   hoverColor: ["Text Color", "Text color while the mouse is over this. Leave empty to keep the ordinary color."],
   hoverBackground: ["Fill Color", "The color behind this while the mouse is over it. Leave empty to keep the ordinary fill."],
   background: ["Fill Color", "The flat color behind everything else."],
