@@ -1755,6 +1755,19 @@
 
 /* --- Focusing the sample ------------------------------------------------ */
 
+/* The sample is a picture of a page, not a page. Its buttons and its title field
+   are there to be looked at, and Foundry styles both to react to a pointer — so
+   pointing at the sample lit up the Reveal button and changed the title field's
+   edge, neither of which is anything the style being edited says. Taking them
+   out of the pointer's reach stops that without touching the parts whose
+   hovered state is worth seeing: headings, boxes, links, panel entries. */
+.illuminus-preview__frame button,
+.illuminus-preview__frame input,
+.illuminus-preview__frame select,
+.illuminus-preview__frame textarea {
+  pointer-events: none;
+}
+
 /* While a tab is open, the parts of the sample it does not style step back.
    Dimmed rather than hidden: a heading alone on a blank page says nothing about
    how it sits against the text around it. */
