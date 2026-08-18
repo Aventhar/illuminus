@@ -268,7 +268,7 @@ ${headingSelector(level)} {
 const HOVER_TARGETS = {
   page: ".illuminus-styled .journal-entry-content",
   title: ".illuminus-styled .journal-header .title",
-  heading1: ".illuminus-styled .journal-page-content h1",
+  heading1: headingSelector(1),
   heading2: ".illuminus-styled .journal-page-content h2",
   heading3: ".illuminus-styled .journal-page-content h3",
   heading4: ".illuminus-styled .journal-page-content h4",
@@ -355,8 +355,12 @@ const IMAGE_LAYERS = [
   // put a picture on — so the Title tab's Background Image had nowhere to paint
   // and silently did nothing. The header is the same width and a real element.
   { selector: ".illuminus-styled .journal-header", group: "title", prefix: "" },
+  // The same selector the heading's own rule uses, so level 1's picture reaches
+  // the page title as well: the sheet renders that title *outside* the content,
+  // and a layer written for the content only left Background Image doing
+  // nothing on the one heading most likely to want one.
   ...HEADINGS.map(({ group, level }) =>
-    ({ selector: `.illuminus-styled .journal-page-content h${level}`, group: group.id, prefix: "" })),
+    ({ selector: headingSelector(level), group: group.id, prefix: "" })),
   { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },
   { selector: ".illuminus-styled .journal-page-content thead th", group: "tables", prefix: "header" },
   { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-box)", group: "boxes", prefix: "" },

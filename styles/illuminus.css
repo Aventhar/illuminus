@@ -2055,9 +2055,15 @@
   width: 100%;
 }
 
-.illuminus-preview__frame .journal-page-content {
-  /* Scale the sample down so a full page of elements fits the pane while
-     keeping every relative size faithful to the real thing. */
+/* Scale the sample down so a full page of elements fits the pane while keeping
+   every relative size faithful to the real thing.
+
+   On the page rather than on its content: a page's title sits in a header
+   *beside* the content, not inside it, so scaling only the content left the
+   title — heading level 1 — drawn a third larger than the levels below it at
+   the same setting. The page's own surface is left unscaled, so the sample
+   still fills the pane. */
+.illuminus-preview__frame .journal-entry-page > div {
   zoom: 0.75;
 }
 

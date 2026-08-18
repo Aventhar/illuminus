@@ -1724,11 +1724,17 @@
   opacity: var(--ill-title-texture-opacity);
 }
 
+.illuminus-styled .journal-page-header h1,
+.illuminus-styled .journal-page-header h2,
+.illuminus-styled .journal-page-header h3,
 .illuminus-styled .journal-page-content h1 {
   position: relative;
   isolation: isolate;
 }
 
+.illuminus-styled .journal-page-header h1::after,
+.illuminus-styled .journal-page-header h2::after,
+.illuminus-styled .journal-page-header h3::after,
 .illuminus-styled .journal-page-content h1::after {
   content: "";
   position: absolute;
@@ -2322,6 +2328,9 @@
   border-left-color: var(--ill-title-hover-border-left-color, var(--ill-title-border-left-color));
 }
 
+.illuminus-styled .journal-page-header h1:hover,
+.illuminus-styled .journal-page-header h2:hover,
+.illuminus-styled .journal-page-header h3:hover,
 .illuminus-styled .journal-page-content h1:hover {
   color: var(--ill-heading1-hover-color, var(--ill-heading1-color));
   background-color: var(--ill-heading1-hover-background, var(--ill-heading1-background));

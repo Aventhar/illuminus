@@ -972,8 +972,10 @@ const assets = await cdp.evaluate(`(async () => {
   document.head.append(freeze);
 
   // The sample renders at zoom 0.75 so a whole page fits the pane, and computed
-  // lengths come back scaled. Undo it just for the measurement.
-  const zoomed = app.element.querySelector(".illuminus-preview__frame .journal-page-content");
+  // lengths come back scaled. Undo it just for the measurement — on the page
+  // itself, which is what carries the zoom, since the page's title sits beside
+  // its content rather than inside it.
+  const zoomed = app.element.querySelector(".illuminus-preview__frame .journal-entry-page > div");
   const priorZoom = zoomed.style.zoom;
   zoomed.style.zoom = "1";
 
@@ -4255,7 +4257,46 @@ try {
   })()`);
 }
 
-console.log("\n[51] Console is clean");
+console.log("\n[51] The sample draws every heading level at one scale");
+// The sample is shrunk to fit its pane. Scaling the page's *content* left the
+// page title — heading level 1 — at full size, so a style setting all six levels
+// to one size drew the first a third larger than the rest.
+const scale = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const settings = {};
+  for (let level = 1; level <= 6; level += 1) settings["heading" + level] = {size: 36};
+  // Heading 1 also styles the page title, which the sheet renders outside the
+  // page's content — a picture set here used to land nowhere.
+  settings.heading1.texture = "icons/svg/mystery-man.svg";
+  const style = await api.createStyle({name: "Heading Scale Probe", settings});
+  try {
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1200));
+    const freeze = document.createElement("style");
+    freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+    document.head.append(freeze);
+    const sizes = {};
+    for (let level = 1; level <= 6; level += 1) {
+      const el = app.element.querySelector('.illuminus-preview__frame [data-part="heading' + level + '"]');
+      sizes["h" + level] = el ? getComputedStyle(el).fontSize : null;
+    }
+    const title = app.element.querySelector('.illuminus-preview__frame .journal-page-header h1');
+    sizes.titleLayer = title ? getComputedStyle(title, "::after").backgroundImage : null;
+    freeze.remove();
+    await app.close({force: true});
+    return JSON.stringify(sizes);
+  } finally {
+    await api.deleteStyle(style.id);
+  }
+})()`);
+const hs = JSON.parse(scale);
+const drawn = [1, 2, 3, 4, 5, 6].map((level) => hs["h" + level]);
+check(drawn.every(Boolean), `every heading level is in the sample (${JSON.stringify(hs)})`);
+check(new Set(drawn).size === 1, `and all six are drawn at one size (${JSON.stringify(hs)})`);
+check((hs.titleLayer ?? "").includes("mystery-man"),
+  `heading 1's picture reaches the page title (got ${hs.titleLayer})`);
+
+console.log("\n[52] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 
