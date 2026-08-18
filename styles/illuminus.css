@@ -60,8 +60,8 @@
 
 /* The background picture rides on its own layer so it can carry an independent
    opacity and blend mode without affecting the text above it. */
-.illuminus-styled .journal-entry-content::before,
-.illuminus-styled.journal-entry-page > .window-content::before {
+.illuminus-styled .journal-entry-content::after,
+.illuminus-styled.journal-entry-page > .window-content::after {
   content: "";
   position: absolute;
   inset: 0;

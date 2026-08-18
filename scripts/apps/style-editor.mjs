@@ -132,6 +132,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       pickColor: IlluminusStyleEditor.#onPickColor,
       renameMember: IlluminusStyleEditor.#onRenameMember,
       copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
+      foundryDefault: IlluminusStyleEditor.#onFoundryDefault,
       openColorPicker: IlluminusStyleEditor.#onOpenColorPicker
     }
   };
@@ -308,6 +309,10 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       active: this.tabGroups.sheet === group.id,
       changedCount: this.#changedCount(group),
       hoverOff: this.#groupContext(group, fonts).hoverOff,
+      // The window's defaults are all "leave it as Foundry draws it", so
+      // clearing the tab is exactly that — said in those words on the one tab
+      // where "Reset Tab" does not convey it.
+      plainReset: group.id === "window",
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
@@ -1252,6 +1257,27 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     });
     if (!confirmed) return;
     for (const field of groupFields(group)) this.#working[group.id][field.name] = this.#baselineFor(group.id, field);
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
+  }
+
+  /**
+   * Hand the window back to Foundry.
+   *
+   * Not the same as resetting the tab, which restores the values this style was
+   * last *saved* with — a style whose saved window is bright red resets to
+   * bright red. This puts the schema's own values back, and those are all
+   * "leave it as Foundry draws it": no fill, no picture, no edges of ours.
+   */
+  static async #onFoundryDefault() {
+    const group = GROUPS.find((candidate) => candidate.id === "window");
+    const confirmed = await DialogV2.confirm({
+      window: { title: game.i18n.localize("ILLUMINUS.Buttons.FoundryDefault") },
+      content: `<p>${game.i18n.localize("ILLUMINUS.Confirm.FoundryDefault")}</p>`
+    });
+    if (!confirmed) return;
+    for (const field of groupFields(group)) this.#working[group.id][field.name] = field.default;
     this.#dirty = true;
     this.#applyPreview();
     this.render();

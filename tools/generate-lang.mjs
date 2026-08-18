@@ -93,6 +93,9 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.Close": "Close",
   "ILLUMINUS.Buttons.CopyFrom": "Copy {name}",
   "ILLUMINUS.Buttons.CopyNormal": "Copy Normal",
+  "ILLUMINUS.Buttons.FoundryDefault": "Use Foundry Default",
+  "ILLUMINUS.Confirm.FoundryDefault": "Clear every setting on this tab, leaving the window frame, title bar, and buttons as Foundry draws them?",
+  "ILLUMINUS.Buttons.FoundryDefaultTooltip": "Clear this tab, leaving the window frame, title bar, and buttons as Foundry draws them",
   "ILLUMINUS.Buttons.CopyNormalTooltip": "Fill these from the ordinary controls, as a starting point to change",
   "ILLUMINUS.Buttons.CopyFromTooltip": "Take every setting from the level above, as a starting point to change",
   // Named for what the window does rather than for the pen on the button: the

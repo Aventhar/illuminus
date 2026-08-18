@@ -118,6 +118,11 @@ These are all load-bearing and none are obvious from the code.
   picker. The overlay is positioned from the input's measured rect, because the color
   element's internal spacing is not ours to assume — aligning to the row's edge left it
   five pixels off its click target.
+- **FontAwesome owns `::before`.** An icon is a glyph in that pseudo-element's `content`,
+  so a background layer rule setting `content: ""` erases the icon on every button it
+  touches — the button keeps its fill, which reads as "the icon color does not work"
+  rather than as the icon being gone. Generated image layers therefore ride on `::after`,
+  and so does the hand-written page layer, for one rule to remember.
 - **Some core styling is fed through element-local custom properties.** A journal
   sheet's header buttons carry `--button-text-color` on themselves, which a generic
   `button { color: var(--button-text-color) }` then resolves. Setting `color` works, but

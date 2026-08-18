@@ -282,7 +282,7 @@ body {
     background-color: transparent;
   }
 
-  .illuminus-export:not(.illuminus-print-background) .journal-entry-content::before {
+  .illuminus-export:not(.illuminus-print-background) .journal-entry-content::after {
     display: none;
   }
 

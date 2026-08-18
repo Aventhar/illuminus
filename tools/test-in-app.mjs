@@ -1013,7 +1013,7 @@ const texture = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 1200));
 
   const content = entry.sheet.element.querySelector(".journal-entry-content");
-  const url = getComputedStyle(content, "::before").backgroundImage.match(/url\\("([^"]+)"\\)/)?.[1];
+  const url = getComputedStyle(content, "::after").backgroundImage.match(/url\\("([^"]+)"\\)/)?.[1];
   const res = url ? await fetch(url) : null;
   const out = {url, ok: res?.ok ?? false, doubled: (url ?? "").includes("styles/modules")};
 
@@ -2061,7 +2061,7 @@ try {
     const layer = (sel) => {
       const el = root.querySelector(sel);
       if (!el) return {missing: true};
-      const before = getComputedStyle(el, "::before");
+      const before = getComputedStyle(el, "::after");
       return {
         image: /mystery-man/.test(before.backgroundImage),
         opacity: before.opacity, repeat: before.backgroundRepeat,
@@ -2078,7 +2078,12 @@ try {
       // so its picture goes on the header around it, and the input must keep no
       // fill of its own or it covers what is painted behind it.
       title: layer(".journal-header"),
-      titleFill: getComputedStyle(root.querySelector(".journal-header .title")).backgroundColor
+      titleFill: getComputedStyle(root.querySelector(".journal-header .title")).backgroundColor,
+      // An icon is a glyph in the ::before pseudo-element, which is where a
+      // layer used to go — and a layer setting an empty content erased every
+      // icon it touched. The button kept its fill, so it read as the icon
+      // colour not working rather than as the icon being gone.
+      iconGlyph: getComputedStyle(root.querySelector(".window-header button.header-control"), "::before").content
     };
     window.__layers = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);
@@ -2096,6 +2101,8 @@ try {
   check(ly.title.image, "and the journal title, whose picture rides on the header around it");
   check(["rgba(0, 0, 0, 0)", "transparent"].includes(ly.titleFill),
     `with the name itself carrying no fill to cover it (${ly.titleFill})`);
+  check(ly.iconGlyph && ly.iconGlyph !== '""' && ly.iconGlyph !== "none",
+    `and a button keeps the icon a layer used to erase (${ly.iconGlyph})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -2745,6 +2752,64 @@ try {
     const api = game.modules.get("illuminus").api;
     if (window.__pal?.styleId) await api.deleteStyle(window.__pal.styleId);
     window.__pal = undefined;
+  })()`);
+}
+
+// The Window tab's defaults are all "leave it as Foundry draws it", so clearing
+// that tab is exactly that — and it says so, on the one tab where "Reset Tab"
+// does not convey what resetting means.
+console.log("\n[56] Handing the window back to Foundry");
+try {
+  const handed = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Foundry Default Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.window, {background: "#204060", headerButtonColor: "#ffcc00"});
+    await api.updateStyle(style.id, {settings});
+
+    const app = await api.openEditor(style.id);
+    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    app.changeTab("window", "sheet");
+    await new Promise(r => setTimeout(r, 500));
+
+    const button = app.element.querySelector('[data-tab="window"] [data-action="foundryDefault"]');
+    const out = { offered: Boolean(button), says: button?.textContent.trim() };
+    const before = app.element.querySelector('[data-field="window.headerButtonColor"] color-picker')?.value;
+    button?.click();
+    await new Promise(r => setTimeout(r, 700));
+    // Clearing a tab asks first, as it should.
+    const asked = [...foundry.applications.instances.values()]
+      .filter(a => a.constructor.name === "DialogV2").pop();
+    out.asked = Boolean(asked);
+    asked?.element.querySelector('button[data-action="yes"], button[data-action="ok"]')?.click();
+    await new Promise(r => setTimeout(r, 900));
+    const after = app.element.querySelector('[data-field="window.headerButtonColor"] color-picker')?.value;
+    out.cleared = before !== after;
+    out.after = after;
+    // Only that tab: the rest of the style is left alone.
+    out.elsewhere = app.element.querySelector('[data-field="page.background"] color-picker')?.value;
+
+    await app.close({force: true});
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`);
+  const fd = JSON.parse(handed);
+  check(fd.offered && /Foundry/.test(fd.says ?? ""),
+    `the Window tab offers to hand it back to Foundry (${fd.says})`);
+  check(fd.asked, "asking first, since it clears the whole tab");
+  check(fd.cleared, `and clearing it puts the tab back to its defaults (${fd.after})`);
+  check(Boolean(fd.elsewhere), "leaving every other tab as it was");
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Foundry Default Probe") await api.deleteStyle(style.id);
+    }
   })()`);
 }
 
@@ -3750,7 +3815,7 @@ try {
       // taller than a sheet whether or not anything asked it to be.
       sheetHigh: parseInt(getComputedStyle(surface).minHeight, 10) || 0,
       sheet: innerHeight,
-      texture: getComputedStyle(surface, "::before").display,
+      texture: getComputedStyle(surface, "::after").display,
       fill: getComputedStyle(surface).backgroundColor,
       // The margin has to be the sheet's own. Padding on a page applies where
       // that page starts and ends, so a page running over three sheets leaves
@@ -3791,7 +3856,7 @@ try {
     return JSON.stringify({
       sheetHigh: parseInt(getComputedStyle(surface).minHeight, 10) || 0,
       sheet: innerHeight,
-      texture: getComputedStyle(surface, "::before").display,
+      texture: getComputedStyle(surface, "::after").display,
       fill: getComputedStyle(surface).backgroundColor
     });
   })()`, { printMedia: true }));

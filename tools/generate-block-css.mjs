@@ -374,16 +374,25 @@ const imageVar = (layer, part, suffix = "") => {
 };
 
 /**
- * `::before` on every member of a comma-joined selector, not only the last.
+ * `::after` on every member of a comma-joined selector, not only the last.
  *
- * `a, b::before` attaches the pseudo-element to `b` alone and applies the rule's
+ * Two things are going on here, and both were bugs.
+ *
+ * The layer rides on `::after` and not on `::before` because **FontAwesome owns
+ * `::before`**: an icon is a glyph in that pseudo-element's `content`, and a
+ * layer rule setting `content: ""` erased the icon on every button it touched.
+ * The button kept its fill, so it read as "the icon colour does not work" when
+ * the icon was not there at all.
+ *
+ * And it is appended to each member of a comma-joined selector, not to the list:
+ * `a, b::after` attaches the pseudo-element to `b` alone and applies the rule's
  * declarations to `a` itself — which put `position: absolute; inset: 0` on every
- * content link in a styled journal and took them out of the flow entirely. The
- * same trap as appending `:hover` to a list, and it fails just as quietly.
+ * content link in a styled journal. The same trap as appending `:hover` to a
+ * list, and it fails just as quietly.
  */
-const eachBefore = (selector) => selector
+const eachAfter = (selector) => selector
   .split(",")
-  .map((one) => `${one.trim()}::before`)
+  .map((one) => `${one.trim()}::after`)
   .join(",\n");
 
 const imageLayer = (layer) => `
@@ -391,7 +400,7 @@ ${layer.selector} {
 ${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
 }
 
-${eachBefore(layer.selector)} {
+${eachAfter(layer.selector)} {
   content: "";
   position: absolute;
   inset: 0;
