@@ -15,6 +15,13 @@
   <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
 
     <header class="illuminus-tab__head">
+      {{#if group.hoverOff}}
+      <label class="illuminus-hover-off">
+        <input type="checkbox" name="{{group.hoverOff.path}}" data-dtype="Boolean"
+               {{checked group.hoverOff.checked}}>
+        <span>{{group.hoverOff.label}}</span>
+      </label>
+      {{/if}}
       <p class="hint">{{group.hint}}</p>
       {{#if group.plainReset}}
       <button type="button" class="illuminus-reset" data-action="foundryDefault"
@@ -22,13 +29,6 @@
         <i class="fa-solid fa-rotate-left"></i>
         {{localize "ILLUMINUS.Buttons.FoundryDefault"}}
       </button>
-      {{/if}}
-      {{#if group.hoverOff}}
-      <label class="illuminus-hover-off">
-        <input type="checkbox" name="{{group.hoverOff.path}}" data-dtype="Boolean"
-               {{checked group.hoverOff.checked}}>
-        <span>{{group.hoverOff.label}}</span>
-      </label>
       {{/if}}
     </header>
 
