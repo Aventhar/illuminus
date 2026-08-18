@@ -1207,33 +1207,12 @@
   display: block;
 }
 
-/* Room between the style picker and the filter that follows it, so the two do
-   not read as one control. */
-.illuminus-export-dialog select[name="styleId"] + /* The switch that turns a tab's hovered state off, and what it greys out. The
-   controls stay in place rather than disappearing: a control that vanishes
-   leaves you wondering what you lost, and the switch is right there. */
-.illuminus-hover-off {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.illuminus-field.is-hover-off,
-.illuminus-state.is-hover-off {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.illuminus-state__copy.is-hidden {
-  display: none;
-}
-
 .illuminus-export-dialog__option.is-hidden {
   display: none;
 }
 
+/* Room between the style picker and the tick box under it, so the two do not
+   read as one control. */
 .illuminus-export-dialog__option {
   margin-top: 0.5rem;
 }
