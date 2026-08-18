@@ -483,6 +483,14 @@
   margin-bottom: var(--ill-lists-detail-spacing-below);
 }
 
+.illuminus-styled .journal-page-content dt:hover {
+  color: var(--ill-lists-hover-term-color, var(--ill-lists-term-color));
+}
+
+.illuminus-styled .journal-page-content dd:hover {
+  color: var(--ill-lists-hover-detail-color, var(--ill-lists-detail-color));
+}
+
 /* --- Table captions ----------------------------------------------------- */
 
 .illuminus-styled .journal-page-content table > caption {
@@ -843,6 +851,13 @@
   color: var(--ill-lists-marker-color);
   font-family: var(--ill-lists-marker-font);
   font-size: var(--ill-lists-marker-size);
+}
+
+/* Pointed at, with the ordinary color as the fallback, so an unset hovered
+   color leaves the marker exactly as it was. The item is what a reader points
+   at; the marker is what changes. */
+.illuminus-styled .journal-page-content li:hover::marker {
+  color: var(--ill-lists-hover-marker-color, var(--ill-lists-marker-color));
 }
 
 /* --- Tables ------------------------------------------------------------- */
@@ -1229,7 +1244,7 @@
 }
 
 .illuminus-field.is-hover-off,
-.illuminus-state.is-hover-off {
+.illuminus-state__option.is-hover-off {
   opacity: 0.4;
   pointer-events: none;
 }

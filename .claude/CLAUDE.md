@@ -525,8 +525,9 @@ rather than half-hidden.
 lettering color, fill, and edge color with a `hover…` counterpart, and the generator
 emits the matching `:hover` rule with the ordinary value as its fallback — so an unset
 hovered color changes nothing rather than resetting the element. Paint only: shadowing a
-size or a padding would reflow the page under the pointer. `NO_HOVER` skips the window
-frame and the contents panel, which are not hovered as objects.
+size or a padding would reflow the page under the pointer. `NO_HOVER` skips the *deriving*
+for the window frame and the contents panel, which are not hovered as objects — both
+still get the switch, because both hold hovered controls written by hand.
 
 When a selector is a comma-joined list, `:hover` must be appended to **each** member —
 `a, b:hover` hovers only `b`, which half-works in silence. **The same is true of
@@ -535,14 +536,30 @@ alone and applies the whole rule to `a` itself, so the links layer put `position
 absolute; inset: 0` on every content link in a styled journal and took them out of the
 flow. `eachBefore()` in the generator exists for that.
 
-**A hovered state is off until it is asked for.** Each tab that has hovered controls
-carries a `hoverOff` toggle, default true, and the compiler emits none of that tab's
-hovered values while it is on — the `:hover` rules then fall through to the ordinary
-ones, which is what "nothing happens when you point at it" means in CSS, since a rule
-cannot decline to apply. The control is `chrome: true`: stored and exported like any
+**A hovered state is off until it is asked for.** Each tab holding anything hovered —
+derived or written by hand — carries a `hoverOff` toggle, and the compiler emits none of
+that tab's hovered values while it is on, so the `:hover` rules fall through to the
+ordinary ones. That is what "nothing happens when you point at it" means in CSS, since a
+rule cannot decline to apply. The control is `chrome: true`: stored and exported like any
 other value, drawn beside the tab's name rather than in the list, and exempt from
 `validate.mjs`'s "every field emits a property" checks because it drives the compiler
 rather than the stylesheet.
+
+**Two things make that harder than "emit nothing", and both were bugs.** The toggle
+defaults to on (hovered state off) everywhere except the four tabs named in `HOVER_ON` —
+the contents panel, the window, links, and secrets: those spell their hovered colors out
+by hand and ship real values for them, so starting switched off would take away something
+the style already does. They are also the four whose elements a reader points at on
+purpose. And
+where a hovered control ships a real default, staying quiet is not enough — the
+*skeleton* paints that default for every style, and it went on painting it with the
+switch on. `unhovered()` in the compiler therefore points such a control at the ordinary
+one it stands in for (`--…-button-hover-color: var(--…-button-color)`), or at what the
+ordinary element paints where there is no such control — `transparent`, `none`. It stays
+quiet for the derived controls, whose defaults are empty, so a switched-off tab costs a
+handful of declarations rather than a thousand. `ordinaryTwinFor` searches the control's
+own section only, so a hovered *entry* fill cannot fall back to the fill of the *panel*
+it sits in; `HOVER_TWIN_ELSEWHERE` names the one pair that genuinely spans two sections.
 
 The switch offers **whatever states a section actually has**, from a `STATES` table
 matched against field names. A section with no ordinary controls of its own offers only
@@ -550,6 +567,9 @@ the named ones — the sidebar's Entry States holds pointed-at and current-page 
 because the ordinary entry is styled in the section above it, and offering it a "Normal"
 that showed nothing would be a lie. A control with no counterpart in another state
 belongs to all of them: a button's corner rounding does not change when pointed at.
+Turning the hovered state off greys the *hovered* controls and that switch's hovered
+choice only — greying the whole switch put the panel's current-page controls out of
+reach, since that switch offers pointed-at and current-page and no ordinary state at all.
 
 Filtering and the switch can hide the same control for different reasons, so they use
 different classes: a filter hit un-hides a state-folded control (`is-state-suppressed`)

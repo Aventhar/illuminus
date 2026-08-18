@@ -847,6 +847,7 @@ export const GROUPS = [
         select("numberStyle", "decimal", CHOICES.numberStyle, { emit: emitKeyword }),
         num("markerSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("markerColor", "#7a2010"),
+          col("hoverMarkerColor", ""),
           font("markerFont", "")
         ]
       },
@@ -858,12 +859,14 @@ export const GROUPS = [
           font("termFont", ""),
           num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("termColor", "#5e1914"),
+          col("hoverTermColor", ""),
           textStyleField("termTextStyle", "700", "normal"),
           select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
           num("termSpacingAbove", 8, "px", 0, 100, 1),
           font("detailFont", ""),
           num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("detailColor", "#241b10"),
+          col("hoverDetailColor", ""),
           textStyleField("detailTextStyle", "400", "normal"),
           num("detailIndent", 24, "px", 0, 200, 2),
           num("detailSpacingBelow", 6, "px", 0, 100, 1)
@@ -1147,34 +1150,98 @@ function isHoverName(name) {
  * The window frame and the contents panel are not hovered as objects — their
  * hovered states belong to the things inside them, which they already state by
  * hand. Deriving more would offer controls that could never do anything.
+ *
+ * This governs the *deriving* only. Both tabs still get the switch below, since
+ * both hold hovered controls.
  */
 const NO_HOVER = new Set(["window", "sidebar"]);
 
+/**
+ * The tabs whose switch starts off, so their hovered state is on.
+ *
+ * Everywhere else a hovered control is derived and starts empty, so leaving the
+ * state switched off changes nothing until somebody fills one in. These four
+ * spell their hovered colors out by hand and ship real values for them — a
+ * button that lights up under the pointer, a page entry that answers to it, a
+ * link that brightens, a Reveal button that does — so starting them switched
+ * off would take away something the style already does. They are also the four
+ * whose elements are pointed at on purpose rather than merely passed over.
+ */
+const HOVER_ON = new Set(["window", "sidebar", "links", "secrets"]);
+
+/** Whether a control names a hovered state, in either spelling. */
+export function isHoveredField(name) {
+  return name !== "hoverOff" && /hover/i.test(name);
+}
+
+/**
+ * The ordinary control a hovered one stands in for, by name.
+ *
+ * Both spellings occur — `hoverColor` as well as `buttonHoverColor` — so the
+ * word is taken out wherever it sits and the capital it leaves behind is put
+ * back down.
+ */
+export function ordinaryNameFor(name) {
+  const stripped = name.replace(/hover/i, "");
+  if (!stripped) return null;
+  return /[a-z]/.test(name[0]) ? stripped[0].toLowerCase() + stripped.slice(1) : stripped;
+}
+
+/**
+ * A hovered control whose ordinary counterpart lives in another section.
+ *
+ * The contents panel lists its entries in one section and states how they look
+ * when pointed at in the next, because the pointed-at entry and the current
+ * page belong together. Everything else pairs inside its own section.
+ */
+const HOVER_TWIN_ELSEWHERE = new Map([["sidebar.hoverColor", "color"]]);
+
+/**
+ * The field a hovered control falls back to when its tab's hovered state is
+ * switched off, or null when the ordinary element paints nothing there.
+ *
+ * Only the same section is searched, so that a hovered entry fill does not fall
+ * back to the fill of the panel it sits in — two different things that happen
+ * to share a name.
+ */
+export function ordinaryTwinFor(group, hovered) {
+  const wanted = HOVER_TWIN_ELSEWHERE.get(`${group.id}.${hovered.name}`)
+    ?? ordinaryNameFor(hovered.name);
+  if (!wanted) return null;
+  const own = group.sections.find((section) => section.fields.includes(hovered));
+  const searched = HOVER_TWIN_ELSEWHERE.has(`${group.id}.${hovered.name}`)
+    ? group.sections
+    : [own].filter(Boolean);
+  for (const section of searched) {
+    const twin = section.fields.find((field) => field.name === wanted);
+    if (twin) return twin;
+  }
+  return null;
+}
+
 for (const group of GROUPS) {
-  if (NO_HOVER.has(group.id)) continue;
   const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
-  let derived = 0;
-  for (const section of group.sections) {
-    for (const name of HOVERABLE) {
-      if (!section.fields.some((field) => field.name === name)) continue;
-      const hovered = hoverNameFor(name);
-      // Never shadow a control the schema already spells out itself — the
-      // sidebar and the window state their hovered colors by hand.
-      if (taken.has(hovered)) continue;
-      taken.add(hovered);
-      section.fields.push(col(hovered, ""));
-      derived += 1;
+  if (!NO_HOVER.has(group.id)) {
+    for (const section of group.sections) {
+      for (const name of HOVERABLE) {
+        if (!section.fields.some((field) => field.name === name)) continue;
+        const hovered = hoverNameFor(name);
+        // Never shadow a control the schema already spells out itself — the
+        // sidebar and the window state their hovered colors by hand.
+        if (taken.has(hovered)) continue;
+        taken.add(hovered);
+        section.fields.push(col(hovered, ""));
+      }
     }
   }
 
-  // A switch for the whole tab, off by default: most things a reader points at
-  // should not move under the pointer, and a hovered state nobody asked for is
-  // a hovered state half filled in. It rides in the first section as chrome —
+  // A switch for the whole tab, on every tab that has anything to switch —
+  // derived or written by hand. It rides in the first section as chrome:
   // stored and exported like any other value, but drawn beside the tab's name
   // rather than in the list, because it governs the list.
-  if (!derived) continue;
+  if (![...taken].some(isHoveredField)) continue;
   group.sections[0].fields.push({
-    type: "toggle", name: "hoverOff", default: true, chrome: true, emit: () => null
+    type: "toggle", name: "hoverOff", default: !HOVER_ON.has(group.id), chrome: true, emit: () => null
   });
 }
 

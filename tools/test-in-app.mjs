@@ -4296,7 +4296,147 @@ check(new Set(drawn).size === 1, `and all six are drawn at one size (${JSON.stri
 check((hs.titleLayer ?? "").includes("mystery-man"),
   `heading 1's picture reaches the page title (got ${hs.titleLayer})`);
 
-console.log("\n[52] Console is clean");
+console.log("\n[52] The hovered-state switch, tab by tab");
+// Three tabs used to have no switch at all: Lists had nothing hovered to
+// switch, and the contents panel and the window were left out of the deriving
+// because they state their hovered colors by hand. They have one now, and it
+// has to bite on colors the schema ships rather than only on empty ones.
+{
+  const layout = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Hover Switch Probe"});
+    try {
+      const app = await api.openEditor(style.id);
+      await new Promise(r => setTimeout(r, 1200));
+      const out = {};
+      for (const tab of ["lists", "sidebar", "window", "links", "secrets"]) {
+        app.changeTab(tab, "sheet");
+        await new Promise(r => setTimeout(r, 250));
+        const el = app.element.querySelector('.illuminus-tab[data-tab="' + tab + '"]');
+        for (const section of el.querySelectorAll("details.illuminus-section")) section.open = true;
+        await new Promise(r => setTimeout(r, 350));
+        const box = el.querySelector('input[name$=".hoverOff"]');
+        out[tab] = {
+          present: !!box,
+          checked: box ? box.checked : null,
+          states: [...el.querySelectorAll(".illuminus-section")]
+            .filter((section) => section.querySelector('.illuminus-state__option[data-state="hover"]'))
+            .length,
+          // The contents panel's switch offers current-page as well as
+          // pointed-at, and turning the hovered state off must not put the
+          // current page out of reach with it.
+          reachable: [...el.querySelectorAll('.illuminus-state__option[data-state="active"]')]
+            .every((option) => !option.classList.contains("is-hover-off"))
+        };
+      }
+      await app.close({force: true});
+      return JSON.stringify(out);
+    } finally { await api.deleteStyle(style.id); }
+  })()`);
+  const sw = JSON.parse(layout);
+  const tabs = ["lists", "sidebar", "window", "links", "secrets"];
+  check(tabs.every((tab) => sw[tab].present),
+    `every tab holding anything hovered has the switch (${tabs.length} of ${tabs.length})`);
+  check(sw.lists.checked === true, `Lists starts switched off (${sw.lists.checked})`);
+  // The four tabs whose hovered colors ship with real values start switched on,
+  // because switching them off would take away what a style already does.
+  check(["sidebar", "window", "links", "secrets"].every((tab) => sw[tab].checked === false),
+    `the panel, the window, links and secrets start switched on `
+    + `(${["sidebar", "window", "links", "secrets"].map((tab) => sw[tab].checked).join(", ")})`);
+  check(sw.lists.states >= 2 && sw.sidebar.states >= 2 && sw.window.states >= 2,
+    `and each offers the two states where it has both (${sw.lists.states}, ${sw.sidebar.states}, ${sw.window.states})`);
+  check(sw.sidebar.reachable, "the current-page controls stay reachable while hovered is off");
+}
+
+try {
+  const setup = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Hover Effect Probe", settings: {
+      lists: {markerColor: "#112233", hoverMarkerColor: "#ff0000", hoverOff: false},
+      sidebar: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
+    }});
+    const entry = await JournalEntry.create({name: "Illuminus Hover Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<ul><li>Item one</li></ul>"}
+    }]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1200));
+    const freeze = document.createElement("style");
+    freeze.id = "illuminus-hover-freeze";
+    freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+    document.head.append(freeze);
+    // The headless browser's own toast sits over the window, and a pointer
+    // aimed through it lands on the toast rather than on the button.
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    const root = entry.sheet.element;
+    const at = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+    return JSON.stringify({
+      styleId: style.id, entryId: entry.id,
+      li: at(root.querySelector(".journal-page-content li")),
+      button: at(root.querySelector(".journal-sidebar button"))
+    });
+  })()`));
+
+  const paint = async () => JSON.parse(await cdp.evaluate(`(() => {
+    const root = game.journal.get(${JSON.stringify(setup.entryId)}).sheet.element;
+    const li = root.querySelector(".journal-page-content li");
+    const button = root.querySelector(".journal-sidebar button");
+    return JSON.stringify({
+      marker: getComputedStyle(li, "::marker").color,
+      button: getComputedStyle(button).color,
+      onButton: document.elementFromPoint(...${JSON.stringify(setup.button)}) === button
+    });
+  })()`));
+
+  await cdp.mouse("mouseMoved", ...setup.li);
+  await new Promise((r) => setTimeout(r, 250));
+  const overItem = await paint();
+  await cdp.mouse("mouseMoved", ...setup.button);
+  await new Promise((r) => setTimeout(r, 250));
+  const overButton = await paint();
+
+  check(overItem.marker === "rgb(255, 0, 0)", `a pointed-at list marker takes its hovered color (got ${overItem.marker})`);
+  check(overButton.onButton, "the pointer really reaches the panel's button");
+  check(overButton.button === "rgb(0, 255, 0)",
+    `and a panel button takes its hovered color while the switch is off (got ${overButton.button})`);
+
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = api.getStyle(${JSON.stringify(setup.styleId)});
+    const settings = foundry.utils.deepClone(style.settings);
+    settings.lists.hoverOff = true;
+    settings.sidebar = {...settings.sidebar, hoverOff: true};
+    await api.updateStyle(style.id, {settings});
+    await new Promise(r => setTimeout(r, 500));
+  })()`);
+
+  await cdp.mouse("mouseMoved", ...setup.li);
+  await new Promise((r) => setTimeout(r, 250));
+  const quietItem = await paint();
+  await cdp.mouse("mouseMoved", ...setup.button);
+  await new Promise((r) => setTimeout(r, 250));
+  const quietButton = await paint();
+
+  check(quietItem.marker === "rgb(17, 34, 51)",
+    `switching the state off leaves the marker alone (got ${quietItem.marker})`);
+  // The one the skeleton's own default used to win: a shipped hovered color is
+  // painted for every style, so switching off has to say something rather than
+  // merely stay quiet.
+  check(quietButton.button === "rgb(17, 34, 51)",
+    `and beats the shipped hovered color on a panel button (got ${quietButton.button})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    document.getElementById("illuminus-hover-freeze")?.remove();
+    const entry = game.journal.getName("Illuminus Hover Journal");
+    if (entry) { await entry.sheet.close({force: true}); await entry.delete(); }
+    const style = api.listStyles().find(s => s.name === "Hover Effect Probe");
+    if (style) await api.deleteStyle(style.id);
+  })()`);
+}
+
+console.log("\n[53] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

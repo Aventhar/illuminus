@@ -580,13 +580,17 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       const tab = box.closest(".illuminus-tab");
       for (const field of tab?.querySelectorAll(".illuminus-field[data-field]") ?? []) {
         const [, name] = field.dataset.field.split(".");
-        if (stateOf(name) === "normal") continue;
+        // The hovered state only. A tab can hold another — the contents panel's
+        // current page is not hovered, and greying it out with the rest would
+        // put the page you are reading behind a switch about pointing.
+        if (stateOf(name) !== "hover") continue;
         field.classList.toggle("is-hover-off", off);
       }
-      // The switch that chooses which state to show has nothing to choose while
-      // the hovered one is off.
-      for (const wrap of tab?.querySelectorAll(".illuminus-state") ?? []) {
-        wrap.classList.toggle("is-hover-off", off);
+      // The switch keeps its other choices: greying the whole thing put the
+      // sidebar's current-page controls out of reach, since that switch offers
+      // pointed-at and current-page and no ordinary state at all.
+      for (const option of tab?.querySelectorAll('.illuminus-state__option[data-state="hover"]') ?? []) {
+        option.classList.toggle("is-hover-off", off);
       }
       if (!tab) continue;
       tab.dataset.hoverOff = String(off);
