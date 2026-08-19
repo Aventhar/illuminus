@@ -4732,7 +4732,76 @@ try {
   })()`);
 }
 
-console.log("\n[54] Console is clean");
+console.log("\n[54] The sample keeps up while a control is still being used");
+// The sample used to wait until a slider was let go of or a field was left,
+// because the events that arrive while somebody is still working come from the
+// input *inside* Foundry's control, which carries no name — and the handler
+// read the name.
+{
+  const live = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Live Feedback Probe"});
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1300));
+    app.changeTab("body", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    app.element.querySelector('.illuminus-tab[data-tab="body"] details.illuminus-section').open = true;
+    await new Promise(r => setTimeout(r, 400));
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    const slider = app.element.querySelector('[data-field="body.size"] input[type="range"]');
+    const box = slider.getBoundingClientRect();
+    const sample = app.element.querySelector('.illuminus-preview__frame [data-part="body"]');
+    return JSON.stringify({
+      styleId: style.id,
+      before: getComputedStyle(sample).fontSize,
+      grip: [box.left + box.width * 0.15, box.top + box.height / 2],
+      far: [box.left + box.width * 0.85, box.top + box.height / 2]
+    });
+  })()`));
+
+  // Pressed, moved, and read — all before the button is let go of.
+  await cdp.mouse("mouseMoved", ...live.grip);
+  await cdp.mouse("mousePressed", live.grip[0], live.grip[1], 1);
+  await cdp.mouse("mouseMoved", live.far[0], live.far[1], 1);
+  await new Promise((r) => setTimeout(r, 250));
+  const holding = JSON.parse(await cdp.evaluate(`(() => {
+    const app = [...foundry.applications.instances.values()].find(a => a.constructor.name.includes("StyleEditor"));
+    const sample = app.element.querySelector('.illuminus-preview__frame [data-part="body"]');
+    return JSON.stringify({
+      sample: getComputedStyle(sample).fontSize,
+      control: app.element.querySelector('[data-field="body.size"] input[type="number"]').value
+    });
+  })()`));
+  await cdp.mouse("mouseReleased", live.far[0], live.far[1], 1);
+
+  check(holding.control !== "16", `dragging the slider moves it (${live.before} to ${holding.control})`);
+  check(holding.sample === holding.control + "px",
+    `and the sample is already showing it, mouse still down (${holding.sample})`);
+
+  const typed = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const app = [...foundry.applications.instances.values()].find(a => a.constructor.name.includes("StyleEditor"));
+    const sample = app.element.querySelector('.illuminus-preview__frame [data-part="body"]');
+    const text = app.element.querySelector('[data-field="body.color"] input[type="text"]');
+    const before = getComputedStyle(sample).color;
+    // One keystroke's worth of event, with the field still focused: nothing has
+    // been committed, and the sample should have it anyway.
+    text.focus();
+    text.value = "#00ff00";
+    text.dispatchEvent(new Event("input", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 350));
+    const out = JSON.stringify({ before, after: getComputedStyle(sample).color,
+      stillFocused: document.activeElement === text });
+    await app.close({force: true});
+    await api.deleteStyle(${JSON.stringify("__id__")});
+    return out;
+  })()`.replace("__id__", live.styleId)));
+  check(typed.after === "rgb(0, 255, 0)" && typed.before !== typed.after,
+    `typing a color shows it before the field is left (${typed.before} to ${typed.after})`);
+  check(typed.stillFocused, "and the field still has the cursor in it");
+}
+
+console.log("\n[55] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

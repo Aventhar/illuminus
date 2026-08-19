@@ -115,10 +115,14 @@ export async function connect(port = 9222) {
    * neither, which is how a control that CSS has made unclickable can still
    * pass a test.
    */
-  const mouse = async (type, x, y) => {
+  /**
+   * @param {number} [buttons] Which buttons are held. 1 while dragging: a move
+   *   sent with none held is a hover, and a slider does not follow a hover.
+   */
+  const mouse = async (type, x, y, buttons = 0) => {
     await send("Input.dispatchMouseEvent", {
-      type, x, y, button: type === "mouseMoved" ? "none" : "left",
-      clickCount: type === "mouseMoved" ? 0 : 1, buttons: 0
+      type, x, y, button: type === "mouseMoved" && !buttons ? "none" : "left",
+      clickCount: type === "mouseMoved" ? 0 : 1, buttons
     });
     await new Promise((r) => setTimeout(r, 60));
   };

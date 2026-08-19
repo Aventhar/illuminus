@@ -948,8 +948,17 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    */
   #onFieldChange(event) {
     const input = event.target;
-    if (!input?.name) return;
-    const [groupId, fieldName] = input.name.split(".");
+    if (!(input instanceof HTMLElement)) return;
+    // The name is on Foundry's own element — range-picker, color-picker,
+    // file-picker — and not on the input inside it. The inside one is what
+    // fires while somebody is still dragging or still typing, so reading only
+    // named events meant the sample waited until the control was let go of.
+    // The row knows which setting it is, which is enough to act on every
+    // keystroke and every step of a drag.
+    const path = input.getAttribute("name")
+      || input.closest(".illuminus-field[data-field]")?.dataset.field;
+    if (!path) return;
+    const [groupId, fieldName] = path.split(".");
     const field = GROUPS.find((g) => g.id === groupId)?.sections
       .flatMap((s) => s.fields).find((f) => f.name === fieldName);
     if (!field) return;
@@ -960,12 +969,35 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     this.#working[groupId][fieldName] = coerced;
     this.#dirty = true;
-    this.#applyPreview();
+    // Once a frame rather than once an event: a drag fires input events faster
+    // than a stylesheet of two thousand declarations can be rebuilt, and the
+    // sample only has to be right by the time it is next drawn.
+    this.#previewSoon();
 
     const row = this.element.querySelector(`[data-field="${groupId}.${fieldName}"]`);
     row?.classList.toggle("is-default", coerced === this.#baselineFor(groupId, field));
     if (row && field.type === "color") this.#showSwatch(row, String(coerced));
     this.#updateTabBadge(groupId);
+  }
+
+  /** Set while a repaint of the sample is already booked. */
+  #previewPending = false;
+
+  /**
+   * Repaint the sample once the current burst of events has been handled.
+   *
+   * A timer rather than an animation frame: a frame is only offered to a window
+   * that is being drawn, so an editor in a background tab — or in a browser
+   * driven by a test — would sit there holding a repaint that never came. A
+   * zero delay still folds a burst of keystrokes into one repaint.
+   */
+  #previewSoon() {
+    if (this.#previewPending) return;
+    this.#previewPending = true;
+    setTimeout(() => {
+      this.#previewPending = false;
+      if (this.element) this.#applyPreview();
+    }, 0);
   }
 
   /** Refresh the "n changed" badge on a tab without re-rendering. */
