@@ -877,6 +877,13 @@ export const GROUPS = [
           ...cornerFields("codeCorner", 3),
           col("codeBorderColor", "#8a6a3d"),
           num("codeBorderWidth", 0, "px", 0, 12, 1),
+        ]
+      },
+      // A block of code is its own thing: it had the same four Padding controls
+      // as code inside a sentence, in the same section, under the same names.
+      {
+        id: "codeBlock",
+        fields: [
           ...spacingFields("codeBlockPadding", 10, { max: 80 }),
           num("codeBlockMarginTop", 10, "px", -60, 120, 1),
           num("codeBlockMarginBottom", 10, "px", -60, 120, 1)
@@ -1427,7 +1434,7 @@ for (const group of GROUPS) {
 const SECTION_ORDER = [
   // Text, and what is done to it
   "text", "textShadow", "decoration", "paragraph", "columns", "dropCap",
-  "marks", "code", "marker", "definitions",
+  "marks", "code", "codeBlock", "marker", "definitions",
   // The element itself, from the inside out
   "background", "padding", "border", "corners", "shadow", "innerShadow",
   "glow", "margin", "layout", "tagLayout",
@@ -1474,6 +1481,33 @@ const FIELD_ORDER = {
   ]
 };
 
+/**
+ * The order the parts of one thing are set in, wherever they are set.
+ *
+ * `FIELD_ORDER` says it for the sections every tab shares, by naming controls
+ * outright. A section with its own vocabulary — a table's header row, a
+ * definition's term — spells the same properties with a prefix, so the order is
+ * read off the suffix instead. Controls whose suffix is not listed keep the
+ * order their author gave them, after the ones that are.
+ */
+const SUFFIX_ORDER = [
+  "Font", "Size", "Color", "TextStyle", "TextStyleSlant",
+  "OutlineWidth", "OutlineColor",
+  "TextShadowOffsetX", "TextShadowOffsetY", "TextShadowBlur", "TextShadowColor",
+  "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Align", "VerticalAlign"
+];
+
+/** The word a control's name starts with, before the first capital. */
+const prefixOf = (name) => name.match(/^[a-z]+/)?.[0] ?? "";
+
+/** How far down the shared order a control's suffix sits, or Infinity. */
+const suffixRank = (name, prefix) => {
+  const suffix = prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name;
+  const at = SUFFIX_ORDER.findIndex((known) =>
+    suffix === known || suffix === known[0].toLowerCase() + known.slice(1));
+  return at < 0 ? Infinity : at;
+};
+
 for (const group of GROUPS) {
   for (const section of group.sections) {
     if (!SECTION_ORDER.includes(section.id)) {
@@ -1487,6 +1521,25 @@ for (const group of GROUPS) {
         throw new Error(`${group.id}.${section.id}: "${field.name}" has no place in FIELD_ORDER.${section.id}`);
       }
       section.fields.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+    } else {
+      // Grouped by the thing they belong to, in the order those things first
+      // appear, and inside each group in the same order every other section
+      // uses. A table's header row read Fill, Text Color, Typeface, Text Size
+      // while every plain Text section read Typeface, Text Size, Text Color.
+      const groups = [];
+      for (const field of section.fields) {
+        const prefix = prefixOf(field.name);
+        const found = groups.find((one) => one.prefix === prefix);
+        if (found) found.fields.push(field);
+        else groups.push({ prefix, fields: [field] });
+      }
+      for (const one of groups) {
+        one.fields = one.fields
+          .map((field, index) => ({ field, index, rank: suffixRank(field.name, one.prefix) }))
+          .sort((a, b) => (a.rank - b.rank) || (a.index - b.index))
+          .map((entry) => entry.field);
+      }
+      section.fields = groups.flatMap((one) => one.fields);
     }
 
     // A control's other states sit against it, in the order the switch offers

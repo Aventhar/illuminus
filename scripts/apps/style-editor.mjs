@@ -437,11 +437,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     // A family tab focuses the member its picker names, not the family itself.
     const active = this.#activeGroupId();
-    const known = parts.some((part) => part.dataset.part === active);
+    const target = parts.find((part) => part.dataset.part === active);
     for (const part of parts) {
-      part.classList.toggle("is-dimmed", known && part.dataset.part !== active);
+      // What holds the focused piece stays as it is: the page's own surface
+      // wraps everything on it, and dimming a wrapper dims what is inside it
+      // however brightly the inside is marked.
+      part.classList.toggle("is-dimmed",
+        Boolean(target) && part.dataset.part !== active && !part.contains(target));
     }
-    if (known) this.#scrollSampleTo(parts.find((part) => part.dataset.part === active), frame);
+    if (target) this.#scrollSampleTo(target, frame);
   }
 
   /**
@@ -1319,8 +1323,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static #onShowHint(event, target) {
     event.preventDefault();
     event.stopPropagation();
-    const hint = target.closest(".illuminus-field, .illuminus-section")
-      ?.querySelector(".illuminus-field__hint, .illuminus-section__hint")?.textContent?.trim();
+    const hint = target.closest(".illuminus-field, .illuminus-section, .illuminus-tab__head")
+      ?.querySelector(".illuminus-field__hint, .illuminus-section__hint, .illuminus-tab__hint")
+      ?.textContent?.trim();
     if (!hint) return;
     // A second click on the same icon puts it away, which is what a person
     // expects of something they opened by clicking.

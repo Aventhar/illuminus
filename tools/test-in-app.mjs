@@ -3454,14 +3454,17 @@ try {
     return JSON.stringify(out);
   })()`);
   const fc = JSON.parse(focus);
-  check(JSON.stringify(fc.tables.lit) === JSON.stringify(["tables"]) && fc.tables.dimmed > 10,
+  // The page's surface wraps every other piece, so it stays lit alongside
+  // whichever piece is focused — dimming it would dim what is inside it.
+  check(JSON.stringify(fc.tables.lit) === JSON.stringify(["page", "tables"]) && fc.tables.dimmed > 10,
     `opening a tab brings its own part forward (lit ${fc.tables.lit.join(", ")}, ${fc.tables.dimmed} dimmed)`);
-  check(fc.body.lit.every((part) => part === "body") && fc.body.lit.length > 1,
-    `a tab with several pieces lights them all (${fc.body.lit.length} lit)`);
+  const bodyLit = fc.body.lit.filter((part) => part !== "page");
+  check(bodyLit.every((part) => part === "body") && bodyLit.length > 1,
+    `a tab with several pieces lights them all (${bodyLit.length} lit)`);
   check(fc.scrolledIntoView, "and the sample scrolls so that part can be seen");
   check(fc.family.dimmed === 0,
     `a family tab, which replaces the pane outright, dims nothing (${fc.family.dimmed})`);
-  check(JSON.stringify(fc.afterPick) === JSON.stringify(["heading3"]),
+  check(JSON.stringify(fc.afterPick) === JSON.stringify(["page", "heading3"]),
     `the focus follows the member the picker names (lit ${fc.afterPick.join(", ")})`);
   check(fc.buttons.some((t) => /Illuminus Styles/.test(t))
     && fc.buttons.some((t) => /Illuminus Templates/.test(t)),

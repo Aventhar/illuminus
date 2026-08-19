@@ -22,7 +22,14 @@
         <span>{{group.hoverOff.label}}</span>
       </label>
       {{/if}}
-      <p class="hint">{{group.hint}}</p>
+      {{!-- Behind an icon like every other explanation. It stays in the markup
+            for the search box, and at a narrow settings column a paragraph
+            here pushed the first control most of the way down the pane. --}}
+      <p class="hint illuminus-tab__hint">{{group.hint}}</p>
+      <button type="button" class="illuminus-info" data-action="showHint"
+              aria-label="{{group.hint}}">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
       {{#if group.plainReset}}
       <button type="button" class="illuminus-reset" data-action="foundryDefault"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.FoundryDefaultTooltip'}}">
@@ -205,7 +212,9 @@
         </footer>
       </aside>
 
-      <section class="journal-entry-content">
+      {{!-- The page's own surface, so opening the Page tab lights something
+            rather than dimming everything the page contains. --}}
+      <section class="journal-entry-content" data-part="page">
         <header class="journal-header" data-part="title">
           <div class="title">{{localize "ILLUMINUS.Preview.JournalTitle"}}</div>
         </header>

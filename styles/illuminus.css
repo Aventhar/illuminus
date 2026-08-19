@@ -1533,8 +1533,8 @@
   gap: 0.75rem;
 }
 
-.illuminus-tab__head .hint {
-  flex: 1;
+.illuminus-tab__head .illuminus-info {
+  margin-right: auto;
 }
 
 .illuminus-reset {
@@ -1660,7 +1660,8 @@
    six hundred controls each carrying a paragraph left the settings reading as
    explanation with controls in it. */
 .illuminus-field__hint,
-.illuminus-section__hint {
+.illuminus-section__hint,
+.illuminus-tab__hint {
   display: none;
 }
 
@@ -1910,13 +1911,13 @@
 
 /* --- Focusing the sample ------------------------------------------------ */
 
-/* The sample is a picture of a page, not a page. Its buttons and its title field
-   are there to be looked at, and Foundry styles both to react to a pointer — so
-   pointing at the sample lit up the Reveal button and changed the title field's
-   edge, neither of which is anything the style being edited says. Taking them
-   out of the pointer's reach stops that without touching the parts whose
-   hovered state is worth seeing: headings, boxes, links, panel entries. */
-.illuminus-preview__frame button,
+/* What the sample answers to, and what it does not.
+   A button in the sample is worth pointing at: the Reveal button, the panel's
+   buttons, and the window's icons all have hovered settings of their own now,
+   and a style is judged by what they do. A text field is not: Foundry paints
+   its own focus and hover chrome on an input, Illuminus offers nothing to set
+   against it, and the journal's title picked up a dark box that no setting in
+   the editor could explain. */
 .illuminus-preview__frame input,
 .illuminus-preview__frame select,
 .illuminus-preview__frame textarea {
