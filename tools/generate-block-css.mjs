@@ -308,6 +308,8 @@ const HOVER_TARGETS = {
 };
 
 /** The paint a hovered element can change, and the property each one sets. */
+const SHADOW_PARTS = ["OffsetX", "OffsetY", "Blur", "Color"];
+
 const HOVER_PROPS = [
   { name: "color", property: "color" },
   // Longhands rather than the shorthand: the ordinary rule sets the shorthand,
@@ -336,6 +338,16 @@ const hoverRules = (group, selector) => {
       const hovered = `hover${name[0].toUpperCase()}${name.slice(1)}`;
       return `  ${property}: var(${varFor(group, hovered)}, var(${varFor(group, name)}));`;
     });
+  // A text shadow is four controls and one property, so it is composed rather
+  // than mapped: each part falls back to the ordinary one on its own, which is
+  // what lets a state change the color of a shadow and leave its offsets alone.
+  if (fields.some((field) => field.name === "hoverTextShadowOffsetX")) {
+    const part = (name) => {
+      const hovered = `hoverTextShadow${name}`;
+      return `var(${varFor(group, hovered)}, var(${varFor(group, `textShadow${name}`)}))`;
+    };
+    lines.push(`  text-shadow: ${part("OffsetX")} ${part("OffsetY")}\n               ${part("Blur")} ${part("Color")};`);
+  }
   if (!lines.length) return "";
   // Appended per selector: a comma-joined list would otherwise hover only its
   // last member, which is the kind of thing that half-works in silence.
@@ -425,6 +437,16 @@ const eachAfter = (selector) => selector
   .map((one) => `${one.trim()}::after`)
   .join(",\n");
 
+/**
+ * Whether this layer's group offers "does the picture travel with the content".
+ * Only the tall things do — a page, and the panel beside it.
+ */
+const hasAttachment = (layer) => {
+  const group = GROUPS.find((one) => one.id === layer.group);
+  const name = layer.prefix ? `${layer.prefix}TextureAttachment` : "textureAttachment";
+  return groupFields(group).some((field) => field.name === name);
+};
+
 const imageLayer = (layer) => `
 ${layer.selector} {
 ${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
@@ -441,7 +463,7 @@ ${eachAfter(layer.selector)} {
   background-size: ${imageVar(layer, "Fit", "size")};
   background-repeat: ${imageVar(layer, "Fit", "repeat")};
   background-position: ${imageVar(layer, "Position")};
-  mix-blend-mode: ${imageVar(layer, "Blend")};
+${hasAttachment(layer) ? `  background-attachment: ${imageVar(layer, "Attachment")};\n` : ""}  mix-blend-mode: ${imageVar(layer, "Blend")};
   opacity: ${imageVar(layer, "Opacity")};
 }
 `;

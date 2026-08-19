@@ -1830,6 +1830,7 @@
   background-size: var(--ill-sidebar-texture-fit-size);
   background-repeat: var(--ill-sidebar-texture-fit-repeat);
   background-position: var(--ill-sidebar-texture-position);
+  background-attachment: var(--ill-sidebar-texture-attachment);
   mix-blend-mode: var(--ill-sidebar-texture-blend);
   opacity: var(--ill-sidebar-texture-opacity);
 }
@@ -2578,6 +2579,8 @@
   border-right-color: var(--ill-title-hover-border-right-color, var(--ill-title-border-right-color));
   border-bottom-color: var(--ill-title-hover-border-bottom-color, var(--ill-title-border-bottom-color));
   border-left-color: var(--ill-title-hover-border-left-color, var(--ill-title-border-left-color));
+  text-shadow: var(--ill-title-hover-text-shadow-offset-x, var(--ill-title-text-shadow-offset-x)) var(--ill-title-hover-text-shadow-offset-y, var(--ill-title-text-shadow-offset-y))
+               var(--ill-title-hover-text-shadow-blur, var(--ill-title-text-shadow-blur)) var(--ill-title-hover-text-shadow-color, var(--ill-title-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-header h1:hover,
@@ -2592,6 +2595,8 @@
   border-right-color: var(--ill-heading1-hover-border-right-color, var(--ill-heading1-border-right-color));
   border-bottom-color: var(--ill-heading1-hover-border-bottom-color, var(--ill-heading1-border-bottom-color));
   border-left-color: var(--ill-heading1-hover-border-left-color, var(--ill-heading1-border-left-color));
+  text-shadow: var(--ill-heading1-hover-text-shadow-offset-x, var(--ill-heading1-text-shadow-offset-x)) var(--ill-heading1-hover-text-shadow-offset-y, var(--ill-heading1-text-shadow-offset-y))
+               var(--ill-heading1-hover-text-shadow-blur, var(--ill-heading1-text-shadow-blur)) var(--ill-heading1-hover-text-shadow-color, var(--ill-heading1-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content h2:hover {
@@ -2603,6 +2608,8 @@
   border-right-color: var(--ill-heading2-hover-border-right-color, var(--ill-heading2-border-right-color));
   border-bottom-color: var(--ill-heading2-hover-border-bottom-color, var(--ill-heading2-border-bottom-color));
   border-left-color: var(--ill-heading2-hover-border-left-color, var(--ill-heading2-border-left-color));
+  text-shadow: var(--ill-heading2-hover-text-shadow-offset-x, var(--ill-heading2-text-shadow-offset-x)) var(--ill-heading2-hover-text-shadow-offset-y, var(--ill-heading2-text-shadow-offset-y))
+               var(--ill-heading2-hover-text-shadow-blur, var(--ill-heading2-text-shadow-blur)) var(--ill-heading2-hover-text-shadow-color, var(--ill-heading2-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content h3:hover {
@@ -2614,6 +2621,8 @@
   border-right-color: var(--ill-heading3-hover-border-right-color, var(--ill-heading3-border-right-color));
   border-bottom-color: var(--ill-heading3-hover-border-bottom-color, var(--ill-heading3-border-bottom-color));
   border-left-color: var(--ill-heading3-hover-border-left-color, var(--ill-heading3-border-left-color));
+  text-shadow: var(--ill-heading3-hover-text-shadow-offset-x, var(--ill-heading3-text-shadow-offset-x)) var(--ill-heading3-hover-text-shadow-offset-y, var(--ill-heading3-text-shadow-offset-y))
+               var(--ill-heading3-hover-text-shadow-blur, var(--ill-heading3-text-shadow-blur)) var(--ill-heading3-hover-text-shadow-color, var(--ill-heading3-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content h4:hover {
@@ -2625,6 +2634,8 @@
   border-right-color: var(--ill-heading4-hover-border-right-color, var(--ill-heading4-border-right-color));
   border-bottom-color: var(--ill-heading4-hover-border-bottom-color, var(--ill-heading4-border-bottom-color));
   border-left-color: var(--ill-heading4-hover-border-left-color, var(--ill-heading4-border-left-color));
+  text-shadow: var(--ill-heading4-hover-text-shadow-offset-x, var(--ill-heading4-text-shadow-offset-x)) var(--ill-heading4-hover-text-shadow-offset-y, var(--ill-heading4-text-shadow-offset-y))
+               var(--ill-heading4-hover-text-shadow-blur, var(--ill-heading4-text-shadow-blur)) var(--ill-heading4-hover-text-shadow-color, var(--ill-heading4-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content h5:hover {
@@ -2636,6 +2647,8 @@
   border-right-color: var(--ill-heading5-hover-border-right-color, var(--ill-heading5-border-right-color));
   border-bottom-color: var(--ill-heading5-hover-border-bottom-color, var(--ill-heading5-border-bottom-color));
   border-left-color: var(--ill-heading5-hover-border-left-color, var(--ill-heading5-border-left-color));
+  text-shadow: var(--ill-heading5-hover-text-shadow-offset-x, var(--ill-heading5-text-shadow-offset-x)) var(--ill-heading5-hover-text-shadow-offset-y, var(--ill-heading5-text-shadow-offset-y))
+               var(--ill-heading5-hover-text-shadow-blur, var(--ill-heading5-text-shadow-blur)) var(--ill-heading5-hover-text-shadow-color, var(--ill-heading5-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content h6:hover {
@@ -2647,6 +2660,8 @@
   border-right-color: var(--ill-heading6-hover-border-right-color, var(--ill-heading6-border-right-color));
   border-bottom-color: var(--ill-heading6-hover-border-bottom-color, var(--ill-heading6-border-bottom-color));
   border-left-color: var(--ill-heading6-hover-border-left-color, var(--ill-heading6-border-left-color));
+  text-shadow: var(--ill-heading6-hover-text-shadow-offset-x, var(--ill-heading6-text-shadow-offset-x)) var(--ill-heading6-hover-text-shadow-offset-y, var(--ill-heading6-text-shadow-offset-y))
+               var(--ill-heading6-hover-text-shadow-blur, var(--ill-heading6-text-shadow-blur)) var(--ill-heading6-hover-text-shadow-color, var(--ill-heading6-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content p:hover,
@@ -2667,6 +2682,8 @@
   border-right-color: var(--ill-links-hover-border-right-color, var(--ill-links-border-right-color));
   border-bottom-color: var(--ill-links-hover-border-bottom-color, var(--ill-links-border-bottom-color));
   border-left-color: var(--ill-links-hover-border-left-color, var(--ill-links-border-left-color));
+  text-shadow: var(--ill-links-hover-text-shadow-offset-x, var(--ill-links-text-shadow-offset-x)) var(--ill-links-hover-text-shadow-offset-y, var(--ill-links-text-shadow-offset-y))
+               var(--ill-links-hover-text-shadow-blur, var(--ill-links-text-shadow-blur)) var(--ill-links-hover-text-shadow-color, var(--ill-links-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content table:hover {
@@ -2676,6 +2693,8 @@
   border-right-color: var(--ill-tables-hover-border-right-color, var(--ill-tables-border-right-color));
   border-bottom-color: var(--ill-tables-hover-border-bottom-color, var(--ill-tables-border-bottom-color));
   border-left-color: var(--ill-tables-hover-border-left-color, var(--ill-tables-border-left-color));
+  text-shadow: var(--ill-tables-hover-text-shadow-offset-x, var(--ill-tables-text-shadow-offset-x)) var(--ill-tables-hover-text-shadow-offset-y, var(--ill-tables-text-shadow-offset-y))
+               var(--ill-tables-hover-text-shadow-blur, var(--ill-tables-text-shadow-blur)) var(--ill-tables-hover-text-shadow-color, var(--ill-tables-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content blockquote:not(.illuminus-box):hover {
@@ -2687,6 +2706,8 @@
   border-right-color: var(--ill-boxes-hover-border-right-color, var(--ill-boxes-border-right-color));
   border-bottom-color: var(--ill-boxes-hover-border-bottom-color, var(--ill-boxes-border-bottom-color));
   border-left-color: var(--ill-boxes-hover-border-left-color, var(--ill-boxes-border-left-color));
+  text-shadow: var(--ill-boxes-hover-text-shadow-offset-x, var(--ill-boxes-text-shadow-offset-x)) var(--ill-boxes-hover-text-shadow-offset-y, var(--ill-boxes-text-shadow-offset-y))
+               var(--ill-boxes-hover-text-shadow-blur, var(--ill-boxes-text-shadow-blur)) var(--ill-boxes-hover-text-shadow-color, var(--ill-boxes-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content section.secret:hover {
@@ -2698,6 +2719,8 @@
   border-right-color: var(--ill-secrets-hover-border-right-color, var(--ill-secrets-border-right-color));
   border-bottom-color: var(--ill-secrets-hover-border-bottom-color, var(--ill-secrets-border-bottom-color));
   border-left-color: var(--ill-secrets-hover-border-left-color, var(--ill-secrets-border-left-color));
+  text-shadow: var(--ill-secrets-hover-text-shadow-offset-x, var(--ill-secrets-text-shadow-offset-x)) var(--ill-secrets-hover-text-shadow-offset-y, var(--ill-secrets-text-shadow-offset-y))
+               var(--ill-secrets-hover-text-shadow-blur, var(--ill-secrets-text-shadow-blur)) var(--ill-secrets-hover-text-shadow-color, var(--ill-secrets-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content figure:hover {
@@ -2717,6 +2740,8 @@
   border-right-color: var(--ill-box01-hover-border-right-color, var(--ill-box01-border-right-color));
   border-bottom-color: var(--ill-box01-hover-border-bottom-color, var(--ill-box01-border-bottom-color));
   border-left-color: var(--ill-box01-hover-border-left-color, var(--ill-box01-border-left-color));
+  text-shadow: var(--ill-box01-hover-text-shadow-offset-x, var(--ill-box01-text-shadow-offset-x)) var(--ill-box01-hover-text-shadow-offset-y, var(--ill-box01-text-shadow-offset-y))
+               var(--ill-box01-hover-text-shadow-blur, var(--ill-box01-text-shadow-blur)) var(--ill-box01-hover-text-shadow-color, var(--ill-box01-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box02:hover {
@@ -2728,6 +2753,8 @@
   border-right-color: var(--ill-box02-hover-border-right-color, var(--ill-box02-border-right-color));
   border-bottom-color: var(--ill-box02-hover-border-bottom-color, var(--ill-box02-border-bottom-color));
   border-left-color: var(--ill-box02-hover-border-left-color, var(--ill-box02-border-left-color));
+  text-shadow: var(--ill-box02-hover-text-shadow-offset-x, var(--ill-box02-text-shadow-offset-x)) var(--ill-box02-hover-text-shadow-offset-y, var(--ill-box02-text-shadow-offset-y))
+               var(--ill-box02-hover-text-shadow-blur, var(--ill-box02-text-shadow-blur)) var(--ill-box02-hover-text-shadow-color, var(--ill-box02-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box03:hover {
@@ -2739,6 +2766,8 @@
   border-right-color: var(--ill-box03-hover-border-right-color, var(--ill-box03-border-right-color));
   border-bottom-color: var(--ill-box03-hover-border-bottom-color, var(--ill-box03-border-bottom-color));
   border-left-color: var(--ill-box03-hover-border-left-color, var(--ill-box03-border-left-color));
+  text-shadow: var(--ill-box03-hover-text-shadow-offset-x, var(--ill-box03-text-shadow-offset-x)) var(--ill-box03-hover-text-shadow-offset-y, var(--ill-box03-text-shadow-offset-y))
+               var(--ill-box03-hover-text-shadow-blur, var(--ill-box03-text-shadow-blur)) var(--ill-box03-hover-text-shadow-color, var(--ill-box03-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box04:hover {
@@ -2750,6 +2779,8 @@
   border-right-color: var(--ill-box04-hover-border-right-color, var(--ill-box04-border-right-color));
   border-bottom-color: var(--ill-box04-hover-border-bottom-color, var(--ill-box04-border-bottom-color));
   border-left-color: var(--ill-box04-hover-border-left-color, var(--ill-box04-border-left-color));
+  text-shadow: var(--ill-box04-hover-text-shadow-offset-x, var(--ill-box04-text-shadow-offset-x)) var(--ill-box04-hover-text-shadow-offset-y, var(--ill-box04-text-shadow-offset-y))
+               var(--ill-box04-hover-text-shadow-blur, var(--ill-box04-text-shadow-blur)) var(--ill-box04-hover-text-shadow-color, var(--ill-box04-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box05:hover {
@@ -2761,6 +2792,8 @@
   border-right-color: var(--ill-box05-hover-border-right-color, var(--ill-box05-border-right-color));
   border-bottom-color: var(--ill-box05-hover-border-bottom-color, var(--ill-box05-border-bottom-color));
   border-left-color: var(--ill-box05-hover-border-left-color, var(--ill-box05-border-left-color));
+  text-shadow: var(--ill-box05-hover-text-shadow-offset-x, var(--ill-box05-text-shadow-offset-x)) var(--ill-box05-hover-text-shadow-offset-y, var(--ill-box05-text-shadow-offset-y))
+               var(--ill-box05-hover-text-shadow-blur, var(--ill-box05-text-shadow-blur)) var(--ill-box05-hover-text-shadow-color, var(--ill-box05-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box06:hover {
@@ -2772,6 +2805,8 @@
   border-right-color: var(--ill-box06-hover-border-right-color, var(--ill-box06-border-right-color));
   border-bottom-color: var(--ill-box06-hover-border-bottom-color, var(--ill-box06-border-bottom-color));
   border-left-color: var(--ill-box06-hover-border-left-color, var(--ill-box06-border-left-color));
+  text-shadow: var(--ill-box06-hover-text-shadow-offset-x, var(--ill-box06-text-shadow-offset-x)) var(--ill-box06-hover-text-shadow-offset-y, var(--ill-box06-text-shadow-offset-y))
+               var(--ill-box06-hover-text-shadow-blur, var(--ill-box06-text-shadow-blur)) var(--ill-box06-hover-text-shadow-color, var(--ill-box06-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box07:hover {
@@ -2783,6 +2818,8 @@
   border-right-color: var(--ill-box07-hover-border-right-color, var(--ill-box07-border-right-color));
   border-bottom-color: var(--ill-box07-hover-border-bottom-color, var(--ill-box07-border-bottom-color));
   border-left-color: var(--ill-box07-hover-border-left-color, var(--ill-box07-border-left-color));
+  text-shadow: var(--ill-box07-hover-text-shadow-offset-x, var(--ill-box07-text-shadow-offset-x)) var(--ill-box07-hover-text-shadow-offset-y, var(--ill-box07-text-shadow-offset-y))
+               var(--ill-box07-hover-text-shadow-blur, var(--ill-box07-text-shadow-blur)) var(--ill-box07-hover-text-shadow-color, var(--ill-box07-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box08:hover {
@@ -2794,6 +2831,8 @@
   border-right-color: var(--ill-box08-hover-border-right-color, var(--ill-box08-border-right-color));
   border-bottom-color: var(--ill-box08-hover-border-bottom-color, var(--ill-box08-border-bottom-color));
   border-left-color: var(--ill-box08-hover-border-left-color, var(--ill-box08-border-left-color));
+  text-shadow: var(--ill-box08-hover-text-shadow-offset-x, var(--ill-box08-text-shadow-offset-x)) var(--ill-box08-hover-text-shadow-offset-y, var(--ill-box08-text-shadow-offset-y))
+               var(--ill-box08-hover-text-shadow-blur, var(--ill-box08-text-shadow-blur)) var(--ill-box08-hover-text-shadow-color, var(--ill-box08-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box09:hover {
@@ -2805,6 +2844,8 @@
   border-right-color: var(--ill-box09-hover-border-right-color, var(--ill-box09-border-right-color));
   border-bottom-color: var(--ill-box09-hover-border-bottom-color, var(--ill-box09-border-bottom-color));
   border-left-color: var(--ill-box09-hover-border-left-color, var(--ill-box09-border-left-color));
+  text-shadow: var(--ill-box09-hover-text-shadow-offset-x, var(--ill-box09-text-shadow-offset-x)) var(--ill-box09-hover-text-shadow-offset-y, var(--ill-box09-text-shadow-offset-y))
+               var(--ill-box09-hover-text-shadow-blur, var(--ill-box09-text-shadow-blur)) var(--ill-box09-hover-text-shadow-color, var(--ill-box09-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box10:hover {
@@ -2816,6 +2857,8 @@
   border-right-color: var(--ill-box10-hover-border-right-color, var(--ill-box10-border-right-color));
   border-bottom-color: var(--ill-box10-hover-border-bottom-color, var(--ill-box10-border-bottom-color));
   border-left-color: var(--ill-box10-hover-border-left-color, var(--ill-box10-border-left-color));
+  text-shadow: var(--ill-box10-hover-text-shadow-offset-x, var(--ill-box10-text-shadow-offset-x)) var(--ill-box10-hover-text-shadow-offset-y, var(--ill-box10-text-shadow-offset-y))
+               var(--ill-box10-hover-text-shadow-blur, var(--ill-box10-text-shadow-blur)) var(--ill-box10-hover-text-shadow-color, var(--ill-box10-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag01:hover {
@@ -2827,6 +2870,8 @@
   border-right-color: var(--ill-tag01-hover-border-right-color, var(--ill-tag01-border-right-color));
   border-bottom-color: var(--ill-tag01-hover-border-bottom-color, var(--ill-tag01-border-bottom-color));
   border-left-color: var(--ill-tag01-hover-border-left-color, var(--ill-tag01-border-left-color));
+  text-shadow: var(--ill-tag01-hover-text-shadow-offset-x, var(--ill-tag01-text-shadow-offset-x)) var(--ill-tag01-hover-text-shadow-offset-y, var(--ill-tag01-text-shadow-offset-y))
+               var(--ill-tag01-hover-text-shadow-blur, var(--ill-tag01-text-shadow-blur)) var(--ill-tag01-hover-text-shadow-color, var(--ill-tag01-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag02:hover {
@@ -2838,6 +2883,8 @@
   border-right-color: var(--ill-tag02-hover-border-right-color, var(--ill-tag02-border-right-color));
   border-bottom-color: var(--ill-tag02-hover-border-bottom-color, var(--ill-tag02-border-bottom-color));
   border-left-color: var(--ill-tag02-hover-border-left-color, var(--ill-tag02-border-left-color));
+  text-shadow: var(--ill-tag02-hover-text-shadow-offset-x, var(--ill-tag02-text-shadow-offset-x)) var(--ill-tag02-hover-text-shadow-offset-y, var(--ill-tag02-text-shadow-offset-y))
+               var(--ill-tag02-hover-text-shadow-blur, var(--ill-tag02-text-shadow-blur)) var(--ill-tag02-hover-text-shadow-color, var(--ill-tag02-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag03:hover {
@@ -2849,6 +2896,8 @@
   border-right-color: var(--ill-tag03-hover-border-right-color, var(--ill-tag03-border-right-color));
   border-bottom-color: var(--ill-tag03-hover-border-bottom-color, var(--ill-tag03-border-bottom-color));
   border-left-color: var(--ill-tag03-hover-border-left-color, var(--ill-tag03-border-left-color));
+  text-shadow: var(--ill-tag03-hover-text-shadow-offset-x, var(--ill-tag03-text-shadow-offset-x)) var(--ill-tag03-hover-text-shadow-offset-y, var(--ill-tag03-text-shadow-offset-y))
+               var(--ill-tag03-hover-text-shadow-blur, var(--ill-tag03-text-shadow-blur)) var(--ill-tag03-hover-text-shadow-color, var(--ill-tag03-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag04:hover {
@@ -2860,6 +2909,8 @@
   border-right-color: var(--ill-tag04-hover-border-right-color, var(--ill-tag04-border-right-color));
   border-bottom-color: var(--ill-tag04-hover-border-bottom-color, var(--ill-tag04-border-bottom-color));
   border-left-color: var(--ill-tag04-hover-border-left-color, var(--ill-tag04-border-left-color));
+  text-shadow: var(--ill-tag04-hover-text-shadow-offset-x, var(--ill-tag04-text-shadow-offset-x)) var(--ill-tag04-hover-text-shadow-offset-y, var(--ill-tag04-text-shadow-offset-y))
+               var(--ill-tag04-hover-text-shadow-blur, var(--ill-tag04-text-shadow-blur)) var(--ill-tag04-hover-text-shadow-color, var(--ill-tag04-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag05:hover {
@@ -2871,6 +2922,8 @@
   border-right-color: var(--ill-tag05-hover-border-right-color, var(--ill-tag05-border-right-color));
   border-bottom-color: var(--ill-tag05-hover-border-bottom-color, var(--ill-tag05-border-bottom-color));
   border-left-color: var(--ill-tag05-hover-border-left-color, var(--ill-tag05-border-left-color));
+  text-shadow: var(--ill-tag05-hover-text-shadow-offset-x, var(--ill-tag05-text-shadow-offset-x)) var(--ill-tag05-hover-text-shadow-offset-y, var(--ill-tag05-text-shadow-offset-y))
+               var(--ill-tag05-hover-text-shadow-blur, var(--ill-tag05-text-shadow-blur)) var(--ill-tag05-hover-text-shadow-color, var(--ill-tag05-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag06:hover {
@@ -2882,6 +2935,8 @@
   border-right-color: var(--ill-tag06-hover-border-right-color, var(--ill-tag06-border-right-color));
   border-bottom-color: var(--ill-tag06-hover-border-bottom-color, var(--ill-tag06-border-bottom-color));
   border-left-color: var(--ill-tag06-hover-border-left-color, var(--ill-tag06-border-left-color));
+  text-shadow: var(--ill-tag06-hover-text-shadow-offset-x, var(--ill-tag06-text-shadow-offset-x)) var(--ill-tag06-hover-text-shadow-offset-y, var(--ill-tag06-text-shadow-offset-y))
+               var(--ill-tag06-hover-text-shadow-blur, var(--ill-tag06-text-shadow-blur)) var(--ill-tag06-hover-text-shadow-color, var(--ill-tag06-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag07:hover {
@@ -2893,6 +2948,8 @@
   border-right-color: var(--ill-tag07-hover-border-right-color, var(--ill-tag07-border-right-color));
   border-bottom-color: var(--ill-tag07-hover-border-bottom-color, var(--ill-tag07-border-bottom-color));
   border-left-color: var(--ill-tag07-hover-border-left-color, var(--ill-tag07-border-left-color));
+  text-shadow: var(--ill-tag07-hover-text-shadow-offset-x, var(--ill-tag07-text-shadow-offset-x)) var(--ill-tag07-hover-text-shadow-offset-y, var(--ill-tag07-text-shadow-offset-y))
+               var(--ill-tag07-hover-text-shadow-blur, var(--ill-tag07-text-shadow-blur)) var(--ill-tag07-hover-text-shadow-color, var(--ill-tag07-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag08:hover {
@@ -2904,6 +2961,8 @@
   border-right-color: var(--ill-tag08-hover-border-right-color, var(--ill-tag08-border-right-color));
   border-bottom-color: var(--ill-tag08-hover-border-bottom-color, var(--ill-tag08-border-bottom-color));
   border-left-color: var(--ill-tag08-hover-border-left-color, var(--ill-tag08-border-left-color));
+  text-shadow: var(--ill-tag08-hover-text-shadow-offset-x, var(--ill-tag08-text-shadow-offset-x)) var(--ill-tag08-hover-text-shadow-offset-y, var(--ill-tag08-text-shadow-offset-y))
+               var(--ill-tag08-hover-text-shadow-blur, var(--ill-tag08-text-shadow-blur)) var(--ill-tag08-hover-text-shadow-color, var(--ill-tag08-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag09:hover {
@@ -2915,6 +2974,8 @@
   border-right-color: var(--ill-tag09-hover-border-right-color, var(--ill-tag09-border-right-color));
   border-bottom-color: var(--ill-tag09-hover-border-bottom-color, var(--ill-tag09-border-bottom-color));
   border-left-color: var(--ill-tag09-hover-border-left-color, var(--ill-tag09-border-left-color));
+  text-shadow: var(--ill-tag09-hover-text-shadow-offset-x, var(--ill-tag09-text-shadow-offset-x)) var(--ill-tag09-hover-text-shadow-offset-y, var(--ill-tag09-text-shadow-offset-y))
+               var(--ill-tag09-hover-text-shadow-blur, var(--ill-tag09-text-shadow-blur)) var(--ill-tag09-hover-text-shadow-color, var(--ill-tag09-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag10:hover {
@@ -2926,6 +2987,8 @@
   border-right-color: var(--ill-tag10-hover-border-right-color, var(--ill-tag10-border-right-color));
   border-bottom-color: var(--ill-tag10-hover-border-bottom-color, var(--ill-tag10-border-bottom-color));
   border-left-color: var(--ill-tag10-hover-border-left-color, var(--ill-tag10-border-left-color));
+  text-shadow: var(--ill-tag10-hover-text-shadow-offset-x, var(--ill-tag10-text-shadow-offset-x)) var(--ill-tag10-hover-text-shadow-offset-y, var(--ill-tag10-text-shadow-offset-y))
+               var(--ill-tag10-hover-text-shadow-blur, var(--ill-tag10-text-shadow-blur)) var(--ill-tag10-hover-text-shadow-color, var(--ill-tag10-text-shadow-color));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image01:hover {

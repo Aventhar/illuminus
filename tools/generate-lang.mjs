@@ -464,6 +464,9 @@ const IMAGE_TEXT = {
 const CROWDED_OUTLINE = new Set(GROUPS.flatMap((group) => group.sections.flatMap((section) => {
   const prefixes = new Set(section.fields
     .filter((field) => /OutlineWidth$|^outlineWidth$/.test(field.name))
+    // A state's own outline is the same family as the one it stands in for, so
+    // it does not make a section crowded — the switch tells them apart.
+    .filter((field) => !/^(hover|active)|(Hover|Active)(?=[A-Z])/.test(field.name))
     .map((field) => field.name.replace(/OutlineWidth$/, "")));
   return prefixes.size > 1
     ? section.fields.filter((field) => /Outline(Width|Color)$/.test(field.name)).map((field) => field.name)
@@ -811,7 +814,31 @@ for (const [name, [label, hint]] of Object.entries(FIELD_TEXT)) {
   put(`ILLUMINUS.Field.${name}.label`, label);
   put(`ILLUMINUS.Field.${name}.hint`, hint);
 }
-const stillMissing = unmatched.filter((n) => !(n in FIELD_TEXT));
+/**
+ * A state's own control says what its ordinary twin says.
+ *
+ * The switch above it already names the state, so "Outline Thickness" under
+ * Hovered is the whole of what needs saying — and it stays in step with the
+ * ordinary control's wording for free. Anything named by hand above keeps that
+ * wording; this is only for the ones derived from the schema.
+ */
+const stateStem = (name) => {
+  const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
+  if (stripped === name || !stripped) return null;
+  return stripped[0].toLowerCase() + stripped.slice(1);
+};
+for (const name of unmatched) {
+  if (name in FIELD_TEXT) continue;
+  const stem = stateStem(name);
+  const label = stem && out[`ILLUMINUS.Field.${stem}.label`];
+  const hint = stem && out[`ILLUMINUS.Field.${stem}.hint`];
+  if (!label) continue;
+  put(`ILLUMINUS.Field.${name}.label`, label);
+  put(`ILLUMINUS.Field.${name}.hint`, hint);
+}
+
+const stillMissing = unmatched.filter((n) => !(n in FIELD_TEXT)
+  && !(`ILLUMINUS.Field.${n}.label` in out));
 if (stillMissing.length) {
   console.error("No wording for: " + stillMissing.join(", "));
   process.exit(1);

@@ -320,6 +320,28 @@ function v6_to_v7(settings) {
   return out;
 }
 
+/**
+ * Version 7 -> 8.
+ *
+ * A list's hovered colors were written by hand as `hoverMarkerColor` and its
+ * kin, before the schema learned to derive a hovered twin for a control that
+ * carries a prefix. They are derived now, under the name that convention gives
+ * them — the prefix first, the state in the middle.
+ */
+const HOVER_LIST_RENAMES = {
+  hoverMarkerColor: "markerHoverColor",
+  hoverTermColor: "termHoverColor",
+  hoverDetailColor: "detailHoverColor"
+};
+
+function v7_to_v8(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const lists = out.lists;
+  if (!lists) return out;
+  for (const [from, to] of Object.entries(HOVER_LIST_RENAMES)) rename(lists, from, to);
+  return out;
+}
+
 /** Migrations keyed by the version they upgrade *from*. */
 const MIGRATIONS = {
   1: v1_to_v2,
@@ -327,7 +349,8 @@ const MIGRATIONS = {
   3: v3_to_v4,
   4: v4_to_v5,
   5: v5_to_v6,
-  6: v6_to_v7
+  6: v6_to_v7,
+  7: v7_to_v8
 };
 
 /**

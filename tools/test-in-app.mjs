@@ -4548,7 +4548,7 @@ try {
   const setup = JSON.parse(await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Effect Probe", settings: {
-      lists: {markerColor: "#112233", hoverMarkerColor: "#ff0000", hoverOff: false},
+      lists: {markerColor: "#112233", markerHoverColor: "#ff0000", hoverOff: false},
       sidebar: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
     }});
     const entry = await JournalEntry.create({name: "Illuminus Hover Journal"});

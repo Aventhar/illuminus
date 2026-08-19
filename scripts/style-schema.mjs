@@ -562,7 +562,15 @@ export const GROUPS = [
     // its tab sits with the Window tab at the end of the strip.
     strip: "end",
     sections: [
-      { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
+      {
+        id: "background",
+        fields: [
+          col("background", "#00000000"), ...imageFields(),
+          // As the page has: a panel is tall enough to scroll, so whether its
+          // picture travels with the list or stays put is a real choice.
+          select("textureAttachment", "scroll", CHOICES.textureAttachment)
+        ]
+      },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
       { id: "layout", fields: [num("sidebarWidth", 300, "px", 120, 700, 10)] },
       { id: "border", fields: borderFields("border", { color: "#00000000" }) },
@@ -954,7 +962,7 @@ export const GROUPS = [
         select("numberStyle", "decimal", CHOICES.numberStyle, { emit: emitKeyword }),
         num("markerSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("markerColor", "#7a2010"),
-          col("hoverMarkerColor", ""),
+          col("markerHoverColor", ""),
           font("markerFont", "")
         ]
       },
@@ -966,14 +974,14 @@ export const GROUPS = [
           font("termFont", ""),
           num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("termColor", "#5e1914"),
-          col("hoverTermColor", ""),
+          col("termHoverColor", ""),
           ...textStyleField("termTextStyle", "700", "normal"),
           select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
           num("termSpacingAbove", 8, "px", 0, 100, 1),
           font("detailFont", ""),
           num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("detailColor", "#241b10"),
-          col("hoverDetailColor", ""),
+          col("detailHoverColor", ""),
           ...textStyleField("detailTextStyle", "400", "normal"),
           num("detailIndent", 24, "px", 0, 200, 2),
           num("detailSpacingBelow", 6, "px", 0, 100, 1)
@@ -1240,6 +1248,13 @@ export const GROUPS = [
 const HOVERABLE = [
   "color",
   "background",
+  // A shadow is paint, like the outline beside it: it lifts the letter off what
+  // is behind it and moves nothing. Sharing one between the states meant a
+  // shadow set for the ordinary look was the shadow you got when pointed at.
+  "textShadowOffsetX",
+  "textShadowOffsetY",
+  "textShadowBlur",
+  "textShadowColor",
   // The outline as well as the fill: sharing one outline between the ordinary
   // and pointed-at states meant setting it under Hovered changed the ordinary
   // one too, which is not what a state is for. Still paint only — a stroke
@@ -1381,12 +1396,41 @@ export function ordinaryTwinFor(group, hovered) {
 
 for (const group of GROUPS) {
   const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
-  if (!NO_HOVER.has(group.id)) {
-    for (const section of group.sections) {
-      for (const name of HOVERABLE) {
-        const original = section.fields.find((field) => field.name === name);
-        if (!original) continue;
-        const hovered = hoverNameFor(name);
+  for (const section of group.sections) {
+      // The window frame and the contents panel are not hovered as objects, so
+      // nothing is derived for them wholesale — but a section of one that
+      // already states a hovered control is a section about something that *is*
+      // hovered, and the rest of its paint should follow. Without this, a
+      // sub-heading could take a hovered color and nothing else: changing its
+      // outline under Hovered changed the ordinary one too.
+      const stated = section.fields.some((field) => isHoveredField(field.name));
+      if (NO_HOVER.has(group.id) && !stated) continue;
+
+      // A section that states a hovered control is about something that is
+      // pointed at, so every paint control it has gets a counterpart — under
+      // its own prefix, since that is how it is named: a sub-heading's outline
+      // is `headingOutlineWidth`, and its hovered twin `headingHoverOutlineWidth`.
+      const capital = (name) => `${name[0].toUpperCase()}${name.slice(1)}`;
+      // Read off each control rather than each name in the list, and take the
+      // longest match: `outlineColor` is one control, not "outline" wearing
+      // "Color". A control that is already a state's own is left alone, or
+      // `hoverColor` would grow a hovered twin of its own.
+      const stateControl = (name) => /^(hover|active)/.test(name) || /(Hover|Active)[A-Z]/.test(name);
+      const wanted = section.fields.flatMap((original) => {
+        // A state's own control never grows another state of its own.
+        if (stateControl(original.name)) return [];
+        const bare = HOVERABLE
+          .filter((name) => original.name === name
+            || (stated && original.name.endsWith(capital(name))))
+          .sort((a, b) => b.length - a.length)[0];
+        return bare ? [{ bare, original }] : [];
+      });
+
+      for (const { bare, original } of wanted) {
+        const prefix = original.name === bare
+          ? ""
+          : original.name.slice(0, -capital(bare).length);
+        const hovered = prefix ? `${prefix}Hover${capital(bare)}` : hoverNameFor(bare);
         // Never shadow a control the schema already spells out itself — the
         // sidebar and the window state their hovered colors by hand.
         if (taken.has(hovered)) continue;
@@ -1399,7 +1443,6 @@ for (const group of GROUPS) {
           ? { ...original, name: hovered, default: 0, emitZero: false }
           : col(hovered, ""));
       }
-    }
   }
 
   // A switch for the whole tab, on every tab that has anything to switch —
