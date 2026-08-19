@@ -264,6 +264,9 @@ Object.assign(out, {
   "ILLUMINUS.Preview.MarksLead": "Marked text, such as",
   "ILLUMINUS.Preview.Highlight": "a highlight",
   "ILLUMINUS.Preview.Code": "code",
+  "ILLUMINUS.Preview.CodeBlock": "a block of code, set apart from the prose",
+  "ILLUMINUS.Preview.Struck": "struck through",
+  "ILLUMINUS.Preview.Underlined": "underlined",
   "ILLUMINUS.Preview.Abbr": "an abbreviation",
   "ILLUMINUS.Preview.Collapsible": "A collapsible passage",
   "ILLUMINUS.Preview.CollapsibleBody": "What the reader sees once it is opened.",
@@ -436,15 +439,14 @@ const unmatched = [];
 
 /**
  * Background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity). Every
- * fill color has one, so the labels are generated rather than listed. Where two
- * fills share a section — a button and the same button being pointed at — the
- * qualifier keeps their labels apart.
+ * fill color has one, so the labels are generated rather than listed.
+ *
+ * Where two fills share a section — a button and the same button pointed at —
+ * they used to be told apart by a qualifier in the label. The state switch does
+ * that now, and shows one of them at a time, so the qualifier said the same
+ * thing twice.
  */
-const IMAGE_QUALIFIER = (prefix) => {
-  if (/hover$/i.test(prefix)) return " When Pointed At";
-  if (prefix === "active") return " for the Current Page";
-  return "";
-};
+const IMAGE_QUALIFIER = () => "";
 const IMAGE_TEXT = {
   "": ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
   Fit: ["Image Fit", "How the background image covers the area."],
@@ -458,6 +460,15 @@ const IMAGE_TEXT = {
  * that offers a typeface offers a line around the letters too. The prefix says
  * which lettering, in the same words its own typeface control uses.
  */
+const CROWDED_OUTLINE = new Set(GROUPS.flatMap((group) => group.sections.flatMap((section) => {
+  const prefixes = new Set(section.fields
+    .filter((field) => /OutlineWidth$|^outlineWidth$/.test(field.name))
+    .map((field) => field.name.replace(/OutlineWidth$/, "")));
+  return prefixes.size > 1
+    ? section.fields.filter((field) => /Outline(Width|Color)$/.test(field.name)).map((field) => field.name)
+    : [];
+})));
+
 const OUTLINE_WORD = {
   "": "", heading: "Heading", category: "Category", term: "Term", detail: "Definition",
   header: "Header", caption: "Caption", summary: "Heading",
@@ -485,8 +496,9 @@ for (const name of names) {
     if (prefix in OUTLINE_WORD) {
       const word = OUTLINE_WORD[prefix];
       const of = word ? `${word.toLowerCase()} ` : "";
+      const said = word && CROWDED_OUTLINE.has(name) ? `${word} ` : "";
       put(`ILLUMINUS.Field.${name}.label`,
-        `${word ? `${word} ` : ""}Outline ${part === "Width" ? "Thickness" : "Color"}`);
+        `${said}Outline ${part === "Width" ? "Thickness" : "Color"}`);
       put(`ILLUMINUS.Field.${name}.hint`, part === "Width"
         ? `A line drawn around each ${of}letter. Leave at 0 for none.`
         : `The color of the line drawn around each ${of}letter.`);
@@ -616,12 +628,12 @@ const FIELD_TEXT = {
   termSize: ["Term Text Size", "How large the term is. 0 follows the page."],
   termColor: ["Term Color", "Text color of the term being defined."],
   termCaps: ["Term Capitals", "Force capital letters on the term."],
-  termSpacingAbove: ["Space Above Term", "Empty space above each term."],
-  detailFont: ["Explanation Typeface", "The typeface used for the explanation under a term."],
-  detailSize: ["Explanation Text Size", "How large the explanation is. 0 follows the page."],
-  detailColor: ["Explanation Color", "Text color of the explanation under a term."],
-  detailIndent: ["Explanation Indent", "How far the explanation is pushed in from the left."],
-  detailSpacingBelow: ["Space Below Explanation", "Empty space under each explanation."],
+  termSpacingAbove: ["Gap Above Term", "Empty space above each term."],
+  detailFont: ["Definition Typeface", "The typeface used for the definition under a term."],
+  detailSize: ["Definition Text Size", "How large the definition is. 0 follows the page."],
+  detailColor: ["Definition Color", "Text color of the definition under a term."],
+  detailIndent: ["Definition Indent", "How far the definition is pushed in from the left."],
+  detailSpacingBelow: ["Gap Below Definition", "Empty space under each definition."],
   captionSide: ["Caption Position", "Whether the caption sits above or below the table."],
   captionCaps: ["Caption Capitals", "Force capital letters on the caption."],
   summaryFont: ["Heading Typeface", "The typeface used for the line you click to open it."],
@@ -661,12 +673,12 @@ const FIELD_TEXT = {
   size: ["Text Size", "How large the lettering is."],
   color: ["Text Color", "Color of the lettering."],
   textStyle: ["Text Style", "How the lettering looks \u2014 its weight and whether it is italic."],
-  activeTextStyle: ["Current Page Text Style", "How the entry for the page being read looks."],
-  numberTextStyle: ["Page Number Text Style", "How the numbers beside page entries look."],
-  headingTextStyle: ["Heading Text Style", "How headings look."],
-  categoryTextStyle: ["Category Text Style", "How a category row looks."],
-  headerTextStyle: ["Header Text Style", "How the lettering in a header row looks."],
-  captionTextStyle: ["Caption Text Style", "How caption lettering looks."],
+  activeTextStyle: ["Text Style", "How the entry for the page being read looks."],
+  numberTextStyle: ["Text Style", "How the numbers beside page entries look."],
+  headingTextStyle: ["Text Style", "How headings look."],
+  categoryTextStyle: ["Text Style", "How a category row looks."],
+  headerTextStyle: ["Text Style", "How the lettering in a header row looks."],
+  captionTextStyle: ["Text Style", "How caption lettering looks."],
   caps: ["Capitals", "Force capital letters, or use small capitals for a printed-book feel."],
   letterSpacing: ["Letter Spacing", "Extra space between letters. A little goes a long way on headings."],
   wordSpacing: ["Word Spacing", "Extra space between words."],
@@ -724,8 +736,8 @@ const FIELD_TEXT = {
   dividerColor: ["Color", "Color of a horizontal rule."],
   dividerLength: ["Length", "How much of the width a horizontal rule spans."],
   dividerAlign: ["Alignment", "Which side a shortened rule sits against."],
-  dividerMarginTop: ["Space Above", "Gap between a rule and what comes before it."],
-  dividerMarginBottom: ["Space Below", "Gap between a rule and what comes after it."],
+  dividerMarginTop: ["Gap Above", "Space between a divider and what comes before it."],
+  dividerMarginBottom: ["Gap Below", "Space between a divider and what comes after it."],
 
   float: ["Float", "Let text wrap around this, on the left or the right of the page."],
   width: ["Width", "How much of the available width this takes up."],
@@ -737,8 +749,8 @@ const FIELD_TEXT = {
   headingWeight: ["Thickness", "How heavy headings inside this block are."],
   headingCaps: ["Capitals", "Capitalization of headings inside this block."],
   headingAlign: ["Alignment", "Which edge headings inside this block line up against."],
-  headingMarginTop: ["Space Above", "Gap above a heading inside this block."],
-  headingMarginBottom: ["Space Below", "Gap below a heading inside this block."],
+  headingMarginTop: ["Gap Above", "Space above a heading inside this box."],
+  headingMarginBottom: ["Gap Below", "Space below a heading inside this box."],
   headingRuleWidth: ["Rule Thickness", "A line above each heading inside this block. 0 draws nothing."],
   headingRuleStyle: ["Rule Style", "What the line above a heading looks like."],
   headingRuleColor: ["Rule Color", "Color of the line above a heading."],
@@ -746,18 +758,18 @@ const FIELD_TEXT = {
   sidebarWidth: ["Panel Width", "How wide the contents panel is."],
   titleBarBackground: ["Fill Color", "Color of the strip across the top of the window."],
   headerButtonColor: ["Icon Color", "Color of the title bar's icon buttons."],
-  headerButtonHoverColor: ["Icon Color When Pointed At", "Icon color while the mouse is over a title bar button."],
+  headerButtonHoverColor: ["Icon Color", "Icon color while the mouse is over a title bar button."],
   headerButtonBackground: ["Fill Color", "Color behind the title bar's icon buttons."],
-  headerButtonHoverBackground: ["Fill When Pointed At", "Color behind a title bar button while the mouse is over it."],
+  headerButtonHoverBackground: ["Fill Color", "Color behind a title bar button while the mouse is over it."],
   headerButtonSize: ["Icon Size", "How large the title bar's icons are."],
   pageButtonColor: ["Icon Color", "Color of the edit pencil."],
-  pageButtonHoverColor: ["Icon Color When Pointed At", "Color of the edit pencil while the mouse is over it."],
+  pageButtonHoverColor: ["Icon Color", "Color of the edit pencil while the mouse is over it."],
   pageButtonBackground: ["Fill Color", "Color behind the edit pencil."],
-  pageButtonHoverBackground: ["Fill When Pointed At", "Color behind the edit pencil while the mouse is over it."],
+  pageButtonHoverBackground: ["Fill Color", "Color behind the edit pencil while the mouse is over it."],
   pageButtonSize: ["Icon Size", "How large the edit pencil is."],
-  hoverBackground: ["Highlight When Pointed At", "Color behind an entry while the mouse is over it."],
-  activeColor: ["Current Page Color", "Text color of the page you are reading."],
-  activeBackground: ["Current Page Highlight", "Color behind the page you are reading."],
+  hoverBackground: ["Fill Color", "Color behind an entry while the mouse is over it."],
+  activeColor: ["Text Color", "Text color of the page you are reading."],
+  activeBackground: ["Fill Color", "Color behind the page you are reading."],
   activeAccentColor: ["Current Page Marker Color", "Color of the bar marking the page you are reading."],
   activeAccentWidth: ["Current Page Marker Width", "A bar down the left of the page you are reading. 0 draws nothing."],
   activeWeight: ["Current Page Thickness", "How heavy the lettering is for the page you are reading."],
@@ -771,9 +783,9 @@ const FIELD_TEXT = {
   headingColor: ["Text Color", "Color of the sub-headings."],
   headingWeight: ["Thickness", "How heavy the sub-headings are."],
   headingStyle: ["Slant", "Whether the sub-headings are italic."],
-  headingHoverColor: ["Color When Pointed At", "Color a sub-heading turns when the mouse is over it."],
+  headingHoverColor: ["Text Color", "Color a sub-heading turns when the mouse is over it."],
   headingIndent: ["Indent", "How far the sub-headings are pushed in from the left."],
-  headingLineHeight: ["Row Height", "How tall each sub-heading row is."],
+  headingLineHeight: ["Line Spacing", "How tall each sub-heading row is."],
   categoryFont: ["Typeface", "The typeface used for category headers."],
   categorySize: ["Text Size", "How large category headers are."],
   categoryColor: ["Text Color", "Color of category headers."],
@@ -790,9 +802,9 @@ const FIELD_TEXT = {
   buttonBackground: ["Fill Color", "Color inside the panel's buttons."],
   buttonBorderColor: ["Border Color", "Color of the outline around the panel's buttons."],
   buttonBorderWidth: ["Border Thickness", "How heavy the outline around the panel's buttons is."],
-  buttonHoverColor: ["Text Color When Pointed At", "Text color while the mouse is over a button."],
-  buttonHoverBackground: ["Fill When Pointed At", "Color inside a button while the mouse is over it."],
-  buttonHoverBorderColor: ["Border Color When Pointed At", "Outline color while the mouse is over a button."]
+  buttonHoverColor: ["Text Color", "Text color while the mouse is over a button."],
+  buttonHoverBackground: ["Fill Color", "Color inside a button while the mouse is over it."],
+  buttonHoverBorderColor: ["Border Color", "Edge color while the mouse is over a button."]
 };
 for (const [name, [label, hint]] of Object.entries(FIELD_TEXT)) {
   put(`ILLUMINUS.Field.${name}.label`, label);

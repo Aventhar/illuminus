@@ -1279,16 +1279,22 @@ for (const group of GROUPS) {
       if (field.type !== "font" || NO_OUTLINE_FIELDS.has(field.name)) continue;
       const prefix = field.name === "font" ? "" : field.name.replace(/Font$/, "");
       const [width] = outlineFields(prefix);
-      if (!section.fields.some((other) => other.name === width.name)) {
-        section.fields.push(...outlineFields(prefix));
-      }
+      const after = (added) => {
+        // Directly after the last control sharing this prefix: appending to the
+        // end of the section put a term's outline below a definition's indent,
+        // which reads as belonging to neither.
+        const last = section.fields.reduce((at, other, index) =>
+          (prefix ? other.name.startsWith(prefix) : !/[A-Z]/.test(other.name[0])) ? index : at, -1);
+        section.fields.splice(last + 1, 0, ...added);
+      };
+      if (!section.fields.some((other) => other.name === width.name)) after(outlineFields(prefix));
       // The two go together: an outline and a shadow are the two things you do
       // to a letter to lift it off what is behind it, and having one without
       // the other is a gap somebody meets the moment they try.
       const shadow = prefix ? `${prefix}TextShadow` : "textShadow";
       const inGroup = group.sections.some((other) =>
         other.fields.some((f) => f.name === `${shadow}OffsetX`));
-      if (!inGroup) section.fields.push(...textShadowFields(shadow));
+      if (!inGroup) after(textShadowFields(shadow));
     }
   }
 }
@@ -1483,16 +1489,31 @@ for (const group of GROUPS) {
       section.fields.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
     }
 
-    // A hovered color sits against the ordinary one it replaces, so that the
-    // two states read alike: switching to Hovered hides controls but never
-    // shuffles the ones that stay.
-    const twins = new Map(section.fields.map((field) => [hoverNameFor(field.name), field.name]));
+    // A control's other states sit against it, in the order the switch offers
+    // them: ordinary, pointed at, selected. Switching states then hides controls
+    // without shuffling the ones that stay, and a tab reads the same whichever
+    // state is on show.
+    // Both spellings of a state occur — `hoverColor` and `buttonHoverColor` —
+    // so the word is taken out wherever it sits.
+    const stemOf = (name) => {
+      const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
+      if (stripped === name || !stripped) return name;
+      return stripped[0].toLowerCase() + stripped.slice(1);
+    };
+    const has = new Set(section.fields.map((field) => field.name));
     const ordered = [];
     for (const field of section.fields) {
-      if (twins.has(field.name)) continue;
+      const stem = stemOf(field.name);
+      // A state's control whose ordinary counterpart is in this section waits
+      // for it; one without a counterpart stands where it is.
+      if (stem !== field.name && has.has(stem)) continue;
       ordered.push(field);
-      const hovered = section.fields.find((other) => twins.get(other.name) === field.name);
-      if (hovered) ordered.push(hovered);
+      for (const state of ["hover", "active"]) {
+        const twin = section.fields.find((other) =>
+          other.name !== field.name && stemOf(other.name) === field.name
+          && new RegExp(`^${state}|${state[0].toUpperCase()}${state.slice(1)}`).test(other.name));
+        if (twin) ordered.push(twin);
+      }
     }
     section.fields = ordered;
   }

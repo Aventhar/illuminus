@@ -37,14 +37,26 @@
   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
   <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
 </ul>
+{{!-- Numbered as well as bulleted: the Lists tab sets how each is marked, and
+      Number Style had nothing to show. --}}
+<ol data-part="lists">
+  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
+  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
+</ol>
 <dl data-part="lists">
   <dt>{{localize "ILLUMINUS.Preview.Term"}}</dt>
   <dd>{{localize "ILLUMINUS.Preview.Definition"}}</dd>
 </dl>
+{{!-- Every mark the toolbar can apply, because each has its own settings on the
+      Body tab and a setting with nothing to look at may as well not be there. --}}
 <p data-part="body">{{localize "ILLUMINUS.Preview.MarksLead"}}
   <mark>{{localize "ILLUMINUS.Preview.Highlight"}}</mark>,
+  <s>{{localize "ILLUMINUS.Preview.Struck"}}</s>,
+  <u>{{localize "ILLUMINUS.Preview.Underlined"}}</u>,
   <code>{{localize "ILLUMINUS.Preview.Code"}}</code>, and
   <abbr title="{{localize 'ILLUMINUS.Preview.Abbr'}}">{{localize "ILLUMINUS.Preview.Abbr"}}</abbr>.</p>
+{{!-- A block of code, which is set separately from code inside a sentence. --}}
+<pre data-part="body"><code>{{localize "ILLUMINUS.Preview.CodeBlock"}}</code></pre>
 <details open data-part="boxes">
   <summary>{{localize "ILLUMINUS.Preview.Collapsible"}}</summary>
   <p>{{localize "ILLUMINUS.Preview.CollapsibleBody"}}</p>

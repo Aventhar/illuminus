@@ -2817,10 +2817,12 @@ try {
     await new Promise(r => setTimeout(r, 250));
     out.entryOnActive = entryShown();
 
-    // Searching must reach a control the switch has folded away.
+    // Searching must reach a control the switch has folded away. The words are
+    // in its wording rather than its name: a state's controls are named plainly
+    // now, because the switch above them says which state they are.
     buttons.querySelector('.illuminus-state__option[data-state="normal"]').click();
     await new Promise(r => setTimeout(r, 250));
-    await type("pointed at");
+    await type("mouse is over");
     out.filterReachesHidden = hoverFields().some(f => !f.classList.contains("is-filtered-out")
       && f.classList.contains("is-state-suppressed"));
     await type("");
