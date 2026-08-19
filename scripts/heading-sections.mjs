@@ -1,0 +1,91 @@
+/**
+ * Wrap each heading's run of content, so a heading can column the text beneath
+ * it.
+ *
+ * A journal page is a flat sequence: a heading, some paragraphs, another
+ * heading, more paragraphs. CSS can only set columns on an element, and "the
+ * paragraphs after this heading" is not one — so one is made here, at render.
+ *
+ * Three things are deliberate:
+ *
+ *   - **Nothing is stored.** The wrappers exist in what is on screen, never in
+ *     the page's own content: a person could not have typed them, and a journal
+ *     that carries markup its editor cannot produce is a journal that breaks the
+ *     first time somebody edits it.
+ *   - **The heading stays outside its wrapper.** It is the run of text that goes
+ *     into columns, not the heading, which reads across the full measure as a
+ *     section heading does in print.
+ *   - **It runs again on every render, and undoes itself first.** A sheet
+ *     re-renders when a page is edited or a style changes, and wrapping wrapped
+ *     content would nest a column inside a column.
+ */
+
+/** The class each wrapper carries, with the heading level it belongs to. */
+export const FLOW_CLASS = "illuminus-flow";
+
+/**
+ * Content above the first heading belongs to level 1.
+ *
+ * The page's *title* is a level 1 heading — the sheet renders it in a header of
+ * its own, outside the content, and level 1 is what styles it. So the text
+ * beneath that title is the text under a level 1 heading, and setting Heading 1
+ * to two columns sets it in two. Giving it a level of its own instead left the
+ * first and most obvious heading governing nothing at all.
+ */
+const LEAD = "h1";
+
+/** Take the wrappers back out, leaving the content where it was. */
+export function unwrapHeadingSections(content) {
+  for (const flow of content.querySelectorAll(`:scope > .${FLOW_CLASS}`)) {
+    flow.replaceWith(...flow.childNodes);
+  }
+}
+
+/**
+ * Wrap the runs inside one element holding a page's content.
+ *
+ * Exported here as well as used below: an export builds its pages in a parsed
+ * document of its own, where there is no `.journal-page-content` to look for
+ * yet — the content *is* the element being handed over.
+ * @param {HTMLElement} content
+ */
+export function wrapFlows(content) {
+  unwrapHeadingSections(content);
+  let level = LEAD;
+  let flow = null;
+  for (const node of [...content.childNodes]) {
+    const heading = node.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(node.tagName);
+    if (heading) {
+      level = node.tagName.toLowerCase();
+      flow = null;
+      continue;
+    }
+    // Whitespace between elements belongs to whatever follows it, not to the
+    // run that has just ended — otherwise every wrapper starts with a newline
+    // and an empty first line box in the first column.
+    if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) continue;
+    if (!flow) {
+      flow = document.createElement("div");
+      flow.className = `${FLOW_CLASS} ${FLOW_CLASS}--${level}`;
+      node.before(flow);
+    }
+    flow.append(node);
+  }
+}
+
+/**
+ * Wrap every page inside a rendered element: a journal sheet, the editor's
+ * sample, or a page built for export.
+ * @param {HTMLElement} root
+ */
+export function wrapHeadingSections(root) {
+  if (!root) return;
+  for (const content of root.querySelectorAll(".journal-page-content")) {
+    // Never inside the editor. Its content element carries the same class while
+    // ProseMirror owns the DOM underneath it, and moving nodes out from under
+    // an editor breaks the selection it is holding — which showed up as an
+    // inline tag refusing to wrap the words a person had selected.
+    if (content.closest("prose-mirror") || content.isContentEditable) continue;
+    wrapFlows(content);
+  }
+}

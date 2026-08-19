@@ -6,6 +6,7 @@ import { exportStyles, promptImport } from "../io.mjs";
 import { IlluminusStyleEditor } from "./style-editor.mjs";
 import { IlluminusExportDialog } from "./export-dialog.mjs";
 import { promptDetails } from "./details-dialog.mjs";
+import { createSampleJournal } from "../sample-journal.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -38,6 +39,7 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
       import: IlluminusStyleManager.#onImport,
       advancedExport: IlluminusStyleManager.#onAdvancedExport,
       restore: IlluminusStyleManager.#onRestore,
+      sampleJournal: IlluminusStyleManager.#onSampleJournal,
       toggleAll: IlluminusStyleManager.#onToggleAll
     }
   };
@@ -166,6 +168,19 @@ export class IlluminusStyleManager extends HandlebarsApplicationMixin(Applicatio
       ? game.i18n.format("ILLUMINUS.Manager.Restored", { count: restored })
       : game.i18n.localize("ILLUMINUS.Manager.RestoredNone"));
     this.render();
+  }
+
+  /**
+   * Build a journal holding what the editor's sample holds, in a folder of its
+   * own, dressed in whichever style is ticked.
+   *
+   * The sample pane can only say so much at the width of a pane. This is the
+   * same page at the table's own size, in a real window, with a real contents
+   * panel beside it — which is where a style is finally judged.
+   */
+  static async #onSampleJournal() {
+    const entry = await createSampleJournal({ styleId: this.#selected()[0] });
+    ui.notifications.info(game.i18n.format("ILLUMINUS.Sample.Made", { name: entry.name }));
   }
 
   static async #onImport() {

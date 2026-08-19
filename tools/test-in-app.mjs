@@ -254,8 +254,9 @@ check(m.rows === 1, `manager lists the seeded style (got ${m.rows})`);
 // Named rather than counted, so adding a button is a deliberate edit here
 // rather than a number that quietly drifts.
 check(JSON.stringify(m.toolbarButtons)
-  === JSON.stringify(["create", "import", "exportSelected", "exportAll", "advancedExport", "restore"]),
-  `toolbar has create/import/export/restore buttons (got ${m.toolbarButtons.join(",")})`);
+  === JSON.stringify(["create", "import", "exportSelected", "exportAll", "advancedExport",
+    "sampleJournal", "restore"]),
+  `toolbar has create/import/export/sample/restore buttons (got ${m.toolbarButtons.join(",")})`);
 check(m.untranslated.length === 0, `no untranslated keys in manager${m.untranslated.length ? `: ${m.untranslated.slice(0,3)}` : ""}`);
 
 console.log("\n[8] Style editor GUI renders with all tabs and controls");
@@ -480,16 +481,19 @@ const merged = await cdp.evaluate(`(async () => {
   return JSON.stringify({out, kept: cleanSettings(out)});
 })()`);
 const mx = JSON.parse(merged);
-check(mx.kept.body.textStyle === "extraBoldItalic",
-  `a heavy italic keeps its exact weight (got ${mx.kept.body.textStyle})`);
-check(mx.kept.heading1.textStyle === "extraLight",
-  `and so does a hairline one (got ${mx.kept.heading1.textStyle})`);
+// Nine thicknesses became three, and italic became a tick box beside them, so a
+// v2 style arrives as the nearest of Light, Normal, and Bold with the slant on
+// its own control.
+check(mx.kept.body.textStyle === "bold" && mx.kept.body.textStyleSlant === true,
+  `a heavy italic arrives as bold and italic (got ${mx.kept.body.textStyle}, slant ${mx.kept.body.textStyleSlant})`);
+check(mx.kept.heading1.textStyle === "light",
+  `and a hairline one as light (got ${mx.kept.heading1.textStyle})`);
 check(mx.kept.sidebar.activeTextStyle === "bold",
   `a thickness that never had a slant still converts (got ${mx.kept.sidebar.activeTextStyle})`);
 check(mx.kept.box01.textStyle === "inherit",
   `"use the page setting" survives on both halves, under the renamed group (got ${mx.kept.box01.textStyle})`);
-check(mx.kept.images.captionTextStyle === "normalItalic",
-  `oblique counts as italic (got ${mx.kept.images.captionTextStyle})`);
+check(mx.kept.images.captionTextStyle === "normal" && mx.kept.images.captionTextStyleSlant === true,
+  `oblique counts as italic (got ${mx.kept.images.captionTextStyle}, slant ${mx.kept.images.captionTextStyleSlant})`);
 check(mx.out.body.weight === undefined && mx.out.body.style === undefined,
   "and the two old keys are gone");
 
@@ -599,8 +603,10 @@ const sidebar = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Sidebar Probe", settings: {sidebar: {
       background: "#12151b", color: "#c8d2de",
-      activeColor: "#e8c979", activeTextStyle: "boldItalic",
-      activeAccentColor: "#e8c979", activeAccentWidth: 3,
+      activeColor: "#e8c979", activeTextStyle: "bold", activeTextStyleSlant: true,
+      entryBorderLeftWidth: 3, entryBorderLeftColor: "#00000000",
+      activeEntryBorderLeftColor: "#e8c979",
+      hoverOutlineWidth: 1, hoverOutlineColor: "#ff8800",
       entryBorderBottomWidth: 1, entryBorderBottomColor: "#262c38",
       numberColor: "#6b7688", searchBackground: "#0d1015"
     }}});
@@ -639,11 +645,21 @@ const sidebar = await cdp.evaluate(`(async () => {
     activeColor: cs(active?.querySelector(".page-title")).color,
     activeWeight: cs(active?.querySelector(".page-title")).fontWeight,
     activeSlant: cs(active?.querySelector(".page-title")).fontStyle,
-    activeShadow: cs(active).boxShadow,
+    activeLeftBorder: cs(active).borderLeftColor,
     entryBorderBottom: cs(inactive).borderBottomWidth + " " + cs(inactive).borderBottomColor,
     numberColor: cs(root.querySelector(".toc .page-index")).color,
+    numberShown: cs(root.querySelector(".toc .page-index")).display,
     searchBg: cs(root.querySelector("search input[type=search]")).backgroundColor
   };
+
+  // And with the numbers turned off, which is what the panel looks like when
+  // the page's name is the whole of the entry.
+  const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+  settings.sidebar.numberShown = "notShown";
+  await api.updateStyle(style.id, {settings});
+  await new Promise(r => setTimeout(r, 400));
+  out.numberHidden = cs(root.querySelector(".toc .page-index")).display;
+
   await entry.delete();
   return JSON.stringify(out);
 })()`);
@@ -657,10 +673,15 @@ check(sb.activeWeight === "700", `current page weight applied (got ${sb.activeWe
 // A lone Thickness had no Slant beside it; the combined control carries both,
 // so the sidebar can be italic now where it could not before.
 check(sb.activeSlant === "italic", `and the slant it gained with it (got ${sb.activeSlant})`);
-check((sb.activeShadow ?? "").includes("rgb(232, 201, 121)"), `current page accent bar drawn (got ${sb.activeShadow})`);
+// The Page Marker was an inset shadow of its own; it is a left edge the
+// selected state colors in, drawn with the border controls every state has.
+check(sb.activeLeftBorder === "rgb(232, 201, 121)",
+  `the selected entry colors its own left edge (got ${sb.activeLeftBorder})`);
 check(sb.entryBorderBottom.startsWith("1px") && sb.entryBorderBottom.includes("38, 44, 56"),
   `entry divider beat core's own border rule (got ${sb.entryBorderBottom})`);
 check(sb.numberColor === "rgb(107, 118, 136)", `page number color applied (got ${sb.numberColor})`);
+check(sb.numberShown !== "none", `page numbers are shown unless asked otherwise (got ${sb.numberShown})`);
+check(sb.numberHidden === "none", `and Do not display takes them away (got ${sb.numberHidden})`);
 check(sb.searchBg === "rgb(13, 16, 21)", `search box color applied (got ${sb.searchBg})`);
 
 console.log("\n[17] The sample shows a sidebar, but only on the Sidebar tab");
@@ -1371,6 +1392,88 @@ check(!fr.stored.includes("#112233") && fr.stored.length === 2,
   `and it is gone from the style (${fr.stored.join(", ")})`);
 
 console.log("\n[28] Saving sets the baseline that Reset returns to");
+// The editor is a form, so Enter in a field used to submit it — saving the
+// style from the keyboard, some way from the button that says Save.
+{
+  const where = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Enter Probe"});
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1200));
+    app.changeTab("body", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    const section = app.element.querySelector('.illuminus-tab[data-tab="body"] details.illuminus-section');
+    section.open = true;
+    await new Promise(r => setTimeout(r, 300));
+    // Assigned on the element that carries the name, which is what dispatches
+    // the events — writing to the inner input does nothing at all.
+    const control = app.element.querySelector('[data-field="body.size"] range-picker');
+    control.value = 21;
+    await new Promise(r => setTimeout(r, 300));
+    // The number box inside the control, not the control's middle — the middle
+    // of a range picker is its slider, and clicking a slider sets a value.
+    const field = control.querySelector('input[type="number"]').getBoundingClientRect();
+    const save = app.element.querySelector('button[type="submit"]').getBoundingClientRect();
+    return JSON.stringify({
+      styleId: style.id,
+      stored: api.getStyle(style.id).settings.body?.size,
+      // The working copy, so a failure below says which half broke: the typing
+      // or the saving.
+      working: app.element.querySelector('[data-field="body.size"]').classList.contains("is-default"),
+      field: [field.left + field.width / 2, field.top + field.height / 2],
+      save: [save.left + save.width / 2, save.top + save.height / 2]
+    });
+  })()`));
+
+  // Typed into like a person, and Enter pressed for real: a dispatched event
+  // does not submit a form, so a scripted one would pass whatever we did.
+  await cdp.click(...where.field);
+  for (const type of ["keyDown", "keyUp"]) {
+    await cdp.send("Input.dispatchKeyEvent", { type, key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+  }
+  await new Promise((r) => setTimeout(r, 600));
+  const afterEnter = JSON.parse(await cdp.evaluate(`(() => {
+    const api = game.modules.get("illuminus").api;
+    return JSON.stringify({
+      stored: api.getStyle(${JSON.stringify(where.styleId)}).settings.body?.size,
+      open: [...foundry.applications.instances.values()].some(a => a.constructor.name.includes("StyleEditor"))
+    });
+  })()`));
+  check(!where.working, "the edit reached the working copy");
+  check(afterEnter.stored === where.stored,
+    `Enter leaves the style unsaved (${where.stored} still, not ${21})`);
+  check(afterEnter.open, "and leaves the editor open");
+
+  // The button is hit-tested rather than clicked. A synthetic click delivered
+  // straight after a synthetic Enter is dropped by the headless browser about
+  // half the time — every extra round-trip makes it land — and a check that
+  // fails on the input pipeline says nothing about the editor. What it is
+  // really asserting is that the thing at those coordinates is the submit
+  // button, and that submitting saves; the submit path itself is driven the
+  // same way the rest of this file drives it.
+  const save = JSON.parse(await cdp.evaluate(`(() => {
+    const app = [...foundry.applications.instances.values()].find(a => a.constructor.name.includes("StyleEditor"));
+    const button = app.element.querySelector('button[type="submit"]');
+    const box = button.getBoundingClientRect();
+    const at = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    return JSON.stringify({ reached: at === button || button.contains(at), at: at?.tagName });
+  })()`));
+  check(save.reached, `the Save button is what is under the pointer (${save.at})`);
+  const afterSave = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const app = [...foundry.applications.instances.values()].find(a => a.constructor.name.includes("StyleEditor"));
+    await app.submit();
+    await new Promise(r => setTimeout(r, 500));
+    const out = JSON.stringify({ stored: api.getStyle(${JSON.stringify(where.styleId)}).settings.body?.size });
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    await api.deleteStyle(${JSON.stringify(where.styleId)});
+    return out;
+  })()`));
+  check(afterSave.stored === 21, `while the Save button still saves it (got ${afterSave.stored})`);
+}
+
 const baseline = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = await api.createStyle({name: "Baseline Probe"});
@@ -2151,7 +2254,12 @@ try {
       // The page title takes level 1's look even though it sits outside the
       // content area, which is why level 1 styles the header too.
       titleBg: getComputedStyle(root.querySelector(".journal-page-header h1")).backgroundColor,
-      dropCapFont: getComputedStyle(root.querySelector(".journal-page-content > p:first-child"), "::first-letter").fontFamily
+      // The opening paragraph is inside the wrapper that carries the page's own
+      // columns, so it is looked for both ways.
+      dropCapFont: getComputedStyle(
+        root.querySelector(".journal-page-content > p:first-child")
+          ?? root.querySelector(".journal-page-content > .illuminus-flow:first-child > p:first-child"),
+        "::first-letter").fontFamily
     };
     window.__heads = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);
@@ -2611,8 +2719,13 @@ try {
     out.beforeFilter = visible();
     await type("shadow");
     out.afterFilter = visible();
+    // Dimming is measured on a word only one tab has. "Shadow" is on every tab
+    // now that lettering everywhere can cast one, so it narrows a tab without
+    // dimming any — which is right, and says nothing about dimming.
+    await type("bullet");
     out.dimmedTabs = [...el.querySelectorAll("nav.tabs [data-tab]")]
       .filter(t => t.classList.contains("is-filtered-out")).length;
+    await type("shadow");
     // A section whose own name matches opens even when its controls are worded
     // differently — Inner Shadow's are all "shading".
     out.openSections = [...el.querySelectorAll(".illuminus-tab.active .illuminus-section")]
@@ -2640,15 +2753,17 @@ try {
       .filter(f => f.dataset.field.endsWith(".buttonColor"))
       .every(f => f.classList.contains("is-state-hidden"));
 
-    // A section whose states are all named — no ordinary one among them — offers
-    // exactly those. The sidebar's entry states are pointed-at and current-page;
-    // the ordinary entry is styled in the section above.
+    // A listed page is set in one section, in its three states — which is what
+    // the switch is for. It was three sections, and the same entry could not be
+    // compared with itself.
     const entryStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
-      .find(s => s.querySelector("summary")?.dataset.section === "entryStates");
+      .find(s => s.querySelector("summary")?.dataset.section === "entries");
     entryStates.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
     out.entryStateOptions = [...entryStates.querySelectorAll(".illuminus-state__option")]
       .map(b => b.dataset.state);
+    out.entryStateLabels = [...entryStates.querySelectorAll(".illuminus-state__option")]
+      .map(b => b.textContent.trim());
     const entryShown = () => [...entryStates.querySelectorAll(".illuminus-field")]
       .filter(f => !f.classList.contains("is-state-hidden")).length;
     out.entryTotal = entryStates.querySelectorAll(".illuminus-field").length;
@@ -2679,10 +2794,16 @@ try {
   check(f.hoverHiddenNormally, "whose pointed-at controls are folded away by default");
   check(f.hoverShownAfter && f.normalHiddenAfter, "and swap in when it is switched");
   check(f.filterReachesHidden, "searching still reaches a control the switch folded away");
-  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["hover", "active"]),
-    `a section with no ordinary state offers only the ones it has (got ${f.entryStateOptions.join(", ")})`);
-  check(f.entryFirst + f.entryOnActive === f.entryTotal && f.entryFirst > 0 && f.entryOnActive > 0,
-    `and splits its controls between them (${f.entryFirst} + ${f.entryOnActive} of ${f.entryTotal})`);
+  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["normal", "hover", "active"]),
+    `a listed page offers all three of its states in one section (got ${f.entryStateOptions.join(", ")})`);
+  check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected"]),
+    `named as a person would name them (got ${f.entryStateLabels.join(", ")})`);
+  // Neither state shows everything, and each hides something the other shows.
+  // They overlap on purpose: a padding or an edge thickness belongs to all
+  // three, since a row that resized under the pointer would move the list.
+  check(f.entryFirst > 0 && f.entryOnActive > 0
+    && f.entryFirst < f.entryTotal && f.entryOnActive < f.entryTotal,
+    `and shows one state at a time (${f.entryFirst} then ${f.entryOnActive} of ${f.entryTotal})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -3002,7 +3123,7 @@ try {
 // An outline is the one lettering control that has to be drawn behind the
 // letters rather than over them, so both halves are checked: that it arrives,
 // and that it is painted underneath.
-console.log("\n[52] An outline around the title and the headings");
+console.log("\n[52] An outline wherever lettering is set");
 try {
   const outline = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3010,11 +3131,19 @@ try {
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
     Object.assign(settings.title, {outlineWidth: 3, outlineColor: "#ff00ff"});
     Object.assign(settings.heading2, {outlineWidth: 2, outlineColor: "#00ff00"});
+    // The controls are derived from wherever a typeface can be set, so the
+    // check reaches past the two tabs that had them written by hand.
+    Object.assign(settings.tables, {headerOutlineWidth: 1, headerOutlineColor: "#0000ff"});
+    Object.assign(settings.images, {captionOutlineWidth: 1.5, captionOutlineColor: "#ffff00"});
+    Object.assign(settings.links, {outlineWidth: 1, outlineColor: "#ff8800"});
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Outline Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{
-      name: "P", type: "text", text: {content: "<h2>Heading</h2><p>Body.</p>"}
+      name: "P", type: "text", text: {content: "<h2>Heading</h2><p>Body with a "
+        + "<a class=\\"content-link\\">link</a>.</p>"
+        + "<table><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Cell</td></tr></tbody></table>"
+        + "<figure><img src=\\"icons/svg/mystery-man.svg\\"><figcaption>Caption</figcaption></figure>"}
     }]);
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
@@ -3031,7 +3160,13 @@ try {
         order: cs.paintOrder
       };
     };
-    const out = {title: read(".journal-header .title"), heading: read(".journal-page-content h2")};
+    const out = {
+      title: read(".journal-header .title"),
+      heading: read(".journal-page-content h2"),
+      tableHeader: read(".journal-page-content th"),
+      caption: read(".journal-page-content figcaption"),
+      link: read(".journal-page-content a.content-link")
+    };
     // A level left alone keeps none of it.
     out.untouched = read(".journal-page-content h2") && (() => {
       const el = root.querySelector(".journal-page-content p");
@@ -3050,7 +3185,13 @@ try {
   check(/stroke/.test(ol.title.order) && /stroke/.test(ol.heading.order),
     `painted behind the letters rather than over them (${ol.title.order})`);
   check(ol.untouched === "0px",
-    `body text is left alone (${ol.untouched})`);
+    `body text is left alone, which is the one place it has none (${ol.untouched})`);
+  check(ol.tableHeader.width === "1px" && ol.tableHeader.color === "rgb(0, 0, 255)",
+    `a table header takes one (${ol.tableHeader.width} ${ol.tableHeader.color})`);
+  check(ol.caption.width === "1.5px" && ol.caption.color === "rgb(255, 255, 0)",
+    `so does a picture's caption (${ol.caption.width} ${ol.caption.color})`);
+  check(ol.link.width === "1px" && ol.link.color === "rgb(255, 136, 0)",
+    `and a link, which has no typeface of its own (${ol.link.width} ${ol.link.color})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -3559,7 +3700,10 @@ try {
       face: read(".journal-page-content p", "fontFamily"),
       size: read(".journal-page-content p", "fontSize"),
       sidebar: Boolean(document.querySelector(".journal-sidebar .toc li.page")),
-      panel: document.querySelector(".journal-sidebar").getBoundingClientRect().width
+      panel: document.querySelector(".journal-sidebar").getBoundingClientRect().width,
+      // Each heading columns the text beneath it, and the wrappers that makes
+      // possible are put in at render — so an export has to carry its own.
+      flows: document.querySelectorAll(".journal-page-content > .illuminus-flow").length
     });
   })()`);
 
@@ -3572,6 +3716,8 @@ try {
       .filter((k) => !same.includes(k)).map((k) => `${k}: ${there[k]} vs ${ex.live[k]}`).join(", ")}`})`);
   check(there.sidebar && there.panel > 100,
     `and the contents panel travels with it, at the width the style gives it (${Math.round(there.panel)}px)`);
+  check(there.flows > 0,
+    `each heading's run of text is wrapped in the export too (${there.flows})`);
 } finally {
   fs.rmSync(exportDir, { recursive: true, force: true });
   await cdp.evaluate(`(async () => {
@@ -4436,7 +4582,111 @@ try {
   })()`);
 }
 
-console.log("\n[53] Console is clean");
+console.log("\n[53] The sample journal, and columns per heading level");
+try {
+  const built = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    // Two columns under the page's title, one under level 2, three under level
+    // 3: if each heading really governs its own passage, one page shows all
+    // three at once — and level 1 governs the opening text, since the title is
+    // a level 1 heading.
+    const style = await api.createStyle({name: "Sample Journal Probe", settings: {
+      heading1: {columnCount: 2, columnGap: 20},
+      heading2: {columnCount: 1},
+      heading3: {columnCount: 3, columnGap: 16, columnRuleWidth: 1}
+    }});
+    const entry = await api.createSampleJournal({styleId: style.id});
+    await new Promise(r => setTimeout(r, 1400));
+    const content = entry.sheet.element.querySelector(".journal-page-content");
+    // What was *stored*, not what is on screen: Foundry's enricher wraps a
+    // secret section in a secret-block of its own and gives it the Reveal
+    // button the sample only draws a picture of, and Illuminus wraps each
+    // heading's run of text at render. None of that is in the page.
+    const stored = document.createElement("div");
+    stored.innerHTML = entry.pages.contents[0].text.content;
+
+    // The editor's own sample, to compare against: one markup file feeds both,
+    // and this is what proves it still does. The render-time wrappers come out
+    // of the comparison, since the stored page has none.
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1200));
+    // The first page in the frame is the sample proper; the Box, Tag, and
+    // Picture panes that follow are pages of their own and wrapped as well.
+    const samplePage = app.element.querySelector(".illuminus-preview__frame .journal-page-content");
+    const sampleFlows = samplePage.querySelectorAll(":scope > .illuminus-flow").length;
+    const sample = samplePage.cloneNode(true);
+    for (const flow of sample.querySelectorAll(".illuminus-flow")) flow.replaceWith(...flow.childNodes);
+    const outline = (root) => [...root.querySelectorAll("*")]
+      .filter((el) => el.tagName !== "BUTTON")
+      .map((el) => el.tagName).join(",");
+
+    const flow = (name) => {
+      const el = content.querySelector(".illuminus-flow--" + name);
+      if (!el) return null;
+      return { count: getComputedStyle(el).columnCount, width: Math.round(el.getBoundingClientRect().width) };
+    };
+    const out = {
+      styleId: style.id, entryId: entry.id,
+      folder: entry.folder?.name ?? null,
+      pages: entry.pages.size,
+      sameOutline: outline(stored) === outline(sample),
+      journalOutline: outline(stored).slice(0, 120),
+      sampleOutline: outline(sample).slice(0, 120),
+      partsLeft: stored.querySelectorAll("[data-part]").length,
+      mockButtons: stored.querySelectorAll("button").length,
+      headingParagraphs: [...stored.querySelectorAll("h2, h3, h4, h5, h6")]
+        .filter((heading) => heading.nextElementSibling?.tagName === "P").length,
+      storedFlows: /illuminus-flow/.test(entry.pages.contents[0].text.content),
+      sampleFlows,
+      flows: [...content.querySelectorAll(":scope > .illuminus-flow")]
+        .map((el) => el.className.split(" ")[1]),
+      lead: flow("h1"), h2: flow("h2"), h3: flow("h3")
+    };
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`));
+
+  check(built.folder === "Samples", `the journal lands in its own folder (${built.folder})`);
+  check(built.pages === 1, `with the sample on one page (${built.pages})`);
+  check(built.sameOutline,
+    `holding exactly what the editor's sample holds`
+    + (built.sameOutline ? "" : `\n      journal: ${built.journalOutline}\n      sample:  ${built.sampleOutline}`));
+  check(built.partsLeft === 0 && built.mockButtons === 0,
+    `with the editor's own marks and mock button left behind (${built.partsLeft} parts, ${built.mockButtons} buttons)`);
+  check(built.headingParagraphs === 5,
+    `every heading below the first is followed by a paragraph (${built.headingParagraphs} of 5)`);
+
+  // Each heading governs the run of text beneath it, which needs an element to
+  // apply to — one made at render, never stored.
+  check(built.flows.join(",") === "illuminus-flow--h1,illuminus-flow--h2,illuminus-flow--h3,"
+    + "illuminus-flow--h4,illuminus-flow--h5,illuminus-flow--h6",
+    `every heading's run of text is wrapped (${built.flows.join(", ")})`);
+  check(!built.storedFlows, "and none of that wrapping is written into the page");
+  check(built.sampleFlows === built.flows.length,
+    `the editor's sample is wrapped the same way (${built.sampleFlows} of ${built.flows.length})`);
+  check(built.h3?.count === "3" && built.h2?.count === "1" && built.lead?.count === "2",
+    `each level sets its own passage — two under the title, one under level 2, three under level 3 `
+    + `(${built.lead?.count}, ${built.h2?.count}, ${built.h3?.count})`);
+  check(built.h3?.width === built.h2?.width,
+    `both passages still fill the page (${built.h2?.width} and ${built.h3?.width})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name.startsWith("Illuminus Sample"))) {
+      await entry.sheet.close({force: true});
+      await entry.delete();
+    }
+    const folder = game.folders.find((f) => f.type === "JournalEntry" && f.name === "Samples");
+    if (folder) await folder.delete();
+    const style = api.listStyles().find((s) => s.name === "Sample Journal Probe");
+    if (style) await api.deleteStyle(style.id);
+  })()`);
+}
+
+console.log("\n[54] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

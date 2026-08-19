@@ -66,6 +66,10 @@ ${memberSelector(group)} {
   clear: ${v(group, "clear")};
 ${box(group)}
   font-family: ${v(group, "font")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   font-size: ${v(group, "size")};
   font-weight: ${v(group, "textStyle", "weight")};
   font-style: ${v(group, "textStyle", "slant")};
@@ -79,6 +83,10 @@ ${box(group)}
 
 ${memberSelector(group, " :is(h1, h2, h3, h4, h5, h6)")} {
   font-family: ${v(group, "headingFont")};
+  -webkit-text-stroke: ${v(group, "headingOutlineWidth")} ${v(group, "headingOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "headingTextShadowOffsetX")} ${v(group, "headingTextShadowOffsetY")}
+               ${v(group, "headingTextShadowBlur")} ${v(group, "headingTextShadowColor")};
   font-size: ${v(group, "headingSize")};
   font-weight: ${v(group, "headingTextStyle", "weight")};
   font-style: ${v(group, "headingTextStyle", "slant")};
@@ -131,6 +139,10 @@ ${memberSelector(group, " img")} {
 
 ${memberSelector(group, " figcaption")} {
   font-family: ${v(group, "captionFont")};
+  -webkit-text-stroke: ${v(group, "captionOutlineWidth")} ${v(group, "captionOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "captionTextShadowOffsetX")} ${v(group, "captionTextShadowOffsetY")}
+               ${v(group, "captionTextShadowBlur")} ${v(group, "captionTextShadowColor")};
   font-size: ${v(group, "captionSize")};
   font-weight: ${v(group, "captionTextStyle", "weight")};
   font-style: ${v(group, "captionTextStyle", "slant")};
@@ -166,6 +178,10 @@ ${memberSelector(group)} {
   border-radius: ${corners(group, "corner")};
   box-shadow: ${shadow(group, "shadow")};
   font-family: ${v(group, "font")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   font-size: ${v(group, "size")};
   font-weight: ${v(group, "textStyle", "weight")};
   font-style: ${v(group, "textStyle", "slant")};
@@ -231,6 +247,10 @@ const headingRules = (group, level) => `
 /* ${group.id} */
 ${headingSelector(level)} {
   font-family: ${v(group, "font")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   font-size: ${v(group, "size")};
   font-weight: ${v(group, "textStyle", "weight")};
   font-style: ${v(group, "textStyle", "slant")};
@@ -245,6 +265,8 @@ ${headingSelector(level)} {
                ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
   paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   background-color: ${v(group, "background")};
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
@@ -288,6 +310,10 @@ const HOVER_TARGETS = {
 /** The paint a hovered element can change, and the property each one sets. */
 const HOVER_PROPS = [
   { name: "color", property: "color" },
+  // Longhands rather than the shorthand: the ordinary rule sets the shorthand,
+  // and one half of a state's outline may be left to fall back to it.
+  { name: "outlineWidth", property: "-webkit-text-stroke-width" },
+  { name: "outlineColor", property: "-webkit-text-stroke-color" },
   { name: "background", property: "background-color" },
   ...["Top", "Right", "Bottom", "Left"].map((side) => ({
     name: `border${side}Color`,
@@ -486,7 +512,26 @@ const blocks = blockGroups.map(boxRules).join("");
 const pictures = GROUPS.filter((g) => g.family === "imageStyles").map(imageRules).join("");
 const tags = GROUPS.filter((g) => g.family === "tagStyles").map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
-const headings = HEADINGS.map(({ group, level }) => headingRules(group, level)).join("");
+/**
+ * The text under one heading level.
+ *
+ * `heading-sections.mjs` wraps each heading's run of content at render, which is
+ * what gives these something to apply to: columns need an element, and "the
+ * paragraphs after this heading" is not one until something makes it one.
+ */
+const flowRules = (group, level) => `
+/* the text under a level ${level} heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h${level} {
+  column-count: ${v(group, "columnCount")};
+  column-gap: ${v(group, "columnGap")};
+  column-rule-width: ${v(group, "columnRuleWidth")};
+  column-rule-style: ${v(group, "columnRuleStyle")};
+  column-rule-color: ${v(group, "columnRuleColor")};
+}
+`;
+
+const headings = HEADINGS.map(({ group, level }) =>
+  headingRules(group, level) + flowRules(group, level)).join("");
 const hovers = GROUPS.map((group) => {
   const selector = HOVER_TARGETS[group.id]
     ?? (group.family ? memberSelector(group) : null);

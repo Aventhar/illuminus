@@ -38,6 +38,10 @@
         <summary data-action="toggleSection" data-group="{{group.id}}" data-section="{{section.id}}">
           <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
           <span class="illuminus-section__label">{{section.label}}</span>
+          <button type="button" class="illuminus-info" data-action="showHint"
+                  aria-label="{{section.hint}}">
+            <i class="fa-solid fa-circle-info"></i>
+          </button>
           <span class="illuminus-section__hint">{{section.hint}}</span>
         </summary>
 
@@ -110,6 +114,10 @@
         <summary data-action="toggleSection" data-group="{{family.current.id}}" data-section="{{section.id}}">
           <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
           <span class="illuminus-section__label">{{section.label}}</span>
+          <button type="button" class="illuminus-info" data-action="showHint"
+                  aria-label="{{section.hint}}">
+            <i class="fa-solid fa-circle-info"></i>
+          </button>
           <span class="illuminus-section__hint">{{section.hint}}</span>
         </summary>
 
@@ -207,57 +215,11 @@
               <header class="journal-page-header">
                 <h1 data-part="heading1">{{localize "ILLUMINUS.Preview.Heading1"}}</h1>
               </header>
+              {{!-- The page's contents live in their own file, because the
+                    sample journal the style library builds is made of exactly
+                    this markup. --}}
               <section class="journal-page-content">
-                <p data-part="body">{{localize "ILLUMINUS.Preview.Body"}}
-                  <a class="content-link" data-part="links">{{localize "ILLUMINUS.Preview.Link"}}</a>.</p>
-                <hr data-part="body">
-                {{!-- Mirrors what Foundry renders, Reveal button and all. --}}
-                <section class="secret" data-part="secrets">
-                  <button type="button" class="reveal" disabled>{{localize "ILLUMINUS.Preview.Reveal"}}</button>
-                  <p>{{localize "ILLUMINUS.Preview.Secret"}}</p>
-                </section>
-                <h2 data-part="heading2">{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
-                <blockquote data-part="boxes"><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
-                <h3 data-part="heading3">{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
-                <h4 data-part="heading4">{{localize "ILLUMINUS.Preview.Heading4"}}</h4>
-                <h5 data-part="heading5">{{localize "ILLUMINUS.Preview.Heading5"}}</h5>
-                <h6 data-part="heading6">{{localize "ILLUMINUS.Preview.Heading6"}}</h6>
-                <ul data-part="lists">
-                  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
-                  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
-                </ul>
-                <dl data-part="lists">
-                  <dt>{{localize "ILLUMINUS.Preview.Term"}}</dt>
-                  <dd>{{localize "ILLUMINUS.Preview.Definition"}}</dd>
-                </dl>
-                <p data-part="body">{{localize "ILLUMINUS.Preview.MarksLead"}}
-                  <mark>{{localize "ILLUMINUS.Preview.Highlight"}}</mark>,
-                  <code>{{localize "ILLUMINUS.Preview.Code"}}</code>, and
-                  <abbr title="{{localize 'ILLUMINUS.Preview.Abbr'}}">{{localize "ILLUMINUS.Preview.Abbr"}}</abbr>.</p>
-                <details open data-part="boxes">
-                  <summary>{{localize "ILLUMINUS.Preview.Collapsible"}}</summary>
-                  <p>{{localize "ILLUMINUS.Preview.CollapsibleBody"}}</p>
-                </details>
-                <table data-part="tables">
-                  <caption>{{localize "ILLUMINUS.Preview.TableCaption"}}</caption>
-                  <thead>
-                    <tr>
-                      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
-                      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
-                    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
-                  </tbody>
-                </table>
-                <figure data-part="images">
-                  {{!-- One of Foundry's own icons: the module carries no artwork, and the
-                       sample only needs something to demonstrate the Images tab on. --}}
-                  <img src="icons/svg/mystery-man.svg"
-                       alt="{{localize 'ILLUMINUS.Preview.Caption'}}">
-                  <figcaption>{{localize "ILLUMINUS.Preview.Caption"}}</figcaption>
-                </figure>
+                {{> "modules/illuminus/templates/sample-page.hbs"}}
               </section>
             </div>
             <div class="edit-container">

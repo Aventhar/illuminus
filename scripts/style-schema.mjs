@@ -70,9 +70,8 @@ const CHOICES = {
   inlineAlign: ["baseline", "middle", "top", "bottom"],
   // Every CSS weight, each with and without a slant, ordered light to heavy so
   // the list reads as a ramp rather than a pile.
-  textStyle: ["thin", "thinItalic", "extraLight", "extraLightItalic", "light", "lightItalic",
-              "normal", "normalItalic", "medium", "mediumItalic", "semiBold", "semiBoldItalic",
-              "bold", "boldItalic", "extraBold", "extraBoldItalic", "black", "blackItalic"],
+  textStyle: ["light", "normal", "bold"],
+  numberShown: ["shown", "notShown"],
   whenEmpty: ["show", "hide"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
@@ -167,6 +166,9 @@ const emitKeyword = (value) => KEYWORD[value] ?? value;
  */
 const emitWhenEmpty = (value) => (value === "hide" ? "none" : "block");
 
+/** A page number that is not displayed leaves its row to the page's name. */
+const emitNumberShown = (value) => (value === "notShown" ? "none" : "block");
+
 /**
  * How the lettering looks, as one choice rather than a thickness and a slant
  * side by side. Two controls that are almost always set together read as one
@@ -178,11 +180,17 @@ const TEXT_STYLE_WEIGHT = {
   semiBold: "600", bold: "700", extraBold: "800", black: "900"
 };
 
+/**
+ * Three thicknesses, and italic asked separately.
+ *
+ * Nine weights crossed with italic made eighteen entries in a drop-down, and a
+ * person choosing how a heading looks was reading a list of typographic terms
+ * to find "bold". Light, Normal, and Bold are the three a face reliably has,
+ * and italic is a yes-or-no question, so it is a tick box beside them.
+ */
 const emitTextStyle = (value) => {
-  if (value === "inherit") return { weight: "inherit", slant: "inherit" };
-  const italic = String(value).endsWith("Italic");
-  const base = italic ? String(value).slice(0, -"Italic".length) : String(value);
-  return { weight: TEXT_STYLE_WEIGHT[base] ?? "400", slant: italic ? "italic" : "normal" };
+  if (value === "inherit") return { weight: "inherit" };
+  return { weight: TEXT_STYLE_WEIGHT[String(value)] ?? "400" };
 };
 
 /**
@@ -192,18 +200,30 @@ const emitTextStyle = (value) => {
  */
 function textStyleOf(weight, slant) {
   if (weight === "inherit" || slant === "inherit") return "inherit";
-  const base = Object.keys(TEXT_STYLE_WEIGHT).find((k) => TEXT_STYLE_WEIGHT[k] === String(weight)) ?? "normal";
-  const italic = slant === "italic" || slant === "oblique";
-  return italic ? `${base}Italic` : base;
+  const number = Number(weight);
+  if (Number.isFinite(number)) return number >= 600 ? "bold" : number <= 300 ? "light" : "normal";
+  return TEXT_STYLE_WEIGHT[String(weight)] ? String(weight) : "normal";
 }
 
 /** The same choice list, with "use the setting above" in front. */
 const withInherit = () => ["inherit", ...CHOICES.textStyle];
 
-/** One combined lettering control. */
-const textStyleField = (name, weight = "400", slant = "normal", { inherit = false } = {}) =>
+/**
+ * The thickness, and the slant beside it.
+ *
+ * Two controls, one name: the tick box is `<name>Slant`, so the property it
+ * emits is the `-slant` half the stylesheet already reads and no rule had to
+ * change. Callers still pass a weight and a slant as defaults.
+ */
+const textStyleField = (name, weight = "400", slant = "normal", { inherit = false } = {}) => [
   select(name, textStyleOf(weight, slant), inherit ? withInherit() : CHOICES.textStyle,
-    { emit: emitTextStyle });
+    { emit: emitTextStyle }),
+  {
+    type: "toggle", name: `${name}Slant`,
+    default: slant === "italic" || slant === "oblique",
+    on: "italic", off: inherit && slant === "inherit" ? "inherit" : "normal"
+  }
+];
 
 /* -------------------------------------------- */
 /*  Field builders                              */
@@ -271,7 +291,7 @@ function textFields(prefix, defaults = {}) {
     font(n("Font"), d("font", "")),
     num(n("Size"), d("size", 16), "px", 6, 200, 1),
     col(n("Color"), d("color", "#241b10")),
-    textStyleField(n("TextStyle"), d("weight", "400"), d("style", "normal")),
+    ...textStyleField(n("TextStyle"), d("weight", "400"), d("style", "normal")),
     select(n("Caps"), d("caps", "none"), CHOICES.caps, { emit: emitCaps }),
     num(n("LetterSpacing"), d("letterSpacing", 0), "px", -5, 40, 0.5),
     num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
@@ -310,7 +330,7 @@ function boxSections() {
         font("font", ""),
         num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("color", ""),
-        textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
+        ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", inheritCaps, { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
@@ -323,7 +343,7 @@ function boxSections() {
         font("headingFont", ""),
         num("headingSize", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("headingColor", ""),
-        textStyleField("headingTextStyle", "inherit", "inherit", { inherit: true }),
+        ...textStyleField("headingTextStyle", "inherit", "inherit", { inherit: true }),
         select("headingCaps", "inherit", inheritCaps, { emit: emitCaps }),
         select("headingAlign", "inherit", inheritAlign),
         num("headingMarginTop", 0, "px", -100, 100, 1),
@@ -393,7 +413,7 @@ function tagSections() {
         font("font", ""),
         num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
         col("color", ""),
-        textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
+        ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
@@ -443,11 +463,50 @@ function imageSections() {
         font("captionFont", ""),
         num("captionSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
         col("captionColor", ""),
-        textStyleField("captionTextStyle", "inherit", "inherit", { inherit: true }),
+        ...textStyleField("captionTextStyle", "inherit", "inherit", { inherit: true }),
         select("captionAlign", "inherit", ["inherit", ...CHOICES.align]),
         num("captionSpacing", 4, "px", 0, 60, 1)
       ]
     }
+  ];
+}
+
+/**
+ * Columns for one run of text.
+ *
+ * A page is not columned as a whole: each heading governs the text beneath it,
+ * so a chapter opening can run wide while the section under it sets in two.
+ * That is why these live on the heading tabs rather than on Body. The text
+ * above the first heading follows level 1, because the page's title is a level
+ * 1 heading — so nothing needs a set of its own.
+ *
+ * The rendered page is what carries this: `heading-sections.mjs` wraps each
+ * heading's run of content in an element, because a multi-column container has
+ * to be an element and a run of siblings is not one. Nothing is stored — the
+ * journal's own content is untouched.
+ */
+function columnFields() {
+  return [
+    num("columnCount", 1, "", 1, 4, 1),
+    num("columnGap", 32, "px", 0, 200, 2),
+    num("columnRuleWidth", 0, "px", 0, 20, 1),
+    select("columnRuleStyle", "solid", CHOICES.borderStyle),
+    col("columnRuleColor", "#8a6a3d")
+  ];
+}
+
+/**
+ * A line drawn around each letter.
+ *
+ * Paired with `paint-order: stroke fill` in the stylesheet, so the stroke is
+ * painted *behind* the letterform: over it, a heavy stroke eats into the shapes
+ * and closes a display face up.
+ */
+function outlineFields(prefix = "") {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    num(n("OutlineWidth"), 0, "px", 0, 8, 0.5),
+    col(n("OutlineColor"), "#000000")
   ];
 }
 
@@ -460,18 +519,19 @@ function bannerSections(defaults = {}) {
       // edge, which is what `paint-order` in the stylesheet is for: a stroke
       // painted over the fill eats into the shapes and thickens a display face
       // until it closes up.
-      fields: [
-        ...textFields("", defaults),
-        num("outlineWidth", 0, "px", 0, 8, 0.5),
-        col("outlineColor", "#000000")
-      ]
+      fields: textFields("", defaults)
     },
     { id: "textShadow", fields: textShadowFields() },
     { id: "margin", fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 }) },
     { id: "padding", fields: spacingFields("padding", defaults.padding ?? 0) },
     { id: "background", fields: [col("background", defaults.background ?? "#00000000"), ...imageFields()] },
     { id: "border", fields: borderFields("border", defaults.border) },
-    { id: "corners", fields: cornerFields("corner") }
+    { id: "corners", fields: cornerFields("corner") },
+    // Heading levels only: these set the text *under* the heading. The
+    // journal's own title has no text of its own to set.
+    ...(defaults.columns
+      ? [{ id: "columns", hint: "ILLUMINUS.Sections.headingColumns.hint", fields: columnFields() }]
+      : [])
   ];
 }
 
@@ -493,32 +553,46 @@ export const GROUPS = [
       { id: "layout", fields: [num("sidebarWidth", 300, "px", 120, 700, 10)] },
       { id: "border", fields: borderFields("border", { color: "#00000000" }) },
       { id: "corners", fields: cornerFields("corner") },
+      // Shading inside the panel's own edges, as the page has: it is what makes
+      // a contents panel read as recessed into the window rather than painted
+      // onto it.
+      { id: "innerShadow", fields: shadowFields("innerShadow") },
+      // One section for a listed page, in its three states. They were three
+      // sections — the entry, its edges, and "entry states" — which meant the
+      // ordinary look, the pointed-at look, and the selected look were set in
+      // three different places and could not be compared. The editor's own
+      // state switch reads the control names, so putting them together is all
+      // it takes to get Normal / Hovered / Selected across the whole set.
+      //
+      // Each state states its own lettering, outline, and edge colors. Edge
+      // *thickness* is shared, deliberately: a border that appears only when
+      // pointed at would move every row below it. Leave the ordinary edge color
+      // transparent and give the state one, and the line appears without
+      // anything shifting.
       {
         id: "entries",
         fields: [
           ...textFields("", { size: 14, color: "#f0f0e0", weight: "400", lineHeight: 2.3 }),
-          ...spacingFields("entryPadding", 0, { max: 60 })
-        ]
-      },
-      { id: "entryBorder", fields: borderFields("entryBorder", { color: "#00000000" }) },
-      {
-        id: "entryStates",
-        fields: [
           col("hoverColor", "#ffffff"),
-          col("hoverBackground", "#00000000"), ...imageFields("hover"),
           col("activeColor", "#ffffff"),
+          ...outlineFields("hover"),
+          ...outlineFields("active"),
+          ...textStyleField("activeTextStyle", "400", "normal"),
+          col("hoverBackground", "#00000000"), ...imageFields("hover"),
           col("activeBackground", "#00000000"), ...imageFields("active"),
-          col("activeAccentColor", "#c9a961"),
-          num("activeAccentWidth", 0, "px", 0, 20, 1),
-          textStyleField("activeTextStyle", "400", "normal")
+          ...spacingFields("entryPadding", 0, { max: 60 }),
+          ...borderFields("entryBorder", { color: "#00000000" }),
+          ...SIDES.map((side) => col(`hoverEntryBorder${side}Color`, "")),
+          ...SIDES.map((side) => col(`activeEntryBorder${side}Color`, ""))
         ]
       },
       {
         id: "number",
         fields: [
+          select("numberShown", "shown", CHOICES.numberShown, { emit: emitNumberShown }),
           col("numberColor", "#8a8a8a"),
           num("numberSize", 14, "px", 6, 60, 1),
-          textStyleField("numberTextStyle", "400", "normal"),
+          ...textStyleField("numberTextStyle", "400", "normal"),
           select("numberAlign", "center", CHOICES.alignNoJustify),
           num("numberWidth", 40, "px", 0, 120, 2)
         ]
@@ -529,7 +603,7 @@ export const GROUPS = [
           font("headingFont", ""),
           num("headingSize", 14, "px", 6, 60, 1),
           col("headingColor", "#c8c8b8"),
-          textStyleField("headingTextStyle", "400", "normal"),
+          ...textStyleField("headingTextStyle", "400", "normal"),
           col("headingHoverColor", "#ffffff"),
           num("headingIndent", 16, "px", 0, 120, 2),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05)
@@ -541,11 +615,23 @@ export const GROUPS = [
           font("categoryFont", ""),
           num("categorySize", 24, "px", 6, 80, 1),
           col("categoryColor", "#f0f0e0"),
-          textStyleField("categoryTextStyle", "700", "normal"),
+          ...textStyleField("categoryTextStyle", "700", "normal"),
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
-          col("categoryBackground", "#00000000"), ...imageFields("category")
+          col("categoryBackground", "#00000000"), ...imageFields("category"),
+          // A category is a heading in a list of pages, so it needs room around
+          // it as much as it needs lettering — without it the group name sits
+          // hard against the first page under it.
+          ...spacingFields("categoryPadding", 0, { max: 60 }),
+          ...spacingFields("categoryMargin", 0, { min: -40, max: 60 })
+        ]
+      },
+      {
+        id: "categoryBorder",
+        fields: [
+          ...borderFields("categoryBorder", { color: "#00000000" }),
+          ...cornerFields("categoryCorner")
         ]
       },
       {
@@ -597,7 +683,7 @@ export const GROUPS = [
           font("font", ""),
           num("size", 16, "px", 6, 60, 1),
           col("color", "#f7f3e8"),
-          textStyleField("textStyle", "700", "normal"),
+          ...textStyleField("textStyle", "700", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
@@ -670,7 +756,8 @@ export const GROUPS = [
     icon: "fa-solid fa-heading",
     family: "headings",
     sections: bannerSections({
-      size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 }
+      size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 },
+      columns: true
     })
   },
   {
@@ -678,7 +765,8 @@ export const GROUPS = [
     icon: "fa-solid fa-heading",
     family: "headings",
     sections: bannerSections({
-      size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 }
+      size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 },
+      columns: true
     })
   },
   {
@@ -687,7 +775,8 @@ export const GROUPS = [
     family: "headings",
     sections: bannerSections({
       size: 18, color: "#5a4326", weight: "700", style: "italic", lineHeight: 1.3,
-      margin: { top: 14, bottom: 6 }
+      margin: { top: 14, bottom: 6 },
+      columns: true
     })
   },
 
@@ -700,7 +789,8 @@ export const GROUPS = [
     family: "headings",
     sections: bannerSections({
       size: 16, color: "#5a4326", weight: "700", lineHeight: 1.3,
-      margin: { top: 12, bottom: 5 }
+      margin: { top: 12, bottom: 5 },
+      columns: true
     })
   },
   {
@@ -709,7 +799,8 @@ export const GROUPS = [
     family: "headings",
     sections: bannerSections({
       size: 15, color: "#5a4326", weight: "600", caps: "smallCaps", lineHeight: 1.3,
-      margin: { top: 12, bottom: 4 }
+      margin: { top: 12, bottom: 4 },
+      columns: true
     })
   },
   {
@@ -718,7 +809,8 @@ export const GROUPS = [
     family: "headings",
     sections: bannerSections({
       size: 14, color: "#6b5636", weight: "600", style: "italic", lineHeight: 1.3,
-      margin: { top: 10, bottom: 4 }
+      margin: { top: 10, bottom: 4 },
+      columns: true
     })
   },
 
@@ -737,16 +829,6 @@ export const GROUPS = [
           num("firstLineIndent", 0, "px", -100, 200, 2),
           select("whiteSpace", "normal", CHOICES.whiteSpace, { emit: emitKeyword }),
           select("wordBreak", "normal", CHOICES.wordBreak, { emit: emitKeyword })
-        ]
-      },
-      {
-        id: "columns",
-        fields: [
-          num("columnCount", 1, "", 1, 4, 1),
-          num("columnGap", 32, "px", 0, 200, 2),
-          num("columnRuleWidth", 0, "px", 0, 20, 1),
-          select("columnRuleStyle", "solid", CHOICES.borderStyle),
-          col("columnRuleColor", "#8a6a3d")
         ]
       },
       {
@@ -816,7 +898,9 @@ export const GROUPS = [
         fields: [
           col("color", "#7a2010"),
           col("hoverColor", "#a8341c"),
-          textStyleField("textStyle", "400", "normal"),
+          ...outlineFields(),
+          ...textShadowFields(),
+          ...textStyleField("textStyle", "400", "normal"),
           num("letterSpacing", 0, "px", -5, 40, 0.5)
         ]
       },
@@ -860,14 +944,14 @@ export const GROUPS = [
           num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("termColor", "#5e1914"),
           col("hoverTermColor", ""),
-          textStyleField("termTextStyle", "700", "normal"),
+          ...textStyleField("termTextStyle", "700", "normal"),
           select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
           num("termSpacingAbove", 8, "px", 0, 100, 1),
           font("detailFont", ""),
           num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("detailColor", "#241b10"),
           col("hoverDetailColor", ""),
-          textStyleField("detailTextStyle", "400", "normal"),
+          ...textStyleField("detailTextStyle", "400", "normal"),
           num("detailIndent", 24, "px", 0, 200, 2),
           num("detailSpacingBelow", 6, "px", 0, 100, 1)
         ]
@@ -909,7 +993,7 @@ export const GROUPS = [
           col("headerColor", "#f6efe0"),
           font("headerFont", ""),
           num("headerSize", 16, "px", 6, 100, 1),
-          textStyleField("headerTextStyle", "700", "normal"),
+          ...textStyleField("headerTextStyle", "700", "normal"),
           select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("headerAlign", "left", CHOICES.align),
           num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
@@ -922,7 +1006,7 @@ export const GROUPS = [
           font("captionFont", ""),
           num("captionSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("captionColor", "#5a4326"),
-          textStyleField("captionTextStyle", "700", "italic"),
+          ...textStyleField("captionTextStyle", "700", "italic"),
           select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("captionAlign", "center", CHOICES.alignNoJustify),
           num("captionSpacing", 6, "px", 0, 60, 1)
@@ -965,7 +1049,7 @@ export const GROUPS = [
           font("summaryFont", ""),
           num("summarySize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("summaryColor", "#5e1914"),
-          textStyleField("summaryTextStyle", "700", "normal"),
+          ...textStyleField("summaryTextStyle", "700", "normal"),
           select("summaryCaps", "none", CHOICES.caps, { emit: emitCaps }),
           col("summaryBackground", "#00000000"), ...imageFields("summary"),
           ...spacingFields("summaryPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 60 }),
@@ -996,7 +1080,7 @@ export const GROUPS = [
           font("font", ""),
           num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
           col("color", ""),
-          textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
+          ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
           select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
           num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
@@ -1077,7 +1161,7 @@ export const GROUPS = [
           font("captionFont", ""),
           num("captionSize", 13, "px", 6, 100, 1),
           col("captionColor", "#5a4326"),
-          textStyleField("captionTextStyle", "400", "italic"),
+          ...textStyleField("captionTextStyle", "400", "italic"),
           select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("captionAlign", "center", CHOICES.alignNoJustify),
           num("captionSpacing", 4, "px", 0, 60, 1)
@@ -1133,6 +1217,12 @@ export const GROUPS = [
 const HOVERABLE = [
   "color",
   "background",
+  // The outline as well as the fill: sharing one outline between the ordinary
+  // and pointed-at states meant setting it under Hovered changed the ordinary
+  // one too, which is not what a state is for. Still paint only — a stroke
+  // draws inside the letter's own box, so nothing moves.
+  "outlineWidth",
+  "outlineColor",
   ...SIDES.map((side) => `border${side}Color`)
 ];
 
@@ -1144,6 +1234,47 @@ export function hoverNameFor(name) {
 /** Whether a name is the hovered twin of some other control. */
 function isHoverName(name) {
   return /^hover[A-Z]/.test(name);
+}
+
+/**
+ * An outline wherever lettering can be set.
+ *
+ * A section that offers a typeface is a section about words, so it offers a line
+ * around them too — derived from that rather than listed, so a new text section
+ * gets one without an edit here. The prefix comes from the typeface's own name,
+ * which keeps `headingFont` and `headingOutlineWidth` together.
+ *
+ * Body text is left out: it is the one place a page-wide outline would be a
+ * mistake rather than a decoration, and it is what everything else falls back
+ * to. A list marker is left out because a marker is not a letterform — the
+ * pseudo-element it is drawn in takes a colour and a face and nothing else.
+ */
+const NO_OUTLINE_GROUPS = new Set(["body"]);
+const NO_OUTLINE_FIELDS = new Set(["markerFont"]);
+// Body text takes neither, with one exception: the opening capital is a piece
+// of display lettering rather than prose, and is exactly the sort of letter
+// somebody wants outlined and shadowed.
+const OUTLINE_ANYWAY = new Set(["body.dropCap"]);
+
+for (const group of GROUPS) {
+  for (const section of group.sections) {
+    if (NO_OUTLINE_GROUPS.has(group.id) && !OUTLINE_ANYWAY.has(`${group.id}.${section.id}`)) continue;
+    for (const field of [...section.fields]) {
+      if (field.type !== "font" || NO_OUTLINE_FIELDS.has(field.name)) continue;
+      const prefix = field.name === "font" ? "" : field.name.replace(/Font$/, "");
+      const [width] = outlineFields(prefix);
+      if (!section.fields.some((other) => other.name === width.name)) {
+        section.fields.push(...outlineFields(prefix));
+      }
+      // The two go together: an outline and a shadow are the two things you do
+      // to a letter to lift it off what is behind it, and having one without
+      // the other is a gap somebody meets the moment they try.
+      const shadow = prefix ? `${prefix}TextShadow` : "textShadow";
+      const inGroup = group.sections.some((other) =>
+        other.fields.some((f) => f.name === `${shadow}OffsetX`));
+      if (!inGroup) section.fields.push(...textShadowFields(shadow));
+    }
+  }
 }
 
 /**
@@ -1224,13 +1355,20 @@ for (const group of GROUPS) {
   if (!NO_HOVER.has(group.id)) {
     for (const section of group.sections) {
       for (const name of HOVERABLE) {
-        if (!section.fields.some((field) => field.name === name)) continue;
+        const original = section.fields.find((field) => field.name === name);
+        if (!original) continue;
         const hovered = hoverNameFor(name);
         // Never shadow a control the schema already spells out itself — the
         // sidebar and the window state their hovered colors by hand.
         if (taken.has(hovered)) continue;
         taken.add(hovered);
-        section.fields.push(col(hovered, ""));
+        // The twin is the same kind of control as the one it stands in for, and
+        // says nothing until it is filled in: an empty color, and a thickness
+        // of zero that emits no value at all rather than a literal 0, so the
+        // `:hover` rule falls back to the ordinary one.
+        section.fields.push(original.type === "number"
+          ? { ...original, name: hovered, default: 0, emitZero: false }
+          : col(hovered, ""));
       }
     }
   }
@@ -1276,7 +1414,7 @@ const SECTION_ORDER = [
   "tableCaption", "caption", "media", "collapsible", "revealed",
   "revealButton", "dividers",
   // The contents panel, then the window
-  "entries", "entryBorder", "entryStates", "number", "subHeadings",
+  "entries", "number", "subHeadings", "categoryBorder",
   "category", "search", "buttons",
   "frame", "titleBar", "headerButtons", "pageButton"
 ];
@@ -1292,8 +1430,9 @@ const SECTION_ORDER = [
  */
 const FIELD_ORDER = {
   text: [
-    "font", "size", "color", "textColor", "textStyle", "outlineWidth",
-    "outlineColor", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+    "font", "size", "color", "textColor", "textStyle", "textStyleSlant", "outlineWidth",
+    "outlineColor", "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur",
+    "textShadowColor", "caps", "letterSpacing", "wordSpacing", "lineHeight",
     "align", "verticalAlign", "width"
   ],
   background: [
@@ -1307,6 +1446,8 @@ const FIELD_ORDER = {
   tagLayout: ["float", "minWidth", "verticalAlign", "lift"],
   caption: [
     "captionFont", "captionSize", "captionColor", "captionTextStyle",
+    "captionTextStyleSlant", "captionOutlineWidth", "captionOutlineColor", "captionTextShadowOffsetX",
+    "captionTextShadowOffsetY", "captionTextShadowBlur", "captionTextShadowColor",
     "captionCaps", "captionAlign", "captionSpacing"
   ]
 };

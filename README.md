@@ -140,6 +140,8 @@ Typeface dropdown.
 | Keep something you built for next time | Select it, then **Illuminus → Template → Save selection as template** |
 | Tidy or share templates | Journals sidebar → **Templates** |
 | Get a deleted sample back | Style library → **Restore Samples** |
+| See a style at full size, in a real journal | Style library → tick a style → **Sample Journal** |
+| Set a passage in columns | The heading above it → **Columns**. Level 1 sets the text under the page's title |
 
 ## Finding your way around the editor
 

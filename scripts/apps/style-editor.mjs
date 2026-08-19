@@ -1,3 +1,4 @@
+import { wrapHeadingSections } from "../heading-sections.mjs";
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "../constants.mjs";
 import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
@@ -116,7 +117,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resizable: true,
       contentClasses: ["standard-form"]
     },
-    position: { width: 980, height: 780 },
+    // 300 for the settings and 800 for the sample, plus the 12px between them
+    // and the 34 Foundry's own window padding takes. The sample is the point of
+    // the window, so it gets the room: a page of prose at something near its
+    // real width says more than a wider column of controls does.
+    position: { width: 1146, height: 780 },
     form: {
       handler: IlluminusStyleEditor.#onSubmit,
       submitOnChange: false,
@@ -133,7 +138,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       renameMember: IlluminusStyleEditor.#onRenameMember,
       copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
       foundryDefault: IlluminusStyleEditor.#onFoundryDefault,
-      openColorPicker: IlluminusStyleEditor.#onOpenColorPicker
+      openColorPicker: IlluminusStyleEditor.#onOpenColorPicker,
+      showHint: IlluminusStyleEditor.#onShowHint
     }
   };
 
@@ -141,9 +147,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     tabs: { template: "templates/generic/tab-navigation.hbs" },
     body: {
       template: `modules/${MODULE_ID}/templates/style-editor.hbs`,
-      // Registered as a partial so the page tabs and the block and picture tabs
-      // render their controls from one copy.
-      templates: [`modules/${MODULE_ID}/templates/style-field.hbs`],
+      // Registered as partials: the controls, so the page tabs and the block and
+      // picture tabs render from one copy, and the sample page, which the
+      // sample journal is also built from. A partial referenced by path is not
+      // found unless it is named here.
+      templates: [
+        `modules/${MODULE_ID}/templates/style-field.hbs`,
+        `modules/${MODULE_ID}/templates/sample-page.hbs`
+      ],
       classes: ["illuminus-editor__body"],
       scrollable: [".illuminus-fields"]
     },
@@ -672,6 +683,36 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     });
   }
 
+  /**
+   * Stop Enter from saving the style.
+   *
+   * The editor is a form, and a form submits when Enter is pressed in a field —
+   * so typing a size and pressing Enter saved the whole style, silently and
+   * some way from the Save button. Saving is a deliberate act here: nothing is
+   * written to the world until that button is clicked, which is what makes
+   * Undo Changes mean anything.
+   *
+   * Enter still does whatever the control it is pressed in does: it commits a
+   * renamed block or picture treatment, as a person naturally expects, and it
+   * still works on the Save button itself, which is a real click rather than an
+   * implicit submission.
+   */
+  #holdEnter() {
+    this.element.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || event.shiftKey) return;
+      const field = event.target;
+      if (!(field instanceof HTMLElement)) return;
+      // A button pressed with Enter is a button being clicked, textareas take
+      // the newline, and anything editable keeps its own behaviour.
+      if (field.matches("button, textarea") || field.isContentEditable) return;
+
+      event.preventDefault();
+      const renaming = field.dataset?.rename;
+      if (!renaming) return;
+      this.element.querySelector(`[data-action="renameMember"][data-group="${renaming}"]`)?.click();
+    });
+  }
+
   /** Show only the controls matching the filter, and say where the rest are. */
   #applyFilter() {
     const term = this.#filter.trim().toLowerCase();
@@ -774,6 +815,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         this.render();
       });
     }
+    this.#holdEnter();
+    // The sample is a picture of a page, so it gets what a page gets: each
+    // heading's run of text wrapped, or the Columns settings would show nothing
+    // here and everything in a journal.
+    wrapHeadingSections(this.element.querySelector(".illuminus-preview"));
     this.#activateGrip();
     this.#focusSample();
     this.#activateStates();
@@ -1228,6 +1274,27 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     else delete labels[groupId];
     await updateStyle(this.#styleId, { labels });
     this.render();
+  }
+
+  /**
+   * Say what a control or a section is for, on the click that asks.
+   *
+   * The wording used to sit under every label, which is a paragraph of grey text
+   * beside every one of six hundred controls — the tab you were reading became
+   * mostly explanation. It is still in the markup, and still what the search box
+   * searches; it is shown when somebody wants it.
+   */
+  static #onShowHint(event, target) {
+    event.preventDefault();
+    event.stopPropagation();
+    const hint = target.closest(".illuminus-field, .illuminus-section")
+      ?.querySelector(".illuminus-field__hint, .illuminus-section__hint")?.textContent?.trim();
+    if (!hint) return;
+    // A second click on the same icon puts it away, which is what a person
+    // expects of something they opened by clicking.
+    if (game.tooltip.element === target) return game.tooltip.deactivate();
+    game.tooltip.deactivate();
+    game.tooltip.activate(target, { text: hint, direction: "LEFT", cssClass: "illuminus-hint-tooltip" });
   }
 
   /** Collapse or expand a section, remembering the choice across re-renders. */

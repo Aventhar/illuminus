@@ -248,6 +248,27 @@ and Window sit together at the end while styling different things. `FAMILIES` su
 only the icon, label, and whether members can be renamed (`renamable: false` for heading
 levels, since the level is the name).
 
+**Each level columns the text beneath it.** Columns are not a property of the page: a
+chapter opening can run wide while the section under it sets in two, so every heading
+level carries a Columns section. The text above the first heading belongs to **level 1**,
+because the page's title *is* a level 1 heading — giving that run a level of its own left
+the first and most obvious heading governing nothing, which is exactly how it was
+reported. That needs an element to apply to, and "the paragraphs after this heading" is not
+one — `scripts/heading-sections.mjs` wraps each heading's run at render, in the sheet, in
+the editor's sample, and in an export. Four things are load-bearing:
+
+- **Nothing is stored.** The wrappers live in what is on screen; the page keeps the markup
+  a person typed. A check asserts the saved content has none.
+- **Never inside the editor.** ProseMirror's content element carries the same class, and
+  moving nodes out from under it breaks the selection it holds — which showed up as an
+  inline tag refusing to wrap the selected words, three sections away from anything to do
+  with columns. `wrapHeadingSections` skips anything inside a `prose-mirror` or
+  contenteditable.
+- **It undoes itself first**, because a sheet re-renders on every edit and wrapping a
+  wrapper nests a column inside a column.
+- **The opening paragraph moved.** `.journal-page-content > p:first-child` no longer finds
+  it — the drop cap rule and anything looking for it must accept the wrapper in between.
+
 **Level 1 also styles the page title**, which the sheet renders in
 `.journal-page-header` — *outside* `.journal-page-content`, so it needs naming
 explicitly. Its three selectors sat at the head of level 1's selector list; moving the
@@ -505,6 +526,26 @@ both.
 The same reasoning covers the Page tab's Outer Shadow, which the window clips: it is
 kept because an *export* shows it, and its hint says so. A section may name its own hint
 key in the schema for cases like that.
+
+## The sample, and the sample journal
+
+The Live Sample's page contents live in **`templates/sample-page.hbs`**, not in the
+editor's own template, because `scripts/sample-journal.mjs` builds a real journal out of
+exactly that markup — a second copy would drift, and a sample journal that no longer
+matches the editor is worse than none. Three things follow.
+
+- **A partial referenced by path is not found unless it is named.** `PARTS.body.templates`
+  in the editor is what registers it; leaving it out fails at render with "the partial …
+  could not be found" and nothing else.
+- **Two things are taken out on the way into a journal**: `data-part`, which is how the
+  editor dims and scrolls to a piece and means nothing on a page, and the mock Reveal
+  button, which Foundry's enricher supplies itself.
+- **Compare what was stored, not what is on screen.** The enricher wraps a secret section
+  in a `secret-block` and adds that Reveal button, so a rendered page and the sample
+  differ by Foundry's own work. The check reads `page.text.content`.
+
+Sample journals are numbered rather than reused, and land in a folder of their own, so
+comparing two styles means two journals rather than one being overwritten.
 
 ## Editor chrome
 

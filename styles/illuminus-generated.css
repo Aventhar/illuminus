@@ -62,6 +62,10 @@
 .illuminus-styled .journal-page-header h3,
 .illuminus-styled .journal-page-content h1 {
   font-family: var(--ill-heading1-font);
+  -webkit-text-stroke: var(--ill-heading1-outline-width) var(--ill-heading1-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
+               var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
   font-size: var(--ill-heading1-size);
   font-weight: var(--ill-heading1-text-style-weight);
   font-style: var(--ill-heading1-text-style-slant);
@@ -76,6 +80,8 @@
                var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading1-outline-width) var(--ill-heading1-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
+               var(--ill-heading1-text-shadow-blur) var(--ill-heading1-text-shadow-color);
   background-color: var(--ill-heading1-background);
   margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right) var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
   padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right) var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
@@ -85,9 +91,22 @@
   border-radius: var(--ill-heading1-corner-top-left) var(--ill-heading1-corner-top-right) var(--ill-heading1-corner-bottom-right) var(--ill-heading1-corner-bottom-left);
 }
 
+/* the text under a level 1 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h1 {
+  column-count: var(--ill-heading1-column-count);
+  column-gap: var(--ill-heading1-column-gap);
+  column-rule-width: var(--ill-heading1-column-rule-width);
+  column-rule-style: var(--ill-heading1-column-rule-style);
+  column-rule-color: var(--ill-heading1-column-rule-color);
+}
+
 /* heading2 */
 .illuminus-styled .journal-page-content h2 {
   font-family: var(--ill-heading2-font);
+  -webkit-text-stroke: var(--ill-heading2-outline-width) var(--ill-heading2-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
+               var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
   font-size: var(--ill-heading2-size);
   font-weight: var(--ill-heading2-text-style-weight);
   font-style: var(--ill-heading2-text-style-slant);
@@ -102,6 +121,8 @@
                var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading2-outline-width) var(--ill-heading2-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
+               var(--ill-heading2-text-shadow-blur) var(--ill-heading2-text-shadow-color);
   background-color: var(--ill-heading2-background);
   margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right) var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
   padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right) var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
@@ -111,9 +132,22 @@
   border-radius: var(--ill-heading2-corner-top-left) var(--ill-heading2-corner-top-right) var(--ill-heading2-corner-bottom-right) var(--ill-heading2-corner-bottom-left);
 }
 
+/* the text under a level 2 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h2 {
+  column-count: var(--ill-heading2-column-count);
+  column-gap: var(--ill-heading2-column-gap);
+  column-rule-width: var(--ill-heading2-column-rule-width);
+  column-rule-style: var(--ill-heading2-column-rule-style);
+  column-rule-color: var(--ill-heading2-column-rule-color);
+}
+
 /* heading3 */
 .illuminus-styled .journal-page-content h3 {
   font-family: var(--ill-heading3-font);
+  -webkit-text-stroke: var(--ill-heading3-outline-width) var(--ill-heading3-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
+               var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
   font-size: var(--ill-heading3-size);
   font-weight: var(--ill-heading3-text-style-weight);
   font-style: var(--ill-heading3-text-style-slant);
@@ -128,6 +162,8 @@
                var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading3-outline-width) var(--ill-heading3-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
+               var(--ill-heading3-text-shadow-blur) var(--ill-heading3-text-shadow-color);
   background-color: var(--ill-heading3-background);
   margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right) var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
   padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right) var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
@@ -137,9 +173,22 @@
   border-radius: var(--ill-heading3-corner-top-left) var(--ill-heading3-corner-top-right) var(--ill-heading3-corner-bottom-right) var(--ill-heading3-corner-bottom-left);
 }
 
+/* the text under a level 3 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h3 {
+  column-count: var(--ill-heading3-column-count);
+  column-gap: var(--ill-heading3-column-gap);
+  column-rule-width: var(--ill-heading3-column-rule-width);
+  column-rule-style: var(--ill-heading3-column-rule-style);
+  column-rule-color: var(--ill-heading3-column-rule-color);
+}
+
 /* heading4 */
 .illuminus-styled .journal-page-content h4 {
   font-family: var(--ill-heading4-font);
+  -webkit-text-stroke: var(--ill-heading4-outline-width) var(--ill-heading4-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading4-text-shadow-offset-x) var(--ill-heading4-text-shadow-offset-y)
+               var(--ill-heading4-text-shadow-blur) var(--ill-heading4-text-shadow-color);
   font-size: var(--ill-heading4-size);
   font-weight: var(--ill-heading4-text-style-weight);
   font-style: var(--ill-heading4-text-style-slant);
@@ -154,6 +203,8 @@
                var(--ill-heading4-text-shadow-blur) var(--ill-heading4-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading4-outline-width) var(--ill-heading4-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading4-text-shadow-offset-x) var(--ill-heading4-text-shadow-offset-y)
+               var(--ill-heading4-text-shadow-blur) var(--ill-heading4-text-shadow-color);
   background-color: var(--ill-heading4-background);
   margin: var(--ill-heading4-margin-top) var(--ill-heading4-margin-right) var(--ill-heading4-margin-bottom) var(--ill-heading4-margin-left);
   padding: var(--ill-heading4-padding-top) var(--ill-heading4-padding-right) var(--ill-heading4-padding-bottom) var(--ill-heading4-padding-left);
@@ -163,9 +214,22 @@
   border-radius: var(--ill-heading4-corner-top-left) var(--ill-heading4-corner-top-right) var(--ill-heading4-corner-bottom-right) var(--ill-heading4-corner-bottom-left);
 }
 
+/* the text under a level 4 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h4 {
+  column-count: var(--ill-heading4-column-count);
+  column-gap: var(--ill-heading4-column-gap);
+  column-rule-width: var(--ill-heading4-column-rule-width);
+  column-rule-style: var(--ill-heading4-column-rule-style);
+  column-rule-color: var(--ill-heading4-column-rule-color);
+}
+
 /* heading5 */
 .illuminus-styled .journal-page-content h5 {
   font-family: var(--ill-heading5-font);
+  -webkit-text-stroke: var(--ill-heading5-outline-width) var(--ill-heading5-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading5-text-shadow-offset-x) var(--ill-heading5-text-shadow-offset-y)
+               var(--ill-heading5-text-shadow-blur) var(--ill-heading5-text-shadow-color);
   font-size: var(--ill-heading5-size);
   font-weight: var(--ill-heading5-text-style-weight);
   font-style: var(--ill-heading5-text-style-slant);
@@ -180,6 +244,8 @@
                var(--ill-heading5-text-shadow-blur) var(--ill-heading5-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading5-outline-width) var(--ill-heading5-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading5-text-shadow-offset-x) var(--ill-heading5-text-shadow-offset-y)
+               var(--ill-heading5-text-shadow-blur) var(--ill-heading5-text-shadow-color);
   background-color: var(--ill-heading5-background);
   margin: var(--ill-heading5-margin-top) var(--ill-heading5-margin-right) var(--ill-heading5-margin-bottom) var(--ill-heading5-margin-left);
   padding: var(--ill-heading5-padding-top) var(--ill-heading5-padding-right) var(--ill-heading5-padding-bottom) var(--ill-heading5-padding-left);
@@ -189,9 +255,22 @@
   border-radius: var(--ill-heading5-corner-top-left) var(--ill-heading5-corner-top-right) var(--ill-heading5-corner-bottom-right) var(--ill-heading5-corner-bottom-left);
 }
 
+/* the text under a level 5 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h5 {
+  column-count: var(--ill-heading5-column-count);
+  column-gap: var(--ill-heading5-column-gap);
+  column-rule-width: var(--ill-heading5-column-rule-width);
+  column-rule-style: var(--ill-heading5-column-rule-style);
+  column-rule-color: var(--ill-heading5-column-rule-color);
+}
+
 /* heading6 */
 .illuminus-styled .journal-page-content h6 {
   font-family: var(--ill-heading6-font);
+  -webkit-text-stroke: var(--ill-heading6-outline-width) var(--ill-heading6-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-heading6-text-shadow-offset-x) var(--ill-heading6-text-shadow-offset-y)
+               var(--ill-heading6-text-shadow-blur) var(--ill-heading6-text-shadow-color);
   font-size: var(--ill-heading6-size);
   font-weight: var(--ill-heading6-text-style-weight);
   font-style: var(--ill-heading6-text-style-slant);
@@ -206,6 +285,8 @@
                var(--ill-heading6-text-shadow-blur) var(--ill-heading6-text-shadow-color);
   -webkit-text-stroke: var(--ill-heading6-outline-width) var(--ill-heading6-outline-color);
   paint-order: stroke fill;
+  text-shadow: var(--ill-heading6-text-shadow-offset-x) var(--ill-heading6-text-shadow-offset-y)
+               var(--ill-heading6-text-shadow-blur) var(--ill-heading6-text-shadow-color);
   background-color: var(--ill-heading6-background);
   margin: var(--ill-heading6-margin-top) var(--ill-heading6-margin-right) var(--ill-heading6-margin-bottom) var(--ill-heading6-margin-left);
   padding: var(--ill-heading6-padding-top) var(--ill-heading6-padding-right) var(--ill-heading6-padding-bottom) var(--ill-heading6-padding-left);
@@ -213,6 +294,15 @@
   border-style: var(--ill-heading6-border-top-style) var(--ill-heading6-border-right-style) var(--ill-heading6-border-bottom-style) var(--ill-heading6-border-left-style);
   border-color: var(--ill-heading6-border-top-color) var(--ill-heading6-border-right-color) var(--ill-heading6-border-bottom-color) var(--ill-heading6-border-left-color);
   border-radius: var(--ill-heading6-corner-top-left) var(--ill-heading6-corner-top-right) var(--ill-heading6-corner-bottom-right) var(--ill-heading6-corner-bottom-left);
+}
+
+/* the text under a level 6 heading */
+.illuminus-styled .journal-page-content .illuminus-flow--h6 {
+  column-count: var(--ill-heading6-column-count);
+  column-gap: var(--ill-heading6-column-gap);
+  column-rule-width: var(--ill-heading6-column-rule-width);
+  column-rule-style: var(--ill-heading6-column-rule-style);
+  column-rule-color: var(--ill-heading6-column-rule-color);
 }
 
 /* box01 */
@@ -229,6 +319,10 @@
   border-radius: var(--ill-box01-corner-top-left) var(--ill-box01-corner-top-right) var(--ill-box01-corner-bottom-right) var(--ill-box01-corner-bottom-left);
   box-shadow: var(--ill-box01-shadow-offset-x) var(--ill-box01-shadow-offset-y) var(--ill-box01-shadow-blur) var(--ill-box01-shadow-spread) var(--ill-box01-shadow-color);
   font-family: var(--ill-box01-font);
+  -webkit-text-stroke: var(--ill-box01-outline-width) var(--ill-box01-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box01-text-shadow-offset-x) var(--ill-box01-text-shadow-offset-y)
+               var(--ill-box01-text-shadow-blur) var(--ill-box01-text-shadow-color);
   font-size: var(--ill-box01-size);
   font-weight: var(--ill-box01-text-style-weight);
   font-style: var(--ill-box01-text-style-slant);
@@ -242,6 +336,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box01 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box01-heading-font);
+  -webkit-text-stroke: var(--ill-box01-heading-outline-width) var(--ill-box01-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box01-heading-text-shadow-offset-x) var(--ill-box01-heading-text-shadow-offset-y)
+               var(--ill-box01-heading-text-shadow-blur) var(--ill-box01-heading-text-shadow-color);
   font-size: var(--ill-box01-heading-size);
   font-weight: var(--ill-box01-heading-text-style-weight);
   font-style: var(--ill-box01-heading-text-style-slant);
@@ -270,6 +368,10 @@
   border-radius: var(--ill-box02-corner-top-left) var(--ill-box02-corner-top-right) var(--ill-box02-corner-bottom-right) var(--ill-box02-corner-bottom-left);
   box-shadow: var(--ill-box02-shadow-offset-x) var(--ill-box02-shadow-offset-y) var(--ill-box02-shadow-blur) var(--ill-box02-shadow-spread) var(--ill-box02-shadow-color);
   font-family: var(--ill-box02-font);
+  -webkit-text-stroke: var(--ill-box02-outline-width) var(--ill-box02-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box02-text-shadow-offset-x) var(--ill-box02-text-shadow-offset-y)
+               var(--ill-box02-text-shadow-blur) var(--ill-box02-text-shadow-color);
   font-size: var(--ill-box02-size);
   font-weight: var(--ill-box02-text-style-weight);
   font-style: var(--ill-box02-text-style-slant);
@@ -283,6 +385,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box02 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box02-heading-font);
+  -webkit-text-stroke: var(--ill-box02-heading-outline-width) var(--ill-box02-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box02-heading-text-shadow-offset-x) var(--ill-box02-heading-text-shadow-offset-y)
+               var(--ill-box02-heading-text-shadow-blur) var(--ill-box02-heading-text-shadow-color);
   font-size: var(--ill-box02-heading-size);
   font-weight: var(--ill-box02-heading-text-style-weight);
   font-style: var(--ill-box02-heading-text-style-slant);
@@ -311,6 +417,10 @@
   border-radius: var(--ill-box03-corner-top-left) var(--ill-box03-corner-top-right) var(--ill-box03-corner-bottom-right) var(--ill-box03-corner-bottom-left);
   box-shadow: var(--ill-box03-shadow-offset-x) var(--ill-box03-shadow-offset-y) var(--ill-box03-shadow-blur) var(--ill-box03-shadow-spread) var(--ill-box03-shadow-color);
   font-family: var(--ill-box03-font);
+  -webkit-text-stroke: var(--ill-box03-outline-width) var(--ill-box03-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box03-text-shadow-offset-x) var(--ill-box03-text-shadow-offset-y)
+               var(--ill-box03-text-shadow-blur) var(--ill-box03-text-shadow-color);
   font-size: var(--ill-box03-size);
   font-weight: var(--ill-box03-text-style-weight);
   font-style: var(--ill-box03-text-style-slant);
@@ -324,6 +434,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box03 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box03-heading-font);
+  -webkit-text-stroke: var(--ill-box03-heading-outline-width) var(--ill-box03-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box03-heading-text-shadow-offset-x) var(--ill-box03-heading-text-shadow-offset-y)
+               var(--ill-box03-heading-text-shadow-blur) var(--ill-box03-heading-text-shadow-color);
   font-size: var(--ill-box03-heading-size);
   font-weight: var(--ill-box03-heading-text-style-weight);
   font-style: var(--ill-box03-heading-text-style-slant);
@@ -352,6 +466,10 @@
   border-radius: var(--ill-box04-corner-top-left) var(--ill-box04-corner-top-right) var(--ill-box04-corner-bottom-right) var(--ill-box04-corner-bottom-left);
   box-shadow: var(--ill-box04-shadow-offset-x) var(--ill-box04-shadow-offset-y) var(--ill-box04-shadow-blur) var(--ill-box04-shadow-spread) var(--ill-box04-shadow-color);
   font-family: var(--ill-box04-font);
+  -webkit-text-stroke: var(--ill-box04-outline-width) var(--ill-box04-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box04-text-shadow-offset-x) var(--ill-box04-text-shadow-offset-y)
+               var(--ill-box04-text-shadow-blur) var(--ill-box04-text-shadow-color);
   font-size: var(--ill-box04-size);
   font-weight: var(--ill-box04-text-style-weight);
   font-style: var(--ill-box04-text-style-slant);
@@ -365,6 +483,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box04 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box04-heading-font);
+  -webkit-text-stroke: var(--ill-box04-heading-outline-width) var(--ill-box04-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box04-heading-text-shadow-offset-x) var(--ill-box04-heading-text-shadow-offset-y)
+               var(--ill-box04-heading-text-shadow-blur) var(--ill-box04-heading-text-shadow-color);
   font-size: var(--ill-box04-heading-size);
   font-weight: var(--ill-box04-heading-text-style-weight);
   font-style: var(--ill-box04-heading-text-style-slant);
@@ -393,6 +515,10 @@
   border-radius: var(--ill-box05-corner-top-left) var(--ill-box05-corner-top-right) var(--ill-box05-corner-bottom-right) var(--ill-box05-corner-bottom-left);
   box-shadow: var(--ill-box05-shadow-offset-x) var(--ill-box05-shadow-offset-y) var(--ill-box05-shadow-blur) var(--ill-box05-shadow-spread) var(--ill-box05-shadow-color);
   font-family: var(--ill-box05-font);
+  -webkit-text-stroke: var(--ill-box05-outline-width) var(--ill-box05-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box05-text-shadow-offset-x) var(--ill-box05-text-shadow-offset-y)
+               var(--ill-box05-text-shadow-blur) var(--ill-box05-text-shadow-color);
   font-size: var(--ill-box05-size);
   font-weight: var(--ill-box05-text-style-weight);
   font-style: var(--ill-box05-text-style-slant);
@@ -406,6 +532,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box05 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box05-heading-font);
+  -webkit-text-stroke: var(--ill-box05-heading-outline-width) var(--ill-box05-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box05-heading-text-shadow-offset-x) var(--ill-box05-heading-text-shadow-offset-y)
+               var(--ill-box05-heading-text-shadow-blur) var(--ill-box05-heading-text-shadow-color);
   font-size: var(--ill-box05-heading-size);
   font-weight: var(--ill-box05-heading-text-style-weight);
   font-style: var(--ill-box05-heading-text-style-slant);
@@ -434,6 +564,10 @@
   border-radius: var(--ill-box06-corner-top-left) var(--ill-box06-corner-top-right) var(--ill-box06-corner-bottom-right) var(--ill-box06-corner-bottom-left);
   box-shadow: var(--ill-box06-shadow-offset-x) var(--ill-box06-shadow-offset-y) var(--ill-box06-shadow-blur) var(--ill-box06-shadow-spread) var(--ill-box06-shadow-color);
   font-family: var(--ill-box06-font);
+  -webkit-text-stroke: var(--ill-box06-outline-width) var(--ill-box06-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box06-text-shadow-offset-x) var(--ill-box06-text-shadow-offset-y)
+               var(--ill-box06-text-shadow-blur) var(--ill-box06-text-shadow-color);
   font-size: var(--ill-box06-size);
   font-weight: var(--ill-box06-text-style-weight);
   font-style: var(--ill-box06-text-style-slant);
@@ -447,6 +581,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box06 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box06-heading-font);
+  -webkit-text-stroke: var(--ill-box06-heading-outline-width) var(--ill-box06-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box06-heading-text-shadow-offset-x) var(--ill-box06-heading-text-shadow-offset-y)
+               var(--ill-box06-heading-text-shadow-blur) var(--ill-box06-heading-text-shadow-color);
   font-size: var(--ill-box06-heading-size);
   font-weight: var(--ill-box06-heading-text-style-weight);
   font-style: var(--ill-box06-heading-text-style-slant);
@@ -475,6 +613,10 @@
   border-radius: var(--ill-box07-corner-top-left) var(--ill-box07-corner-top-right) var(--ill-box07-corner-bottom-right) var(--ill-box07-corner-bottom-left);
   box-shadow: var(--ill-box07-shadow-offset-x) var(--ill-box07-shadow-offset-y) var(--ill-box07-shadow-blur) var(--ill-box07-shadow-spread) var(--ill-box07-shadow-color);
   font-family: var(--ill-box07-font);
+  -webkit-text-stroke: var(--ill-box07-outline-width) var(--ill-box07-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box07-text-shadow-offset-x) var(--ill-box07-text-shadow-offset-y)
+               var(--ill-box07-text-shadow-blur) var(--ill-box07-text-shadow-color);
   font-size: var(--ill-box07-size);
   font-weight: var(--ill-box07-text-style-weight);
   font-style: var(--ill-box07-text-style-slant);
@@ -488,6 +630,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box07 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box07-heading-font);
+  -webkit-text-stroke: var(--ill-box07-heading-outline-width) var(--ill-box07-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box07-heading-text-shadow-offset-x) var(--ill-box07-heading-text-shadow-offset-y)
+               var(--ill-box07-heading-text-shadow-blur) var(--ill-box07-heading-text-shadow-color);
   font-size: var(--ill-box07-heading-size);
   font-weight: var(--ill-box07-heading-text-style-weight);
   font-style: var(--ill-box07-heading-text-style-slant);
@@ -516,6 +662,10 @@
   border-radius: var(--ill-box08-corner-top-left) var(--ill-box08-corner-top-right) var(--ill-box08-corner-bottom-right) var(--ill-box08-corner-bottom-left);
   box-shadow: var(--ill-box08-shadow-offset-x) var(--ill-box08-shadow-offset-y) var(--ill-box08-shadow-blur) var(--ill-box08-shadow-spread) var(--ill-box08-shadow-color);
   font-family: var(--ill-box08-font);
+  -webkit-text-stroke: var(--ill-box08-outline-width) var(--ill-box08-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box08-text-shadow-offset-x) var(--ill-box08-text-shadow-offset-y)
+               var(--ill-box08-text-shadow-blur) var(--ill-box08-text-shadow-color);
   font-size: var(--ill-box08-size);
   font-weight: var(--ill-box08-text-style-weight);
   font-style: var(--ill-box08-text-style-slant);
@@ -529,6 +679,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box08 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box08-heading-font);
+  -webkit-text-stroke: var(--ill-box08-heading-outline-width) var(--ill-box08-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box08-heading-text-shadow-offset-x) var(--ill-box08-heading-text-shadow-offset-y)
+               var(--ill-box08-heading-text-shadow-blur) var(--ill-box08-heading-text-shadow-color);
   font-size: var(--ill-box08-heading-size);
   font-weight: var(--ill-box08-heading-text-style-weight);
   font-style: var(--ill-box08-heading-text-style-slant);
@@ -557,6 +711,10 @@
   border-radius: var(--ill-box09-corner-top-left) var(--ill-box09-corner-top-right) var(--ill-box09-corner-bottom-right) var(--ill-box09-corner-bottom-left);
   box-shadow: var(--ill-box09-shadow-offset-x) var(--ill-box09-shadow-offset-y) var(--ill-box09-shadow-blur) var(--ill-box09-shadow-spread) var(--ill-box09-shadow-color);
   font-family: var(--ill-box09-font);
+  -webkit-text-stroke: var(--ill-box09-outline-width) var(--ill-box09-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box09-text-shadow-offset-x) var(--ill-box09-text-shadow-offset-y)
+               var(--ill-box09-text-shadow-blur) var(--ill-box09-text-shadow-color);
   font-size: var(--ill-box09-size);
   font-weight: var(--ill-box09-text-style-weight);
   font-style: var(--ill-box09-text-style-slant);
@@ -570,6 +728,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box09 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box09-heading-font);
+  -webkit-text-stroke: var(--ill-box09-heading-outline-width) var(--ill-box09-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box09-heading-text-shadow-offset-x) var(--ill-box09-heading-text-shadow-offset-y)
+               var(--ill-box09-heading-text-shadow-blur) var(--ill-box09-heading-text-shadow-color);
   font-size: var(--ill-box09-heading-size);
   font-weight: var(--ill-box09-heading-text-style-weight);
   font-style: var(--ill-box09-heading-text-style-slant);
@@ -598,6 +760,10 @@
   border-radius: var(--ill-box10-corner-top-left) var(--ill-box10-corner-top-right) var(--ill-box10-corner-bottom-right) var(--ill-box10-corner-bottom-left);
   box-shadow: var(--ill-box10-shadow-offset-x) var(--ill-box10-shadow-offset-y) var(--ill-box10-shadow-blur) var(--ill-box10-shadow-spread) var(--ill-box10-shadow-color);
   font-family: var(--ill-box10-font);
+  -webkit-text-stroke: var(--ill-box10-outline-width) var(--ill-box10-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box10-text-shadow-offset-x) var(--ill-box10-text-shadow-offset-y)
+               var(--ill-box10-text-shadow-blur) var(--ill-box10-text-shadow-color);
   font-size: var(--ill-box10-size);
   font-weight: var(--ill-box10-text-style-weight);
   font-style: var(--ill-box10-text-style-slant);
@@ -611,6 +777,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box10 :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--ill-box10-heading-font);
+  -webkit-text-stroke: var(--ill-box10-heading-outline-width) var(--ill-box10-heading-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-box10-heading-text-shadow-offset-x) var(--ill-box10-heading-text-shadow-offset-y)
+               var(--ill-box10-heading-text-shadow-blur) var(--ill-box10-heading-text-shadow-color);
   font-size: var(--ill-box10-heading-size);
   font-weight: var(--ill-box10-heading-text-style-weight);
   font-style: var(--ill-box10-heading-text-style-slant);
@@ -661,6 +831,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image01 figcaption {
   font-family: var(--ill-image01-caption-font);
+  -webkit-text-stroke: var(--ill-image01-caption-outline-width) var(--ill-image01-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image01-caption-text-shadow-offset-x) var(--ill-image01-caption-text-shadow-offset-y)
+               var(--ill-image01-caption-text-shadow-blur) var(--ill-image01-caption-text-shadow-color);
   font-size: var(--ill-image01-caption-size);
   font-weight: var(--ill-image01-caption-text-style-weight);
   font-style: var(--ill-image01-caption-text-style-slant);
@@ -705,6 +879,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image02 figcaption {
   font-family: var(--ill-image02-caption-font);
+  -webkit-text-stroke: var(--ill-image02-caption-outline-width) var(--ill-image02-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image02-caption-text-shadow-offset-x) var(--ill-image02-caption-text-shadow-offset-y)
+               var(--ill-image02-caption-text-shadow-blur) var(--ill-image02-caption-text-shadow-color);
   font-size: var(--ill-image02-caption-size);
   font-weight: var(--ill-image02-caption-text-style-weight);
   font-style: var(--ill-image02-caption-text-style-slant);
@@ -749,6 +927,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image03 figcaption {
   font-family: var(--ill-image03-caption-font);
+  -webkit-text-stroke: var(--ill-image03-caption-outline-width) var(--ill-image03-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image03-caption-text-shadow-offset-x) var(--ill-image03-caption-text-shadow-offset-y)
+               var(--ill-image03-caption-text-shadow-blur) var(--ill-image03-caption-text-shadow-color);
   font-size: var(--ill-image03-caption-size);
   font-weight: var(--ill-image03-caption-text-style-weight);
   font-style: var(--ill-image03-caption-text-style-slant);
@@ -793,6 +975,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image04 figcaption {
   font-family: var(--ill-image04-caption-font);
+  -webkit-text-stroke: var(--ill-image04-caption-outline-width) var(--ill-image04-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image04-caption-text-shadow-offset-x) var(--ill-image04-caption-text-shadow-offset-y)
+               var(--ill-image04-caption-text-shadow-blur) var(--ill-image04-caption-text-shadow-color);
   font-size: var(--ill-image04-caption-size);
   font-weight: var(--ill-image04-caption-text-style-weight);
   font-style: var(--ill-image04-caption-text-style-slant);
@@ -837,6 +1023,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image05 figcaption {
   font-family: var(--ill-image05-caption-font);
+  -webkit-text-stroke: var(--ill-image05-caption-outline-width) var(--ill-image05-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image05-caption-text-shadow-offset-x) var(--ill-image05-caption-text-shadow-offset-y)
+               var(--ill-image05-caption-text-shadow-blur) var(--ill-image05-caption-text-shadow-color);
   font-size: var(--ill-image05-caption-size);
   font-weight: var(--ill-image05-caption-text-style-weight);
   font-style: var(--ill-image05-caption-text-style-slant);
@@ -881,6 +1071,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image06 figcaption {
   font-family: var(--ill-image06-caption-font);
+  -webkit-text-stroke: var(--ill-image06-caption-outline-width) var(--ill-image06-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image06-caption-text-shadow-offset-x) var(--ill-image06-caption-text-shadow-offset-y)
+               var(--ill-image06-caption-text-shadow-blur) var(--ill-image06-caption-text-shadow-color);
   font-size: var(--ill-image06-caption-size);
   font-weight: var(--ill-image06-caption-text-style-weight);
   font-style: var(--ill-image06-caption-text-style-slant);
@@ -925,6 +1119,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image07 figcaption {
   font-family: var(--ill-image07-caption-font);
+  -webkit-text-stroke: var(--ill-image07-caption-outline-width) var(--ill-image07-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image07-caption-text-shadow-offset-x) var(--ill-image07-caption-text-shadow-offset-y)
+               var(--ill-image07-caption-text-shadow-blur) var(--ill-image07-caption-text-shadow-color);
   font-size: var(--ill-image07-caption-size);
   font-weight: var(--ill-image07-caption-text-style-weight);
   font-style: var(--ill-image07-caption-text-style-slant);
@@ -969,6 +1167,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image08 figcaption {
   font-family: var(--ill-image08-caption-font);
+  -webkit-text-stroke: var(--ill-image08-caption-outline-width) var(--ill-image08-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image08-caption-text-shadow-offset-x) var(--ill-image08-caption-text-shadow-offset-y)
+               var(--ill-image08-caption-text-shadow-blur) var(--ill-image08-caption-text-shadow-color);
   font-size: var(--ill-image08-caption-size);
   font-weight: var(--ill-image08-caption-text-style-weight);
   font-style: var(--ill-image08-caption-text-style-slant);
@@ -1013,6 +1215,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image09 figcaption {
   font-family: var(--ill-image09-caption-font);
+  -webkit-text-stroke: var(--ill-image09-caption-outline-width) var(--ill-image09-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image09-caption-text-shadow-offset-x) var(--ill-image09-caption-text-shadow-offset-y)
+               var(--ill-image09-caption-text-shadow-blur) var(--ill-image09-caption-text-shadow-color);
   font-size: var(--ill-image09-caption-size);
   font-weight: var(--ill-image09-caption-text-style-weight);
   font-style: var(--ill-image09-caption-text-style-slant);
@@ -1057,6 +1263,10 @@
 
 .illuminus-styled .journal-page-content .illuminus-image--image10 figcaption {
   font-family: var(--ill-image10-caption-font);
+  -webkit-text-stroke: var(--ill-image10-caption-outline-width) var(--ill-image10-caption-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-image10-caption-text-shadow-offset-x) var(--ill-image10-caption-text-shadow-offset-y)
+               var(--ill-image10-caption-text-shadow-blur) var(--ill-image10-caption-text-shadow-color);
   font-size: var(--ill-image10-caption-size);
   font-weight: var(--ill-image10-caption-text-style-weight);
   font-style: var(--ill-image10-caption-text-style-slant);
@@ -1080,6 +1290,10 @@
   border-radius: var(--ill-tag01-corner-top-left) var(--ill-tag01-corner-top-right) var(--ill-tag01-corner-bottom-right) var(--ill-tag01-corner-bottom-left);
   box-shadow: var(--ill-tag01-shadow-offset-x) var(--ill-tag01-shadow-offset-y) var(--ill-tag01-shadow-blur) var(--ill-tag01-shadow-spread) var(--ill-tag01-shadow-color);
   font-family: var(--ill-tag01-font);
+  -webkit-text-stroke: var(--ill-tag01-outline-width) var(--ill-tag01-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag01-text-shadow-offset-x) var(--ill-tag01-text-shadow-offset-y)
+               var(--ill-tag01-text-shadow-blur) var(--ill-tag01-text-shadow-color);
   font-size: var(--ill-tag01-size);
   font-weight: var(--ill-tag01-text-style-weight);
   font-style: var(--ill-tag01-text-style-slant);
@@ -1114,6 +1328,10 @@
   border-radius: var(--ill-tag02-corner-top-left) var(--ill-tag02-corner-top-right) var(--ill-tag02-corner-bottom-right) var(--ill-tag02-corner-bottom-left);
   box-shadow: var(--ill-tag02-shadow-offset-x) var(--ill-tag02-shadow-offset-y) var(--ill-tag02-shadow-blur) var(--ill-tag02-shadow-spread) var(--ill-tag02-shadow-color);
   font-family: var(--ill-tag02-font);
+  -webkit-text-stroke: var(--ill-tag02-outline-width) var(--ill-tag02-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag02-text-shadow-offset-x) var(--ill-tag02-text-shadow-offset-y)
+               var(--ill-tag02-text-shadow-blur) var(--ill-tag02-text-shadow-color);
   font-size: var(--ill-tag02-size);
   font-weight: var(--ill-tag02-text-style-weight);
   font-style: var(--ill-tag02-text-style-slant);
@@ -1148,6 +1366,10 @@
   border-radius: var(--ill-tag03-corner-top-left) var(--ill-tag03-corner-top-right) var(--ill-tag03-corner-bottom-right) var(--ill-tag03-corner-bottom-left);
   box-shadow: var(--ill-tag03-shadow-offset-x) var(--ill-tag03-shadow-offset-y) var(--ill-tag03-shadow-blur) var(--ill-tag03-shadow-spread) var(--ill-tag03-shadow-color);
   font-family: var(--ill-tag03-font);
+  -webkit-text-stroke: var(--ill-tag03-outline-width) var(--ill-tag03-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag03-text-shadow-offset-x) var(--ill-tag03-text-shadow-offset-y)
+               var(--ill-tag03-text-shadow-blur) var(--ill-tag03-text-shadow-color);
   font-size: var(--ill-tag03-size);
   font-weight: var(--ill-tag03-text-style-weight);
   font-style: var(--ill-tag03-text-style-slant);
@@ -1182,6 +1404,10 @@
   border-radius: var(--ill-tag04-corner-top-left) var(--ill-tag04-corner-top-right) var(--ill-tag04-corner-bottom-right) var(--ill-tag04-corner-bottom-left);
   box-shadow: var(--ill-tag04-shadow-offset-x) var(--ill-tag04-shadow-offset-y) var(--ill-tag04-shadow-blur) var(--ill-tag04-shadow-spread) var(--ill-tag04-shadow-color);
   font-family: var(--ill-tag04-font);
+  -webkit-text-stroke: var(--ill-tag04-outline-width) var(--ill-tag04-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag04-text-shadow-offset-x) var(--ill-tag04-text-shadow-offset-y)
+               var(--ill-tag04-text-shadow-blur) var(--ill-tag04-text-shadow-color);
   font-size: var(--ill-tag04-size);
   font-weight: var(--ill-tag04-text-style-weight);
   font-style: var(--ill-tag04-text-style-slant);
@@ -1216,6 +1442,10 @@
   border-radius: var(--ill-tag05-corner-top-left) var(--ill-tag05-corner-top-right) var(--ill-tag05-corner-bottom-right) var(--ill-tag05-corner-bottom-left);
   box-shadow: var(--ill-tag05-shadow-offset-x) var(--ill-tag05-shadow-offset-y) var(--ill-tag05-shadow-blur) var(--ill-tag05-shadow-spread) var(--ill-tag05-shadow-color);
   font-family: var(--ill-tag05-font);
+  -webkit-text-stroke: var(--ill-tag05-outline-width) var(--ill-tag05-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag05-text-shadow-offset-x) var(--ill-tag05-text-shadow-offset-y)
+               var(--ill-tag05-text-shadow-blur) var(--ill-tag05-text-shadow-color);
   font-size: var(--ill-tag05-size);
   font-weight: var(--ill-tag05-text-style-weight);
   font-style: var(--ill-tag05-text-style-slant);
@@ -1250,6 +1480,10 @@
   border-radius: var(--ill-tag06-corner-top-left) var(--ill-tag06-corner-top-right) var(--ill-tag06-corner-bottom-right) var(--ill-tag06-corner-bottom-left);
   box-shadow: var(--ill-tag06-shadow-offset-x) var(--ill-tag06-shadow-offset-y) var(--ill-tag06-shadow-blur) var(--ill-tag06-shadow-spread) var(--ill-tag06-shadow-color);
   font-family: var(--ill-tag06-font);
+  -webkit-text-stroke: var(--ill-tag06-outline-width) var(--ill-tag06-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag06-text-shadow-offset-x) var(--ill-tag06-text-shadow-offset-y)
+               var(--ill-tag06-text-shadow-blur) var(--ill-tag06-text-shadow-color);
   font-size: var(--ill-tag06-size);
   font-weight: var(--ill-tag06-text-style-weight);
   font-style: var(--ill-tag06-text-style-slant);
@@ -1284,6 +1518,10 @@
   border-radius: var(--ill-tag07-corner-top-left) var(--ill-tag07-corner-top-right) var(--ill-tag07-corner-bottom-right) var(--ill-tag07-corner-bottom-left);
   box-shadow: var(--ill-tag07-shadow-offset-x) var(--ill-tag07-shadow-offset-y) var(--ill-tag07-shadow-blur) var(--ill-tag07-shadow-spread) var(--ill-tag07-shadow-color);
   font-family: var(--ill-tag07-font);
+  -webkit-text-stroke: var(--ill-tag07-outline-width) var(--ill-tag07-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag07-text-shadow-offset-x) var(--ill-tag07-text-shadow-offset-y)
+               var(--ill-tag07-text-shadow-blur) var(--ill-tag07-text-shadow-color);
   font-size: var(--ill-tag07-size);
   font-weight: var(--ill-tag07-text-style-weight);
   font-style: var(--ill-tag07-text-style-slant);
@@ -1318,6 +1556,10 @@
   border-radius: var(--ill-tag08-corner-top-left) var(--ill-tag08-corner-top-right) var(--ill-tag08-corner-bottom-right) var(--ill-tag08-corner-bottom-left);
   box-shadow: var(--ill-tag08-shadow-offset-x) var(--ill-tag08-shadow-offset-y) var(--ill-tag08-shadow-blur) var(--ill-tag08-shadow-spread) var(--ill-tag08-shadow-color);
   font-family: var(--ill-tag08-font);
+  -webkit-text-stroke: var(--ill-tag08-outline-width) var(--ill-tag08-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag08-text-shadow-offset-x) var(--ill-tag08-text-shadow-offset-y)
+               var(--ill-tag08-text-shadow-blur) var(--ill-tag08-text-shadow-color);
   font-size: var(--ill-tag08-size);
   font-weight: var(--ill-tag08-text-style-weight);
   font-style: var(--ill-tag08-text-style-slant);
@@ -1352,6 +1594,10 @@
   border-radius: var(--ill-tag09-corner-top-left) var(--ill-tag09-corner-top-right) var(--ill-tag09-corner-bottom-right) var(--ill-tag09-corner-bottom-left);
   box-shadow: var(--ill-tag09-shadow-offset-x) var(--ill-tag09-shadow-offset-y) var(--ill-tag09-shadow-blur) var(--ill-tag09-shadow-spread) var(--ill-tag09-shadow-color);
   font-family: var(--ill-tag09-font);
+  -webkit-text-stroke: var(--ill-tag09-outline-width) var(--ill-tag09-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag09-text-shadow-offset-x) var(--ill-tag09-text-shadow-offset-y)
+               var(--ill-tag09-text-shadow-blur) var(--ill-tag09-text-shadow-color);
   font-size: var(--ill-tag09-size);
   font-weight: var(--ill-tag09-text-style-weight);
   font-style: var(--ill-tag09-text-style-slant);
@@ -1386,6 +1632,10 @@
   border-radius: var(--ill-tag10-corner-top-left) var(--ill-tag10-corner-top-right) var(--ill-tag10-corner-bottom-right) var(--ill-tag10-corner-bottom-left);
   box-shadow: var(--ill-tag10-shadow-offset-x) var(--ill-tag10-shadow-offset-y) var(--ill-tag10-shadow-blur) var(--ill-tag10-shadow-spread) var(--ill-tag10-shadow-color);
   font-family: var(--ill-tag10-font);
+  -webkit-text-stroke: var(--ill-tag10-outline-width) var(--ill-tag10-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-tag10-text-shadow-offset-x) var(--ill-tag10-text-shadow-offset-y)
+               var(--ill-tag10-text-shadow-blur) var(--ill-tag10-text-shadow-color);
   font-size: var(--ill-tag10-size);
   font-weight: var(--ill-tag10-text-style-weight);
   font-style: var(--ill-tag10-text-style-slant);
@@ -2321,6 +2571,8 @@
 
 .illuminus-styled .journal-header .title:hover {
   color: var(--ill-title-hover-color, var(--ill-title-color));
+  -webkit-text-stroke-width: var(--ill-title-hover-outline-width, var(--ill-title-outline-width));
+  -webkit-text-stroke-color: var(--ill-title-hover-outline-color, var(--ill-title-outline-color));
   background-color: var(--ill-title-hover-background, var(--ill-title-background));
   border-top-color: var(--ill-title-hover-border-top-color, var(--ill-title-border-top-color));
   border-right-color: var(--ill-title-hover-border-right-color, var(--ill-title-border-right-color));
@@ -2333,6 +2585,8 @@
 .illuminus-styled .journal-page-header h3:hover,
 .illuminus-styled .journal-page-content h1:hover {
   color: var(--ill-heading1-hover-color, var(--ill-heading1-color));
+  -webkit-text-stroke-width: var(--ill-heading1-hover-outline-width, var(--ill-heading1-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading1-hover-outline-color, var(--ill-heading1-outline-color));
   background-color: var(--ill-heading1-hover-background, var(--ill-heading1-background));
   border-top-color: var(--ill-heading1-hover-border-top-color, var(--ill-heading1-border-top-color));
   border-right-color: var(--ill-heading1-hover-border-right-color, var(--ill-heading1-border-right-color));
@@ -2342,6 +2596,8 @@
 
 .illuminus-styled .journal-page-content h2:hover {
   color: var(--ill-heading2-hover-color, var(--ill-heading2-color));
+  -webkit-text-stroke-width: var(--ill-heading2-hover-outline-width, var(--ill-heading2-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading2-hover-outline-color, var(--ill-heading2-outline-color));
   background-color: var(--ill-heading2-hover-background, var(--ill-heading2-background));
   border-top-color: var(--ill-heading2-hover-border-top-color, var(--ill-heading2-border-top-color));
   border-right-color: var(--ill-heading2-hover-border-right-color, var(--ill-heading2-border-right-color));
@@ -2351,6 +2607,8 @@
 
 .illuminus-styled .journal-page-content h3:hover {
   color: var(--ill-heading3-hover-color, var(--ill-heading3-color));
+  -webkit-text-stroke-width: var(--ill-heading3-hover-outline-width, var(--ill-heading3-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading3-hover-outline-color, var(--ill-heading3-outline-color));
   background-color: var(--ill-heading3-hover-background, var(--ill-heading3-background));
   border-top-color: var(--ill-heading3-hover-border-top-color, var(--ill-heading3-border-top-color));
   border-right-color: var(--ill-heading3-hover-border-right-color, var(--ill-heading3-border-right-color));
@@ -2360,6 +2618,8 @@
 
 .illuminus-styled .journal-page-content h4:hover {
   color: var(--ill-heading4-hover-color, var(--ill-heading4-color));
+  -webkit-text-stroke-width: var(--ill-heading4-hover-outline-width, var(--ill-heading4-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading4-hover-outline-color, var(--ill-heading4-outline-color));
   background-color: var(--ill-heading4-hover-background, var(--ill-heading4-background));
   border-top-color: var(--ill-heading4-hover-border-top-color, var(--ill-heading4-border-top-color));
   border-right-color: var(--ill-heading4-hover-border-right-color, var(--ill-heading4-border-right-color));
@@ -2369,6 +2629,8 @@
 
 .illuminus-styled .journal-page-content h5:hover {
   color: var(--ill-heading5-hover-color, var(--ill-heading5-color));
+  -webkit-text-stroke-width: var(--ill-heading5-hover-outline-width, var(--ill-heading5-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading5-hover-outline-color, var(--ill-heading5-outline-color));
   background-color: var(--ill-heading5-hover-background, var(--ill-heading5-background));
   border-top-color: var(--ill-heading5-hover-border-top-color, var(--ill-heading5-border-top-color));
   border-right-color: var(--ill-heading5-hover-border-right-color, var(--ill-heading5-border-right-color));
@@ -2378,6 +2640,8 @@
 
 .illuminus-styled .journal-page-content h6:hover {
   color: var(--ill-heading6-hover-color, var(--ill-heading6-color));
+  -webkit-text-stroke-width: var(--ill-heading6-hover-outline-width, var(--ill-heading6-outline-width));
+  -webkit-text-stroke-color: var(--ill-heading6-hover-outline-color, var(--ill-heading6-outline-color));
   background-color: var(--ill-heading6-hover-background, var(--ill-heading6-background));
   border-top-color: var(--ill-heading6-hover-border-top-color, var(--ill-heading6-border-top-color));
   border-right-color: var(--ill-heading6-hover-border-right-color, var(--ill-heading6-border-right-color));
@@ -2396,6 +2660,8 @@
 .illuminus-styled .journal-page-content a.content-link:hover,
 .illuminus-styled .journal-page-content a.inline-roll:hover {
   color: var(--ill-links-hover-color, var(--ill-links-color));
+  -webkit-text-stroke-width: var(--ill-links-hover-outline-width, var(--ill-links-outline-width));
+  -webkit-text-stroke-color: var(--ill-links-hover-outline-color, var(--ill-links-outline-color));
   background-color: var(--ill-links-hover-background, var(--ill-links-background));
   border-top-color: var(--ill-links-hover-border-top-color, var(--ill-links-border-top-color));
   border-right-color: var(--ill-links-hover-border-right-color, var(--ill-links-border-right-color));
@@ -2404,6 +2670,8 @@
 }
 
 .illuminus-styled .journal-page-content table:hover {
+  -webkit-text-stroke-width: var(--ill-tables-hover-outline-width, var(--ill-tables-outline-width));
+  -webkit-text-stroke-color: var(--ill-tables-hover-outline-color, var(--ill-tables-outline-color));
   border-top-color: var(--ill-tables-hover-border-top-color, var(--ill-tables-border-top-color));
   border-right-color: var(--ill-tables-hover-border-right-color, var(--ill-tables-border-right-color));
   border-bottom-color: var(--ill-tables-hover-border-bottom-color, var(--ill-tables-border-bottom-color));
@@ -2412,6 +2680,8 @@
 
 .illuminus-styled .journal-page-content blockquote:not(.illuminus-box):hover {
   color: var(--ill-boxes-hover-color, var(--ill-boxes-color));
+  -webkit-text-stroke-width: var(--ill-boxes-hover-outline-width, var(--ill-boxes-outline-width));
+  -webkit-text-stroke-color: var(--ill-boxes-hover-outline-color, var(--ill-boxes-outline-color));
   background-color: var(--ill-boxes-hover-background, var(--ill-boxes-background));
   border-top-color: var(--ill-boxes-hover-border-top-color, var(--ill-boxes-border-top-color));
   border-right-color: var(--ill-boxes-hover-border-right-color, var(--ill-boxes-border-right-color));
@@ -2421,6 +2691,8 @@
 
 .illuminus-styled .journal-page-content section.secret:hover {
   color: var(--ill-secrets-hover-color, var(--ill-secrets-color));
+  -webkit-text-stroke-width: var(--ill-secrets-hover-outline-width, var(--ill-secrets-outline-width));
+  -webkit-text-stroke-color: var(--ill-secrets-hover-outline-color, var(--ill-secrets-outline-color));
   background-color: var(--ill-secrets-hover-background, var(--ill-secrets-background));
   border-top-color: var(--ill-secrets-hover-border-top-color, var(--ill-secrets-border-top-color));
   border-right-color: var(--ill-secrets-hover-border-right-color, var(--ill-secrets-border-right-color));
@@ -2438,6 +2710,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box01:hover {
   color: var(--ill-box01-hover-color, var(--ill-box01-color));
+  -webkit-text-stroke-width: var(--ill-box01-hover-outline-width, var(--ill-box01-outline-width));
+  -webkit-text-stroke-color: var(--ill-box01-hover-outline-color, var(--ill-box01-outline-color));
   background-color: var(--ill-box01-hover-background, var(--ill-box01-background));
   border-top-color: var(--ill-box01-hover-border-top-color, var(--ill-box01-border-top-color));
   border-right-color: var(--ill-box01-hover-border-right-color, var(--ill-box01-border-right-color));
@@ -2447,6 +2721,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box02:hover {
   color: var(--ill-box02-hover-color, var(--ill-box02-color));
+  -webkit-text-stroke-width: var(--ill-box02-hover-outline-width, var(--ill-box02-outline-width));
+  -webkit-text-stroke-color: var(--ill-box02-hover-outline-color, var(--ill-box02-outline-color));
   background-color: var(--ill-box02-hover-background, var(--ill-box02-background));
   border-top-color: var(--ill-box02-hover-border-top-color, var(--ill-box02-border-top-color));
   border-right-color: var(--ill-box02-hover-border-right-color, var(--ill-box02-border-right-color));
@@ -2456,6 +2732,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box03:hover {
   color: var(--ill-box03-hover-color, var(--ill-box03-color));
+  -webkit-text-stroke-width: var(--ill-box03-hover-outline-width, var(--ill-box03-outline-width));
+  -webkit-text-stroke-color: var(--ill-box03-hover-outline-color, var(--ill-box03-outline-color));
   background-color: var(--ill-box03-hover-background, var(--ill-box03-background));
   border-top-color: var(--ill-box03-hover-border-top-color, var(--ill-box03-border-top-color));
   border-right-color: var(--ill-box03-hover-border-right-color, var(--ill-box03-border-right-color));
@@ -2465,6 +2743,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box04:hover {
   color: var(--ill-box04-hover-color, var(--ill-box04-color));
+  -webkit-text-stroke-width: var(--ill-box04-hover-outline-width, var(--ill-box04-outline-width));
+  -webkit-text-stroke-color: var(--ill-box04-hover-outline-color, var(--ill-box04-outline-color));
   background-color: var(--ill-box04-hover-background, var(--ill-box04-background));
   border-top-color: var(--ill-box04-hover-border-top-color, var(--ill-box04-border-top-color));
   border-right-color: var(--ill-box04-hover-border-right-color, var(--ill-box04-border-right-color));
@@ -2474,6 +2754,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box05:hover {
   color: var(--ill-box05-hover-color, var(--ill-box05-color));
+  -webkit-text-stroke-width: var(--ill-box05-hover-outline-width, var(--ill-box05-outline-width));
+  -webkit-text-stroke-color: var(--ill-box05-hover-outline-color, var(--ill-box05-outline-color));
   background-color: var(--ill-box05-hover-background, var(--ill-box05-background));
   border-top-color: var(--ill-box05-hover-border-top-color, var(--ill-box05-border-top-color));
   border-right-color: var(--ill-box05-hover-border-right-color, var(--ill-box05-border-right-color));
@@ -2483,6 +2765,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box06:hover {
   color: var(--ill-box06-hover-color, var(--ill-box06-color));
+  -webkit-text-stroke-width: var(--ill-box06-hover-outline-width, var(--ill-box06-outline-width));
+  -webkit-text-stroke-color: var(--ill-box06-hover-outline-color, var(--ill-box06-outline-color));
   background-color: var(--ill-box06-hover-background, var(--ill-box06-background));
   border-top-color: var(--ill-box06-hover-border-top-color, var(--ill-box06-border-top-color));
   border-right-color: var(--ill-box06-hover-border-right-color, var(--ill-box06-border-right-color));
@@ -2492,6 +2776,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box07:hover {
   color: var(--ill-box07-hover-color, var(--ill-box07-color));
+  -webkit-text-stroke-width: var(--ill-box07-hover-outline-width, var(--ill-box07-outline-width));
+  -webkit-text-stroke-color: var(--ill-box07-hover-outline-color, var(--ill-box07-outline-color));
   background-color: var(--ill-box07-hover-background, var(--ill-box07-background));
   border-top-color: var(--ill-box07-hover-border-top-color, var(--ill-box07-border-top-color));
   border-right-color: var(--ill-box07-hover-border-right-color, var(--ill-box07-border-right-color));
@@ -2501,6 +2787,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box08:hover {
   color: var(--ill-box08-hover-color, var(--ill-box08-color));
+  -webkit-text-stroke-width: var(--ill-box08-hover-outline-width, var(--ill-box08-outline-width));
+  -webkit-text-stroke-color: var(--ill-box08-hover-outline-color, var(--ill-box08-outline-color));
   background-color: var(--ill-box08-hover-background, var(--ill-box08-background));
   border-top-color: var(--ill-box08-hover-border-top-color, var(--ill-box08-border-top-color));
   border-right-color: var(--ill-box08-hover-border-right-color, var(--ill-box08-border-right-color));
@@ -2510,6 +2798,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box09:hover {
   color: var(--ill-box09-hover-color, var(--ill-box09-color));
+  -webkit-text-stroke-width: var(--ill-box09-hover-outline-width, var(--ill-box09-outline-width));
+  -webkit-text-stroke-color: var(--ill-box09-hover-outline-color, var(--ill-box09-outline-color));
   background-color: var(--ill-box09-hover-background, var(--ill-box09-background));
   border-top-color: var(--ill-box09-hover-border-top-color, var(--ill-box09-border-top-color));
   border-right-color: var(--ill-box09-hover-border-right-color, var(--ill-box09-border-right-color));
@@ -2519,6 +2809,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-box--box10:hover {
   color: var(--ill-box10-hover-color, var(--ill-box10-color));
+  -webkit-text-stroke-width: var(--ill-box10-hover-outline-width, var(--ill-box10-outline-width));
+  -webkit-text-stroke-color: var(--ill-box10-hover-outline-color, var(--ill-box10-outline-color));
   background-color: var(--ill-box10-hover-background, var(--ill-box10-background));
   border-top-color: var(--ill-box10-hover-border-top-color, var(--ill-box10-border-top-color));
   border-right-color: var(--ill-box10-hover-border-right-color, var(--ill-box10-border-right-color));
@@ -2528,6 +2820,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag01:hover {
   color: var(--ill-tag01-hover-color, var(--ill-tag01-color));
+  -webkit-text-stroke-width: var(--ill-tag01-hover-outline-width, var(--ill-tag01-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag01-hover-outline-color, var(--ill-tag01-outline-color));
   background-color: var(--ill-tag01-hover-background, var(--ill-tag01-background));
   border-top-color: var(--ill-tag01-hover-border-top-color, var(--ill-tag01-border-top-color));
   border-right-color: var(--ill-tag01-hover-border-right-color, var(--ill-tag01-border-right-color));
@@ -2537,6 +2831,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag02:hover {
   color: var(--ill-tag02-hover-color, var(--ill-tag02-color));
+  -webkit-text-stroke-width: var(--ill-tag02-hover-outline-width, var(--ill-tag02-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag02-hover-outline-color, var(--ill-tag02-outline-color));
   background-color: var(--ill-tag02-hover-background, var(--ill-tag02-background));
   border-top-color: var(--ill-tag02-hover-border-top-color, var(--ill-tag02-border-top-color));
   border-right-color: var(--ill-tag02-hover-border-right-color, var(--ill-tag02-border-right-color));
@@ -2546,6 +2842,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag03:hover {
   color: var(--ill-tag03-hover-color, var(--ill-tag03-color));
+  -webkit-text-stroke-width: var(--ill-tag03-hover-outline-width, var(--ill-tag03-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag03-hover-outline-color, var(--ill-tag03-outline-color));
   background-color: var(--ill-tag03-hover-background, var(--ill-tag03-background));
   border-top-color: var(--ill-tag03-hover-border-top-color, var(--ill-tag03-border-top-color));
   border-right-color: var(--ill-tag03-hover-border-right-color, var(--ill-tag03-border-right-color));
@@ -2555,6 +2853,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag04:hover {
   color: var(--ill-tag04-hover-color, var(--ill-tag04-color));
+  -webkit-text-stroke-width: var(--ill-tag04-hover-outline-width, var(--ill-tag04-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag04-hover-outline-color, var(--ill-tag04-outline-color));
   background-color: var(--ill-tag04-hover-background, var(--ill-tag04-background));
   border-top-color: var(--ill-tag04-hover-border-top-color, var(--ill-tag04-border-top-color));
   border-right-color: var(--ill-tag04-hover-border-right-color, var(--ill-tag04-border-right-color));
@@ -2564,6 +2864,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag05:hover {
   color: var(--ill-tag05-hover-color, var(--ill-tag05-color));
+  -webkit-text-stroke-width: var(--ill-tag05-hover-outline-width, var(--ill-tag05-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag05-hover-outline-color, var(--ill-tag05-outline-color));
   background-color: var(--ill-tag05-hover-background, var(--ill-tag05-background));
   border-top-color: var(--ill-tag05-hover-border-top-color, var(--ill-tag05-border-top-color));
   border-right-color: var(--ill-tag05-hover-border-right-color, var(--ill-tag05-border-right-color));
@@ -2573,6 +2875,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag06:hover {
   color: var(--ill-tag06-hover-color, var(--ill-tag06-color));
+  -webkit-text-stroke-width: var(--ill-tag06-hover-outline-width, var(--ill-tag06-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag06-hover-outline-color, var(--ill-tag06-outline-color));
   background-color: var(--ill-tag06-hover-background, var(--ill-tag06-background));
   border-top-color: var(--ill-tag06-hover-border-top-color, var(--ill-tag06-border-top-color));
   border-right-color: var(--ill-tag06-hover-border-right-color, var(--ill-tag06-border-right-color));
@@ -2582,6 +2886,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag07:hover {
   color: var(--ill-tag07-hover-color, var(--ill-tag07-color));
+  -webkit-text-stroke-width: var(--ill-tag07-hover-outline-width, var(--ill-tag07-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag07-hover-outline-color, var(--ill-tag07-outline-color));
   background-color: var(--ill-tag07-hover-background, var(--ill-tag07-background));
   border-top-color: var(--ill-tag07-hover-border-top-color, var(--ill-tag07-border-top-color));
   border-right-color: var(--ill-tag07-hover-border-right-color, var(--ill-tag07-border-right-color));
@@ -2591,6 +2897,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag08:hover {
   color: var(--ill-tag08-hover-color, var(--ill-tag08-color));
+  -webkit-text-stroke-width: var(--ill-tag08-hover-outline-width, var(--ill-tag08-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag08-hover-outline-color, var(--ill-tag08-outline-color));
   background-color: var(--ill-tag08-hover-background, var(--ill-tag08-background));
   border-top-color: var(--ill-tag08-hover-border-top-color, var(--ill-tag08-border-top-color));
   border-right-color: var(--ill-tag08-hover-border-right-color, var(--ill-tag08-border-right-color));
@@ -2600,6 +2908,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag09:hover {
   color: var(--ill-tag09-hover-color, var(--ill-tag09-color));
+  -webkit-text-stroke-width: var(--ill-tag09-hover-outline-width, var(--ill-tag09-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag09-hover-outline-color, var(--ill-tag09-outline-color));
   background-color: var(--ill-tag09-hover-background, var(--ill-tag09-background));
   border-top-color: var(--ill-tag09-hover-border-top-color, var(--ill-tag09-border-top-color));
   border-right-color: var(--ill-tag09-hover-border-right-color, var(--ill-tag09-border-right-color));
@@ -2609,6 +2919,8 @@
 
 .illuminus-styled .journal-page-content .illuminus-tag--tag10:hover {
   color: var(--ill-tag10-hover-color, var(--ill-tag10-color));
+  -webkit-text-stroke-width: var(--ill-tag10-hover-outline-width, var(--ill-tag10-outline-width));
+  -webkit-text-stroke-color: var(--ill-tag10-hover-outline-color, var(--ill-tag10-outline-color));
   background-color: var(--ill-tag10-hover-background, var(--ill-tag10-background));
   border-top-color: var(--ill-tag10-hover-border-top-color, var(--ill-tag10-border-top-color));
   border-right-color: var(--ill-tag10-hover-border-right-color, var(--ill-tag10-border-right-color));

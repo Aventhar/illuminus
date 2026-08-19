@@ -1,0 +1,71 @@
+{{!-- The sample page's contents, shared by two things that must not drift: the
+      editor's Live Sample, which wraps this in a mock journal window, and the
+      sample journal the style library can build, which puts it in a real page.
+      Everything here is markup a person could have typed in the editor, so a
+      style has nothing to paint that a journal cannot also carry. --}}
+{{!-- Three paragraphs rather than one: paragraph spacing, an opening capital,
+      and columns all say nothing until there is a second paragraph to say it
+      against. The link stays near the top, where a reader meets it. --}}
+<p data-part="body">{{localize "ILLUMINUS.Preview.Body"}}
+  <a class="content-link" data-part="links">{{localize "ILLUMINUS.Preview.Link"}}</a>.
+  {{localize "ILLUMINUS.Preview.BodyRest"}}</p>
+<p data-part="body">{{localize "ILLUMINUS.Preview.BodyTwo"}}</p>
+<p data-part="body">{{localize "ILLUMINUS.Preview.BodyThree"}}</p>
+<hr data-part="body">
+{{!-- Mirrors what Foundry renders, Reveal button and all. --}}
+<section class="secret" data-part="secrets">
+  <button type="button" class="reveal" disabled>{{localize "ILLUMINUS.Preview.Reveal"}}</button>
+  <p>{{localize "ILLUMINUS.Preview.Secret"}}</p>
+</section>
+{{!-- A paragraph under every heading, and deliberately the same one under each:
+      what is being compared is the headings, so the words beneath them should
+      not be a second variable. It is also what makes the Columns settings
+      legible — a heading that runs across the columns has to have something
+      underneath it to run across. --}}
+<h2 data-part="heading2">{{localize "ILLUMINUS.Preview.Heading2"}}</h2>
+<p data-part="body">{{localize "ILLUMINUS.Preview.HeadingBody"}}</p>
+<blockquote data-part="boxes"><p>{{localize "ILLUMINUS.Preview.Boxed"}}</p></blockquote>
+<h3 data-part="heading3">{{localize "ILLUMINUS.Preview.Heading3"}}</h3>
+<p data-part="body">{{localize "ILLUMINUS.Preview.HeadingBody"}}</p>
+<h4 data-part="heading4">{{localize "ILLUMINUS.Preview.Heading4"}}</h4>
+<p data-part="body">{{localize "ILLUMINUS.Preview.HeadingBody"}}</p>
+<h5 data-part="heading5">{{localize "ILLUMINUS.Preview.Heading5"}}</h5>
+<p data-part="body">{{localize "ILLUMINUS.Preview.HeadingBody"}}</p>
+<h6 data-part="heading6">{{localize "ILLUMINUS.Preview.Heading6"}}</h6>
+<p data-part="body">{{localize "ILLUMINUS.Preview.HeadingBody"}}</p>
+<ul data-part="lists">
+  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
+  <li>{{localize "ILLUMINUS.Preview.ListItem"}}</li>
+</ul>
+<dl data-part="lists">
+  <dt>{{localize "ILLUMINUS.Preview.Term"}}</dt>
+  <dd>{{localize "ILLUMINUS.Preview.Definition"}}</dd>
+</dl>
+<p data-part="body">{{localize "ILLUMINUS.Preview.MarksLead"}}
+  <mark>{{localize "ILLUMINUS.Preview.Highlight"}}</mark>,
+  <code>{{localize "ILLUMINUS.Preview.Code"}}</code>, and
+  <abbr title="{{localize 'ILLUMINUS.Preview.Abbr'}}">{{localize "ILLUMINUS.Preview.Abbr"}}</abbr>.</p>
+<details open data-part="boxes">
+  <summary>{{localize "ILLUMINUS.Preview.Collapsible"}}</summary>
+  <p>{{localize "ILLUMINUS.Preview.CollapsibleBody"}}</p>
+</details>
+<table data-part="tables">
+  <caption>{{localize "ILLUMINUS.Preview.TableCaption"}}</caption>
+  <thead>
+    <tr>
+      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
+      <th>{{localize "ILLUMINUS.Preview.TableHeader"}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
+    <tr><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td><td>{{localize "ILLUMINUS.Preview.TableCell"}}</td></tr>
+  </tbody>
+</table>
+<figure data-part="images">
+  {{!-- One of Foundry's own icons: the module carries no artwork, and the
+       sample only needs something to demonstrate the Images tab on. --}}
+  <img src="icons/svg/mystery-man.svg"
+       alt="{{localize 'ILLUMINUS.Preview.Caption'}}">
+  <figcaption>{{localize "ILLUMINUS.Preview.Caption"}}</figcaption>
+</figure>

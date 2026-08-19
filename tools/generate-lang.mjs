@@ -40,7 +40,7 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
   "ILLUMINUS.Editor.StateNormal": "Normal",
   "ILLUMINUS.Editor.StateHover": "Hovered",
-  "ILLUMINUS.Editor.StateActive": "Current page",
+  "ILLUMINUS.Editor.StateActive": "Selected",
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting\u2026",
   "ILLUMINUS.Editor.FilterCount": "{count} match(es)",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",
@@ -191,6 +191,12 @@ Object.assign(out, {
   "ILLUMINUS.ColorPicker.Forget": "Remove this color (or press Delete)",
   // The sample names each element after the setting that controls it, so it
   // reads as a legend rather than as a page of prose.
+  "ILLUMINUS.Sample.Folder": "Samples",
+  "ILLUMINUS.Sample.JournalName": "Illuminus Sample",
+  "ILLUMINUS.Sample.Button": "Sample Journal",
+  "ILLUMINUS.Sample.ButtonTooltip": "Make a real journal holding everything the sample shows, dressed in the ticked style",
+  "ILLUMINUS.Sample.Made": "Made {name}, in the Samples folder.",
+  "ILLUMINUS.Preview.HeadingBody": "The text that follows a heading, so the space above and below it, and the way it sits against a full measure of prose, can both be judged. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
   "ILLUMINUS.Preview.WindowTitle": "Window Title",
   "ILLUMINUS.Preview.JournalTitle": "Journal Title",
   "ILLUMINUS.Preview.Heading1": "Heading 1",
@@ -201,10 +207,20 @@ Object.assign(out, {
   "ILLUMINUS.Preview.Heading6": "Heading 6",
   "ILLUMINUS.Preview.Body": "Body text, run on long enough to wrap over several lines so that line spacing, alignment, paragraph width, and the opening capital can all be judged. It contains a",
   "ILLUMINUS.Preview.Link": "link",
+  // Filler, and deliberately dull: what this half of the paragraph is for is
+  // length. Line spacing, paragraph width, justification, and columns all need
+  // more than a sentence before they show what they are doing, and the link
+  // above stays where a reader meets it early rather than being pushed to the
+  // end of a long block.
+  "ILLUMINUS.Preview.BodyRest": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+  "ILLUMINUS.Preview.BodyTwo": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.",
+  "ILLUMINUS.Preview.BodyThree": "Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem, vestibulum ac diam sit amet quam. Vivamus suscipit tortor eget felis porttitor volutpat, quisque velit nisi pretium ut lacinia in elementum.",
   "ILLUMINUS.Preview.Boxed": "Boxed text, as used for read-aloud description. Long enough to wrap, so its own line spacing and padding are visible.",
   "ILLUMINUS.Preview.ListItem": "List item",
   "ILLUMINUS.Preview.TableHeader": "Table header",
   "ILLUMINUS.Preview.TableCell": "Table cell",
+  "ILLUMINUS.Choices.shown": "Show them",
+  "ILLUMINUS.Choices.notShown": "Do not display",
   "ILLUMINUS.Choices.show": "Show it anyway",
   "ILLUMINUS.Choices.hide": "Hide it",
   "ILLUMINUS.Choices.thin": "Thin",
@@ -326,6 +342,8 @@ const SECTION_TEXT = {
   // The page's own is a special case: the window clips it, so it is a control
   // that only earns its keep outside Foundry.
   pageShadow: ["Outer Shadow", "A shadow cast outwards. Foundry\u2019s window clips it, so this shows in exported pages rather than at the table"],
+  categoryBorder: ["Category Edges", "Lines around a group heading in the contents panel. Each edge is set separately"],
+  headingColumns: ["Columns", "How the text under this heading is set. Each level decides for its own passage, so a chapter can run wide and a section beneath it in two columns. Level 1 also sets the text under the page's title"],
   innerShadow: ["Inner Shadow", "Shading inside the edges, for an aged or lit-from-within look"],
   paragraph: ["Paragraphs", "Spacing and indentation between paragraphs"],
   columns: ["Columns", "Split the text into newspaper-style columns"],
@@ -377,13 +395,20 @@ for (const [id, [label, hint]] of Object.entries(SECTION_TEXT)) {
  */
 const NOUN = {
   border: "edge", cellBorder: "cell edge", entryBorder: "entry edge", searchBorder: "search box edge",
+  hoverEntryBorder: "entry edge", activeEntryBorder: "entry edge",
   headerButtonBorder: "button edge", pageButtonBorder: "button edge",
   headerButtonCorner: "button", pageButtonCorner: "button",
   padding: "contents", cellPadding: "cell's contents", entryPadding: "entry's contents",
+  categoryPadding: "category's name", categoryMargin: "", categoryBorder: "category edge",
+  categoryCorner: "category",
   margin: "", corner: "", searchCorner: "search box", buttonCorner: "button",
   codePadding: "code", codeBlockPadding: "block of code", summaryPadding: "heading",
   collapsiblePadding: "contents",
   shadow: "shadow", innerShadow: "inner shading", textShadow: "text shadow",
+  headingTextShadow: "text shadow", categoryTextShadow: "text shadow",
+  captionTextShadow: "text shadow", headerTextShadow: "text shadow",
+  termTextShadow: "text shadow", detailTextShadow: "text shadow",
+  summaryTextShadow: "text shadow", dropCapTextShadow: "text shadow",
   mediaShadow: "shadow"
 };
 const SIDE_PHRASE = { Top: "above", Right: "to the right of", Bottom: "below", Left: "to the left of" };
@@ -414,8 +439,46 @@ const IMAGE_TEXT = {
   Opacity: ["Image Strength", "How strongly the background image shows. 0 hides it entirely."]
 };
 
+/**
+ * Outline family: <prefix>Outline(Width|Color), derived because every section
+ * that offers a typeface offers a line around the letters too. The prefix says
+ * which lettering, in the same words its own typeface control uses.
+ */
+const OUTLINE_WORD = {
+  "": "", heading: "Heading", category: "Category", term: "Term", detail: "Definition",
+  header: "Header", caption: "Caption", summary: "Heading",
+  // A state's own outline: the switch above the controls says which state, so
+  // the label says only what the control is.
+  hover: "", active: "",
+  // The section is called Opening Capital, so the control says only what it is.
+  dropCap: ""
+};
+
+// Italic: a tick box beside every thickness control, named for it.
+for (const name of names) {
+  if (!/TextStyleSlant$|^textStyleSlant$/.test(name)) continue;
+  put(`ILLUMINUS.Field.${name}.label`, "Italic");
+  put(`ILLUMINUS.Field.${name}.hint`, "Whether this lettering slants.");
+}
+
 for (const name of names) {
   let m;
+  if (/TextStyleSlant$|^textStyleSlant$/.test(name)) continue;
+  // Outline family: <prefix>Outline(Width|Color).
+  if ((m = name.match(/^(.*?)Outline(Width|Color)$/))) {
+    const [, rawPrefix, part] = m;
+    const prefix = rawPrefix ? rawPrefix[0].toLowerCase() + rawPrefix.slice(1) : "";
+    if (prefix in OUTLINE_WORD) {
+      const word = OUTLINE_WORD[prefix];
+      const of = word ? `${word.toLowerCase()} ` : "";
+      put(`ILLUMINUS.Field.${name}.label`,
+        `${word ? `${word} ` : ""}Outline ${part === "Width" ? "Thickness" : "Color"}`);
+      put(`ILLUMINUS.Field.${name}.hint`, part === "Width"
+        ? `A line drawn around each ${of}letter. Leave at 0 for none.`
+        : `The color of the line drawn around each ${of}letter.`);
+      continue;
+    }
+  }
   // background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity).
   // Only prefixed ones — the Page tab's own set is worded by hand.
   if ((m = name.match(/^(.+?)Texture(Fit|Position|Blend|Opacity)?$/))) {
@@ -468,7 +531,10 @@ for (const name of names) {
     continue;
   }
   // shadow family: <prefix><OffsetX|OffsetY|Blur|Spread|Color>
-  if ((m = name.match(/^(shadow|innerShadow|textShadow|mediaShadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
+  // Shadow family: <prefix>(OffsetX|OffsetY|Blur|Spread|Color). Text shadows
+  // are named for the lettering they belong to — captionTextShadow, and so on —
+  // so the prefix is matched rather than listed.
+  if ((m = name.match(/^(shadow|innerShadow|mediaShadow|\w*[Tt]extShadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
     const [, prefix, part] = m;
     const what = NOUN[prefix];
     const text = {
@@ -483,9 +549,11 @@ for (const name of names) {
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
-    if (prefix === "margin") {
+    // A gap is outside the edge whatever it is a gap around, so the two
+    // families are told apart by the word rather than by the whole name.
+    if (/^margin$|Margin$/.test(prefix)) {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Gap`);
       put(`ILLUMINUS.Field.${name}.hint`,
         `Empty space ${SIDE_PHRASE[side]} this, outside the edge. Negative values pull it closer.`);
@@ -561,6 +629,7 @@ const FIELD_TEXT = {
   revealedBackground: ["Fill Color Once Revealed", "The color behind a secret passage after it has been shown."],
   buttonSize: ["Button Text Size", "How large the lettering on the button is."],
   buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],
+  numberShown: ["Page Numbers", "Whether each listed page carries its number. Hiding them leaves the whole row to the page's name."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
   minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],
@@ -589,7 +658,7 @@ const FIELD_TEXT = {
   firstLineIndent: ["First Line Indent", "Pushes the first line of each paragraph inward, as in a printed novel."],
   whiteSpace: ["Line Wrapping", "Whether long lines wrap, and whether extra spaces are kept."],
   wordBreak: ["Word Splitting", "Whether very long words may be broken across lines."],
-  columnCount: ["Number of Columns", "Split the text into columns, as printed adventures often do."],
+  columnCount: ["Number of Columns", "Split this passage into columns, as printed adventures often do. 1 leaves it running the full width."],
   columnGap: ["Gap Between Columns", "Empty space separating one column from the next."],
   columnRuleWidth: ["Divider Thickness", "A vertical line drawn between columns. 0 draws nothing."],
   columnRuleStyle: ["Divider Style", "What the line between columns looks like."],

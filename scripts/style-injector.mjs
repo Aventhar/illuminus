@@ -1,6 +1,7 @@
 import { STYLE_ELEMENT_ID, PREVIEW_ELEMENT_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
 import { compileAll, compileDeclarations, selectorFor } from "./style-compiler.mjs";
 import { getStyles, getAssignedStyleId } from "./style-store.mjs";
+import { wrapHeadingSections } from "./heading-sections.mjs";
 
 /**
  * Keeps the compiled stylesheets in `document.head` in sync with the style
@@ -78,6 +79,10 @@ export function clearPreview(id) {
  */
 export function applyToElement(root, entry) {
   if (!root) return;
+  // Every rendered page, styled or not: the wrappers carry no look of their own
+  // until a style names one, and a page that gains a style without re-rendering
+  // would otherwise have nothing to column.
+  wrapHeadingSections(root);
   const styleId = getAssignedStyleId(entry);
   if (styleId && getStyles()[styleId]) {
     root.classList.add(STYLED_CLASS);

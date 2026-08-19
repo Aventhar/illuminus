@@ -2,6 +2,15 @@
       <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
         <label for="illuminus-{{field.path}}">
           <span class="illuminus-field__label">{{field.label}}</span>
+          {{!-- Beside the name, where the question is asked, rather than out at
+                the end of the row past the control. --}}
+          <button type="button" class="illuminus-info" data-action="showHint"
+                  aria-label="{{field.hint}}">
+            <i class="fa-solid fa-circle-info"></i>
+          </button>
+          {{!-- Kept in the markup and hidden by the stylesheet rather than left
+                out: the search box reads it, so a control is still findable by
+                what it does rather than only by what it is called. --}}
           <span class="illuminus-field__hint">{{field.hint}}</span>
         </label>
 

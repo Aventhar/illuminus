@@ -235,11 +235,99 @@ function v3_to_v4(settings) {
   return out;
 }
 
+/**
+ * Version 4 -> 5.
+ *
+ * Columns moved from Body, where one setting columned a whole page, onto each
+ * heading level: a chapter can now run wide and the section beneath it set in
+ * two. A style that columned its pages keeps doing so — the old setting is
+ * copied to every level, and the text above the first heading follows level 1,
+ * which is the level the page's own title is.
+ */
+const COLUMN_KEYS = ["columnCount", "columnGap", "columnRuleWidth", "columnRuleStyle", "columnRuleColor"];
+
+function v4_to_v5(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const body = out.body;
+  if (!body) return out;
+  const columns = Object.fromEntries(
+    COLUMN_KEYS.filter((key) => body[key] !== undefined).map((key) => [key, body[key]]));
+  for (const key of COLUMN_KEYS) delete body[key];
+  if (!Object.keys(columns).length) return out;
+
+  for (const groupId of ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"]) {
+    out[groupId] = { ...columns, ...(out[groupId] ?? {}) };
+  }
+  return out;
+}
+
+/**
+ * Version 5 -> 6.
+ *
+ * The contents panel's entry, its edges, and its states became one section, and
+ * each state gained its own edge colors — which is what the Page Marker was
+ * drawing by hand, as an inset shadow down the left of the selected entry. So
+ * the marker becomes what it always was: a left edge the entry carries and the
+ * selected state colors in.
+ */
+function v5_to_v6(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const sidebar = out.sidebar;
+  if (!sidebar) return out;
+  const width = Number(sidebar.activeAccentWidth ?? 0);
+  const color = sidebar.activeAccentColor;
+  delete sidebar.activeAccentWidth;
+  delete sidebar.activeAccentColor;
+  if (width > 0) {
+    sidebar.entryBorderLeftWidth = sidebar.entryBorderLeftWidth ?? width;
+    // Transparent while the entry is neither pointed at nor selected, so the
+    // line shows where the marker used to and nowhere else.
+    sidebar.entryBorderLeftColor = sidebar.entryBorderLeftColor ?? "#00000000";
+    if (color) sidebar.activeEntryBorderLeftColor = sidebar.activeEntryBorderLeftColor ?? color;
+  }
+  return out;
+}
+
+/**
+ * Version 6 -> 7.
+ *
+ * The lettering control offered nine thicknesses crossed with italic —
+ * eighteen entries in a drop-down, most of which no typeface has. It offers
+ * Light, Normal, and Bold, with italic as a tick box beside it. Anything
+ * heavier than normal becomes bold and anything lighter becomes light, which is
+ * the same rule the nine were collapsed by once before, and the italic half
+ * moves to the box.
+ */
+const TEXT_STYLE_BASE = {
+  thin: "light", extraLight: "light", light: "light",
+  normal: "normal", medium: "normal", semiBold: "bold",
+  bold: "bold", extraBold: "bold", black: "bold"
+};
+
+function v6_to_v7(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  for (const group of Object.values(out)) {
+    if (!group || typeof group !== "object") continue;
+    for (const [key, value] of Object.entries(group)) {
+      if (!/TextStyle$|^textStyle$/.test(key) || typeof value !== "string") continue;
+      if (value === "inherit") continue;
+      const italic = value.endsWith("Italic");
+      const base = italic ? value.slice(0, -"Italic".length) : value;
+      group[key] = TEXT_STYLE_BASE[base] ?? "normal";
+      if (italic) group[`${key}Slant`] = true;
+    }
+  }
+  return out;
+}
+
 /** Migrations keyed by the version they upgrade *from*. */
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
-  3: v3_to_v4
+  3: v3_to_v4,
+  4: v4_to_v5,
+  5: v5_to_v6,
+  6: v6_to_v7
 };
 
 /**

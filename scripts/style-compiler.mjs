@@ -101,6 +101,9 @@ export function fieldToCss(field, value) {
     case "number": {
       const n = Number(value);
       if (!Number.isFinite(n)) return null;
+      // A hovered thickness of zero means "say nothing", so the `:hover` rule
+      // falls back to the ordinary value rather than rubbing it out.
+      if (n === 0 && field.emitZero === false) return null;
       if (n === 0 && field.zeroAs) return { "": field.zeroAs };
       return { "": `${n}${field.unit ?? ""}` };
     }
