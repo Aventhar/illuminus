@@ -418,6 +418,20 @@ const CORNER_WORD = {
 const noun = (prefix, fallback) => (prefix in NOUN ? NOUN[prefix] : fallback);
 
 const names = [...new Set(allFields().map(({ field }) => field.name))];
+
+/**
+ * Shadow controls that share a section with the lettering they belong to.
+ *
+ * Under Opening Capital, a Color above an Outline Color above another Color
+ * explains nothing — the shadow's says so. Wording is keyed by field name and a
+ * name is shared across tabs, so where a tab does have a Text Shadow section of
+ * its own the label reads "Shadow Color" inside it, which is a word longer than
+ * it needs to be rather than a word short of clear.
+ */
+const SHARED_SHADOW = new Set(GROUPS.flatMap((group) => group.sections
+  .filter((section) => section.id !== "textShadow")
+  .flatMap((section) => section.fields.map((field) => field.name))
+  .filter((field) => /TextShadow(OffsetX|OffsetY|Blur|Spread|Color)$|^textShadow(OffsetX|OffsetY|Blur|Spread|Color)$/.test(field))));
 const unmatched = [];
 
 /**
@@ -544,7 +558,8 @@ for (const name of names) {
       Spread: ["Size", `Grows or shrinks the ${what} beyond the shape that casts it.`],
       Color: ["Color", `Color of the ${what}. A fully transparent color means none at all.`]
     }[part];
-    put(`ILLUMINUS.Field.${name}.label`, text[0]);
+    put(`ILLUMINUS.Field.${name}.label`,
+      SHARED_SHADOW.has(name) ? `Shadow ${text[0]}` : text[0]);
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
@@ -630,6 +645,7 @@ const FIELD_TEXT = {
   buttonSize: ["Button Text Size", "How large the lettering on the button is."],
   buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],
   pageButtonSide: ["Which Side", "The side of the page the pencil sits on."],
+  pageButtonOffset: ["Distance from the Edge", "How far in from that side the pencil sits. Raise it to slide the button clear of anything it lands on; negative numbers push it outside the page."],
   numberShown: ["Page Numbers", "Whether each listed page carries its number. Hiding them leaves the whole row to the page's name."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],

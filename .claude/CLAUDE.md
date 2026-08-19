@@ -267,7 +267,16 @@ the editor's sample, and in an export. Four things are load-bearing:
 - **It undoes itself first**, because a sheet re-renders on every edit and wrapping a
   wrapper nests a column inside a column.
 - **The opening paragraph moved.** `.journal-page-content > p:first-child` no longer finds
-  it — the drop cap rule and anything looking for it must accept the wrapper in between.
+  it — anything looking for it must accept the wrapper in between.
+
+**The opening capital is an element, not `::first-letter`.** A browser paints that
+pseudo-element with a fixed list of properties, and an outline is not on it:
+`-webkit-text-stroke-width` computes to `0px` there however it is written, while
+`text-shadow` applies — so half the controls worked and half did nothing. `markDropCap`
+wraps the page's first letter in a `span.illuminus-drop-cap` at render, beside the flow
+wrappers and under the same rules: never stored, never inside an editor, and put back
+before it is redone. Anything comparing rendered markup with a page's own content has to
+unwrap it as well as the flows.
 
 **Level 1 also styles the page title**, which the sheet renders in
 `.journal-page-header` — *outside* `.journal-page-content`, so it needs naming

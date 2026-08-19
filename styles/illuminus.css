@@ -507,8 +507,11 @@
   text-indent: 0;
 }
 
-.illuminus-styled .journal-page-content > p:first-child::first-letter,
-.illuminus-styled .journal-page-content > .illuminus-flow:first-child > p:first-child::first-letter {
+/* On an element of its own rather than on `::first-letter`, which a browser
+   paints with only a fixed list of properties — an outline is not among them,
+   and its thickness computed to zero there however it was written. The letter
+   is wrapped at render by scripts/heading-sections.mjs; nothing is stored. */
+.illuminus-styled .journal-page-content .illuminus-drop-cap {
   float: var(--ill-body-drop-cap-float);
   -webkit-text-stroke: var(--ill-body-drop-cap-outline-width) var(--ill-body-drop-cap-outline-color);
   paint-order: stroke fill;

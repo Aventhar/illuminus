@@ -73,6 +73,44 @@ export function wrapFlows(content) {
   }
 }
 
+/** The class the page's opening letter wears. */
+export const CAP_CLASS = "illuminus-drop-cap";
+
+/**
+ * Give the page's opening letter an element of its own.
+ *
+ * `::first-letter` would be the obvious way, and it is how this started — but a
+ * browser applies only a fixed list of properties to it, and an outline is not
+ * on that list: `-webkit-text-stroke-width` computes to zero there however it is
+ * written. A real element takes every property a letter can have.
+ *
+ * Only the first paragraph of a page, and only its first character: the letter
+ * a reader sees as the opening of the page.
+ */
+export function markDropCap(content) {
+  for (const old of content.querySelectorAll(`.${CAP_CLASS}`)) {
+    old.replaceWith(...old.childNodes);
+    old.parentElement?.normalize();
+  }
+  const first = content.querySelector(`:scope > p, :scope > .${FLOW_CLASS} > p`);
+  if (!first) return;
+  const text = [...first.childNodes].find((node) =>
+    node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+  if (!text) return;
+  const at = text.textContent.search(/\S/);
+  if (at < 0) return;
+
+  const letter = document.createElement("span");
+  letter.className = CAP_CLASS;
+  // Split twice: once at the letter, once after it. The span goes in where the
+  // letter was, before what follows — putting it in before moving the letter
+  // would be asking a node to sit inside itself.
+  const capital = text.splitText(at);
+  const rest = capital.splitText(1);
+  rest.before(letter);
+  letter.append(capital);
+}
+
 /**
  * Wrap every page inside a rendered element: a journal sheet, the editor's
  * sample, or a page built for export.
@@ -87,5 +125,6 @@ export function wrapHeadingSections(root) {
     // inline tag refusing to wrap the words a person had selected.
     if (content.closest("prose-mirror") || content.isContentEditable) continue;
     wrapFlows(content);
+    markDropCap(content);
   }
 }

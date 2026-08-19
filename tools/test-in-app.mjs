@@ -398,9 +398,13 @@ const dropCap = await cdp.evaluate(`(async () => {
   probe.setAttribute("data-illuminus-style", "dropcap-probe");
   probe.innerHTML = '<section class="journal-page-content"><p>Black water laps.</p></section>';
   document.body.append(probe);
+  // The capital is an element wrapped at render rather than a pseudo-element,
+  // so the probe is given the same treatment a rendered page gets.
+  const { markDropCap } = await import("/modules/illuminus/scripts/heading-sections.mjs");
+  markDropCap(probe.querySelector(".journal-page-content"));
 
   const read = () => {
-    const cs = getComputedStyle(probe.querySelector("p"), "::first-letter");
+    const cs = getComputedStyle(probe.querySelector(".illuminus-drop-cap"));
     return {color: cs.color, float: cs.float, fontSize: cs.fontSize};
   };
 
@@ -968,9 +972,12 @@ const win = await cdp.evaluate(`(async () => {
     })()
   };
 
-  // And with the pencil asked to sit on the other side.
+  // And with the pencil asked to sit on the other side, 40px in — the distance
+  // is what keeps it clear of whatever a page keeps in that corner, so it is
+  // measured on the page rather than read off the property.
   const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
   settings.window.pageButtonSide = "left";
+  settings.window.pageButtonOffset = 40;
   await api.updateStyle(style.id, {settings});
   await new Promise(r => setTimeout(r, 500));
   {
@@ -980,6 +987,7 @@ const win = await cdp.evaluate(`(async () => {
     const bar = box.getBoundingClientRect();
     out.editSideLeft = [moved.left, moved.right];
     out.editNearer = (bar.left - page.left) < (page.right - bar.right) ? "left" : "right";
+    out.editFromLeft = Math.round(bar.left - page.left);
   }
 
   freeze.remove();
@@ -998,8 +1006,10 @@ check(wn.editColor === "rgb(255, 0, 255)", `edit pencil color applied (got ${wn.
 check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
 check(wn.editSide?.[1] === "5px" && wn.editSide?.[0] !== "5px",
   `the edit pencil sits where Foundry puts it until asked otherwise (${wn.editSide?.join(" / ")})`);
-check(wn.editSideLeft?.[0] === "5px" && wn.editSideLeft?.[1] !== "5px" && wn.editNearer === "left",
+check(wn.editNearer === "left" && wn.editSideLeft?.[0] === "40px",
   `and moves to the other side when it is (${wn.editSideLeft?.join(" / ")}, nearer ${wn.editNearer})`);
+check(wn.editFromLeft === 40,
+  `sliding it in by 40 puts it 40 from that edge (got ${wn.editFromLeft})`);
 check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
 
 // The module bundles no artwork of its own, so what matters here is that the
@@ -2262,11 +2272,14 @@ try {
     settings.heading1.background = "#5e1914";
     settings.body.dropCap = "three";
     settings.body.dropCapFont = "Courier New";
+    settings.body.dropCapOutlineWidth = 3;
+    settings.body.dropCapOutlineColor = "#ff0000";
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Heading Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
       "<p>Opening paragraph.</p><h3>Three</h3><h4>Four</h4><h5>Five</h5><h6>Six</h6>"}}]);
+    // "Opening paragraph." — the capital is its O.
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     await new Promise(r => setTimeout(r, 1400));
@@ -2280,12 +2293,15 @@ try {
       // The page title takes level 1's look even though it sits outside the
       // content area, which is why level 1 styles the header too.
       titleBg: getComputedStyle(root.querySelector(".journal-page-header h1")).backgroundColor,
-      // The opening paragraph is inside the wrapper that carries the page's own
-      // columns, so it is looked for both ways.
-      dropCapFont: getComputedStyle(
-        root.querySelector(".journal-page-content > p:first-child")
-          ?? root.querySelector(".journal-page-content > .illuminus-flow:first-child > p:first-child"),
-        "::first-letter").fontFamily
+      // The opening capital wears an element of its own, wrapped at render: a
+      // browser paints the first-letter pseudo-element with a fixed list of
+      // properties, and an outline is not on it.
+      dropCapFont: getComputedStyle(root.querySelector(".illuminus-drop-cap")).fontFamily,
+      dropCapLetter: root.querySelector(".illuminus-drop-cap")?.textContent,
+      dropCapOutline: (() => {
+        const cs = getComputedStyle(root.querySelector(".illuminus-drop-cap"));
+        return cs.webkitTextStrokeWidth + " " + cs.webkitTextStrokeColor;
+      })()
     };
     window.__heads = {entryId: entry.id, styleId: style.id};
     return JSON.stringify(out);
@@ -2303,6 +2319,9 @@ try {
     `the page title still takes level 1's look (got ${hd.titleBg})`);
   check(/Courier New/.test(hd.dropCapFont),
     `the opening capital takes its own typeface (got ${hd.dropCapFont})`);
+  check(hd.dropCapLetter === "O", `on the page's first letter and no more of it (got "${hd.dropCapLetter}")`);
+  check(hd.dropCapOutline === "3px rgb(255, 0, 0)",
+    `and an outline, which a pseudo-element would have refused (got ${hd.dropCapOutline})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -4642,6 +4661,7 @@ try {
     const sampleFlows = samplePage.querySelectorAll(":scope > .illuminus-flow").length;
     const sample = samplePage.cloneNode(true);
     for (const flow of sample.querySelectorAll(".illuminus-flow")) flow.replaceWith(...flow.childNodes);
+    for (const cap of sample.querySelectorAll(".illuminus-drop-cap")) cap.replaceWith(...cap.childNodes);
     const outline = (root) => [...root.querySelectorAll("*")]
       .filter((el) => el.tagName !== "BUTTON")
       .map((el) => el.tagName).join(",");

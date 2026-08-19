@@ -1,5 +1,5 @@
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "./constants.mjs";
-import { wrapFlows } from "./heading-sections.mjs";
+import { wrapFlows, markDropCap } from "./heading-sections.mjs";
 import { allFields } from "./style-schema.mjs";
 import { compileBaseRule, compileStyle } from "./style-compiler.mjs";
 import { getStyle, getAssignedStyleId } from "./style-store.mjs";
@@ -246,6 +246,7 @@ async function rewriteContent(html, { pageLinks, assets, report, headings, prefi
   // Done on the parsed page rather than on the markup, which is what the
   // function is holding anyway.
   wrapFlows(root);
+  markDropCap(root);
 
   return root.innerHTML;
 }
