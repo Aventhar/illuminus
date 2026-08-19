@@ -4806,7 +4806,59 @@ console.log("\n[54] The sample keeps up while a control is still being used");
   check(typed.stillFocused, "and the field still has the cursor in it");
 }
 
-console.log("\n[55] Console is clean");
+console.log("\n[55] A stylesheet on its own");
+// The look without the words: what somebody laying out a page of their own
+// needs, and the one export that carries no journal text at all.
+{
+  const sheet = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = api.listStyles()[0];
+    const entry = await JournalEntry.create({name: "Illuminus CSS Export"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "P", type: "text", text: {content: "<h1>Chapter</h1><p>Body.</p>"}
+    }]);
+    try {
+      const built = await api.buildJournalExport({
+        styleId: style.id, entryIds: [entry.id], format: "css", prefix: "my-module"
+      });
+      const text = built.css ?? "";
+      return JSON.stringify({
+        filename: built.filename,
+        type: built.blob.type,
+        bytes: built.blob.size,
+        // It has to carry the style's own values and the rules that read them,
+        // under the name it was given.
+        hasValues: /--my-module-page-background:/.test(text),
+        hasRules: /\.my-module-styled .journal-page-content/.test(text),
+        // And nothing that points at a folder beside it. Matched without
+        // crossing a closing bracket, since a data URI is full of them.
+        pointsOut: /url\\(\\s*["']?(?!data:)[^)"']+/.test(text),
+        // The look, not the words: the journal's own text is not in here.
+        noText: !text.includes("Body."),
+        saysIlluminus: /illuminus|--ill-/.test(text),
+        // A typeface is licensed to whoever installed it: the file names the
+        // faces and carries none of them.
+        carriesFonts: /@font-face/.test(text),
+        namesFaces: /font-family:/.test(text)
+      });
+    } finally { await entry.delete(); }
+  })()`));
+
+  check(sheet.filename.endsWith(".css") && sheet.type === "text/css",
+    `it comes out as a stylesheet (${sheet.filename}, ${sheet.type})`);
+  check(sheet.hasValues && sheet.hasRules,
+    `carrying the style's values and the rules that read them (${sheet.hasValues}, ${sheet.hasRules})`);
+  check(!sheet.pointsOut, "with its pictures inside it rather than beside it");
+  check(sheet.noText && sheet.bytes > 2000, `and no journal text at all (${sheet.bytes} bytes)`);
+  // Named by whoever exported it: a file still answering to Illuminus's own
+  // names would collide with Illuminus the moment it sat beside it.
+  check(!sheet.saysIlluminus, "and says Illuminus nowhere at all — classes and colors alike");
+  check(sheet.filename.startsWith("aged-parchment"), `whose file is named for the style (${sheet.filename})`);
+  check(!sheet.carriesFonts && sheet.namesFaces,
+    `naming its typefaces without carrying them (${sheet.carriesFonts ? "carries" : "names only"})`);
+}
+
+console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
 

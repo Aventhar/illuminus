@@ -431,6 +431,25 @@ only get a worse answer.
   as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
   in a browser before believing a rendering bug.
 
+## Exporting a stylesheet on its own
+
+The fourth export format is the look without the words: `format: "css"` returns the
+stylesheet the single-file export would have carried, and nothing else. Three things make
+it different from the others, and all three are about it landing in somebody *else's*
+release rather than on their own shelf.
+
+- **It is renamed on the way out.** A file still answering to `illuminus-styled` and
+  `--ill-…` would collide with Illuminus the moment it sat beside it, so the export
+  dialog asks for a Custom Descriptor and `rename()` rewrites both spellings — the
+  classes and the short form the custom properties wear. The field is required for this
+  format alone, and prefilled from the world's name, because a prefix somebody invents on
+  the spot is a prefix called "test".
+- **It carries no typefaces.** `buildStylesheet` takes `{ fonts: false }` and the gathered
+  path strips `@font-face` — a font file is licensed to whoever installed it. The file
+  names the faces and leaves finding them to whatever loads it, which the wording says.
+- **Pictures still travel inside it**, as data URIs, because a lone `.css` has no folder
+  beside it. Whoever exports it licenses those; the wording says that too.
+
 ## The two library windows
 
 The style library and the template library are the same window with different

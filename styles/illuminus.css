@@ -72,7 +72,6 @@
   background-size: var(--ill-page-texture-fit-size);
   background-repeat: var(--ill-page-texture-fit-repeat);
   background-position: var(--ill-page-texture-position);
-  background-attachment: var(--ill-page-texture-attachment);
   mix-blend-mode: var(--ill-page-texture-blend);
   opacity: var(--ill-page-texture-opacity);
 }
@@ -1374,6 +1373,35 @@
   display: none;
 }
 
+/* The stylesheet's own name: a label, the icon that explains it, and the field.
+   Its wording is in the markup for the icon to show rather than printed under
+   the field, as the editor does it. */
+/* One row apiece: the option, the icon that explains it, and — where there is
+   one — the field it needs. The field takes the room that is left rather than
+   whatever a browser gives a text input by default. */
+.illuminus-export-dialog__option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.illuminus-export-dialog__option > label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.illuminus-export-dialog__css-only input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.illuminus-export-dialog__hint {
+  display: none;
+}
+
 /* Room between the style picker and the tick box under it, so the two do not
    read as one control. */
 .illuminus-export-dialog__option {
@@ -1403,6 +1431,31 @@
 
 .illuminus-export-dialog__option.is-hidden {
   display: none;
+}
+
+/* The stylesheet's own name: a label, the icon that explains it, and the field.
+   Its wording is in the markup for the icon to show rather than printed under
+   the field, as the editor does it. */
+/* One row apiece: the option, the icon that explains it, and — where there is
+   one — the field it needs. The field takes the room that is left rather than
+   whatever a browser gives a text input by default. */
+.illuminus-export-dialog__option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.illuminus-export-dialog__option > label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.illuminus-export-dialog__css-only input[type="text"] {
+  flex: 1;
+  min-width: 0;
 }
 
 .illuminus-export-dialog__option {

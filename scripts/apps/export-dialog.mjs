@@ -6,6 +6,19 @@ import { confirmExportTerms, showExportTerms, whatTravels } from "../export-term
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
+ * A name a stylesheet can be built out of: letters, digits and hyphens, opening
+ * with a letter. A CSS class cannot start with a digit, and a name with a space
+ * in it would break every selector it appears in.
+ */
+function slugPrefix(value) {
+  return String(value).trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^[^a-z]+/, "")
+    .replace(/-+$/, "")
+    .slice(0, 40);
+}
+
+/**
  * A window to print into, opened while the click that asked for it is still
  * fresh, and given something to say while the pages are made.
  *
@@ -47,8 +60,9 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       resizable: true
     },
     // Tall enough for every section at once: a window that opens with its last
-    // fieldset cut off reads as a mistake, and this one has five.
-    position: { width: 560, height: 780 },
+    // fieldset cut off reads as a mistake, and this one has five — the last of
+    // which grew a name field when the stylesheet export arrived.
+    position: { width: 560, height: 830 },
     form: {
       handler: IlluminusExportDialog.#onSubmit,
       closeOnSubmit: true
@@ -56,7 +70,8 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     actions: {
       pickAll: IlluminusExportDialog.#onPickAll,
       pickNone: IlluminusExportDialog.#onPickNone,
-      terms: IlluminusExportDialog.#onShowTerms
+      terms: IlluminusExportDialog.#onShowTerms,
+      showHint: IlluminusExportDialog.#onShowHint
     }
   };
 
@@ -105,6 +120,10 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       }))
     ];
     context.carrying = whatTravels().join(" ");
+    // A name of their own for the exported stylesheet. Theirs by default, taken
+    // from the world, because a prefix somebody has to invent on the spot is a
+    // prefix that ends up being "test".
+    context.cssPrefix = slugPrefix(game.world?.title ?? game.system?.title ?? "");
     // One window, three ways out. A folder is the fullest, one page is the one
     // you can email, and printing is the one that becomes a PDF.
     // The PDF leads, and is what the window offers unless told otherwise: it is
@@ -112,7 +131,9 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     context.formats = [
       { id: "print", label: "ILLUMINUS.Export.FormatPrint", note: "ILLUMINUS.Export.FormatPrintNote", checked: true },
       { id: "folder", label: "ILLUMINUS.Export.FormatFolder" },
-      { id: "file", label: "ILLUMINUS.Export.FormatFile" }
+      { id: "file", label: "ILLUMINUS.Export.FormatFile" },
+      // The look without the words: for laying out a page of your own.
+      { id: "css", label: "ILLUMINUS.Export.FormatCss", note: "ILLUMINUS.Export.FormatCssNote" }
     ];
     context.journals = game.journal.contents
       .filter((entry) => entry.testUserPermission(game.user, "OBSERVER"))
@@ -190,6 +211,12 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     for (const only of this.element.querySelectorAll(".illuminus-export-dialog__pdf-only")) {
       only.classList.toggle("is-hidden", format !== "print");
     }
+    for (const only of this.element.querySelectorAll(".illuminus-export-dialog__css-only")) {
+      only.classList.toggle("is-hidden", format !== "css");
+    }
+    for (const not of this.element.querySelectorAll(".illuminus-export-dialog__not-css")) {
+      not.classList.toggle("is-hidden", format === "css");
+    }
   }
 
   /** @override */
@@ -203,6 +230,16 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     }
     this.#applyFilter();
     this.#applyFormat();
+  }
+
+  /** Say what a setting is for, on the click that asks. */
+  static #onShowHint(event, target) {
+    event.preventDefault();
+    const hint = target.parentElement?.querySelector(".illuminus-export-dialog__hint")?.textContent?.trim();
+    if (!hint) return;
+    if (game.tooltip.element === target) return game.tooltip.deactivate();
+    game.tooltip.deactivate();
+    game.tooltip.activate(target, { text: hint, direction: "UP" });
   }
 
   /** Read the notice again, whenever somebody wants to. */
@@ -221,6 +258,14 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       return;
     }
     const format = data.format ?? "print";
+    // Required for a stylesheet, and only for one: without it the file would
+    // answer to the same names Illuminus does, which is the one thing it must
+    // not do in somebody else's module.
+    const prefix = slugPrefix(data.cssPrefix ?? "");
+    if (format === "css" && !prefix) {
+      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.CssPrefixNeeded"));
+      return;
+    }
 
     // The notice first, and the window after it. A browser allows a new window
     // while it can still see the click that asked for one — and the notice is
@@ -244,6 +289,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       secrets: Boolean(data.secrets),
       pageBackground: Boolean(data.pageBackground),
       format,
+      prefix,
       target
     });
   }

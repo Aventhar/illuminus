@@ -78,17 +78,45 @@
 
   <fieldset>
     <legend>{{localize "ILLUMINUS.Export.OptionsLegend"}}</legend>
-    <label class="illuminus-export-dialog__option">
-      <input type="checkbox" name="secrets">
-      <span>
-        {{localize "ILLUMINUS.Export.Secrets"}}
-      </span>
-    </label>
-    <label class="illuminus-export-dialog__option illuminus-export-dialog__pdf-only">
-      <input type="checkbox" name="pageBackground">
-      <span>
-        {{localize "ILLUMINUS.Export.PageTexture"}}
-      </span>
-    </label>
+    {{!-- Each option says what it is, and keeps why behind the icon beside it,
+          as the style editor does. --}}
+    {{!-- A stylesheet carries no words, so there are none to keep back. --}}
+    <div class="illuminus-export-dialog__option illuminus-export-dialog__not-css">
+      <label>
+        <input type="checkbox" name="secrets">
+        <span>{{localize "ILLUMINUS.Export.Secrets"}}</span>
+      </label>
+      <button type="button" class="illuminus-info" data-action="showHint"
+              aria-label="{{localize 'ILLUMINUS.Export.SecretsHint'}}">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+      <span class="illuminus-export-dialog__hint">{{localize "ILLUMINUS.Export.SecretsHint"}}</span>
+    </div>
+    <div class="illuminus-export-dialog__option illuminus-export-dialog__pdf-only">
+      <label>
+        <input type="checkbox" name="pageBackground">
+        <span>{{localize "ILLUMINUS.Export.PageTexture"}}</span>
+      </label>
+      <button type="button" class="illuminus-info" data-action="showHint"
+              aria-label="{{localize 'ILLUMINUS.Export.PageTextureHint'}}">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+      <span class="illuminus-export-dialog__hint">{{localize "ILLUMINUS.Export.PageTextureHint"}}</span>
+    </div>
+    {{!-- Only for the stylesheet, and required there: it is what keeps the
+          exported CSS from answering to the same names Illuminus does. --}}
+    <div class="illuminus-export-dialog__option illuminus-export-dialog__css-only">
+      <label for="illuminus-css-prefix">{{localize "ILLUMINUS.Export.CssPrefix"}}</label>
+      <button type="button" class="illuminus-info" data-action="showHint"
+              aria-label="{{localize 'ILLUMINUS.Export.CssPrefixHint'}}">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+      <input type="text" id="illuminus-css-prefix" name="cssPrefix" value="{{cssPrefix}}"
+             placeholder="{{localize 'ILLUMINUS.Export.CssPrefixPlaceholder'}}" required>
+      {{!-- Ours alone, with none of Foundry's own hint styling: that class is
+            unlayered, and an unlayered rule beats a layered one however
+            specific — the wording showed itself however firmly we hid it. --}}
+      <span class="illuminus-export-dialog__hint">{{localize "ILLUMINUS.Export.CssPrefixHint"}}</span>
+    </div>
   </fieldset>
 </div>

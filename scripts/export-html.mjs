@@ -492,8 +492,12 @@ async function fontRules(style, assets) {
  * The whole stylesheet for an export: what the module always ships, then the
  * one style's own values, with every picture it names pulled into the archive.
  */
-async function buildStylesheet(style, assets, report) {
-  const fonts = await fontRules(style, assets);
+async function buildStylesheet(style, assets, report, { fonts: withFonts = true } = {}) {
+  // A stylesheet on its own carries no typefaces. A font file is somebody's to
+  // license, and a CSS file is the one export that goes into another person's
+  // release rather than onto their own shelf — so it names the faces and leaves
+  // finding them to whatever loads it.
+  const fonts = withFonts ? await fontRules(style, assets) : { css: "", count: 0 };
   report.fonts = fonts.count;
   const parts = [
     await moduleFile("styles/illuminus-export.css"),
@@ -505,6 +509,25 @@ async function buildStylesheet(style, assets, report) {
   ];
 
   return carryPictures(parts.filter(Boolean).join("\n\n"), assets);
+}
+
+/**
+ * The exported stylesheet under somebody else's name.
+ *
+ * A file that still answered to `illuminus-styled` and `--ill-…` would collide
+ * with Illuminus itself the moment it was used in a module beside it — and the
+ * point of exporting the look is to take it somewhere else. Both spellings are
+ * renamed: the classes, and the custom properties, which wear the short form.
+ *
+ * The markup that carries these classes is exported alongside in the other
+ * formats; a stylesheet on its own is for markup somebody writes themselves,
+ * so it is theirs to name.
+ */
+function rename(css, prefix) {
+  if (!prefix || prefix === "illuminus") return css;
+  return css
+    .replace(/illuminus/g, prefix)
+    .replace(/--ill-/g, `--${prefix}-`);
 }
 
 /**
@@ -544,7 +567,7 @@ async function carryPictures(css, assets) {
  * This is what carries a game system's look — the reason a published adventure
  * exports looking like itself rather than like plain HTML.
  */
-async function buildAppliedStylesheet(documents, assets, report) {
+async function buildAppliedStylesheet(documents, assets, report, { fonts = true } = {}) {
   const found = collectAppliedCss(documents);
   report.sources = found.sources;
   report.rules = found.rules;
@@ -555,8 +578,13 @@ async function buildAppliedStylesheet(documents, assets, report) {
   // like `.sheet.journal-entry.application .journal-sidebar` without writing
   // longer selectors here than there — the same mechanism Foundry uses to let
   // modules override core.
+  const gathered = fonts
+    ? found.css
+    // Same reasoning as a compiled style's: a typeface is licensed to whoever
+    // installed it, not to whoever opens the file.
+    : found.css.replace(/@font-face\s*\{[^}]*\}/g, "");
   const css = [
-    `@layer illuminus-source {\n${found.css}\n}`,
+    `@layer illuminus-source {\n${gathered}\n}`,
     await moduleFile("styles/illuminus-export.css")
   ].join("\n\n");
   return carryPictures(css, assets);
@@ -604,8 +632,10 @@ function skippedPages(entry) {
  * @returns {Promise<{blob: Blob, filename: string, report: object, html?: string}|null>}
  */
 export async function buildHtmlExport({
-  styleId, entryIds, secrets = false, format = "folder", pageBackground = false
+  styleId, entryIds, secrets = false, format = "folder", pageBackground = false, prefix = ""
 }) {
+  // A stylesheet on its own is built like the single-file export — everything
+  // inlined, since a lone .css file has no folder beside it to hold pictures.
   const onePage = format !== "folder";
   // No style means "as it looks now", which is a different question: the CSS is
   // gathered from the page rather than compiled from a style.
@@ -732,11 +762,24 @@ export async function buildHtmlExport({
     // the markup then carries the stylesheet.
     const probe = page(title, plan.journals[0]?.entry, sidebar, body);
     const css = style
-      ? await buildStylesheet(style, assets, report)
-      : await buildAppliedStylesheet([probe], assets, report);
+      ? await buildStylesheet(style, assets, report, { fonts: format !== "css" })
+      : await buildAppliedStylesheet([probe], assets, report, { fonts: format !== "css" });
     const html = page(title, plan.journals[0]?.entry, sidebar, body, css);
 
     report.assets = assets.count;
+    // The stylesheet on its own: the same CSS the page would have carried, for
+    // somebody laying out a page of their own — a website, a print template,
+    // anything that is not Foundry. The markup had to be built anyway, because
+    // without a style the rules are chosen by what the markup contains.
+    if (format === "css") {
+      const renamed = rename(css, prefix);
+      return {
+        blob: new Blob([renamed], { type: "text/css" }),
+        filename: `${slug(style?.name ?? "journal", prefix || "illuminus")}.css`,
+        report,
+        css: renamed
+      };
+    }
     const name = `${slug(single ? entries[0].name : (style?.name ?? "journals"), "journals")}.html`;
     return { blob: new Blob([html], { type: "text/html" }), filename: name, report, html };
   }

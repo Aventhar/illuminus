@@ -60,7 +60,6 @@ const CHOICES = {
   blend: ["normal", "multiply", "overlay", "softLight", "hardLight", "screen", "luminosity", "colorBurn"],
   textureFit: ["tile", "cover", "contain", "stretch"],
   texturePosition: ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"],
-  textureAttachment: ["scroll", "fixed", "local"],
   dropCap: ["none", "two", "three", "four", "five"],
   blockFloat: ["none", "left", "right"],
   blockWidth: ["full", "threeQuarters", "half", "third"],
@@ -565,10 +564,7 @@ export const GROUPS = [
       {
         id: "background",
         fields: [
-          col("background", "#00000000"), ...imageFields(),
-          // As the page has: a panel is tall enough to scroll, so whether its
-          // picture travels with the list or stays put is a real choice.
-          select("textureAttachment", "scroll", CHOICES.textureAttachment)
+          col("background", "#00000000"), ...imageFields()
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
@@ -752,7 +748,6 @@ export const GROUPS = [
           { type: "image", name: "texture", default: "" },
           select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
           select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
-          select("textureAttachment", "scroll", CHOICES.textureAttachment),
           select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
           num("textureOpacity", 100, "%", 0, 100, 1)
         ]
@@ -1509,7 +1504,7 @@ const FIELD_ORDER = {
   ],
   background: [
     "background", "texture", "textureFit", "texturePosition",
-    "textureAttachment", "textureBlend", "textureOpacity"
+    "textureBlend", "textureOpacity"
   ],
   layout: [
     "float", "width", "maxWidth", "sidebarWidth", "align", "clear", "flip",

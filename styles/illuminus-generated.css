@@ -1830,7 +1830,6 @@
   background-size: var(--ill-sidebar-texture-fit-size);
   background-repeat: var(--ill-sidebar-texture-fit-repeat);
   background-position: var(--ill-sidebar-texture-position);
-  background-attachment: var(--ill-sidebar-texture-attachment);
   mix-blend-mode: var(--ill-sidebar-texture-blend);
   opacity: var(--ill-sidebar-texture-opacity);
 }

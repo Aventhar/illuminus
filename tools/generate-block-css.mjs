@@ -437,16 +437,6 @@ const eachAfter = (selector) => selector
   .map((one) => `${one.trim()}::after`)
   .join(",\n");
 
-/**
- * Whether this layer's group offers "does the picture travel with the content".
- * Only the tall things do — a page, and the panel beside it.
- */
-const hasAttachment = (layer) => {
-  const group = GROUPS.find((one) => one.id === layer.group);
-  const name = layer.prefix ? `${layer.prefix}TextureAttachment` : "textureAttachment";
-  return groupFields(group).some((field) => field.name === name);
-};
-
 const imageLayer = (layer) => `
 ${layer.selector} {
 ${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
@@ -463,7 +453,7 @@ ${eachAfter(layer.selector)} {
   background-size: ${imageVar(layer, "Fit", "size")};
   background-repeat: ${imageVar(layer, "Fit", "repeat")};
   background-position: ${imageVar(layer, "Position")};
-${hasAttachment(layer) ? `  background-attachment: ${imageVar(layer, "Attachment")};\n` : ""}  mix-blend-mode: ${imageVar(layer, "Blend")};
+  mix-blend-mode: ${imageVar(layer, "Blend")};
   opacity: ${imageVar(layer, "Opacity")};
 }
 `;
