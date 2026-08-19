@@ -172,6 +172,13 @@
 }
 
 /* The pencil that appears over a page on hover. */
+/* Which side the pencil sits on. Core pins it to the top right; both edges are
+   set here so that choosing the left actually releases the right. */
+.illuminus-styled .journal-entry-page .edit-container {
+  left: var(--ill-window-page-button-side-left);
+  right: var(--ill-window-page-button-side-right);
+}
+
 .illuminus-styled .journal-entry-page .edit-container button {
   --button-text-color: var(--ill-window-page-button-color);
   --button-background-color: var(--ill-window-page-button-background);

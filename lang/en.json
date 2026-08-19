@@ -1113,6 +1113,8 @@
   "ILLUMINUS.Field.pageButtonHoverTextureOpacity.label": "Image Strength When Pointed At",
   "ILLUMINUS.Field.pageButtonHoverTexturePosition.hint": "Where the background image is anchored.",
   "ILLUMINUS.Field.pageButtonHoverTexturePosition.label": "Image Position When Pointed At",
+  "ILLUMINUS.Field.pageButtonSide.hint": "The side of the page the pencil sits on.",
+  "ILLUMINUS.Field.pageButtonSide.label": "Which Side",
   "ILLUMINUS.Field.pageButtonSize.hint": "How large the edit pencil is.",
   "ILLUMINUS.Field.pageButtonSize.label": "Icon Size",
   "ILLUMINUS.Field.pageButtonTexture.hint": "An image laid over the fill color, such as a parchment scan. Leave empty for none.",

@@ -944,6 +944,14 @@ const win = await cdp.evaluate(`(async () => {
     buttonSize: button?.fontSize,
     editColor: edit?.color,
     editBg: edit?.backgroundColor,
+    // Which side the pencil sits on. Core pins it right, so choosing the left
+    // has to release that as well as set it — a check reading one edge would
+    // pass while the button stayed where it was.
+    editSide: (() => {
+      const box = root.querySelector(".journal-entry-page .edit-container");
+      const cs = box ? getComputedStyle(box) : null;
+      return cs ? [cs.left, cs.right] : null;
+    })(),
     // The controls dropdown reuses the class on list items; they are not icons.
     dropdownItemsUntouched: [...root.querySelectorAll("li.header-control")]
       .every(li => getComputedStyle(li).fontSize !== "22px"),
@@ -960,6 +968,20 @@ const win = await cdp.evaluate(`(async () => {
     })()
   };
 
+  // And with the pencil asked to sit on the other side.
+  const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+  settings.window.pageButtonSide = "left";
+  await api.updateStyle(style.id, {settings});
+  await new Promise(r => setTimeout(r, 500));
+  {
+    const box = root.querySelector(".journal-entry-page .edit-container");
+    const moved = getComputedStyle(box);
+    const page = root.querySelector("article.journal-entry-page").getBoundingClientRect();
+    const bar = box.getBoundingClientRect();
+    out.editSideLeft = [moved.left, moved.right];
+    out.editNearer = (bar.left - page.left) < (page.right - bar.right) ? "left" : "right";
+  }
+
   freeze.remove();
   await entry.delete();
   await api.deleteStyle(style.id);
@@ -974,6 +996,10 @@ check(wn.buttonColor === "rgb(0, 255, 136)", `title bar icon color applied (got 
 check(wn.buttonSize === "22px", `title bar icon size applied (got ${wn.buttonSize})`);
 check(wn.editColor === "rgb(255, 0, 255)", `edit pencil color applied (got ${wn.editColor})`);
 check(wn.editBg === "rgb(16, 16, 16)", `edit pencil fill applied (got ${wn.editBg})`);
+check(wn.editSide?.[1] === "5px" && wn.editSide?.[0] !== "5px",
+  `the edit pencil sits where Foundry puts it until asked otherwise (${wn.editSide?.join(" / ")})`);
+check(wn.editSideLeft?.[0] === "5px" && wn.editSideLeft?.[1] !== "5px" && wn.editNearer === "left",
+  `and moves to the other side when it is (${wn.editSideLeft?.join(" / ")}, nearer ${wn.editNearer})`);
 check(wn.dropdownItemsUntouched, "the controls dropdown's list items are left alone");
 
 // The module bundles no artwork of its own, so what matters here is that the

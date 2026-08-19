@@ -629,6 +629,7 @@ const FIELD_TEXT = {
   revealedBackground: ["Fill Color Once Revealed", "The color behind a secret passage after it has been shown."],
   buttonSize: ["Button Text Size", "How large the lettering on the button is."],
   buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],
+  pageButtonSide: ["Which Side", "The side of the page the pencil sits on."],
   numberShown: ["Page Numbers", "Whether each listed page carries its number. Hiding them leaves the whole row to the page's name."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],

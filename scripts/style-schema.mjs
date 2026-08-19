@@ -99,6 +99,17 @@ const emitTextureFit = (value) => ({
   stretch: { size: "100% 100%", repeat: "no-repeat" }
 }[value] ?? { size: "auto", repeat: "repeat" });
 
+/**
+ * Which side of the page the Edit pencil sits on.
+ *
+ * Foundry pins it to the top right. Both edges are stated rather than one,
+ * because leaving core's `right` in place would hold the button there however
+ * far left it was asked to go — the unused edge has to say `auto`.
+ */
+const emitButtonSide = (value) => (value === "left"
+  ? { left: "5px", right: "auto" }
+  : { left: "auto", right: "5px" });
+
 /** Nine-point background position. */
 const emitTexturePosition = (value) => ({
   topLeft: "left top", top: "center top", topRight: "right top",
@@ -710,6 +721,7 @@ export const GROUPS = [
           col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
           col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
           num("pageButtonSize", 14, "px", 6, 48, 1),
+          select("pageButtonSide", "right", ["left", "right"], { emit: emitButtonSide }),
           ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
           ...cornerFields("pageButtonCorner", 3)
         ]
