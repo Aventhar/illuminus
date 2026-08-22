@@ -1,4 +1,5 @@
 import { wrapHeadingSections } from "../heading-sections.mjs";
+import { markFolds } from "../collapsible.mjs";
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "../constants.mjs";
 import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
@@ -121,7 +122,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // and the 34 Foundry's own window padding takes. The sample is the point of
     // the window, so it gets the room: a page of prose at something near its
     // real width says more than a wider column of controls does.
-    position: { width: 1146, height: 780 },
+    // Wide enough for five hundred pixels of settings and the sample beside
+    // them; the pane's own width is dragged from the grip between the two.
+    position: { width: 1200, height: 780 },
     form: {
       handler: IlluminusStyleEditor.#onSubmit,
       submitOnChange: false,
@@ -326,7 +329,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       plainReset: group.id === "window",
       sections: group.sections.map((section) => ({
         id: section.id,
-        label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
+        label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
         // A section may name its own wording, for the rare case where the same
         // section means something different on one tab — the page's shadow,
         // which Foundry's window clips and only an export ever shows.
@@ -337,7 +340,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         matchable: section.fields.some((field) => field.link),
         fields: section.fields
           .filter((field) => !field.chrome)
-          .map((field) => this.#fieldContext(group, field, fonts))
+          .map((field) => ({
+            ...this.#fieldContext(group, field, fonts),
+            // A line across the tab before this control, where the section has
+            // laid its own controls out in runs.
+            divider: Boolean(section.dividers?.has(field.name))
+          }))
       }))
     }));
     context.buttons = [
@@ -358,7 +366,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       hoverOff: chrome ? this.#fieldContext(group, chrome, fonts) : null,
       sections: group.sections.map((section) => ({
         id: section.id,
-        label: game.i18n.localize(`ILLUMINUS.Sections.${section.id}.label`),
+        label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
         // A section may name its own wording, for the rare case where the same
         // section means something different on one tab — the page's shadow,
         // which Foundry's window clips and only an export ever shows.
@@ -367,7 +375,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         matchable: section.fields.some((field) => field.link),
         fields: section.fields
           .filter((field) => !field.chrome)
-          .map((field) => this.#fieldContext(group, field, fonts))
+          .map((field) => ({
+            ...this.#fieldContext(group, field, fonts),
+            // A line across the tab before this control, where the section has
+            // laid its own controls out in runs.
+            divider: Boolean(section.dividers?.has(field.name))
+          }))
       }))
     };
   }
@@ -439,11 +452,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const active = this.#activeGroupId();
     const target = parts.find((part) => part.dataset.part === active);
     for (const part of parts) {
-      // What holds the focused piece stays as it is: the page's own surface
-      // wraps everything on it, and dimming a wrapper dims what is inside it
-      // however brightly the inside is marked.
-      part.classList.toggle("is-dimmed",
-        Boolean(target) && part.dataset.part !== active && !part.contains(target));
+      // Neither what holds the focused piece nor what it holds. A wrapper that
+      // dimmed would dim what is inside it however brightly the inside is
+      // marked — and the Page tab's piece is the surface everything else sits
+      // on, so dimming its contents greyed the whole sample out and left the
+      // one tab whose setting covers the page with nothing to look at.
+      part.classList.toggle("is-dimmed", Boolean(target) && part.dataset.part !== active
+        && !part.contains(target) && !target.contains(part));
     }
     if (target) this.#scrollSampleTo(target, frame);
   }
@@ -648,11 +663,30 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       for (const field of fields) {
         const name = named(field);
         const state = stateOf(name);
-        // A control with no counterpart in another state belongs to all of
-        // them: a button's corner rounding does not change when pointed at.
-        const managed = state !== "normal" || kinds.get(stateBase(name))?.size > 1;
-        if (!managed) continue;
-        field.classList.toggle("is-state-hidden", state !== chosen);
+        // A control belongs to the state it is named for, and an ordinary
+        // control belongs to every state that has no control of its own for it:
+        // a listed page's corner rounding does not change because the page is
+        // the one being read. Asked per state rather than once — every control
+        // has a pointed-at twin now, so "this has more than one state" had
+        // become true of all of them, and choosing Selected hid the whole
+        // section but the handful of controls named for it.
+        const others = kinds.get(stateBase(name));
+        const shared = state === "normal" && !others?.has(chosen);
+        field.classList.toggle("is-state-hidden", !shared && state !== chosen);
+      }
+
+      // A line with nothing under it says nothing. A divider is written before
+      // the ordinary control of a run, so switching to a state would leave it
+      // stranded above that state's controls — it goes where the whole run it
+      // introduces has gone.
+      for (const line of section.querySelectorAll(".illuminus-divider:not(.illuminus-divider--edge)")) {
+        let showing = false;
+        for (let next = line.nextElementSibling; next; next = next.nextElementSibling) {
+          if (next.classList.contains("illuminus-divider")) break;
+          if (!next.classList.contains("illuminus-field")) continue;
+          if (!next.classList.contains("is-state-hidden")) { showing = true; break; }
+        }
+        line.classList.toggle("is-state-hidden", !showing);
       }
     }
   }
@@ -780,20 +814,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const pane = this.element.querySelector(".illuminus-preview");
     const grip = this.element.querySelector(".illuminus-preview__grip");
     if (!pane || !grip) return;
-    if (this.#previewWidth) pane.style.setProperty("--illuminus-pane-width", `${this.#previewWidth}px`);
+    // The settings column is the sized one and the sample takes the rest, so
+    // the grip writes the settings width — dragging left widens the sample.
+    const columns = this.element.querySelector(".illuminus-editor__columns");
+    if (this.#previewWidth) columns.style.setProperty("--illuminus-settings-width", `${this.#previewWidth}px`);
 
     grip.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       grip.setPointerCapture(event.pointerId);
       grip.classList.add("is-dragging");
-      const right = pane.getBoundingClientRect().right;
 
+
+      const left = this.element.querySelector(".illuminus-tab.active")?.getBoundingClientRect().left ?? 0;
       const onMove = (move) => {
-        // Measured from the pane's right edge, which does not move, so the
-        // sample follows the pointer exactly however the window is laid out.
-        const width = Math.round(Math.min(Math.max(right - move.clientX, 260), 1200));
+        // Measured from the settings column's left edge, which does not move, so
+        // the split follows the pointer exactly however the window is laid out.
+        const width = Math.round(Math.min(Math.max(move.clientX - left, 260), 900));
         this.#previewWidth = width;
-        pane.style.setProperty("--illuminus-pane-width", `${width}px`);
+        columns.style.setProperty("--illuminus-settings-width", `${width}px`);
       };
       const onUp = () => {
         grip.classList.remove("is-dragging");
@@ -824,6 +862,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // heading's run of text wrapped, or the Columns settings would show nothing
     // here and everything in a journal.
     wrapHeadingSections(this.element.querySelector(".illuminus-preview"));
+    // The sample folds as a page does, so the Folding controls show what they
+    // do rather than being taken on trust.
+    markFolds(this.element.querySelector(".illuminus-preview"));
     this.#activateGrip();
     this.#focusSample();
     this.#activateStates();

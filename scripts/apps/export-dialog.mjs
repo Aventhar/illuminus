@@ -62,7 +62,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     // Tall enough for every section at once: a window that opens with its last
     // fieldset cut off reads as a mistake, and this one has five — the last of
     // which grew a name field when the stylesheet export arrived.
-    position: { width: 560, height: 830 },
+    position: { width: 560, height: 810 },
     form: {
       handler: IlluminusExportDialog.#onSubmit,
       closeOnSubmit: true
@@ -101,7 +101,19 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
    */
   static open(options = {}) {
     const existing = foundry.applications.instances.get("illuminus-export-dialog");
-    if (existing) return existing.bringToFront();
+    // An instance that is closing is still registered under its id for a moment
+    // after its window has gone. Handing that one back gives the caller a window
+    // with nothing in it — and taking the id for a new one while the old still
+    // holds it is worse. It is rendered again instead.
+    // The window is returned whichever path is taken. `bringToFront` answers
+    // with nothing, so returning it handed the caller undefined whenever a
+    // window happened to be open already — and the caller has no way to tell
+    // that from "it did not open".
+    if (existing?.rendered) {
+      existing.bringToFront();
+      return existing;
+    }
+    if (existing) return existing.render({ force: true });
     return new IlluminusExportDialog(options).render({ force: true });
   }
 
@@ -120,18 +132,18 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
       }))
     ];
     context.carrying = whatTravels().join(" ");
-    // A name of their own for the exported stylesheet. Theirs by default, taken
-    // from the world, because a prefix somebody has to invent on the spot is a
-    // prefix that ends up being "test".
-    context.cssPrefix = slugPrefix(game.world?.title ?? game.system?.title ?? "");
+    // Left empty on purpose: this is the name somebody else's module will
+    // answer to, and a prefilled one is a name nobody chose.
+    context.cssPrefix = "";
     // One window, three ways out. A folder is the fullest, one page is the one
     // you can email, and printing is the one that becomes a PDF.
     // The PDF leads, and is what the window offers unless told otherwise: it is
     // the one most people are here for, and the only one that ends at a table.
+    // Every one of them says what it is for, behind the icon beside it.
     context.formats = [
       { id: "print", label: "ILLUMINUS.Export.FormatPrint", note: "ILLUMINUS.Export.FormatPrintNote", checked: true },
-      { id: "folder", label: "ILLUMINUS.Export.FormatFolder" },
-      { id: "file", label: "ILLUMINUS.Export.FormatFile" },
+      { id: "folder", label: "ILLUMINUS.Export.FormatFolder", note: "ILLUMINUS.Export.FormatFolderNote" },
+      { id: "file", label: "ILLUMINUS.Export.FormatFile", note: "ILLUMINUS.Export.FormatFileNote" },
       // The look without the words: for laying out a page of your own.
       { id: "css", label: "ILLUMINUS.Export.FormatCss", note: "ILLUMINUS.Export.FormatCssNote" }
     ];
@@ -208,6 +220,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
    */
   #applyFormat() {
     const format = this.element.querySelector('input[name="format"]:checked')?.value ?? "folder";
+    this.#applyStyleOnly(format);
     for (const only of this.element.querySelectorAll(".illuminus-export-dialog__pdf-only")) {
       only.classList.toggle("is-hidden", format !== "print");
     }
@@ -217,6 +230,7 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     for (const not of this.element.querySelectorAll(".illuminus-export-dialog__not-css")) {
       not.classList.toggle("is-hidden", format === "css");
     }
+    this.#applyPrefix();
   }
 
   /** @override */
@@ -225,11 +239,16 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     for (const control of ['select[name="styleId"]', 'input[name="onlyStyled"]']) {
       this.element.querySelector(control)?.addEventListener("change", () => this.#applyFilter());
     }
+    this.element.querySelector('select[name="styleId"]')
+      ?.addEventListener("change", () => this.#applyFormat());
     for (const radio of this.element.querySelectorAll('input[name="format"]')) {
       radio.addEventListener("change", () => this.#applyFormat());
     }
+    const prefix = this.element.querySelector('input[name="cssPrefix"]');
+    prefix?.addEventListener("input", () => this.#applyPrefix());
     this.#applyFilter();
     this.#applyFormat();
+    this.#applyPrefix();
   }
 
   /** Say what a setting is for, on the click that asks. */
@@ -240,6 +259,44 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     if (game.tooltip.element === target) return game.tooltip.deactivate();
     game.tooltip.deactivate();
     game.tooltip.activate(target, { text: hint, direction: "UP" });
+  }
+
+  /**
+   * A stylesheet can only be Illuminus's own work.
+   *
+   * "As it looks now" gathers whatever is painting the page, which can be a
+   * game system's or another module's — fine to carry inside a page somebody
+   * keeps, and not fine to hand out as a stylesheet under their own name. So
+   * that pairing is refused: the format is disabled while no style is chosen,
+   * and the picker will not offer "as it looks now" while it is.
+   */
+  #applyStyleOnly(format) {
+    const picker = this.element.querySelector('select[name="styleId"]');
+    const css = this.element.querySelector('input[name="format"][value="css"]');
+    if (!picker || !css) return;
+    const own = Boolean(picker.value);
+    css.disabled = !own;
+    css.closest(".illuminus-export-dialog__option")?.classList.toggle("is-refused", !own);
+    if (!own && css.checked) {
+      css.checked = false;
+      this.element.querySelector('input[name="format"][value="print"]').checked = true;
+    }
+    const plain = [...picker.options].find((option) => !option.value);
+    if (plain) plain.disabled = format === "css";
+  }
+
+  /**
+   * Mark the descriptor while it is not one.
+   *
+   * A stylesheet cannot be written without it, so the field says so before the
+   * Export button is pressed rather than after — an edge in the warning color
+   * for as long as what is typed could not be used as a name.
+   */
+  #applyPrefix() {
+    const field = this.element.querySelector('input[name="cssPrefix"]');
+    if (!field) return;
+    const wanted = this.element.querySelector('input[name="format"]:checked')?.value === "css";
+    field.classList.toggle("is-needed", wanted && !slugPrefix(field.value));
   }
 
   /** Read the notice again, whenever somebody wants to. */
@@ -261,9 +318,20 @@ export class IlluminusExportDialog extends HandlebarsApplicationMixin(Applicatio
     // Required for a stylesheet, and only for one: without it the file would
     // answer to the same names Illuminus does, which is the one thing it must
     // not do in somebody else's module.
+    // Refused rather than silently downgraded: what "as it looks now" gathers
+    // is somebody else's stylesheet, and a CSS file is the one export made to
+    // be handed on.
+    if (format === "css" && !data.styleId) {
+      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.CssNeedsStyle"));
+      return;
+    }
     const prefix = slugPrefix(data.cssPrefix ?? "");
     if (format === "css" && !prefix) {
       ui.notifications.warn(game.i18n.localize("ILLUMINUS.Export.CssPrefixNeeded"));
+      // Left open, marked, and with the cursor in the field: a window that
+      // closes on a refusal has thrown away everything else that was chosen.
+      this.#applyPrefix();
+      this.element.querySelector('input[name="cssPrefix"]')?.focus();
       return;
     }
 

@@ -59,20 +59,24 @@
 
   <fieldset>
     <legend>{{localize "ILLUMINUS.Export.FormatLegend"}}</legend>
+    {{!-- The icon sits outside the label: inside it, clicking to read what a
+          format does would choose that format. --}}
     {{#each formats as |format|}}
-    <label class="illuminus-export-dialog__option">
-      {{#if format.checked}}
-      <input type="radio" name="format" value="{{format.id}}" checked>
-      {{else}}
-      <input type="radio" name="format" value="{{format.id}}">
-      {{/if}}
-      <span>
-        {{localize format.label}}
-        {{#if format.note}}
-        <span class="hint">{{localize format.note}}</span>
+    <div class="illuminus-export-dialog__option">
+      <label>
+        {{#if format.checked}}
+        <input type="radio" name="format" value="{{format.id}}" checked>
+        {{else}}
+        <input type="radio" name="format" value="{{format.id}}">
         {{/if}}
-      </span>
-    </label>
+        <span>{{localize format.label}}</span>
+      </label>
+      <button type="button" class="illuminus-info" data-action="showHint"
+              aria-label="{{localize format.note}}">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+      <span class="illuminus-export-dialog__hint">{{localize format.note}}</span>
+    </div>
     {{/each}}
   </fieldset>
 
@@ -104,7 +108,12 @@
       <span class="illuminus-export-dialog__hint">{{localize "ILLUMINUS.Export.PageTextureHint"}}</span>
     </div>
     {{!-- Only for the stylesheet, and required there: it is what keeps the
-          exported CSS from answering to the same names Illuminus does. --}}
+          exported CSS from answering to the same names Illuminus does.
+
+          Required by the submit handler rather than by the `required`
+          attribute: this row is hidden for every other way of saving, and a
+          browser refuses to submit a form holding an empty required field it
+          cannot even focus — which stopped the export dead, with nothing said. --}}
     <div class="illuminus-export-dialog__option illuminus-export-dialog__css-only">
       <label for="illuminus-css-prefix">{{localize "ILLUMINUS.Export.CssPrefix"}}</label>
       <button type="button" class="illuminus-info" data-action="showHint"
@@ -112,7 +121,7 @@
         <i class="fa-solid fa-circle-info"></i>
       </button>
       <input type="text" id="illuminus-css-prefix" name="cssPrefix" value="{{cssPrefix}}"
-             placeholder="{{localize 'ILLUMINUS.Export.CssPrefixPlaceholder'}}" required>
+             placeholder="{{localize 'ILLUMINUS.Export.CssPrefixPlaceholder'}}">
       {{!-- Ours alone, with none of Foundry's own hint styling: that class is
             unlayered, and an unlayered rule beats a layered one however
             specific — the wording showed itself however firmly we hid it. --}}

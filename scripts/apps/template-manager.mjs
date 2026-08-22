@@ -48,7 +48,13 @@ export class IlluminusTemplateManager extends HandlebarsApplicationMixin(Applica
   /** Open the library, or bring it forward if it is already up. */
   static open() {
     const existing = foundry.applications.instances.get("illuminus-template-manager");
-    if (existing) return existing.bringToFront();
+    // The window either way: `bringToFront` answers with nothing, and a caller
+    // handed undefined cannot tell that from a window that failed to open.
+    if (existing?.rendered) {
+      existing.bringToFront();
+      return existing;
+    }
+    if (existing) return existing.render({ force: true });
     return new IlluminusTemplateManager().render({ force: true });
   }
 

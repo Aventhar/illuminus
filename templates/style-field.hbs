@@ -1,4 +1,9 @@
 {{!-- One control. Shared by the page tabs and the block and picture tabs. --}}
+      {{!-- A line across the tab, where a section has laid its controls out in
+            runs: the lettering, then how it is spaced, then what is drawn
+            around it. It belongs to the control it precedes, so it travels with
+            that control however the state switch shuffles the rest. --}}
+      {{#if field.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
       <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
         <label for="illuminus-{{field.path}}">
           <span class="illuminus-field__label">{{field.label}}</span>

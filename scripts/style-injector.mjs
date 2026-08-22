@@ -2,6 +2,8 @@ import { STYLE_ELEMENT_ID, PREVIEW_ELEMENT_ID, STYLED_CLASS, STYLE_ATTR, log } f
 import { compileAll, compileDeclarations, selectorFor } from "./style-compiler.mjs";
 import { getStyles, getAssignedStyleId } from "./style-store.mjs";
 import { wrapHeadingSections } from "./heading-sections.mjs";
+import { markFolds } from "./collapsible.mjs";
+import { markCurrentHeadings } from "./toc-current.mjs";
 
 /**
  * Keeps the compiled stylesheets in `document.head` in sync with the style
@@ -83,6 +85,12 @@ export function applyToElement(root, entry) {
   // until a style names one, and a page that gains a style without re-rendering
   // would otherwise have nothing to column.
   wrapHeadingSections(root);
+  // After the wrappers, which decide what a heading governs — a marker folds
+  // the run its heading holds, and the run is not there until it is wrapped.
+  markFolds(root);
+  // And which listed heading a reader chose, which is what the panel's Selected
+  // state paints. Foundry marks the page being read and nothing finer.
+  markCurrentHeadings(root);
   const styleId = getAssignedStyleId(entry);
   if (styleId && getStyles()[styleId]) {
     root.classList.add(STYLED_CLASS);

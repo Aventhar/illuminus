@@ -51,8 +51,15 @@ export async function connect(port = 9222) {
     }
   };
 
-  /** How long any one protocol call may take before it counts as lost. */
-  const CALL_TIMEOUT = 90000;
+  /**
+   * How long any one protocol call may take before it counts as lost.
+   *
+   * Generous, because a single call can drive a whole scene — building a style,
+   * opening the editor several times, answering a prompt — on a headless
+   * browser with no hardware behind it. Short enough that a call which is never
+   * coming back still names itself rather than hanging the run.
+   */
+  const CALL_TIMEOUT = 180000;
 
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const msgId = ++id;

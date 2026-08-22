@@ -21,12 +21,13 @@ export const SAMPLE_STYLES = [
         background: "#2b1d12",
         color: "#e8dcc2",
         activeColor: "#f6efe0",
-        activeBackground: "#3d2a1a",
+        entryActiveBackground: "#3d2a1a",
         activeAccentColor: "#a8341c",
         activeAccentWidth: 4,
-        hoverBackground: "#3a281a",
+        entryHoverBackground: "#3a281a",
         entryBorderBottomWidth: 1,
         entryBorderBottomColor: "#463322",
+        numberShown: true,
         numberColor: "#9c8a6a",
         categoryColor: "#d9a441",
         categorySize: 20,
@@ -92,6 +93,8 @@ export const SAMPLE_STYLES = [
         caps: "smallCaps"
       },
       body: {
+        color: "#241b10",
+        size: 16,
         lineHeight: 1.55,
         align: "justify",
         marginBottom: 10
@@ -105,6 +108,8 @@ export const SAMPLE_STYLES = [
         indent: 28
       },
       tables: {
+        headerBackground: "#5e1914",
+        headerColor: "#f6efe0",
         stripeColor: "#8a6a3d1a",
         cellPaddingTop: 5,
         cellPaddingRight: 10,

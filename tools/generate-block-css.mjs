@@ -176,7 +176,7 @@ ${memberSelector(group)} {
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  box-shadow: ${shadow(group, "shadow")};
+  box-shadow: ${shadow(group, "shadow")}, inset ${shadow(group, "innerShadow")};
   font-family: ${v(group, "font")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
   paint-order: stroke fill;
@@ -289,7 +289,10 @@ ${headingSelector(level)} {
  */
 const HOVER_TARGETS = {
   page: ".illuminus-styled .journal-entry-content",
-  title: ".illuminus-styled .journal-header .title",
+  title: {
+    text: ".illuminus-styled .journal-header .title",
+    box: ".illuminus-styled .journal-header"
+  },
   heading1: headingSelector(1),
   heading2: ".illuminus-styled .journal-page-content h2",
   heading3: ".illuminus-styled .journal-page-content h3",
@@ -316,10 +319,11 @@ const HOVER_PROPS = [
   // and one half of a state's outline may be left to fall back to it.
   { name: "outlineWidth", property: "-webkit-text-stroke-width" },
   { name: "outlineColor", property: "-webkit-text-stroke-color" },
-  { name: "background", property: "background-color" },
+  { name: "background", property: "background-color", box: true },
   ...["Top", "Right", "Bottom", "Left"].map((side) => ({
     name: `border${side}Color`,
-    property: `border-${side.toLowerCase()}-color`
+    property: `border-${side.toLowerCase()}-color`,
+    box: true
   }))
 ];
 
@@ -330,14 +334,29 @@ const HOVER_PROPS = [
  * was never set changes nothing at all rather than resetting the element to
  * some default.
  */
-const hoverRules = (group, selector) => {
+/**
+ * One element's hovered rule, or two where the words and the box they sit in
+ * are different elements.
+ *
+ * The journal's name is the case that needs it: Foundry renders it as an
+ * `<input>`, which cannot hold a picture, so its fill and its edges are painted
+ * on the header around it while the lettering stays on the input. The hovered
+ * rule has to divide the same way — painting a hovered fill on the input put a
+ * flat colour over the header's picture, which is exactly the box somebody sees
+ * appear when they point at the title.
+ */
+const hoverRules = (group, target) => {
   const fields = groupFields(group);
-  const lines = HOVER_PROPS
-    .filter(({ name }) => fields.some((field) => field.name === `hover${name[0].toUpperCase()}${name.slice(1)}`))
-    .map(({ name, property }) => {
-      const hovered = `hover${name[0].toUpperCase()}${name.slice(1)}`;
-      return `  ${property}: var(${varFor(group, hovered)}, var(${varFor(group, name)}));`;
-    });
+  const selector = typeof target === "string" ? target : target.text;
+  const boxSelector = typeof target === "string" ? target : target.box;
+  const wanted = HOVER_PROPS
+    .filter(({ name }) => fields.some((field) => field.name === `hover${name[0].toUpperCase()}${name.slice(1)}`));
+  const declare = ({ name, property }) => {
+    const hovered = `hover${name[0].toUpperCase()}${name.slice(1)}`;
+    return `  ${property}: var(${varFor(group, hovered)}, var(${varFor(group, name)}));`;
+  };
+  const boxLines = selector === boxSelector ? [] : wanted.filter((one) => one.box).map(declare);
+  const lines = wanted.filter((one) => selector === boxSelector || !one.box).map(declare);
   // A text shadow is four controls and one property, so it is composed rather
   // than mapped: each part falls back to the ordinary one on its own, which is
   // what lets a state change the color of a shadow and leave its offsets alone.
@@ -352,7 +371,12 @@ const hoverRules = (group, selector) => {
   // Appended per selector: a comma-joined list would otherwise hover only its
   // last member, which is the kind of thing that half-works in silence.
   const hovered = selector.split(",").map((one) => `${one.trim()}:hover`).join(",\n");
-  return `
+  const boxRule = !boxLines.length ? "" : `
+${boxSelector.split(",").map((one) => `${one.trim()}:hover`).join(",\n")} {
+${boxLines.join("\n")}
+}
+`;
+  return boxRule + `
 ${hovered} {
 ${lines.join("\n")}
 }
@@ -381,9 +405,19 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled .window-header button.header-control:hover", group: "window", prefix: "headerButtonHover" },
   { selector: ".illuminus-styled .journal-entry-page .edit-container button", group: "window", prefix: "pageButton" },
   { selector: ".illuminus-styled .journal-entry-page .edit-container button:hover", group: "window", prefix: "pageButtonHover" },
+  { selector: ".illuminus-styled.journal-entry-page.application, .illuminus-styled .illuminus-preview__editor", group: "editor", prefix: "", host: false },
+  { selector: ".illuminus-styled.journal-entry-page .window-header, .illuminus-styled .illuminus-preview__editor .window-header", group: "editor", prefix: "titleBar" },
+  { selector: ".illuminus-styled.journal-entry-page .window-header button.header-control", group: "editor", prefix: "headerButton" },
+  { selector: ".illuminus-styled.journal-entry-page .window-header button.header-control:hover", group: "editor", prefix: "headerButtonHover" },
+  { selector: ".illuminus-styled.journal-entry-page menu.editor-menu, .illuminus-styled .illuminus-preview__editor menu.editor-menu", group: "editor", prefix: "toolbar" },
+  { selector: ".illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown, .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown", group: "editor", prefix: "dropdown" },
+  { selector: ".illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown), .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown)", group: "editor", prefix: "toolbarButton" },
+  { selector: ".illuminus-styled.journal-entry-page .page-metadata select, .illuminus-styled .illuminus-preview__editor .page-metadata select", group: "editor", prefix: "field" },
+  { selector: ".illuminus-styled.journal-entry-page .page-metadata, .illuminus-styled .illuminus-preview__editor .page-metadata", group: "editor", prefix: "settingsBar" },
   { selector: ".illuminus-styled .journal-sidebar", group: "sidebar", prefix: "" },
-  { selector: ".illuminus-styled .journal-sidebar .toc li.page:hover", group: "sidebar", prefix: "hover" },
-  { selector: ".illuminus-styled .journal-sidebar .toc li.page.active", group: "sidebar", prefix: "active" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.page", group: "sidebar", prefix: "entry" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.page:hover", group: "sidebar", prefix: "entryHover" },
+  { selector: ".illuminus-styled .journal-sidebar .toc li.heading", group: "sidebar", prefix: "heading" },
   { selector: ".illuminus-styled .journal-sidebar .toc li.category", group: "sidebar", prefix: "category" },
   { selector: '.illuminus-styled .journal-sidebar search input[type="search"]', group: "sidebar", prefix: "search" },
   { selector: ".illuminus-styled .journal-sidebar button", group: "sidebar", prefix: "button" },
@@ -437,8 +471,20 @@ const eachAfter = (selector) => selector
   .map((one) => `${one.trim()}::after`)
   .join(",\n");
 
+/**
+ * The element a layer hangs off, made ready to hold one — always, not only in
+ * the state whose picture it is.
+ *
+ * `isolation: isolate` starts a stacking context. Applied under `:hover`, it
+ * appeared and disappeared as the pointer moved, and anything Foundry had put
+ * inside that element went with it: a context menu opened on a listed page
+ * flickered and could not be clicked. The state belongs on the picture, not on
+ * the box that holds it.
+ */
+const layerHost = (selector) => selector.replace(/:hover|\.active(?=$|[\s,])/g, "");
+
 const imageLayer = (layer) => `
-${layer.selector} {
+${layerHost(layer.selector)} {
 ${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
 }
 
@@ -542,15 +588,236 @@ const flowRules = (group, level) => `
 }
 `;
 
+/**
+ * The marker that folds one heading level.
+ *
+ * The marker is written into every heading whatever the style says, and the
+ * stylesheet decides whether a reader can see it — a style supplies values and
+ * never rules, so "this level folds" has to be a value like any other.
+ *
+ * The glyph is the marker's own `::before` content, which is how FontAwesome
+ * draws an icon in the first place: the element carries the family, and naming
+ * a marker means naming the character. It turns when what it holds is open,
+ * rather than swapping for a second glyph, so one control covers both states.
+ */
+const foldRules = (group, level) => {
+  const each = (suffix) => headingSelector(level)
+    .split(",").map((one) => `${one.trim()}${suffix}`).join(",\n");
+  return `
+/* the folding marker on a level ${level} heading */
+${each(" > .illuminus-fold")} {
+  display: ${v(group, "foldShown")};
+  align-items: center;
+  justify-content: center;
+  color: ${vOr(group, "foldColor", "currentColor")};
+  font-size: ${v(group, "foldSize")};
+  margin-right: ${v(group, "foldGap")};
+}
+
+${each(" > .illuminus-fold i")} {
+  transform: rotate(${v(group, "foldTurn")});
+}
+
+${each(".is-folded > .illuminus-fold i")} {
+  transform: rotate(0deg);
+}
+
+${each(" > .illuminus-fold i::before")} {
+  content: ${v(group, "foldIcon")};
+}
+`;
+};
+
 const headings = HEADINGS.map(({ group, level }) =>
-  headingRules(group, level) + flowRules(group, level)).join("");
-const hovers = GROUPS.map((group) => {
-  const selector = HOVER_TARGETS[group.id]
-    ?? (group.family ? memberSelector(group) : null);
-  return selector ? hoverRules(group, selector) : "";
-}).join("");
-const images = IMAGE_LAYERS.map(imageLayer).join("");
-const out = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}${hovers}`;
+  headingRules(group, level) + flowRules(group, level) + foldRules(group, level)).join("");
+/**
+ * The shadow that goes with a picture.
+ *
+ * The schema derives a shadow and an inner shading beside every background
+ * picture, on the grounds that both answer the same question — how this surface
+ * sits on the page — so the rules are written from the same table the pictures
+ * are. The two are one declaration: `box-shadow` takes a list, and an element
+ * setting it twice keeps only the second.
+ *
+ * A state's own picture is skipped, as it is in the schema: the pointed-at
+ * shadow comes from the mirrored `:hover` rule below, which reads the twin.
+ */
+const shadowLayer = (layer) => {
+  if (/hover|active/i.test(layer.prefix)) return "";
+  const group = GROUPS.find((g) => g.id === layer.group);
+  const outer = layer.prefix ? `${layer.prefix}Shadow` : "shadow";
+  const inner = layer.prefix ? `${layer.prefix}InnerShadow` : "innerShadow";
+  return `
+${layerHost(layer.selector)} {
+  box-shadow: ${shadow(group, outer)},
+              inset ${shadow(group, inner)};
+}
+`;
+};
+
+const images = IMAGE_LAYERS.map(imageLayer).join("") + IMAGE_LAYERS.map(shadowLayer).join("");
+
+/* -------------------------------------------- */
+/*  The same rules again, pointed at             */
+/* -------------------------------------------- */
+
+/**
+ * Every custom property that has a state's own counterpart, and what to read
+ * instead when the thing wearing it is pointed at.
+ *
+ * Built from the schema rather than from a list of properties: every control in
+ * a state-switched section has a twin now — a size, a typeface, a spacing, not
+ * only paint — and a list would be a second place to keep them.
+ */
+const varsFor = (word) => {
+  const Word = `${word[0].toUpperCase()}${word.slice(1)}`;
+  const isState = (name) => new RegExp(`^${word}|${Word}(?=[A-Z])`).test(name);
+  const vars = new Map();
+  for (const group of GROUPS) {
+  const fields = groupFields(group);
+  for (const field of fields) {
+    if (isState(field.name)) continue;
+    // Paired by taking the state word back out of the other name, in either
+    // spelling: `hoverColor` and `buttonHoverColor` both belong to the control
+    // whose name is what is left. Splitting the ordinary name to guess where
+    // the word would go cannot be done — `headerButtonColor` is not "header"
+    // wearing "ButtonColor".
+    const stemOf = (name) => {
+      const stripped = name.replace(new RegExp(`^${word}`), "").replace(new RegExp(`${Word}(?=[A-Z])`), "");
+      return stripped ? `${stripped[0].toLowerCase()}${stripped.slice(1)}` : name;
+    };
+    const twin = fields.find((other) => isState(other.name) && stemOf(other.name) === field.name);
+    if (!twin) continue;
+    // Paired by the name they share rather than by the suffixes they emit: one
+    // control can write several properties — a lettering style writes a weight
+    // and a slant — and they all hang off the same stem.
+    vars.set(cssVarFor(group.id, field), cssVarFor(group.id, twin));
+  }
+  }
+  // The longest stem a property name begins with wins: one control can write
+  // several properties, and they all hang off the same stem.
+  const stems = [...vars.entries()].sort((a, b) => b[0].length - a[0].length);
+  return (name) => {
+    if (vars.has(name)) return vars.get(name);
+    const stem = stems.find(([ordinary]) => name.startsWith(`${ordinary}-`));
+    return stem ? `${stem[1]}${name.slice(stem[0].length)}` : null;
+  };
+};
+
+/** What to read instead of each property when the thing wearing it is pointed at. */
+const hoverTwinOf = varsFor("hover");
+
+/** And when it is the one being read, or the one a reader chose. */
+const activeTwinOf = varsFor("active");
+
+/** A selector with `:hover` on it, before any pseudo-element it ends with. */
+const pointedAt = (selector) => selector.split(",").map((one) => {
+  const trimmed = one.trim();
+  const pseudo = trimmed.match(/::[a-z-]+$/)?.[0] ?? "";
+  return `${pseudo ? trimmed.slice(0, -pseudo.length) : trimmed}:hover${pseudo}`;
+}).join(",\n");
+
+/**
+ * Every `var(--ill-…)` in a declaration, wrapped so the state's own value is
+ * read first and the ordinary one is what it falls back to.
+ *
+ * Written as a scan rather than a pattern because a good many of these already
+ * carry a fallback of their own — `var(--ill-box01-color, inherit)` — and a
+ * pattern that stopped at the first bracket left every one of those alone,
+ * which is a control that silently governs both states again.
+ */
+function readTwins(declaration, twinOf) {
+  let out = "";
+  let at = 0;
+  while (true) {
+    const found = declaration.indexOf("var(--ill-", at);
+    if (found < 0) return out + declaration.slice(at);
+    out += declaration.slice(at, found);
+    let depth = 0;
+    let end = found + 3;
+    for (; end < declaration.length; end += 1) {
+      if (declaration[end] === "(") depth += 1;
+      else if (declaration[end] === ")" && --depth === 0) break;
+    }
+    const whole = declaration.slice(found, end + 1);
+    const name = whole.slice(4).match(/^--ill-[a-z0-9-]+/)?.[0] ?? "";
+    const twin = twinOf(name);
+    out += twin ? `var(${twin}, ${whole})` : whole;
+    at = end + 1;
+  }
+}
+
+/**
+ * The stylesheet again, for the moment somebody points at something.
+ *
+ * Rather than a hand-kept list of which properties a state may change, each
+ * rule that reads a property with a twin is written out a second time under
+ * `:hover`, reading the twin and falling back to the ordinary value. A style
+ * that sets nothing for a state therefore looks exactly as it did, and nothing
+ * can be settable in one state and not the other — which is what it was.
+ */
+function pointedRules(css, { twinOf = hoverTwinOf, selector: restate = pointedAt } = {}) {
+  const out = [];
+  // Comments first: a brace inside one — and there are several, quoting the
+  // very rules this walks — makes nonsense of reading a stylesheet by its
+  // brackets, and the rule after it is silently skipped.
+  const plain = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const [, selector, body] of plain.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const target = selector.trim();
+    if (!target.startsWith(".illuminus-styled")) continue;
+    if (/:hover|:focus|::-webkit/.test(target)) continue;
+    const stated = restate(target);
+    if (!stated) continue;
+    const lines = [];
+    for (const declaration of body.split(";")) {
+      const rewritten = readTwins(declaration.trim(), twinOf);
+      if (rewritten === declaration.trim()) continue;
+      lines.push(`  ${rewritten};`);
+    }
+    if (!lines.length) continue;
+    out.push(`\n${stated} {\n${lines.join("\n")}\n}\n`);
+  }
+  return out.join("");
+}
+
+/**
+ * The contents panel's two lists again, for the entry being read and the
+ * heading a reader chose.
+ *
+ * Only these: everywhere else "selected" means nothing, and a state nothing can
+ * enter is a set of controls that does nothing. The lettering rules name the
+ * link inside the row rather than the row, so each is restated as that link
+ * inside a chosen row — `.toc .page-title` becomes `.toc li.page.active
+ * .page-title`, which is how the hand-written Selected rules were already
+ * written.
+ */
+const CHOSEN = [
+  [/(\.journal-sidebar \.toc )li\.page(?![-\w.])/g, "$1li.page.active"],
+  [/(\.journal-sidebar \.toc )\.page-title/g, "$1li.page.active .page-title"],
+  [/(\.journal-sidebar \.toc )li\.heading(?![-\w.])/g, "$1li.heading.illuminus-current"],
+  [/(\.journal-sidebar \.toc )\.heading-link/g, "$1li.heading.illuminus-current .heading-link"]
+];
+
+/** One selector as it reads for the chosen row, or null where it is not one. */
+const chosen = (selector) => {
+  if (/\.active|illuminus-current|\.context/.test(selector)) return null;
+  const out = selector.split(",").map((one) => {
+    const trimmed = one.trim();
+    for (const [pattern, replacement] of CHOSEN) {
+      const said = trimmed.replace(pattern, replacement);
+      if (said !== trimmed) return said;
+    }
+    return null;
+  });
+  return out.every(Boolean) ? out.join(",\n") : null;
+};
+
+const ordinary = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}`;
+const written = fs.readFileSync(`${ROOT}/styles/illuminus.css`, "utf8");
+const hovers = pointedRules(written) + pointedRules(ordinary);
+const selected = pointedRules(written, { twinOf: activeTwinOf, selector: chosen })
+  + pointedRules(ordinary, { twinOf: activeTwinOf, selector: chosen });
+const out = `${ordinary}${hovers}${selected}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
   + `${GROUPS.filter((g) => g.family).length} groups`);

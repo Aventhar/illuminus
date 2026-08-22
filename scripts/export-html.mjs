@@ -446,6 +446,28 @@ function defaultStack() {
   return getComputedStyle(document.body).fontFamily || "Signika, sans-serif";
 }
 
+/**
+ * The lettering a journal falls back to, taken from the application rather than
+ * named here.
+ *
+ * Most text settings mean "use the journal's own", and a new style means it for
+ * all of them — so what a page is set in is whatever Foundry paints, which a
+ * browser knows nothing about. Without these an exported page came out at the
+ * browser's own sixteen pixels in its own black, a size and a color the reader
+ * never saw at the table.
+ */
+function defaultText() {
+  const body = getComputedStyle(document.body);
+  const page = document.querySelector(".journal-entry-content .journal-page-content p");
+  const prose = page ? getComputedStyle(page) : body;
+  return {
+    family: defaultStack(),
+    size: prose.fontSize || body.fontSize,
+    lineHeight: prose.lineHeight || body.lineHeight,
+    color: prose.color || body.color
+  };
+}
+
 /** The first named family in that stack: the one with a file to copy. */
 function defaultFamily() {
   return defaultStack().split(",")[0].replace(/["']/g, "").trim() || "Signika";
@@ -467,7 +489,13 @@ async function fontRules(style, assets) {
   // Stated as a stack, so a family with no file of its own — Arial, Courier
   // New — still lands somewhere sensible, and so does one whose file could not
   // be read.
-  const rules = [`body {\n  font-family: ${defaultStack()};\n}`];
+  const base = defaultText();
+  const rules = [`body {
+  font-family: ${base.family};
+  font-size: ${base.size};
+  line-height: ${base.lineHeight};
+  color: ${base.color};
+}`];
   let count = 0;
   for (const family of families) {
     for (const face of defined[family]?.fonts ?? []) {

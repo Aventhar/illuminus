@@ -64,6 +64,16 @@ export function wrapFlows(content) {
     // run that has just ended — otherwise every wrapper starts with a newline
     // and an empty first line box in the first column.
     if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) continue;
+    // A custom element is left exactly where it is. Moving one disconnects it
+    // and connects it again, which throws away whatever it was holding: a
+    // secret passage's <secret-block> came back with a Reveal button that did
+    // nothing at all, because the element it belonged to was no longer the one
+    // listening. The run ends here and a new one starts after it, so a secret
+    // stands between two columned passages rather than inside one.
+    if (node.nodeType === Node.ELEMENT_NODE && node.localName.includes("-")) {
+      flow = null;
+      continue;
+    }
     if (!flow) {
       flow = document.createElement("div");
       flow.className = `${FLOW_CLASS} ${FLOW_CLASS}--${level}`;
@@ -123,7 +133,11 @@ export function wrapHeadingSections(root) {
     // ProseMirror owns the DOM underneath it, and moving nodes out from under
     // an editor breaks the selection it is holding — which showed up as an
     // inline tag refusing to wrap the words a person had selected.
-    if (content.closest("prose-mirror") || content.isContentEditable) continue;
+    // The sample's editor stands for the editor, where these never run: it is
+    // written as a plain element so that no editor starts inside the sample, so
+    // it says what it is instead.
+    if (content.closest("prose-mirror, .illuminus-preview__editor")
+      || content.isContentEditable) continue;
     wrapFlows(content);
     markDropCap(content);
   }

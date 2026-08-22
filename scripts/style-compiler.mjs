@@ -83,10 +83,21 @@ export function fieldToCss(field, value) {
   if (field.emit) {
     const emitted = field.emit(value);
     if (emitted === null || emitted === undefined) return null;
-    if (typeof emitted !== "object") return { "": sanitizeEmitted(emitted) };
+    // An empty value is not a value: a custom property declared as `--x: ;` is
+    // *defined*, so `var(--x, fallback)` resolves to nothing rather than to the
+    // fallback — and the property it feeds falls back to its initial value
+    // instead of to the ordinary one. That is how an unset hovered underline
+    // came to rub out the link's underline the moment a pointer touched it.
+    if (typeof emitted !== "object") {
+      const css = sanitizeEmitted(emitted);
+      return css === "" ? null : { "": css };
+    }
     const out = {};
-    for (const [suffix, css] of Object.entries(emitted)) out[suffix] = sanitizeEmitted(css);
-    return out;
+    for (const [suffix, css] of Object.entries(emitted)) {
+      const clean = sanitizeEmitted(css);
+      if (clean !== "") out[suffix] = clean;
+    }
+    return Object.keys(out).length ? out : null;
   }
 
   switch (field.type) {
@@ -97,6 +108,9 @@ export function fieldToCss(field, value) {
       return { "": path ? `url("${path}")` : "none" };
     }
     case "font":
+      // A state's own typeface says nothing until it is chosen, so the rule it
+      // feeds falls back to the ordinary one rather than to "inherit".
+      if (!value && field.emitEmpty === false) return null;
       return { "": fontValue(value, field.fallback) };
     case "number": {
       const n = Number(value);
@@ -109,6 +123,8 @@ export function fieldToCss(field, value) {
     }
     case "select":
       return field.choices.includes(value) ? { "": sanitize(value) } : null;
+    case "toggle-state":
+      return null;
     case "toggle":
       return { "": sanitize(value ? field.on : field.off) };
     default:
@@ -177,6 +193,8 @@ export function compileDeclarations(settings, { withDefaults = false } = {}) {
     const emitted = fieldToCss(field, value);
     if (!emitted) continue;
     for (const [suffix, css] of Object.entries(emitted)) {
+      // Nothing rather than an empty declaration, for the same reason.
+      if (css === "" || css === null || css === undefined) continue;
       lines.push(`  ${cssVarFor(group.id, field, suffix)}: ${css};`);
     }
   }

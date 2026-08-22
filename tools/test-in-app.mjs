@@ -136,10 +136,15 @@ const skeleton = await cdp.evaluate(`(() => {
 })()`);
 const sk = JSON.parse(skeleton);
 check(sk.declaredStyles.includes("modules/illuminus/styles/illuminus.css"), "manifest declares the stylesheet");
-check(sk.pageBg === "rgb(237, 224, 200)", `skeleton resolves the default page color (got ${sk.pageBg})`);
-check(sk.pagePadding === "24px", `skeleton resolves the default inner margin (got ${sk.pagePadding})`);
-check(sk.bodyColor === "rgb(36, 27, 16)", `skeleton resolves the default ink color (got ${sk.bodyColor})`);
-check(sk.quoteLeft === "4px", `boxed-text edge calc() resolves (got ${sk.quoteLeft})`);
+// A new style is a plain Foundry journal, so the skeleton resolves to what
+// Foundry paints rather than to a look of the module own: a page on the
+// window own dark ground, lettering that follows the journal, and a blockquote
+// with no accent bar until somebody asks for one.
+check(sk.pageBg === "rgba(11, 10, 19, 0.9)", `skeleton resolves the default page color (got ${sk.pageBg})`);
+check(sk.pagePadding === "0px 12px 0px 0px", `skeleton resolves the default inner margin (got ${sk.pagePadding})`);
+check(sk.bodyColor !== "" && sk.bodyColor !== "rgba(0, 0, 0, 0)",
+  `skeleton resolves an ink color at all (got ${sk.bodyColor})`);
+check(sk.quoteLeft === "0px", `boxed-text edge calc() resolves (got ${sk.quoteLeft})`);
 
 console.log("\n[4] Create a journal, assign a style, verify it applies");
 const applied = await cdp.evaluate(`(async () => {
@@ -570,6 +575,39 @@ check(mt.before[0] === "7px", `one side can be set alone (top ${mt.before[0]}, r
 check(mt.before[1] !== "7px", "the other sides are genuinely independent");
 check(mt.after.every(w => w === "7px"), `Match copied it to all four sides (got ${mt.after.join(", ")})`);
 
+// Match copies across one state, not across both. Every control now has a
+// state's own twin, and a twin that shared the ordinary control's Match key was
+// overwritten by it — which reads as the hovered setting not working at all.
+const matchedStates = await cdp.evaluate(`(async () => {
+  const api = game.modules.get("illuminus").api;
+  const style = api.listStyles().find(s => s.name === "Aged Parchment");
+  const app = await api.openEditor(style.id);
+  await new Promise(r => setTimeout(r, 1000));
+  const el = app.element;
+  const set = (path, value) => {
+    el.querySelector('[data-field="' + path + '"] range-picker').value = value;
+  };
+  const read = (path) => Number(el.querySelector('[data-field="' + path + '"] range-picker').value);
+
+  set("sidebar.buttonCornerTopLeft", 2);
+  set("sidebar.hoverButtonCornerTopLeft", 24);
+  await new Promise(r => setTimeout(r, 400));
+  el.querySelector('[data-action="matchSides"][data-group="sidebar"][data-section="buttons"]').click();
+  await new Promise(r => setTimeout(r, 600));
+
+  const corners = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
+  const after = {
+    ordinary: corners.map(c => read("sidebar.buttonCorner" + c)),
+    hovered: corners.map(c => read("sidebar.hoverButtonCorner" + c))
+  };
+  await app.close({force: true});
+  return JSON.stringify(after);
+})()`);
+const ms = JSON.parse(matchedStates);
+check(ms.ordinary.every(v => v === 2), `Match evens out the ordinary corners (got ${ms.ordinary.join(", ")})`);
+check(ms.hovered.every(v => v === 24),
+  `and evens out the hovered ones on their own (got ${ms.hovered.join(", ")})`);
+
 // The preview frame is its own scroll container, so the sample page must grow
 // with its content — otherwise everything scrolled past has no page background.
 console.log("\n[15] Preview background covers the full scroll height");
@@ -612,7 +650,12 @@ const sidebar = await cdp.evaluate(`(async () => {
       activeEntryBorderLeftColor: "#e8c979",
       hoverOutlineWidth: 1, hoverOutlineColor: "#ff8800",
       entryBorderBottomWidth: 1, entryBorderBottomColor: "#262c38",
-      numberColor: "#6b7688", searchBackground: "#0d1015"
+      // Controls the page being read has of its own, beyond the colors it
+      // always had: a chosen row can sit differently as well as be painted
+      // differently, and one left unset follows the ordinary row.
+      entryPaddingTop: 4, activeEntryPaddingTop: 12, activeEntryCornerTopLeft: 9,
+      size: 15, activeSize: 21,
+      numberShown: true, numberColor: "#6b7688", searchBackground: "#0d1015"
     }}});
   let entry = game.journal.getName("Sidebar Test Journal");
   if (!entry) {
@@ -651,6 +694,13 @@ const sidebar = await cdp.evaluate(`(async () => {
     activeSlant: cs(active?.querySelector(".page-title")).fontStyle,
     activeLeftBorder: cs(active).borderLeftColor,
     entryBorderBottom: cs(inactive).borderBottomWidth + " " + cs(inactive).borderBottomColor,
+    activePadTop: cs(active).paddingTop,
+    entryPadTop: cs(inactive).paddingTop,
+    activeCorner: cs(active).borderTopLeftRadius,
+    entryCorner: cs(inactive).borderTopLeftRadius,
+    activeSize: cs(active?.querySelector(".page-title")).fontSize,
+    entrySize: cs(inactive?.querySelector(".page-title")).fontSize,
+    activeBottomBorder: cs(active).borderBottomWidth,
     numberColor: cs(root.querySelector(".toc .page-index")).color,
     numberShown: cs(root.querySelector(".toc .page-index")).display,
     searchBg: cs(root.querySelector("search input[type=search]")).backgroundColor
@@ -659,7 +709,7 @@ const sidebar = await cdp.evaluate(`(async () => {
   // And with the numbers turned off, which is what the panel looks like when
   // the page's name is the whole of the entry.
   const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-  settings.sidebar.numberShown = "notShown";
+  settings.sidebar.numberShown = false;
   await api.updateStyle(style.id, {settings});
   await new Promise(r => setTimeout(r, 400));
   out.numberHidden = cs(root.querySelector(".toc .page-index")).display;
@@ -679,13 +729,25 @@ check(sb.activeWeight === "700", `current page weight applied (got ${sb.activeWe
 check(sb.activeSlant === "italic", `and the slant it gained with it (got ${sb.activeSlant})`);
 // The Page Marker was an inset shadow of its own; it is a left edge the
 // selected state colors in, drawn with the border controls every state has.
+check(sb.activePadTop === "12px" && sb.entryPadTop === "4px",
+  `the page being read takes its own inner spacing (${sb.activePadTop} against ${sb.entryPadTop})`);
+check(sb.activeCorner === "9px" && sb.entryCorner === "0px",
+  `and its own corner (${sb.activeCorner} against ${sb.entryCorner})`);
+check(sb.activeSize === "21px" && sb.entrySize === "15px",
+  `and its own text size (${sb.activeSize} against ${sb.entrySize})`);
+// And what it was given nothing of its own for is what every other row has,
+// rather than nothing at all.
+check(sb.activeBottomBorder === "1px",
+  `while an unset one follows the ordinary row (${sb.activeBottomBorder})`);
 check(sb.activeLeftBorder === "rgb(232, 201, 121)",
   `the selected entry colors its own left edge (got ${sb.activeLeftBorder})`);
 check(sb.entryBorderBottom.startsWith("1px") && sb.entryBorderBottom.includes("38, 44, 56"),
   `entry divider beat core's own border rule (got ${sb.entryBorderBottom})`);
 check(sb.numberColor === "rgb(107, 118, 136)", `page number color applied (got ${sb.numberColor})`);
-check(sb.numberShown !== "none", `page numbers are shown unless asked otherwise (got ${sb.numberShown})`);
-check(sb.numberHidden === "none", `and Do not display takes them away (got ${sb.numberHidden})`);
+// Numbering is a tick box that starts unticked: a style has to ask for the
+// numbers, and this style does.
+check(sb.numberShown !== "none", `a style that asks for page numbers gets them (got ${sb.numberShown})`);
+check(sb.numberHidden === "none", `and unticking takes them away (got ${sb.numberHidden})`);
 check(sb.searchBg === "rgb(13, 16, 21)", `search box color applied (got ${sb.searchBg})`);
 
 console.log("\n[17] The sample shows a sidebar, but only on the Sidebar tab");
@@ -740,9 +802,11 @@ const picked = await cdp.evaluate(`(async () => {
   const picker = row.querySelector("color-picker");
 
   // Aim at the sample page, whose color we know from the preset.
-  const sample = el.querySelector(".illuminus-preview__frame .journal-entry-content");
+  const sample = el.querySelector(".illuminus-preview__frame .journal-entry-pages")
+    ?? el.querySelector(".illuminus-preview__frame .journal-entry-content");
   const box = sample.getBoundingClientRect();
   const x = Math.round(box.left + box.width / 2);
+  // Below the journal's name, which is a bar of its own with a fill of its own.
   const y = Math.round(box.top + 8);
 
   const point = (type, opts = {}) => document.dispatchEvent(
@@ -939,9 +1003,14 @@ const win = await cdp.evaluate(`(async () => {
   const button = cs(".window-header button.header-control");
   const edit = cs(".journal-entry-page .edit-container button");
   const out = {
-    // The fill is painted as a layer over Foundry's own, so that a color of
-    // None leaves the window as Foundry draws it rather than erasing it.
-    headerBg: cs(".window-header")?.backgroundImage,
+    // The fill is painted on the layer that carries the title bar's picture,
+    // over Foundry's own, so that a color of None leaves the window as Foundry
+    // draws it rather than erasing it — a gradient would have replaced the
+    // texture Foundry paints there, since a background image is one property.
+    headerBg: (() => {
+      const header = root.querySelector(".window-header");
+      return header ? getComputedStyle(header, "::after").backgroundColor : null;
+    })(),
     titleColor: cs(".window-header .window-title")?.color,
     titleSize: cs(".window-header .window-title")?.fontSize,
     buttonColor: button?.color,
@@ -996,7 +1065,7 @@ const win = await cdp.evaluate(`(async () => {
   return JSON.stringify(out);
 })()`);
 const wn = JSON.parse(win);
-check((wn.headerBg ?? "").includes("rgb(32, 64, 96)"), `title bar fill applied (got ${wn.headerBg})`);
+check(wn.headerBg === "rgb(32, 64, 96)", `title bar fill applied (got ${wn.headerBg})`);
 check(wn.titleColor === "rgb(255, 204, 0)", `title lettering applied (got ${wn.titleColor})`);
 check(wn.titleSize === "20px", `title size applied (got ${wn.titleSize})`);
 if (wn.buttonColor !== "rgb(0, 255, 136)") console.log("      diag:", JSON.stringify(wn.diag));
@@ -1104,12 +1173,24 @@ const editShift = await cdp.evaluate(`(async () => {
     await new Promise(r => setTimeout(r, 1200));
     const before = at();
 
-    entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
-    await new Promise(r => setTimeout(r, 1600));
-    const after = at();
-
-    const editSheet = [...foundry.applications.instances.values()].find(
+    // Waited for rather than slept past, in both directions: the Edit button
+    // arrives with the page's own render, and the window it opens is a second
+    // application with a template of its own to fetch.
+    let editButton = null;
+    for (let i = 0; i < 100 && !editButton; i++) {
+      editButton = entry.sheet.element.querySelector(".journal-entry-page .edit-container button");
+      if (!editButton) await new Promise(r => setTimeout(r, 100));
+    }
+    editButton?.click();
+    const opened = () => [...foundry.applications.instances.values()].find(
       a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
+    let editSheet = null;
+    for (let i = 0; i < 150 && !editSheet; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      editSheet = opened();
+    }
+    await new Promise(r => setTimeout(r, 600));
+    const after = at();
     const position = editSheet ? getComputedStyle(editSheet.element).position : null;
     const marked = editSheet ? editSheet.element.classList.contains("illuminus-styled") : false;
     // What the prose is written on, and whether Foundry's own frame survived.
@@ -2242,6 +2323,48 @@ try {
   check(ly.title.image, "and the journal title, whose picture rides on the header around it");
   check(["rgba(0, 0, 0, 0)", "transparent"].includes(ly.titleFill),
     `with the name itself carrying no fill to cover it (${ly.titleFill})`);
+  // And still none when it is pointed at. The hovered rule used to paint the
+  // title's fill onto the input, which put a flat color over the picture on the
+  // header behind it — a dark box appearing over the name under the pointer.
+  {
+    // The spot is measured here rather than reused: the window has been read
+    // and scrolled since, and a pointer sent to a remembered spot is how a
+    // check comes to fail on something other than what it is about.
+    const spot = JSON.parse(await cdp.evaluate(`(() => {
+      const entry = game.journal.get(window.__layers.entryId);
+      // Brought forward first: windows from earlier checks are still on screen,
+      // and a pointer sent at a window underneath one of them lands on the one
+      // on top. Headless Chrome also pins a permanent "no hardware
+      // acceleration" notice over the top of the window, which is exactly where
+      // a journal's name is.
+      entry.sheet.bringToFront();
+      document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+      const title = entry.sheet.element.querySelector(".journal-header .title");
+      const box = title.getBoundingClientRect();
+      const middle = [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)];
+      const at = document.elementFromPoint(...middle);
+      return JSON.stringify({middle, at: at?.tagName + "." + (at?.className || "")});
+    })()`));
+    let pointed = {hovering: false};
+    for (let tries = 0; tries < 3 && !pointed.hovering; tries += 1) {
+      await cdp.mouse("mouseMoved", spot.middle[0], spot.middle[1] + tries);
+      await new Promise((r) => setTimeout(r, 300));
+      pointed = JSON.parse(await cdp.evaluate(`(() => {
+        const entry = game.journal.get(window.__layers.entryId);
+        const title = entry.sheet.element.querySelector(".journal-header .title");
+        return JSON.stringify({
+          hovering: title.matches(":hover"),
+          name: getComputedStyle(title).backgroundColor,
+          header: getComputedStyle(title.parentElement).backgroundColor
+        });
+      })()`));
+    }
+    check(pointed.hovering, `the pointer reaches the name (topmost there: ${spot.at})`);
+    check(["rgba(0, 0, 0, 0)", "transparent"].includes(pointed.name),
+      `and it carries no fill when pointed at either (${pointed.name})`);
+    check(pointed.header === "rgb(43, 29, 18)",
+      `while the header behind it keeps its own (${pointed.header})`);
+  }
   check(ly.iconGlyph && ly.iconGlyph !== '""' && ly.iconGlyph !== "none",
     `and a button keeps the icon a layer used to erase (${ly.iconGlyph})`);
 } finally {
@@ -2363,8 +2486,8 @@ const ht = JSON.parse(headingTab);
 check(ht.tabs.includes("headings") && !ht.tabs.includes("heading1"),
   "the six levels share one tab rather than taking six");
 check(ht.levels === 6, `and its picker offers every level (got ${ht.levels})`);
-check(ht.tabs.indexOf("headings") === ht.tabs.indexOf("title") + 1,
-  `which sits where the levels do, after Title (strip: ${ht.tabs.slice(0, 5).join(", ")})`);
+check(ht.tabs.indexOf("headings") === ht.tabs.indexOf("page") + 1,
+  `which sits where the levels do, after Page (strip: ${ht.tabs.slice(0, 5).join(", ")})`);
 check(ht.before?.startsWith("heading1.") && ht.after?.startsWith("heading5."),
   `choosing a level builds that level's controls (${ht.before} -> ${ht.after})`);
 
@@ -2434,8 +2557,11 @@ try {
 
     const entry = await JournalEntry.create({name: "Secret Test Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
-      '<section class="secret"><p>Hidden.</p></section>' +
-      '<section class="secret revealed"><p>Shown.</p></section>'}}]);
+      // Written with ids, as the editor writes them: Foundry finds a passage by
+      // its id when it reveals one, and a section without one is a passage
+      // nothing can reveal.
+      '<section class="secret" id="secret-hidden"><p>Hidden.</p></section>' +
+      '<section class="secret revealed" id="secret-shown"><p>Shown.</p></section>'}}]);
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     await new Promise(r => setTimeout(r, 1400));
@@ -2563,73 +2689,124 @@ try {
 // window is the one click that can lose an afternoon's work.
 console.log("\n[37] Closing with unsaved changes asks first");
 try {
-  const unsaved = await cdp.evaluate(`(async () => {
+  // Step by step from here rather than in one call: each of these opens the
+  // editor and waits on a prompt, and a single call that stops answering says
+  // only that something inside it hung.
+  const step = (name, body) => cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
+    const state = window.__unsaved;
+    ${body}
+  })()`).then((value) => JSON.parse(value ?? "null"), (err) => {
+    throw new Error(`${name}: ${err.message}`);
+  });
+
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    // Nothing else on screen: the editor is opened and closed several times
+    // here, and a window left over from an earlier check is a window in the way.
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
     const style = await api.createStyle({name: "Unsaved Probe"});
-    window.__unsaved = {styleId: style.id};
-    const out = {};
+    window.__unsaved = {styleId: style.id, out: {}};
     // Waits for the control rather than guessing at a delay: the editor builds
-    // a few hundred of them, and a fixed wait that was long enough once stops
-    // being long enough as the schema grows.
-    const dirty = async () => {
-      const app = await api.openEditor(style.id);
+    // a couple of thousand of them, and a fixed wait that was long enough once
+    // stops being long enough as the schema grows.
+    window.__unsaved.dirty = async () => {
+      const app = await api.openEditor(window.__unsaved.styleId);
       let control = null;
-      for (let i = 0; i < 200 && !control; i++) {
+      for (let i = 0; i < 400 && !control; i++) {
         await new Promise(r => setTimeout(r, 100));
         control = app.element?.querySelector('[data-field="page.background"] color-picker');
       }
-      if (!control) throw new Error("the editor did not render its controls in twenty seconds");
+      if (!control) throw new Error("the editor did not render its controls in forty seconds");
       control.value = "#123456";
-      await new Promise(r => setTimeout(r, 250));
+      // Believed only once the editor says it has something to lose: the value
+      // is set through the element's own setter, and a close that finds nothing
+      // changed closes without asking — which reads as Save having lost the
+      // change rather than as the change never arriving.
+      for (let i = 0; i < 40; i++) {
+        await new Promise(r => setTimeout(r, 100));
+        if (app.element?.querySelector('[data-field="page.background"]:not(.is-default)')) break;
+      }
       return app;
     };
-    const prompt = () => [...foundry.applications.instances.values()]
+    window.__unsaved.prompt = () => [...foundry.applications.instances.values()]
       .find(a => a.constructor.name.includes("Dialog"));
-    const answer = async (action) => {
-      prompt()?.element.querySelector(\`button[data-action="\${action}"]\`)?.click();
+    // The prompt is rendered on a click, so it is waited for rather than slept
+    // past — twenty seconds of patience, and it usually takes one frame.
+    window.__unsaved.waitForPrompt = async () => {
+      for (let i = 0; i < 200; i++) {
+        if (window.__unsaved.prompt()) return true;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return false;
+    };
+    window.__unsaved.answer = async (action) => {
+      await window.__unsaved.waitForPrompt();
+      window.__unsaved.prompt()?.element.querySelector('button[data-action="' + action + '"]')?.click();
       await new Promise(r => setTimeout(r, 700));
     };
+  })()`);
 
-    // Nothing changed: closing must not nag.
-    let app = await api.openEditor(style.id);
+  // Nothing changed: closing must not nag.
+  await step("clean close", `
+    const app = await api.openEditor(state.styleId);
     await new Promise(r => setTimeout(r, 900));
     await app.close({force: true});
     await new Promise(r => setTimeout(r, 400));
-    out.cleanAsked = !!prompt();
-    out.cleanClosed = !app.rendered;
+    state.out.cleanAsked = !!state.prompt();
+    state.out.cleanClosed = !app.rendered;
+    return "null";
+  `);
 
-    // Deliberately unforced from here on: the prompt is what is under test.
-    app = await dirty();
-    app.close();
-    await new Promise(r => setTimeout(r, 600));
-    out.asked = !!prompt();
-    await answer("cancel");
-    out.keptOpen = app.rendered;
+  // Deliberately unforced from here on: the prompt is what is under test.
+  await step("keep editing", `
+    state.app = await state.dirty();
+    state.app.close();
+    state.out.asked = await state.waitForPrompt();
+    await state.answer("cancel");
+    state.out.keptOpen = state.app.rendered;
+    return "null";
+  `);
 
-    app.close();
-    await new Promise(r => setTimeout(r, 600));
-    await answer("discard");
-    out.discardClosed = !app.rendered;
-    out.afterDiscard = api.getStyle(style.id).settings.page.background;
+  await step("discard", `
+    state.app.close();
+    await state.answer("discard");
+    // Waited for rather than slept past, as the control above is: closing tears
+    // down a couple of thousand controls, and a window still on screen when a
+    // fixed delay ends reads as Discard having declined to close.
+    for (let i = 0; i < 100 && state.app.rendered; i++) await new Promise(r => setTimeout(r, 100));
+    state.out.discardClosed = !state.app.rendered;
+    state.out.afterDiscard = api.getStyle(state.styleId).settings.page.background;
+    return "null";
+  `);
 
-    app = await dirty();
-    app.close();
-    await new Promise(r => setTimeout(r, 600));
-    await answer("save");
-    await new Promise(r => setTimeout(r, 700));
-    out.saveClosed = !app.rendered;
-    out.afterSave = api.getStyle(style.id).settings.page.background;
-    return JSON.stringify(out);
-  })()`);
-  const un = JSON.parse(unsaved);
+  await step("save and close", `
+    state.app = await state.dirty();
+    state.out.askedAgain = !!state.app.element?.querySelector('[data-field="page.background"]:not(.is-default)');
+    state.app.close();
+    await state.answer("save");
+    // Waited for rather than slept past: saving writes a world setting, and the
+    // read that follows a fixed delay can be the value from before it landed.
+    const stored = () => api.getStyle(state.styleId).settings.page.background;
+    for (let i = 0; i < 60 && stored() !== "#123456"; i++) await new Promise(r => setTimeout(r, 100));
+    state.out.saveClosed = !state.app.rendered;
+    state.out.afterSave = stored();
+    return "null";
+  `);
+
+  const un = await step("results", `return JSON.stringify(state.out);`);
   check(!un.cleanAsked && un.cleanClosed, "closing an unchanged style just closes");
   check(un.asked, "closing a changed one asks first");
   check(un.keptOpen, "Keep Editing leaves the editor open");
   check(un.discardClosed && un.afterDiscard !== "#123456",
     `Discard closes and throws the change away (stored ${un.afterDiscard})`);
   check(un.saveClosed && un.afterSave === "#123456",
-    `Save and Close keeps it (stored ${un.afterSave})`);
+    `Save and Close keeps it (stored ${un.afterSave}${un.askedAgain ? "" : ", the change never reached the editor"})`);
 } finally {
+
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
@@ -2770,11 +2947,27 @@ try {
     await type("bullet");
     out.dimmedTabs = [...el.querySelectorAll("nav.tabs [data-tab]")]
       .filter(t => t.classList.contains("is-filtered-out")).length;
-    await type("shadow");
     // A section whose own name matches opens even when its controls are worded
-    // differently — Inner Shadow's are all "shading".
+    // differently — an Inner Shadow's are all "shading". Measured on a tab that
+    // still has a category named for a shadow: the tabs laid out by hand hold
+    // both shadows inside Fill and Image, and name neither.
+    // A category named for something none of its controls are called. The
+    // shadows now share Fill and Image wherever they are, so Folding is the one
+    // that reads that way: its controls are a marker, a size and a turn.
+    const shadowTab = [...el.querySelectorAll(".illuminus-tab")].find((one) =>
+      [...one.querySelectorAll(".illuminus-section__label")]
+        .some((label) => /folding/i.test(label.textContent)));
+    const wasOn = el.querySelector(".illuminus-tab.active")?.dataset.tab;
+    if (shadowTab) app.changeTab(shadowTab.dataset.tab, "sheet");
+    await new Promise(r => setTimeout(r, 200));
+    await type("folding");
+    out.shadowTab = shadowTab?.dataset.tab ?? "none";
     out.openSections = [...el.querySelectorAll(".illuminus-tab.active .illuminus-section")]
       .filter(s => s.open).length;
+    // Back where it was: everything after this counts controls on the tab the
+    // check started on, and a tab with eight times as many is not that.
+    if (wasOn) app.changeTab(wasOn, "sheet");
+    await new Promise(r => setTimeout(r, 200));
     await type("");
     out.restored = visible();
     out.noneDimmed = [...el.querySelectorAll("nav.tabs [data-tab]")]
@@ -2817,6 +3010,21 @@ try {
     await new Promise(r => setTimeout(r, 250));
     out.entryOnActive = entryShown();
 
+    // And the list of headings under a page, which has the same three states:
+    // the heading a reader chose is as much a state as the page being read.
+    const headingStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+      .find(s => s.querySelector("summary")?.dataset.section === "subHeadings");
+    headingStates.querySelector("summary").click();
+    await new Promise(r => setTimeout(r, 300));
+    const headingShown = () => [...headingStates.querySelectorAll(".illuminus-field")]
+      .filter(f => !f.classList.contains("is-state-hidden")).length;
+    out.headingStateOptions = [...headingStates.querySelectorAll(".illuminus-state__option")]
+      .map(b => b.dataset.state);
+    out.headingNormal = headingShown();
+    headingStates.querySelector('.illuminus-state__option[data-state="active"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    out.headingOnActive = headingShown();
+
     // Searching must reach a control the switch has folded away. The words are
     // in its wording rather than its name: a state's controls are named plainly
     // now, because the switch above them says which state they are.
@@ -2833,8 +3041,8 @@ try {
   check(f.afterFilter < f.beforeFilter && f.afterFilter > 0,
     `the filter narrows a tab to what matches (${f.beforeFilter} -> ${f.afterFilter})`);
   check(f.dimmedTabs > 0, `and dims the tabs with nothing in them (${f.dimmedTabs} dimmed)`);
-  check(f.openSections >= 2,
-    `a section whose own name matches opens too (${f.openSections} open)`);
+  check(f.openSections >= 1 && f.shadowTab !== "none",
+    `a section whose own name matches opens too (${f.openSections} open on ${f.shadowTab})`);
   check(f.restored === f.beforeFilter && f.noneDimmed,
     `clearing it puts everything back (${f.restored})`);
   check(f.hasSwitch, "a section with pointed-at colors gets a switch");
@@ -2845,12 +3053,19 @@ try {
     `a listed page offers all three of its states in one section (got ${f.entryStateOptions.join(", ")})`);
   check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected"]),
     `named as a person would name them (got ${f.entryStateLabels.join(", ")})`);
-  // Neither state shows everything, and each hides something the other shows.
-  // They overlap on purpose: a padding or an edge thickness belongs to all
-  // three, since a row that resized under the pointer would move the list.
+  // Neither state shows everything: one at a time is the whole point of the
+  // switch.
   check(f.entryFirst > 0 && f.entryOnActive > 0
     && f.entryFirst < f.entryTotal && f.entryOnActive < f.entryTotal,
     `and shows one state at a time (${f.entryFirst} then ${f.entryOnActive} of ${f.entryTotal})`);
+  // And Selected is a state in full, not a handful of controls with the rest
+  // governing every row at once: the page being read has its own of everything.
+  check(f.entryFirst === f.entryOnActive,
+    `a listed page offers as much when it is the one being read (${f.entryFirst} then ${f.entryOnActive})`);
+  check(JSON.stringify(f.headingStateOptions) === JSON.stringify(["normal", "hover", "active"]),
+    `a listed heading offers the same three states (${f.headingStateOptions?.join(", ")})`);
+  check(f.headingNormal > 0 && f.headingNormal === f.headingOnActive,
+    `and as much for the one a reader chose (${f.headingNormal} then ${f.headingOnActive})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -2894,8 +3109,10 @@ try {
     from.dispatchEvent(new DragEvent("dragstart", {bubbles: true, dataTransfer: data}));
     target.dispatchEvent(new DragEvent("dragover", {bubbles: true, dataTransfer: data}));
     target.dispatchEvent(new DragEvent("drop", {bubbles: true, dataTransfer: data}));
-    await new Promise(r => setTimeout(r, 400));
-    out.orderAfterDrag = (api.getStyle(style.id).swatches ?? []).map(sw => sw.hex ?? sw);
+    const order = () => (api.getStyle(style.id).swatches ?? []).map(sw => sw.hex ?? sw);
+    const wasFirst = order()[0];
+    for (let i = 0; i < 40 && order()[0] === wasFirst; i++) await new Promise(r => setTimeout(r, 100));
+    out.orderAfterDrag = order();
 
     // Keeping a color remembers it; cancelling would not.
     await setSettingSafe();
@@ -2991,6 +3208,12 @@ console.log("\n[54] Hovered states are off until asked for");
 try {
   const off = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
+    // Nothing else on screen: earlier checks leave windows open, and a pointer
+    // sent at a window underneath one of them lands on the one on top.
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
     const style = await api.createStyle({name: "Hover Off Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
     Object.assign(settings.boxes, {background: "#123456", hoverBackground: "#ff0000"});
@@ -3326,6 +3549,11 @@ try {
     settings.heading2.hoverBorderTopColor = "#ff8800";
     settings.heading2.borderTopWidth = 3;
     settings.heading2.borderTopStyle = "solid";
+    // A button's corners, which are a number rather than a color: the twin has
+    // to reach a size as well as a paint, and Match must not have flattened it.
+    settings.sidebar.hoverOff = false;
+    settings.sidebar.buttonCornerTopLeft = 2;
+    settings.sidebar.hoverButtonCornerTopLeft = 24;
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Hover Test Journal"});
@@ -3334,34 +3562,89 @@ try {
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
     entry.sheet.setPosition({left: 60, top: 60, width: 900, height: 700});
+    // In front of whatever earlier checks left open: a pointer sent at a window
+    // underneath another lands on the one on top, and the heading in the middle
+    // of the page is exactly where those windows sit.
+    entry.sheet.bringToFront();
     await new Promise(r => setTimeout(r, 1400));
+    // Foundry animates buttons, so a corner read as the pointer arrives comes
+    // back part-way through the transition — 15.9px between 2 and 24.
+    const freeze = document.createElement("style");
+    freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+    document.head.append(freeze);
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
     window.__hover = {entryId: entry.id, styleId: style.id};
     const box = (sel) => {
       const el = entry.sheet.element.querySelector(sel);
       const b = el.getBoundingClientRect();
       return {x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2)};
     };
+    // The first panel button the pointer can actually reach: one of them sits
+    // under the panel's own edge, and hovering what covers it proves nothing.
+    // Foundry's own buttons: a folding marker is a button too, and the panel's
+    // Buttons controls deliberately leave it alone.
+    const buttons = [...entry.sheet.element.querySelectorAll(".journal-sidebar button:not(.illuminus-fold)")];
+    const reachable = buttons.findIndex((b) => {
+      const r = b.getBoundingClientRect();
+      return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === b;
+    });
+    window.__hover.buttonIndex = reachable;
     return JSON.stringify({
       h1: box(".journal-page-content h1"),
       h2: box(".journal-page-content h2"),
       quote: box(".journal-page-content blockquote"),
+      button: (() => {
+        const r = buttons[reachable].getBoundingClientRect();
+        return {x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2)};
+      })(),
+      buttonRest: getComputedStyle(buttons[reachable]).borderTopLeftRadius,
       restColor: getComputedStyle(entry.sheet.element.querySelector(".journal-page-content h1")).color
     });
   })()`);
   const at = JSON.parse(setUp);
 
-  const readAfterHover = async (point, sel, property) => {
-    await cdp.mouse("mouseMoved", point.x, point.y);
-    await new Promise((r) => setTimeout(r, 200));
-    return cdp.evaluate(`(() => {
-      const entry = game.journal.get(window.__hover.entryId);
-      return getComputedStyle(entry.sheet.element.querySelector(${JSON.stringify(sel)})).${property};
-    })()`);
+  /**
+   * Point at something and read what it takes on.
+   *
+   * The spot is measured immediately before the pointer is sent to it, and the
+   * read is believed only once the element says it is hovered: a page settles
+   * for a moment after it renders — a typeface arriving moves every line — and a
+   * pointer sent to a spot measured a second earlier lands beside a heading
+   * rather than on it, which is what "the hovered color never applied" turned
+   * out to be.
+   */
+  const readAfterHover = async (pick, property) => {
+    let last = null;
+    for (let tries = 0; tries < 4; tries += 1) {
+      const spot = JSON.parse(await cdp.evaluate(`(() => {
+        const root = game.journal.get(window.__hover.entryId).sheet.element;
+        const box = (${pick}).getBoundingClientRect();
+        return JSON.stringify([Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)]);
+      })()`));
+      await cdp.mouse("mouseMoved", spot[0], spot[1]);
+      await new Promise((r) => setTimeout(r, 250));
+      const read = JSON.parse(await cdp.evaluate(`(() => {
+        const root = game.journal.get(window.__hover.entryId).sheet.element;
+        const el = ${pick};
+        const top = document.elementFromPoint(${spot[0]}, ${spot[1]});
+        return JSON.stringify({hovering: el.matches(":hover"), value: getComputedStyle(el).${property},
+          topmost: top ? top.tagName + "." + (top.className || "") : "nothing"});
+      })()`));
+      last = read;
+      if (read.hovering) return read.value;
+    }
+    // Named rather than silently wrong: a read taken while the pointer was
+    // somewhere else fails on the color and says nothing about the pointer.
+    return `${last.value} (pointer reached ${last.topmost})`;
   };
 
-  const h1Hovered = await readAfterHover(at.h1, ".journal-page-content h1", "color");
-  const quoteHovered = await readAfterHover(at.quote, ".journal-page-content blockquote", "backgroundColor");
-  const h2Hovered = await readAfterHover(at.h2, ".journal-page-content h2", "borderTopColor");
+  const h1Hovered = await readAfterHover(`root.querySelector(".journal-page-content h1")`, "color");
+  const quoteHovered = await readAfterHover(`root.querySelector(".journal-page-content blockquote")`, "backgroundColor");
+  const h2Hovered = await readAfterHover(`root.querySelector(".journal-page-content h2")`, "borderTopColor");
+  const buttonRadius = await readAfterHover(
+    `[...root.querySelectorAll(".journal-sidebar button:not(.illuminus-fold)")][window.__hover.buttonIndex]`,
+    "borderTopLeftRadius");
+
   // Move away and the ordinary color comes back.
   await cdp.mouse("mouseMoved", 5, 5);
   await new Promise((r) => setTimeout(r, 200));
@@ -3373,6 +3656,8 @@ try {
   check(h1Hovered === "rgb(0, 255, 0)", `a heading takes its hovered lettering (got ${h1Hovered})`);
   check(quoteHovered === "rgb(18, 52, 86)", `a box takes its hovered fill (got ${quoteHovered})`);
   check(h2Hovered === "rgb(255, 136, 0)", `and an edge takes its hovered color (got ${h2Hovered})`);
+  check(at.buttonRest === "2px", `a panel button is square-ish at rest (got ${at.buttonRest})`);
+  check(buttonRadius === "24px", `and rounds off when pointed at (got ${buttonRadius})`);
   check(h1Rested === at.restColor,
     `moving away puts the ordinary color back (${h1Rested} vs ${at.restColor})`);
 } finally {
@@ -3407,7 +3692,19 @@ try {
     const visit = async (tab) => {
       app.changeTab(tab, "sheet");
       await new Promise(r => setTimeout(r, 500));
-      return {lit: lit(), dimmed: dimmed()};
+      // The pieces lit in their own right: a link inside a lit paragraph is lit
+      // with it, and dimming it would be dimming part of what is in focus.
+      // Every piece of the kind in focus lit, and nothing of another kind —
+      // except what sits *inside* one of them, since a link inside a lit
+      // paragraph is part of what is in focus.
+      const own = parts().filter(p => p.dataset.part === tab);
+      const inside = (part) => own.some(one => one !== part && one.contains(part));
+      return {
+        lit: lit(), dimmed: dimmed(),
+        allOwnLit: own.length > 1 && own.every(p => !p.classList.contains("is-dimmed")),
+        otherLit: parts().filter(p => !p.classList.contains("is-dimmed")
+          && p.dataset.part !== tab && p.dataset.part !== "page" && !inside(p)).map(p => p.dataset.part)
+      };
     };
 
     const out = {tables: await visit("tables"), body: await visit("body")};
@@ -3434,6 +3731,15 @@ try {
     }
 
     // A family replaces the pane outright, so nothing there should be dimmed.
+    // The Page tab's piece is the surface everything else sits on, so lighting
+    // it and dimming what it holds greyed the whole sample out.
+    out.page = await visit("page");
+    // Inside the page, that is: the Box, Tag and Picture panes below it are
+    // pages of their own, and dimming those is the point of dimming.
+    out.page.dimmedInside = parts().filter((part) =>
+      part.classList.contains("is-dimmed")
+      && el.querySelector('.illuminus-preview__frame [data-part="page"]').contains(part)).length;
+
     out.family = await visit("boxStyles");
 
     // And the focus follows the level the picker names.
@@ -3458,10 +3764,12 @@ try {
   // whichever piece is focused — dimming it would dim what is inside it.
   check(JSON.stringify(fc.tables.lit) === JSON.stringify(["page", "tables"]) && fc.tables.dimmed > 10,
     `opening a tab brings its own part forward (lit ${fc.tables.lit.join(", ")}, ${fc.tables.dimmed} dimmed)`);
-  const bodyLit = fc.body.lit.filter((part) => part !== "page");
-  check(bodyLit.every((part) => part === "body") && bodyLit.length > 1,
-    `a tab with several pieces lights them all (${bodyLit.length} lit)`);
+  check(fc.body.allOwnLit && fc.body.otherLit.length === 0,
+    `a tab with several pieces lights them all and nothing else`
+    + `${fc.body.otherLit.length ? ` (also lit: ${fc.body.otherLit.join(", ")})` : ""}`);
   check(fc.scrolledIntoView, "and the sample scrolls so that part can be seen");
+  check(fc.page.dimmedInside === 0 && fc.page.lit.includes("page"),
+    `the tab whose piece holds the rest dims none of what it holds (${fc.page.dimmedInside} dimmed inside)`);
   check(fc.family.dimmed === 0,
     `a family tab, which replaces the pane outright, dims nothing (${fc.family.dimmed})`);
   check(JSON.stringify(fc.afterPick) === JSON.stringify(["page", "heading3"]),
@@ -3499,7 +3807,10 @@ try {
       rendered.set(summary.dataset.group, list);
     }
 
-    const out = {tabs: rendered.size, wrongOrder: [], textNotFirst: []};
+    // A tab that lays itself out is exempt from the shared reading order: it
+    // has one of its own, which the schema states and this reads back.
+    const ownOrder = schema.GROUPS.filter(g => g.order).map(g => g.id);
+    const out = {tabs: rendered.size, wrongOrder: [], textNotFirst: [], ownOrder};
     for (const [id, sections] of rendered) {
       const group = schema.GROUPS.find(g => g.id === id);
       const wanted = group.sections.map(s => s.id);
@@ -3508,9 +3819,16 @@ try {
     }
 
     // The convention itself, stated once rather than inferred from the schema
-    // it is checking: what a box and a tag open with.
-    out.boxes = (rendered.get("boxes") ?? []).slice(0, 4);
-    out.tag = (rendered.get("tag01") ?? []).slice(0, 4);
+    // it is checking: what a box style and a tag open with. Read from tabs that
+    // take the shared order — the Boxes tab states one of its own now, and a tab
+    // that has been laid out by hand is not evidence about the shared one.
+    // Read as names rather than as ids: a box's first category and a tag's are
+    // the same question — how much room it takes — under two ids.
+    const named = (id) => (rendered.get(id) ?? []).slice(0, 4).map((section) =>
+      app.element.querySelector('summary[data-group="' + id + '"][data-section="' + section + '"]')
+        ?.querySelector(".illuminus-section__label")?.textContent.trim() ?? section);
+    out.boxes = named("box01");
+    out.tag = named("tag01");
     out.lettering = app.element.textContent.includes("Lettering");
 
     // Turned on first: a tab whose hovered state is switched off greys the
@@ -3560,22 +3878,29 @@ try {
   const sh = JSON.parse(shape);
   check(sh.tabs >= 15 && sh.wrongOrder.length === 0,
     `all ${sh.tabs} tabs list their sections in the schema's order${sh.wrongOrder.length ? `:\n      ${sh.wrongOrder.join("\n      ")}` : ""}`);
-  check(sh.textNotFirst.length === 0,
+  // A tab that states its own section order is exempt: the Title tab opens with
+  // Show Title, because whether the name is drawn at all comes before how it looks.
+  check(sh.textNotFirst.filter((tab) => !sh.ownOrder?.includes(tab)).length === 0,
     `Text comes first wherever it exists${sh.textNotFirst.length ? ` (not on ${sh.textNotFirst.join(", ")})` : ""}`);
-  check(sh.boxes.join() === "text,background,padding,border" && sh.tag.join() === sh.boxes.join(),
+  check(sh.boxes.join() === "Size and Position,Text,Fill and Image,Inner Spacing"
+    && sh.tag.join() === sh.boxes.join(),
     `a box and a tag open the same way (${sh.boxes.join(" > ")})`);
   check(!sh.lettering, "and nothing is called Lettering any more");
   // With the state word taken off, the hovered controls must read as the
   // ordinary ones do — in the same order, and with the controls that have no
   // hovered twin (a thickness does not change when pointed at) still in place.
-  const bases = sh.hovered.map((name) => name.replace(/^hover/, "").replace(/^./, (c) => c.toLowerCase()));
+  const bases = sh.hovered.map((name) => name
+    .replace(/^hover/, "").replace(/Hover(?=[A-Z])/, "").replace(/^./, (c) => c.toLowerCase()));
   const places = bases.map((name) => sh.normal.indexOf(name));
   check(sh.reachable, "the state switch is where it looks like it is");
-  const swapped = sh.hovered.filter((name) => /^hover/.test(name)).length;
-  check(swapped === 4 && bases.length === sh.normal.length
+  // Every control has a state's own twin now, so a whole section swaps rather
+  // than the paint in it: the hovered list must read as the ordinary one does,
+  // control for control and in the same order.
+  const swapped = sh.hovered.filter((name) => /hover/i.test(name)).length;
+  check(swapped === sh.hovered.length && bases.length === sh.normal.length
     && places.every((at, i) => at >= 0 && (!i || at > places[i - 1])),
-    `switching to Hovered swaps ${swapped} controls and leaves the other `
-    + `${bases.length - swapped} where they were`);
+    `switching to Hovered swaps every one of the ${sh.normal.length} controls, in the same order `
+    + `(${swapped} carried the state's name)`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -4321,6 +4646,57 @@ try {
     out.footerInside = footer.bottom <= window.bottom + 1 && footer.width > 0;
     out.footerGap = Math.round(footer.top - body.bottom);
 
+    // Every way of saving has to fit above the button, not only the one the
+    // window opens on: each choice shows and hides rows of its own.
+    const radio = (value) => el.querySelector('input[name="format"][value="' + value + '"]');
+    const choose = async (value) => {
+      radio(value).checked = true;
+      radio(value).dispatchEvent(new Event("change"));
+      await new Promise(r => setTimeout(r, 200));
+    };
+    out.gaps = {};
+    for (const format of ["print", "folder", "file", "css"]) {
+      if (radio(format).disabled) { out.gaps[format] = "refused"; continue; }
+      await choose(format);
+      out.gaps[format] = Math.round(el.querySelector(".form-footer").getBoundingClientRect().top
+        - el.querySelector(".illuminus-export-dialog").getBoundingClientRect().bottom);
+    }
+
+    // The descriptor: never prefilled, marked while what is typed could not be
+    // used as a name, and asked for by the stylesheet alone.
+    const prefix = el.querySelector('input[name="cssPrefix"]');
+    const cssRow = prefix.closest(".illuminus-export-dialog__option");
+    out.prefixStarts = prefix.value;
+    await choose("css");
+    out.prefixAsked = !cssRow.classList.contains("is-hidden");
+    out.markedEmpty = prefix.classList.contains("is-needed");
+    prefix.value = "   ";
+    prefix.dispatchEvent(new Event("input"));
+    await new Promise(r => setTimeout(r, 100));
+    out.markedBlank = prefix.classList.contains("is-needed");
+    prefix.value = "Moonlit Keep";
+    prefix.dispatchEvent(new Event("input"));
+    await new Promise(r => setTimeout(r, 100));
+    out.markedNamed = prefix.classList.contains("is-needed");
+    await choose("folder");
+    out.prefixHidden = cssRow.classList.contains("is-hidden");
+
+    // A stylesheet is Illuminus's own work or nothing: gathering whatever is
+    // painting the page can carry a game system's styling, which is not ours to
+    // hand on under somebody else's name.
+    const picker = el.querySelector('select[name="styleId"]');
+    picker.value = "";
+    picker.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 200));
+    out.cssRefused = radio("css").disabled;
+    picker.value = style.id;
+    picker.dispatchEvent(new Event("change"));
+    await new Promise(r => setTimeout(r, 200));
+    out.cssOffered = !radio("css").disabled;
+    await choose("css");
+    out.plainHeld = [...picker.options].find(option => !option.value)?.disabled === true;
+    await choose("folder");
+
     out.filtered = {
       styled: named("Export Filter Styled")?.offsetParent !== null,
       plain: named("Export Filter Plain")?.offsetParent !== null
@@ -4351,6 +4727,26 @@ try {
   const dl = JSON.parse(dialog);
   check(dl.footerInside && dl.footerGap >= 0,
     `the export button sits inside the window, clear of the section above (${dl.footerGap}px)`);
+  check(Object.values(dl.gaps).every((gap) => gap === "refused" || gap >= 0),
+    `and every way of saving fits above it (${Object.entries(dl.gaps).map(([f, g]) => `${f}:${g}`).join(", ")})`);
+  check(dl.prefixStarts === "" && dl.prefixAsked,
+    `the descriptor starts empty ("${dl.prefixStarts}")`);
+  check(dl.markedEmpty && dl.markedBlank && !dl.markedNamed,
+    `and is marked until it is a name that could be used (${dl.markedEmpty}, ${dl.markedBlank}, ${dl.markedNamed})`);
+  check(dl.prefixHidden, "and is not asked for by the other ways of saving");
+  check(dl.cssRefused, "a stylesheet is not offered for styling that is not Illuminus's");
+  check(dl.cssOffered, "and is offered once a style is chosen");
+  check(dl.plainHeld, "with the picker held there while it is");
+  check(Object.values(dl.gaps).every((gap) => gap === "refused" || gap >= 0),
+    `and every way of saving fits above it (${Object.entries(dl.gaps).map(([f, g]) => `${f}:${g}`).join(", ")})`);
+  check(dl.prefixStarts === "" && dl.prefixAsked,
+    `the descriptor starts empty ("${dl.prefixStarts}")`);
+  check(dl.markedEmpty && dl.markedBlank && !dl.markedNamed,
+    `and is marked until it is a name that could be used (${dl.markedEmpty}, ${dl.markedBlank}, ${dl.markedNamed})`);
+  check(dl.prefixHidden, "and is not asked for by the other ways of saving");
+  check(dl.cssRefused, "a stylesheet is not offered for styling that is not Illuminus's");
+  check(dl.cssOffered, "and is offered once a style is chosen");
+  check(dl.plainHeld, "with the picker held there while it is");
   check(dl.filtered.styled && !dl.filtered.plain,
     "the style picker filters the list to journals using it");
   check(dl.allShown >= 2, `turning the filter off shows every journal (${dl.allShown})`);
@@ -4394,6 +4790,10 @@ try {
     await new Promise(r => setTimeout(r, 600));
 
     const out = {};
+    // The window has to be there at all: bringing an already-open one forward
+    // returns nothing, so opening used to hand back undefined and everything
+    // after it read as a window that never appeared.
+    out.opened = Boolean(dialog?.element);
     // Read on demand, whether or not it has ever been shown.
     dialog.element.querySelector('[data-action="terms"]').click();
     await new Promise(r => setTimeout(r, 700));
@@ -4434,6 +4834,7 @@ try {
     return JSON.stringify(out);
   })()`);
   const nt = JSON.parse(notice);
+  check(nt.opened, "the export window opens for the notice");
   check(nt.beforeExport, "the notice stands in front of an export");
   check(nt.defaultAction === "cancel",
     `and the button with focus is the one that does not export (${nt.defaultAction || "none"})`);
@@ -4518,6 +4919,12 @@ console.log("\n[52] The hovered-state switch, tab by tab");
           states: [...el.querySelectorAll(".illuminus-section")]
             .filter((section) => section.querySelector('.illuminus-state__option[data-state="hover"]'))
             .length,
+          // Which sections have none, by name: the contents panel and the
+          // window were derived for only where they already stated one by hand,
+          // so most of their settings governed both states at once.
+          without: [...el.querySelectorAll("details.illuminus-section")]
+            .filter((section) => !section.querySelector('.illuminus-state__option[data-state="hover"]'))
+            .map((section) => section.querySelector(".illuminus-section__label")?.textContent.trim()),
           // The contents panel's switch offers current-page as well as
           // pointed-at, and turning the hovered state off must not put the
           // current page out of reach with it.
@@ -4541,6 +4948,12 @@ console.log("\n[52] The hovered-state switch, tab by tab");
     + `(${["sidebar", "window", "links", "secrets"].map((tab) => sw[tab].checked).join(", ")})`);
   check(sw.lists.states >= 2 && sw.sidebar.states >= 2 && sw.window.states >= 2,
     `and each offers the two states where it has both (${sw.lists.states}, ${sw.sidebar.states}, ${sw.window.states})`);
+  // Every section of the panel and the window, not the few that spelled a
+  // hovered color out by hand: a control that governs both states at once is a
+  // control that cannot say what it is for.
+  check(sw.sidebar.without.length === 0 && sw.window.without.length === 0,
+    `and every section of the panel and the window offers it`
+    + `${[...sw.sidebar.without, ...sw.window.without].length ? ` (missing from ${[...sw.sidebar.without, ...sw.window.without].join(", ")})` : ""}`);
   check(sw.sidebar.reachable, "the current-page controls stay reachable while hovered is off");
 }
 
@@ -4667,6 +5080,10 @@ try {
     const sample = samplePage.cloneNode(true);
     for (const flow of sample.querySelectorAll(".illuminus-flow")) flow.replaceWith(...flow.childNodes);
     for (const cap of sample.querySelectorAll(".illuminus-drop-cap")) cap.replaceWith(...cap.childNodes);
+    // And the folding markers, which are chrome the same way the wrappers are:
+    // taken out whole, since the icon inside one is an element of its own and
+    // skipping the button alone left it in the comparison.
+    for (const marker of sample.querySelectorAll(".illuminus-fold")) marker.remove();
     const outline = (root) => [...root.querySelectorAll("*")]
       .filter((el) => el.tagName !== "BUTTON")
       .map((el) => el.tagName).join(",");
@@ -4720,6 +5137,44 @@ try {
     + `(${built.lead?.count}, ${built.h2?.count}, ${built.h3?.count})`);
   check(built.h3?.width === built.h2?.width,
     `both passages still fill the page (${built.h2?.width} and ${built.h3?.width})`);
+
+  // Foundry reveals a secret passage by rewriting the page's *stored* markup,
+  // finding the passage by matching its id — so a page built out of markup
+  // written without one has a Reveal button that does nothing whatever when it
+  // is clicked. Clicked here the way a person clicks it, and believed only from
+  // what the page ends up holding.
+  const secret = JSON.parse(await cdp.evaluate(`(() => {
+    const entry = game.journal.get("${built.entryId}");
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    game.tooltip.deactivate();
+    document.getElementById("tooltip")?.remove();
+    const stored = entry.pages.contents[0].text.content;
+    const button = entry.sheet.element.querySelector("section.secret button.reveal");
+    const box = button?.getBoundingClientRect();
+    const at = box ? [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)] : null;
+    return JSON.stringify({
+      hasId: /<section[^>]*\\bid="secret-/.test(stored),
+      revealed: /secret revealed/.test(stored),
+      at,
+      reaches: at ? document.elementFromPoint(at[0], at[1])?.classList.contains("reveal") ?? false : false
+    });
+  })()`));
+  check(secret.hasId && !secret.revealed,
+    `the sample's secret passage is stored with an id of its own${secret.hasId ? "" : " (none)"}`);
+  check(secret.reaches, "and its Reveal button is what the pointer reaches");
+  if (secret.at) {
+    await cdp.click(secret.at[0], secret.at[1]);
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+  const revealed = JSON.parse(await cdp.evaluate(`(() => {
+    const entry = game.journal.get("${built.entryId}");
+    return JSON.stringify({
+      stored: /secret revealed/.test(entry.pages.contents[0].text.content),
+      label: entry.sheet.element.querySelector("section.secret button.reveal")?.textContent.trim() ?? ""
+    });
+  })()`));
+  check(revealed.stored, "and clicking it reveals the passage in the page itself");
+  check(revealed.label === "Hide", `the button offering to hide it again (${revealed.label})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -4856,6 +5311,807 @@ console.log("\n[55] A stylesheet on its own");
   check(sheet.filename.startsWith("aged-parchment"), `whose file is named for the style (${sheet.filename})`);
   check(!sheet.carriesFonts && sheet.namesFaces,
     `naming its typefaces without carrying them (${sheet.carriesFonts ? "carries" : "names only"})`);
+}
+
+// Folding is behaviour a style switches on: the marker is written into every
+// heading that governs something, and the stylesheet decides whether a reader
+// can see it. That keeps the compiler's one rule — values, never rules — so the
+// check is that a value reaches a marker and that clicking it folds.
+console.log("\n[57] Folding a heading, and folding the contents panel");
+try {
+  const set = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    // Nothing else on screen: earlier checks leave windows open, and a pointer
+    // sent at a window underneath one of them lands on the one on top.
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Fold Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    settings.heading2.foldShown = true;
+    settings.heading2.foldIcon = "plus";
+    settings.heading2.foldColor = "#00aa00";
+    settings.heading3.foldShown = false;
+    settings.sidebar.foldShown = true;
+    await api.updateStyle(style.id, {settings});
+
+    const entry = await JournalEntry.create({name: "Fold Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "Folding", type: "text", text: {content:
+      "<h2>Section one</h2><p id='under-two'>Under two.</p><h3>Deeper</h3><p>Under three.</p>" +
+      "<h2>Section two</h2><p>Elsewhere.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    entry.sheet.setPosition({left: 60, top: 60, width: 900, height: 700});
+    // In front of whatever earlier checks left open, or a click aimed here
+    // lands on the window on top of it.
+    entry.sheet.bringToFront();
+    await new Promise(r => setTimeout(r, 1500));
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    window.__fold = {entryId: entry.id, styleId: style.id};
+
+    const root = entry.sheet.element;
+    const h2 = root.querySelector(".journal-page-content h2");
+    const h3 = root.querySelector(".journal-page-content h3");
+    const marker = h2.querySelector(".illuminus-fold");
+    const box = marker.getBoundingClientRect();
+    const at = [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)];
+    // Clicked the way a person does: a marker CSS has made unclickable would
+    // still answer element.click().
+    const topmost = document.elementFromPoint(...at)?.closest(".illuminus-fold") === marker;
+    const tocMarker = root.querySelector(".journal-sidebar .toc li.page .illuminus-fold");
+    const tocBox = tocMarker?.getBoundingClientRect();
+    return JSON.stringify({
+      hasMarker: Boolean(marker),
+      shown: getComputedStyle(marker).display,
+      glyph: getComputedStyle(marker.querySelector("i"), "::before").content,
+      color: getComputedStyle(marker).color,
+      deeperHidden: getComputedStyle(h3.querySelector(".illuminus-fold")).display,
+      runVisible: !root.querySelector("#under-two").closest("[hidden]"),
+      at, topmost,
+      tocAt: tocBox && [Math.round(tocBox.left + tocBox.width / 2), Math.round(tocBox.top + tocBox.height / 2)],
+      tocListed: Boolean(root.querySelector(".journal-sidebar .toc ol.headings"))
+    });
+  })()`);
+  const fold = JSON.parse(set);
+  check(fold.hasMarker && fold.shown !== "none", `a folding level carries a marker a reader can see (${fold.shown})`);
+  // FontAwesome draws an icon as a character: the plus is U+F067, and naming a
+  // marker is naming that character.
+  check(fold.glyph.includes("\uf067"), `wearing the glyph the style named (got ${JSON.stringify(fold.glyph)})`);
+  check(fold.color === "rgb(0, 170, 0)", `in the color it named (got ${fold.color})`);
+  check(fold.deeperHidden === "none", `a level that does not fold keeps its marker out of sight (${fold.deeperHidden})`);
+  check(fold.topmost, "and the marker is what the pointer reaches");
+
+  // Measured again on the click itself: the page settles after it renders, and
+  // a marker is a small target.
+  const foldedNow = () => cdp.evaluate(`(() => {
+    const root = game.journal.get(window.__fold.entryId).sheet.element;
+    return String(root.querySelectorAll(".is-folded").length);
+  })()`);
+
+  const clickMarker = async (pick) => {
+    let blocked = "nothing";
+    const before = await foldedNow();
+    for (let tries = 0; tries < 4; tries += 1) {
+      const spot = JSON.parse(await cdp.evaluate(`(() => {
+        // Foundry's tooltip follows the pointer and outlives the thing that
+        // asked for it: one left showing over the panel covers whatever is
+        // under it, and a click aimed there lands on the tooltip.
+        game.tooltip.deactivate();
+        document.querySelectorAll("#tooltip").forEach(t => t.remove());
+        const root = game.journal.get(window.__fold.entryId).sheet.element;
+        const marker = ${pick};
+        if (!marker) return "null";
+        const b = marker.getBoundingClientRect();
+        const at = [Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)];
+        const top = document.elementFromPoint(at[0], at[1]);
+        return JSON.stringify({at, reaches: top?.closest(".illuminus-fold") === marker,
+          topmost: top ? top.tagName + "." + (top.className || "") : "nothing"});
+      })()`));
+      if (!spot) return "no marker";
+      if (!spot.reaches) {
+        blocked = spot.topmost;
+        await new Promise((r) => setTimeout(r, 250));
+        continue;
+      }
+      await cdp.click(spot.at[0], spot.at[1]);
+      // Answered, not merely aimed at: a click landing between a render and the
+      // layout that follows it hits where the marker was.
+      for (let waited = 0; waited < 12; waited += 1) {
+        await new Promise((r) => setTimeout(r, 150));
+        if (await foldedNow() !== before) return "";
+      }
+      blocked = "the click did nothing";
+    }
+    return blocked;
+  };
+
+  // Polled rather than slept past: a click and the read after it are two
+  // protocol calls, and the second used to race the first.
+  const settled = async (want) => {
+    for (let i = 0; i < 20; i += 1) {
+      const hidden = await cdp.evaluate(`(() => {
+        const root = game.journal.get(window.__fold.entryId).sheet.element;
+        return String(Boolean(root.querySelector("#under-two").closest("[hidden]")));
+      })()`);
+      if (hidden === String(want)) return true;
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    return false;
+  };
+
+  const blockedBy = await clickMarker(`root.querySelector(".journal-page-content h2 .illuminus-fold")`);
+  await settled(true);
+  const afterFold = JSON.parse(await cdp.evaluate(`(() => {
+    const root = game.journal.get(window.__fold.entryId).sheet.element;
+    const h2 = root.querySelector(".journal-page-content h2");
+    return JSON.stringify({
+      folded: h2.classList.contains("is-folded"),
+      runHidden: Boolean(root.querySelector("#under-two").closest("[hidden]")),
+      // Only what this heading governs: the next section is not its business.
+      elsewhere: !root.querySelectorAll(".journal-page-content h2")[1].hasAttribute("hidden")
+    });
+  })()`));
+  check(afterFold.folded && afterFold.runHidden,
+    `clicking it folds the run beneath the heading away${blockedBy ? ` (blocked by ${blockedBy})` : ""}`);
+  check(afterFold.elsewhere, "and leaves the next section where it was");
+
+  await clickMarker(`root.querySelector(".journal-page-content h2 .illuminus-fold")`);
+  await settled(false);
+  const stored = JSON.parse(await cdp.evaluate(`(async () => {
+    const entry = game.journal.get(window.__fold.entryId);
+    const root = entry.sheet.element;
+    return JSON.stringify({
+      back: !root.querySelector("#under-two").closest("[hidden]"),
+      // Nothing is stored: the page keeps the markup a person typed.
+      content: entry.pages.contents[0].text.content
+    });
+  })()`));
+  check(stored.back, "clicking again brings it back");
+  check(!/illuminus-fold/.test(stored.content), "and the page keeps no marker of its own");
+
+  // The contents panel folds nothing: it has no settings for a marker, so it is
+  // not given one. Folding is the page's.
+  check(!fold.tocAt, "and the contents panel carries no marker of its own");
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.get(window.__fold?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__fold?.styleId) await api.deleteStyle(window.__fold.styleId);
+    window.__fold = undefined;
+  })()`);
+}
+
+// Foundry injects a context menu *inside* the entry it was opened on, and every
+// entry is a stacking context of its own so a background image can blend with
+// its own fill — which left the entries below painting over the menu. Measured
+// against an unstyled journal rather than in the absolute: a menu that runs past
+// the bottom of a short panel is clipped by the panel whatever a style says, and
+// the question is whether styling makes it worse.
+console.log("\n[58] A context menu on a listed page can be used");
+try {
+  const menu = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Menu Probe"});
+    const out = {};
+    window.__menu = {styleId: style.id, entries: []};
+
+    for (const [key, name] of [["styled", "Menu Journal"], ["plain", "Menu Journal Plain"]]) {
+      const entry = await JournalEntry.create({name});
+      await entry.createEmbeddedDocuments("JournalEntryPage", [
+        {name: "First", type: "text", text: {content: "<p>x</p>"}},
+        {name: "Second", type: "text", text: {content: "<p>y</p>"}}]);
+      if (key === "styled") await api.assignStyle(entry, style.id);
+      await entry.sheet.render({force: true});
+      entry.sheet.setPosition({left: 60, top: 60, width: 900, height: 700});
+      entry.sheet.bringToFront();
+      window.__menu.entries.push(entry.id);
+      await new Promise(r => setTimeout(r, 1400));
+      document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+      game.tooltip.deactivate();
+      document.querySelectorAll("#tooltip").forEach(t => t.remove());
+
+      const li = entry.sheet.element.querySelector(".journal-sidebar .toc li.page");
+      const box = li.getBoundingClientRect();
+      li.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true,
+        clientX: Math.round(box.left + box.width / 2), clientY: Math.round(box.top + box.height / 2), button: 2}));
+      await new Promise(r => setTimeout(r, 700));
+
+      const opened = entry.sheet.element.querySelector("#context-menu");
+      if (!opened) { out[key] = {missing: true}; continue; }
+      const items = [...opened.querySelectorAll("li.context-item")];
+      // Every item, not the first alone: the overlap grew down the list, so an
+      // entry lower in the menu was the one that could not be clicked.
+      const covered = items.map((item) => {
+        const b = item.getBoundingClientRect();
+        const top = document.elementFromPoint(Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2));
+        return opened.contains(top) ? null : (top ? top.tagName + "." + (top.className || "") : "nothing");
+      }).filter(Boolean);
+      out[key] = {items: items.length, covered: covered.length, by: [...new Set(covered)],
+        raised: getComputedStyle(li).zIndex};
+      // Closed before the next one, or the first menu is still on screen.
+      document.body.click();
+      await new Promise(r => setTimeout(r, 400));
+    }
+    return JSON.stringify(out);
+  })()`);
+  const cm = JSON.parse(menu);
+  check(!cm.styled.missing && cm.styled.items >= 3,
+    `right-clicking a listed page opens its menu (${cm.styled.items} entries)`);
+  check(cm.styled.covered <= cm.plain.covered,
+    `and styling covers none of it that Foundry does not cover itself`
+    + `${cm.styled.covered > cm.plain.covered
+      ? ` (${cm.styled.covered} covered by ${cm.styled.by.join(", ")} against ${cm.plain.covered} unstyled)` : ""}`);
+  check(cm.styled.raised === "31",
+    `because the entry holding it rises above the rest (z ${cm.styled.raised})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const id of window.__menu?.entries ?? []) {
+      const entry = game.journal.get(id);
+      if (entry) await entry.delete();
+    }
+    const api = game.modules.get("illuminus").api;
+    if (window.__menu?.styleId) await api.deleteStyle(window.__menu.styleId);
+    window.__menu = undefined;
+  })()`);
+}
+
+// Ticking Disable Hovered State means the ordinary settings are the whole of
+// what a style says: pointing at something may still do whatever Foundry does,
+// and must do nothing more. Proved by comparing a styled journal against an
+// unstyled one — the properties that change under the pointer must be no more
+// than core's own.
+console.log("\n[59] With the hovered state off, only the ordinary settings apply");
+try {
+  const start = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Hover Off Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    // Every tab, not the four that start switched on: this is the question the
+    // tick box asks, and it has to answer the same way everywhere.
+    for (const group of Object.values(settings)) {
+      if (typeof group === "object" && "hoverOff" in group) group.hoverOff = true;
+    }
+    await api.updateStyle(style.id, {settings});
+
+    const content = "<h2>Heading</h2><p>Some words and a <a class='content-link'>link</a>.</p>"
+      + "<ul><li>Item</li></ul><blockquote><p>Boxed</p></blockquote>";
+    const made = {};
+    for (const [key, name] of [["styled", "Hover Off Styled"], ["plain", "Hover Off Plain"]]) {
+      const entry = await JournalEntry.create({name});
+      // One page holding all of it: a sheet shows the current page, and the
+      // things being pointed at were on the one it was not showing.
+      await entry.createEmbeddedDocuments("JournalEntryPage", [
+        {name: "One", type: "text", text: {content}}]);
+      if (key === "styled") await api.assignStyle(entry, style.id);
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      // Side by side rather than stacked, so pointing at one is never pointing
+      // through the other.
+      entry.sheet.setPosition({left: key === "styled" ? 20 : 700, top: 40, width: 640, height: 620});
+      await new Promise(r => setTimeout(r, 1200));
+      made[key] = entry.id;
+    }
+    const freeze = document.createElement("style");
+    freeze.id = "illuminus-hover-off-freeze";
+    freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
+    document.head.append(freeze);
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    window.__hoverOff = {styleId: style.id, ...made};
+    return JSON.stringify(made);
+  })()`);
+  JSON.parse(start);
+
+  // What changes under the pointer, property by property, for one element.
+  const changedBy = async (which, selector) => {
+    const place = async (where) => {
+      const spot = JSON.parse(await cdp.evaluate(`(() => {
+        const entry = game.journal.get(window.__hoverOff[${JSON.stringify(which)}]);
+        entry.sheet.bringToFront();
+        const el = entry.sheet.element.querySelector(${JSON.stringify(selector)});
+        if (!el) return "null";
+        const b = el.getBoundingClientRect();
+        return JSON.stringify([Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)]);
+      })()`));
+      if (!spot) return null;
+      await cdp.mouse("mouseMoved", where === "on" ? spot[0] : 5, where === "on" ? spot[1] : 5);
+      await new Promise((r) => setTimeout(r, 250));
+      return cdp.evaluate(`(() => {
+        const entry = game.journal.get(window.__hoverOff[${JSON.stringify(which)}]);
+        const el = entry.sheet.element.querySelector(${JSON.stringify(selector)});
+        const cs = getComputedStyle(el);
+        const out = {};
+        for (const name of cs) out[name] = cs.getPropertyValue(name);
+        const b = el.getBoundingClientRect();
+        const top = document.elementFromPoint(Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2));
+        return JSON.stringify({hovering: el.matches(":hover"), style: out,
+          topmost: top ? top.tagName + "." + (top.className || "") : "nothing"});
+      })()`);
+    };
+    await place("off");
+    const rest = JSON.parse(await place("off"));
+    const over = JSON.parse(await place("on"));
+    if (!rest || !over) return null;
+    const changed = Object.keys(over.style)
+      .filter((name) => !name.startsWith("--") && over.style[name] !== rest.style[name]);
+    return { hovering: over.hovering, topmost: over.topmost, changed };
+  };
+
+  const targets = [
+    [".journal-page-content h2", "a heading"],
+    [".journal-page-content p", "a paragraph"],
+    [".journal-page-content a.content-link", "a link"],
+    [".journal-page-content li", "a list item"],
+    [".journal-page-content blockquote", "a box"],
+    [".journal-sidebar .toc li.page", "a listed page"],
+    [".journal-sidebar button:not(.illuminus-fold)", "a panel button"],
+    [".journal-header .title", "the journal's name"]
+  ];
+  const extra = [];
+  const missed = [];
+  let reached = 0;
+  for (const [selector, what] of targets) {
+    const styled = await changedBy("styled", selector);
+    const plain = await changedBy("plain", selector);
+    if (!styled || !plain) { missed.push(what + " (not on screen)"); continue; }
+    if (styled.hovering) reached += 1;
+    else missed.push(what + " (pointer reached " + styled.topmost + ")");
+    const beyond = styled.changed.filter((name) => !plain.changed.includes(name));
+    if (beyond.length) extra.push(what + ": " + beyond.join(", "));
+  }
+  check(reached >= 6, `the pointer reached ${reached} of ${targets.length} things to point at`
+    + `${missed.length ? `:\n      ${missed.join("\n      ")}` : ""}`);
+  check(extra.length === 0,
+    `and with the switch off none of them changes beyond what Foundry does itself`
+    + `${extra.length ? `:\n      ${extra.join("\n      ")}` : ""}`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    document.getElementById("illuminus-hover-off-freeze")?.remove();
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const key of ["styled", "plain"]) {
+      const entry = game.journal.get(window.__hoverOff?.[key]);
+      if (entry) await entry.delete();
+    }
+    const api = game.modules.get("illuminus").api;
+    if (window.__hoverOff?.styleId) await api.deleteStyle(window.__hoverOff.styleId);
+    window.__hoverOff = undefined;
+  })()`);
+}
+
+// Two windows, styled apart: the journal's, whose width these limits clamp, and
+// the one Edit Page opens, which has a tab of its own. The editor's frame used
+// to be whatever the Window tab said, so there was no way to give the place you
+// write a look of its own.
+console.log("\n[60] The window's width, and the editor's own window");
+try {
+  const set = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Window Width Probe", settings: {
+      // The journal window, and a title bar the editor must not borrow.
+      window: {frameMinWidth: 400, frameMaxWidth: 620, color: "#ff0000", size: 12},
+      editor: {background: "#123456", color: "#00ff00", size: 26, frameMinWidth: 700,
+               borderTopWidth: 4, borderTopStyle: "solid", borderTopColor: "#ff00ff",
+               toolbarBackground: "#ff8800", toolbarColor: "#0000ff", toolbarSize: 20,
+               // The bar, one icon on it, the two named controls, and the page's
+               // own settings are four different things to paint.
+               toolbarButtonBackground: "#00ffff", toolbarButtonHoverBackground: "#ff00aa",
+               dropdownBackground: "#222266", dropdownColor: "#ffee00",
+               fieldBackground: "#663322", fieldColor: "#00ddaa", fieldSize: 19,
+               fieldCheckColor: "#ff00ff", fieldCheckSize: 22,
+               settingsBarBackground: "#0a5f5f", settingsBarPaddingTop: 7}
+    }});
+    const entry = await JournalEntry.create({name: "Window Width Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h1>One</h1><p>Body text.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    // Asked for more than the maximum on purpose: Foundry sets a window's width
+    // itself, and the question is whether the limit is drawn.
+    entry.sheet.setPosition({left: 40, top: 40, width: 900, height: 700});
+    await new Promise(r => setTimeout(r, 1400));
+    window.__widths = {entryId: entry.id, styleId: style.id};
+    const root = entry.sheet.element;
+    const cs = getComputedStyle(root);
+    return JSON.stringify({
+      wide: Math.round(root.getBoundingClientRect().width),
+      max: cs.maxWidth, min: cs.minWidth,
+      titleColor: getComputedStyle(root.querySelector(".window-header .window-title")).color
+    });
+  })()`);
+  const w = JSON.parse(set);
+  check(w.wide <= 621 && w.max === "620px",
+    `a journal window is drawn no wider than its maximum (asked 900, drawn ${w.wide})`);
+  check(w.min === "400px", `and no narrower than its minimum (${w.min})`);
+  check(w.titleColor === "rgb(255, 0, 0)", `the journal window keeps its own title (${w.titleColor})`);
+
+  const editor = await cdp.evaluate(`(async () => {
+    const entry = game.journal.get(window.__widths.entryId);
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
+    let sheet = null;
+    for (let i = 0; i < 150 && !sheet; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      sheet = [...foundry.applications.instances.values()].find(
+        a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
+    }
+    if (!sheet) return JSON.stringify({missing: true});
+    window.__widths.sheetId = sheet.id;
+    await new Promise(r => setTimeout(r, 1200));
+    const el = sheet.element;
+    const cs = getComputedStyle(el);
+    const button = el.querySelector("menu.editor-menu button:not(.pm-dropdown)");
+    const menu = el.querySelector("menu.editor-menu");
+    return JSON.stringify({
+      // Painted on the layer that carries the window's picture, over Foundry's
+      // own, so that a color of None leaves the window as Foundry draws it.
+      fill: getComputedStyle(el, "::after").backgroundColor,
+      border: cs.borderTopWidth + " " + cs.borderTopColor,
+      min: cs.minWidth, drawn: Math.round(el.getBoundingClientRect().width),
+      titleColor: getComputedStyle(el.querySelector(".window-header .window-title")).color,
+      titleSize: getComputedStyle(el.querySelector(".window-header .window-title")).fontSize,
+      toolbarFill: menu ? getComputedStyle(menu).backgroundColor : null,
+      toolbarColor: button ? getComputedStyle(button).color : null,
+      toolbarSize: button ? getComputedStyle(button).fontSize : null,
+      iconFill: getComputedStyle(el.querySelector("menu.editor-menu button:not(.pm-dropdown)")).backgroundColor,
+      dropdownFill: getComputedStyle(el.querySelector("menu.editor-menu .pm-dropdown")).backgroundColor,
+      dropdownColor: getComputedStyle(el.querySelector("menu.editor-menu .pm-dropdown")).color,
+      fieldFill: getComputedStyle(el.querySelector(".page-metadata select")).backgroundColor,
+      fieldColor: getComputedStyle(el.querySelector(".page-metadata select")).color,
+      fieldSize: getComputedStyle(el.querySelector(".page-metadata select")).fontSize,
+      labelColor: getComputedStyle(el.querySelector(".page-metadata label")).color,
+      checkColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]')).accentColor,
+      checkSize: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]')).width,
+      settingsBarFill: getComputedStyle(el.querySelector(".page-metadata")).backgroundColor,
+      settingsBarPad: getComputedStyle(el.querySelector(".page-metadata")).paddingTop,
+      // The page's own surface is what is written on, which the Page tab paints.
+      surface: getComputedStyle(el.querySelector(":scope > .window-content")).backgroundColor
+    });
+  })()`);
+  const ed = JSON.parse(editor);
+  check(!ed.missing && ed.fill === "rgb(18, 52, 86)",
+    `the editor's window takes its own fill (${ed.fill})`);
+  check(ed.border === "4px rgb(255, 0, 255)", `and its own edges (${ed.border})`);
+  check(ed.min === "700px" && ed.drawn >= 700,
+    `and its own width limits, apart from the journal's (${ed.min}, drawn ${ed.drawn})`);
+  check(ed.titleColor === "rgb(0, 255, 0)" && ed.titleSize === "26px",
+    `its title bar is its own rather than the journal window's (${ed.titleColor}, ${ed.titleSize})`);
+  check(ed.toolbarFill === "rgb(255, 136, 0)" && ed.toolbarColor === "rgb(0, 0, 255)",
+    `and the editing controls take a fill and an icon color (${ed.toolbarFill}, ${ed.toolbarColor})`);
+  check(ed.toolbarSize === "20px", `sized by the style (${ed.toolbarSize})`);
+  check(ed.iconFill === "rgb(0, 255, 255)" && ed.iconFill !== ed.toolbarFill,
+    `one icon takes a fill of its own, apart from the row's (${ed.iconFill} on ${ed.toolbarFill})`);
+  check(ed.dropdownFill === "rgb(34, 34, 102)" && ed.dropdownColor === "rgb(255, 238, 0)",
+    `the named controls take their own fill and lettering (${ed.dropdownFill}, ${ed.dropdownColor})`);
+  check(ed.fieldFill === "rgb(102, 51, 34)" && ed.fieldColor === "rgb(0, 221, 170)",
+    `and so do the page's own settings above them (${ed.fieldFill}, ${ed.fieldColor})`);
+  check(ed.fieldSize === "19px" && ed.labelColor === "rgb(0, 221, 170)",
+    `their size and the words beside them (${ed.fieldSize}, ${ed.labelColor})`);
+  // A browser draws the tick box itself, so it answers to the color of the tick
+  // rather than to a fill.
+  check(ed.checkColor === "rgb(255, 0, 255)" && ed.checkSize === "22px",
+    `and the tick box has a color and a size of its own (${ed.checkColor}, ${ed.checkSize})`);
+  // The strip they stand on is painted apart from the controls standing on it,
+  // as the editing bar is from its icons.
+  check(ed.settingsBarFill === "rgb(10, 95, 95)" && ed.settingsBarPad === "7px",
+    `the strip holding them takes its own fill and spacing (${ed.settingsBarFill}, ${ed.settingsBarPad})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.get(window.__widths?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__widths?.styleId) await api.deleteStyle(window.__widths.styleId);
+    window.__widths = undefined;
+  })()`);
+}
+
+// The Title tab is laid out by hand rather than by the shared pass: fewer, longer
+// categories, each reading in runs with a line drawn between them. The order is
+// the point, so it is asserted rather than left to the pass that sorts the rest.
+console.log("\n[61] The Title tab reads as it was laid out");
+try {
+  const laid = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Title Layout Probe"});
+    window.__title = {styleId: style.id};
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1600));
+    // The controls are in the DOM whether or not their category is open, and a
+    // closed one is what makes this affordable: opening every category on six
+    // tabs is a few thousand controls laid out at once, which took longer than
+    // the protocol will wait. Only the tab whose line is measured is opened.
+    const laidOut = {};
+    // The six levels share one tab, so the family's id is what opens it.
+    for (const which of ["title", "page", "headings", "body", "links", "lists",
+      "tables", "boxes", "secrets", "images", "boxStyles", "sidebar", "window", "editor"]) {
+      laidOut[which] = app.element.querySelector('.illuminus-tab[data-tab="' + which + '"]');
+    }
+    const tab = laidOut.title;
+
+    // Read from the class the state switch writes rather than from the computed
+    // style: six tabs of two and a half thousand controls is a great many forced
+    // layouts, and the run used to time out before it could say anything.
+    const showing = (el) => !el.classList.contains("is-state-hidden")
+      && !el.classList.contains("is-filtered-out");
+    // The lines closing a category off are chrome, drawn around every category
+    // alike; what is asserted here is the runs the schema asked for.
+    const read = (section) => [...section.querySelectorAll(
+      ".illuminus-divider:not(.illuminus-divider--edge), .illuminus-field[data-field]")]
+      .filter(showing)
+      .map(el => el.classList.contains("illuminus-divider") ? "---"
+        : el.querySelector(".illuminus-field__label").textContent.trim());
+    const sections = [...tab.querySelectorAll("details.illuminus-section")].map(section => ({
+      name: section.querySelector(".illuminus-section__label").textContent.trim(),
+      rows: read(section)
+    }));
+
+    // A line with a run under it, whichever state is on show: the divider is
+    // written before an ordinary control, so a state used to strand it.
+    const text = [...tab.querySelectorAll("details.illuminus-section")]
+      .find(s => s.querySelector(".illuminus-section__label").textContent.trim() === "Text");
+    text.open = true;
+    text.querySelector('.illuminus-state__option[data-state="hover"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    const hovered = read(text);
+
+    // Measured while the window is still open: a closed application's element
+    // is detached, and a detached element has no computed style at all.
+    const named = (tab) => [...tab.querySelectorAll("details.illuminus-section")].map(section => ({
+      name: section.querySelector(".illuminus-section__label").textContent.trim(),
+      rows: read(section)
+    }));
+    const page = named(laidOut.page);
+    const heading = named(laidOut.headings);
+    const body = named(laidOut.body);
+    const links = named(laidOut.links);
+    const lists = named(laidOut.lists);
+    const tables = named(laidOut.tables);
+    const boxes = named(laidOut.boxes);
+    const secrets = named(laidOut.secrets);
+    const images = named(laidOut.images);
+    const boxStyles = named(laidOut.boxStyles);
+    const sidebar = named(laidOut.sidebar);
+    const window_ = named(laidOut.window);
+    const editor = named(laidOut.editor);
+    // Measured with the Title tab on show and one category open: a hidden tab's
+    // boxes are all zero, which reads as a line drawn nowhere rather than as one
+    // drawn across.
+    app.changeTab("title", "sheet");
+    tab.querySelector("details.illuminus-section").open = true;
+    await new Promise(r => setTimeout(r, 400));
+    // A line between runs, not one of the pair closing the category off: those
+    // sit tighter, and are drawn around every category whatever its layout.
+    const line = tab.querySelector(".illuminus-divider:not(.illuminus-divider--edge)");
+    const seen = getComputedStyle(line);
+    const drawn = {
+      width: Math.round(line.getBoundingClientRect().width),
+      control: Math.round(tab.querySelector(".illuminus-field").getBoundingClientRect().width),
+      thickness: seen.borderTopWidth, color: seen.borderTopColor,
+      above: seen.marginTop, below: seen.marginBottom
+    };
+    await app.close({force: true});
+    return JSON.stringify({sections, page, heading, body, links, lists, tables, boxes, secrets,
+      images, boxStyles, sidebar, window: window_, editor, hovered, ...drawn});
+  })()`);
+  const t = JSON.parse(laid);
+  const names = t.sections.map((s) => s.name);
+  check(JSON.stringify(names) === JSON.stringify(
+    ["Size and Position", "Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border"]),
+    `the categories read in the order they were given (${names.join(" > ")})`);
+  const text = t.sections.find((s) => s.name === "Text").rows;
+  check(JSON.stringify(text) === JSON.stringify([
+    "Typeface", "Text Size", "Text Color", "Text Style", "Italic",
+    "---", "Alignment", "Capitals", "Letter Spacing", "Word Spacing", "Line Spacing",
+    "---", "Outline Color", "Outline Thickness",
+    "---", "Shadow Horizontal Offset", "Shadow Vertical Offset",
+    "Shadow Softness", "Shadow Color"]),
+    `Text holds its four runs, lines and all (${text.length} rows)`);
+  const fill = t.sections.find((s) => s.name === "Fill and Image").rows;
+  check(fill[0] === "Fill Color" && fill.filter((row) => row === "---").length === 3
+    && fill.includes("Inner Shadow Softness") && fill.includes("Outer Shadow Horizontal Offset"),
+    `Fill and Image holds the picture and both shadows (${fill.filter(r => r === "---").length} lines)`);
+  const border = t.sections.find((s) => s.name === "Border").rows;
+  check(border.slice(0, 3).join(", ") === "Top Style, Top Color, Top Thickness"
+    && border.filter((row) => row === "---").length === 4
+    && border.at(-1) === "Bottom-Right Corner",
+    `Border reads a side at a time and ends with the corners (${border.at(-1)})`);
+  const pageNames = t.page.map((s) => s.name);
+  check(JSON.stringify(pageNames) === JSON.stringify(
+    ["Size and Position", "Fill and Image", "Inner Spacing", "Border"]),
+    `the Page tab reads the same way (${pageNames.join(" > ")})`);
+  const pageFill = t.page.find((s) => s.name === "Fill and Image").rows;
+  check(pageFill[0] === "Fill Color" && pageFill.filter((row) => row === "---").length === 3
+    && pageFill.at(-1) === "Outer Shadow Color",
+    `with the surface's picture and both its shadows in one category (${pageFill.length} rows)`);
+  const headingNames = t.heading.map((s) => s.name);
+  check(JSON.stringify(headingNames) === JSON.stringify(
+    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Columns", "Folding"]),
+    `a heading level reads the same way (${headingNames.join(" > ")})`);
+  const headingText = t.heading.find((s) => s.name === "Text").rows;
+  check(headingText.filter((row) => row === "---").length === 3
+    && headingText.slice(-4).join(", ") === "Shadow Horizontal Offset, Shadow Vertical Offset, "
+      + "Shadow Softness, Shadow Color",
+    `with the lettering's own shadow at the foot of its Text (${headingText.slice(-1)[0]})`);
+  const bodyNames = t.body.map((s) => s.name);
+  check(JSON.stringify(bodyNames) === JSON.stringify(
+    ["Text", "Paragraphs", "Opening Capital", "Marked Text", "Code", "Code Block", "Dividers"]),
+    `and Body keeps its own parts in order (${bodyNames.join(" > ")})`);
+  const marks = t.body.find((s) => s.name === "Marked Text").rows;
+  check(marks[0] === "Quotation Typeface" && marks.filter((row) => row === "---").length === 4,
+    `each mark a run of its own (${marks.filter(r => r === "---").length} lines)`);
+  const linkNames = t.links.map((s) => s.name);
+  check(JSON.stringify(linkNames) === JSON.stringify(["Text", "Border", "Underline", "Highlight"]),
+    `Links reads lettering, edges, line, chip (${linkNames.join(" > ")})`);
+  const chip = t.links.find((s) => s.name === "Highlight").rows;
+  check(chip[0] === "Fill Color" && chip.filter((row) => row === "---").length === 4
+    && chip.at(-1) === "Right Padding",
+    `the chip carrying its picture, its shadows and its spacing (${chip.length} rows)`);
+  const listNames = t.lists.map((s) => s.name);
+  check(JSON.stringify(listNames) === JSON.stringify(
+    ["Size and Position", "Outer Spacing", "Bullets and Numbers", "Definition Lists"]),
+    `Lists reads where it sits, then the mark, then the definitions (${listNames.join(" > ")})`);
+  const defs = t.lists.find((s) => s.name === "Definition Lists").rows;
+  check(defs[0] === "Term Typeface" && defs.filter((row) => row === "---").length === 5
+    && defs.at(-1) === "Definition Shadow Color",
+    `the term and its definition each a lettering, an outline and a shadow (${defs.length} rows)`);
+  const tableNames = t.tables.map((s) => s.name);
+  check(JSON.stringify(tableNames) === JSON.stringify(
+    ["Size and Position", "Text", "Outer Spacing", "Border", "Header Row", "Table Rows",
+     "Cell Styles", "Table Caption"]),
+    `Tables reads the table, then its parts (${tableNames.join(" > ")})`);
+  const cells = t.tables.find((s) => s.name === "Cell Styles").rows;
+  check(cells[0] === "Top Padding" && cells.filter((row) => row === "---").length === 4,
+    `a cell's room and its edges in one category (${cells.length} rows)`);
+  const boxNames = t.boxes.map((s) => s.name);
+  check(JSON.stringify(boxNames) === JSON.stringify(
+    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Collapsible"]),
+    `Boxes reads the same way (${boxNames.join(" > ")})`);
+  const secretNames = t.secrets.map((s) => s.name);
+  check(JSON.stringify(secretNames) === JSON.stringify(
+    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Once Revealed",
+     "Reveal Button"]),
+    `and Secrets ends with what reveals it (${secretNames.join(" > ")})`);
+  const button = t.secrets.find((s) => s.name === "Reveal Button").rows;
+  check(button[0] === "Button Text Size" && button.filter((row) => row === "---").length === 5,
+    `the button in six runs of its own (${button.filter(r => r === "---").length} lines)`);
+  // The seven laid out from the map rather than in their own literal: the
+  // categories they were given, in the order they were given them.
+  const laidTabs = {
+    images: ["Size and Position", "Inner Spacing", "Outer Spacing", "Border", "Image Caption",
+      "Sound and Video"],
+    boxStyles: ["Size and Position", "Text", "Fill and Image", "Inner Spacing", "Outer Spacing",
+      "Border", "Headings Inside"],
+    sidebar: ["Size and Position", "Fill and Image", "Inner Spacing", "Border", "Categories",
+      "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
+    window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
+    editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
+      "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls"]
+  };
+  for (const [tab, wanted] of Object.entries(laidTabs)) {
+    const got = t[tab].map((s) => s.name);
+    check(JSON.stringify(got) === JSON.stringify(wanted),
+      `${tab} reads as it was laid out (${got.join(" > ")})`);
+  }
+  const panelFill = t.sidebar.find((s) => s.name === "Fill and Image").rows;
+  check(panelFill[0] === "Fill Color" && panelFill.includes("Inner Shadow Softness"),
+    `the panel's fill, picture and shading in one category (${panelFill.length} rows)`);
+  check(t.hovered.filter((row) => row === "---").length === 3,
+    `the lines are still there in the pointed-at state (${t.hovered.filter(r => r === "---").length})`);
+  check(t.thickness === "1px" && t.width >= t.control - 2,
+    `and each is drawn across the whole row (${t.thickness}, ${t.width} of ${t.control})`);
+  // Room either side, and enough contrast to be seen against the tab.
+  check(t.above === "16px" && t.below === "16px", `with room above and below (${t.above} / ${t.below})`);
+  const alpha = Number(t.color.match(/[\d.]+\)$/)?.[0].slice(0, -1) ?? 1);
+  check(alpha >= 0.25, `and a line that shows against the panel (${t.color})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    if (window.__title?.styleId) await api.deleteStyle(window.__title.styleId);
+    window.__title = undefined;
+  })()`);
+}
+
+// Pointing at a journal must not move it. Every control has a state's own twin
+// now, and a twin says nothing by leaving its number at zero — but a number is
+// clamped to its control's range, so the panel-width twin came back as the
+// control's 120px minimum. Hovering anywhere in a styled sheet then shrank the
+// contents panel from 300 to 120, and every click target slid sideways with it:
+// a secret passage's Reveal button walked out from under the pointer.
+console.log("\n[62] Pointing at a journal moves nothing");
+try {
+  const start = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Stillness Probe"});
+    const entry = await JournalEntry.create({name: "Stillness Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<p>Open text.</p><section class='secret' id='secret-still'><p>Hidden words.</p></section>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    entry.sheet.setPosition({left: 40, top: 40, width: 700, height: 620});
+    entry.sheet.bringToFront();
+    await new Promise(r => setTimeout(r, 1400));
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    window.__still = {entryId: entry.id, styleId: style.id};
+    const root = entry.sheet.element;
+    const button = root.querySelector("button.reveal");
+    const box = button.getBoundingClientRect();
+    return JSON.stringify({
+      panel: Math.round(root.querySelector(".journal-sidebar").getBoundingClientRect().width),
+      button: [Math.round(box.x), Math.round(box.y)],
+      at: [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)]
+    });
+  })()`);
+  const rest = JSON.parse(start);
+
+  await cdp.mouse("mouseMoved", rest.at[0], rest.at[1]);
+  await new Promise((r) => setTimeout(r, 300));
+  const pointed = JSON.parse(await cdp.evaluate(`(() => {
+    const root = game.journal.get(window.__still.entryId).sheet.element;
+    const button = root.querySelector("button.reveal");
+    const box = button.getBoundingClientRect();
+    const top = document.elementFromPoint(Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2));
+    return JSON.stringify({
+      panel: Math.round(root.querySelector(".journal-sidebar").getBoundingClientRect().width),
+      button: [Math.round(box.x), Math.round(box.y)],
+      reaches: top?.classList.contains("reveal") ?? false
+    });
+  })()`));
+  check(pointed.panel === rest.panel,
+    `the contents panel keeps its width under the pointer (${rest.panel} then ${pointed.panel})`);
+  check(JSON.stringify(pointed.button) === JSON.stringify(rest.button),
+    `and a button stays where it was drawn (${rest.button.join(",")} then ${pointed.button.join(",")})`);
+  check(pointed.reaches, "so the pointer is still on it");
+
+  await cdp.click(rest.at[0], rest.at[1]);
+  await new Promise((r) => setTimeout(r, 700));
+  const after = JSON.parse(await cdp.evaluate(`(() => {
+    const entry = game.journal.get(window.__still.entryId);
+    return JSON.stringify({
+      classes: entry.sheet.element.querySelector("section.secret")?.className ?? "",
+      stored: /revealed/.test(entry.pages.contents[0].text.content),
+      label: entry.sheet.element.querySelector("button.reveal")?.textContent.trim() ?? ""
+    });
+  })()`));
+  check(after.classes.includes("revealed") && after.stored,
+    `and Reveal reveals the passage (${after.classes || "nothing happened"})`);
+  check(after.label === "Hide", `the button offering to hide it again (${after.label})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.get(window.__still?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__still?.styleId) await api.deleteStyle(window.__still.styleId);
+    window.__still = undefined;
+  })()`);
 }
 
 console.log("\n[56] Console is clean");

@@ -45,6 +45,15 @@ const SIDES = ["Top", "Right", "Bottom", "Left"];
 /** The four corners, in border-radius shorthand order. */
 const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
 
+/**
+ * What a section's own order writes to ask for a line across the tab.
+ *
+ * A tab laid out by hand reads in runs — the lettering, then how it is spaced,
+ * then what is drawn around it — and a line between them says so without a
+ * heading for each.
+ */
+export const DIVIDER = "---";
+
 const CHOICES = {
   align: ["left", "center", "right", "justify"],
   alignNoJustify: ["left", "center", "right"],
@@ -70,8 +79,8 @@ const CHOICES = {
   // Every CSS weight, each with and without a slant, ordered light to heavy so
   // the list reads as a ramp rather than a pile.
   textStyle: ["light", "normal", "bold"],
-  numberShown: ["shown", "notShown"],
   whenEmpty: ["show", "hide"],
+  foldIcon: ["chevron", "caret", "angle", "arrow", "plus"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
 };
@@ -136,7 +145,11 @@ const emitDropCap = (value) => {
     "line-height": "0.82",
     gap: "0.08em",
     weight: "bold",
-    tint: "var(--ill-body-drop-cap-color)"
+    // Through the state's own color first: the tint is a value naming another
+    // control, so a hovered color reaches the letter only if the chain does the
+    // asking. Unset, the hovered name resolves to nothing and the ordinary
+    // color is what is used.
+    tint: "var(--ill-body-hover-drop-cap-color, var(--ill-body-drop-cap-color))"
   };
 };
 
@@ -163,6 +176,20 @@ const emitBullet = (value) => ({
   diamond: '"\\2726  "', star: '"\\2605  "', dash: '"\\2014  "', arrow: '"\\27A4  "'
 }[value] ?? "disc");
 
+/**
+ * The marker a folding heading wears.
+ *
+ * FontAwesome draws an icon as a glyph in `::before`'s `content`, so naming a
+ * marker means naming that glyph — the icon element the module writes carries
+ * the family already, and only the character changes. Nothing is emitted for an
+ * unchosen one, which is what leaves a state's own marker following the
+ * ordinary one.
+ */
+const emitFoldIcon = (value) => ({
+  chevron: '"\\f054"', caret: '"\\f0da"', angle: '"\\f105"',
+  arrow: '"\\f061"', plus: '"\\f067"'
+}[value] ?? null);
+
 /** Multi-word CSS keywords that differ from their camelCase choice value. */
 const KEYWORD = {
   softLight: "soft-light", hardLight: "hard-light", colorBurn: "color-burn",
@@ -180,8 +207,6 @@ const emitKeyword = (value) => KEYWORD[value] ?? value;
 const emitWhenEmpty = (value) => (value === "hide" ? "none" : "block");
 
 /** A page number that is not displayed leaves its row to the page's name. */
-const emitNumberShown = (value) => (value === "notShown" ? "none" : "block");
-
 /**
  * How the lettering looks, as one choice rather than a thickness and a slant
  * side by side. Two controls that are almost always set together read as one
@@ -267,6 +292,26 @@ function cornerFields(prefix, radius = 0) {
 }
 
 /**
+ * The controls for a folding marker: whether there is one, what it looks like,
+ * and how far it turns when what it holds is open.
+ *
+ * Folding itself is behaviour rather than paint, so the switch is a real
+ * control emitting a real property — the marker is always in the markup and the
+ * stylesheet decides whether a reader can see it. That keeps the compiler's one
+ * rule intact: a style supplies values, never rules.
+ */
+function foldFields() {
+  return [
+    { type: "toggle", name: "foldShown", default: false, on: "inline-flex", off: "none" },
+    select("foldIcon", "chevron", CHOICES.foldIcon, { emit: emitFoldIcon }),
+    col("foldColor", ""),
+    num("foldSize", 0, "px", 0, 80, 1, { zeroAs: "inherit" }),
+    num("foldGap", 6, "px", 0, 40, 1),
+    num("foldTurn", 90, "deg", -180, 180, 5)
+  ];
+}
+
+/**
  * Four fields, one per side. Used for both padding and margin; `values` may be
  * a single number or a per-side object.
  */
@@ -302,14 +347,16 @@ function textFields(prefix, defaults = {}) {
   const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
   return [
     font(n("Font"), d("font", "")),
-    num(n("Size"), d("size", 16), "px", 6, 200, 1),
-    col(n("Color"), d("color", "#241b10")),
-    ...textStyleField(n("TextStyle"), d("weight", "400"), d("style", "normal")),
-    select(n("Caps"), d("caps", "none"), CHOICES.caps, { emit: emitCaps }),
+    // A size or a line height of zero means "whatever this already had", which
+    // is what lets a control start by doing nothing at all.
+    num(n("Size"), d("size", 0), "px", 0, 200, 1, { zeroAs: "inherit" }),
+    col(n("Color"), d("color", "")),
+    ...textStyleField(n("TextStyle"), d("weight", "inherit"), d("style", "inherit"), { inherit: true }),
+    select(n("Caps"), d("caps", "inherit"), ["inherit", ...CHOICES.caps], { emit: emitCaps }),
     num(n("LetterSpacing"), d("letterSpacing", 0), "px", -5, 40, 0.5),
     num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
-    num(n("LineHeight"), d("lineHeight", 1.4), "", 0.5, 4, 0.05),
-    select(n("Align"), d("align", "left"), d("choices", CHOICES.alignNoJustify))
+    num(n("LineHeight"), d("lineHeight", 0), "", 0, 4, 0.05, { zeroAs: "inherit" }),
+    select(n("Align"), d("align", "inherit"), d("choices", ["inherit", ...CHOICES.alignNoJustify]))
   ];
 }
 
@@ -524,6 +571,15 @@ function outlineFields(prefix = "") {
 }
 
 /** The section set shared by heading levels and the journal title. */
+/**
+ * The order a heading level's categories read in, and the runs inside each.
+ *
+ * Laid out by hand, as the Title and Page tabs are: the lettering and its
+ * shadow are one question, the fill and its picture and both its shadows are
+ * another, and the edges keep their corners.
+ */
+const HEADING_ORDER = ["text", "background", "padding", "margin", "border", "columns", "fold"];
+
 function bannerSections(defaults = {}) {
   return [
     {
@@ -532,18 +588,71 @@ function bannerSections(defaults = {}) {
       // edge, which is what `paint-order` in the stylesheet is for: a stroke
       // painted over the fill eats into the shapes and thickens a display face
       // until it closes up.
-      fields: textFields("", defaults)
+      order: [
+        "font", "size", "color", "textStyle", "textStyleSlant",
+        DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+        DIVIDER, "outlineColor", "outlineWidth",
+        DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+      ],
+      fields: [...textFields("", defaults), ...textShadowFields()]
     },
-    { id: "textShadow", fields: textShadowFields() },
-    { id: "margin", fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 }) },
-    { id: "padding", fields: spacingFields("padding", defaults.padding ?? 0) },
-    { id: "background", fields: [col("background", defaults.background ?? "#00000000"), ...imageFields()] },
-    { id: "border", fields: borderFields("border", defaults.border) },
-    { id: "corners", fields: cornerFields("corner") },
+    {
+      id: "background",
+      label: "ILLUMINUS.Sections.fillAndImage.label",
+      hint: "ILLUMINUS.Sections.fillAndImage.hint",
+      order: [
+        "background",
+        DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+        DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+        "innerShadowSpread", "innerShadowColor",
+        DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+      ],
+      fields: [col("background", defaults.background ?? "#00000000"), ...imageFields()]
+    },
+    {
+      id: "padding",
+      order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+      fields: spacingFields("padding", defaults.padding ?? 0)
+    },
+    {
+      id: "margin",
+      order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+      fields: spacingFields("margin", defaults.margin ?? 0, { min: -100 })
+    },
+    {
+      id: "border",
+      order: [
+        "borderTopStyle", "borderTopColor", "borderTopWidth",
+        DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+        DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+        DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+        DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      ],
+      // A heading level may ask for the line Foundry draws under it — the first
+      // two levels have one — without asking for the other three sides.
+      fields: [
+        ...borderFields("border", defaults.border).map((field) =>
+          field.name === "borderBottomWidth" && defaults.borderBottom
+            ? { ...field, default: defaults.borderBottom } : field),
+        ...cornerFields("corner")
+      ]
+    },
     // Heading levels only: these set the text *under* the heading. The
     // journal's own title has no text of its own to set.
     ...(defaults.columns
-      ? [{ id: "columns", hint: "ILLUMINUS.Sections.headingColumns.hint", fields: columnFields() }]
+      ? [{
+          id: "columns",
+          hint: "ILLUMINUS.Sections.headingColumns.hint",
+          order: ["columnCount", "columnGap", "columnRuleStyle", "columnRuleColor", "columnRuleWidth"],
+          fields: columnFields()
+        },
+         // Heading levels only, for the same reason: folding hides the run of
+         // text a heading governs, and the journal's title governs none.
+         {
+           id: "fold",
+           order: ["foldShown", "foldIcon", "foldSize", "foldColor", "foldGap", "foldTurn"],
+           fields: foldFields()
+         }]
       : [])
   ];
 }
@@ -590,25 +699,38 @@ export const GROUPS = [
       {
         id: "entries",
         fields: [
-          ...textFields("", { size: 14, color: "#f0f0e0", weight: "400", lineHeight: 2.3 }),
-          col("hoverColor", "#ffffff"),
-          col("activeColor", "#ffffff"),
+          // The panel is Foundry's until a style paints it: an entry's lettering,
+          // and what it looks like pointed at or being read, all follow.
+          ...textFields(""),
+          col("hoverColor", ""),
+          col("activeColor", ""),
           ...outlineFields("hover"),
           ...outlineFields("active"),
           ...textStyleField("activeTextStyle", "400", "normal"),
-          col("hoverBackground", "#00000000"), ...imageFields("hover"),
-          col("activeBackground", "#00000000"), ...imageFields("active"),
+          // Named for the entry rather than for the state alone. `hoverBackground`
+          // was the entry's fill, but the panel's own fill is `background` in
+          // the same tab — so the pointed-at rule the generator mirrors for the
+          // panel read the entry's color and painted the whole panel with it
+          // the moment a pointer entered it.
+          col("entryBackground", "#00000000"), ...imageFields("entry"),
+          col("entryHoverBackground", "#00000000"), ...imageFields("entryHover"),
+          col("entryActiveBackground", "#00000000"), ...imageFields("entryActive"),
           ...spacingFields("entryPadding", 0, { max: 60 }),
-          ...borderFields("entryBorder", { color: "#00000000" }),
+          ...borderFields("entryBorder", { color: "#c9593f" }).map((field) =>
+            field.name === "entryBorderBottomWidth" ? { ...field, default: 1 } : field),
           ...SIDES.map((side) => col(`hoverEntryBorder${side}Color`, "")),
-          ...SIDES.map((side) => col(`activeEntryBorder${side}Color`, ""))
+          ...SIDES.map((side) => col(`activeEntryBorder${side}Color`, "")),
+          ...cornerFields("entryCorner"),
+          ...spacingFields("entryMargin", 0, { min: -40, max: 60 })
         ]
       },
       {
         id: "number",
         fields: [
-          select("numberShown", "shown", CHOICES.numberShown, { emit: emitNumberShown }),
-          col("numberColor", "#8a8a8a"),
+          // A tick box rather than a two-way choice: "shown or not" is what a tick
+          // box is for, and page numbers are off until somebody wants them.
+          { type: "toggle", name: "numberShown", default: true, on: "block", off: "none" },
+          col("numberColor", "#666666"),
           num("numberSize", 14, "px", 6, 60, 1),
           ...textStyleField("numberTextStyle", "400", "normal"),
           select("numberAlign", "center", CHOICES.alignNoJustify),
@@ -620,10 +742,30 @@ export const GROUPS = [
         fields: [
           font("headingFont", ""),
           num("headingSize", 14, "px", 6, 60, 1),
-          col("headingColor", "#c8c8b8"),
+          col("headingColor", ""),
           ...textStyleField("headingTextStyle", "400", "normal"),
-          col("headingHoverColor", "#ffffff"),
-          num("headingIndent", 16, "px", 0, 120, 2),
+          col("headingHoverColor", ""),
+          // The heading a reader chose in the panel. Foundry marks the page
+          // being read and nothing finer, so `scripts/toc-current.mjs` marks
+          // the entry that was clicked — nothing is stored, as with the folding
+          // markers.
+          col("headingActiveColor", ""),
+          ...textStyleField("headingActiveTextStyle", "400", "normal"),
+          num("headingActiveOutlineWidth", 0, "px", 0, 20, 0.5),
+          col("headingActiveOutlineColor", ""),
+          col("headingBackground", "#00000000"), ...imageFields("heading"),
+          col("headingActiveBackground", "#00000000"), ...imageFields("headingActive"),
+          ...SIDES.map((side) => col(`headingActiveBorder${side}Color`, "")),
+          ...spacingFields("headingPadding", 0, { max: 60 }),
+          ...borderFields("headingBorder", { color: "#00000000" }),
+          ...cornerFields("headingCorner"),
+          ...spacingFields("headingMargin", 0, { min: -40, max: 60 }),
+          // The indent is the list's, not the item's: it moves every listed
+          // heading in from the page entry above them together.
+          // How far the whole list is pushed in, which belongs to the list
+          // rather than to a row in it — so there is no such thing as the
+          // indent of the heading a reader chose.
+          num("headingIndent", 16, "px", 0, 120, 2, { noSelected: true }),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05)
         ]
       },
@@ -632,7 +774,7 @@ export const GROUPS = [
         fields: [
           font("categoryFont", ""),
           num("categorySize", 24, "px", 6, 80, 1),
-          col("categoryColor", "#f0f0e0"),
+          col("categoryColor", ""),
           ...textStyleField("categoryTextStyle", "700", "normal"),
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
@@ -642,21 +784,16 @@ export const GROUPS = [
           // it as much as it needs lettering — without it the group name sits
           // hard against the first page under it.
           ...spacingFields("categoryPadding", 0, { max: 60 }),
-          ...spacingFields("categoryMargin", 0, { min: -40, max: 60 })
-        ]
-      },
-      {
-        id: "categoryBorder",
-        fields: [
           ...borderFields("categoryBorder", { color: "#00000000" }),
-          ...cornerFields("categoryCorner")
+          ...cornerFields("categoryCorner"),
+          ...spacingFields("categoryMargin", 0, { min: -40, max: 60 })
         ]
       },
       {
         id: "search",
         fields: [
           col("searchBackground", "#00000000"), ...imageFields("search"),
-          col("searchColor", "#f0f0e0"),
+          col("searchColor", ""),
           col("searchPlaceholderColor", "#8a8a8a"),
           num("searchSize", 14, "px", 6, 40, 1),
           ...borderFields("searchBorder", { color: "#00000000" }),
@@ -666,10 +803,10 @@ export const GROUPS = [
       {
         id: "buttons",
         fields: [
-          col("buttonColor", "#f0f0e0"),
+          col("buttonColor", ""),
           col("buttonBackground", "#00000000"), ...imageFields("button"),
-          col("buttonBorderColor", "#8a8a8a"),
-          col("buttonHoverColor", "#ffffff"),
+          col("buttonBorderColor", ""),
+          col("buttonHoverColor", ""),
           col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
           col("buttonHoverBorderColor", "#c9a961"),
           num("buttonBorderWidth", 1, "px", 0, 12, 1),
@@ -694,13 +831,26 @@ export const GROUPS = [
           ...cornerFields("corner")
         ]
       },
+      // How wide the window may be drawn. Foundry sets a window's width itself,
+      // as a number a person can drag; these are the limits it is drawn within,
+      // which is what keeps a journal readable on a wide screen and usable on a
+      // narrow one. Named for the frame rather than `minWidth`, which already
+      // means the least width of a tag, and `maxWidth`, which already means the
+      // measure of the text on a page.
+      {
+        id: "frameSize",
+        fields: [
+          num("frameMinWidth", 0, "px", 0, 3000, 10, { zeroAs: "auto" }),
+          num("frameMaxWidth", 0, "px", 0, 3000, 10, { zeroAs: "none" })
+        ]
+      },
       {
         id: "titleBar",
         fields: [
           col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
           font("font", ""),
-          num("size", 16, "px", 6, 60, 1),
-          col("color", "#f7f3e8"),
+          num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
+          col("color", ""),
           ...textStyleField("textStyle", "700", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
@@ -728,8 +878,11 @@ export const GROUPS = [
           col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
           col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
           num("pageButtonSize", 14, "px", 6, 48, 1),
-          select("pageButtonSide", "right", ["left", "right"], { emit: emitButtonSide }),
-          num("pageButtonOffset", 5, "px", -100, 600, 1),
+          // No hovered twin for either: where the pencil sits is decided by one
+          // control naming the other, and a button that moved as the pointer
+          // reached it would be a button nobody could click.
+          select("pageButtonSide", "right", ["left", "right"], { emit: emitButtonSide, noTwin: true }),
+          num("pageButtonOffset", 5, "px", -100, 600, 1, { noTwin: true }),
           ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
           ...cornerFields("pageButtonCorner", 3)
         ]
@@ -738,44 +891,132 @@ export const GROUPS = [
   },
 
     {
-    id: "page",
-    icon: "fa-solid fa-scroll",
+    id: "title",
+    icon: "fa-solid fa-t",
+    order: ["layout", "text", "background", "padding", "margin", "border"],
+    // Laid out by hand rather than by the shared pass: fewer, longer sections,
+    // each reading in runs with a line drawn between them. The lettering keeps
+    // its own shadow, the fill keeps its picture and both its shadows, and the
+    // edges keep their corners — three questions rather than seven.
     sections: [
+      // Whether the journal's name is drawn at all. Some pages carry their own
+      // title in the text, and a second one above it is a second title.
+      { id: "layout", fields: [
+        { type: "toggle", name: "shown", default: true, on: "block", off: "none" }
+      ] },
+      {
+        id: "text",
+        order: [
+          "font", "size", "color", "textStyle", "textStyleSlant",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
+        fields: [
+          // The name as Foundry draws it: a centred banner, larger than the
+          // prose, on a bar of its own.
+          ...textFields("", { size: 32, color: "#e7d1b1", align: "center" }),
+          ...textShadowFields()
+        ]
+      },
       {
         id: "background",
+        label: "ILLUMINUS.Sections.fillAndImage.label",
+        hint: "ILLUMINUS.Sections.fillAndImage.hint",
+        order: [
+          "background",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+        ],
+        fields: [col("background", "#302831"), ...imageFields()]
+      },
+      {
+        id: "padding",
+        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+        fields: spacingFields("padding", 0)
+      },
+      {
+        id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+        fields: spacingFields("margin", 0, { min: -100 })
+      },
+      {
+        id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
+        fields: [...borderFields("border"), ...cornerFields("corner")]
+      }
+    ]
+  },
+
+  {
+    id: "page",
+    icon: "fa-solid fa-scroll",
+    // Laid out by hand, as the Title tab is: the fill, its picture and both its
+    // shadows are one question about the surface, and the edges and their
+    // corners are one question about what is drawn around it.
+    order: ["layout", "background", "padding", "border"],
+    sections: [
+      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      {
+        id: "background",
+        label: "ILLUMINUS.Sections.fillAndImage.label",
+        // The outer shadow keeps the note it had when it was a section of its
+        // own: Foundry's window clips it, and only an export ever shows it.
+        hint: "ILLUMINUS.Sections.pageFillAndImage.hint",
+        order: [
+          "background",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+        ],
         fields: [
-          col("background", "#ede0c8"),
+          col("background", "#0b0a13e6"),
           { type: "image", name: "texture", default: "" },
           select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
           select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
-          select("textureBlend", "multiply", CHOICES.blend, { emit: emitKeyword }),
-          num("textureOpacity", 100, "%", 0, 100, 1)
+          select("textureBlend", "normal", CHOICES.blend, { emit: emitKeyword }),
+          num("textureOpacity", 100, "%", 0, 100, 1),
+          ...shadowFields("shadow"),
+          ...shadowFields("innerShadow")
         ]
       },
-      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
-      { id: "padding", fields: spacingFields("padding", 24) },
-      { id: "border", fields: borderFields("border") },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", hint: "ILLUMINUS.Sections.pageShadow.hint", fields: shadowFields("shadow") },
-      { id: "innerShadow", fields: shadowFields("innerShadow") }
+      {
+        id: "padding",
+        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+        fields: spacingFields("padding", { top: 0, right: 12, bottom: 0, left: 0 })
+      },
+      {
+        id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
+        fields: [...borderFields("border"), ...cornerFields("corner")]
+      }
     ]
   },
 
 
   {
-    id: "title",
-    icon: "fa-solid fa-t",
-    sections: bannerSections({
-      size: 36, color: "#3b2412", weight: "700", align: "center", lineHeight: 1.2
-    })
-  },
-
-  {
     id: "heading1",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 28, color: "#5e1914", weight: "700", lineHeight: 1.2, margin: { top: 16, bottom: 8 },
+      color: "#f7f3e8", size: 28, lineHeight: 0, margin: { top: 0, bottom: 8 },
+      border: { color: "#5d142b" }, borderBottom: 2,
       columns: true
     })
   },
@@ -783,8 +1024,10 @@ export const GROUPS = [
     id: "heading2",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 22, color: "#7a3b16", weight: "700", lineHeight: 1.25, margin: { top: 16, bottom: 8 },
+      color: "#f7f3e8", size: 21, lineHeight: 0, margin: { top: 21, bottom: 8 },
+      border: { color: "#5d142b" }, borderBottom: 1,
       columns: true
     })
   },
@@ -792,9 +1035,9 @@ export const GROUPS = [
     id: "heading3",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 18, color: "#5a4326", weight: "700", style: "italic", lineHeight: 1.3,
-      margin: { top: 14, bottom: 6 },
+      color: "#f7f3e8", size: 17.5, lineHeight: 0, margin: { top: 17.5, bottom: 8 },
       columns: true
     })
   },
@@ -806,9 +1049,9 @@ export const GROUPS = [
     id: "heading4",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 16, color: "#5a4326", weight: "700", lineHeight: 1.3,
-      margin: { top: 12, bottom: 5 },
+      color: "#f7f3e8", size: 14, lineHeight: 0, margin: { top: 14, bottom: 8 },
       columns: true
     })
   },
@@ -816,9 +1059,9 @@ export const GROUPS = [
     id: "heading5",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 15, color: "#5a4326", weight: "600", caps: "smallCaps", lineHeight: 1.3,
-      margin: { top: 12, bottom: 4 },
+      color: "#f7f3e8", size: 11.62, lineHeight: 0, margin: { top: 11.62, bottom: 8 },
       columns: true
     })
   },
@@ -826,9 +1069,9 @@ export const GROUPS = [
     id: "heading6",
     icon: "fa-solid fa-heading",
     family: "headings",
+    order: HEADING_ORDER,
     sections: bannerSections({
-      size: 14, color: "#6b5636", weight: "600", style: "italic", lineHeight: 1.3,
-      margin: { top: 10, bottom: 4 },
+      color: "#f7f3e8", size: 9.38, lineHeight: 0, margin: { top: 9.38, bottom: 8 },
       columns: true
     })
   },
@@ -836,13 +1079,29 @@ export const GROUPS = [
   {
     id: "body",
     icon: "fa-solid fa-paragraph",
+    // Laid out by hand, as the tabs before it are: what a run reads in is said
+    // by a line across the tab rather than by a category of its own.
+    order: ["text", "paragraph", "dropCap", "marks", "code", "codeBlock", "dividers"],
     sections: [
       {
         id: "text",
-        fields: textFields("", { size: 16, color: "#241b10", lineHeight: 1.5, choices: CHOICES.align })
+        order: [
+          "font", "size", "color", "textStyle", "textStyleSlant",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight"
+        ],
+        // Every one of these follows whatever is painting the page until it is
+        // set: an empty color, a size of 0, an alignment of "inherit". A new
+        // style therefore reads exactly as an unstyled journal does, in any
+        // game system, rather than in the one it was written on.
+        fields: textFields("", { choices: ["inherit", ...CHOICES.align] })
       },
       {
         id: "paragraph",
+        order: [
+          "firstLineIndent",
+          DIVIDER, "marginTop", "marginBottom", "marginLeft", "marginRight",
+          "whiteSpace", "wordBreak"
+        ],
         fields: [
           ...spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 }),
           num("firstLineIndent", 0, "px", -100, 200, 2),
@@ -854,15 +1113,22 @@ export const GROUPS = [
         // What the editor's own toolbar buttons produce. Highlight arrives as
         // Foundry's yellow-on-black until it is set here.
         id: "marks",
+        order: [
+          "quoteFont", "quoteColor", "quoteStyle",
+          DIVIDER, "highlightColor", "highlightBackground",
+          DIVIDER, "strikeColor", "strikeThickness",
+          DIVIDER, "underlineColor", "underlineThickness", "underlineOffset",
+          DIVIDER, "abbrColor", "abbrLine"
+        ],
         fields: [
           col("highlightBackground", "#e8c979"),
           col("highlightColor", "#241b10"),
-          col("strikeColor", "#7a2010"),
+          col("strikeColor", ""),
           num("strikeThickness", 1, "px", 0, 12, 1),
-          col("underlineColor", "#8a6a3d"),
+          col("underlineColor", ""),
           num("underlineThickness", 1, "px", 0, 12, 1),
           num("underlineOffset", 2, "px", 0, 20, 1),
-          col("abbrColor", "#5a4326"),
+          col("abbrColor", ""),
           select("abbrLine", "dotted", CHOICES.lineStyle),
           font("quoteFont", ""),
           select("quoteStyle", "italic", CHOICES.fontStyle),
@@ -871,14 +1137,27 @@ export const GROUPS = [
       },
       {
         id: "code",
+        order: [
+          "codeFont", "codeSize", "codeColor", "codeBorderColor",
+          DIVIDER, "codeBackground",
+          DIVIDER, "codeTexture", "codeTextureFit", "codeTexturePosition",
+          "codeTextureBlend", "codeTextureOpacity",
+          DIVIDER, "codeInnerShadowOffsetX", "codeInnerShadowOffsetY", "codeInnerShadowBlur",
+          "codeInnerShadowSpread", "codeInnerShadowColor",
+          DIVIDER, "codeShadowOffsetX", "codeShadowOffsetY", "codeShadowBlur",
+          "codeShadowSpread", "codeShadowColor",
+          DIVIDER, "codePaddingTop", "codePaddingBottom", "codePaddingLeft", "codePaddingRight",
+          DIVIDER, "codeCornerTopLeft", "codeCornerTopRight", "codeCornerBottomLeft",
+          "codeCornerBottomRight", "codeBorderWidth"
+        ],
         fields: [
           font("codeFont", "monospace"),
           num("codeSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
-          col("codeColor", "#3a2c18"),
-          col("codeBackground", "#00000012"), ...imageFields("code"),
-          ...spacingFields("codePadding", { top: 1, right: 4, bottom: 1, left: 4 }, { max: 60 }),
-          ...cornerFields("codeCorner", 3),
-          col("codeBorderColor", "#8a6a3d"),
+          col("codeColor", ""),
+          col("codeBackground", "#00000000"), ...imageFields("code"),
+          ...spacingFields("codePadding", { top: 0, right: 4, bottom: 0, left: 4 }, { max: 60 }),
+          ...cornerFields("codeCorner"),
+          col("codeBorderColor", ""),
           num("codeBorderWidth", 0, "px", 0, 12, 1),
         ]
       },
@@ -886,6 +1165,10 @@ export const GROUPS = [
       // as code inside a sentence, in the same section, under the same names.
       {
         id: "codeBlock",
+        order: [
+          "codeBlockPaddingTop", "codeBlockPaddingBottom", "codeBlockPaddingLeft", "codeBlockPaddingRight",
+          DIVIDER, "codeBlockMarginTop", "codeBlockMarginBottom"
+        ],
         fields: [
           ...spacingFields("codeBlockPadding", 10, { max: 80 }),
           num("codeBlockMarginTop", 10, "px", -60, 120, 1),
@@ -894,6 +1177,12 @@ export const GROUPS = [
       },
       {
         id: "dropCap",
+        order: [
+          "dropCap", "dropCapFont", "dropCapColor",
+          DIVIDER, "dropCapOutlineColor", "dropCapOutlineWidth",
+          DIVIDER, "dropCapTextShadowOffsetX", "dropCapTextShadowOffsetY",
+          "dropCapTextShadowBlur", "dropCapTextShadowColor"
+        ],
         fields: [
           select("dropCap", "none", CHOICES.dropCap, { emit: emitDropCap }),
           font("dropCapFont", ""),
@@ -902,8 +1191,12 @@ export const GROUPS = [
       },
       {
         id: "dividers",
+        order: [
+          "dividerStyle", "dividerColor", "dividerLength", "dividerWidth", "dividerAlign",
+          DIVIDER, "dividerMarginTop", "dividerMarginBottom"
+        ],
         fields: [
-          num("dividerWidth", 1, "px", 0, 40, 1),
+          num("dividerWidth", 0, "px", 0, 40, 1),
           select("dividerStyle", "solid", CHOICES.borderStyle),
           col("dividerColor", "#8a6a3d"),
           num("dividerLength", 100, "%", 5, 100, 1),
@@ -918,12 +1211,20 @@ export const GROUPS = [
   {
     id: "links",
     icon: "fa-solid fa-link",
+    // Laid out by hand: the lettering and its shadow, then what is drawn around
+    // it, then the line under it, then the chip a link can be set on.
+    order: ["text", "border", "decoration", "chip"],
     sections: [
       {
         id: "text",
+        order: [
+          "color", "textStyle", "textStyleSlant", "letterSpacing",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
         fields: [
-          col("color", "#7a2010"),
-          col("hoverColor", "#a8341c"),
+          col("color", ""),
+          col("hoverColor", ""),
           ...outlineFields(),
           ...textShadowFields(),
           ...textStyleField("textStyle", "400", "normal"),
@@ -931,32 +1232,68 @@ export const GROUPS = [
         ]
       },
       {
-        id: "decoration",
+        id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
         fields: [
-          select("decorationLine", "underline", CHOICES.decorationLine, { emit: emitKeyword }),
+          ...borderFields("border", { width: 1, color: "#816b66" }),
+          ...cornerFields("corner", 2)
+        ]
+      },
+      {
+        id: "decoration",
+        order: [
+          "decorationColor", "decorationLine", "decorationStyle",
+          "decorationThickness", "decorationOffset"
+        ],
+        fields: [
+          select("decorationLine", "none", CHOICES.decorationLine, { emit: emitKeyword }),
           select("decorationStyle", "solid", CHOICES.lineStyle),
-          col("decorationColor", "#7a2010"),
+          col("decorationColor", ""),
           num("decorationThickness", 1, "px", 0, 12, 0.5),
           num("decorationOffset", 2, "px", -10, 20, 0.5)
         ]
       },
-      { id: "chip", fields: [col("background", "#00000000"), ...imageFields(), ...spacingFields("padding", 0, { max: 40 })] },
-      { id: "border", fields: borderFields("border", { color: "#00000000" }) },
-      { id: "corners", fields: cornerFields("corner", 3) }
+      {
+        id: "chip",
+        order: [
+          "background",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
+          DIVIDER, "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+        ],
+        // The chip Foundry draws a content link on: a dark pill with a hairline
+        // edge, which is what an unstyled journal shows.
+        fields: [
+          col("background", "#0b0a13e6"), ...imageFields(),
+          ...spacingFields("padding", { top: 0, right: 4, bottom: 0, left: 4 }, { max: 40 })
+        ]
+      }
     ]
   },
 
   {
     id: "lists",
     icon: "fa-solid fa-list-ul",
+    // Laid out by hand: where the list sits, the room around it, the mark in
+    // front of each item, and then the two-part lettering of a definition list.
+    order: ["layout", "margin", "marker", "definitions"],
     sections: [
       {
         id: "marker",
+        order: ["markerFont", "markerSize", "markerColor", "bullet", "numberStyle"],
         fields: [
           select("bullet", "disc", CHOICES.bullet, { emit: emitBullet }),
         select("numberStyle", "decimal", CHOICES.numberStyle, { emit: emitKeyword }),
         num("markerSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
-          col("markerColor", "#7a2010"),
+          col("markerColor", ""),
           col("markerHoverColor", ""),
           font("markerFont", "")
         ]
@@ -965,17 +1302,29 @@ export const GROUPS = [
         // dt and dd inherit Foundry's own colors, which are light — on a
         // parchment page they are close to invisible until set here.
         id: "definitions",
+        order: [
+          "termFont", "termSize", "termColor", "termTextStyle", "termTextStyleSlant",
+          "termCaps", "termSpacingAbove",
+          DIVIDER, "termOutlineWidth", "termOutlineColor",
+          DIVIDER, "termTextShadowOffsetX", "termTextShadowOffsetY",
+          "termTextShadowBlur", "termTextShadowColor",
+          DIVIDER, "detailFont", "detailSize", "detailColor", "detailTextStyle",
+          "detailTextStyleSlant", "detailIndent", "detailSpacingBelow",
+          DIVIDER, "detailOutlineWidth", "detailOutlineColor",
+          DIVIDER, "detailTextShadowOffsetX", "detailTextShadowOffsetY",
+          "detailTextShadowBlur", "detailTextShadowColor"
+        ],
         fields: [
           font("termFont", ""),
           num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
-          col("termColor", "#5e1914"),
+          col("termColor", ""),
           col("termHoverColor", ""),
           ...textStyleField("termTextStyle", "700", "normal"),
           select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
           num("termSpacingAbove", 8, "px", 0, 100, 1),
           font("detailFont", ""),
           num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
-          col("detailColor", "#241b10"),
+          col("detailColor", ""),
           col("detailHoverColor", ""),
           ...textStyleField("detailTextStyle", "400", "normal"),
           num("detailIndent", 24, "px", 0, 200, 2),
@@ -984,6 +1333,7 @@ export const GROUPS = [
       },
       {
         id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
         fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
       },
       {
@@ -999,34 +1349,102 @@ export const GROUPS = [
   {
     id: "tables",
     icon: "fa-solid fa-table",
+    // Laid out by hand: the table itself, then the parts of it — the header row,
+    // the rows beneath, a cell, and the caption.
+    order: ["layout", "text", "margin", "border", "header", "rows", "cellPadding", "tableCaption"],
     sections: [
+      // How wide the table is drawn, which is a question about the table rather
+      // than about its lettering.
+      { id: "layout", order: ["width"], fields: [num("width", 100, "%", 10, 100, 1)] },
       {
         id: "text",
+        order: [
+          "font", "size", "textColor",
+          DIVIDER, "align", "verticalAlign", "lineHeight",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
         fields: [
           font("font", ""),
-          num("size", 16, "px", 6, 100, 1),
-          col("textColor", "#241b10"),
-          num("lineHeight", 1.4, "", 0.5, 4, 0.05),
+          num("size", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
+          col("textColor", ""),
+          num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
           select("align", "left", CHOICES.align),
-          select("verticalAlign", "middle", CHOICES.verticalAlign),
-          num("width", 100, "%", 10, 100, 1)
+          select("verticalAlign", "middle", CHOICES.verticalAlign)
         ]
       },
       {
+        id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+        fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+      },
+      {
+        id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
+        fields: [...borderFields("border"), ...cornerFields("corner")]
+      },
+      {
         id: "header",
+        order: [
+          "headerBackground",
+          DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
+          DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing",
+          DIVIDER, "headerOutlineColor", "headerOutlineWidth",
+          DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
+          "headerTextShadowBlur", "headerTextShadowColor",
+          DIVIDER, "headerTexture", "headerTextureFit", "headerTexturePosition",
+          "headerTextureBlend", "headerTextureOpacity",
+          DIVIDER, "headerInnerShadowOffsetX", "headerInnerShadowOffsetY", "headerInnerShadowBlur",
+          "headerInnerShadowSpread", "headerInnerShadowColor",
+          DIVIDER, "headerShadowOffsetX", "headerShadowOffsetY", "headerShadowBlur",
+          "headerShadowSpread", "headerShadowColor"
+        ],
         fields: [
-          col("headerBackground", "#5e1914"), ...imageFields("header"),
-          col("headerColor", "#f6efe0"),
+          col("headerBackground", "#00000000"), ...imageFields("header"),
+          col("headerColor", ""),
           font("headerFont", ""),
-          num("headerSize", 16, "px", 6, 100, 1),
+          num("headerSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
           ...textStyleField("headerTextStyle", "700", "normal"),
           select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("headerAlign", "left", CHOICES.align),
           num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
         ]
       },
+      { id: "rows", order: ["rowColor", "stripeColor"],
+        fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
+      // A cell's own spacing and its edges are one question about a cell, so
+      // they read as one category.
+      {
+        id: "cellPadding",
+        label: "ILLUMINUS.Sections.cellStyles.label",
+        hint: "ILLUMINUS.Sections.cellStyles.hint",
+        order: [
+          "cellPaddingTop", "cellPaddingBottom", "cellPaddingLeft", "cellPaddingRight",
+          DIVIDER, "cellBorderTopStyle", "cellBorderTopColor", "cellBorderTopWidth",
+          DIVIDER, "cellBorderBottomStyle", "cellBorderBottomColor", "cellBorderBottomWidth",
+          DIVIDER, "cellBorderLeftStyle", "cellBorderLeftColor", "cellBorderLeftWidth",
+          DIVIDER, "cellBorderRightStyle", "cellBorderRightColor", "cellBorderRightWidth"
+        ],
+        fields: [
+          ...spacingFields("cellPadding", { top: 8, right: 16, bottom: 8, left: 16 }, { max: 80 }),
+          ...borderFields("cellBorder")
+        ]
+      },
       {
         id: "tableCaption",
+        order: [
+          "captionFont", "captionSize", "captionColor", "captionTextStyle", "captionTextStyleSlant",
+          DIVIDER, "captionAlign", "captionCaps",
+          DIVIDER, "captionOutlineColor", "captionOutlineWidth",
+          DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
+          "captionTextShadowBlur", "captionTextShadowColor", "captionSide", "captionSpacing"
+        ],
         fields: [
           select("captionSide", "top", ["top", "bottom"]),
           font("captionFont", ""),
@@ -1037,40 +1455,84 @@ export const GROUPS = [
           select("captionAlign", "center", CHOICES.alignNoJustify),
           num("captionSpacing", 6, "px", 0, 60, 1)
         ]
-      },
-      { id: "rows", fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
-      { id: "cellPadding", fields: spacingFields("cellPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 80 }) },
-      { id: "cellBorder", fields: borderFields("cellBorder", { width: 1 }) },
-      { id: "border", fields: borderFields("border", { width: 1 }) },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "margin", fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 }) }
+      }
     ]
   },
 
   {
     id: "boxes",
     icon: "fa-solid fa-square-dashed",
+    // Laid out by hand: the words, the surface they sit on, the room around
+    // them, the edges, and then the disclosure widget that can fold them away.
+    order: ["text", "background", "padding", "margin", "border", "collapsible"],
     sections: [
       {
         id: "text",
-        fields: textFields("", {
-          size: 16, color: "#241b10", style: "italic", lineHeight: 1.5, choices: CHOICES.align
-        })
+        order: [
+          "font", "size", "color", "textStyle", "textStyleSlant",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
+        fields: textFields("", { style: "italic", choices: ["inherit", ...CHOICES.align] })
       },
-      { id: "background", fields: [col("background", "#e3d3ad"), ...imageFields()] },
-      { id: "padding", fields: spacingFields("padding", 12) },
-      { id: "margin", fields: spacingFields("margin", 12, { min: -100 }) },
+      {
+        id: "background",
+        label: "ILLUMINUS.Sections.fillAndImage.label",
+        hint: "ILLUMINUS.Sections.fillAndImage.hint",
+        order: [
+          "background",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+        ],
+        fields: [col("background", "#00000000"), ...imageFields(), ...shadowFields("shadow")]
+      },
+      {
+        id: "padding",
+        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+        fields: spacingFields("padding", { top: 0, right: 0, bottom: 0, left: 16 })
+      },
+      {
+        id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+        fields: spacingFields("margin", 0, { min: -100 })
+      },
       {
         id: "border",
-        // Left-only by default: the classic read-aloud accent bar.
-        fields: borderFields("border", { color: "#7a2010" }).map((field) =>
-          field.name === "borderLeftWidth" ? { ...field, default: 4 } : field)
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
+        fields: [...borderFields("border", { color: "#7a2010" }), ...cornerFields("corner", 2)]
       },
-      { id: "corners", fields: cornerFields("corner", 2) },
-      { id: "shadow", fields: shadowFields("shadow") },
       {
         // Foundry's disclosure widget: a <details> the reader can fold away.
         id: "collapsible",
+        order: [
+          "summaryFont", "summarySize", "summaryColor", "collapsibleBorderColor",
+          "summaryTextStyle", "summaryTextStyleSlant",
+          DIVIDER, "summaryCaps", "summaryBackground", "summaryPaddingTop", "summaryPaddingBottom",
+          "summaryPaddingLeft", "summaryPaddingRight",
+          DIVIDER, "collapsibleBackground", "collapsiblePaddingTop", "collapsiblePaddingBottom",
+          "collapsiblePaddingLeft", "collapsiblePaddingRight",
+          DIVIDER, "summaryOutlineColor", "summaryOutlineWidth",
+          DIVIDER, "summaryTextShadowOffsetX", "summaryTextShadowOffsetY",
+          "summaryTextShadowBlur", "summaryTextShadowColor",
+          DIVIDER, "summaryTexture", "summaryTextureFit", "summaryTexturePosition",
+          "summaryTextureBlend", "summaryTextureOpacity",
+          DIVIDER, "summaryInnerShadowOffsetX", "summaryInnerShadowOffsetY", "summaryInnerShadowBlur",
+          "summaryInnerShadowSpread", "summaryInnerShadowColor",
+          DIVIDER, "summaryShadowOffsetX", "summaryShadowOffsetY", "summaryShadowBlur",
+          "summaryShadowSpread", "summaryShadowColor",
+          DIVIDER, "collapsibleMarginTop", "collapsibleMarginBottom",
+          DIVIDER, "collapsibleBorderWidth", "collapsibleCornerTopLeft", "collapsibleCornerTopRight",
+          "collapsibleCornerBottomLeft", "collapsibleCornerBottomRight"
+        ],
         fields: [
           font("summaryFont", ""),
           num("summarySize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
@@ -1094,14 +1556,44 @@ export const GROUPS = [
   {
     id: "secrets",
     icon: "fa-solid fa-user-secret",
+    // Laid out by hand: the words, the surface, the room around it, the edges,
+    // then what it looks like once revealed and the button that reveals it.
+    order: ["text", "background", "padding", "margin", "border", "revealed", "revealButton"],
     sections: [
-      { id: "background", fields: [col("background", "#3500790d"), ...imageFields()] },
+      {
+        id: "background",
+        label: "ILLUMINUS.Sections.fillAndImage.label",
+        hint: "ILLUMINUS.Sections.fillAndImage.hint",
+        order: [
+          "background",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+        ],
+        fields: [col("background", "#3500790d"), ...imageFields(), ...shadowFields("shadow")]
+      },
       {
         id: "revealed",
+        order: [
+          "revealedBackground",
+          DIVIDER, "revealedTexture", "revealedTextureFit", "revealedTexturePosition",
+          "revealedTextureBlend", "revealedTextureOpacity",
+          DIVIDER, "revealedInnerShadowOffsetX", "revealedInnerShadowOffsetY",
+          "revealedInnerShadowBlur", "revealedInnerShadowSpread", "revealedInnerShadowColor",
+          DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
+          "revealedShadowSpread", "revealedShadowColor"
+        ],
         fields: [col("revealedBackground", "#0035000d"), ...imageFields("revealed")]
       },
       {
         id: "text",
+        order: [
+          "font", "size", "color", "textStyle", "textStyleSlant",
+          DIVIDER, "align", "caps", "letterSpacing", "lineHeight",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
         fields: [
           font("font", ""),
           num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
@@ -1113,18 +1605,47 @@ export const GROUPS = [
           select("align", "inherit", ["inherit", ...CHOICES.align])
         ]
       },
-      { id: "padding", fields: spacingFields("padding", { top: 4, right: 8, bottom: 4, left: 8 }) },
-      { id: "margin", fields: spacingFields("margin", { top: 10, right: 0, bottom: 10, left: 0 }, { min: -100 }) },
+      {
+        id: "padding",
+        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+        fields: spacingFields("padding", { top: 4, right: 8, bottom: 4, left: 8 })
+      },
+      {
+        id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+        fields: spacingFields("margin", { top: 10, right: 0, bottom: 10, left: 0 }, { min: -100 })
+      },
       {
         id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        ],
         // Top and bottom only by default, as Foundry draws them.
-        fields: borderFields("border", { color: "#7a6a58" }).map((field) =>
-          ["borderTopWidth", "borderBottomWidth"].includes(field.name) ? { ...field, default: 1 } : field)
+        fields: [
+          ...borderFields("border", { color: "#7a6a58" }).map((field) =>
+            ["borderTopWidth", "borderBottomWidth"].includes(field.name)
+              ? { ...field, default: 1 } : field),
+          ...cornerFields("corner")
+        ]
       },
-      { id: "corners", fields: cornerFields("corner") },
-      { id: "shadow", fields: shadowFields("shadow") },
       {
         id: "revealButton",
+        order: [
+          "buttonSize", "buttonColor", "buttonBackground",
+          DIVIDER, "buttonBorderStyle", "buttonBorderColor", "buttonBorderWidth",
+          DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
+          "buttonCornerBottomLeft", "buttonCornerBottomRight",
+          DIVIDER, "buttonTexture", "buttonTextureFit", "buttonTexturePosition",
+          "buttonTextureBlend", "buttonTextureOpacity",
+          DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY", "buttonInnerShadowBlur",
+          "buttonInnerShadowSpread", "buttonInnerShadowColor",
+          DIVIDER, "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur",
+          "buttonShadowSpread", "buttonShadowColor"
+        ],
         fields: [
           col("buttonColor", "#f0f0e0"),
           col("buttonBackground", "#00000000"), ...imageFields("button"),
@@ -1136,6 +1657,139 @@ export const GROUPS = [
           num("buttonBorderWidth", 1, "px", 0, 12, 1),
           select("buttonBorderStyle", "dashed", CHOICES.borderStyle),
           ...cornerFields("buttonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+  {
+    id: "editor",
+    icon: "fa-solid fa-pen-to-square",
+    // The window Edit Page opens, which Foundry appends to the body and
+    // positions itself. It is styled apart from the journal window: the two are
+    // different windows doing different jobs, and a frame that reads well around
+    // a page of prose is not always the one to write in. What is written *on*
+    // is the page's own surface, which the Page tab paints — the same surface as
+    // the page it will become, so that what you type looks like what you will
+    // read.
+    strip: "end",
+    sections: [
+      {
+        id: "frame",
+        fields: [
+          col("background", "#00000000"), ...imageFields(),
+          ...borderFields("border", { color: "#00000000" }),
+          ...cornerFields("corner")
+        ]
+      },
+      {
+        id: "frameSize",
+        fields: [
+          num("frameMinWidth", 0, "px", 0, 3000, 10, { zeroAs: "auto" }),
+          num("frameMaxWidth", 0, "px", 0, 3000, 10, { zeroAs: "none" })
+        ]
+      },
+      {
+        id: "titleBar",
+        fields: [
+          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
+          font("font", ""),
+          num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
+          col("color", ""),
+          ...textStyleField("textStyle", "700", "normal"),
+          select("caps", "none", CHOICES.caps, { emit: emitCaps }),
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          select("align", "left", CHOICES.alignNoJustify),
+          ...spacingFields("padding", 0, { max: 60 })
+        ]
+      },
+      {
+        id: "headerButtons",
+        fields: [
+          col("headerButtonColor", "#f7f3e8"),
+          col("headerButtonHoverColor", "#ffffff"),
+          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
+          col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
+          num("headerButtonSize", 14, "px", 6, 48, 1),
+          ...borderFields("headerButtonBorder", { color: "#00000000" }),
+          ...cornerFields("headerButtonCorner", 3)
+        ]
+      },
+      // The bar of controls above the prose, and the icons on it. Two
+      // categories rather than one: a fill set on the bar paints the whole row
+      // and a fill set on an icon paints what sits behind that icon, and one
+      // category holding both said "Fill Color" twice and meant two things.
+      {
+        id: "toolbar",
+        fields: [
+          col("toolbarBackground", "#00000000"), ...imageFields("toolbar"),
+          ...borderFields("toolbarBorder", { color: "#00000000" }),
+          ...cornerFields("toolbarCorner"),
+          ...spacingFields("toolbarPadding", 0, { max: 60 })
+        ]
+      },
+      {
+        id: "toolbarIcons",
+        fields: [
+          col("toolbarColor", ""),
+          col("toolbarHoverColor", ""),
+          num("toolbarSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
+          col("toolbarButtonBackground", "#00000000"), ...imageFields("toolbarButton"),
+          col("toolbarButtonHoverBackground", "#00000000"),
+          ...borderFields("toolbarButtonBorder", { color: "#00000000" }),
+          ...cornerFields("toolbarButtonCorner"),
+          ...spacingFields("toolbarButtonPadding", 0, { max: 40 })
+        ]
+      },
+      // The two named controls on that row — Format, and Illuminus — which open
+      // a list rather than doing something. The list itself is Foundry's and is
+      // drawn outside the window, so what a style reaches is the control.
+      {
+        id: "dropdowns",
+        fields: [
+          font("dropdownFont", ""),
+          // Silent at 0 rather than the `inherit` the rest use: the rule reads
+          // the icon size next, so a row set to 20 sizes its named controls too.
+          num("dropdownSize", 0, "px", 0, 40, 1, { emitZero: false }),
+          col("dropdownColor", ""),
+          col("dropdownHoverColor", ""),
+          ...textStyleField("dropdownTextStyle", "inherit", "inherit", { inherit: true }),
+          col("dropdownBackground", "#00000000"), ...imageFields("dropdown"),
+          col("dropdownHoverBackground", "#00000000"),
+          ...borderFields("dropdownBorder", { color: "#00000000" }),
+          ...cornerFields("dropdownCorner"),
+          ...spacingFields("dropdownPadding", 0, { max: 40 })
+        ]
+      },
+      // The row those settings sit on, which is an area of its own: the
+      // controls are painted below, and this is the strip behind them.
+      {
+        id: "settingsBar",
+        fields: [
+          col("settingsBarBackground", "#00000000"), ...imageFields("settingsBar"),
+          ...borderFields("settingsBarBorder", { color: "#00000000" }),
+          ...cornerFields("settingsBarCorner"),
+          ...spacingFields("settingsBarPadding", 0, { max: 60 })
+        ]
+      },
+      // The page's own settings, above the prose: which level its title is, and
+      // whether that title is shown at all.
+      {
+        id: "pageFields",
+        fields: [
+          font("fieldFont", ""),
+          num("fieldSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
+          col("fieldColor", ""),
+          ...textStyleField("fieldTextStyle", "inherit", "inherit", { inherit: true }),
+          col("fieldBackground", "#00000000"), ...imageFields("field"),
+          ...borderFields("fieldBorder", { color: "#00000000" }),
+          ...cornerFields("fieldCorner"),
+          ...spacingFields("fieldPadding", 0, { max: 40 }),
+          // The tick box beside them is drawn by the browser rather than by the
+          // page, so a fill and an edge do nothing to it: what it answers to is
+          // the color its tick is drawn in, and how large the box itself is.
+          col("fieldCheckColor", ""),
+          num("fieldCheckSize", 0, "px", 0, 40, 1, { emitZero: false })
         ]
       }
     ]
@@ -1259,6 +1913,54 @@ const HOVERABLE = [
   ...SIDES.map((side) => `border${side}Color`)
 ];
 
+/**
+ * A control's counterpart in one of its other states, saying nothing until it
+ * is filled in.
+ *
+ * The same kind of control as the one it stands in for: an empty color or
+ * typeface, an unchosen option, a number that emits nothing rather than a
+ * literal zero — so the state's own rule falls back to the ordinary value and
+ * an element nobody has set anything for looks exactly as it did.
+ * @param {object} original  The control being shadowed.
+ * @param {string} name      What the twin is called.
+ * @param {string} word      The state, `hover` or `active`.
+ */
+function stateTwin(original, name, word) {
+  if (original.type === "toggle") {
+    // A tick box has two answers and the twin needs three: yes, no, and
+    // "whatever the ordinary one says". Left as a tick box, an untouched twin
+    // would read as *off* — which is how hovering the journal's name came to
+    // hide it.
+    return select(name, "same", ["same", "on", "off"], {
+      emit: (value) => (value === "on" ? original.on : value === "off" ? original.off : null)
+    });
+  }
+  // A twin says nothing until it is filled in, and zero is how a number says
+  // it — so the twin's range has to start at zero however narrow the ordinary
+  // control's is. Copying `min` raised the twin's silence to the control's
+  // minimum: the panel's width twin emitted 120px, and pointing anywhere in a
+  // journal shrank the contents panel from 300 to 120 and slid every click
+  // target sideways with it.
+  const quiet = {
+    number: { default: 0, emitZero: false, min: 0 },
+    font: { default: "", emitEmpty: false },
+    select: { default: "" },
+    color: { default: "" },
+    image: { default: "" }
+  }[original.type] ?? { default: "" };
+  // "Match all sides" copies one value across everything sharing a link, so a
+  // twin needs a link of its own: sharing the ordinary one's meant matching the
+  // corners of a button overwrote its other states' corners with the ordinary
+  // value, which reads as those settings not working.
+  const link = original.link ? { link: stateNameFor(word, original.link) } : {};
+  return { ...original, name, ...quiet, ...link };
+}
+
+/** A state's name for a control, e.g. `hover` + `borderTopColor`. */
+function stateNameFor(word, name) {
+  return `${word}${name[0].toUpperCase()}${name.slice(1)}`;
+}
+
 /** Hovered name for a control, e.g. `borderTopColor` -> `hoverBorderTopColor`. */
 export function hoverNameFor(name) {
   return `hover${name[0].toUpperCase()}${name.slice(1)}`;
@@ -1317,14 +2019,484 @@ for (const group of GROUPS) {
 }
 
 /**
- * The window frame and the contents panel are not hovered as objects — their
- * hovered states belong to the things inside them, which they already state by
- * hand. Deriving more would offer controls that could never do anything.
+ * A shadow, and a shading inside the edges, wherever a picture can be placed.
  *
- * This governs the *deriving* only. Both tabs still get the switch below, since
- * both hold hovered controls.
+ * A background picture and a shadow are the same decision from a style's point
+ * of view: this is a surface, and here is how it sits on the page. Anything that
+ * can carry one can carry the other, so the pair is derived from the picture
+ * rather than listed — a new fill with a picture beside it gets both for free,
+ * and `validate.mjs` sees to it that the stylesheet reads them.
+ *
+ * A state's own picture is skipped: its shadows come from the hovered twins
+ * derived below, so shadowing `entryHoverTexture` here would be a second
+ * control for the pointed-at shadow of a listed page.
  */
-const NO_HOVER = new Set(["window", "sidebar"]);
+for (const group of GROUPS) {
+  const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
+  for (const section of group.sections) {
+    for (const field of [...section.fields]) {
+      const prefix = field.name === "texture" ? "" : field.name.match(/^(.*)Texture$/)?.[1];
+      if (prefix === undefined || /hover|active/i.test(prefix)) continue;
+      for (const kind of ["Shadow", "InnerShadow"]) {
+        const name = prefix ? `${prefix}${kind}` : `${kind[0].toLowerCase()}${kind.slice(1)}`;
+        if (taken.has(`${name}Color`)) continue;
+        const made = shadowFields(name);
+        for (const one of made) taken.add(one.name);
+        section.fields.push(...made);
+      }
+    }
+  }
+}
+
+/**
+ * Tabs laid out by hand, as data.
+ *
+ * The tabs done earliest say their arrangement in their own literal — an
+ * `order` on the group and one on each section. That reads well for a tab whose
+ * categories were also rewritten, and badly for seven tabs at once, so the rest
+ * say it here: which categories the tab has, in which order, and what is in each
+ * of them. A control named for a category it did not belong to is moved into it,
+ * which is how a category can hold what were two before.
+ *
+ * The runs inside a category are separated by `DIVIDER`, exactly as they are in
+ * a section's own `order`.
+ */
+const LAYOUTS = {
+  images: {
+    order: ["layout", "padding", "margin", "border", "caption", "media"],
+    layout: { order: [
+      "opacity", "background", DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
+      DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
+      "maxWidth"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    margin: { order: [
+      "marginTop", "marginBottom", "marginLeft", "marginRight"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    caption: { label: "ILLUMINUS.Sections.imageCaption.label", hint: "ILLUMINUS.Sections.imageCaption.hint", order: [
+      "captionFont", "captionSize", "captionColor", "captionTextStyle",
+      "captionTextStyleSlant", DIVIDER, "captionAlign", "captionCaps", DIVIDER,
+      "captionOutlineColor", "captionOutlineWidth", DIVIDER, "captionTextShadowOffsetX",
+      "captionTextShadowOffsetY", "captionTextShadowBlur", "captionTextShadowColor",
+      "captionSpacing"
+    ] },
+    media: { order: [
+      "mediaMaxWidth", DIVIDER, "mediaShadowOffsetX", "mediaShadowOffsetY", "mediaShadowBlur",
+      "mediaShadowSpread", "mediaShadowColor", DIVIDER, "mediaMarginTop", "mediaMarginBottom",
+      DIVIDER, "mediaBorderTopStyle", "mediaBorderTopColor", "mediaBorderTopWidth", DIVIDER,
+      "mediaBorderBottomStyle", "mediaBorderBottomColor", "mediaBorderBottomWidth", DIVIDER,
+      "mediaBorderLeftStyle", "mediaBorderLeftColor", "mediaBorderLeftWidth", DIVIDER,
+      "mediaBorderRightStyle", "mediaBorderRightColor", "mediaBorderRightWidth", DIVIDER,
+      "mediaCornerTopLeft", "mediaCornerTopRight", "mediaCornerBottomLeft",
+      "mediaCornerBottomRight", DIVIDER
+    ] },
+  },
+  boxStyles: {
+    order: ["layout", "text", "background", "padding", "margin", "border", "blockHeadings"],
+    layout: { order: [
+      "float", "width", "clear", "whenEmpty"
+    ] },
+    text: { order: [
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
+      "letterSpacing", "lineHeight", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
+      "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+    ] },
+    background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
+      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    margin: { order: [
+      "marginTop", "marginBottom", "marginLeft", "marginRight"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    blockHeadings: { order: [
+      "headingFont", "headingSize", "headingColor", "headingRuleColor", "headingTextStyle",
+      "headingTextStyleSlant", DIVIDER, "headingAlign", "headingCaps", DIVIDER,
+      "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
+      "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
+      "headingMarginTop", "headingMarginBottom", "headingRuleWidth", "headingRuleStyle",
+      DIVIDER
+    ] },
+  },
+  tagStyles: {
+    order: ["tagLayout", "text", "background", "padding", "margin", "border"],
+    tagLayout: { order: [
+      "verticalAlign", "float", "minWidth", "lift"
+    ] },
+    text: { order: [
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
+      "lineHeight", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+    ] },
+    background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
+      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    margin: { order: [
+      "marginTop", "marginBottom", "marginLeft", "marginRight"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight",
+      DIVIDER
+    ] },
+  },
+  imageStyles: {
+    order: ["layout", "padding", "margin", "border", "caption"],
+    layout: { order: [
+      "opacity", "background", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor", "float", "width", "align", "clear", "flip",
+      "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+      "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
+      "innerShadowColor"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    margin: { order: [
+      "marginTop", "marginBottom"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    caption: { label: "ILLUMINUS.Sections.imageCaption.label", hint: "ILLUMINUS.Sections.imageCaption.hint", order: [
+      "captionFont", "captionSize", "captionColor", "captionTextStyle",
+      "captionTextStyleSlant", DIVIDER, "captionAlign", DIVIDER, "captionOutlineColor",
+      "captionOutlineWidth", DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
+      "captionTextShadowBlur", "captionTextShadowColor", "captionSpacing"
+    ] },
+  },
+  sidebar: {
+    order: ["layout", "background", "padding", "border", "category", "number", "entries",
+      "subHeadings", "search", "buttons"],
+    layout: { order: [
+      "sidebarWidth"
+    ] },
+    background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
+      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    number: { order: [
+      "numberShown", "numberWidth", "numberAlign", "numberSize", "numberColor",
+      "numberTextStyle", "numberTextStyleSlant"
+    ] },
+    entries: { order: [
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
+      "letterSpacing", "wordSpacing", "lineHeight", DIVIDER, "outlineColor", "outlineWidth",
+      DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
+      DIVIDER, "entryBackground", DIVIDER, "entryTexture", "entryTextureFit",
+      "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", DIVIDER,
+      "entryInnerShadowOffsetX", "entryInnerShadowOffsetY", "entryInnerShadowBlur",
+      "entryInnerShadowSpread", "entryInnerShadowColor", DIVIDER, "entryShadowOffsetX",
+      "entryShadowOffsetY", "entryShadowBlur", "entryShadowSpread", "entryShadowColor",
+      DIVIDER, "entryPaddingTop", "entryPaddingBottom", "entryPaddingLeft",
+      "entryPaddingRight", DIVIDER, "entryMarginTop", "entryMarginBottom", "entryMarginLeft",
+      "entryMarginRight", DIVIDER, "entryBorderTopStyle", "entryBorderTopColor",
+      "entryBorderTopWidth", DIVIDER, "entryBorderBottomStyle", "entryBorderBottomColor",
+      "entryBorderBottomWidth", DIVIDER, "entryBorderLeftStyle", "entryBorderLeftColor",
+      "entryBorderLeftWidth", DIVIDER, "entryBorderRightStyle", "entryBorderRightColor",
+      "entryBorderRightWidth", DIVIDER, "entryCornerTopLeft", "entryCornerTopRight",
+      "entryCornerBottomLeft", "entryCornerBottomRight"
+    ] },
+    subHeadings: { order: [
+      "headingFont", "headingSize", "headingColor", "headingTextStyle",
+      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingIndent", DIVIDER,
+      "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
+      "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
+      "headingBackground", DIVIDER, "headingTexture", "headingTextureFit",
+      "headingTexturePosition", "headingTextureBlend", "headingTextureOpacity", DIVIDER,
+      "headingInnerShadowOffsetX", "headingInnerShadowOffsetY", "headingInnerShadowBlur",
+      "headingInnerShadowSpread", "headingInnerShadowColor", DIVIDER, "headingShadowOffsetX",
+      "headingShadowOffsetY", "headingShadowBlur", "headingShadowSpread", "headingShadowColor",
+      DIVIDER, "headingPaddingTop", "headingPaddingBottom", "headingPaddingLeft",
+      "headingPaddingRight", DIVIDER, "headingMarginTop", "headingMarginBottom",
+      "headingMarginLeft", "headingMarginRight", DIVIDER, "headingBorderTopStyle",
+      "headingBorderTopColor", "headingBorderTopWidth", DIVIDER, "headingBorderBottomStyle",
+      "headingBorderBottomColor", "headingBorderBottomWidth", DIVIDER,
+      "headingBorderLeftStyle", "headingBorderLeftColor", "headingBorderLeftWidth", DIVIDER,
+      "headingBorderRightStyle", "headingBorderRightColor", "headingBorderRightWidth", DIVIDER,
+      "headingCornerTopLeft", "headingCornerTopRight", "headingCornerBottomLeft",
+      "headingCornerBottomRight"
+    ] },
+    category: { order: [
+      "categoryFont", "categorySize", "categoryColor", "categoryTextStyle",
+      "categoryTextStyleSlant", DIVIDER, "categoryAlign", "categoryCaps",
+      "categoryLetterSpacing", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
+      DIVIDER, "categoryTextShadowOffsetX", "categoryTextShadowOffsetY",
+      "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground",
+      DIVIDER, "categoryTexture", "categoryTextureFit", "categoryTexturePosition",
+      "categoryTextureBlend", "categoryTextureOpacity", DIVIDER, "categoryInnerShadowOffsetX",
+      "categoryInnerShadowOffsetY", "categoryInnerShadowBlur", "categoryInnerShadowSpread",
+      "categoryInnerShadowColor", DIVIDER, "categoryShadowOffsetX", "categoryShadowOffsetY",
+      "categoryShadowBlur", "categoryShadowSpread", "categoryShadowColor", DIVIDER,
+      "categoryPaddingTop", "categoryPaddingBottom", "categoryPaddingLeft",
+      "categoryPaddingRight", DIVIDER, "categoryMarginTop", "categoryMarginBottom",
+      "categoryMarginLeft", "categoryMarginRight", DIVIDER, "categoryBorderTopStyle",
+      "categoryBorderTopColor", "categoryBorderTopWidth", DIVIDER, "categoryBorderBottomStyle",
+      "categoryBorderBottomColor", "categoryBorderBottomWidth", DIVIDER,
+      "categoryBorderLeftStyle", "categoryBorderLeftColor", "categoryBorderLeftWidth", DIVIDER,
+      "categoryBorderRightStyle", "categoryBorderRightColor", "categoryBorderRightWidth",
+      DIVIDER, "categoryCornerTopLeft", "categoryCornerTopRight", "categoryCornerBottomLeft",
+      "categoryCornerBottomRight"
+    ] },
+    search: { order: [
+      "searchSize", "searchPlaceholderColor", "searchColor", DIVIDER, "searchBackground",
+      DIVIDER, "searchTexture", "searchTextureFit", "searchTexturePosition",
+      "searchTextureBlend", "searchTextureOpacity", DIVIDER, "searchInnerShadowOffsetX",
+      "searchInnerShadowOffsetY", "searchInnerShadowBlur", "searchInnerShadowSpread",
+      "searchInnerShadowColor", DIVIDER, "searchShadowOffsetX", "searchShadowOffsetY",
+      "searchShadowBlur", "searchShadowSpread", "searchShadowColor", DIVIDER,
+      "searchBorderTopStyle", "searchBorderTopColor", "searchBorderTopWidth", DIVIDER,
+      "searchBorderBottomStyle", "searchBorderBottomColor", "searchBorderBottomWidth", DIVIDER,
+      "searchBorderLeftStyle", "searchBorderLeftColor", "searchBorderLeftWidth", DIVIDER,
+      "searchBorderRightStyle", "searchBorderRightColor", "searchBorderRightWidth", DIVIDER,
+      "searchCornerTopLeft", "searchCornerTopRight", "searchCornerBottomLeft",
+      "searchCornerBottomRight"
+    ] },
+    buttons: { order: [
+      "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", DIVIDER,
+      "buttonTexture", "buttonTextureFit", "buttonTexturePosition", "buttonTextureBlend",
+      "buttonTextureOpacity", DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY",
+      "buttonInnerShadowBlur", "buttonInnerShadowSpread", "buttonInnerShadowColor", DIVIDER,
+      "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur", "buttonShadowSpread",
+      "buttonShadowColor", DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
+      "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonBorderWidth", DIVIDER
+    ] },
+  },
+  window: {
+    order: ["frameSize", "frame", "titleBar", "headerButtons", "pageButton"],
+    frameSize: { label: "ILLUMINUS.Sections.layout.label", hint: "ILLUMINUS.Sections.layout.hint", order: [
+      "frameMinWidth", "frameMaxWidth"
+    ] },
+    frame: { order: [
+      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
+      "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+      DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth", DIVIDER,
+      "borderRightStyle", "borderRightColor", "borderRightWidth", DIVIDER, "cornerTopLeft",
+      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    titleBar: { order: [
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
+      "letterSpacing", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "textShadowOffsetY", "textShadowBlur", "textShadowColor", DIVIDER, "titleBarBackground",
+      DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
+      "titleBarTextureBlend", "titleBarTextureOpacity", DIVIDER, "titleBarInnerShadowOffsetX",
+      "titleBarInnerShadowOffsetY", "titleBarInnerShadowBlur", "titleBarInnerShadowSpread",
+      "titleBarInnerShadowColor", DIVIDER, "titleBarShadowOffsetX", "titleBarShadowOffsetY",
+      "titleBarShadowBlur", "titleBarShadowSpread", "titleBarShadowColor", DIVIDER,
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    headerButtons: { order: [
+      "headerButtonSize", "headerButtonColor", DIVIDER, "headerButtonBackground", DIVIDER,
+      "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
+      "headerButtonTextureBlend", "headerButtonTextureOpacity", DIVIDER,
+      "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
+      "headerButtonInnerShadowBlur", "headerButtonInnerShadowSpread",
+      "headerButtonInnerShadowColor", DIVIDER, "headerButtonShadowOffsetX",
+      "headerButtonShadowOffsetY", "headerButtonShadowBlur", "headerButtonShadowSpread",
+      "headerButtonShadowColor", DIVIDER, "headerButtonBorderTopStyle",
+      "headerButtonBorderTopColor", "headerButtonBorderTopWidth", DIVIDER,
+      "headerButtonBorderBottomStyle", "headerButtonBorderBottomColor",
+      "headerButtonBorderBottomWidth", DIVIDER, "headerButtonBorderLeftStyle",
+      "headerButtonBorderLeftColor", "headerButtonBorderLeftWidth", DIVIDER,
+      "headerButtonBorderRightStyle", "headerButtonBorderRightColor",
+      "headerButtonBorderRightWidth", DIVIDER, "headerButtonCornerTopLeft",
+      "headerButtonCornerTopRight", "headerButtonCornerBottomLeft",
+      "headerButtonCornerBottomRight"
+    ] },
+    pageButton: { order: [
+      "pageButtonSide", "pageButtonOffset", DIVIDER, "pageButtonSize", "pageButtonColor",
+      "pageButtonBackground", DIVIDER, "pageButtonTexture", "pageButtonTextureFit",
+      "pageButtonTexturePosition", "pageButtonTextureBlend", "pageButtonTextureOpacity",
+      DIVIDER, "pageButtonInnerShadowOffsetX", "pageButtonInnerShadowOffsetY",
+      "pageButtonInnerShadowBlur", "pageButtonInnerShadowSpread", "pageButtonInnerShadowColor",
+      DIVIDER, "pageButtonShadowOffsetX", "pageButtonShadowOffsetY", "pageButtonShadowBlur",
+      "pageButtonShadowSpread", "pageButtonShadowColor", DIVIDER, "pageButtonBorderTopStyle",
+      "pageButtonBorderTopColor", "pageButtonBorderTopWidth", DIVIDER,
+      "pageButtonBorderBottomStyle", "pageButtonBorderBottomColor",
+      "pageButtonBorderBottomWidth", DIVIDER, "pageButtonBorderLeftStyle",
+      "pageButtonBorderLeftColor", "pageButtonBorderLeftWidth", DIVIDER,
+      "pageButtonBorderRightStyle", "pageButtonBorderRightColor", "pageButtonBorderRightWidth",
+      DIVIDER, "pageButtonCornerTopLeft", "pageButtonCornerTopRight",
+      "pageButtonCornerBottomLeft", "pageButtonCornerBottomRight", DIVIDER
+    ] },
+  },
+  editor: {
+    order: ["frameSize", "frame", "titleBar", "headerButtons", "settingsBar", "pageFields",
+      "toolbar", "toolbarIcons", "dropdowns"],
+    settingsBar: { order: [
+      "settingsBarBackground", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
+      "settingsBarTexturePosition", "settingsBarTextureBlend", "settingsBarTextureOpacity",
+      DIVIDER, "settingsBarInnerShadowOffsetX", "settingsBarInnerShadowOffsetY",
+      "settingsBarInnerShadowBlur", "settingsBarInnerShadowSpread", "settingsBarInnerShadowColor",
+      DIVIDER, "settingsBarShadowOffsetX", "settingsBarShadowOffsetY", "settingsBarShadowBlur",
+      "settingsBarShadowSpread", "settingsBarShadowColor",
+      DIVIDER, "settingsBarPaddingTop", "settingsBarPaddingBottom", "settingsBarPaddingLeft",
+      "settingsBarPaddingRight",
+      DIVIDER, "settingsBarBorderTopStyle", "settingsBarBorderTopColor", "settingsBarBorderTopWidth",
+      DIVIDER, "settingsBarBorderBottomStyle", "settingsBarBorderBottomColor",
+      "settingsBarBorderBottomWidth",
+      DIVIDER, "settingsBarBorderLeftStyle", "settingsBarBorderLeftColor", "settingsBarBorderLeftWidth",
+      DIVIDER, "settingsBarBorderRightStyle", "settingsBarBorderRightColor",
+      "settingsBarBorderRightWidth",
+      DIVIDER, "settingsBarCornerTopLeft", "settingsBarCornerTopRight",
+      "settingsBarCornerBottomLeft", "settingsBarCornerBottomRight"
+    ] },
+    frameSize: { label: "ILLUMINUS.Sections.layout.label", hint: "ILLUMINUS.Sections.layout.hint", order: [
+      "frameMinWidth", "frameMaxWidth"
+    ] },
+    frame: { order: [
+      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
+      "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+      DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth", DIVIDER,
+      "borderRightStyle", "borderRightColor", "borderRightWidth", DIVIDER, "cornerTopLeft",
+      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+    ] },
+    titleBar: { order: [
+      "titleBarBackground", DIVIDER, "font", "size", "color", "textStyle", "textStyleSlant",
+      DIVIDER, "align", "caps", "letterSpacing", DIVIDER, "outlineColor", "outlineWidth",
+      DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
+      DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
+      "titleBarTextureBlend", "titleBarTextureOpacity", DIVIDER, "titleBarInnerShadowOffsetX",
+      "titleBarInnerShadowOffsetY", "titleBarInnerShadowBlur", "titleBarInnerShadowSpread",
+      "titleBarInnerShadowColor", DIVIDER, "titleBarShadowOffsetX", "titleBarShadowOffsetY",
+      "titleBarShadowBlur", "titleBarShadowSpread", "titleBarShadowColor", DIVIDER,
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    headerButtons: { order: [
+      "headerButtonSize", "headerButtonColor", "headerButtonBackground", DIVIDER,
+      "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
+      "headerButtonTextureBlend", "headerButtonTextureOpacity", DIVIDER,
+      "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
+      "headerButtonInnerShadowBlur", "headerButtonInnerShadowSpread",
+      "headerButtonInnerShadowColor", DIVIDER, "headerButtonShadowOffsetX",
+      "headerButtonShadowOffsetY", "headerButtonShadowBlur", "headerButtonShadowSpread",
+      "headerButtonShadowColor", DIVIDER, "headerButtonBorderTopStyle",
+      "headerButtonBorderTopColor", "headerButtonBorderTopWidth", DIVIDER,
+      "headerButtonBorderBottomStyle", "headerButtonBorderBottomColor",
+      "headerButtonBorderBottomWidth", DIVIDER, "headerButtonBorderLeftStyle",
+      "headerButtonBorderLeftColor", "headerButtonBorderLeftWidth", DIVIDER,
+      "headerButtonBorderRightStyle", "headerButtonBorderRightColor",
+      "headerButtonBorderRightWidth", DIVIDER, "headerButtonCornerTopLeft",
+      "headerButtonCornerTopRight", "headerButtonCornerBottomLeft",
+      "headerButtonCornerBottomRight"
+    ] },
+    toolbar: { order: [
+      "toolbarBackground", DIVIDER, "toolbarTexture", "toolbarTextureFit",
+      "toolbarTexturePosition", "toolbarTextureBlend", "toolbarTextureOpacity", DIVIDER,
+      "toolbarInnerShadowOffsetX", "toolbarInnerShadowOffsetY", "toolbarInnerShadowBlur",
+      "toolbarInnerShadowSpread", "toolbarInnerShadowColor", DIVIDER, "toolbarShadowOffsetX",
+      "toolbarShadowOffsetY", "toolbarShadowBlur", "toolbarShadowSpread", "toolbarShadowColor",
+      DIVIDER, "toolbarPaddingTop", "toolbarPaddingBottom", "toolbarPaddingLeft",
+      "toolbarPaddingRight", DIVIDER, "toolbarBorderTopStyle", "toolbarBorderTopColor",
+      "toolbarBorderTopWidth", DIVIDER, "toolbarBorderBottomStyle", "toolbarBorderBottomColor",
+      "toolbarBorderBottomWidth", DIVIDER, "toolbarBorderLeftStyle", "toolbarBorderLeftColor",
+      "toolbarBorderLeftWidth", DIVIDER, "toolbarBorderRightStyle", "toolbarBorderRightColor",
+      "toolbarBorderRightWidth", DIVIDER, "toolbarCornerTopLeft", "toolbarCornerTopRight",
+      "toolbarCornerBottomLeft", "toolbarCornerBottomRight"
+    ] },
+    toolbarIcons: { order: [
+      "toolbarSize", "toolbarColor", DIVIDER, "toolbarButtonBackground",
+      DIVIDER, "toolbarButtonTexture", "toolbarButtonTextureFit", "toolbarButtonTexturePosition",
+      "toolbarButtonTextureBlend", "toolbarButtonTextureOpacity",
+      DIVIDER, "toolbarButtonInnerShadowOffsetX", "toolbarButtonInnerShadowOffsetY",
+      "toolbarButtonInnerShadowBlur", "toolbarButtonInnerShadowSpread", "toolbarButtonInnerShadowColor",
+      DIVIDER, "toolbarButtonShadowOffsetX", "toolbarButtonShadowOffsetY", "toolbarButtonShadowBlur",
+      "toolbarButtonShadowSpread", "toolbarButtonShadowColor",
+      DIVIDER, "toolbarButtonPaddingTop", "toolbarButtonPaddingBottom", "toolbarButtonPaddingLeft",
+      "toolbarButtonPaddingRight",
+      DIVIDER, "toolbarButtonBorderTopStyle", "toolbarButtonBorderTopColor", "toolbarButtonBorderTopWidth",
+      DIVIDER, "toolbarButtonBorderBottomStyle", "toolbarButtonBorderBottomColor",
+      "toolbarButtonBorderBottomWidth",
+      DIVIDER, "toolbarButtonBorderLeftStyle", "toolbarButtonBorderLeftColor", "toolbarButtonBorderLeftWidth",
+      DIVIDER, "toolbarButtonBorderRightStyle", "toolbarButtonBorderRightColor",
+      "toolbarButtonBorderRightWidth",
+      DIVIDER, "toolbarButtonCornerTopLeft", "toolbarButtonCornerTopRight",
+      "toolbarButtonCornerBottomLeft", "toolbarButtonCornerBottomRight"
+    ] },
+  },
+};
+
+for (const [key, layout] of Object.entries(LAYOUTS)) {
+  for (const group of GROUPS.filter((one) => (one.family ?? one.id) === key)) {
+    const home = new Map();
+    for (const section of group.sections) {
+      for (const field of section.fields) home.set(field.name, section);
+    }
+    for (const [id, plan] of Object.entries(layout)) {
+      if (id === "order") continue;
+      const section = group.sections.find((one) => one.id === id);
+      if (!section) throw new Error(`${group.id}: no category "${id}" to lay out`);
+      if (plan.label) section.label = plan.label;
+      if (plan.hint) section.hint = plan.hint;
+      section.order = plan.order;
+      // Anything named here that lived in another category moves, along with
+      // nothing else: what a category holds is what its order says.
+      for (const name of plan.order) {
+        if (name === DIVIDER) continue;
+        const from = home.get(name);
+        if (!from) throw new Error(`${group.id}.${id}: no control called "${name}"`);
+        if (from === section) continue;
+        const field = from.fields.find((one) => one.name === name);
+        from.fields = from.fields.filter((one) => one !== field);
+        section.fields.push(field);
+        home.set(name, section);
+      }
+    }
+    group.order = layout.order;
+    // A category the layout does not name is one the tab no longer has; its
+    // controls have been moved out by now, so an empty one simply goes.
+    group.sections = group.sections.filter((section) =>
+      layout.order.includes(section.id) || section.fields.length);
+    const stray = group.sections.find((section) => !layout.order.includes(section.id));
+    if (stray) throw new Error(`${group.id}: "${stray.id}" has controls but no place in the layout`);
+  }
+}
 
 /**
  * The tabs whose switch starts off, so their hovered state is on.
@@ -1392,51 +2564,44 @@ export function ordinaryTwinFor(group, hovered) {
 for (const group of GROUPS) {
   const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
   for (const section of group.sections) {
-      // The window frame and the contents panel are not hovered as objects, so
-      // nothing is derived for them wholesale — but a section of one that
-      // already states a hovered control is a section about something that *is*
-      // hovered, and the rest of its paint should follow. Without this, a
-      // sub-heading could take a hovered color and nothing else: changing its
-      // outline under Hovered changed the ordinary one too.
-      const stated = section.fields.some((field) => isHoveredField(field.name));
-      if (NO_HOVER.has(group.id) && !stated) continue;
+      // Every section of every tab, the window frame and the contents panel
+      // included. They were left out on the grounds that neither is hovered as
+      // an object — but a panel a pointer is inside is a thing that can answer
+      // to it, and deciding for somebody which of their settings could
+      // usefully change under the pointer is not ours to do.
 
       // A section that states a hovered control is about something that is
       // pointed at, so every paint control it has gets a counterpart — under
       // its own prefix, since that is how it is named: a sub-heading's outline
       // is `headingOutlineWidth`, and its hovered twin `headingHoverOutlineWidth`.
-      const capital = (name) => `${name[0].toUpperCase()}${name.slice(1)}`;
-      // Read off each control rather than each name in the list, and take the
-      // longest match: `outlineColor` is one control, not "outline" wearing
-      // "Color". A control that is already a state's own is left alone, or
-      // `hoverColor` would grow a hovered twin of its own.
+      // A section that states one gets a twin for *everything* it holds, not
+      // only its paint. A size or a spacing that changes under the pointer
+      // moves the page, which is why this was once paint only — but whether
+      // that is worth doing belongs to whoever is building the style, and a
+      // control quietly governing both states at once was not a choice at all.
+      //
+      // Elsewhere only the paint is shadowed, matched by name.
       const stateControl = (name) => /^(hover|active)/.test(name) || /(Hover|Active)[A-Z]/.test(name);
-      const wanted = section.fields.flatMap((original) => {
-        // A state's own control never grows another state of its own.
-        if (stateControl(original.name)) return [];
-        const bare = HOVERABLE
-          .filter((name) => original.name === name
-            || (stated && original.name.endsWith(capital(name))))
-          .sort((a, b) => b.length - a.length)[0];
-        return bare ? [{ bare, original }] : [];
-      });
+      // Everything the section holds. `stated` only decides whether a section
+      // of the window or the panel takes part at all — those two are not
+      // hovered as objects, so only the parts of them that say they are.
+      const wanted = section.fields.filter((original) =>
+        !stateControl(original.name) && !original.chrome && !original.noTwin);
 
-      for (const { bare, original } of wanted) {
-        const prefix = original.name === bare
-          ? ""
-          : original.name.slice(0, -capital(bare).length);
-        const hovered = prefix ? `${prefix}Hover${capital(bare)}` : hoverNameFor(bare);
+      for (const original of wanted) {
+        // Named by putting the state in front of the whole control's name.
+        // Splitting a name to slip the word into the middle needs to know where
+        // the name's own prefix ends, and it cannot be told: `outlineWidth` is
+        // one word for one thing, not "outline" wearing "Width".
+        const hovered = hoverNameFor(original.name);
         // Never shadow a control the schema already spells out itself — the
-        // sidebar and the window state their hovered colors by hand.
-        if (taken.has(hovered)) continue;
+        // sidebar and the window state their hovered colors by hand, in the
+        // other spelling, and one control per thing is the point.
+        const own = original.name.match(/^[a-z]+(?=[A-Z])/)?.[0] ?? "";
+        const infix = own ? `${own}Hover${original.name.slice(own.length)}` : hovered;
+        if (taken.has(hovered) || taken.has(infix)) continue;
         taken.add(hovered);
-        // The twin is the same kind of control as the one it stands in for, and
-        // says nothing until it is filled in: an empty color, and a thickness
-        // of zero that emits no value at all rather than a literal 0, so the
-        // `:hover` rule falls back to the ordinary one.
-        section.fields.push(original.type === "number"
-          ? { ...original, name: hovered, default: 0, emitZero: false }
-          : col(hovered, ""));
+        section.fields.push(stateTwin(original, hovered, "hover"));
       }
   }
 
@@ -1448,6 +2613,43 @@ for (const group of GROUPS) {
   group.sections[0].fields.push({
     type: "toggle", name: "hoverOff", default: !HOVER_ON.has(group.id), chrome: true, emit: () => null
   });
+}
+
+/**
+ * The two lists in the contents panel answer to being chosen as well as to
+ * being pointed at.
+ *
+ * A listed page can be the page being read, and a listed heading can be the one
+ * a reader clicked — states of their own, and not the same thing as a pointer
+ * passing over them. Both sections stated a handful of Selected controls by
+ * hand, a lettering color and a fill and an edge color, and every other control
+ * in the section governed the chosen entry and the rest at once: setting the
+ * corner rounding of the page being read was not something a style could say.
+ *
+ * Derived exactly as the pointed-at twins are and just as silent until it is
+ * set, so a style that says nothing about the chosen entry paints it as it
+ * paints the others.
+ */
+const SELECTED_SECTIONS = new Set(["sidebar.entries", "sidebar.subHeadings"]);
+
+for (const group of GROUPS) {
+  for (const section of group.sections) {
+    if (!SELECTED_SECTIONS.has(`${group.id}.${section.id}`)) continue;
+    const taken = new Set(section.fields.map((field) => field.name));
+    const stated = (name) => /^(hover|active)/.test(name) || /(Hover|Active)[A-Z]/.test(name);
+    for (const original of section.fields.filter((field) =>
+      !stated(field.name) && !field.chrome && !field.noTwin && !field.noSelected)) {
+      // Both spellings are already in use here — `activeColor` beside
+      // `entryActiveBackground` — so a control the schema states itself is
+      // left alone whichever way round it was written.
+      const selected = stateNameFor("active", original.name);
+      const own = original.name.match(/^[a-z]+(?=[A-Z])/)?.[0] ?? "";
+      const infix = own ? `${own}Active${original.name.slice(own.length)}` : selected;
+      if (taken.has(selected) || taken.has(infix)) continue;
+      taken.add(selected);
+      section.fields.push(stateTwin(original, selected, "active"));
+    }
+  }
 }
 
 /* -------------------------------------------- */
@@ -1479,11 +2681,10 @@ const SECTION_ORDER = [
   // The parts inside it
   "chip", "blockHeadings", "header", "rows", "cellPadding", "cellBorder",
   "tableCaption", "caption", "media", "collapsible", "revealed",
-  "revealButton", "dividers",
+  "revealButton", "dividers", "fold",
   // The contents panel, then the window
-  "entries", "number", "subHeadings", "categoryBorder",
-  "category", "search", "buttons",
-  "frame", "titleBar", "headerButtons", "pageButton"
+  "number", "entries", "subHeadings", "category", "search", "buttons",
+  "frame", "frameSize", "titleBar", "headerButtons", "pageButton", "toolbar"
 ];
 
 /**
@@ -1495,6 +2696,9 @@ const SECTION_ORDER = [
  * Sections built by `spacingFields`, `borderFields` and their like are already
  * identical wherever they appear, and are left out.
  */
+/** Whether a name belongs to a state rather than to the ordinary control. */
+const stateNamed = (name) => name !== "hoverOff" && /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
+
 const FIELD_ORDER = {
   text: [
     "font", "size", "color", "textColor", "textStyle", "textStyleSlant", "outlineWidth",
@@ -1504,11 +2708,16 @@ const FIELD_ORDER = {
   ],
   background: [
     "background", "texture", "textureFit", "texturePosition",
-    "textureBlend", "textureOpacity"
+    "textureBlend", "textureOpacity",
+    // A shadow is derived beside every picture, so the shared Fill section
+    // carries one wherever it appears.
+    "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
+    "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
+    "innerShadowColor"
   ],
   layout: [
-    "float", "width", "maxWidth", "sidebarWidth", "align", "clear", "flip",
-    "opacity", "indent", "itemSpacing", "whenEmpty"
+    "shown", "float", "width", "maxWidth", "sidebarWidth", "align", "clear",
+    "flip", "opacity", "indent", "itemSpacing", "whenEmpty"
   ],
   tagLayout: ["float", "minWidth", "verticalAlign", "lift"],
   caption: [
@@ -1535,8 +2744,25 @@ const SUFFIX_ORDER = [
   "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Align", "VerticalAlign"
 ];
 
-/** The word a control's name starts with, before the first capital. */
-const prefixOf = (name) => name.match(/^[a-z]+/)?.[0] ?? "";
+/**
+ * The word a control's name starts with, where the rest of it is a control this
+ * order knows about.
+ *
+ * Without that condition `outlineWidth` reads as "outline" wearing "Width", and
+ * a section's outline is sorted into a group of its own — which is how Outline
+ * and Text Shadow came to sit at opposite ends of the contents panel's entry.
+ */
+const knownSuffix = (text) => SUFFIX_ORDER.some((known) =>
+  known === text || known === `${text[0]?.toUpperCase()}${text.slice(1)}`);
+
+const prefixOf = (name) => {
+  // The whole name first: `outlineColor` is one control, and reading it as
+  // "outline" wearing "Color" — both of which are known — sorted a section's
+  // outline color away from its outline thickness, with the shadows between.
+  if (knownSuffix(name)) return "";
+  const lead = name.match(/^[a-z]+(?=[A-Z])/)?.[0] ?? "";
+  return lead && knownSuffix(name.slice(lead.length)) ? lead : "";
+};
 
 /** How far down the shared order a control's suffix sits, or Infinity. */
 const suffixRank = (name, prefix) => {
@@ -1548,11 +2774,40 @@ const suffixRank = (name, prefix) => {
 
 for (const group of GROUPS) {
   for (const section of group.sections) {
-    if (!SECTION_ORDER.includes(section.id)) {
-      throw new Error(`${group.id}: section "${section.id}" has no place in SECTION_ORDER`);
+    if (!(group.order ?? SECTION_ORDER).includes(section.id)) {
+      throw new Error(`${group.id}: section "${section.id}" has no place in ${group.order ? "this tab's own order" : "SECTION_ORDER"}`);
+    }
+    // A section may state its own order, and put a divider between the runs it
+    // reads in: "---" in the list is a line drawn across the tab before the
+    // control that follows it. The shared pass below is what every other section
+    // uses; this is for a tab somebody has laid out by hand.
+    if (section.order) {
+      const wanted = section.order.filter((name) => name !== DIVIDER);
+      const missing = section.fields.filter((field) =>
+        !isHoverName(field.name) && !stateNamed(field.name) && !field.chrome
+        && !wanted.includes(field.name));
+      if (missing.length) {
+        throw new Error(`${group.id}.${section.id}: "${missing[0].name}" is not in the section's own order`);
+      }
+      const place = (name) => {
+        const at = wanted.indexOf(name);
+        return at < 0 ? wanted.length : at;
+      };
+      section.fields.sort((a, b) => place(a.name) - place(b.name));
+      // The divider belongs to the control it precedes, which is where the
+      // editor draws it — so it travels with that control however the states
+      // shuffle the rest.
+      section.dividers = new Set();
+      for (let i = 0; i < section.order.length; i += 1) {
+        if (section.order[i] !== DIVIDER) continue;
+        const next = section.order.slice(i + 1).find((name) => name !== DIVIDER);
+        if (next) section.dividers.add(next);
+      }
     }
     const order = FIELD_ORDER[section.id];
-    if (order) {
+    if (section.order) {
+      // Already placed.
+    } else if (order) {
       for (const field of section.fields) {
         // A hovered control is placed against its own below, not by this list.
         if (order.includes(field.name) || isHoverName(field.name)) continue;
@@ -1608,7 +2863,10 @@ for (const group of GROUPS) {
     }
     section.fields = ordered;
   }
-  group.sections.sort((a, b) => SECTION_ORDER.indexOf(a.id) - SECTION_ORDER.indexOf(b.id));
+  // A tab may state the order of its own sections, for one laid out by hand;
+  // every other tab takes the shared one, which is what keeps them alike.
+  const sections = group.order ?? SECTION_ORDER;
+  group.sections.sort((a, b) => sections.indexOf(a.id) - sections.indexOf(b.id));
 }
 
 /* -------------------------------------------- */

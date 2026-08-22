@@ -94,6 +94,23 @@ These are all load-bearing and none are obvious from the code.
   the root is an `.application` as well, so the window's own background lands on the
   same element and wins on document order — which left the editor showing the page's
   ink over Foundry's frame color, unreadable.
+- **An empty custom property is not an absent one.** `--x: ;` is a *defined*
+  property whose value is the empty token stream, so `var(--x, fallback)`
+  resolves to nothing rather than to the fallback — and the property it feeds
+  becomes invalid at computed-value time and takes its initial value instead.
+  A field with an `emit` that returned `""` for an unset choice therefore rubbed
+  out whatever it fed the moment a pointer touched it: an unset hovered underline
+  took the link's underline away, and an unset hovered spacing moved the thing
+  under the pointer out from under it. `fieldToCss` returns null rather than an
+  empty value, and the compiler skips one if it ever sees one.
+- **A context menu is injected *inside* the thing it was opened on.** Core appends
+  `#context-menu` to the target element and sets `position: relative` on it — so a
+  listed page's menu lives inside that `li`. Every entry carries `isolation: isolate`
+  so its background image blends with its own fill rather than with the panel, and that
+  makes each entry a stacking context: the menu's `z-index` can no longer lift it out,
+  and the entries *after* it paint over it in document order. The next page's name sat
+  across the first menu item and swallowed the click. Core marks the open entry
+  `context`, so the fix is to raise **the entry**, not the menu.
 - **A color of None must not erase what core paints.** The window frame and title bar
   default to `#00000000`, and applying that as a `background-color` took Foundry's own
   away: every styled journal window became see-through to the canvas — invisible on
@@ -137,6 +154,18 @@ These are all load-bearing and none are obvious from the code.
   style is being deleted, a test cleaning up — must pass `{ force: true }` or it will sit
   on a dialog forever. This is the trap it caused: every check that closed a dirty editor
   hung, and the suite stalled at an unrelated one.
+- **A secret passage is revealed by its id.** Foundry's Reveal button rewrites the
+  page's *stored* markup, finding the passage with a regular expression that matches
+  `id="…"` — so a `<section class="secret">` written without one can never be revealed
+  and its button does nothing whatever when clicked. The editor gives each secret an
+  id as a person makes one (`SecretNode.getAttrs`), and so does anything parsed through
+  `foundry.prosemirror.dom.parseString`, which is why templates are safe. Markup turned
+  straight into a page is not: `sampleMarkup()` stamps one per page, and a check clicks
+  the button and reads what the page ends up holding.
+- **What a reveal changes is 5% of an alpha.** Foundry paints an unrevealed passage
+  `rgb(53 0 121 / 5%)` and a revealed one `rgb(0 53 0 / 5%)`, and a new style ships
+  both — so "nothing happens when I click Reveal" is usually the toggle working and
+  the difference being invisible. Measure the two fills before believing otherwise.
 - **Render hooks fire for the whole inheritance chain.** `renderJournalEntrySheet` fires
   for system subclasses too, so hooking the core class is enough.
 - **An ApplicationV2 part template must have exactly one root element.** More than one
@@ -283,6 +312,43 @@ unwrap it as well as the flows.
 explicitly. Its three selectors sat at the head of level 1's selector list; moving the
 rules into the generator by cutting from `.journal-page-content h1 {` left them orphaned
 and the title unstyled, which is now covered by a check.
+
+## Folding
+
+A heading can fold the run of text beneath it, and a contents entry can fold the
+entries under it. `scripts/collapsible.mjs` writes the markers at render, beside
+the flow wrappers and under the same three rules: **nothing is stored**, **never
+inside an editor**, and **it undoes itself first**.
+
+- **A style says whether a marker can be seen, not whether one exists.** The
+  marker goes into every heading that governs something, whatever the style, and
+  `--ill-<group>-fold-shown` is what makes it visible. A style that could decide
+  which headings get a button would be a style supplying rules, and the whole
+  point of the compiler is that it cannot.
+- **The glyph is `::before` content**, which is how FontAwesome draws every icon:
+  the element the module writes carries the family, and a style names the
+  character. That is the one place the "FontAwesome owns `::before`" trap is
+  deliberately used rather than avoided.
+- **One glyph, turned.** Open is the ordinary glyph rotated by Marker Turn
+  (90° by default, pointing a sideways arrow downwards); folded is the same glyph
+  at rest. Two glyphs would be two controls saying one thing.
+- **What a heading governs is what follows it until a heading of its own level
+  or shallower** — asked for on every click, because the flow wrappers are
+  rebuilt on every render.
+- **The contents panel's list is flat.** Core writes `li.heading.h2` and
+  `li.heading.h3` as siblings, so "the entries under this one" is the run that
+  follows it until an entry of its own depth. A page entry folds the whole
+  `ol.headings` core appended to it.
+- **Only what folding hid is unhidden.** Foundry hides a listed page from the
+  players with the same `hidden` attribute, so unfolding stamps and reads
+  `data-illuminus-folded` rather than clearing every `hidden` it finds.
+- **Which sections are folded is remembered for the session, not stored.** A
+  sheet re-renders on every edit and every style change; a reader who had folded
+  three chapters away would otherwise fold them again each time. The key is the
+  page and the heading's text, because the element does not survive the render
+  that replaced it.
+- Exports carry no markers. An exported page is a document rather than an
+  application, and a button that did nothing would be worse than no button.
 
 ## Coverage
 
@@ -450,6 +516,18 @@ release rather than on their own shelf.
 - **Pictures still travel inside it**, as data URIs, because a lone `.css` has no folder
   beside it. Whoever exports it licenses those; the wording says that too.
 
+**A `required` field that is hidden stops the whole form.** The export window shows the
+Custom Descriptor only for the stylesheet format; marked `required`, it silently blocked
+*every other* export — a browser will not submit a form holding an empty required control,
+and cannot focus a hidden one to say so. Nothing happened when Export was pressed and
+nothing was logged. Requirements that depend on what else is chosen belong in the submit
+handler, which is where this one lives.
+
+**`bringToFront()` answers with nothing.** An `open()` that returns it hands the caller
+`undefined` whenever a window happens to be open already, which is indistinguishable from
+"it did not open". Return the application itself, and re-render rather than hand back an
+instance that is still registered but closing.
+
 ## The two library windows
 
 The style library and the template library are the same window with different
@@ -481,6 +559,31 @@ in the template library.
   "Critical Failure". The version is taken from the installed app now. Build 366 also
   replaced the join screen's user *list* with a *name field*, which `joinAndWait` handles
   both of.
+- **The "no hardware acceleration" toast covers the top of the window**, and not
+  only in screenshots: it is `permanent`, it sits exactly where a journal's name
+  is, and a pointer sent to the title lands on the notice instead. Clear
+  `#notifications .notification` before any hit test near the top of a sheet,
+  not just before capturing.
+- **Measure the spot on the click itself.** A page settles for a moment after it
+  renders — a typeface arriving moves every line — so a pointer sent to a spot
+  measured a second earlier lands beside a heading rather than on it. That is what
+  "the hovered color never applied" turned out to be, twice. Re-measure, hit-test,
+  and believe the read only once the element says it is hovered.
+- **Foundry's tooltip outlives what asked for it.** One left showing over the
+  contents panel covers whatever is under it, and a click aimed there lands on the
+  tooltip. `game.tooltip.deactivate()` and remove `#tooltip` before a hit test,
+  as with the hardware-acceleration notice.
+- **Where geometry can decide the answer, compare against an unstyled journal.**
+  A context menu that runs past the bottom of a short panel is clipped by the
+  panel whatever a style says, so "every entry can be clicked" fails for reasons
+  that have nothing to do with us. The honest assertion is that styling covers
+  none of it that Foundry does not cover itself — the same shape as the
+  hovered-state check, which asks that nothing changes under the pointer beyond
+  what core changes.
+- **A check that opens windows should close the ones already open.** Earlier
+  checks leave sheets on screen, and a pointer sent at a window underneath one of
+  them lands on the one on top — which reads as a styling failure three sections
+  away from anything to do with windows.
 - **A crashed run leaves fixtures behind**, and a stray style breaks the seeded-style
   counts three checks in — which looks like a bug in those checks. When counts are wrong
   in section [2], the world is dirty: `tools/sandbox.sh reset`.
@@ -492,6 +595,14 @@ in the template library.
   learn you were driving the same browser from two places.
 
 ## Generated files — do not hand-edit
+
+- **`SETTINGS.md`** is not kept in the repo — a list of two thousand controls is out
+  of date by the end of the week. `node tools/generate-settings-doc.mjs` writes it when
+  one is wanted: every tab, every category, and every setting, in the order the editor
+  draws them, read from the sorted schema and `lang/en.json`, so it is the interface
+  written down rather than a second description of it. A state's own controls get no row
+  of their own — the editor draws them in place of the control they stand in for, so the
+  row names the states instead.
 
 - **`styles/illuminus-generated.css`** is written by `node tools/generate-block-css.mjs`.
   The ten blocks and ten picture treatments are identical rule sets apart from which
@@ -577,6 +688,12 @@ comparing two styles means two journals rather than one being overwritten.
 
 ## Editor chrome
 
+**A piece the focused one holds is lit with it.** The Page tab's piece is the surface
+everything else sits on, so dimming everything that is not the focused part greyed the
+whole sample out and left the one tab covering the page with nothing to look at. Neither
+a part that holds the focused one nor a part it holds is dimmed — which also keeps a link
+lit inside the paragraph it sits in.
+
 The sample **follows the open tab**: pieces of it carry `data-part="<group id>"`, and
 the editor dims the rest and scrolls the focused one into view. `changeTab` is overridden
 to do it, because switching tabs does not re-render. A family tab focuses the member its
@@ -590,13 +707,13 @@ hover half occur — `hoverBackground` as well as `buttonHoverBackground` — so
 case-insensitive, and a control whose twin lives in a *different section* is left alone
 rather than half-hidden.
 
-**Hovered controls are derived, not written.** `HOVERABLE` in the schema shadows every
-lettering color, fill, and edge color with a `hover…` counterpart, and the generator
-emits the matching `:hover` rule with the ordinary value as its fallback — so an unset
-hovered color changes nothing rather than resetting the element. Paint only: shadowing a
-size or a padding would reflow the page under the pointer. `NO_HOVER` skips the *deriving*
-for the window frame and the contents panel, which are not hovered as objects — both
-still get the switch, because both hold hovered controls written by hand.
+**Hovered controls are derived, not written.** Every control the schema declares gets a
+state's own counterpart — a color, a size, a spacing, a tick box — and the generator
+mirrors every rule under `:hover`, reading the twin first and falling back to the
+ordinary value, so an unset hovered control changes nothing rather than resetting the
+element. Every section of every tab takes part, the window frame and the contents panel
+included: they were left out on the grounds that neither is hovered as an object, which
+left most of their settings governing both states at once.
 
 When a selector is a comma-joined list, `:hover` must be appended to **each** member —
 `a, b:hover` hovers only `b`, which half-works in silence. **The same is true of
@@ -644,8 +761,101 @@ Filtering and the switch can hide the same control for different reasons, so the
 different classes: a filter hit un-hides a state-folded control (`is-state-suppressed`)
 rather than the filter lying about what exists.
 
+## The two windows, and the shadows
+
+**The Journal Editor tab styles the window Edit Page opens**, and every rule it writes
+out-specifies the Window tab's, which keeps the journal window. The two are separate
+deliberately: they are different windows doing different jobs. What is written *on* is
+still the page's own surface, painted by the Page tab, so what you type looks like what
+you will read — that is the one thing the editor tab does not own.
+
+**A shadow is derived from a picture.** A background picture and a shadow answer the same
+question — this is a surface, and this is how it sits on the page — so the schema gives
+every fill that can carry a picture a shadow and an inner shading beside it, and the
+generator writes the rules from the same table the pictures come from. A new fill with a
+picture gets both for free. A *state's* picture is skipped: its shadows come from the
+hovered twins, or there would be two controls for one pointed-at shadow.
+
+**The mirror runs once per state.** `pointedRules` in the generator takes the state's
+twin table and a selector rewrite, so the same pass writes the `:hover` rules and the
+rules for the contents panel's chosen row — `li.page.active` and
+`li.heading.illuminus-current`, whose ordinary selectors are restated by the `CHOSEN`
+table. That is what gives those two categories a Selected state in full rather than the
+handful of hand-written colors they had, and what makes an unset Selected control fall
+back to the ordinary value instead of painting nothing. A control that belongs to the
+list rather than to a row in it says `noSelected: true` — the sub-headings' Indent is
+the one.
+
+**The contents panel's Selected heading is the module's own mark.** Foundry marks the page
+being read and nothing finer, so `scripts/toc-current.mjs` marks the listed heading a
+reader clicked — under the same three rules as the folding markers: nothing stored,
+nothing inside an editor, re-applied on every render.
+
+**A control belongs to the states that have no control of their own for it.** Every
+control has a pointed-at twin now, so "this has more than one state" became true of all of
+them — and choosing Selected hid a whole section but the handful of controls named for it,
+which reads as the settings being missing. The rule is per state: show a control if it is
+named for the chosen state, or if it is the ordinary control and the chosen state has none
+of its own.
+
+## A new style is a plain journal
+
+**The shipped defaults are Foundry's own.** Opening a new style and looking at it
+should show exactly what an unstyled journal shows, so that every control starts by
+doing nothing. Two mechanisms carry that:
+
+- **Anything inherited follows the journal.** An empty color, a size of 0
+  (`zeroAs: "inherit"`), a lettering style of `inherit`, an alignment of `inherit` —
+  all of them emit either nothing or the keyword, so the page's own value comes
+  through whatever game system is painting it. `textFields()` defaults to that for
+  every tab.
+- **Anything not inherited is set to what Foundry paints**, measured rather than
+  guessed: the page's dark ground, the heading scale and the rules under the first two
+  levels, the link chip, the panel's dividers and page numbers. Those numbers come from
+  a world running a game system, so they are Foundry-as-installed rather than
+  Foundry-in-the-abstract — a system that restyles journals will differ, and the honest
+  fix if that matters is to defer rather than to copy.
+
+`tools/…` has no check for this on its own; **section [62] and the delta probe are what
+prove it** — a new style beside an unstyled journal, compared property by property.
+
+**A hovered twin must be free to say nothing.** A twin holds 0 to mean "nothing to say",
+and `cleanSettings` clamps a number into its control's range — so a twin that copied its
+control's `min` emitted that minimum instead of silence. The panel-width twin came back
+as 120px, and pointing anywhere in a styled journal shrank the contents panel from 300 to
+120: every click target slid sideways, and a secret passage's Reveal button walked out
+from under the pointer. A derived numeric twin gets `min: 0`.
+
+**A fill painted over Foundry's goes on the layer, not on the element.** The window frame
+and title bar were painted as a `linear-gradient` of one color so that None would leave
+Foundry's own showing. That works for a background *color* and not for a background
+*image*: it is one property, so the gradient replaced whatever texture Foundry paints
+there. The fill goes on the `::after` layer that already carries the picture, which sits
+above the element's own background and below its content.
+
+**Never move a custom element.** `wrapFlows` used to sweep a `<secret-block>` into a
+flow wrapper along with everything else; moving one disconnects and reconnects it, and it
+came back with a Reveal button that did nothing. A custom element ends the run it is in
+and stays where it is.
+
 ## Conventions worth keeping
 
+- **A tab may lay itself out, and then it says so twice.** `SECTION_ORDER` and
+  `FIELD_ORDER` sort every tab so they read alike; a tab that wants its own
+  arrangement states `order` on the group (its sections) and `order` on a section
+  (its controls), and the shared pass leaves it alone. `DIVIDER` — `"---"` — in a
+  section's order draws a line before the control that follows it, which is how a
+  long category reads in runs rather than as a list. The line belongs to the
+  control it precedes, so it travels with that control when the state switch
+  shuffles the rest, and it hides itself when the whole run it introduces is
+  hidden. A section stating its own order must name every control it holds, or
+  the schema throws at import — the same bargain `FIELD_ORDER` drives.
+- **A shadow sharing a section says which shadow it is.** "Softness" is enough in
+  a category called Inner Shadow and ambiguous in one holding a fill, a picture
+  and two shadows. The qualifier is written as the *tab's* own wording rather
+  than the control's, so the Page tab's own Outer Shadow category keeps the short
+  labels while the Title tab, which holds both in one category, gets the long
+  ones.
 - **Where a control appears is decided in one place.** `SECTION_ORDER` and
   `FIELD_ORDER` at the foot of `style-schema.mjs` sort every tab after it is built,
   so each tab reads the same way: text, fill, inner spacing, border, corners, shadow,
@@ -654,6 +864,18 @@ rather than the filter lying about what exists.
   against the ordinary control they replace, which is what keeps the two states in the
   same order. Order the sections wherever it reads best in the source; the pass settles
   the rest.
+- **A state's control is named for the thing it belongs to, never for the state
+  alone.** A listed page's pointed-at fill was `hoverBackground`, and the panel's
+  own fill is `background` in the same tab — so the mirror paired them and the
+  pointed-at rule it wrote for the *panel* painted the whole panel with the
+  *entry's* color the moment a pointer entered it. They are `entryBackground`,
+  `entryHoverBackground`, and `entryActiveBackground` now. Field names share one
+  namespace per tab, so a bare state word is a collision waiting to happen.
+- **A derived hovered twin needs its own "Match all sides" key.** The twin is a
+  copy of the control it stands in for, and copying its `link` too meant Match
+  took the *ordinary* corner and wrote it across the hovered ones as well —
+  which reads as the hovered settings not working at all rather than as Match
+  overreaching.
 - **Every schema change is three edits**: the field in `scripts/style-schema.mjs`, a rule
   in `styles/illuminus.css` consuming its custom property, and a re-run of the lang
   generator. `validate.mjs` fails if you miss any of them.

@@ -342,6 +342,32 @@ function v7_to_v8(settings) {
   return out;
 }
 
+/**
+ * Version 8 -> 9.
+ *
+ * Two changes to the contents panel. A listed page's own fill and picture were
+ * named for the state alone — `hoverBackground`, `activeTexture` — while the
+ * panel's own fill is `background` in the same tab, so the pointed-at rule the
+ * generator mirrors for the panel read the *entry's* color and painted the whole
+ * panel with it. They are named for the entry now.
+ *
+ * And page numbers became a tick box that starts unticked, so a stored "shown"
+ * or "notShown" becomes the answer it stood for.
+ */
+function v8_to_v9(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const sidebar = out.sidebar;
+  if (!sidebar) return out;
+  for (const [from, to] of [["hoverBackground", "entryHoverBackground"],
+    ["activeBackground", "entryActiveBackground"]]) rename(sidebar, from, to);
+  for (const part of ["Texture", "TextureFit", "TexturePosition", "TextureBlend", "TextureOpacity"]) {
+    rename(sidebar, `hover${part}`, `entryHover${part}`);
+    rename(sidebar, `active${part}`, `entryActive${part}`);
+  }
+  if (typeof sidebar.numberShown === "string") sidebar.numberShown = sidebar.numberShown !== "notShown";
+  return out;
+}
+
 /** Migrations keyed by the version they upgrade *from*. */
 const MIGRATIONS = {
   1: v1_to_v2,
@@ -350,7 +376,8 @@ const MIGRATIONS = {
   4: v4_to_v5,
   5: v5_to_v6,
   6: v6_to_v7,
-  7: v7_to_v8
+  7: v7_to_v8,
+  8: v8_to_v9
 };
 
 /**

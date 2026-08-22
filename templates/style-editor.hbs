@@ -69,9 +69,14 @@
           </button>
         </div>
 
+        {{!-- A line above the first control and below the last, so a category
+              reads as a block of its own rather than running into the one
+              beneath it. The ones between the runs are written by the schema. --}}
+        <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
         {{#each section.fields as |field|}}
         {{> "modules/illuminus/templates/style-field.hbs" field=field}}
         {{/each}}
+        <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
       </details>
       {{/each}}
     </div>
@@ -145,9 +150,14 @@
           </button>
         </div>
 
+        {{!-- A line above the first control and below the last, so a category
+              reads as a block of its own rather than running into the one
+              beneath it. The ones between the runs are written by the schema. --}}
+        <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
         {{#each section.fields as |field|}}
         {{> "modules/illuminus/templates/style-field.hbs" field=field}}
         {{/each}}
+        <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
       </details>
       {{/each}}
     </div>
@@ -195,7 +205,9 @@
                 <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.CurrentPage"}}</span>
               </div>
               <ol class="headings">
-                <li class="heading h2"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
+                {{!-- Marked as the one a reader chose, so the panel's Selected
+                      controls have something to show. --}}
+                <li class="heading h2 illuminus-current"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
                 <li class="heading h3"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
               </ol>
             </li>
@@ -238,6 +250,62 @@
         </div>
       </section>
       </div>
+      </div>
+
+      {{!-- The window Edit Page opens, so the Journal Editor tab has something
+            to look at. It carries the classes the real one does, because the
+            rules are scoped to them: an `.application` that is also a
+            `.journal-entry-page`, a title bar with its buttons, the row of
+            editing controls, and a line of prose on the page's own surface.
+
+            Written as a plain element rather than as a `prose-mirror`: that is
+            a custom element, and putting one here would start an editor in the
+            sample. --}}
+      {{!-- Not marked as styled itself: the skeleton declares every default on
+            `.illuminus-styled`, so a second one inside the frame would shadow
+            the values the frame is carrying. The editor's rules name this piece
+            instead. --}}
+      <div class="illuminus-preview__editor application sheet journal-sheet journal-entry-page"
+           data-part="editor">
+        <header class="window-header">
+          <h1 class="window-title">{{localize "ILLUMINUS.Preview.EditorTitle"}}</h1>
+          <button type="button" class="header-control icon fa-solid fa-book" disabled></button>
+          <button type="button" class="header-control icon fa-solid fa-xmark" disabled></button>
+        </header>
+        <section class="window-content">
+          {{!-- What a page is called, and the settings beside it: the name is the
+                Title tab's own control, and the two settings have a category of
+                their own on this tab. --}}
+          <header class="journal-header">
+            <input class="title" type="text" value="{{localize "ILLUMINUS.Preview.EditorPageName"}}" disabled>
+            <div class="page-metadata flexrow">
+              <div class="heading-level flexrow">
+                <label class="flex0 fa-solid fa-list-tree"></label>
+                <select disabled>
+                  <option>{{localize "ILLUMINUS.Preview.EditorLevel"}}</option>
+                </select>
+              </div>
+              <div class="show-title noflex">
+                <label class="checkbox">
+                  {{localize "ILLUMINUS.Preview.EditorShowTitle"}}
+                  <input type="checkbox" checked disabled>
+                </label>
+              </div>
+            </div>
+          </header>
+          <div class="journal-page-content editor prosemirror active illuminus-preview__prose">
+            <menu class="editor-menu">
+              <button type="button" class="pm-dropdown" disabled>{{localize "ILLUMINUS.Preview.EditorFormat"}}</button>
+              <button type="button" class="pm-dropdown" disabled>{{localize "ILLUMINUS.Preview.EditorIlluminus"}}</button>
+              <button type="button" class="icon fa-solid fa-bold" disabled></button>
+              <button type="button" class="icon fa-solid fa-italic" disabled></button>
+              <button type="button" class="icon fa-solid fa-link" disabled></button>
+            </menu>
+            <div class="editor-content ProseMirror">
+              <p>{{localize "ILLUMINUS.Preview.EditorBody"}}</p>
+            </div>
+          </div>
+        </section>
       </div>
 
       {{!-- Block Styles and Picture Styles take the pane over: a block is only

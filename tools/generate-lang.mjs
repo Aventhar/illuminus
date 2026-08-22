@@ -123,12 +123,15 @@ Object.assign(out, {
   "ILLUMINUS.Export.PageCountOne": "1 page",
   "ILLUMINUS.Export.NoJournals": "There are no journals to export.",
   "ILLUMINUS.Export.FormatLegend": "How to Save It",
-  "ILLUMINUS.Export.FormatPrintNote": "Use in Chrome browser for best results.",
+  "ILLUMINUS.Export.FormatPrintNote": "Opens your browser\u2019s print dialog, where Save as PDF lives \u2014 paper size, margins and background ink are chosen there. Chrome gives the best result: it writes its own PDF and keeps the contents page\u2019s links.",
   "ILLUMINUS.Export.FormatFolder": "Website directory structure",
   "ILLUMINUS.Export.CssPrefix": "Custom Descriptor",
   "ILLUMINUS.Export.CssPrefixPlaceholder": "Mandatory",
   "ILLUMINUS.Export.CssPrefixHint": "Every class and color name in the exported file is built from this word, in place of \"illuminus\" \u2014 so the file can sit in your own module without answering to Illuminus's names or being changed by them. Letters, digits and hyphens; it must start with a letter. Any pictures the style uses are carried inside the file, and licensing them for whatever you release is yours to arrange. Typefaces are not included: the file names them and leaves finding them to whatever loads it.",
+  "ILLUMINUS.Export.CssNeedsStyle": "A style sheet can only be exported from an Illuminus style. \u201CAs they appear in Foundry VTT\u201D gathers the styling that is painting the page, which is not Illuminus\u2019s to hand on.",
   "ILLUMINUS.Export.CssPrefixNeeded": "A style sheet needs a name of its own before it can be exported.",
+  "ILLUMINUS.Export.FormatFolderNote": "A folder of web pages, one file per journal, with a contents page and a styles folder beside them. Open it in any browser, or put the folder on a website.",
+  "ILLUMINUS.Export.FormatFileNote": "One file holding everything \u2014 pages, pictures and styling alike. Nothing sits beside it, so it can be emailed, put on a memory stick, or opened straight from a download.",
   "ILLUMINUS.Export.FormatCss": "Independent Style Sheet (CSS)",
   "ILLUMINUS.Export.FormatCssNote": "The look on its own, for a page you lay out yourself. Pictures are carried inside the file.",
   "ILLUMINUS.Export.FormatFile": "Single file website",
@@ -161,6 +164,10 @@ Object.assign(out, {
   "ILLUMINUS.Families.tagStyles": "Tag Styles",
   "ILLUMINUS.Families.tagStylesName": "Tag name",
   "ILLUMINUS.Families.tagStylesHint": "Styles you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
+  "ILLUMINUS.Field.sidebar.buttonColor.label": "Icon Color",
+  "ILLUMINUS.Field.sidebar.buttonColor.hint": "Color of the icons on the panel's buttons.",
+  "ILLUMINUS.Field.sidebar.buttonHoverColor.label": "Icon Color",
+  "ILLUMINUS.Field.sidebar.buttonHoverColor.hint": "Color of the icons while the mouse is over a button.",
   "ILLUMINUS.Field.secrets.color.label": "Text Color",
   "ILLUMINUS.Field.secrets.color.hint": "Color of the lettering inside a secret passage. Leave empty to follow the page.",
   "ILLUMINUS.Field.secrets.size.hint": "How large the lettering is inside a secret passage. 0 follows the page.",
@@ -205,6 +212,13 @@ Object.assign(out, {
   "ILLUMINUS.Sample.ButtonTooltip": "Make a real journal holding everything the sample shows, dressed in the ticked style",
   "ILLUMINUS.Sample.Made": "Made {name}, in the Samples folder.",
   "ILLUMINUS.Preview.HeadingBody": "The text that follows a heading, so the space above and below it, and the way it sits against a full measure of prose, can both be judged. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+  "ILLUMINUS.Preview.EditorTitle": "Editing: A Page",
+  "ILLUMINUS.Preview.EditorPageName": "A Page",
+  "ILLUMINUS.Preview.EditorLevel": "Level 1",
+  "ILLUMINUS.Preview.EditorShowTitle": "Show Title",
+  "ILLUMINUS.Preview.EditorFormat": "Format",
+  "ILLUMINUS.Preview.EditorIlluminus": "Illuminus",
+  "ILLUMINUS.Preview.EditorBody": "What you type here is written on the page's own surface, so it looks like what a reader will see.",
   "ILLUMINUS.Preview.WindowTitle": "Window Title",
   "ILLUMINUS.Preview.JournalTitle": "Journal Title",
   "ILLUMINUS.Preview.Heading1": "Heading 1",
@@ -298,6 +312,7 @@ Object.assign(out, {
 
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
+  editor: ["Journal Editor", "The window that opens when you edit a page — its frame, its title bar, and the row of editing controls. What you write on is the page's own surface, set on the Page tab"],
   page: ["Page", "The paper the text sits on: its color, any background image, and the frame around it."],
   window: ["Window", "The journal window itself: its frame, the title bar across the top, and the icon buttons."],
   sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."],
@@ -358,13 +373,14 @@ const SECTION_TEXT = {
   innerShadow: ["Inner Shadow", "Shading inside the edges, for an aged or lit-from-within look"],
   paragraph: ["Paragraphs", "Spacing and indentation between paragraphs"],
   columns: ["Columns", "Split the text into newspaper-style columns"],
+  fold: ["Folding", "Let a reader fold this away and open it again, and set what the marker looks like"],
   codeBlock: ["Code Block", "A block of code set apart from the prose, rather than code inside a sentence"],
   dropCap: ["Opening Capital", "An enlarged first letter at the start of a page"],
   decoration: ["Underline", "The line drawn through or under a link"],
   marks: ["Marked Text", "Highlighting, strike-through, underline, and the rest of the toolbar's marks"],
   code: ["Code", "Fixed-width text, inline and as a block"],
   definitions: ["Definition Lists", "A term with its explanation beneath"],
-  tableCaption: ["Caption", "The title printed above or below a table"],
+  tableCaption: ["Table Caption", "The title printed above or below a table"],
   collapsible: ["Collapsible", "A passage the reader can fold away"],
   glow: ["Glow", "A halo that follows the picture's shape"],
   media: ["Sound and Video", "Embedded players and pages"],
@@ -373,7 +389,7 @@ const SECTION_TEXT = {
   chip: ["Highlight", "A patch of color behind a link, making it look like a button"],
   marker: ["Bullets and Numbers", "The mark in front of each item"],
   header: ["Header Row", "The top row of a table"],
-  rows: ["Rows", "The body rows of a table"],
+  rows: ["Table Rows", "The body rows of a table"],
   cellPadding: ["Cell Spacing", "Room between a cell's edges and its contents"],
   caption: ["Caption", "The text beneath an image"],
   dividers: ["Dividers", "Horizontal rules between passages"],
@@ -381,14 +397,24 @@ const SECTION_TEXT = {
   entries: ["Page Entries", "Each page listed in the contents panel"],
   entryBorder: ["Entry Borders", "Lines around each listed page. Each edge is set separately"],
   entryStates: ["Current and Hovered", "How the page you are reading, and the one under the mouse, stand out"],
-  number: ["Page Numbers", "The number shown beside each listed page"],
+  number: ["Numbering", "The number shown beside each listed page"],
   subHeadings: ["Sub-Headings", "The headings listed underneath the page you are reading"],
-  category: ["Category Rows", "Group headers in the contents panel"],
+  category: ["Categories", "The group headings between the pages, and the rows they sit in"],
   search: ["Search Box", "The search field at the top of the panel"],
   buttons: ["Buttons", "The controls beside the search box and along the bottom"],
   frame: ["Window Frame", "The edge of the window, visible around the page"],
   titleBar: ["Title Bar", "The strip across the top carrying the journal's name"],
   headerButtons: ["Title Bar Buttons", "The icon buttons at the right of the title bar, including Illuminus's own"],
+  frameSize: ["Window Size", "How wide the window may be drawn, whatever it is dragged to"],
+  fillAndImage: ["Fill and Image", "The color and picture behind the contents, and the shadows they cast"],
+  imageCaption: ["Image Caption", "The words printed under a picture"],
+  cellStyles: ["Cell Styles", "The room inside a cell and the lines drawn around it"],
+  pageFillAndImage: ["Fill and Image", "The color and picture behind the contents, and the shadows they cast — Foundry's window clips the outer one, so it shows in an exported page rather than at the table"],
+  toolbar: ["Editing Bar", "The strip the editing controls stand on, above the prose"],
+  toolbarIcons: ["Editing Icons", "Each icon on that strip \u2014 bold, italic, and the rest"],
+  settingsBar: ["Page Settings Bar", "The strip holding the page's own settings, above the editing bar"],
+  pageFields: ["Page Settings", "The title level and the Show Title tick box standing on that strip"],
+  dropdowns: ["Named Controls", "The two controls that open a list of their own, Format and Illuminus"],
   pageButton: ["Edit Button", "The pencil that appears over a page when you point at it"]
 };
 for (const [id, [label, hint]] of Object.entries(SECTION_TEXT)) {
@@ -411,6 +437,13 @@ const NOUN = {
   headerButtonBorder: "button edge", pageButtonBorder: "button edge",
   headerButtonCorner: "button", pageButtonCorner: "button",
   padding: "contents", cellPadding: "cell's contents", entryPadding: "entry's contents",
+  entryMargin: "", headingPadding: "listed heading's name", headingMargin: "",
+  toolbarPadding: "editing controls", toolbarBorder: "editing bar edge", toolbarCorner: "editing bar",
+  settingsBarPadding: "settings on the strip", settingsBarBorder: "strip edge", settingsBarCorner: "strip",
+  toolbarButtonPadding: "icon", toolbarButtonBorder: "icon edge", toolbarButtonCorner: "icon",
+  dropdownPadding: "drop-down's name", dropdownBorder: "drop-down edge", dropdownCorner: "drop-down",
+  fieldPadding: "field's contents", fieldBorder: "field edge", fieldCorner: "field",
+  headingBorder: "listed heading edge", headingCorner: "listed heading", entryCorner: "entry",
   categoryPadding: "category's name", categoryMargin: "", categoryBorder: "category edge",
   categoryCorner: "category",
   margin: "", corner: "", searchCorner: "search box", buttonCorner: "button",
@@ -427,7 +460,24 @@ const SIDE_PHRASE = { Top: "above", Right: "to the right of", Bottom: "below", L
 const CORNER_WORD = {
   TopLeft: "Top-Left", TopRight: "Top-Right", BottomRight: "Bottom-Right", BottomLeft: "Bottom-Left"
 };
-const noun = (prefix, fallback) => (prefix in NOUN ? NOUN[prefix] : fallback);
+/** A prefix with its state word taken out, or null when it carries none. */
+const withoutState = (name) => {
+  const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
+  if (stripped === name || !stripped) return null;
+  return stripped[0].toLowerCase() + stripped.slice(1);
+};
+
+/**
+ * The wording for a prefix. A state's own control describes the same thing its
+ * ordinary twin does — `hoverButtonCorner` is still the button's corner — so a
+ * prefix carrying a state word is looked up without it rather than falling to
+ * the generic phrase, which dropped "of the button" from every hovered corner.
+ */
+const noun = (prefix, fallback) => {
+  if (prefix in NOUN) return NOUN[prefix];
+  const bare = withoutState(prefix);
+  return bare && bare in NOUN ? NOUN[bare] : fallback;
+};
 
 const names = [...new Set(allFields().map(({ field }) => field.name))];
 
@@ -440,10 +490,37 @@ const names = [...new Set(allFields().map(({ field }) => field.name))];
  * its own the label reads "Shadow Color" inside it, which is a word longer than
  * it needs to be rather than a word short of clear.
  */
-const SHARED_SHADOW = new Set(GROUPS.flatMap((group) => group.sections
-  .filter((section) => section.id !== "textShadow")
-  .flatMap((section) => section.fields.map((field) => field.name))
-  .filter((field) => /TextShadow(OffsetX|OffsetY|Blur|Spread|Color)$|^textShadow(OffsetX|OffsetY|Blur|Spread|Color)$/.test(field))));
+/**
+ * Shadows that share a section with anything else.
+ *
+ * A shadow whose section holds nothing but its own five controls is named by
+ * that section — Outer Shadow, Inner Shadow, Text Shadow — so "Softness" is the
+ * whole of what the row needs to say. One sharing a section with a fill, a
+ * picture, and a second shadow needs to say which shadow it is, or a tab reads
+ * Horizontal Offset twice and means two different things.
+ */
+/**
+ * Shadows that share a section with anything else, by tab.
+ *
+ * A shadow whose section holds nothing but its own five controls is named by
+ * that section — Outer Shadow, Inner Shadow, Text Shadow — so "Softness" is the
+ * whole of what the row needs to say. One sharing a section with a fill, a
+ * picture, and a second shadow has to say which shadow it is, or the tab reads
+ * "Horizontal Offset" twice and means two different things by it. Keyed by tab
+ * because the same control is both, depending on how the tab is laid out.
+ */
+const PARTS = /(OffsetX|OffsetY|Blur|Spread|Color)$/;
+const isShadow = (name) => /[Ss]hadow(OffsetX|OffsetY|Blur|Spread|Color)$/.test(name);
+const ordinaryName = (name) => name.replace(/^(hover|active)/, "")
+  .replace(/(Hover|Active)(?=[A-Z])/, "").replace(/^./, (c) => c.toLowerCase());
+const SHARED_SHADOW = new Set(GROUPS.flatMap((group) => group.sections.flatMap((section) => {
+  const shadows = section.fields.map((field) => field.name).filter(isShadow);
+  if (!shadows.length) return [];
+  const families = new Set(shadows.map((name) => ordinaryName(name).replace(PARTS, "")));
+  const alone = families.size === 1 && section.fields.every((field) => isShadow(field.name));
+  return alone ? [] : shadows.map((name) => `${group.family ?? group.id}.${name}`);
+})));
+
 const unmatched = [];
 
 /**
@@ -488,7 +565,9 @@ const OUTLINE_WORD = {
   // the label says only what the control is.
   hover: "", active: "",
   // The section is called Opening Capital, so the control says only what it is.
-  dropCap: ""
+  dropCap: "",
+  // A section holding one typeface needs no qualifier either.
+  field: "", dropdown: ""
 };
 
 // Italic: a tick box beside every thickness control, named for it.
@@ -563,7 +642,7 @@ for (const name of names) {
   if ((m = name.match(/^(.*?)(TopLeft|TopRight|BottomRight|BottomLeft)$/))) {
     const [, prefix, corner] = m;
     const what = noun(prefix, "");
-    put(`ILLUMINUS.Field.${name}.label`, `${CORNER_WORD[corner]} Rounding`);
+    put(`ILLUMINUS.Field.${name}.label`, `${CORNER_WORD[corner]} Corner`);
     put(`ILLUMINUS.Field.${name}.hint`,
       `How rounded the ${CORNER_WORD[corner].toLowerCase()} corner ${what ? `of the ${what} ` : ""}is. 0 is a sharp corner.`);
     continue;
@@ -572,23 +651,28 @@ for (const name of names) {
   // Shadow family: <prefix>(OffsetX|OffsetY|Blur|Spread|Color). Text shadows
   // are named for the lettering they belong to — captionTextShadow, and so on —
   // so the prefix is matched rather than listed.
-  if ((m = name.match(/^(shadow|innerShadow|mediaShadow|\w*[Tt]extShadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
+  // Any prefix, not a list of them: a shadow and a shading inside the edges are
+  // derived beside every background picture, so the families are open-ended.
+  if ((m = name.match(/^(\w*?[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
     const [, prefix, part] = m;
-    const what = NOUN[prefix];
+    const inner = /[Ii]nnerShadow$/.test(prefix);
+    const lettering = /[Tt]extShadow$/.test(prefix);
+    const what = NOUN[prefix] ?? (inner ? "inner shading" : lettering ? "text shadow" : "shadow");
     const text = {
-      OffsetX: ["Sideways Offset", `How far the ${what} sits to the right. Negative moves it left.`],
-      OffsetY: ["Downward Offset", `How far the ${what} sits below. Negative moves it up.`],
+      OffsetX: ["Horizontal Offset", `How far the ${what} sits to the right. Negative moves it left.`],
+      OffsetY: ["Vertical Offset", `How far the ${what} sits below. Negative moves it up.`],
       Blur: ["Softness", `How blurred the ${what} is. 0 is a hard edge.`],
       Spread: ["Size", `Grows or shrinks the ${what} beyond the shape that casts it.`],
       Color: ["Color", `Color of the ${what}. A fully transparent color means none at all.`]
     }[part];
-    put(`ILLUMINUS.Field.${name}.label`,
-      SHARED_SHADOW.has(name) ? `Shadow ${text[0]}` : text[0]);
+    // The plain label. Where a shadow shares a section, the tab writes a
+    // qualified one of its own below.
+    put(`ILLUMINUS.Field.${name}.label`, text[0]);
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
     // A gap is outside the edge whatever it is a gap around, so the two
     // families are told apart by the word rather than by the whole name.
@@ -607,6 +691,41 @@ for (const name of names) {
 
 /* ---------- Remaining fields ---------- */
 const FIELD_TEXT = {
+  shown: ["Show Title", "Whether the journal's name is drawn above the page at all."],
+  entryBackground: ["Fill Color", "The color behind a listed page."],
+  entryHoverBackground: ["Fill Color", "The color behind a listed page while the mouse is over it."],
+  entryActiveBackground: ["Fill Color", "The color behind the page being read."],
+  headingBackground: ["Fill Color", "The color behind a heading listed under a page."],
+  toolbarBackground: ["Fill Color", "The color behind the whole strip of editing controls."],
+  settingsBarBackground: ["Fill Color", "The color behind the strip the page's settings stand on."],
+  toolbarColor: ["Icon Color", "Color of the icons on the editing bar."],
+  toolbarHoverColor: ["Icon Color", "Color of a control while the mouse is over it. Leave empty to keep the ordinary color."],
+  toolbarSize: ["Icon Size", "How large each icon on the editing bar is drawn."],
+  // The category is named for the icons, so the control says only what it is —
+  // as the window's own buttons do in a category named for them.
+  toolbarButtonBackground: ["Fill Color", "The color behind one icon, rather than behind the whole strip."],
+  toolbarButtonHoverBackground: ["Fill Color", "The color behind an icon while the mouse is over it."],
+  dropdownFont: ["Typeface", "The lettering on the two named controls, Format and Illuminus."],
+  dropdownSize: ["Text Size", "How large their names are drawn. 0 follows the editing controls."],
+  dropdownColor: ["Text Color", "Color of their names."],
+  dropdownHoverColor: ["Text Color", "Color of a name while the mouse is over it. Leave empty to keep the ordinary color."],
+  dropdownBackground: ["Fill Color", "The color behind a named control."],
+  dropdownHoverBackground: ["Fill Color", "The color behind a named control while the mouse is over it."],
+  fieldFont: ["Typeface", "The lettering on the settings above the editing controls."],
+  fieldSize: ["Text Size", "How large those settings are drawn. 0 follows the window."],
+  fieldColor: ["Text Color", "Color of their words."],
+  fieldBackground: ["Fill Color", "The color behind a setting's box."],
+  fieldCheckColor: ["Tick Box Color", "The color the tick is drawn in. Leave empty for the browser's own."],
+  fieldCheckSize: ["Tick Box Size", "How large the tick box is drawn. 0 leaves it as the browser draws it."],
+  frameMinWidth: ["Minimum Width", "The narrowest the window may be drawn, however far it is dragged in. 0 lets Foundry decide."],
+  frameMaxWidth: ["Maximum Width", "The widest the window may be drawn, however far it is dragged out. 0 lets Foundry decide."],
+  foldShown: ["Can Be Folded", "Whether a marker appears for folding this away. A reader clicks it to hide what is under it and clicks again to bring it back; nothing is saved, so a page opens as its author left it."],
+  foldIcon: ["Marker", "The shape of the marker a reader clicks to fold."],
+  foldColor: ["Marker Color", "Color of the marker. Leave empty to follow the lettering beside it."],
+  foldHoverColor: ["Marker Color", "Color of the marker while the mouse is over it. Leave empty to keep the ordinary color."],
+  foldSize: ["Marker Size", "How large the marker is. 0 follows the lettering beside it."],
+  foldGap: ["Marker Gap", "Space between the marker and the words beside it."],
+  foldTurn: ["Marker Turn", "How far the marker turns when what it holds is open. 90 points a sideways arrow downwards."],
   hoverOff: ["Disable Hovered State", "Nothing on this tab changes when the mouse is over it. Turn this off to set how it looks when pointed at."],
   outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
   outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
@@ -660,8 +779,8 @@ const FIELD_TEXT = {
   collapsibleMarginBottom: ["Bottom Gap", "Empty space below a collapsible passage."],
   glowColor: ["Glow Color", "A glow that follows the picture's own edges, not its box. Fully transparent means none."],
   glowSize: ["Glow Size", "How far the glow spreads. 0 draws nothing."],
-  glowOffsetX: ["Glow Sideways Offset", "How far the glow sits to the right. Negative moves it left."],
-  glowOffsetY: ["Glow Downward Offset", "How far the glow sits below. Negative moves it up."],
+  glowOffsetX: ["Glow Horizontal Offset", "How far the glow sits to the right. Negative moves it left."],
+  glowOffsetY: ["Glow Vertical Offset", "How far the glow sits below. Negative moves it up."],
   mediaMaxWidth: ["Maximum Width", "How much of the text width a player or embedded page may take."],
   mediaMarginTop: ["Top Gap", "Empty space above a player or embedded page."],
   mediaMarginBottom: ["Bottom Gap", "Empty space below a player or embedded page."],
@@ -670,7 +789,7 @@ const FIELD_TEXT = {
   buttonBorderStyle: ["Button Border Style", "What the line around the button looks like."],
   pageButtonSide: ["Which Side", "The side of the page the pencil sits on."],
   pageButtonOffset: ["Distance from the Edge", "How far in from that side the pencil sits. Raise it to slide the button clear of anything it lands on; negative numbers push it outside the page."],
-  numberShown: ["Page Numbers", "Whether each listed page carries its number. Hiding them leaves the whole row to the page's name."],
+  numberShown: ["Show Page Numbers", "Whether each listed page carries its number. Leaving them off gives the whole row to the page's name."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
   lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
   minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],
@@ -830,11 +949,7 @@ for (const [name, [label, hint]] of Object.entries(FIELD_TEXT)) {
  * ordinary control's wording for free. Anything named by hand above keeps that
  * wording; this is only for the ones derived from the schema.
  */
-const stateStem = (name) => {
-  const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
-  if (stripped === name || !stripped) return null;
-  return stripped[0].toLowerCase() + stripped.slice(1);
-};
+const stateStem = withoutState;
 for (const name of unmatched) {
   if (name in FIELD_TEXT) continue;
   const stem = stateStem(name);
@@ -843,6 +958,43 @@ for (const name of unmatched) {
   if (!label) continue;
   put(`ILLUMINUS.Field.${name}.label`, label);
   put(`ILLUMINUS.Field.${name}.hint`, hint);
+}
+
+/* ---------- Shadows that share a section say which shadow they are ---------- */
+/**
+ * Whose shadow it is, where a category holds more than one lettering's.
+ *
+ * A definition list sets a term and its definition in the same category and both
+ * cast one, so "Shadow Softness" twice says nothing about which. Where a
+ * category holds a single lettering shadow, the category already says whose it
+ * is and the shorter label is the better one.
+ */
+const SHADOW_OWNERS = new Map();
+for (const group of GROUPS) {
+  for (const section of group.sections) {
+    const families = new Set(section.fields.map((field) => field.name)
+      .filter(isShadow).map((name) => ordinaryName(name).replace(PARTS, "")));
+    const lettering = [...families].filter((family) => /[Tt]extShadow$/.test(family));
+    if (lettering.length < 2) continue;
+    for (const family of lettering) {
+      SHADOW_OWNERS.set(`${group.family ?? group.id}.${family}`,
+        OUTLINE_WORD[family.replace(/TextShadow$/, "")] ?? "");
+    }
+  }
+}
+
+for (const key of SHARED_SHADOW) {
+  const [tab, name] = [key.slice(0, key.indexOf(".")), key.slice(key.indexOf(".") + 1)];
+  const plain = out[`ILLUMINUS.Field.${name}.label`];
+  if (!plain) continue;
+  const family = ordinaryName(name).replace(PARTS, "");
+  // A lettering shadow says "Shadow" and no more, unless another lettering in
+  // the same category casts one too.
+  const owner = SHADOW_OWNERS.get(`${tab}.${family}`);
+  const lead = /[Ii]nnerShadow$/.test(family) ? "Inner Shadow "
+    : /[Tt]extShadow$/.test(family) ? `${owner ? `${owner} ` : ""}Shadow ` : "Outer Shadow ";
+  put(`ILLUMINUS.Field.${tab}.${name}.label`, `${lead}${plain}`);
+  put(`ILLUMINUS.Field.${tab}.${name}.hint`, out[`ILLUMINUS.Field.${name}.hint`]);
 }
 
 const stillMissing = unmatched.filter((n) => !(n in FIELD_TEXT)
@@ -856,6 +1008,10 @@ put("ILLUMINUS.Field.texture.placeholder", "No picture");
 
 /* ---------- Choices ---------- */
 const CHOICE_TEXT = {
+  // The three answers a state's own tick box has: its own yes, its own no, and
+  // whichever the ordinary one gave.
+  same: "Same as normal", on: "Yes", off: "No",
+  chevron: "Chevron", caret: "Solid triangle", angle: "Thin angle", arrow: "Arrow", plus: "Plus",
   none: "None", left: "Left", center: "Centered", right: "Right", justify: "Justified (both edges even)",
   normal: "Normal", italic: "Italic", oblique: "Slanted",
   uppercase: "ALL CAPITALS", lowercase: "all lower case", capitalize: "Title Case", smallCaps: "Small Capitals",

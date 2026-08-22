@@ -36,6 +36,15 @@ export async function sampleMarkup() {
   page.innerHTML = rendered;
   for (const marked of page.querySelectorAll("[data-part]")) marked.removeAttribute("data-part");
   for (const button of page.querySelectorAll("button")) button.remove();
+  // A secret passage is revealed by its id. Foundry's Reveal button rewrites
+  // the page's *stored* markup, finding the passage by matching `id="…"` — so a
+  // section written without one can never be revealed, and its button does
+  // nothing at all when clicked. The editor gives each secret an id as a person
+  // makes it; markup turned into a page has to do the same. One per page rather
+  // than one in the template, since two sample journals must not share an id.
+  for (const secret of page.querySelectorAll("section.secret")) {
+    if (!secret.id) secret.id = `secret-${foundry.utils.randomID()}`;
+  }
   return page.innerHTML.trim();
 }
 
