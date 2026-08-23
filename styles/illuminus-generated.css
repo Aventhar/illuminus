@@ -3469,12 +3469,29 @@
   border-bottom-color: var(--ill-editor-hover-item-divider-color, var(--ill-editor-item-divider-color));
 }
 
-.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover,
-.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:hover {
-  --checkbox-background-color: var(--ill-editor-hover-field-check-color, var(--ill-editor-field-check-color));
-  --checkbox-checked-color: var(--ill-editor-hover-field-check-ticked-color, var(--ill-editor-field-check-ticked-color));
-  --checkbox-checkmark-color: var(--ill-editor-hover-field-check-mark-color, var(--ill-editor-field-check-mark-color));
-  --checkbox-size: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size));
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover::before,
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover::after,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:hover::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:hover::after {
+  width: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size, var(--checkbox-size)));
+  height: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size, var(--checkbox-size)));
+  font-size: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size, var(--checkbox-size)));
+  line-height: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size, var(--checkbox-size)));
+}
+
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:hover::before {
+  color: var(--ill-editor-hover-field-check-color, var(--ill-editor-field-check-color, var(--checkbox-background-color)));
+}
+
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked:hover::after,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked:hover::after {
+  color: var(--ill-editor-hover-field-check-ticked-color, var(--ill-editor-field-check-ticked-color, var(--checkbox-checked-color)));
+}
+
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked:hover::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked:hover::before {
+  color: var(--ill-editor-hover-field-check-mark-color, var(--ill-editor-field-check-mark-color, var(--checkbox-checkmark-color)));
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown):hover,

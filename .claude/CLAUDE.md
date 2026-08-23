@@ -94,6 +94,15 @@ These are all load-bearing and none are obvious from the code.
   the root is an `.application` as well, so the window's own background lands on the
   same element and wins on document order — which left the editor showing the page's
   ink over Foundry's frame color, unreadable.
+- **Setting one of core's own variables is the same trap.** The tick box on the page
+  editor is drawn by Foundry rather than by the browser — `appearance: none`, a glyph in
+  `::before`, and a second one in `::after` once it is ticked, with every part fed
+  through `--checkbox-…` properties. Writing those from unset controls
+  (`--checkbox-checkmark-color: var(--ill-…)`) *defined* them as empty, so both glyph
+  layers took the same inherited color and the tick disappeared into the box, which had
+  lost its size with it. Paint the pseudo-elements instead, each falling back to the
+  variable it stands in for: `color: var(--ill-…, var(--checkbox-checkmark-color))`.
+  Note the tick is transparent by default — a cut-out through the box, not a mark on it.
 - **An empty custom property is not an absent one.** `--x: ;` is a *defined*
   property whose value is the empty token stream, so `var(--x, fallback)`
   resolves to nothing rather than to the fallback — and the property it feeds

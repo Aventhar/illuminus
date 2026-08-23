@@ -5766,6 +5766,19 @@ try {
   check(w.titleColor === "rgb(255, 0, 0)", `the journal window keeps its own title (${w.titleColor})`);
 
   const editor = await cdp.evaluate(`(async () => {
+    const tickBox = (box) => {
+      const was = box.checked;
+      box.checked = true;
+      const read = {
+        checkSize: getComputedStyle(box, "::before").fontSize,
+        tickedColor: getComputedStyle(box, "::after").color,
+        markColor: getComputedStyle(box, "::before").color
+      };
+      box.checked = false;
+      read.emptyColor = getComputedStyle(box, "::before").color;
+      box.checked = was;
+      return read;
+    };
     const entry = game.journal.get(window.__widths.entryId);
     entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
     let sheet = null;
@@ -5801,12 +5814,10 @@ try {
       labelColor: getComputedStyle(el.querySelector(".page-metadata label")).color,
       // Read from what is drawn rather than from the input: Foundry turns the
       // browser's own drawing off and prints a glyph, so the box a person sees
-      // is the after layer and the tick inside it the before one.
-      checkSize: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::before").fontSize,
-      tickedColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::after").color,
-      markColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::before").color,
-      emptyColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'))
-        .getPropertyValue("--checkbox-background-color").trim(),
+      // is the after layer and the tick inside it the before one — and that
+      // before layer is the *empty* box while nothing is ticked, which is why
+      // each of these is read with the box put deliberately into one state.
+      ...tickBox(el.querySelector('.page-metadata input[type="checkbox"]')),
       settingsBarFill: getComputedStyle(el.querySelector(".page-metadata")).backgroundColor,
       settingsBarPad: getComputedStyle(el.querySelector(".page-metadata")).paddingTop,
       settingsBarGap: getComputedStyle(el.querySelector(".page-metadata")).marginTop,
@@ -5843,7 +5854,7 @@ try {
   // The tick box is a printed glyph rather than a box, so a fill and an edge
   // would land on nothing: it takes a size, a color for the empty box, one for
   // the box once ticked, and one for the tick itself.
-  check(ed.checkSize === "22px" && ed.emptyColor === "#ff00ff",
+  check(ed.checkSize === "22px" && ed.emptyColor === "rgb(255, 0, 255)",
     `and the tick box has a size and a color of its own (${ed.checkSize}, ${ed.emptyColor})`);
   check(ed.tickedColor === "rgb(0, 255, 136)" && ed.markColor === "rgb(34, 0, 255)",
     `with the box it turns and the tick inside it apart (${ed.tickedColor}, ${ed.markColor})`);
@@ -6248,6 +6259,74 @@ try {
     const api = game.modules.get("illuminus").api;
     if (window.__dropList?.styleId) await api.deleteStyle(window.__dropList.styleId);
     window.__dropList = undefined;
+  })()`);
+}
+
+// A style that says nothing about the tick box must leave it exactly as Foundry
+// draws it. Setting core's own variables from unset controls did not: an empty
+// custom property is a *defined* one, so both glyph layers took the same
+// inherited color and the tick disappeared into the box. Compared against an
+// unstyled editor, which is the only thing that says what "left alone" means.
+console.log("\n[64] A tick box nobody has set is Foundry's own");
+try {
+  const look = async (styled) => JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = ${styled} ? await api.createStyle({name: "Plain Tick Probe"}) : null;
+    const entry = await JournalEntry.create({name: "Plain Tick Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<p>x</p>"}}]);
+    if (style) await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1200));
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
+    let sheet = null;
+    for (let i = 0; i < 150 && !sheet; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      sheet = [...foundry.applications.instances.values()].find(
+        a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
+    }
+    await new Promise(r => setTimeout(r, 900));
+    const box = sheet.element.querySelector('.page-metadata input[type="checkbox"]');
+    const was = box.checked;
+    box.checked = true;
+    const out = {
+      tick: getComputedStyle(box, "::before").color,
+      tickedBox: getComputedStyle(box, "::after").color,
+      size: getComputedStyle(box, "::before").width
+    };
+    box.checked = false;
+    out.emptyBox = getComputedStyle(box, "::before").color;
+    box.checked = was;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    if (style) await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  const plain = await look(false);
+  const styled = await look(true);
+  check(styled.tick === plain.tick && styled.tickedBox === plain.tickedBox,
+    `an unset tick box is painted as Foundry paints it (tick ${styled.tick}, box ${styled.tickedBox})`);
+  check(styled.emptyBox === plain.emptyBox && styled.size === plain.size,
+    `down to the empty box and its size (${styled.emptyBox}, ${styled.size})`);
+  // The tick is a cut-out through the box rather than a mark drawn over it,
+  // which is why wiping its color made it vanish rather than change.
+  check(plain.tick !== plain.tickedBox,
+    `and the tick still tells itself apart from the box behind it (${plain.tick} in ${plain.tickedBox})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Plain Tick Journal")) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles().filter((s) => s.name === "Plain Tick Probe")) {
+      await api.deleteStyle(style.id);
+    }
   })()`);
 }
 

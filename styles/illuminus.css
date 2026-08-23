@@ -424,18 +424,44 @@
 }
 
 /* The tick box beside them, which is not a box: Foundry sets `appearance: none`
-   and prints a FontAwesome glyph in `::before`, so a fill, an edge and a corner
-   land on nothing a person can see — and `accent-color`, which only means
-   anything while a browser is drawing the control itself, does nothing either.
-   Core feeds every part of it through element-local custom properties, so those
-   are what a style sets: the empty box, the box once it is ticked, the tick
-   inside it, and how large the glyph is drawn. */
-.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"],
-.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"] {
-  --checkbox-background-color: var(--ill-editor-field-check-color);
-  --checkbox-checked-color: var(--ill-editor-field-check-ticked-color);
-  --checkbox-checkmark-color: var(--ill-editor-field-check-mark-color);
-  --checkbox-size: var(--ill-editor-field-check-size);
+   and prints a FontAwesome glyph in `::before`, with a second one in `::after`
+   once it is ticked — so a fill, an edge and a corner land on nothing a person
+   can see, and `accent-color` means nothing while no browser is drawing it.
+
+   Painted on the two glyphs rather than through core's own variables, and every
+   one of them falls back to the variable it stands in for. Setting those
+   variables looked tidier and was wrong: a style that says nothing about the
+   tick box emits no value, and `--checkbox-checkmark-color: var(--unset)`
+   *defines* that property as empty rather than leaving it alone — which made
+   both glyphs take the same inherited color and put a tick nobody could see
+   inside a box that had lost its size. An empty custom property is not an
+   absent one. */
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]::before,
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]::after,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::after {
+  width: var(--ill-editor-field-check-size, var(--checkbox-size));
+  height: var(--ill-editor-field-check-size, var(--checkbox-size));
+  font-size: var(--ill-editor-field-check-size, var(--checkbox-size));
+  line-height: var(--ill-editor-field-check-size, var(--checkbox-size));
+}
+
+/* The empty box. */
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::before {
+  color: var(--ill-editor-field-check-color, var(--checkbox-background-color));
+}
+
+/* Once it is ticked, the box is the layer behind and the tick the one in front,
+   which is why the tick is transparent by default: it is cut out of the box. */
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked::after,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked::after {
+  color: var(--ill-editor-field-check-ticked-color, var(--checkbox-checked-color));
+}
+
+.illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked::before,
+.illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked::before {
+  color: var(--ill-editor-field-check-mark-color, var(--checkbox-checkmark-color));
 }
 
 /* Each icon on the editing row, which is a key of its own: the bar's fill
