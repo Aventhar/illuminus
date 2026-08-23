@@ -414,6 +414,8 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown), .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown)", group: "editor", prefix: "toolbarButton" },
   { selector: ".illuminus-styled.journal-entry-page .page-metadata select, .illuminus-styled .illuminus-preview__editor .page-metadata select", group: "editor", prefix: "field" },
   { selector: ".illuminus-styled.journal-entry-page .page-metadata, .illuminus-styled .illuminus-preview__editor .page-metadata", group: "editor", prefix: "settingsBar" },
+  // Core positions the list itself, so the layer rides on it without claiming it.
+  { selector: ".illuminus-styled#prosemirror-dropdown ul", group: "editor", prefix: "list", host: false },
   { selector: ".illuminus-styled .journal-sidebar", group: "sidebar", prefix: "" },
   { selector: ".illuminus-styled .journal-sidebar .toc li.page", group: "sidebar", prefix: "entry" },
   { selector: ".illuminus-styled .journal-sidebar .toc li.page:hover", group: "sidebar", prefix: "entryHover" },

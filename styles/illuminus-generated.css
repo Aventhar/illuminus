@@ -2144,6 +2144,25 @@
   opacity: var(--ill-editor-settings-bar-texture-opacity);
 }
 
+.illuminus-styled#prosemirror-dropdown ul {
+  isolation: isolate;
+}
+
+.illuminus-styled#prosemirror-dropdown ul::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-editor-list-texture);
+  background-size: var(--ill-editor-list-texture-fit-size);
+  background-repeat: var(--ill-editor-list-texture-fit-repeat);
+  background-position: var(--ill-editor-list-texture-position);
+  mix-blend-mode: var(--ill-editor-list-texture-blend);
+  opacity: var(--ill-editor-list-texture-opacity);
+}
+
 .illuminus-styled .journal-sidebar {
   position: relative;
   isolation: isolate;
@@ -2971,6 +2990,11 @@
               inset var(--ill-editor-settings-bar-inner-shadow-offset-x) var(--ill-editor-settings-bar-inner-shadow-offset-y) var(--ill-editor-settings-bar-inner-shadow-blur) var(--ill-editor-settings-bar-inner-shadow-spread) var(--ill-editor-settings-bar-inner-shadow-color);
 }
 
+.illuminus-styled#prosemirror-dropdown ul {
+  box-shadow: var(--ill-editor-list-shadow-offset-x) var(--ill-editor-list-shadow-offset-y) var(--ill-editor-list-shadow-blur) var(--ill-editor-list-shadow-spread) var(--ill-editor-list-shadow-color),
+              inset var(--ill-editor-list-inner-shadow-offset-x) var(--ill-editor-list-inner-shadow-offset-y) var(--ill-editor-list-inner-shadow-blur) var(--ill-editor-list-inner-shadow-spread) var(--ill-editor-list-inner-shadow-color);
+}
+
 .illuminus-styled .journal-sidebar {
   box-shadow: var(--ill-sidebar-shadow-offset-x) var(--ill-sidebar-shadow-offset-y) var(--ill-sidebar-shadow-blur) var(--ill-sidebar-shadow-spread) var(--ill-sidebar-shadow-color),
               inset var(--ill-sidebar-inner-shadow-offset-x) var(--ill-sidebar-inner-shadow-offset-y) var(--ill-sidebar-inner-shadow-blur) var(--ill-sidebar-inner-shadow-spread) var(--ill-sidebar-inner-shadow-color);
@@ -3339,9 +3363,25 @@
 
 .illuminus-styled.journal-entry-page .page-metadata:hover,
 .illuminus-styled .illuminus-preview__editor .page-metadata:hover {
+  font-family: var(--ill-editor-hover-settings-bar-font, var(--ill-editor-settings-bar-font));
+  font-size: var(--ill-editor-hover-settings-bar-size, var(--ill-editor-settings-bar-size));
+  color: var(--ill-editor-hover-settings-bar-color, var(--ill-editor-settings-bar-color));
+  font-weight: var(--ill-editor-hover-settings-bar-text-style-weight, var(--ill-editor-settings-bar-text-style-weight));
+  font-style: var(--ill-editor-hover-settings-bar-text-style-slant, var(--ill-editor-settings-bar-text-style-slant));
+  font-variant: var(--ill-editor-hover-settings-bar-caps-variant, var(--ill-editor-settings-bar-caps-variant));
+  text-transform: var(--ill-editor-hover-settings-bar-caps-transform, var(--ill-editor-settings-bar-caps-transform));
+  letter-spacing: var(--ill-editor-hover-settings-bar-letter-spacing, var(--ill-editor-settings-bar-letter-spacing));
+  word-spacing: var(--ill-editor-hover-settings-bar-word-spacing, var(--ill-editor-settings-bar-word-spacing));
+  line-height: var(--ill-editor-hover-settings-bar-line-height, var(--ill-editor-settings-bar-line-height));
+  text-align: var(--ill-editor-hover-settings-bar-align, var(--ill-editor-settings-bar-align));
+  -webkit-text-stroke: var(--ill-editor-hover-settings-bar-outline-width, var(--ill-editor-settings-bar-outline-width)) var(--ill-editor-hover-settings-bar-outline-color, var(--ill-editor-settings-bar-outline-color));
+  text-shadow: var(--ill-editor-hover-settings-bar-text-shadow-offset-x, var(--ill-editor-settings-bar-text-shadow-offset-x)) var(--ill-editor-hover-settings-bar-text-shadow-offset-y, var(--ill-editor-settings-bar-text-shadow-offset-y))
+               var(--ill-editor-hover-settings-bar-text-shadow-blur, var(--ill-editor-settings-bar-text-shadow-blur)) var(--ill-editor-hover-settings-bar-text-shadow-color, var(--ill-editor-settings-bar-text-shadow-color));
   background-color: var(--ill-editor-hover-settings-bar-background, var(--ill-editor-settings-bar-background));
   padding: var(--ill-editor-hover-settings-bar-padding-top, var(--ill-editor-settings-bar-padding-top)) var(--ill-editor-hover-settings-bar-padding-right, var(--ill-editor-settings-bar-padding-right))
            var(--ill-editor-hover-settings-bar-padding-bottom, var(--ill-editor-settings-bar-padding-bottom)) var(--ill-editor-hover-settings-bar-padding-left, var(--ill-editor-settings-bar-padding-left));
+  margin: var(--ill-editor-hover-settings-bar-margin-top, var(--ill-editor-settings-bar-margin-top)) var(--ill-editor-hover-settings-bar-margin-right, var(--ill-editor-settings-bar-margin-right))
+          var(--ill-editor-hover-settings-bar-margin-bottom, var(--ill-editor-settings-bar-margin-bottom)) var(--ill-editor-hover-settings-bar-margin-left, var(--ill-editor-settings-bar-margin-left));
   border-width: var(--ill-editor-hover-settings-bar-border-top-width, var(--ill-editor-settings-bar-border-top-width)) var(--ill-editor-hover-settings-bar-border-right-width, var(--ill-editor-settings-bar-border-right-width))
                 var(--ill-editor-hover-settings-bar-border-bottom-width, var(--ill-editor-settings-bar-border-bottom-width)) var(--ill-editor-hover-settings-bar-border-left-width, var(--ill-editor-settings-bar-border-left-width));
   border-style: var(--ill-editor-hover-settings-bar-border-top-style, var(--ill-editor-settings-bar-border-top-style)) var(--ill-editor-hover-settings-bar-border-right-style, var(--ill-editor-settings-bar-border-right-style))
@@ -3389,11 +3429,52 @@
                var(--ill-editor-hover-field-text-shadow-blur, var(--ill-editor-field-text-shadow-blur)) var(--ill-editor-hover-field-text-shadow-color, var(--ill-editor-field-text-shadow-color));
 }
 
+.illuminus-styled#prosemirror-dropdown ul:hover {
+  background-color: var(--ill-editor-hover-list-background, var(--ill-editor-list-background));
+  padding: var(--ill-editor-hover-list-padding-top, var(--ill-editor-list-padding-top)) var(--ill-editor-hover-list-padding-right, var(--ill-editor-list-padding-right))
+           var(--ill-editor-hover-list-padding-bottom, var(--ill-editor-list-padding-bottom)) var(--ill-editor-hover-list-padding-left, var(--ill-editor-list-padding-left));
+  border-width: var(--ill-editor-hover-list-border-top-width, var(--ill-editor-list-border-top-width)) var(--ill-editor-hover-list-border-right-width, var(--ill-editor-list-border-right-width))
+                var(--ill-editor-hover-list-border-bottom-width, var(--ill-editor-list-border-bottom-width)) var(--ill-editor-hover-list-border-left-width, var(--ill-editor-list-border-left-width));
+  border-style: var(--ill-editor-hover-list-border-top-style, var(--ill-editor-list-border-top-style)) var(--ill-editor-hover-list-border-right-style, var(--ill-editor-list-border-right-style))
+                var(--ill-editor-hover-list-border-bottom-style, var(--ill-editor-list-border-bottom-style)) var(--ill-editor-hover-list-border-left-style, var(--ill-editor-list-border-left-style));
+  border-color: var(--ill-editor-hover-list-border-top-color, var(--ill-editor-list-border-top-color)) var(--ill-editor-hover-list-border-right-color, var(--ill-editor-list-border-right-color))
+                var(--ill-editor-hover-list-border-bottom-color, var(--ill-editor-list-border-bottom-color)) var(--ill-editor-hover-list-border-left-color, var(--ill-editor-list-border-left-color));
+  border-radius: var(--ill-editor-hover-list-corner-top-left, var(--ill-editor-list-corner-top-left)) var(--ill-editor-hover-list-corner-top-right, var(--ill-editor-list-corner-top-right))
+                 var(--ill-editor-hover-list-corner-bottom-right, var(--ill-editor-list-corner-bottom-right)) var(--ill-editor-hover-list-corner-bottom-left, var(--ill-editor-list-corner-bottom-left));
+  box-shadow: var(--ill-editor-hover-list-shadow-offset-x, var(--ill-editor-list-shadow-offset-x)) var(--ill-editor-hover-list-shadow-offset-y, var(--ill-editor-list-shadow-offset-y))
+              var(--ill-editor-hover-list-shadow-blur, var(--ill-editor-list-shadow-blur)) var(--ill-editor-hover-list-shadow-spread, var(--ill-editor-list-shadow-spread))
+              var(--ill-editor-hover-list-shadow-color, var(--ill-editor-list-shadow-color)),
+    inset var(--ill-editor-hover-list-inner-shadow-offset-x, var(--ill-editor-list-inner-shadow-offset-x)) var(--ill-editor-hover-list-inner-shadow-offset-y, var(--ill-editor-list-inner-shadow-offset-y))
+          var(--ill-editor-hover-list-inner-shadow-blur, var(--ill-editor-list-inner-shadow-blur)) var(--ill-editor-hover-list-inner-shadow-spread, var(--ill-editor-list-inner-shadow-spread))
+          var(--ill-editor-hover-list-inner-shadow-color, var(--ill-editor-list-inner-shadow-color));
+}
+
+.illuminus-styled#prosemirror-dropdown li:hover {
+  font-family: var(--ill-editor-hover-item-font, var(--ill-editor-item-font));
+  font-size: var(--ill-editor-hover-item-size, var(--ill-editor-item-size));
+  color: var(--ill-editor-hover-item-color, var(--ill-editor-item-color));
+  font-weight: var(--ill-editor-hover-item-text-style-weight, var(--ill-editor-item-text-style-weight));
+  font-style: var(--ill-editor-hover-item-text-style-slant, var(--ill-editor-item-text-style-slant));
+  -webkit-text-stroke: var(--ill-editor-hover-item-outline-width, var(--ill-editor-item-outline-width)) var(--ill-editor-hover-item-outline-color, var(--ill-editor-item-outline-color));
+  text-shadow: var(--ill-editor-hover-item-text-shadow-offset-x, var(--ill-editor-item-text-shadow-offset-x)) var(--ill-editor-hover-item-text-shadow-offset-y, var(--ill-editor-item-text-shadow-offset-y))
+               var(--ill-editor-hover-item-text-shadow-blur, var(--ill-editor-item-text-shadow-blur)) var(--ill-editor-hover-item-text-shadow-color, var(--ill-editor-item-text-shadow-color));
+  background-color: var(--ill-editor-hover-item-background, var(--ill-editor-item-background));
+  padding: var(--ill-editor-hover-item-padding-top, var(--ill-editor-item-padding-top)) var(--ill-editor-hover-item-padding-right, var(--ill-editor-item-padding-right))
+           var(--ill-editor-hover-item-padding-bottom, var(--ill-editor-item-padding-bottom)) var(--ill-editor-hover-item-padding-left, var(--ill-editor-item-padding-left));
+  border-radius: var(--ill-editor-hover-item-corner-top-left, var(--ill-editor-item-corner-top-left)) var(--ill-editor-hover-item-corner-top-right, var(--ill-editor-item-corner-top-right))
+                 var(--ill-editor-hover-item-corner-bottom-right, var(--ill-editor-item-corner-bottom-right)) var(--ill-editor-hover-item-corner-bottom-left, var(--ill-editor-item-corner-bottom-left));
+}
+
+.illuminus-styled#prosemirror-dropdown li.divider:hover {
+  border-bottom-color: var(--ill-editor-hover-item-divider-color, var(--ill-editor-item-divider-color));
+}
+
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:hover {
-  accent-color: var(--ill-editor-hover-field-check-color, var(--ill-editor-field-check-color));
-  width: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size));
-  height: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size));
+  --checkbox-background-color: var(--ill-editor-hover-field-check-color, var(--ill-editor-field-check-color));
+  --checkbox-checked-color: var(--ill-editor-hover-field-check-ticked-color, var(--ill-editor-field-check-ticked-color));
+  --checkbox-checkmark-color: var(--ill-editor-hover-field-check-mark-color, var(--ill-editor-field-check-mark-color));
+  --checkbox-size: var(--ill-editor-hover-field-check-size, var(--ill-editor-field-check-size));
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown):hover,
@@ -5986,6 +6067,15 @@ blockquote):not(:empty))):hover {
   opacity: var(--ill-editor-hover-settings-bar-texture-opacity, var(--ill-editor-settings-bar-texture-opacity));
 }
 
+.illuminus-styled#prosemirror-dropdown ul:hover::after {
+  background-image: var(--ill-editor-hover-list-texture, var(--ill-editor-list-texture));
+  background-size: var(--ill-editor-hover-list-texture-fit-size, var(--ill-editor-list-texture-fit-size));
+  background-repeat: var(--ill-editor-hover-list-texture-fit-repeat, var(--ill-editor-list-texture-fit-repeat));
+  background-position: var(--ill-editor-hover-list-texture-position, var(--ill-editor-list-texture-position));
+  mix-blend-mode: var(--ill-editor-hover-list-texture-blend, var(--ill-editor-list-texture-blend));
+  opacity: var(--ill-editor-hover-list-texture-opacity, var(--ill-editor-list-texture-opacity));
+}
+
 .illuminus-styled .journal-sidebar:hover::after {
   background-image: var(--ill-sidebar-hover-texture, var(--ill-sidebar-texture));
   background-size: var(--ill-sidebar-hover-texture-fit-size, var(--ill-sidebar-texture-fit-size));
@@ -6379,6 +6469,11 @@ blockquote):not(:empty))):hover {
 .illuminus-styled .illuminus-preview__editor .page-metadata:hover {
   box-shadow: var(--ill-editor-hover-settings-bar-shadow-offset-x, var(--ill-editor-settings-bar-shadow-offset-x)) var(--ill-editor-hover-settings-bar-shadow-offset-y, var(--ill-editor-settings-bar-shadow-offset-y)) var(--ill-editor-hover-settings-bar-shadow-blur, var(--ill-editor-settings-bar-shadow-blur)) var(--ill-editor-hover-settings-bar-shadow-spread, var(--ill-editor-settings-bar-shadow-spread)) var(--ill-editor-hover-settings-bar-shadow-color, var(--ill-editor-settings-bar-shadow-color)),
               inset var(--ill-editor-hover-settings-bar-inner-shadow-offset-x, var(--ill-editor-settings-bar-inner-shadow-offset-x)) var(--ill-editor-hover-settings-bar-inner-shadow-offset-y, var(--ill-editor-settings-bar-inner-shadow-offset-y)) var(--ill-editor-hover-settings-bar-inner-shadow-blur, var(--ill-editor-settings-bar-inner-shadow-blur)) var(--ill-editor-hover-settings-bar-inner-shadow-spread, var(--ill-editor-settings-bar-inner-shadow-spread)) var(--ill-editor-hover-settings-bar-inner-shadow-color, var(--ill-editor-settings-bar-inner-shadow-color));
+}
+
+.illuminus-styled#prosemirror-dropdown ul:hover {
+  box-shadow: var(--ill-editor-hover-list-shadow-offset-x, var(--ill-editor-list-shadow-offset-x)) var(--ill-editor-hover-list-shadow-offset-y, var(--ill-editor-list-shadow-offset-y)) var(--ill-editor-hover-list-shadow-blur, var(--ill-editor-list-shadow-blur)) var(--ill-editor-hover-list-shadow-spread, var(--ill-editor-list-shadow-spread)) var(--ill-editor-hover-list-shadow-color, var(--ill-editor-list-shadow-color)),
+              inset var(--ill-editor-hover-list-inner-shadow-offset-x, var(--ill-editor-list-inner-shadow-offset-x)) var(--ill-editor-hover-list-inner-shadow-offset-y, var(--ill-editor-list-inner-shadow-offset-y)) var(--ill-editor-hover-list-inner-shadow-blur, var(--ill-editor-list-inner-shadow-blur)) var(--ill-editor-hover-list-inner-shadow-spread, var(--ill-editor-list-inner-shadow-spread)) var(--ill-editor-hover-list-inner-shadow-color, var(--ill-editor-list-inner-shadow-color));
 }
 
 .illuminus-styled .journal-sidebar:hover {

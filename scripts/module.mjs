@@ -10,6 +10,7 @@ import { IlluminusStyleManager } from "./apps/style-manager.mjs";
 import { IlluminusStyleEditor } from "./apps/style-editor.mjs";
 import { promptStyleAssignment } from "./apps/style-picker.mjs";
 import { registerEditorMenu } from "./editor-menu.mjs";
+import { watchEditorDropdowns } from "./editor-dropdown.mjs";
 import {
   getTemplates, getTemplate, listTemplates, createTemplate, updateTemplate, deleteTemplate,
   seedTemplatesIfEmpty, restoreTemplatePresets
@@ -32,6 +33,9 @@ Hooks.once("init", () => {
 
   registerSettings();
   registerEditorMenu();
+  // The list a named control opens is built on the body, past anything scoped
+  // to a styled window, so it is marked as it appears.
+  watchEditorDropdowns();
 
   // Publish the public API for macros and other modules.
   game.modules.get(MODULE_ID).api = {

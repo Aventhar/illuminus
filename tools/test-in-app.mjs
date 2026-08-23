@@ -2595,6 +2595,29 @@ try {
   check(sc.buttonColor === "rgb(26, 16, 8)" && sc.buttonBg === "rgb(201, 169, 97)",
     `and takes the style's colors (got ${sc.buttonColor} on ${sc.buttonBg})`);
   check(sc.buttonSize === "14px", `and its size (got ${sc.buttonSize})`);
+
+  // What a player is sent, as against what the gamemaster is shown. A secret is
+  // never hidden from the person running the game — the tint and the Reveal
+  // button are how they tell what the table has been shown — so "the words are
+  // still there after I press Hide" is the feature working. It is the page a
+  // player receives that has to be missing them.
+  const seen = JSON.parse(await cdp.evaluate(`(async () => {
+    const entry = game.journal.get(window.__secrets.entryId);
+    const content = entry.pages.contents[0].text.content;
+    const asPlayer = await CONFIG.ux.TextEditor.enrichHTML(content, {secrets: false});
+    const asGM = await CONFIG.ux.TextEditor.enrichHTML(content, {secrets: true});
+    return JSON.stringify({
+      playerHasHidden: /Hidden\\./.test(asPlayer),
+      playerHasShown: /Shown\\./.test(asPlayer),
+      gmHasHidden: /Hidden\\./.test(asGM),
+      gmHasShown: /Shown\\./.test(asGM)
+    });
+  })()`));
+  check(!seen.playerHasHidden && seen.playerHasShown,
+    `a player is sent the revealed passage and not the hidden one `
+    + `(hidden ${seen.playerHasHidden ? "sent" : "kept back"}, revealed ${seen.playerHasShown ? "sent" : "missing"})`);
+  check(seen.gmHasHidden && seen.gmHasShown,
+    "while the gamemaster is shown both, which is what the Reveal button is for");
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -5713,8 +5736,10 @@ try {
                toolbarButtonBackground: "#00ffff", toolbarButtonHoverBackground: "#ff00aa",
                dropdownBackground: "#222266", dropdownColor: "#ffee00",
                fieldBackground: "#663322", fieldColor: "#00ddaa", fieldSize: 19,
-               fieldCheckColor: "#ff00ff", fieldCheckSize: 22,
-               settingsBarBackground: "#0a5f5f", settingsBarPaddingTop: 7}
+               fieldCheckColor: "#ff00ff", fieldCheckTickedColor: "#00ff88",
+               fieldCheckMarkColor: "#2200ff", fieldCheckSize: 22,
+               settingsBarBackground: "#0a5f5f", settingsBarPaddingTop: 7,
+               settingsBarMarginTop: 5, settingsBarColor: "#ffcc00", settingsBarSize: 17}
     }});
     const entry = await JournalEntry.create({name: "Window Width Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
@@ -5774,10 +5799,24 @@ try {
       fieldColor: getComputedStyle(el.querySelector(".page-metadata select")).color,
       fieldSize: getComputedStyle(el.querySelector(".page-metadata select")).fontSize,
       labelColor: getComputedStyle(el.querySelector(".page-metadata label")).color,
-      checkColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]')).accentColor,
-      checkSize: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]')).width,
+      // Read from what is drawn rather than from the input: Foundry turns the
+      // browser's own drawing off and prints a glyph, so the box a person sees
+      // is the after layer and the tick inside it the before one.
+      checkSize: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::before").fontSize,
+      tickedColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::after").color,
+      markColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'), "::before").color,
+      emptyColor: getComputedStyle(el.querySelector('.page-metadata input[type="checkbox"]'))
+        .getPropertyValue("--checkbox-background-color").trim(),
       settingsBarFill: getComputedStyle(el.querySelector(".page-metadata")).backgroundColor,
       settingsBarPad: getComputedStyle(el.querySelector(".page-metadata")).paddingTop,
+      settingsBarGap: getComputedStyle(el.querySelector(".page-metadata")).marginTop,
+      settingsBarInk: getComputedStyle(el.querySelector(".page-metadata")).color,
+      // What stands on the strip follows its lettering until it is given
+      // something of its own. The tick box's own row is given nothing here and
+      // takes the strip's size; the label on it is a Page Settings control and
+      // takes that one instead.
+      rowSize: getComputedStyle(el.querySelector(".page-metadata .show-title")).fontSize,
+      labelSize: getComputedStyle(el.querySelector(".page-metadata .show-title label")).fontSize,
       // The page's own surface is what is written on, which the Page tab paints.
       surface: getComputedStyle(el.querySelector(":scope > .window-content")).backgroundColor
     });
@@ -5801,14 +5840,22 @@ try {
     `and so do the page's own settings above them (${ed.fieldFill}, ${ed.fieldColor})`);
   check(ed.fieldSize === "19px" && ed.labelColor === "rgb(0, 221, 170)",
     `their size and the words beside them (${ed.fieldSize}, ${ed.labelColor})`);
-  // A browser draws the tick box itself, so it answers to the color of the tick
-  // rather than to a fill.
-  check(ed.checkColor === "rgb(255, 0, 255)" && ed.checkSize === "22px",
-    `and the tick box has a color and a size of its own (${ed.checkColor}, ${ed.checkSize})`);
+  // The tick box is a printed glyph rather than a box, so a fill and an edge
+  // would land on nothing: it takes a size, a color for the empty box, one for
+  // the box once ticked, and one for the tick itself.
+  check(ed.checkSize === "22px" && ed.emptyColor === "#ff00ff",
+    `and the tick box has a size and a color of its own (${ed.checkSize}, ${ed.emptyColor})`);
+  check(ed.tickedColor === "rgb(0, 255, 136)" && ed.markColor === "rgb(34, 0, 255)",
+    `with the box it turns and the tick inside it apart (${ed.tickedColor}, ${ed.markColor})`);
   // The strip they stand on is painted apart from the controls standing on it,
   // as the editing bar is from its icons.
   check(ed.settingsBarFill === "rgb(10, 95, 95)" && ed.settingsBarPad === "7px",
     `the strip holding them takes its own fill and spacing (${ed.settingsBarFill}, ${ed.settingsBarPad})`);
+  check(ed.settingsBarGap === "5px", `and space around it as well as inside (${ed.settingsBarGap})`);
+  check(ed.settingsBarInk === "rgb(255, 204, 0)" && ed.rowSize === "17px",
+    `its lettering is its own, and what stands on it follows (${ed.settingsBarInk}, ${ed.rowSize})`);
+  check(ed.labelSize === "19px",
+    `while a control given its own size keeps it (${ed.labelSize} on a strip of ${ed.rowSize})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -6005,7 +6052,8 @@ try {
       "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
     window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
     editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
-      "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls"]
+      "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls",
+      "Drop-down List", "Drop-down Entries"]
   };
   for (const [tab, wanted] of Object.entries(laidTabs)) {
     const got = t[tab].map((s) => s.name);
@@ -6111,6 +6159,95 @@ try {
     const api = game.modules.get("illuminus").api;
     if (window.__still?.styleId) await api.deleteStyle(window.__still.styleId);
     window.__still = undefined;
+  })()`);
+}
+
+// The list a named control opens is not inside the window it belongs to: core
+// clones it onto the body and positions it against the button, so nothing
+// scoped to a styled sheet reaches it until the module marks it. Opened the way
+// a person opens it, since a scripted event neither positions the list nor
+// hovers its entries.
+console.log("\n[63] The list a named control opens");
+try {
+  const set = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Drop-down List Probe", settings: {editor: {
+      listBackground: "#2b0057", listPaddingTop: 9, listCornerTopLeft: 12,
+      itemColor: "#ffd400", itemBackground: "#004422", itemPaddingLeft: 11,
+      itemDividerColor: "#ff0000"
+    }}});
+    const entry = await JournalEntry.create({name: "Drop-down List Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h1>One</h1><p>Body.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1200));
+    entry.sheet.element.querySelector(".journal-entry-page .edit-container button")?.click();
+    let sheet = null;
+    for (let i = 0; i < 150 && !sheet; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      sheet = [...foundry.applications.instances.values()].find(
+        a => a.document?.documentName === "JournalEntryPage" && a.element?.parentElement === document.body);
+    }
+    window.__dropList = {entryId: entry.id, styleId: style.id};
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    return JSON.stringify({open: !!sheet});
+  })()`));
+  check(set.open, "a page editor is open to walk");
+
+  await menuAtRest();
+  let opened = false;
+  for (let attempt = 0; attempt < 3 && !opened; attempt++) {
+    const button = await settledBox(`${EDIT_SHEET}.element.querySelector("menu.editor-menu .pm-dropdown")`);
+    if (!button) break;
+    await cdp.click(button.x, button.y);
+    opened = await cdp.evaluate(`!!document.querySelector("#prosemirror-dropdown")`);
+  }
+  check(opened, "and its first named control opens a list");
+
+  const list = JSON.parse(await cdp.evaluate(`(() => {
+    const el = document.getElementById("prosemirror-dropdown");
+    if (!el) return JSON.stringify({missing: true});
+    const ul = el.querySelector(":scope > ul");
+    const item = ul.querySelector("li:not(.divider)");
+    const divider = ul.querySelector("li.divider");
+    const cs = (node) => node ? getComputedStyle(node) : {};
+    return JSON.stringify({
+      marked: el.classList.contains("illuminus-styled"),
+      styleId: el.getAttribute("data-illuminus-style"),
+      listFill: cs(ul).backgroundColor,
+      listPad: cs(ul).paddingTop,
+      listCorner: cs(ul).borderTopLeftRadius,
+      itemInk: cs(item).color,
+      itemFill: cs(item).backgroundColor,
+      itemPad: cs(item).paddingLeft,
+      dividerColor: divider ? cs(divider).borderBottomColor : null
+    });
+  })()`));
+  check(list.marked && list.styleId === await cdp.evaluate(`window.__dropList.styleId`),
+    `the list carries the style of the window it was opened from (${list.styleId ?? "unmarked"})`);
+  check(list.listFill === "rgb(43, 0, 87)" && list.listPad === "9px" && list.listCorner === "12px",
+    `and takes its fill, spacing and corner (${list.listFill}, ${list.listPad}, ${list.listCorner})`);
+  check(list.itemInk === "rgb(255, 212, 0)" && list.itemFill === "rgb(0, 68, 34)"
+    && list.itemPad === "11px",
+    `an entry takes its own lettering, fill and spacing (${list.itemInk} on ${list.itemFill})`);
+  check(list.dividerColor === "rgb(255, 0, 0)",
+    `and the line between the runs of entries takes a color (${list.dividerColor})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    document.getElementById("prosemirror-dropdown")?.remove();
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const entry = game.journal.get(window.__dropList?.entryId);
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    if (window.__dropList?.styleId) await api.deleteStyle(window.__dropList.styleId);
+    window.__dropList = undefined;
   })()`);
 }
 

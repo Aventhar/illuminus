@@ -303,9 +303,26 @@
    controls standing on it. */
 .illuminus-styled.journal-entry-page .page-metadata,
 .illuminus-styled .illuminus-preview__editor .page-metadata {
+  font-family: var(--ill-editor-settings-bar-font);
+  font-size: var(--ill-editor-settings-bar-size);
+  color: var(--ill-editor-settings-bar-color);
+  font-weight: var(--ill-editor-settings-bar-text-style-weight);
+  font-style: var(--ill-editor-settings-bar-text-style-slant);
+  font-variant: var(--ill-editor-settings-bar-caps-variant);
+  text-transform: var(--ill-editor-settings-bar-caps-transform);
+  letter-spacing: var(--ill-editor-settings-bar-letter-spacing);
+  word-spacing: var(--ill-editor-settings-bar-word-spacing);
+  line-height: var(--ill-editor-settings-bar-line-height);
+  text-align: var(--ill-editor-settings-bar-align);
+  -webkit-text-stroke: var(--ill-editor-settings-bar-outline-width) var(--ill-editor-settings-bar-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-editor-settings-bar-text-shadow-offset-x) var(--ill-editor-settings-bar-text-shadow-offset-y)
+               var(--ill-editor-settings-bar-text-shadow-blur) var(--ill-editor-settings-bar-text-shadow-color);
   background-color: var(--ill-editor-settings-bar-background);
   padding: var(--ill-editor-settings-bar-padding-top) var(--ill-editor-settings-bar-padding-right)
            var(--ill-editor-settings-bar-padding-bottom) var(--ill-editor-settings-bar-padding-left);
+  margin: var(--ill-editor-settings-bar-margin-top) var(--ill-editor-settings-bar-margin-right)
+          var(--ill-editor-settings-bar-margin-bottom) var(--ill-editor-settings-bar-margin-left);
   border-width: var(--ill-editor-settings-bar-border-top-width) var(--ill-editor-settings-bar-border-right-width)
                 var(--ill-editor-settings-bar-border-bottom-width) var(--ill-editor-settings-bar-border-left-width);
   border-style: var(--ill-editor-settings-bar-border-top-style) var(--ill-editor-settings-bar-border-right-style)
@@ -356,14 +373,69 @@
                var(--ill-editor-field-text-shadow-blur) var(--ill-editor-field-text-shadow-color);
 }
 
-/* The tick box beside them. A browser draws this one itself: a fill and an edge
-   land on the box it reserves rather than on the control a person sees, and the
-   color of the tick is the one thing it does answer to. */
+/* The list a named control opens. Core clones it into a `#prosemirror-dropdown`
+   on the body and positions it against the button, so it is outside the window
+   it belongs to — `scripts/editor-dropdown.mjs` marks it with the style of
+   whatever was clicked, and these are what reach it. Its own placement is
+   Foundry's: only paint is set here, never position. */
+.illuminus-styled#prosemirror-dropdown ul {
+  background-color: var(--ill-editor-list-background);
+  padding: var(--ill-editor-list-padding-top) var(--ill-editor-list-padding-right)
+           var(--ill-editor-list-padding-bottom) var(--ill-editor-list-padding-left);
+  border-width: var(--ill-editor-list-border-top-width) var(--ill-editor-list-border-right-width)
+                var(--ill-editor-list-border-bottom-width) var(--ill-editor-list-border-left-width);
+  border-style: var(--ill-editor-list-border-top-style) var(--ill-editor-list-border-right-style)
+                var(--ill-editor-list-border-bottom-style) var(--ill-editor-list-border-left-style);
+  border-color: var(--ill-editor-list-border-top-color) var(--ill-editor-list-border-right-color)
+                var(--ill-editor-list-border-bottom-color) var(--ill-editor-list-border-left-color);
+  border-radius: var(--ill-editor-list-corner-top-left) var(--ill-editor-list-corner-top-right)
+                 var(--ill-editor-list-corner-bottom-right) var(--ill-editor-list-corner-bottom-left);
+  box-shadow: var(--ill-editor-list-shadow-offset-x) var(--ill-editor-list-shadow-offset-y)
+              var(--ill-editor-list-shadow-blur) var(--ill-editor-list-shadow-spread)
+              var(--ill-editor-list-shadow-color),
+    inset var(--ill-editor-list-inner-shadow-offset-x) var(--ill-editor-list-inner-shadow-offset-y)
+          var(--ill-editor-list-inner-shadow-blur) var(--ill-editor-list-inner-shadow-spread)
+          var(--ill-editor-list-inner-shadow-color);
+}
+
+/* One entry in that list. A heading entry carries its own size from core, which
+   is how the Format list shows what it is offering, so a size set here is what
+   the entries take unless core has said otherwise. */
+.illuminus-styled#prosemirror-dropdown li {
+  font-family: var(--ill-editor-item-font);
+  font-size: var(--ill-editor-item-size);
+  color: var(--ill-editor-item-color);
+  font-weight: var(--ill-editor-item-text-style-weight);
+  font-style: var(--ill-editor-item-text-style-slant);
+  -webkit-text-stroke: var(--ill-editor-item-outline-width) var(--ill-editor-item-outline-color);
+  paint-order: stroke fill;
+  text-shadow: var(--ill-editor-item-text-shadow-offset-x) var(--ill-editor-item-text-shadow-offset-y)
+               var(--ill-editor-item-text-shadow-blur) var(--ill-editor-item-text-shadow-color);
+  background-color: var(--ill-editor-item-background);
+  padding: var(--ill-editor-item-padding-top) var(--ill-editor-item-padding-right)
+           var(--ill-editor-item-padding-bottom) var(--ill-editor-item-padding-left);
+  border-radius: var(--ill-editor-item-corner-top-left) var(--ill-editor-item-corner-top-right)
+                 var(--ill-editor-item-corner-bottom-right) var(--ill-editor-item-corner-bottom-left);
+}
+
+/* The line core draws between one run of entries and the next. */
+.illuminus-styled#prosemirror-dropdown li.divider {
+  border-bottom-color: var(--ill-editor-item-divider-color);
+}
+
+/* The tick box beside them, which is not a box: Foundry sets `appearance: none`
+   and prints a FontAwesome glyph in `::before`, so a fill, an edge and a corner
+   land on nothing a person can see — and `accent-color`, which only means
+   anything while a browser is drawing the control itself, does nothing either.
+   Core feeds every part of it through element-local custom properties, so those
+   are what a style sets: the empty box, the box once it is ticked, the tick
+   inside it, and how large the glyph is drawn. */
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"],
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"] {
-  accent-color: var(--ill-editor-field-check-color);
-  width: var(--ill-editor-field-check-size);
-  height: var(--ill-editor-field-check-size);
+  --checkbox-background-color: var(--ill-editor-field-check-color);
+  --checkbox-checked-color: var(--ill-editor-field-check-ticked-color);
+  --checkbox-checkmark-color: var(--ill-editor-field-check-mark-color);
+  --checkbox-size: var(--ill-editor-field-check-size);
 }
 
 /* Each icon on the editing row, which is a key of its own: the bar's fill

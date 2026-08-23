@@ -162,6 +162,12 @@ These are all load-bearing and none are obvious from the code.
   `foundry.prosemirror.dom.parseString`, which is why templates are safe. Markup turned
   straight into a page is not: `sampleMarkup()` stamps one per page, and a check clicks
   the button and reads what the page ends up holding.
+- **A gamemaster is never shown less.** Hiding a passage changes what *players*
+  are sent, never what the person running the game reads — the tint and the button are
+  how they tell what the table has been shown. "The words are still there after I press
+  Hide" is the feature working, and the only honest proof is to enrich the page both
+  ways: `enrichHTML(content, {secrets: false})` is what a player receives, and a check
+  asserts the hidden passage is missing from it and the revealed one is not.
 - **What a reveal changes is 5% of an alpha.** Foundry paints an unrevealed passage
   `rgb(53 0 121 / 5%)` and a revealed one `rgb(0 53 0 / 5%)`, and a new style ships
   both — so "nothing happens when I click Reveal" is usually the toggle working and
@@ -584,6 +590,12 @@ in the template library.
   checks leave sheets on screen, and a pointer sent at a window underneath one of
   them lands on the one on top — which reads as a styling failure three sections
   away from anything to do with windows.
+- **A tab that vanishes mid-run is the browser, not a check.** After several long
+  runs on one browser instance the page target dies: the run stops with
+  `Runtime.evaluate never answered: the devtools socket errored`, `curl :9222/json`
+  comes back `[ ]`, and Foundry and Chrome are both still up. It has happened twice,
+  each time at a different check. Rebuild with `tools/sandbox.sh down && up` rather than
+  reading anything into where it stopped — and start a long run on a fresh sandbox.
 - **A crashed run leaves fixtures behind**, and a stray style breaks the seeded-style
   counts three checks in — which looks like a bug in those checks. When counts are wrong
   in section [2], the world is dirty: `tools/sandbox.sh reset`.

@@ -415,6 +415,8 @@ const SECTION_TEXT = {
   settingsBar: ["Page Settings Bar", "The strip holding the page's own settings, above the editing bar"],
   pageFields: ["Page Settings", "The title level and the Show Title tick box standing on that strip"],
   dropdowns: ["Named Controls", "The two controls that open a list of their own, Format and Illuminus"],
+  dropdownList: ["Drop-down List", "The list a named control opens, which Foundry draws over the window"],
+  dropdownItems: ["Drop-down Entries", "Each entry in that list"],
   pageButton: ["Edit Button", "The pencil that appears over a page when you point at it"]
 };
 for (const [id, [label, hint]] of Object.entries(SECTION_TEXT)) {
@@ -440,6 +442,9 @@ const NOUN = {
   entryMargin: "", headingPadding: "listed heading's name", headingMargin: "",
   toolbarPadding: "editing controls", toolbarBorder: "editing bar edge", toolbarCorner: "editing bar",
   settingsBarPadding: "settings on the strip", settingsBarBorder: "strip edge", settingsBarCorner: "strip",
+  listPadding: "entries", listBorder: "list edge", listCorner: "list",
+  itemPadding: "entry's name", itemCorner: "entry",
+  settingsBarMargin: "",
   toolbarButtonPadding: "icon", toolbarButtonBorder: "icon edge", toolbarButtonCorner: "icon",
   dropdownPadding: "drop-down's name", dropdownBorder: "drop-down edge", dropdownCorner: "drop-down",
   fieldPadding: "field's contents", fieldBorder: "field edge", fieldCorner: "field",
@@ -567,7 +572,7 @@ const OUTLINE_WORD = {
   // The section is called Opening Capital, so the control says only what it is.
   dropCap: "",
   // A section holding one typeface needs no qualifier either.
-  field: "", dropdown: ""
+  field: "", dropdown: "", settingsBar: "", item: ""
 };
 
 // Italic: a tick box beside every thickness control, named for it.
@@ -672,7 +677,7 @@ for (const name of names) {
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
     // A gap is outside the edge whatever it is a gap around, so the two
     // families are told apart by the word rather than by the whole name.
@@ -697,6 +702,20 @@ const FIELD_TEXT = {
   entryActiveBackground: ["Fill Color", "The color behind the page being read."],
   headingBackground: ["Fill Color", "The color behind a heading listed under a page."],
   toolbarBackground: ["Fill Color", "The color behind the whole strip of editing controls."],
+  listBackground: ["Fill Color", "The color behind the list a named control opens."],
+  itemFont: ["Typeface", "The lettering on each entry in that list."],
+  itemSize: ["Text Size", "How large an entry is drawn. 0 follows the list."],
+  itemColor: ["Text Color", "Color of an entry's name."],
+  itemBackground: ["Fill Color", "The color behind one entry."],
+  itemDividerColor: ["Divider Color", "The line drawn between one run of entries and the next."],
+  settingsBarFont: ["Typeface", "The lettering on the strip. Each setting standing on it follows this unless it is given a typeface of its own."],
+  settingsBarSize: ["Text Size", "How large that lettering is. 0 follows the window."],
+  settingsBarColor: ["Text Color", "Color of that lettering."],
+  settingsBarAlign: ["Alignment", "Which edge the settings line up against on the strip."],
+  settingsBarCaps: ["Capitals", "Force capital letters on the strip, or use small capitals."],
+  settingsBarLetterSpacing: ["Letter Spacing", "Extra space between the letters on the strip."],
+  settingsBarWordSpacing: ["Word Spacing", "Extra space between the words on the strip."],
+  settingsBarLineHeight: ["Line Spacing", "How tall each row on the strip is. 0 follows the window."],
   settingsBarBackground: ["Fill Color", "The color behind the strip the page's settings stand on."],
   toolbarColor: ["Icon Color", "Color of the icons on the editing bar."],
   toolbarHoverColor: ["Icon Color", "Color of a control while the mouse is over it. Leave empty to keep the ordinary color."],
@@ -715,8 +734,10 @@ const FIELD_TEXT = {
   fieldSize: ["Text Size", "How large those settings are drawn. 0 follows the window."],
   fieldColor: ["Text Color", "Color of their words."],
   fieldBackground: ["Fill Color", "The color behind a setting's box."],
-  fieldCheckColor: ["Tick Box Color", "The color the tick is drawn in. Leave empty for the browser's own."],
-  fieldCheckSize: ["Tick Box Size", "How large the tick box is drawn. 0 leaves it as the browser draws it."],
+  fieldCheckColor: ["Tick Box Color", "Color of the empty box. Leave empty to keep the one Foundry draws."],
+  fieldCheckTickedColor: ["Ticked Box Color", "Color the box turns once it is ticked."],
+  fieldCheckMarkColor: ["Tick Color", "Color of the tick inside the box."],
+  fieldCheckSize: ["Tick Box Size", "How large the box is drawn. 0 leaves it the size Foundry draws it."],
   frameMinWidth: ["Minimum Width", "The narrowest the window may be drawn, however far it is dragged in. 0 lets Foundry decide."],
   frameMaxWidth: ["Maximum Width", "The widest the window may be drawn, however far it is dragged out. 0 lets Foundry decide."],
   foldShown: ["Can Be Folded", "Whether a marker appears for folding this away. A reader clicks it to hide what is under it and clicks again to bring it back; nothing is saved, so a page opens as its author left it."],

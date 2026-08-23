@@ -1766,10 +1766,42 @@ export const GROUPS = [
       {
         id: "settingsBar",
         fields: [
+          // The lettering on the strip, which everything standing on it follows
+          // until it is given something of its own: a size or a color set under
+          // Page Settings wins, and one left alone takes what the strip says.
+          ...textFields("settingsBar"),
           col("settingsBarBackground", "#00000000"), ...imageFields("settingsBar"),
           ...borderFields("settingsBarBorder", { color: "#00000000" }),
           ...cornerFields("settingsBarCorner"),
-          ...spacingFields("settingsBarPadding", 0, { max: 60 })
+          ...spacingFields("settingsBarPadding", 0, { max: 60 }),
+          // Space around the strip as well as inside it: negative values pull
+          // it against the page's name above it or the editing bar below.
+          ...spacingFields("settingsBarMargin", 0, { min: -40, max: 60 })
+        ]
+      },
+      // The list a named control opens, which core builds on the body rather
+      // than inside the window — marked as it appears so these reach it.
+      {
+        id: "dropdownList",
+        fields: [
+          col("listBackground", "#00000000"), ...imageFields("list"),
+          ...borderFields("listBorder", { color: "#00000000" }),
+          ...cornerFields("listCorner"),
+          ...spacingFields("listPadding", 0, { max: 40 })
+        ]
+      },
+      {
+        id: "dropdownItems",
+        fields: [
+          font("itemFont", ""),
+          num("itemSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
+          col("itemColor", ""),
+          ...textStyleField("itemTextStyle", "inherit", "inherit", { inherit: true }),
+          col("itemBackground", "#00000000"),
+          ...cornerFields("itemCorner"),
+          ...spacingFields("itemPadding", 0, { max: 40 }),
+          // The line core draws between the runs of entries.
+          col("itemDividerColor", "")
         ]
       },
       // The page's own settings, above the prose: which level its title is, and
@@ -1785,10 +1817,14 @@ export const GROUPS = [
           ...borderFields("fieldBorder", { color: "#00000000" }),
           ...cornerFields("fieldCorner"),
           ...spacingFields("fieldPadding", 0, { max: 40 }),
-          // The tick box beside them is drawn by the browser rather than by the
-          // page, so a fill and an edge do nothing to it: what it answers to is
-          // the color its tick is drawn in, and how large the box itself is.
+          // The tick box beside them is not a box at all: Foundry turns the
+          // browser's own drawing off and prints a glyph in its place, so a
+          // fill, an edge and a corner land on nothing. What it answers to is
+          // the color of the empty box, the color it turns once ticked, the
+          // color of the tick itself, and how large the glyph is drawn.
           col("fieldCheckColor", ""),
+          col("fieldCheckTickedColor", ""),
+          col("fieldCheckMarkColor", ""),
           num("fieldCheckSize", 0, "px", 0, 40, 1, { emitZero: false })
         ]
       }
@@ -2365,9 +2401,41 @@ const LAYOUTS = {
   },
   editor: {
     order: ["frameSize", "frame", "titleBar", "headerButtons", "settingsBar", "pageFields",
-      "toolbar", "toolbarIcons", "dropdowns"],
+      "toolbar", "toolbarIcons", "dropdowns", "dropdownList", "dropdownItems"],
+    dropdownList: { order: [
+      "listBackground", DIVIDER, "listTexture", "listTextureFit", "listTexturePosition",
+      "listTextureBlend", "listTextureOpacity",
+      DIVIDER, "listInnerShadowOffsetX", "listInnerShadowOffsetY", "listInnerShadowBlur",
+      "listInnerShadowSpread", "listInnerShadowColor",
+      DIVIDER, "listShadowOffsetX", "listShadowOffsetY", "listShadowBlur", "listShadowSpread",
+      "listShadowColor",
+      DIVIDER, "listPaddingTop", "listPaddingBottom", "listPaddingLeft", "listPaddingRight",
+      DIVIDER, "listBorderTopStyle", "listBorderTopColor", "listBorderTopWidth",
+      DIVIDER, "listBorderBottomStyle", "listBorderBottomColor", "listBorderBottomWidth",
+      DIVIDER, "listBorderLeftStyle", "listBorderLeftColor", "listBorderLeftWidth",
+      DIVIDER, "listBorderRightStyle", "listBorderRightColor", "listBorderRightWidth",
+      DIVIDER, "listCornerTopLeft", "listCornerTopRight", "listCornerBottomLeft",
+      "listCornerBottomRight"
+    ] },
+    dropdownItems: { order: [
+      "itemFont", "itemSize", "itemColor", "itemTextStyle", "itemTextStyleSlant",
+      DIVIDER, "itemOutlineColor", "itemOutlineWidth",
+      DIVIDER, "itemTextShadowOffsetX", "itemTextShadowOffsetY", "itemTextShadowBlur",
+      "itemTextShadowColor",
+      DIVIDER, "itemBackground",
+      DIVIDER, "itemPaddingTop", "itemPaddingBottom", "itemPaddingLeft", "itemPaddingRight",
+      DIVIDER, "itemCornerTopLeft", "itemCornerTopRight", "itemCornerBottomLeft",
+      "itemCornerBottomRight",
+      DIVIDER, "itemDividerColor"
+    ] },
     settingsBar: { order: [
-      "settingsBarBackground", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
+      "settingsBarFont", "settingsBarSize", "settingsBarColor", "settingsBarTextStyle",
+      "settingsBarTextStyleSlant", DIVIDER, "settingsBarAlign", "settingsBarCaps",
+      "settingsBarLetterSpacing", "settingsBarWordSpacing", "settingsBarLineHeight",
+      DIVIDER, "settingsBarOutlineColor", "settingsBarOutlineWidth",
+      DIVIDER, "settingsBarTextShadowOffsetX", "settingsBarTextShadowOffsetY",
+      "settingsBarTextShadowBlur", "settingsBarTextShadowColor",
+      DIVIDER, "settingsBarBackground", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
       "settingsBarTexturePosition", "settingsBarTextureBlend", "settingsBarTextureOpacity",
       DIVIDER, "settingsBarInnerShadowOffsetX", "settingsBarInnerShadowOffsetY",
       "settingsBarInnerShadowBlur", "settingsBarInnerShadowSpread", "settingsBarInnerShadowColor",
@@ -2375,6 +2443,8 @@ const LAYOUTS = {
       "settingsBarShadowSpread", "settingsBarShadowColor",
       DIVIDER, "settingsBarPaddingTop", "settingsBarPaddingBottom", "settingsBarPaddingLeft",
       "settingsBarPaddingRight",
+      DIVIDER, "settingsBarMarginTop", "settingsBarMarginBottom", "settingsBarMarginLeft",
+      "settingsBarMarginRight",
       DIVIDER, "settingsBarBorderTopStyle", "settingsBarBorderTopColor", "settingsBarBorderTopWidth",
       DIVIDER, "settingsBarBorderBottomStyle", "settingsBarBorderBottomColor",
       "settingsBarBorderBottomWidth",
