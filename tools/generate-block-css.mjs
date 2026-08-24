@@ -403,8 +403,13 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled .window-header", group: "window", prefix: "titleBar" },
   { selector: ".illuminus-styled .window-header button.header-control", group: "window", prefix: "headerButton" },
   { selector: ".illuminus-styled .window-header button.header-control:hover", group: "window", prefix: "headerButtonHover" },
-  { selector: ".illuminus-styled .journal-entry-page .edit-container button", group: "window", prefix: "pageButton" },
-  { selector: ".illuminus-styled .journal-entry-page .edit-container button:hover", group: "window", prefix: "pageButtonHover" },
+  // `host: false`: whether this one is positioned is a control of its own —
+  // the layer taking `position: relative` for itself held the button still
+  // however that control was set.
+  { selector: ".illuminus-styled .journal-entry-page .edit-container button", group: "window", prefix: "pageButton", host: false },
+  // And its pointed-at twin, whose host rule is the same button with the
+  // state stripped off it — so this one held the button still as well.
+  { selector: ".illuminus-styled .journal-entry-page .edit-container button:hover", group: "window", prefix: "pageButtonHover", host: false },
   { selector: ".illuminus-styled.journal-entry-page.application, .illuminus-styled .illuminus-preview__editor", group: "editor", prefix: "", host: false },
   { selector: ".illuminus-styled.journal-entry-page .window-header, .illuminus-styled .illuminus-preview__editor .window-header", group: "editor", prefix: "titleBar" },
   { selector: ".illuminus-styled.journal-entry-page .window-header button.header-control", group: "editor", prefix: "headerButton" },

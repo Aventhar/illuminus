@@ -2766,10 +2766,26 @@ try {
       }
       return false;
     };
+    // The prompt that carries the button asked for, rather than the first
+    // window whose name has Dialog in it: an answered prompt lingers in the
+    // register for the length of its closing animation, so the one before this
+    // could be picked instead and the click would land on a window on its way
+    // out. Nothing then answered the prompt still on screen, and the editor
+    // sitting there unclosed read as Discard declining to close.
     window.__unsaved.answer = async (action) => {
-      await window.__unsaved.waitForPrompt();
-      window.__unsaved.prompt()?.element.querySelector('button[data-action="' + action + '"]')?.click();
-      await new Promise(r => setTimeout(r, 700));
+      const wanted = 'button[data-action="' + action + '"]';
+      for (let i = 0; i < 200; i++) {
+        const asking = [...foundry.applications.instances.values()].find(
+          (app) => app.constructor.name.includes("Dialog") && app.rendered
+            && app.element?.querySelector(wanted));
+        if (asking) {
+          asking.element.querySelector(wanted).click();
+          await new Promise(r => setTimeout(r, 700));
+          return true;
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return false;
     };
   })()`);
 
@@ -2796,12 +2812,17 @@ try {
 
   await step("discard", `
     state.app.close();
-    await state.answer("discard");
+    state.out.discardAnswered = await state.answer("discard");
     // Waited for rather than slept past, as the control above is: closing tears
     // down a couple of thousand controls, and a window still on screen when a
-    // fixed delay ends reads as Discard having declined to close.
-    for (let i = 0; i < 100 && state.app.rendered; i++) await new Promise(r => setTimeout(r, 100));
-    state.out.discardClosed = !state.app.rendered;
+    // fixed delay ends reads as Discard having declined to close. Gone from the
+    // register counts as closed as well as the rendered flag going false: a
+    // window on its way out is still rendered for the length of its animation,
+    // and on a loaded machine that has outlasted ten seconds of patience.
+    const gone = () => !state.app.rendered
+      || ![...foundry.applications.instances.values()].includes(state.app);
+    for (let i = 0; i < 300 && !gone(); i++) await new Promise(r => setTimeout(r, 100));
+    state.out.discardClosed = gone();
     state.out.afterDiscard = api.getStyle(state.styleId).settings.page.background;
     return "null";
   `);
@@ -2824,6 +2845,7 @@ try {
   check(!un.cleanAsked && un.cleanClosed, "closing an unchanged style just closes");
   check(un.asked, "closing a changed one asks first");
   check(un.keptOpen, "Keep Editing leaves the editor open");
+  check(un.discardAnswered, "the prompt is still there to answer when Discard is pressed");
   check(un.discardClosed && un.afterDiscard !== "#123456",
     `Discard closes and throws the change away (stored ${un.afterDiscard})`);
   check(un.saveClosed && un.afterSave === "#123456",
@@ -6061,7 +6083,8 @@ try {
       "Border", "Headings Inside"],
     sidebar: ["Size and Position", "Fill and Image", "Inner Spacing", "Border", "Categories",
       "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
-    window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
+    window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button",
+      "Scroll Bars"],
     editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
       "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls",
       "Drop-down List", "Drop-down Entries"]
@@ -6325,6 +6348,143 @@ try {
     for (const entry of game.journal.filter((e) => e.name === "Plain Tick Journal")) await entry.delete();
     const api = game.modules.get("illuminus").api;
     for (const style of api.listStyles().filter((s) => s.name === "Plain Tick Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// Where the pencil sits, and whether it travels with the reader. Foundry makes
+// it `sticky` inside a container as tall as the page, so it follows the scroll
+// and comes to rest across whatever is half way down — a heading, usually.
+console.log("\n[65] The Edit button stays where it is put");
+try {
+  const look = async (follows) => JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Edit Button Probe", settings: {window: {
+      pageButtonFollows: ${follows}, pageButtonTop: 24
+    }}});
+    const entry = await JournalEntry.create({name: "Edit Button Journal"});
+    // Long enough to scroll, or "follows the reader" cannot be seen at all.
+    const words = new Array(40).fill('<p>Paragraph of the long page, with enough words in it to take a line or two.</p>').join("");
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h1>Chapter</h1>" + words}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    const root = entry.sheet.element;
+    const article = root.querySelector("article.journal-entry-page");
+    const button = article.querySelector(".edit-container button");
+    const pages = root.querySelector(".journal-entry-pages") ?? root.querySelector(".scrollable");
+    const down = () => Math.round(button.getBoundingClientRect().top - article.getBoundingClientRect().top);
+    const out = {
+      position: getComputedStyle(button).position,
+      containerTop: getComputedStyle(article.querySelector(".edit-container")).top,
+      atRest: down()
+    };
+    pages.scrollTop = 600;
+    await new Promise(r => setTimeout(r, 400));
+    out.afterScroll = down();
+    out.scrolled = Math.round(pages.scrollTop);
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+
+  const follows = await look(true);
+  const held = await look(false);
+  check(follows.containerTop === "24px" && follows.atRest === 24 && held.atRest === 24,
+    `the button sits the distance from the top it was given (${held.atRest}px)`);
+  check(follows.scrolled > 100 && follows.afterScroll > follows.atRest + 100,
+    `left to follow the page it travels with the reader (${follows.atRest} to ${follows.afterScroll} `
+    + `over ${follows.scrolled}px)`);
+  check(held.afterScroll === held.atRest,
+    `and held at the top it stays above the words (${held.atRest} to ${held.afterScroll})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Edit Button Journal")) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles().filter((s) => s.name === "Edit Button Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// A browser draws a scroll bar one way or the other and never both: Foundry
+// states `scrollbar-width` and `scrollbar-color` on every element, and Chromium
+// answers a stated one by drawing the bar itself and ignoring the rules that can
+// give it an edge and a corner. So the switch has to say exactly what Foundry
+// says while it is off, and hand the bar over while it is on.
+console.log("\n[66] Scroll bars are Foundry's until they are asked for");
+try {
+  const look = async (settings) => JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const wanted = ${JSON.stringify(settings)};
+    const style = wanted ? await api.createStyle({name: "Scroll Bar Probe", settings: {window: wanted}}) : null;
+    const entry = await JournalEntry.create({name: "Scroll Bar Journal"});
+    const words = new Array(60).fill("<p>A paragraph long enough to make the page scroll inside its own box.</p>").join("");
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h1>Chapter</h1>" + words}}]);
+    if (style) await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    // Whatever is actually scrolling, rather than the element that ought to be.
+    const scroller = [...root.querySelectorAll("*")].find(
+      (el) => el.scrollHeight > el.clientHeight + 40 && el.clientWidth > 200) ?? root;
+    const cs = getComputedStyle(scroller);
+    const out = {
+      // What the browser reserved for the bar, which is the honest read: the
+      // pseudo-element's own styles are still there while they are being
+      // ignored, so reading those would say a bar is drawn when none is.
+      reserved: scroller.offsetWidth - scroller.clientWidth,
+      width: cs.scrollbarWidth,
+      color: cs.scrollbarColor,
+      handle: getComputedStyle(scroller, "::-webkit-scrollbar-thumb").backgroundColor,
+      track: getComputedStyle(scroller, "::-webkit-scrollbar-track").backgroundColor
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    if (style) await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+
+  const plain = await look(null);
+  const off = await look({});
+  const on = await look({
+    scrollbarStyled: true, scrollbarThickness: 18,
+    scrollbarHandleBackground: "#00aaff", scrollbarTrackBackground: "#221100"
+  });
+  check(off.width === plain.width && off.color === plain.color,
+    `switched off, a styled journal says what a plain one says (${off.width}, ${off.color})`);
+  check(off.reserved === plain.reserved,
+    `and gives the bar the same room (${off.reserved} against ${plain.reserved})`);
+  check(on.width === "auto" && on.reserved === 18,
+    `switched on, the bar is drawn to the thickness asked for (${on.reserved}px)`);
+  check(on.handle === "rgb(0, 170, 255)" && on.track === "rgb(34, 17, 0)",
+    `with the handle and the groove behind it painted (${on.handle} on ${on.track})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Scroll Bar Journal")) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles().filter((s) => s.name === "Scroll Bar Probe")) {
       await api.deleteStyle(style.id);
     }
   })()`);

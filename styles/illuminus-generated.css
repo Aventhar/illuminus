@@ -1919,7 +1919,6 @@
 }
 
 .illuminus-styled .journal-entry-page .edit-container button {
-  position: relative;
   isolation: isolate;
 }
 
@@ -1939,7 +1938,6 @@
 }
 
 .illuminus-styled .journal-entry-page .edit-container button {
-  position: relative;
   isolation: isolate;
 }
 
@@ -3265,6 +3263,11 @@
                 var(--ill-window-hover-header-button-border-bottom-color, var(--ill-window-header-button-border-bottom-color)) var(--ill-window-hover-header-button-border-left-color, var(--ill-window-header-button-border-left-color));
   border-radius: var(--ill-window-hover-header-button-corner-top-left, var(--ill-window-header-button-corner-top-left)) var(--ill-window-hover-header-button-corner-top-right, var(--ill-window-header-button-corner-top-right))
                  var(--ill-window-hover-header-button-corner-bottom-right, var(--ill-window-header-button-corner-bottom-right)) var(--ill-window-hover-header-button-corner-bottom-left, var(--ill-window-header-button-corner-bottom-left));
+}
+
+.illuminus-styled:hover,
+.illuminus-styled *:hover {
+  scrollbar-color: var(--ill-window-scrollbar-handle-hover-background, var(--ill-window-scrollbar-handle-background)) var(--ill-window-scrollbar-track-background);
 }
 
 .illuminus-styled .journal-entry-page .edit-container button:hover {

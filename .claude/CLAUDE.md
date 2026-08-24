@@ -94,6 +94,21 @@ These are all load-bearing and none are obvious from the code.
   the root is an `.application` as well, so the window's own background lands on the
   same element and wins on document order — which left the editor showing the page's
   ink over Foundry's frame color, unreadable.
+- **A browser draws a scroll bar one way or the other, never both.** Foundry states
+  `scrollbar-width: thin` and `scrollbar-color` on `*`, and Chromium answers a stated one
+  by drawing the bar itself and ignoring every `::-webkit-scrollbar` rule — where a
+  thickness, an edge and a corner live. That is why the Scroll Bars category is a switch:
+  off, it states exactly what Foundry states; on, it hands both properties back to `auto`
+  and the pseudo-element rules draw the bar. Those rules are still *there* while they are
+  being ignored, so reading `::-webkit-scrollbar-thumb` says a bar is painted when none
+  is — read what the browser reserved (`offsetWidth - clientWidth`) instead. The mirror
+  skips `::-webkit` selectors, so anything under one wants `noTwin`.
+- **A picture layer takes `position: relative` for its host,** which is not always the
+  host's to give. The Edit pencil is `sticky` inside a container as tall as the page, and
+  its own layer — and its pointed-at layer, whose host rule is the same button with the
+  state stripped off — held it still, so a styled journal never had Foundry's behaviour
+  and the pencil sat where the title is. Where a control decides an element's position,
+  the layers must say `host: false` and leave it to the control.
 - **Setting one of core's own variables is the same trap.** The tick box on the page
   editor is drawn by Foundry rather than by the browser — `appearance: none`, a glyph in
   `::before`, and a second one in `::after` once it is ticked, with every part fed
@@ -599,6 +614,12 @@ in the template library.
   checks leave sheets on screen, and a pointer sent at a window underneath one of
   them lands on the one on top — which reads as a styling failure three sections
   away from anything to do with windows.
+- **Answer the prompt that carries the button.** An answered dialog stays in
+  `foundry.applications.instances` for the length of its closing animation, so "the first
+  application whose name has Dialog in it" can be the one on its way out — the click
+  lands on nothing, the prompt still on screen goes unanswered, and the editor sitting
+  there open reads as Discard declining to close. Find the dialog whose element holds the
+  button about to be pressed, and report whether it was pressed.
 - **A tab that vanishes mid-run is the browser, not a check.** After several long
   runs on one browser instance the page target dies: the run stops with
   `Runtime.evaluate never answered: the devtools socket errored`, `curl :9222/json`
