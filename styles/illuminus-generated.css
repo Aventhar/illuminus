@@ -3265,11 +3265,6 @@
                  var(--ill-window-hover-header-button-corner-bottom-right, var(--ill-window-header-button-corner-bottom-right)) var(--ill-window-hover-header-button-corner-bottom-left, var(--ill-window-header-button-corner-bottom-left));
 }
 
-.illuminus-styled:hover,
-.illuminus-styled *:hover {
-  scrollbar-color: var(--ill-window-scrollbar-handle-hover-background, var(--ill-window-scrollbar-handle-background)) var(--ill-window-scrollbar-track-background);
-}
-
 .illuminus-styled .journal-entry-page .edit-container button:hover {
   --button-text-color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color));
   --button-background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background));

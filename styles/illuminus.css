@@ -170,67 +170,6 @@
 }
 
 
-/* --- Scroll bars ------------------------------------------------------- */
-
-/* Wherever one appears inside a styled window: the page area, the contents
-   panel, the prose in the editor, a list long enough to run past its box.
-
-   Two ways of drawing a bar, and a browser will not do both. Foundry states
-   `scrollbar-width` and `scrollbar-color` on every element, and Chromium
-   answers a stated one by drawing the bar itself and ignoring every
-   `::-webkit-scrollbar` rule — which is why the switch exists: off, this states
-   exactly what Foundry states and a styled journal scrolls as a plain one does;
-   on, both are handed back to `auto` and the rules below are what draws it. */
-.illuminus-styled,
-.illuminus-styled * {
-  scrollbar-width: var(--ill-window-scrollbar-styled-width);
-  scrollbar-color: var(--ill-window-scrollbar-styled-color);
-}
-
-.illuminus-styled::-webkit-scrollbar,
-.illuminus-styled *::-webkit-scrollbar {
-  width: var(--ill-window-scrollbar-thickness);
-  height: var(--ill-window-scrollbar-thickness);
-}
-
-.illuminus-styled::-webkit-scrollbar-track,
-.illuminus-styled *::-webkit-scrollbar-track {
-  background-color: var(--ill-window-scrollbar-track-background);
-}
-
-.illuminus-styled::-webkit-scrollbar-thumb,
-.illuminus-styled *::-webkit-scrollbar-thumb {
-  background-color: var(--ill-window-scrollbar-handle-background);
-  border-width: var(--ill-window-scrollbar-handle-border-top-width) var(--ill-window-scrollbar-handle-border-right-width)
-                var(--ill-window-scrollbar-handle-border-bottom-width) var(--ill-window-scrollbar-handle-border-left-width);
-  border-style: var(--ill-window-scrollbar-handle-border-top-style) var(--ill-window-scrollbar-handle-border-right-style)
-                var(--ill-window-scrollbar-handle-border-bottom-style) var(--ill-window-scrollbar-handle-border-left-style);
-  border-color: var(--ill-window-scrollbar-handle-border-top-color) var(--ill-window-scrollbar-handle-border-right-color)
-                var(--ill-window-scrollbar-handle-border-bottom-color) var(--ill-window-scrollbar-handle-border-left-color);
-  border-radius: var(--ill-window-scrollbar-handle-corner-top-left) var(--ill-window-scrollbar-handle-corner-top-right)
-                 var(--ill-window-scrollbar-handle-corner-bottom-right) var(--ill-window-scrollbar-handle-corner-bottom-left);
-  /* An edge on a handle is drawn inside its own box, so the fill is kept off
-     the border rather than showing through it. */
-  background-clip: padding-box;
-}
-
-/* Left empty, the pointed-at handle is the ordinary one. */
-.illuminus-styled::-webkit-scrollbar-thumb:hover,
-.illuminus-styled *::-webkit-scrollbar-thumb:hover {
-  background-color: var(--ill-window-scrollbar-handle-hover-background, var(--ill-window-scrollbar-handle-background));
-}
-
-/* A browser with no bar of its own to draw takes the colors, which is all the
-   standard properties can say. Kept out of Chromium's way: stating them there
-   is what switches the rules above off. */
-@supports not selector(::-webkit-scrollbar) {
-  .illuminus-styled,
-  .illuminus-styled * {
-    scrollbar-color: var(--ill-window-scrollbar-handle-background) var(--ill-window-scrollbar-track-background);
-  }
-}
-
-
 /* The pencil that appears over a page on hover. */
 /* Which side the pencil sits on. Core pins it to the top right; both edges are
    set here so that choosing the left actually releases the right. */
@@ -240,12 +179,34 @@
   top: var(--ill-window-page-button-top);
 }
 
-/* Whether it travels with the reader. Core makes the button `sticky` inside a
-   container as tall as the page, so it follows the scroll — which is how it
-   comes to sit across a heading half way down. Held still, it stays where the
-   container puts it: the top of the page, above the words. */
+/* Anchored to the window, the container hangs off the area holding the contents
+   panel and the page, which begins at the journal's name. Foundry's own rules
+   name the page it was taken out of, so what they gave it is restated here:
+   the box it is placed in, and a pencil that can be seen and clicked. Hiding it
+   until the page is pointed at would be a pencil nobody could find, since the
+   page it belongs to is no longer the thing it sits on. */
+.illuminus-styled .journal-entry-content > .edit-container {
+  position: absolute;
+  top: var(--ill-window-page-button-top);
+  left: var(--ill-window-page-button-side-left);
+  right: var(--ill-window-page-button-side-right);
+  height: auto;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.illuminus-styled .journal-entry-content > .edit-container button {
+  visibility: visible;
+  pointer-events: all;
+}
+
+/* Whether it holds its place on screen. Core makes the button `sticky` inside a
+   container as tall as the page, so it stays in view while the page scrolls
+   under it — which is how it comes to sit across a heading half way down. Held
+   at the top, it stays where the container puts it and scrolls away with the
+   words above it. */
 .illuminus-styled .journal-entry-page .edit-container button {
-  position: var(--ill-window-page-button-follows);
+  position: var(--ill-window-page-button-hold-top);
 }
 
 .illuminus-styled .journal-entry-page .edit-container button {

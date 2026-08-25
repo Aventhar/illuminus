@@ -4,6 +4,7 @@ import { getStyles, getAssignedStyleId } from "./style-store.mjs";
 import { wrapHeadingSections } from "./heading-sections.mjs";
 import { markFolds } from "./collapsible.mjs";
 import { markCurrentHeadings } from "./toc-current.mjs";
+import { anchorEditButton } from "./edit-button.mjs";
 
 /**
  * Keeps the compiled stylesheets in `document.head` in sync with the style
@@ -92,6 +93,12 @@ export function applyToElement(root, entry) {
   // state paints. Foundry marks the page being read and nothing finer.
   markCurrentHeadings(root);
   const styleId = getAssignedStyleId(entry);
+  // Where the Edit pencil hangs, which is a move rather than a value: a page
+  // clips what scrolls inside it, so a pencil asked to sit above the journal's
+  // name has to be somewhere else to be drawn at all.
+  anchorEditButton(root, {
+    toWindow: getStyles()[styleId]?.settings?.window?.pageButtonAnchor === "window"
+  });
   if (styleId && getStyles()[styleId]) {
     root.classList.add(STYLED_CLASS);
     root.setAttribute(STYLE_ATTR, styleId);

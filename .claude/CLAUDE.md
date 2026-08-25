@@ -94,15 +94,30 @@ These are all load-bearing and none are obvious from the code.
   the root is an `.application` as well, so the window's own background lands on the
   same element and wins on document order — which left the editor showing the page's
   ink over Foundry's frame color, unreadable.
-- **A browser draws a scroll bar one way or the other, never both.** Foundry states
+- **Scroll bars are not worth offering, and this is why.** Foundry states
   `scrollbar-width: thin` and `scrollbar-color` on `*`, and Chromium answers a stated one
   by drawing the bar itself and ignoring every `::-webkit-scrollbar` rule — where a
-  thickness, an edge and a corner live. That is why the Scroll Bars category is a switch:
-  off, it states exactly what Foundry states; on, it hands both properties back to `auto`
-  and the pseudo-element rules draw the bar. Those rules are still *there* while they are
-  being ignored, so reading `::-webkit-scrollbar-thumb` says a bar is painted when none
-  is — read what the browser reserved (`offsetWidth - clientWidth`) instead. The mirror
-  skips `::-webkit` selectors, so anything under one wants `noTwin`.
+  thickness, an edge and a corner live. A style could therefore only take the whole bar
+  or leave it, never adjust it, and the bar it drew was a poor thing next to Foundry's.
+  A Scroll Bars category was built behind a switch on that basis and taken out again as
+  bad in use. Do not add it back without a better mechanism than a switch. Two facts
+  worth keeping from it: those pseudo-element rules are still *there* while they are
+  ignored, so reading `::-webkit-scrollbar-thumb` says a bar is painted when none is —
+  read what the browser reserved (`offsetWidth - clientWidth`); and the mirror skips
+  `::-webkit` selectors, so anything under one would want `noTwin`.
+- **A page clips what scrolls inside it, so the Edit pencil cannot rise above it.**
+  Foundry hangs the pencil inside the page's own `article`, which scrolls in a box with
+  `overflow: hidden auto` — a Distance From Top that lifts it past that box's top still
+  gives it a rectangle, and it is simply not drawn. Reaching the journal's name means
+  hanging the container off `.journal-entry-content` instead, which `scripts/edit-button.mjs`
+  does at render: nothing stored, undone before it is redone, and only where one page is
+  on show, since a long scroll gives every page a pencil and a stack of them in one
+  corner is worse. Moved there it must also be made visible and clickable outright —
+  core reveals it when the *page* is hovered, and the page is no longer under it.
+- **A control that answers a question no value can says `noCss`.** Where an element hangs
+  is a move made at render, not a declaration, so such a field is drawn in the list like
+  any other and exempted in `validate.mjs` from "every control produces a declaration" —
+  the same exemption `chrome` fields get for driving the compiler.
 - **A picture layer takes `position: relative` for its host,** which is not always the
   host's to give. The Edit pencil is `sticky` inside a container as tall as the page, and
   its own layer — and its pointed-at layer, whose host rule is the same button with the

@@ -278,21 +278,17 @@ const font = (name, def, opts = {}) => ({ type: "font", name, default: def, fall
  * Default style is `solid` rather than `none` so that raising a thickness
  * produces a visible border without a second trip to the style dropdown.
  */
-function borderFields(prefix, { width = 0, style = "solid", color = "#8a6a3d", noTwin } = {}) {
-  // `noTwin` travels to all twelve: an edge nothing can point at — a scroll
-  // bar's, drawn by the browser — has no pointed-at half to set.
-  const own = noTwin ? { noTwin } : {};
+function borderFields(prefix, { width = 0, style = "solid", color = "#8a6a3d" } = {}) {
   return SIDES.flatMap((side) => [
-    num(`${prefix}${side}Width`, width, "px", 0, 40, 1, { link: `${prefix}Width`, ...own }),
-    select(`${prefix}${side}Style`, style, CHOICES.borderStyle, { link: `${prefix}Style`, ...own }),
-    col(`${prefix}${side}Color`, color, { link: `${prefix}Color`, ...own })
+    num(`${prefix}${side}Width`, width, "px", 0, 40, 1, { link: `${prefix}Width` }),
+    select(`${prefix}${side}Style`, style, CHOICES.borderStyle, { link: `${prefix}Style` }),
+    col(`${prefix}${side}Color`, color, { link: `${prefix}Color` })
   ]);
 }
 
 /** Four fields, one per corner. */
-function cornerFields(prefix, radius = 0, { noTwin } = {}) {
-  return CORNERS.map((corner) =>
-    num(`${prefix}${corner}`, radius, "px", 0, 120, 1, { link: prefix, ...(noTwin ? { noTwin } : {}) }));
+function cornerFields(prefix, radius = 0) {
+  return CORNERS.map((corner) => num(`${prefix}${corner}`, radius, "px", 0, 120, 1, { link: prefix }));
 }
 
 /**
@@ -894,41 +890,25 @@ export const GROUPS = [
           // the side has none: a button that moved as the pointer reached it
           // would be a button nobody could click.
           num("pageButtonTop", 5, "px", -100, 600, 1, { noTwin: true }),
-          // Held still is `relative` rather than `static`, because the button's
-          // own picture layer is drawn inside it and needs a positioned box to
-          // sit in whichever way this is set.
-          { type: "toggle", name: "pageButtonFollows", default: true,
-            on: "sticky", off: "relative", noTwin: true },
+          // What the two distances are measured from. The page clips what
+          // scrolls inside it, so a pencil pushed above the page's own top
+          // stops being drawn there — anchored to the window it hangs off the
+          // area the journal's name sits in, and is placed from that instead.
+          // Read by `scripts/edit-button.mjs` at render rather than emitted:
+          // where an element hangs is not something a value can say.
+          select("pageButtonAnchor", "page", ["page", "window"],
+            { emit: () => null, noCss: true, noTwin: true }),
+          // Named for what ticking it does, which is the opposite of how it
+          // read before: Foundry's button is `sticky`, so it holds its place on
+          // screen while the page scrolls under it — and a person watching that
+          // says the button is staying put, not that it is following the page.
+          // Held is `relative` rather than `static`, because the button's own
+          // picture layer is drawn inside it and needs a positioned box to sit
+          // in whichever way this is set.
+          { type: "toggle", name: "pageButtonHoldTop", default: false,
+            on: "relative", off: "sticky", noTwin: true },
           ...borderFields("pageButtonBorder", { width: 1, color: "#9f8475" }),
           ...cornerFields("pageButtonCorner", 3)
-        ]
-      },
-      // The bars themselves, wherever one appears inside a styled window: the
-      // page area, the contents panel, the prose in the editor, a long list.
-      //
-      // Off until it is asked for, which is not the usual shape and is forced
-      // by the browser. Foundry states `scrollbar-width` and `scrollbar-color`
-      // on every element, and Chromium answers a stated one by drawing the bar
-      // itself and ignoring every `::-webkit-scrollbar` rule — so the choice is
-      // between Foundry's thin bar and a bar drawn here, and there is no way to
-      // set an edge or a corner on the first. Switched off, this states exactly
-      // what Foundry states, and a styled journal scrolls as a plain one does.
-      {
-        id: "scrollbars",
-        fields: [
-          { type: "toggle", name: "scrollbarStyled", default: false, noTwin: true,
-            emit: (value) => (value
-              ? { width: "auto", color: "auto" }
-              : { width: "thin", color: "var(--color-scrollbar) var(--color-scrollbar-track)" }) },
-          num("scrollbarThickness", 12, "px", 4, 40, 1, { noTwin: true }),
-          col("scrollbarTrackBackground", "#00000000", { noTwin: true }),
-          col("scrollbarHandleBackground", "#5d142b", { noTwin: true }),
-          // Written by hand rather than derived: the mirror leaves `::-webkit`
-          // selectors alone, since a browser's own bar is not an element a
-          // pointer enters in the way the rest of these are.
-          col("scrollbarHandleHoverBackground", "", { noTwin: true }),
-          ...borderFields("scrollbarHandleBorder", { color: "#00000000", noTwin: true }),
-          ...cornerFields("scrollbarHandleCorner", 6, { noTwin: true })
         ]
       }
     ]
@@ -2383,21 +2363,7 @@ const LAYOUTS = {
     ] },
   },
   window: {
-    order: ["frameSize", "frame", "titleBar", "headerButtons", "pageButton", "scrollbars"],
-    scrollbars: { order: [
-      "scrollbarStyled", "scrollbarThickness", DIVIDER, "scrollbarTrackBackground",
-      "scrollbarHandleBackground", "scrollbarHandleHoverBackground",
-      DIVIDER, "scrollbarHandleBorderTopStyle", "scrollbarHandleBorderTopColor",
-      "scrollbarHandleBorderTopWidth",
-      DIVIDER, "scrollbarHandleBorderBottomStyle", "scrollbarHandleBorderBottomColor",
-      "scrollbarHandleBorderBottomWidth",
-      DIVIDER, "scrollbarHandleBorderLeftStyle", "scrollbarHandleBorderLeftColor",
-      "scrollbarHandleBorderLeftWidth",
-      DIVIDER, "scrollbarHandleBorderRightStyle", "scrollbarHandleBorderRightColor",
-      "scrollbarHandleBorderRightWidth",
-      DIVIDER, "scrollbarHandleCornerTopLeft", "scrollbarHandleCornerTopRight",
-      "scrollbarHandleCornerBottomLeft", "scrollbarHandleCornerBottomRight"
-    ] },
+    order: ["frameSize", "frame", "titleBar", "headerButtons", "pageButton"],
     frameSize: { label: "ILLUMINUS.Sections.layout.label", hint: "ILLUMINUS.Sections.layout.hint", order: [
       "frameMinWidth", "frameMaxWidth"
     ] },
@@ -2441,7 +2407,7 @@ const LAYOUTS = {
       "headerButtonCornerBottomRight"
     ] },
     pageButton: { order: [
-      "pageButtonSide", "pageButtonOffset", "pageButtonTop", "pageButtonFollows",
+      "pageButtonAnchor", "pageButtonSide", "pageButtonOffset", "pageButtonTop", "pageButtonHoldTop",
       DIVIDER, "pageButtonSize", "pageButtonColor",
       "pageButtonBackground", DIVIDER, "pageButtonTexture", "pageButtonTextureFit",
       "pageButtonTexturePosition", "pageButtonTextureBlend", "pageButtonTextureOpacity",

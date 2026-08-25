@@ -6083,8 +6083,7 @@ try {
       "Border", "Headings Inside"],
     sidebar: ["Size and Position", "Fill and Image", "Inner Spacing", "Border", "Categories",
       "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
-    window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button",
-      "Scroll Bars"],
+    window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
     editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
       "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls",
       "Drop-down List", "Drop-down Entries"]
@@ -6364,7 +6363,7 @@ try {
       if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const style = await api.createStyle({name: "Edit Button Probe", settings: {window: {
-      pageButtonFollows: ${follows}, pageButtonTop: 24
+      pageButtonHoldTop: ${follows}, pageButtonTop: 24
     }}});
     const entry = await JournalEntry.create({name: "Edit Button Journal"});
     // Long enough to scroll, or "follows the reader" cannot be seen at all.
@@ -6397,8 +6396,10 @@ try {
     return JSON.stringify(out);
   })()`));
 
-  const follows = await look(true);
-  const held = await look(false);
+  // Ticked holds it at the top; left alone it is Foundry's, which keeps its
+  // place on screen while the page scrolls under it.
+  const held = await look(true);
+  const follows = await look(false);
   check(follows.containerTop === "24px" && follows.atRest === 24 && held.atRest === 24,
     `the button sits the distance from the top it was given (${held.atRest}px)`);
   check(follows.scrolled > 100 && follows.afterScroll > follows.atRest + 100,
@@ -6406,6 +6407,56 @@ try {
     + `over ${follows.scrolled}px)`);
   check(held.afterScroll === held.atRest,
     `and held at the top it stays above the words (${held.atRest} to ${held.afterScroll})`);
+
+  // Measured from the window rather than the page. A page clips whatever
+  // scrolls inside it, so a pencil pushed above the page's own top is placed
+  // and then not drawn — the container has to hang somewhere else, which is a
+  // move rather than a value. Believed only from a hit test: an element above
+  // the top of a scrolling box has a rectangle all the same.
+  const anchored = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Edit Button Probe", settings: {window: {
+      pageButtonAnchor: "window", pageButtonTop: 4, pageButtonHoldTop: true
+    }}});
+    const entry = await JournalEntry.create({name: "Edit Button Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h1>Chapter</h1>" + new Array(30).fill("<p>Words on the page.</p>").join("")}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    // The hardware-acceleration notice sits exactly where the pencil now is.
+    document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+    game.tooltip.deactivate();
+    document.getElementById("tooltip")?.remove();
+    const root = entry.sheet.element;
+    const button = root.querySelector(".edit-container button");
+    const r = button.getBoundingClientRect();
+    const at = document.elementFromPoint(Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
+    const out = {
+      // Out of the page and onto the area the journal's name sits in.
+      parent: button.closest(".journal-entry-content > .edit-container") ? "window" : "page",
+      buttonTop: Math.round(r.top),
+      pageTop: Math.round(root.querySelector(".journal-entry-pages").getBoundingClientRect().top),
+      titleTop: Math.round(root.querySelector(".journal-header").getBoundingClientRect().top),
+      reaches: at === button || button.contains(at),
+      onTop: at ? at.tagName.toLowerCase() : null
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(anchored.parent === "window",
+    `measured from the window, the pencil hangs off the window rather than the page`);
+  check(anchored.buttonTop < anchored.pageTop && anchored.buttonTop >= anchored.titleTop,
+    `so it sits above the page and beside the journal's name (${anchored.buttonTop}, `
+    + `name at ${anchored.titleTop}, page at ${anchored.pageTop})`);
+  check(anchored.reaches, `and the pointer reaches it there (found ${anchored.onTop})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -6414,77 +6465,6 @@ try {
     for (const entry of game.journal.filter((e) => e.name === "Edit Button Journal")) await entry.delete();
     const api = game.modules.get("illuminus").api;
     for (const style of api.listStyles().filter((s) => s.name === "Edit Button Probe")) {
-      await api.deleteStyle(style.id);
-    }
-  })()`);
-}
-
-// A browser draws a scroll bar one way or the other and never both: Foundry
-// states `scrollbar-width` and `scrollbar-color` on every element, and Chromium
-// answers a stated one by drawing the bar itself and ignoring the rules that can
-// give it an edge and a corner. So the switch has to say exactly what Foundry
-// says while it is off, and hand the bar over while it is on.
-console.log("\n[66] Scroll bars are Foundry's until they are asked for");
-try {
-  const look = async (settings) => JSON.parse(await cdp.evaluate(`(async () => {
-    const api = game.modules.get("illuminus").api;
-    for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
-    }
-    const wanted = ${JSON.stringify(settings)};
-    const style = wanted ? await api.createStyle({name: "Scroll Bar Probe", settings: {window: wanted}}) : null;
-    const entry = await JournalEntry.create({name: "Scroll Bar Journal"});
-    const words = new Array(60).fill("<p>A paragraph long enough to make the page scroll inside its own box.</p>").join("");
-    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
-      text: {content: "<h1>Chapter</h1>" + words}}]);
-    if (style) await api.assignStyle(entry, style.id);
-    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
-    await new Promise(r => setTimeout(r, 1400));
-    const root = entry.sheet.element;
-    // Whatever is actually scrolling, rather than the element that ought to be.
-    const scroller = [...root.querySelectorAll("*")].find(
-      (el) => el.scrollHeight > el.clientHeight + 40 && el.clientWidth > 200) ?? root;
-    const cs = getComputedStyle(scroller);
-    const out = {
-      // What the browser reserved for the bar, which is the honest read: the
-      // pseudo-element's own styles are still there while they are being
-      // ignored, so reading those would say a bar is drawn when none is.
-      reserved: scroller.offsetWidth - scroller.clientWidth,
-      width: cs.scrollbarWidth,
-      color: cs.scrollbarColor,
-      handle: getComputedStyle(scroller, "::-webkit-scrollbar-thumb").backgroundColor,
-      track: getComputedStyle(scroller, "::-webkit-scrollbar-track").backgroundColor
-    };
-    for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
-    }
-    await entry.delete();
-    if (style) await api.deleteStyle(style.id);
-    return JSON.stringify(out);
-  })()`));
-
-  const plain = await look(null);
-  const off = await look({});
-  const on = await look({
-    scrollbarStyled: true, scrollbarThickness: 18,
-    scrollbarHandleBackground: "#00aaff", scrollbarTrackBackground: "#221100"
-  });
-  check(off.width === plain.width && off.color === plain.color,
-    `switched off, a styled journal says what a plain one says (${off.width}, ${off.color})`);
-  check(off.reserved === plain.reserved,
-    `and gives the bar the same room (${off.reserved} against ${plain.reserved})`);
-  check(on.width === "auto" && on.reserved === 18,
-    `switched on, the bar is drawn to the thickness asked for (${on.reserved}px)`);
-  check(on.handle === "rgb(0, 170, 255)" && on.track === "rgb(34, 17, 0)",
-    `with the handle and the groove behind it painted (${on.handle} on ${on.track})`);
-} finally {
-  await cdp.evaluate(`(async () => {
-    for (const app of [...foundry.applications.instances.values()]) {
-      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
-    }
-    for (const entry of game.journal.filter((e) => e.name === "Scroll Bar Journal")) await entry.delete();
-    const api = game.modules.get("illuminus").api;
-    for (const style of api.listStyles().filter((s) => s.name === "Scroll Bar Probe")) {
       await api.deleteStyle(style.id);
     }
   })()`);

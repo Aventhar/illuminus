@@ -369,6 +369,25 @@ function v8_to_v9(settings) {
 }
 
 /** Migrations keyed by the version they upgrade *from*. */
+/**
+ * Version 9 -> 10.
+ *
+ * The Edit button's "Follows The Page" became "Hold At The Top", which is the
+ * same choice named for what ticking it does: Foundry's button holds its place
+ * on screen while the page scrolls under it, and a person watching that says
+ * the button is staying put rather than following the page. The answer is
+ * therefore inverted along with the name — a style that said "follows" meant
+ * "not held".
+ */
+function v9_to_v10(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const window = out.window;
+  if (!window || window.pageButtonFollows === undefined) return out;
+  window.pageButtonHoldTop = !window.pageButtonFollows;
+  delete window.pageButtonFollows;
+  return out;
+}
+
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
@@ -377,7 +396,8 @@ const MIGRATIONS = {
   5: v5_to_v6,
   6: v6_to_v7,
   7: v7_to_v8,
-  8: v8_to_v9
+  8: v8_to_v9,
+  9: v9_to_v10
 };
 
 /**

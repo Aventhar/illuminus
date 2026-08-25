@@ -31,10 +31,13 @@ const baseRule = compileBaseRule();
 const emitted = new Set();
 // A chrome field is stored with a style and exported with it, but drives the
 // editor rather than the stylesheet — "is this tab's hovered state switched
-// off" is a question for the compiler, not a value any rule reads. It is
-// therefore exempt from both directions of the check below, and from the one
-// after it that insists every field can produce a declaration.
-const paints = ({ field }) => !field.chrome;
+// off" is a question for the compiler, not a value any rule reads. A `noCss`
+// field is drawn in the list like any other and answers a question no value
+// can: where the Edit pencil hangs is a move made at render, since a page clips
+// what scrolls inside it. Both are exempt from the two directions of the check
+// below, and from the one after it that insists every field can produce a
+// declaration.
+const paints = ({ field }) => !field.chrome && !field.noCss;
 for (const { group, field } of allFields().filter(paints)) {
   const candidates = [field.default, ...(field.choices ?? []), true, false, 1, ""];
   let sawSuffix = false;
