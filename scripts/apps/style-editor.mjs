@@ -55,6 +55,168 @@ function stateBase(name) {
   return /[a-z]/.test(name[0]) ? stripped[0].toLowerCase() + stripped.slice(1) : stripped;
 }
 
+/**
+ * The four sides, four corners, and the parts an edge is made of, as the schema
+ * names them. Everything that reads a box family reads it from here.
+ */
+const BOX_SIDES = ["Top", "Right", "Bottom", "Left"];
+const BOX_CORNERS = ["TopLeft", "TopRight", "BottomLeft", "BottomRight"];
+const BOX_PARTS = ["Width", "Style", "Color"];
+
+/**
+ * What a control is, within a box: which family it belongs to and which part of
+ * it, or nothing where it is an ordinary control.
+ *
+ * Read from the name, as the generators read it. A section holds at most one
+ * family per prefix, and a state's own controls carry the state in the name, so
+ * `hoverEntryBorderTopWidth` is the pointed-at entry's family rather than the
+ * ordinary one — which is what lets the switch above the section change which
+ * family the widget is editing without the widget knowing anything about states.
+ */
+/**
+ * The other two shapes a section repeats: a shadow, and a picture.
+ *
+ * Five controls each — a shadow is two offsets, a softness, a size and a color;
+ * a picture is the file, how it fits, where it sits, how it mixes and how
+ * strongly it shows — and most categories carry a picture and two shadows, so
+ * fifteen of the rows on a tab are these three shapes over and over.
+ *
+ * Gathered they keep every word they had: laid out with the name above the
+ * control rather than beside it, five rows become one wrapped row, and the
+ * search box still reads exactly what it read before.
+ */
+function clusterPartOf(name) {
+  let m;
+  if ((m = name.match(/^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
+    return { family: `${m[1]}${m[2]}`, kind: "shadow" };
+  }
+  if ((m = name.match(/^(.*?)[Tt]exture(Fit|Position|Blend|Opacity)?$/))) {
+    return { family: `${m[1]}Texture`, kind: "picture" };
+  }
+  return null;
+}
+
+function boxPartOf(name) {
+  const sides = BOX_SIDES.join("|");
+  // Both spellings of the word: a family with no prefix is `borderTopWidth`,
+  // and one with a prefix is `codeBorderTopWidth`. Matching only the second
+  // gathered the handful of prefixed families and left every plain one — which
+  // is most of them — spread down the tab as before.
+  let m;
+  if ((m = name.match(new RegExp(`^(.*?)[Bb]order(${sides})(${BOX_PARTS.join("|")})$`)))) {
+    return { family: `${m[1]}Border`, kind: "border", side: m[2], part: m[3] };
+  }
+  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
+    return { family: `${m[1]}Corner`, kind: "corner", corner: m[2] };
+  }
+  if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
+    return { family: `${m[1]}${m[2]}`, kind: m[2].toLowerCase(), side: m[3] };
+  }
+  return null;
+}
+
+/**
+ * A section's controls, with each box family gathered into one widget.
+ *
+ * Twelve edge controls, four corners and four spacings each, on forty-odd
+ * categories: box families are the greater part of every tab and the least
+ * interesting part of any of them. Gathered, a family reads as four rows —
+ * inner spacing, outer spacing, corners, and an edge with a side to choose —
+ * instead of twenty-four.
+ *
+ * Every control is still here, and still its own `.illuminus-field`: the state
+ * switch, the filter, the changed markers, Match all sides and Reset all read
+ * the controls themselves, and a widget that left any of them out would quietly
+ * take those with it. What changes is where they are drawn.
+ *
+ * Rows come out in the order the schema laid them, with a family standing where
+ * its first control stood — so a tab that was laid out by hand still reads the
+ * way it was written.
+ * @param {object[]} fields  Field contexts, in order.
+ * @returns {object[]}       Rows: a control, or a box family holding several.
+ */
+function boxRows(fields) {
+  const rows = [];
+  const families = new Map();
+  const clusters = new Map();
+  for (const field of fields) {
+    const cluster = boxPartOf(field.name) ? null : clusterPartOf(field.name);
+    if (cluster) {
+      let held = clusters.get(cluster.family);
+      if (!held) {
+        held = { family: cluster.family, kind: cluster.kind, divider: field.divider, fields: [] };
+        clusters.set(cluster.family, held);
+        rows.push({ cluster: held });
+      }
+      // The run takes the qualifier the controls give up, which is the whole of
+      // what a qualified label adds: "Inner Shadow Softness" less "Softness" is
+      // the run's own name. Where a category holds one shadow the two labels
+      // are the same and nothing is left over — and there the category has
+      // already said which shadow it is.
+      if (!held.name && field.label !== field.plain && field.label.endsWith(field.plain)) {
+        held.name = field.label.slice(0, -field.plain.length).trim();
+      }
+      held.fields.push({ ...field, divider: false, short: field.plain });
+      continue;
+    }
+    const part = boxPartOf(field.name);
+    if (!part) {
+      rows.push({ field });
+      continue;
+    }
+    let box = families.get(part.family);
+    if (!box) {
+      box = {
+        family: part.family,
+        // The line the schema drew before this run stays with the family that
+        // replaced it, since the run is what it was introducing.
+        divider: field.divider,
+        border: [], corners: [], padding: [], margin: []
+      };
+      families.set(part.family, box);
+      rows.push({ box });
+    }
+    // A line before any run of the family introduces that run: the corners get
+    // the one the schema drew before them, not the family as a whole. The run
+    // it belongs to is the one it is the first control of.
+    const holds = { border: "border", corner: "corners", padding: "padding", margin: "margin" };
+    const held = box[holds[part.kind]];
+    const already = box.border.length + box.corners.length + box.padding.length + box.margin.length;
+    if (field.divider && held.length === 0 && already > 0) {
+      box.lines ??= {};
+      box.lines[part.kind] = true;
+    }
+    if (part.kind === "border") {
+      const side = `${part.side} `;
+      box.border.push({
+        ...field,
+        // The line above this run is the run's now: left on the control as
+        // well, it was drawn twice.
+        divider: false,
+        short: field.plain?.startsWith(side) ? field.plain.slice(side.length) : field.plain,
+        side: part.side,
+        part: part.part
+      });
+    }
+    else if (part.kind === "corner") {
+      box.corners.push({ ...field, divider: false, corner: part.corner });
+    } else box[part.kind].push({ ...field, divider: false, side: part.side });
+  }
+  // A line introduces a run, and a state's own run is the same run in another
+  // state — so it is introduced by the same line. The schema draws dividers
+  // before ordinary controls, so without this the pointed-at half of a section
+  // lost every line it had.
+  for (const { box, cluster } of rows) {
+    const run = box ?? cluster;
+    if (!run || run.divider) continue;
+    const stem = stateBase(run.family);
+    if (stem === run.family) continue;
+    const ordinary = rows.find(({ box: b, cluster: c }) => (b ?? c)?.family === stem);
+    if (ordinary) run.divider = Boolean((ordinary.box ?? ordinary.cluster).divider);
+  }
+  return rows;
+}
+
 export class IlluminusStyleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Give each editor window an id derived from the style it edits, so `open()`
@@ -96,6 +258,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   #previewWidth;
 
   /** What the filter box holds, kept across re-renders. */
+  /**
+   * Show only the controls this style has something to say about.
+   *
+   * A control still holding its default already says so — it is drawn faded and
+   * carries `is-default`, which is kept in step as values change — so this is a
+   * question the tab can answer without asking the store anything.
+   */
+  #onlySet = false;
+
   #filter = "";
 
   /** Which state each section is showing: "normal" or "hover". */
@@ -156,6 +327,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       // found unless it is named here.
       templates: [
         `modules/${MODULE_ID}/templates/style-field.hbs`,
+        `modules/${MODULE_ID}/templates/style-box.hbs`,
+        `modules/${MODULE_ID}/templates/style-box-cell.hbs`,
+        `modules/${MODULE_ID}/templates/style-cluster.hbs`,
         `modules/${MODULE_ID}/templates/sample-page.hbs`
       ],
       classes: ["illuminus-editor__body"],
@@ -338,14 +512,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         // Only sections whose fields repeat one property across sides or
         // corners can offer to match them.
         matchable: section.fields.some((field) => field.link),
-        fields: section.fields
+        rows: boxRows(section.fields
           .filter((field) => !field.chrome)
           .map((field) => ({
             ...this.#fieldContext(group, field, fonts),
             // A line across the tab before this control, where the section has
             // laid its own controls out in runs.
             divider: Boolean(section.dividers?.has(field.name))
-          }))
+          })))
       }))
     }));
     context.buttons = [
@@ -373,14 +547,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         matchable: section.fields.some((field) => field.link),
-        fields: section.fields
+        rows: boxRows(section.fields
           .filter((field) => !field.chrome)
           .map((field) => ({
             ...this.#fieldContext(group, field, fonts),
             // A line across the tab before this control, where the section has
             // laid its own controls out in runs.
             divider: Boolean(section.dividers?.has(field.name))
-          }))
+          })))
       }))
     };
   }
@@ -408,11 +582,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const value = this.#working?.[group.id]?.[field.name] ?? field.default;
     const context = {
       path: `${group.id}.${field.name}`,
+      // Kept beside the path: what a control is within a box family is read
+      // from its name, and the path carries the tab's name in front of it.
+      name: field.name,
       type: field.type,
       label: this.#fieldText(group, field, "label"),
+      // The same control's name without the qualifier a crowded category gives
+      // it: "Inner Shadow Softness" is "Softness" once the run it sits in is
+      // the inner shadow. Both are in the markup — the search box reads what it
+      // always read, and a gathered run shows the shorter one.
+      plain: game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
       hint: this.#fieldText(group, field, "hint"),
       value,
-      isDefault: value === this.#baselineFor(group.id, field)
+      isDefault: value === this.#baselineFor(group.id, field),
+      // Two different questions, and only one of them is what the fading marks.
+      // `isDefault` is "unchanged since this editor was opened", which is what
+      // the changed counts are about; this is "does the style say anything at
+      // all here", which is what somebody reading a style back wants.
+      isSet: value !== field.default
     };
     if (field.type === "number") Object.assign(context, {
       min: field.min, max: field.max, step: field.step, unit: field.unit
@@ -442,6 +629,44 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * worth having precisely because it is a whole page. A tab the sample has no
    * piece for — the families, which take the pane over entirely — leaves it be.
    */
+/**
+   * Let the sample be the way in.
+   *
+   * The editor already drives the sample from the open tab, dimming everything
+   * the tab does not paint. This turns that arrow round: point at the opening
+   * capital in the sample, click it, and the tab that sets it opens. With two
+   * thousand controls behind sixteen tabs, "where is that setting?" is the
+   * question the editor is worst at answering, and the sample is the one place
+   * where a person can see the thing they mean.
+   *
+   * A piece belonging to a family opens the family's tab and asks its picker
+   * for that member, since `boxStyles` has one tab for ten of them.
+   */
+  #activateSampleParts() {
+    const frame = this.element.querySelector(".illuminus-preview__frame");
+    if (!frame) return;
+    const family = (groupId) => IlluminusStyleEditor.FAMILIES.find(
+      (one) => GROUPS.some((group) => group.id === groupId && (group.family ?? group.id) === one.id));
+    for (const part of frame.querySelectorAll("[data-part]")) {
+      part.classList.add("illuminus-preview__part");
+      part.addEventListener("click", (event) => {
+        const groupId = part.dataset.part;
+        if (!GROUPS.some((group) => group.id === groupId)) return;
+        // The innermost piece under the pointer wins: a link sits inside a
+        // paragraph, which sits on the page, and the one meant is the link.
+        event.stopPropagation();
+        const owner = family(groupId);
+        if (owner) {
+          this.#showing[owner.id] = groupId;
+          this.render();
+          this.changeTab(owner.id, "sheet");
+          return;
+        }
+        this.changeTab(groupId, "sheet");
+      });
+    }
+  }
+
   #focusSample() {
     const frame = this.element.querySelector(".illuminus-preview__frame");
     if (!frame) return;
@@ -628,6 +853,56 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     }
   }
 
+/**
+   * Let an edge show one side at a time.
+   *
+   * Four sides times a thickness, a style and a color is twelve controls for
+   * one edge, and a person sets one side or all four — so the side is chosen
+   * here and the rest are left in the markup, where the search box still reads
+   * them. Nothing is stored: which side is on show is a question about looking
+   * at the tab, not about the style.
+   */
+  #activateBoxes() {
+    for (const run of this.element.querySelectorAll('.illuminus-box__run[data-run="border"]')) {
+      run.dataset.side ||= "Top";
+      for (const button of run.querySelectorAll(".illuminus-box__side")) {
+        button.addEventListener("click", () => {
+          run.dataset.side = button.dataset.side;
+          for (const other of run.querySelectorAll(".illuminus-box__side")) {
+            other.classList.toggle("is-on", other === button);
+          }
+          this.#applyFilter();
+        });
+      }
+    }
+  }
+
+  /**
+   * A gathered family goes with what it holds.
+   *
+   * The state switch and the filter both work by hiding controls, and a family
+   * whose controls have all gone would otherwise leave an empty cross and a row
+   * of side buttons that set nothing — the same way a line between two runs is
+   * left stranded, and taken away for the same reason.
+   */
+  #settleBoxes() {
+    const gone = (field) => field.classList.contains("is-state-hidden")
+      || field.classList.contains("is-filtered-out");
+    for (const run of this.element.querySelectorAll(".illuminus-box__run")) {
+      const fields = [...run.querySelectorAll(".illuminus-field[data-field]")];
+      run.classList.toggle("is-state-hidden", fields.length > 0 && fields.every(gone));
+    }
+    for (const box of this.element.querySelectorAll(".illuminus-box")) {
+      const runs = [...box.querySelectorAll(".illuminus-box__run")];
+      box.classList.toggle("is-state-hidden", runs.length > 0
+        && runs.every((run) => run.classList.contains("is-state-hidden")));
+    }
+    for (const cluster of this.element.querySelectorAll(".illuminus-cluster")) {
+      const fields = [...cluster.querySelectorAll(".illuminus-field[data-field]")];
+      cluster.classList.toggle("is-state-hidden", fields.length > 0 && fields.every(gone));
+    }
+  }
+
   /** Show one state's controls per section, hiding the other's. */
   #applyStates() {
     for (const section of this.element.querySelectorAll(".illuminus-section")) {
@@ -674,20 +949,30 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         const shared = state === "normal" && !others?.has(chosen);
         field.classList.toggle("is-state-hidden", !shared && state !== chosen);
       }
+    }
 
-      // A line with nothing under it says nothing. A divider is written before
-      // the ordinary control of a run, so switching to a state would leave it
-      // stranded above that state's controls — it goes where the whole run it
-      // introduces has gone.
-      for (const line of section.querySelectorAll(".illuminus-divider:not(.illuminus-divider--edge)")) {
-        let showing = false;
-        for (let next = line.nextElementSibling; next; next = next.nextElementSibling) {
-          if (next.classList.contains("illuminus-divider")) break;
-          if (!next.classList.contains("illuminus-field")) continue;
-          if (!next.classList.contains("is-state-hidden")) { showing = true; break; }
-        }
-        line.classList.toggle("is-state-hidden", !showing);
+    // The runs first, and once for the window rather than once for each of a
+    // hundred categories: a line is judged by what follows it, and a gathered
+    // run that has just lost its last control has to know that before the line
+    // above it is asked whether anything is left.
+    this.#settleBoxes();
+
+    // A line with nothing under it says nothing. A divider is written before
+    // the ordinary control of a run, so switching to a state would leave it
+    // stranded above that state's controls — it goes where the whole run it
+    // introduces has gone.
+    for (const line of this.element.querySelectorAll(".illuminus-divider:not(.illuminus-divider--edge)")) {
+      let showing = false;
+      for (let next = line.nextElementSibling; next; next = next.nextElementSibling) {
+        if (next.classList.contains("illuminus-divider")) break;
+        // A gathered run is content the same way a control is: the line
+        // introducing one has nothing under it once that run has gone.
+        const run = next.classList.contains("illuminus-box")
+          || next.classList.contains("illuminus-cluster");
+        if (!run && !next.classList.contains("illuminus-field")) continue;
+        if (!next.classList.contains("is-state-hidden")) { showing = true; break; }
       }
+      line.classList.toggle("is-state-hidden", !showing);
     }
   }
 
@@ -700,6 +985,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * strip itself says where to look.
    */
   #activateFilter() {
+    const onlySet = this.element.querySelector(".illuminus-filter__set-box");
+    if (onlySet) {
+      onlySet.checked = this.#onlySet;
+      onlySet.addEventListener("change", () => {
+        this.#onlySet = onlySet.checked;
+        this.#applyFilter();
+      });
+    }
     const box = this.element.querySelector(".illuminus-filter__input");
     if (!box) return;
     box.value = this.#filter;
@@ -773,16 +1066,23 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         const summary = section.querySelector("summary")?.textContent.toLowerCase() ?? "";
         const wholeSection = Boolean(term) && summary.includes(term);
         for (const field of section.querySelectorAll(".illuminus-field")) {
-          const hit = !term || wholeSection || field.textContent.toLowerCase().includes(term);
+          const set = !this.#onlySet || !field.classList.contains("is-unset");
+          const hit = set
+            && (!term || wholeSection || field.textContent.toLowerCase().includes(term));
           field.classList.toggle("is-filtered-out", !hit);
+          // An edge shows one side at a time, so a search for "Left Thickness"
+          // would find a control the tab is not showing. A hit brings its own
+          // side out from behind whichever side is chosen.
+          field.closest(".illuminus-box__part")?.classList.toggle("is-found", hit && Boolean(term));
           if (hit) sectionMatches += 1;
         }
-        section.classList.toggle("is-filtered-out", Boolean(term) && !sectionMatches);
+        section.classList.toggle("is-filtered-out",
+          (Boolean(term) || this.#onlySet) && !sectionMatches);
         // Open what matched, and hand the author's own open/closed state back
         // when the box is cleared.
         const key = section.querySelector("summary")?.dataset;
         const wasOpen = key ? this.#expanded.has(`${key.group}.${key.section}`) : false;
-        section.open = term ? sectionMatches > 0 : wasOpen;
+        section.open = term || this.#onlySet ? sectionMatches > 0 : wasOpen;
         tabMatches += sectionMatches;
       }
       counts.set(tab.dataset.tab, tabMatches);
@@ -790,13 +1090,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     for (const item of root.querySelectorAll("nav.tabs [data-tab]")) {
       const hits = counts.get(item.dataset.tab) ?? 0;
-      item.classList.toggle("is-filtered-out", Boolean(term) && hits === 0);
+      item.classList.toggle("is-filtered-out", (Boolean(term) || this.#onlySet) && hits === 0);
     }
+
+    this.#settleBoxes();
 
     const total = [...counts.values()].reduce((sum, n) => sum + n, 0);
     const readout = root.querySelector(".illuminus-filter__count");
     if (readout) {
-      readout.textContent = term
+      readout.textContent = term || this.#onlySet
         ? game.i18n.format("ILLUMINUS.Editor.FilterCount", { count: total })
         : "";
     }
@@ -866,6 +1168,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // do rather than being taken on trust.
     markFolds(this.element.querySelector(".illuminus-preview"));
     this.#activateGrip();
+    this.#activateBoxes();
+    this.#activateSampleParts();
     this.#focusSample();
     this.#activateStates();
     this.#activateFilter();
@@ -1021,6 +1325,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
     const row = this.element.querySelector(`[data-field="${groupId}.${fieldName}"]`);
     row?.classList.toggle("is-default", coerced === this.#baselineFor(groupId, field));
+    row?.classList.toggle("is-unset", coerced === field.default);
     if (row && field.type === "color") this.#showSwatch(row, String(coerced));
     this.#updateTabBadge(groupId);
   }
@@ -1071,6 +1376,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         const row = this.element.querySelector(`[data-field="${group.id}.${field.name}"]`);
         row?.classList.toggle("is-default",
           this.#working?.[group.id]?.[field.name] === this.#baselineFor(group.id, field));
+        row?.classList.toggle("is-unset",
+          this.#working?.[group.id]?.[field.name] === field.default);
       }
       this.#updateTabBadge(group.id);
     }

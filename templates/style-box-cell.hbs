@@ -1,0 +1,8 @@
+{{!-- One side or corner of a gathered box family: the control itself, drawn
+      small and placed by where it belongs rather than labelled in a row. The
+      whole `.illuminus-field` is kept so that everything reading the controls
+      goes on working; its label is hidden by the stylesheet and read by the
+      search box, which is how a side is still findable by name. --}}
+<div class="illuminus-box__cell" data-place="{{place}}">
+  {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+</div>

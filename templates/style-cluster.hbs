@@ -1,0 +1,16 @@
+{{!-- A shadow or a picture: five controls that always travel together, laid out
+      with each name above its own control rather than beside it, so five rows
+      become one wrapped row. Every control is still its own `.illuminus-field`
+      with the words it always had — what changes is the direction the name sits
+      in. --}}
+{{#if cluster.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+<div class="illuminus-cluster" data-cluster="{{cluster.family}}" data-kind="{{cluster.kind}}">
+  {{!-- Which of them this is, where a category holds more than one. Where it
+        holds only one, the category has said so already and this is empty. --}}
+  {{#if cluster.name}}<span class="illuminus-cluster__name">{{cluster.name}}</span>{{/if}}
+  {{#each cluster.fields as |field|}}
+  <div class="illuminus-cluster__cell">
+    {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+  </div>
+  {{/each}}
+</div>

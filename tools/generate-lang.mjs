@@ -28,6 +28,17 @@ const CARRY = [
 for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWith(p))) put(k, v);
 
 /* ---------- New chrome strings ---------- */
+// The rows a box family is gathered into, and the sides of an edge.
+put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
+put("ILLUMINUS.Box.Inner", "Inner Spacing");
+put("ILLUMINUS.Box.Outer", "Outer Spacing");
+put("ILLUMINUS.Box.Corners", "Corners");
+put("ILLUMINUS.Box.Edge", "Edge");
+put("ILLUMINUS.Box.WhichSide", "Which side");
+put("ILLUMINUS.Box.Top", "Top");
+put("ILLUMINUS.Box.Right", "Right");
+put("ILLUMINUS.Box.Bottom", "Bottom");
+put("ILLUMINUS.Box.Left", "Left");
 Object.assign(out, {
   "ILLUMINUS.Manager.Restore": "Restore Samples",
   "ILLUMINUS.Manager.RestoreTooltip": "Put back any style that came with Illuminus and is no longer here",

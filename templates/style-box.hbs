@@ -1,0 +1,75 @@
+{{!-- One box family — an edge, its corners, and the space inside and outside it
+      — gathered into four rows instead of twenty-four.
+
+      Every control is still its own `.illuminus-field`, because the state
+      switch, the filter, the changed markers and Match all sides all read the
+      controls themselves. What this changes is where they are drawn: the four
+      sides of a spacing sit in a cross rather than one under another, and an
+      edge shows the side that is chosen rather than all four at once. --}}
+{{#if box.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+<div class="illuminus-box" data-box="{{box.family}}">
+
+  {{#if box.padding.length}}
+  {{#if box.lines.padding}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+  <div class="illuminus-box__run" data-run="padding">
+    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Inner"}}</span>
+    <div class="illuminus-box__cross">
+      {{#each box.padding as |field|}}
+      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if box.margin.length}}
+  {{#if box.lines.margin}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+  <div class="illuminus-box__run" data-run="margin">
+    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Outer"}}</span>
+    <div class="illuminus-box__cross">
+      {{#each box.margin as |field|}}
+      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if box.corners.length}}
+  {{#if box.lines.corner}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+  <div class="illuminus-box__run" data-run="corners">
+    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Corners"}}</span>
+    <div class="illuminus-box__cross illuminus-box__cross--corners">
+      {{#each box.corners as |field|}}
+      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.corner}}
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if box.border.length}}
+  {{#if box.lines.border}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+  <div class="illuminus-box__run" data-run="border">
+    <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edge"}}</span>
+    {{!-- Which side is being set. One at a time, because an edge is four
+          controls three times over and a person sets one side or all four. --}}
+    <div class="illuminus-box__sides" role="group"
+         aria-label="{{localize 'ILLUMINUS.Box.WhichSide'}}">
+      <button type="button" class="illuminus-box__side is-on" data-side="Top">
+        {{localize "ILLUMINUS.Box.Top"}}</button>
+      <button type="button" class="illuminus-box__side" data-side="Right">
+        {{localize "ILLUMINUS.Box.Right"}}</button>
+      <button type="button" class="illuminus-box__side" data-side="Bottom">
+        {{localize "ILLUMINUS.Box.Bottom"}}</button>
+      <button type="button" class="illuminus-box__side" data-side="Left">
+        {{localize "ILLUMINUS.Box.Left"}}</button>
+    </div>
+    <div class="illuminus-box__edge">
+      {{#each box.border as |field|}}
+      <div class="illuminus-box__part" data-side="{{field.side}}" data-part="{{field.part}}">
+        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+      </div>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+</div>

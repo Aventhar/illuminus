@@ -7,6 +7,13 @@
            placeholder="{{localize 'ILLUMINUS.Editor.FilterPlaceholder'}}"
            aria-label="{{localize 'ILLUMINUS.Editor.FilterPlaceholder'}}">
     <span class="illuminus-filter__count" aria-live="polite"></span>
+    {{!-- Reading back what a style actually says is the other question this bar
+          answers, and at two thousand controls it cannot be answered by
+          scrolling. --}}
+    <label class="illuminus-filter__set">
+      <input type="checkbox" class="illuminus-filter__set-box">
+      {{localize "ILLUMINUS.Editor.OnlySet"}}
+    </label>
   </div>
 
   <div class="illuminus-editor__columns">
@@ -73,8 +80,14 @@
               reads as a block of its own rather than running into the one
               beneath it. The ones between the runs are written by the schema. --}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
-        {{#each section.fields as |field|}}
-        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+        {{#each section.rows as |row|}}
+        {{#if row.box}}
+        {{> "modules/illuminus/templates/style-box.hbs" box=row.box}}
+        {{else if row.cluster}}
+        {{> "modules/illuminus/templates/style-cluster.hbs" cluster=row.cluster}}
+        {{else}}
+        {{> "modules/illuminus/templates/style-field.hbs" field=row.field}}
+        {{/if}}
         {{/each}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
       </details>
@@ -154,8 +167,14 @@
               reads as a block of its own rather than running into the one
               beneath it. The ones between the runs are written by the schema. --}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
-        {{#each section.fields as |field|}}
-        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+        {{#each section.rows as |row|}}
+        {{#if row.box}}
+        {{> "modules/illuminus/templates/style-box.hbs" box=row.box}}
+        {{else if row.cluster}}
+        {{> "modules/illuminus/templates/style-cluster.hbs" cluster=row.cluster}}
+        {{else}}
+        {{> "modules/illuminus/templates/style-field.hbs" field=row.field}}
+        {{/if}}
         {{/each}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
       </details>

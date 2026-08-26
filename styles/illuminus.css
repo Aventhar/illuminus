@@ -2123,6 +2123,243 @@
 
 /* --- Fields ------------------------------------------------------------- */
 
+/* A piece of the sample is a way into the settings that paint it, so it says so
+   under the pointer: the outline is the only thing that marks it, since the
+   sample is a picture of a page and anything heavier would be a change to the
+   page rather than to the editor around it. */
+.illuminus-preview__part { cursor: pointer; }
+
+.illuminus-preview__part:hover {
+  outline: 1px dashed var(--color-border-highlight, #ff6400);
+  outline-offset: 2px;
+}
+
+/* --- A gathered box family ---------------------------------------------- */
+
+/* An edge, its corners and the space inside and outside it, drawn as four rows
+   rather than twenty-four. The controls are the ordinary ones: what changes is
+   that the four sides of a spacing sit in a cross where they belong, and an
+   edge shows one side at a time. */
+.illuminus-box {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.2rem 0;
+  padding: 0.35rem 0.4rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--color-border-highlight, #ff6400);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.illuminus-box__run {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.illuminus-box__name {
+  font-weight: 600;
+}
+
+/* Top above, left and right either side, bottom below — a side is set where it
+   is rather than third in a list of four. */
+.illuminus-box__cross {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  gap: 0.15rem;
+  justify-items: center;
+}
+
+.illuminus-box__cell[data-place="Top"] { grid-area: 1 / 2; }
+.illuminus-box__cell[data-place="Left"] { grid-area: 2 / 1; }
+.illuminus-box__cell[data-place="Right"] { grid-area: 2 / 3; }
+.illuminus-box__cell[data-place="Bottom"] { grid-area: 3 / 2; }
+.illuminus-box__cell[data-place="TopLeft"] { grid-area: 1 / 1; }
+.illuminus-box__cell[data-place="TopRight"] { grid-area: 1 / 3; }
+.illuminus-box__cell[data-place="BottomLeft"] { grid-area: 3 / 1; }
+.illuminus-box__cell[data-place="BottomRight"] { grid-area: 3 / 3; }
+
+/* The corners sit at the corners of an empty middle, which reads as the box
+   they round. */
+.illuminus-box__cross--corners { grid-template-rows: auto 0.4rem auto; }
+
+/* Inside a cell the control is the control and nothing else: its name is kept
+   in the markup for the search box to read and taken off the screen, and its
+   own row layout gives way to a single small field. */
+.illuminus-box__cell .illuminus-field {
+  display: block;
+  padding: 0;
+  border-left: none;
+  border-radius: 0;
+}
+
+.illuminus-box__cell .illuminus-field > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The number and nothing else. A slider squeezed into a cell is a dot nobody
+   can drag, and four units in a cross say "px" four times to say it once. */
+.illuminus-box__cell .illuminus-field input[type="range"],
+.illuminus-box__cell .illuminus-field .illuminus-unit {
+  display: none;
+}
+
+.illuminus-box__cell .illuminus-field__control {
+  display: flex;
+  justify-content: center;
+}
+
+.illuminus-box__cell .illuminus-field input[type="number"] {
+  width: 3.4rem;
+  text-align: center;
+}
+
+/* The unit is said once, by the run. */
+.illuminus-box__name::after {
+  content: " " attr(data-unit);
+  opacity: 0.6;
+  font-weight: 400;
+}
+
+/* A faint box behind the cross, so four numbers read as the sides of one thing
+   rather than as four numbers. */
+.illuminus-box__cross {
+  position: relative;
+}
+
+.illuminus-box__cross::before {
+  content: "";
+  position: absolute;
+  inset: 1.6rem 4.2rem;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.illuminus-box__cross--corners::before { inset: 1.4rem 4rem; }
+
+/* Which side of the edge is being set. */
+.illuminus-box__sides {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.illuminus-box__side {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.15rem 0.2rem;
+  font-size: var(--font-size-12, 0.75rem);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.illuminus-box__side.is-on {
+  background: var(--color-warm-2, #7a5a3a);
+  font-weight: 600;
+}
+
+.illuminus-box__edge {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.1rem;
+}
+
+/* One side at a time: the rest are still here, and still read by the search
+   box, which is what keeps "Left Thickness" findable while Top is on show. */
+.illuminus-box__run[data-side="Top"] .illuminus-box__part:not([data-side="Top"]),
+.illuminus-box__run[data-side="Right"] .illuminus-box__part:not([data-side="Right"]),
+.illuminus-box__run[data-side="Bottom"] .illuminus-box__part:not([data-side="Bottom"]),
+.illuminus-box__run[data-side="Left"] .illuminus-box__part:not([data-side="Left"]) {
+  display: none;
+}
+
+/* Found by the search box, and shown whichever side is chosen: a control the
+   filter says exists has to be a control the tab will show. */
+.illuminus-box__run .illuminus-box__part.is-found { display: block; }
+
+/* Only one of the two names shows: the full one everywhere, the short one
+   inside a gathered run, where what it leaves out is what the run already
+   says. The other stays in the markup for the search box to read. */
+.illuminus-field__label--short { display: none; }
+
+.illuminus-box__part .illuminus-field__label:not(.illuminus-field__label--short),
+.illuminus-cluster .illuminus-field__label:not(.illuminus-field__label--short) {
+  display: none;
+}
+
+.illuminus-box__part .illuminus-field__label--short,
+.illuminus-cluster .illuminus-field__label--short { display: inline; }
+
+/* --- A gathered shadow, and a gathered picture -------------------------- */
+
+/* Five controls that always travel together, in one wrapped row with each name
+   above its own control. The words are the words they always had. */
+.illuminus-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.5rem;
+  margin: 0.2rem 0;
+  padding: 0.35rem 0.4rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--color-border-highlight, #ff6400);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.illuminus-cluster__name {
+  flex: 1 1 100%;
+  font-weight: 600;
+}
+
+.illuminus-cluster__cell {
+  flex: 1 1 8rem;
+  min-width: 7rem;
+  display: flex;
+  flex-direction: column;
+  /* Names of one line and names of two would otherwise leave the controls at
+     different heights along the row. */
+  justify-content: flex-end;
+}
+
+/* A picture's own file picker asks for a whole row: a path is long, and the
+   four questions about it are short. */
+.illuminus-cluster[data-kind="picture"] .illuminus-cluster__cell:first-child {
+  flex: 1 1 100%;
+}
+
+.illuminus-cluster .illuminus-field {
+  display: block;
+  padding: 0;
+  border-left: none;
+  border-radius: 0;
+}
+
+.illuminus-cluster .illuminus-field > label {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 0.1rem;
+  font-size: var(--font-size-12, 0.75rem);
+  opacity: 0.85;
+}
+
+/* A slider and a number box side by side in an eighth of the tab is a slider
+   nobody can drag; the number is what a person types into here. */
+.illuminus-cluster .illuminus-field input[type="range"] { display: none; }
+
+.illuminus-cluster .illuminus-field input[type="number"] { width: 100%; }
+
+.illuminus-cluster.is-state-hidden { display: none; }
+
+/* A run with nothing left to show, and a family with no runs left, go with what
+   they held — the same way a line between runs does. */
+.illuminus-box__run.is-state-hidden,
+.illuminus-box.is-state-hidden { display: none; }
+
 .illuminus-field {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);

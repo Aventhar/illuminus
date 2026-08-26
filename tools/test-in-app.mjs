@@ -6011,10 +6011,15 @@ try {
     && fill.includes("Inner Shadow Softness") && fill.includes("Outer Shadow Horizontal Offset"),
     `Fill and Image holds the picture and both shadows (${fill.filter(r => r === "---").length} lines)`);
   const border = t.sections.find((s) => s.name === "Border").rows;
+  // One line, before the corners. The four the schema draws between the sides
+  // are gone with the runs they separated: an edge is gathered into a single
+  // run with a side to choose, so Top no longer needs a line to tell it from
+  // Bottom — they are never both on show.
   check(border.slice(0, 3).join(", ") === "Top Style, Top Color, Top Thickness"
-    && border.filter((row) => row === "---").length === 4
+    && border.filter((row) => row === "---").length === 1
     && border.at(-1) === "Bottom-Right Corner",
-    `Border reads a side at a time and ends with the corners (${border.at(-1)})`);
+    `Border reads a side at a time and ends with the corners `
+    + `(${border.filter((row) => row === "---").length} line, ends ${border.at(-1)})`);
   const pageNames = t.page.map((s) => s.name);
   check(JSON.stringify(pageNames) === JSON.stringify(
     ["Size and Position", "Fill and Image", "Inner Spacing", "Border"]),
@@ -6060,7 +6065,9 @@ try {
      "Cell Styles", "Table Caption"]),
     `Tables reads the table, then its parts (${tableNames.join(" > ")})`);
   const cells = t.tables.find((s) => s.name === "Cell Styles").rows;
-  check(cells[0] === "Top Padding" && cells.filter((row) => row === "---").length === 4,
+  // The room, then a line, then the edge as one run: as above, the lines that
+  // separated the four sides went with the four runs.
+  check(cells[0] === "Top Padding" && cells.filter((row) => row === "---").length === 1,
     `a cell's room and its edges in one category (${cells.length} rows)`);
   const boxNames = t.boxes.map((s) => s.name);
   check(JSON.stringify(boxNames) === JSON.stringify(
@@ -6467,6 +6474,146 @@ try {
     for (const style of api.listStyles().filter((s) => s.name === "Edit Button Probe")) {
       await api.deleteStyle(style.id);
     }
+  })()`);
+}
+
+// The three shapes a tab repeats — a box, a shadow, a picture — gathered into
+// one run each. What matters is that gathering is a change of *layout only*:
+// every control the schema declares is still in the markup, still its own
+// field, because the state switch, the filter, the changed markers, Match all
+// sides and Reset all read the controls themselves.
+console.log("\n[67] Controls are gathered, not taken away");
+try {
+  const gathered = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Gathered Probe"});
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1600));
+    window.__gathered = {styleId: style.id};
+    app.changeTab("boxes", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const tab = app.element.querySelector('.illuminus-tab[data-tab="boxes"]');
+    for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
+    await new Promise(r => setTimeout(r, 400));
+
+    const edge = tab.querySelector('.illuminus-box__run[data-run="border"]');
+    const showing = () => [...edge.querySelectorAll(".illuminus-box__part")]
+      .filter((part) => getComputedStyle(part).display !== "none")
+      .map((part) => part.dataset.side);
+    const before = [...new Set(showing())];
+    edge.querySelector('.illuminus-box__side[data-side="Right"]').click();
+    await new Promise(r => setTimeout(r, 200));
+    const after = [...new Set(showing())];
+
+    const shadow = [...tab.querySelectorAll(".illuminus-cluster")]
+      .find((one) => one.querySelector(".illuminus-cluster__name"));
+    return JSON.stringify({
+      // Every control the schema declares, present whether gathered or not.
+      inTab: tab.querySelectorAll(".illuminus-field[data-field]").length,
+      boxes: tab.querySelectorAll(".illuminus-box").length,
+      clusters: tab.querySelectorAll(".illuminus-cluster").length,
+      sideBefore: before, sideAfter: after,
+      // A gathered run says which one it is, and its controls drop the
+      // qualifier the run has taken on.
+      runName: shadow?.querySelector(".illuminus-cluster__name")?.textContent.trim() ?? null,
+      shortLabel: shadow?.querySelector(".illuminus-field__label--short")?.textContent.trim() ?? null,
+      fullKept: Boolean(shadow?.querySelector(".illuminus-field__label:not(.illuminus-field__label--short)"))
+    });
+  })()`));
+  check(gathered.boxes > 0 && gathered.clusters > 0,
+    `a tab gathers its boxes and its shadows and pictures (${gathered.boxes} boxes, ${gathered.clusters} runs)`);
+  check(gathered.sideBefore.length === 1 && gathered.sideBefore[0] === "Top",
+    `an edge shows one side at a time (${gathered.sideBefore.join(", ") || "none"})`);
+  check(gathered.sideAfter.length === 1 && gathered.sideAfter[0] === "Right",
+    `and choosing another side shows that one instead (${gathered.sideAfter.join(", ") || "none"})`);
+  check(Boolean(gathered.runName) && Boolean(gathered.shortLabel)
+    && !gathered.shortLabel.startsWith(gathered.runName),
+    `a gathered run takes the name its controls give up (${gathered.runName}: ${gathered.shortLabel})`);
+  check(gathered.fullKept,
+    "while the whole name stays in the markup, where the search box reads it");
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    if (window.__gathered?.styleId) await api.deleteStyle(window.__gathered.styleId);
+    window.__gathered = undefined;
+  })()`);
+}
+
+// Two ways in, for an editor with two thousand controls behind sixteen tabs.
+console.log("\n[68] Reading back a style, and pointing at the thing you mean");
+try {
+  const ways = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    // A style that says one thing, so "only what this style sets" has an answer
+    // that can be counted rather than eyeballed.
+    const style = await api.createStyle({name: "Ways In Probe", settings: {links: {color: "#ff8800"}}});
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1600));
+    window.__waysIn = {styleId: style.id};
+    app.changeTab("links", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const el = app.element;
+    const tab = el.querySelector('.illuminus-tab[data-tab="links"]');
+    const shown = () => [...tab.querySelectorAll(".illuminus-field[data-field]")]
+      .filter((field) => !field.classList.contains("is-filtered-out"));
+    const before = shown().length;
+
+    const only = el.querySelector(".illuminus-filter__set-box");
+    only.checked = true;
+    only.dispatchEvent(new Event("change", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 300));
+    const after = shown();
+    const out = {
+      before,
+      after: after.length,
+      // What is left is what the style actually says. Asked of the mark for
+      // that and not of the changed marker beside it: a value the style saved
+      // is unchanged since this editor opened, and would fail the other test
+      // while being exactly what this one is looking for.
+      allSet: after.every((field) => !field.classList.contains("is-unset")),
+      names: after.map((field) => field.dataset.field)
+    };
+    only.checked = false;
+    only.dispatchEvent(new Event("change", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 300));
+    out.restored = shown().length;
+
+    // And the sample as a way in: the piece a person can see, clicked.
+    app.changeTab("page", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    const part = el.querySelector('.illuminus-preview__frame [data-part="links"]');
+    out.hasPart = Boolean(part);
+    part?.click();
+    await new Promise(r => setTimeout(r, 400));
+    out.landedOn = app.tabGroups.sheet;
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`));
+  check(ways.after > 0 && ways.after < ways.before,
+    `"only what this style sets" narrows a tab to what it says (${ways.before} to ${ways.after})`);
+  check(ways.allSet && ways.names.includes("links.color"),
+    `and what is left is exactly that (${ways.names.join(", ") || "nothing"})`);
+  check(ways.restored === ways.before,
+    `turning it off puts the rest back (${ways.restored} of ${ways.before})`);
+  check(ways.hasPart && ways.landedOn === "links",
+    `clicking a piece of the sample opens the tab that paints it (landed on ${ways.landedOn})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    if (window.__waysIn?.styleId) await api.deleteStyle(window.__waysIn.styleId);
+    window.__waysIn = undefined;
   })()`);
 }
 

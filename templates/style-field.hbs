@@ -4,9 +4,16 @@
             around it. It belongs to the control it precedes, so it travels with
             that control however the state switch shuffles the rest. --}}
       {{#if field.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-      <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}" data-field="{{field.path}}">
+      <div class="illuminus-field {{#if field.isDefault}}is-default{{/if}}{{#unless field.isSet}} is-unset{{/unless}}" data-field="{{field.path}}">
         <label for="illuminus-{{field.path}}">
           <span class="illuminus-field__label">{{field.label}}</span>
+          {{!-- The same name without the qualifier its category gives it, for a
+                gathered run where the run says that part already. Both are
+                here: the search box reads the whole label, and only one of the
+                two is ever on screen. --}}
+          {{#if field.short}}
+          <span class="illuminus-field__label illuminus-field__label--short">{{field.short}}</span>
+          {{/if}}
           {{!-- Beside the name, where the question is asked, rather than out at
                 the end of the row past the control. --}}
           <button type="button" class="illuminus-info" data-action="showHint"

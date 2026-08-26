@@ -895,6 +895,43 @@ flow wrapper along with everything else; moving one disconnects and reconnects i
 came back with a Reveal button that did nothing. A custom element ends the run it is in
 and stays where it is.
 
+## Gathered runs in the editor
+
+Three shapes repeat on every tab — a box (twelve edge controls, four corners, four
+spacings), a shadow (five), and a picture (five) — and they are the greater part of the
+2,700 controls. `boxRows()` in `scripts/apps/style-editor.mjs` gathers each into one run
+at render, from the field's *name*, the way the generators read it. Four things are
+load-bearing.
+
+- **Every control is still its own `.illuminus-field[data-field]`.** The state switch, the
+  filter, the changed markers, Match all sides and Reset all read the controls themselves;
+  a widget that left one out would quietly take those with it. What changes is where a
+  control is drawn, never whether it exists.
+- **Both spellings of a family.** A family with no prefix is `borderTopWidth` and one with
+  a prefix is `codeBorderTopWidth`. Matching only the second gathered a handful and left
+  every plain family — which is most of them — spread down the tab as before.
+- **A line belongs to the run it introduces, and only one draws it.** The schema's
+  dividers sit on fields; a gathered field must give its own up or the line is drawn twice,
+  once by the run and once by the control inside it. A family holds up to four runs and
+  the schema draws a line before each, so a line goes to *the run it is the first control
+  of* rather than to the family. A state's own run inherits the ordinary run's line, since
+  dividers are declared for ordinary controls only.
+- **Runs settle before lines are judged.** `#settleBoxes` hides a run whose controls have
+  all gone, and the divider walk asks what follows a line — so the runs must settle first,
+  once for the window rather than once per category.
+
+**Two marks, two questions.** `is-default` is "unchanged since this editor was opened",
+which is what the changed counts and the fading are about. `is-unset` is "the style says
+nothing here", which is what "Only what this style sets" filters on. Wiring the filter to
+the first hid every value the style had saved.
+
+**A control's name is two names.** The full one a crowded category gives it
+("Inner Shadow Softness") and the plain one the schema declares ("Softness"). Both are in
+the markup and only one is on screen: the short one inside a gathered run, where the run
+says the rest. The run's own name is derived by subtracting the plain label from the full
+one — no table, and where a category holds one shadow nothing is left over and no name is
+drawn, which is right because the category has already said which shadow it is.
+
 ## Conventions worth keeping
 
 - **A tab may lay itself out, and then it says so twice.** `SECTION_ORDER` and
