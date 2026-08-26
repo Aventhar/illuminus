@@ -4,13 +4,20 @@
       with the words it always had — what changes is the direction the name sits
       in. --}}
 {{#if cluster.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-<div class="illuminus-cluster" data-cluster="{{cluster.family}}" data-kind="{{cluster.kind}}">
-  {{!-- Which of them this is, where a category holds more than one. Where it
-        holds only one, the category has said so already and this is empty. --}}
-  {{#if cluster.name}}<span class="illuminus-cluster__name">{{cluster.name}}</span>{{/if}}
+<details class="illuminus-cluster" data-cluster="{{cluster.family}}" data-kind="{{cluster.kind}}"
+         {{#if cluster.open}}open{{/if}}>
+  <summary class="illuminus-cluster__summary">
+    {{!-- Which of them this is, where a category holds more than one. Where it
+          holds only one, the category has said so already and the run's own
+          name carries it. --}}
+    <span class="illuminus-cluster__name">{{#if cluster.name}}{{cluster.name}}{{else}}{{cluster.plainName}}{{/if}}</span>
+    {{> "modules/illuminus/templates/style-run-says.hbs" says=cluster}}
+  </summary>
+  <div class="illuminus-cluster__cells">
   {{#each cluster.fields as |field|}}
   <div class="illuminus-cluster__cell">
     {{> "modules/illuminus/templates/style-field.hbs" field=field}}
   </div>
   {{/each}}
-</div>
+  </div>
+</details>

@@ -920,6 +920,20 @@ load-bearing.
   all gone, and the divider walk asks what follows a line — so the runs must settle first,
   once for the window rather than once per category.
 
+**A run folds to what it says.** Each gathered run is a `<details>` whose summary is
+built by `runSummary()` from the controls' own values — the set ones, in the order they
+are drawn — so it needs no wording and cannot drift from what it describes. A run the
+style says nothing about reads "Nothing set" and starts folded; one the style has set
+starts open, so a tab opens showing what the style *does*.
+
+**A corner has a size and a shape.** `corner-shape` (Chromium 139+, and this is a
+Chromium app) sits beside `border-radius` and reads the same four sizes, so a corner set
+to 12 becomes a 12px bevel or scoop with no second measurement. It is a value like any
+other — the compiler still emits nothing but custom properties. `round` is the browser's
+own default, so a style that says nothing about a corner is unchanged, which check [69]
+asserts against a category that sets only a radius. Adding it meant naming it in
+thirty-one order lists, since a laid-out section must name every control it holds.
+
 **Two marks, two questions.** `is-default` is "unchanged since this editor was opened",
 which is what the changed counts and the fading are about. `is-unset` is "the style says
 nothing here", which is what "Only what this style sets" filters on. Wiring the filter to

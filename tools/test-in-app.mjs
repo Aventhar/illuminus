@@ -6017,8 +6017,10 @@ try {
   // Bottom — they are never both on show.
   check(border.slice(0, 3).join(", ") === "Top Style, Top Color, Top Thickness"
     && border.filter((row) => row === "---").length === 1
-    && border.at(-1) === "Bottom-Right Corner",
-    `Border reads a side at a time and ends with the corners `
+    // The four corners, and under them what they are cut to: the shape reads
+    // their sizes, so it belongs with them rather than on its own.
+    && border.at(-2) === "Bottom-Right Corner" && border.at(-1) === "Corner Shape",
+    `Border reads a side at a time and ends with the corners and their shape `
     + `(${border.filter((row) => row === "---").length} line, ends ${border.at(-1)})`);
   const pageNames = t.page.map((s) => s.name);
   check(JSON.stringify(pageNames) === JSON.stringify(
@@ -6500,6 +6502,10 @@ try {
     await new Promise(r => setTimeout(r, 400));
 
     const edge = tab.querySelector('.illuminus-box__run[data-run="border"]');
+    // Opened first, as a person opens it: a run the style says nothing about
+    // starts folded away behind the line that says so.
+    edge.open = true;
+    await new Promise(r => setTimeout(r, 150));
     const showing = () => [...edge.querySelectorAll(".illuminus-box__part")]
       .filter((part) => getComputedStyle(part).display !== "none")
       .map((part) => part.dataset.side);
@@ -6515,6 +6521,10 @@ try {
       inTab: tab.querySelectorAll(".illuminus-field[data-field]").length,
       boxes: tab.querySelectorAll(".illuminus-box").length,
       clusters: tab.querySelectorAll(".illuminus-cluster").length,
+      // A run nobody has set says so and stays folded; the summary is read from
+      // the controls, so it cannot drift from what they hold.
+      foldedAway: [...tab.querySelectorAll(".illuminus-cluster")].filter((one) => !one.open).length,
+      saysNothing: [...tab.querySelectorAll(".illuminus-run-says.is-unset")].length,
       sideBefore: before, sideAfter: after,
       // A gathered run says which one it is, and its controls drop the
       // qualifier the run has taken on.
@@ -6534,6 +6544,9 @@ try {
     `a gathered run takes the name its controls give up (${gathered.runName}: ${gathered.shortLabel})`);
   check(gathered.fullKept,
     "while the whole name stays in the markup, where the search box reads it");
+  check(gathered.foldedAway > 0 && gathered.saysNothing > 0,
+    `a run the style says nothing about is folded away behind the line saying so `
+    + `(${gathered.foldedAway} folded)`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -6614,6 +6627,68 @@ try {
     }
     if (window.__waysIn?.styleId) await api.deleteStyle(window.__waysIn.styleId);
     window.__waysIn = undefined;
+  })()`);
+}
+
+// A corner has a size and a shape. Until browsers grew `corner-shape` only the
+// size could be said, so every corner in every style was a quarter circle; the
+// shape reads the same four sizes and cuts a different shape with them.
+console.log("\n[69] A corner can be cut to a shape");
+try {
+  const shapes = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Corner Shape Probe", settings: {
+      // The block a read-aloud box is built from, cut rather than rounded.
+      box01: {cornerTopLeft: 18, cornerTopRight: 18, cornerBottomLeft: 18,
+              cornerBottomRight: 18, cornerShape: "bevel", background: "#402010"},
+      // And a category that says nothing about it, which must stay as Foundry
+      // draws it: round is the browser's own, so nothing changes.
+      secrets: {cornerTopLeft: 10}
+    }});
+    const entry = await JournalEntry.create({name: "Corner Shape Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<blockquote class="illuminus-box illuminus-box--box01"><p>Read this aloud.</p></blockquote>' +
+      '<section class="secret" id="secret-shape"><p>Hidden.</p></section>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const box = root.querySelector("blockquote.illuminus-box--box01");
+    const secret = root.querySelector("section.secret");
+    const out = {
+      supported: CSS.supports("corner-shape", "bevel"),
+      shape: getComputedStyle(box).cornerShape,
+      radius: getComputedStyle(box).borderTopLeftRadius,
+      unset: getComputedStyle(secret).cornerShape
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(shapes.supported, "the browser can cut a corner to a shape");
+  check(/bevel/.test(shapes.shape ?? "") && shapes.radius === "18px",
+    `a block's corners are cut rather than rounded, to the size they were given `
+    + `(${shapes.shape}, ${shapes.radius})`);
+  // The default is what a browser does anyway, so a style that says nothing
+  // about a corner still looks exactly as it did.
+  check(/round/.test(shapes.unset ?? ""),
+    `and a corner nobody has shaped is round, as Foundry draws it (${shapes.unset})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Corner Shape Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Corner Shape Probe")) {
+      await api.deleteStyle(style.id);
+    }
   })()`);
 }
 

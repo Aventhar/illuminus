@@ -44,6 +44,7 @@ const box = (group) => `  background-color: ${v(group, "background")};
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
+  corner-shape: ${v(group, "cornerShape")};
   box-shadow: ${shadow(group, "shadow")};`;
 
 /* -------------------------------------------- */
@@ -119,6 +120,7 @@ ${memberSelector(group)} {
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
+  corner-shape: ${v(group, "cornerShape")};
   box-shadow: ${shadow(group, "shadow")};
 }
 
@@ -176,6 +178,7 @@ ${memberSelector(group)} {
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
+  corner-shape: ${v(group, "cornerShape")};
   box-shadow: ${shadow(group, "shadow")}, inset ${shadow(group, "innerShadow")};
   font-family: ${v(group, "font")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
@@ -274,6 +277,7 @@ ${headingSelector(level)} {
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
+  corner-shape: ${v(group, "cornerShape")};
 }
 `;
 

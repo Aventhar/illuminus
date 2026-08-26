@@ -30,6 +30,9 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 /* ---------- New chrome strings ---------- */
 // The rows a box family is gathered into, and the sides of an edge.
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
+put("ILLUMINUS.Box.Unset", "Nothing set");
+put("ILLUMINUS.Box.Shadow", "Shadow");
+put("ILLUMINUS.Box.Picture", "Picture");
 put("ILLUMINUS.Box.Inner", "Inner Spacing");
 put("ILLUMINUS.Box.Outer", "Outer Spacing");
 put("ILLUMINUS.Box.Corners", "Corners");
@@ -687,6 +690,15 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
+  // corner shape: <prefix>Shape, one per corner family.
+  if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
+    const of = noun(`${m[1]}Corner`, "");
+    put(`ILLUMINUS.Field.${name}.label`, "Corner Shape");
+    put(`ILLUMINUS.Field.${name}.hint`,
+      `What the corners${of ? ` of the ${of}` : ""} are cut to. Rounded is the ordinary one; `
+      + "the rest use the same corner sizes and cut a different shape with them.");
+    continue;
+  }
   // spacing family: <prefix><Side>
   if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
@@ -1046,6 +1058,10 @@ const CHOICE_TEXT = {
   // The three answers a state's own tick box has: its own yes, its own no, and
   // whichever the ordinary one gave.
   same: "Same as normal", on: "Yes", off: "No",
+  // The shapes a corner can be cut to. Plain words rather than the CSS ones:
+  // "bevel" and "squircle" are jargon outside a stylesheet.
+  round: "Rounded", bevel: "Cut off", notch: "Notched", scoop: "Scooped out",
+  squircle: "Softened square",
   // What the Edit pencil's distances are measured from.
   page: "The page", window: "The window",
   chevron: "Chevron", caret: "Solid triangle", angle: "Thin angle", arrow: "Arrow", plus: "Plus",

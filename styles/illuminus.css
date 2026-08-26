@@ -37,6 +37,7 @@
                 var(--ill-page-border-bottom-color) var(--ill-page-border-left-color);
   border-radius: var(--ill-page-corner-top-left) var(--ill-page-corner-top-right)
                  var(--ill-page-corner-bottom-right) var(--ill-page-corner-bottom-left);
+  corner-shape: var(--ill-page-corner-shape);
   box-shadow:
     var(--ill-page-shadow-offset-x) var(--ill-page-shadow-offset-y)
     var(--ill-page-shadow-blur) var(--ill-page-shadow-spread) var(--ill-page-shadow-color),
@@ -123,6 +124,7 @@
                 var(--ill-window-border-bottom-color) var(--ill-window-border-left-color);
   border-radius: var(--ill-window-corner-top-left) var(--ill-window-corner-top-right)
                  var(--ill-window-corner-bottom-right) var(--ill-window-corner-bottom-left);
+  corner-shape: var(--ill-window-corner-shape);
 }
 
 .illuminus-styled .window-header {
@@ -167,6 +169,7 @@
                 var(--ill-window-header-button-border-bottom-color) var(--ill-window-header-button-border-left-color);
   border-radius: var(--ill-window-header-button-corner-top-left) var(--ill-window-header-button-corner-top-right)
                  var(--ill-window-header-button-corner-bottom-right) var(--ill-window-header-button-corner-bottom-left);
+  corner-shape: var(--ill-window-header-button-corner-shape);
 }
 
 
@@ -223,6 +226,7 @@
                 var(--ill-window-page-button-border-bottom-color) var(--ill-window-page-button-border-left-color);
   border-radius: var(--ill-window-page-button-corner-top-left) var(--ill-window-page-button-corner-top-right)
                  var(--ill-window-page-button-corner-bottom-right) var(--ill-window-page-button-corner-bottom-left);
+  corner-shape: var(--ill-window-page-button-corner-shape);
 }
 
 
@@ -249,6 +253,7 @@
                 var(--ill-editor-border-bottom-color) var(--ill-editor-border-left-color);
   border-radius: var(--ill-editor-corner-top-left) var(--ill-editor-corner-top-right)
                  var(--ill-editor-corner-bottom-right) var(--ill-editor-corner-bottom-left);
+  corner-shape: var(--ill-editor-corner-shape);
 }
 
 .illuminus-styled.journal-entry-page .window-header,
@@ -290,6 +295,7 @@
                 var(--ill-editor-header-button-border-bottom-color) var(--ill-editor-header-button-border-left-color);
   border-radius: var(--ill-editor-header-button-corner-top-left) var(--ill-editor-header-button-corner-top-right)
                  var(--ill-editor-header-button-corner-bottom-right) var(--ill-editor-header-button-corner-bottom-left);
+  corner-shape: var(--ill-editor-header-button-corner-shape);
 }
 
 /* The bar of controls above the prose. It is rebuilt from scratch on every
@@ -308,6 +314,7 @@
                 var(--ill-editor-toolbar-border-bottom-color) var(--ill-editor-toolbar-border-left-color);
   border-radius: var(--ill-editor-toolbar-corner-top-left) var(--ill-editor-toolbar-corner-top-right)
                  var(--ill-editor-toolbar-corner-bottom-right) var(--ill-editor-toolbar-corner-bottom-left);
+  corner-shape: var(--ill-editor-toolbar-corner-shape);
 }
 
 /* Its controls: the drop-downs and the icon buttons alike. Core feeds a
@@ -362,6 +369,7 @@
                 var(--ill-editor-settings-bar-border-bottom-color) var(--ill-editor-settings-bar-border-left-color);
   border-radius: var(--ill-editor-settings-bar-corner-top-left) var(--ill-editor-settings-bar-corner-top-right)
                  var(--ill-editor-settings-bar-corner-bottom-right) var(--ill-editor-settings-bar-corner-bottom-left);
+  corner-shape: var(--ill-editor-settings-bar-corner-shape);
   box-shadow: var(--ill-editor-settings-bar-shadow-offset-x) var(--ill-editor-settings-bar-shadow-offset-y)
               var(--ill-editor-settings-bar-shadow-blur) var(--ill-editor-settings-bar-shadow-spread)
               var(--ill-editor-settings-bar-shadow-color),
@@ -388,6 +396,7 @@
                 var(--ill-editor-field-border-bottom-color) var(--ill-editor-field-border-left-color);
   border-radius: var(--ill-editor-field-corner-top-left) var(--ill-editor-field-corner-top-right)
                  var(--ill-editor-field-corner-bottom-right) var(--ill-editor-field-corner-bottom-left);
+  corner-shape: var(--ill-editor-field-corner-shape);
   box-shadow: var(--ill-editor-field-shadow-offset-x) var(--ill-editor-field-shadow-offset-y)
               var(--ill-editor-field-shadow-blur) var(--ill-editor-field-shadow-spread)
               var(--ill-editor-field-shadow-color),
@@ -421,6 +430,7 @@
                 var(--ill-editor-list-border-bottom-color) var(--ill-editor-list-border-left-color);
   border-radius: var(--ill-editor-list-corner-top-left) var(--ill-editor-list-corner-top-right)
                  var(--ill-editor-list-corner-bottom-right) var(--ill-editor-list-corner-bottom-left);
+  corner-shape: var(--ill-editor-list-corner-shape);
   box-shadow: var(--ill-editor-list-shadow-offset-x) var(--ill-editor-list-shadow-offset-y)
               var(--ill-editor-list-shadow-blur) var(--ill-editor-list-shadow-spread)
               var(--ill-editor-list-shadow-color),
@@ -447,6 +457,7 @@
            var(--ill-editor-item-padding-bottom) var(--ill-editor-item-padding-left);
   border-radius: var(--ill-editor-item-corner-top-left) var(--ill-editor-item-corner-top-right)
                  var(--ill-editor-item-corner-bottom-right) var(--ill-editor-item-corner-bottom-left);
+  corner-shape: var(--ill-editor-item-corner-shape);
 }
 
 /* The line core draws between one run of entries and the next. */
@@ -511,6 +522,7 @@
                 var(--ill-editor-toolbar-button-border-bottom-color) var(--ill-editor-toolbar-button-border-left-color);
   border-radius: var(--ill-editor-toolbar-button-corner-top-left) var(--ill-editor-toolbar-button-corner-top-right)
                  var(--ill-editor-toolbar-button-corner-bottom-right) var(--ill-editor-toolbar-button-corner-bottom-left);
+  corner-shape: var(--ill-editor-toolbar-button-corner-shape);
   box-shadow: var(--ill-editor-toolbar-button-shadow-offset-x) var(--ill-editor-toolbar-button-shadow-offset-y)
               var(--ill-editor-toolbar-button-shadow-blur) var(--ill-editor-toolbar-button-shadow-spread)
               var(--ill-editor-toolbar-button-shadow-color),
@@ -536,6 +548,7 @@
                 var(--ill-editor-dropdown-border-bottom-color) var(--ill-editor-dropdown-border-left-color);
   border-radius: var(--ill-editor-dropdown-corner-top-left) var(--ill-editor-dropdown-corner-top-right)
                  var(--ill-editor-dropdown-corner-bottom-right) var(--ill-editor-dropdown-corner-bottom-left);
+  corner-shape: var(--ill-editor-dropdown-corner-shape);
   box-shadow: var(--ill-editor-dropdown-shadow-offset-x) var(--ill-editor-dropdown-shadow-offset-y)
               var(--ill-editor-dropdown-shadow-blur) var(--ill-editor-dropdown-shadow-spread)
               var(--ill-editor-dropdown-shadow-color),
@@ -603,6 +616,7 @@
                 var(--ill-sidebar-border-bottom-color) var(--ill-sidebar-border-left-color);
   border-radius: var(--ill-sidebar-corner-top-left) var(--ill-sidebar-corner-top-right)
                  var(--ill-sidebar-corner-bottom-right) var(--ill-sidebar-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-corner-shape);
   box-shadow:
     inset var(--ill-sidebar-inner-shadow-offset-x) var(--ill-sidebar-inner-shadow-offset-y)
     var(--ill-sidebar-inner-shadow-blur) var(--ill-sidebar-inner-shadow-spread)
@@ -618,6 +632,7 @@
           var(--ill-sidebar-entry-margin-bottom) var(--ill-sidebar-entry-margin-left);
   border-radius: var(--ill-sidebar-entry-corner-top-left) var(--ill-sidebar-entry-corner-top-right)
                  var(--ill-sidebar-entry-corner-bottom-right) var(--ill-sidebar-entry-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-entry-corner-shape);
   border-width: var(--ill-sidebar-entry-border-top-width) var(--ill-sidebar-entry-border-right-width)
                 var(--ill-sidebar-entry-border-bottom-width) var(--ill-sidebar-entry-border-left-width);
   border-style: var(--ill-sidebar-entry-border-top-style) var(--ill-sidebar-entry-border-right-style)
@@ -698,6 +713,7 @@
                 var(--ill-sidebar-heading-border-bottom-color) var(--ill-sidebar-heading-border-left-color);
   border-radius: var(--ill-sidebar-heading-corner-top-left) var(--ill-sidebar-heading-corner-top-right)
                  var(--ill-sidebar-heading-corner-bottom-right) var(--ill-sidebar-heading-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-heading-corner-shape);
 }
 
 
@@ -760,6 +776,7 @@
                 var(--ill-sidebar-category-border-bottom-color) var(--ill-sidebar-category-border-left-color);
   border-radius: var(--ill-sidebar-category-corner-top-left) var(--ill-sidebar-category-corner-top-right)
                  var(--ill-sidebar-category-corner-bottom-right) var(--ill-sidebar-category-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-category-corner-shape);
 }
 
 .illuminus-styled .journal-sidebar .toc li.category strong {
@@ -793,6 +810,7 @@
                 var(--ill-sidebar-search-border-bottom-color) var(--ill-sidebar-search-border-left-color);
   border-radius: var(--ill-sidebar-search-corner-top-left) var(--ill-sidebar-search-corner-top-right)
                  var(--ill-sidebar-search-corner-bottom-right) var(--ill-sidebar-search-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-search-corner-shape);
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]::placeholder {
@@ -815,6 +833,7 @@
   border-color: var(--ill-sidebar-button-border-color);
   border-radius: var(--ill-sidebar-button-corner-top-left) var(--ill-sidebar-button-corner-top-right)
                  var(--ill-sidebar-button-corner-bottom-right) var(--ill-sidebar-button-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-button-corner-shape);
 }
 
 
@@ -841,6 +860,7 @@
                 var(--ill-title-border-bottom-color) var(--ill-title-border-left-color);
   border-radius: var(--ill-title-corner-top-left) var(--ill-title-corner-top-right)
                  var(--ill-title-corner-bottom-right) var(--ill-title-corner-bottom-left);
+  corner-shape: var(--ill-title-corner-shape);
 }
 
 .illuminus-styled .journal-header .title {
@@ -1057,6 +1077,7 @@
            var(--ill-body-code-padding-bottom) var(--ill-body-code-padding-left);
   border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
                  var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
+  corner-shape: var(--ill-body-code-corner-shape);
   border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
 }
 
@@ -1091,6 +1112,7 @@
   color: var(--ill-body-code-color);
   border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
                  var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
+  corner-shape: var(--ill-body-code-corner-shape);
   border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
 }
 
@@ -1108,6 +1130,7 @@
   border: var(--ill-boxes-collapsible-border-width) solid var(--ill-boxes-collapsible-border-color);
   border-radius: var(--ill-boxes-collapsible-corner-top-left) var(--ill-boxes-collapsible-corner-top-right)
                  var(--ill-boxes-collapsible-corner-bottom-right) var(--ill-boxes-collapsible-corner-bottom-left);
+  corner-shape: var(--ill-boxes-collapsible-corner-shape);
   padding: var(--ill-boxes-collapsible-padding-top) var(--ill-boxes-collapsible-padding-right)
            var(--ill-boxes-collapsible-padding-bottom) var(--ill-boxes-collapsible-padding-left);
   margin-top: var(--ill-boxes-collapsible-margin-top);
@@ -1168,6 +1191,7 @@
                 var(--ill-images-media-border-bottom-color) var(--ill-images-media-border-left-color);
   border-radius: var(--ill-images-media-corner-top-left) var(--ill-images-media-corner-top-right)
                  var(--ill-images-media-corner-bottom-right) var(--ill-images-media-corner-bottom-left);
+  corner-shape: var(--ill-images-media-corner-shape);
   box-shadow: var(--ill-images-media-shadow-offset-x) var(--ill-images-media-shadow-offset-y)
               var(--ill-images-media-shadow-blur) var(--ill-images-media-shadow-spread)
               var(--ill-images-media-shadow-color);
@@ -1202,6 +1226,7 @@
                 var(--ill-secrets-border-bottom-color) var(--ill-secrets-border-left-color);
   border-radius: var(--ill-secrets-corner-top-left) var(--ill-secrets-corner-top-right)
                  var(--ill-secrets-corner-bottom-right) var(--ill-secrets-corner-bottom-left);
+  corner-shape: var(--ill-secrets-corner-shape);
   box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
               var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
               var(--ill-secrets-shadow-color);
@@ -1278,6 +1303,7 @@
   border-style: var(--ill-secrets-button-border-style);
   border-radius: var(--ill-secrets-button-corner-top-left) var(--ill-secrets-button-corner-top-right)
                  var(--ill-secrets-button-corner-bottom-right) var(--ill-secrets-button-corner-bottom-left);
+  corner-shape: var(--ill-secrets-button-corner-shape);
   font-size: var(--ill-secrets-button-size);
 }
 
@@ -1343,6 +1369,7 @@
                 var(--ill-links-border-bottom-color) var(--ill-links-border-left-color);
   border-radius: var(--ill-links-corner-top-left) var(--ill-links-corner-top-right)
                  var(--ill-links-corner-bottom-right) var(--ill-links-corner-bottom-left);
+  corner-shape: var(--ill-links-corner-shape);
 }
 
 /* --- Lists -------------------------------------------------------------- */
@@ -1401,6 +1428,7 @@
                 var(--ill-tables-border-bottom-color) var(--ill-tables-border-left-color);
   border-radius: var(--ill-tables-corner-top-left) var(--ill-tables-corner-top-right)
                  var(--ill-tables-corner-bottom-right) var(--ill-tables-corner-bottom-left);
+  corner-shape: var(--ill-tables-corner-shape);
 }
 
 .illuminus-styled .journal-page-content th,
@@ -1479,6 +1507,7 @@
                 var(--ill-boxes-border-bottom-color) var(--ill-boxes-border-left-color);
   border-radius: var(--ill-boxes-corner-top-left) var(--ill-boxes-corner-top-right)
                  var(--ill-boxes-corner-bottom-right) var(--ill-boxes-corner-bottom-left);
+  corner-shape: var(--ill-boxes-corner-shape);
   box-shadow: var(--ill-boxes-shadow-offset-x) var(--ill-boxes-shadow-offset-y)
               var(--ill-boxes-shadow-blur) var(--ill-boxes-shadow-spread) var(--ill-boxes-shadow-color);
 }
@@ -1517,6 +1546,7 @@
                 var(--ill-images-border-bottom-color) var(--ill-images-border-left-color);
   border-radius: var(--ill-images-corner-top-left) var(--ill-images-corner-top-right)
                  var(--ill-images-corner-bottom-right) var(--ill-images-corner-bottom-left);
+  corner-shape: var(--ill-images-corner-shape);
   box-shadow: var(--ill-images-shadow-offset-x) var(--ill-images-shadow-offset-y)
               var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color);
 }
@@ -2150,11 +2180,57 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* A run is a disclosure: the summary is one row saying what the run holds, and
+   the controls open under it. A run the style says nothing about starts folded,
+   so a tab opens showing what the style does rather than what it could do. */
 .illuminus-box__run {
+  display: block;
+}
+
+.illuminus-box__summary,
+.illuminus-cluster__summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr);
+  align-items: baseline;
   gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  list-style: none;
+}
+
+.illuminus-box__summary::-webkit-details-marker,
+.illuminus-cluster__summary::-webkit-details-marker { display: none; }
+
+/* What the run holds, in its own values. Dimmed where there is nothing to say,
+   so a tab reads at a glance as what is set and what is not. */
+.illuminus-run-says {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+  font-size: var(--font-size-12, 0.75rem);
+}
+
+.illuminus-run-says.is-unset { opacity: 0.45; font-style: italic; }
+
+/* The same mark a category wears, turned the same way, so a run reads as
+   something that opens rather than as a row that happens to be short. */
+.illuminus-run-chevron {
+  font-size: var(--font-size-11, 0.7rem);
+  opacity: 0.7;
+  transition: transform 120ms ease;
+}
+
+details[open] > .illuminus-box__summary > .illuminus-run-chevron,
+details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
+  transform: rotate(90deg);
+}
+
+.illuminus-box__run > .illuminus-box__cross,
+.illuminus-box__run > .illuminus-box__sides,
+.illuminus-box__run > .illuminus-box__edge {
+  margin-top: 0.25rem;
 }
 
 .illuminus-box__name {
@@ -2278,6 +2354,9 @@
   display: none;
 }
 
+/* The shape sits under the corners it cuts, as an ordinary row. */
+.illuminus-box__shape { margin-top: 0.3rem; }
+
 /* Found by the search box, and shown whichever side is chosen: a control the
    filter says exists has to be a control the tab will show. */
 .illuminus-box__run .illuminus-box__part.is-found { display: block; }
@@ -2300,6 +2379,10 @@
 /* Five controls that always travel together, in one wrapped row with each name
    above its own control. The words are the words they always had. */
 .illuminus-cluster {
+  display: block;
+}
+
+.illuminus-cluster__cells {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem 0.5rem;

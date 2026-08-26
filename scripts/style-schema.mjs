@@ -55,6 +55,9 @@ const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
 export const DIVIDER = "---";
 
 const CHOICES = {
+  // What a corner is cut to. `round` is the browser's own, so it is the default
+  // everywhere and a style that says nothing about a corner changes nothing.
+  cornerShape: ["round", "bevel", "notch", "scoop", "squircle"],
   align: ["left", "center", "right", "justify"],
   alignNoJustify: ["left", "center", "right"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -286,9 +289,21 @@ function borderFields(prefix, { width = 0, style = "solid", color = "#8a6a3d" } 
   ]);
 }
 
-/** Four fields, one per corner. */
+/**
+ * Four fields, one per corner, and the shape they are cut to.
+ *
+ * A corner has a size and a shape, and until browsers grew `corner-shape` only
+ * the size could be said: every corner in every style was a quarter circle.
+ * The shape reads the same four sizes, so a corner already set to 12 becomes a
+ * 12px bevel or a 12px scoop without a second measurement — and `round`, the
+ * default, is what a browser does anyway, so a style that says nothing about it
+ * looks exactly as it did.
+ */
 function cornerFields(prefix, radius = 0) {
-  return CORNERS.map((corner) => num(`${prefix}${corner}`, radius, "px", 0, 120, 1, { link: prefix }));
+  return [
+    ...CORNERS.map((corner) => num(`${prefix}${corner}`, radius, "px", 0, 120, 1, { link: prefix })),
+    select(`${prefix}Shape`, "round", CHOICES.cornerShape)
+  ];
 }
 
 /**
@@ -626,7 +641,7 @@ function bannerSections(defaults = {}) {
         DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
         DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
         DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-        DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+        DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
       ],
       // A heading level may ask for the line Foundry draws under it — the first
       // two levels have one — without asking for the other three sides.
@@ -973,7 +988,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         fields: [...borderFields("border"), ...cornerFields("corner")]
       }
@@ -1025,7 +1040,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         fields: [...borderFields("border"), ...cornerFields("corner")]
       }
@@ -1172,7 +1187,7 @@ export const GROUPS = [
           "codeShadowSpread", "codeShadowColor",
           DIVIDER, "codePaddingTop", "codePaddingBottom", "codePaddingLeft", "codePaddingRight",
           DIVIDER, "codeCornerTopLeft", "codeCornerTopRight", "codeCornerBottomLeft",
-          "codeCornerBottomRight", "codeBorderWidth"
+          "codeCornerBottomRight", "codeCornerShape", "codeBorderWidth"
         ],
         fields: [
           font("codeFont", "monospace"),
@@ -1262,7 +1277,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         fields: [
           ...borderFields("border", { width: 1, color: "#816b66" }),
@@ -1409,7 +1424,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         fields: [...borderFields("border"), ...cornerFields("corner")]
       },
@@ -1530,7 +1545,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         fields: [...borderFields("border", { color: "#7a2010" }), ...cornerFields("corner", 2)]
       },
@@ -1555,7 +1570,7 @@ export const GROUPS = [
           "summaryShadowSpread", "summaryShadowColor",
           DIVIDER, "collapsibleMarginTop", "collapsibleMarginBottom",
           DIVIDER, "collapsibleBorderWidth", "collapsibleCornerTopLeft", "collapsibleCornerTopRight",
-          "collapsibleCornerBottomLeft", "collapsibleCornerBottomRight"
+          "collapsibleCornerBottomLeft", "collapsibleCornerBottomRight", "collapsibleCornerShape"
         ],
         fields: [
           font("summaryFont", ""),
@@ -1646,7 +1661,7 @@ export const GROUPS = [
           DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
           DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
         // Top and bottom only by default, as Foundry draws them.
         fields: [
@@ -1662,7 +1677,7 @@ export const GROUPS = [
           "buttonSize", "buttonColor", "buttonBackground",
           DIVIDER, "buttonBorderStyle", "buttonBorderColor", "buttonBorderWidth",
           DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
-          "buttonCornerBottomLeft", "buttonCornerBottomRight",
+          "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape",
           DIVIDER, "buttonTexture", "buttonTextureFit", "buttonTexturePosition",
           "buttonTextureBlend", "buttonTextureOpacity",
           DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY", "buttonInnerShadowBlur",
@@ -2139,7 +2154,7 @@ const LAYOUTS = {
       "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
       "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     caption: { label: "ILLUMINUS.Sections.imageCaption.label", hint: "ILLUMINUS.Sections.imageCaption.hint", order: [
       "captionFont", "captionSize", "captionColor", "captionTextStyle",
@@ -2156,7 +2171,7 @@ const LAYOUTS = {
       "mediaBorderLeftStyle", "mediaBorderLeftColor", "mediaBorderLeftWidth", DIVIDER,
       "mediaBorderRightStyle", "mediaBorderRightColor", "mediaBorderRightWidth", DIVIDER,
       "mediaCornerTopLeft", "mediaCornerTopRight", "mediaCornerBottomLeft",
-      "mediaCornerBottomRight", DIVIDER
+      "mediaCornerBottomRight", "mediaCornerShape", DIVIDER
     ] },
   },
   boxStyles: {
@@ -2185,7 +2200,7 @@ const LAYOUTS = {
       "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
       "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     blockHeadings: { order: [
       "headingFont", "headingSize", "headingColor", "headingRuleColor", "headingTextStyle",
@@ -2222,7 +2237,7 @@ const LAYOUTS = {
       "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
       "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape",
       DIVIDER
     ] },
   },
@@ -2245,7 +2260,7 @@ const LAYOUTS = {
       "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
       "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     caption: { label: "ILLUMINUS.Sections.imageCaption.label", hint: "ILLUMINUS.Sections.imageCaption.hint", order: [
       "captionFont", "captionSize", "captionColor", "captionTextStyle",
@@ -2273,7 +2288,7 @@ const LAYOUTS = {
       "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
       "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     number: { order: [
       "numberShown", "numberWidth", "numberAlign", "numberSize", "numberColor",
@@ -2295,7 +2310,7 @@ const LAYOUTS = {
       "entryBorderBottomWidth", DIVIDER, "entryBorderLeftStyle", "entryBorderLeftColor",
       "entryBorderLeftWidth", DIVIDER, "entryBorderRightStyle", "entryBorderRightColor",
       "entryBorderRightWidth", DIVIDER, "entryCornerTopLeft", "entryCornerTopRight",
-      "entryCornerBottomLeft", "entryCornerBottomRight"
+      "entryCornerBottomLeft", "entryCornerBottomRight", "entryCornerShape"
     ] },
     subHeadings: { order: [
       "headingFont", "headingSize", "headingColor", "headingTextStyle",
@@ -2315,7 +2330,7 @@ const LAYOUTS = {
       "headingBorderLeftStyle", "headingBorderLeftColor", "headingBorderLeftWidth", DIVIDER,
       "headingBorderRightStyle", "headingBorderRightColor", "headingBorderRightWidth", DIVIDER,
       "headingCornerTopLeft", "headingCornerTopRight", "headingCornerBottomLeft",
-      "headingCornerBottomRight"
+      "headingCornerBottomRight", "headingCornerShape"
     ] },
     category: { order: [
       "categoryFont", "categorySize", "categoryColor", "categoryTextStyle",
@@ -2336,7 +2351,7 @@ const LAYOUTS = {
       "categoryBorderLeftStyle", "categoryBorderLeftColor", "categoryBorderLeftWidth", DIVIDER,
       "categoryBorderRightStyle", "categoryBorderRightColor", "categoryBorderRightWidth",
       DIVIDER, "categoryCornerTopLeft", "categoryCornerTopRight", "categoryCornerBottomLeft",
-      "categoryCornerBottomRight"
+      "categoryCornerBottomRight", "categoryCornerShape"
     ] },
     search: { order: [
       "searchSize", "searchPlaceholderColor", "searchColor", DIVIDER, "searchBackground",
@@ -2350,7 +2365,7 @@ const LAYOUTS = {
       "searchBorderLeftStyle", "searchBorderLeftColor", "searchBorderLeftWidth", DIVIDER,
       "searchBorderRightStyle", "searchBorderRightColor", "searchBorderRightWidth", DIVIDER,
       "searchCornerTopLeft", "searchCornerTopRight", "searchCornerBottomLeft",
-      "searchCornerBottomRight"
+      "searchCornerBottomRight", "searchCornerShape"
     ] },
     buttons: { order: [
       "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", DIVIDER,
@@ -2359,7 +2374,7 @@ const LAYOUTS = {
       "buttonInnerShadowBlur", "buttonInnerShadowSpread", "buttonInnerShadowColor", DIVIDER,
       "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur", "buttonShadowSpread",
       "buttonShadowColor", DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
-      "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonBorderWidth", DIVIDER
+      "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape", "buttonBorderWidth", DIVIDER
     ] },
   },
   window: {
@@ -2375,7 +2390,7 @@ const LAYOUTS = {
       "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
       DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth", DIVIDER,
       "borderRightStyle", "borderRightColor", "borderRightWidth", DIVIDER, "cornerTopLeft",
-      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     titleBar: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
@@ -2404,7 +2419,7 @@ const LAYOUTS = {
       "headerButtonBorderRightStyle", "headerButtonBorderRightColor",
       "headerButtonBorderRightWidth", DIVIDER, "headerButtonCornerTopLeft",
       "headerButtonCornerTopRight", "headerButtonCornerBottomLeft",
-      "headerButtonCornerBottomRight"
+      "headerButtonCornerBottomRight", "headerButtonCornerShape"
     ] },
     pageButton: { order: [
       "pageButtonAnchor", "pageButtonSide", "pageButtonOffset", "pageButtonTop", "pageButtonHoldTop",
@@ -2421,7 +2436,7 @@ const LAYOUTS = {
       "pageButtonBorderLeftColor", "pageButtonBorderLeftWidth", DIVIDER,
       "pageButtonBorderRightStyle", "pageButtonBorderRightColor", "pageButtonBorderRightWidth",
       DIVIDER, "pageButtonCornerTopLeft", "pageButtonCornerTopRight",
-      "pageButtonCornerBottomLeft", "pageButtonCornerBottomRight", DIVIDER
+      "pageButtonCornerBottomLeft", "pageButtonCornerBottomRight", "pageButtonCornerShape", DIVIDER
     ] },
   },
   editor: {
@@ -2440,7 +2455,7 @@ const LAYOUTS = {
       DIVIDER, "listBorderLeftStyle", "listBorderLeftColor", "listBorderLeftWidth",
       DIVIDER, "listBorderRightStyle", "listBorderRightColor", "listBorderRightWidth",
       DIVIDER, "listCornerTopLeft", "listCornerTopRight", "listCornerBottomLeft",
-      "listCornerBottomRight"
+      "listCornerBottomRight", "listCornerShape"
     ] },
     dropdownItems: { order: [
       "itemFont", "itemSize", "itemColor", "itemTextStyle", "itemTextStyleSlant",
@@ -2450,7 +2465,7 @@ const LAYOUTS = {
       DIVIDER, "itemBackground",
       DIVIDER, "itemPaddingTop", "itemPaddingBottom", "itemPaddingLeft", "itemPaddingRight",
       DIVIDER, "itemCornerTopLeft", "itemCornerTopRight", "itemCornerBottomLeft",
-      "itemCornerBottomRight",
+      "itemCornerBottomRight", "itemCornerShape",
       DIVIDER, "itemDividerColor"
     ] },
     settingsBar: { order: [
@@ -2477,7 +2492,7 @@ const LAYOUTS = {
       DIVIDER, "settingsBarBorderRightStyle", "settingsBarBorderRightColor",
       "settingsBarBorderRightWidth",
       DIVIDER, "settingsBarCornerTopLeft", "settingsBarCornerTopRight",
-      "settingsBarCornerBottomLeft", "settingsBarCornerBottomRight"
+      "settingsBarCornerBottomLeft", "settingsBarCornerBottomRight", "settingsBarCornerShape"
     ] },
     frameSize: { label: "ILLUMINUS.Sections.layout.label", hint: "ILLUMINUS.Sections.layout.hint", order: [
       "frameMinWidth", "frameMaxWidth"
@@ -2490,7 +2505,7 @@ const LAYOUTS = {
       "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
       DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth", DIVIDER,
       "borderRightStyle", "borderRightColor", "borderRightWidth", DIVIDER, "cornerTopLeft",
-      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight"
+      "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     titleBar: { order: [
       "titleBarBackground", DIVIDER, "font", "size", "color", "textStyle", "textStyleSlant",
@@ -2519,7 +2534,7 @@ const LAYOUTS = {
       "headerButtonBorderRightStyle", "headerButtonBorderRightColor",
       "headerButtonBorderRightWidth", DIVIDER, "headerButtonCornerTopLeft",
       "headerButtonCornerTopRight", "headerButtonCornerBottomLeft",
-      "headerButtonCornerBottomRight"
+      "headerButtonCornerBottomRight", "headerButtonCornerShape"
     ] },
     toolbar: { order: [
       "toolbarBackground", DIVIDER, "toolbarTexture", "toolbarTextureFit",
@@ -2533,7 +2548,7 @@ const LAYOUTS = {
       "toolbarBorderBottomWidth", DIVIDER, "toolbarBorderLeftStyle", "toolbarBorderLeftColor",
       "toolbarBorderLeftWidth", DIVIDER, "toolbarBorderRightStyle", "toolbarBorderRightColor",
       "toolbarBorderRightWidth", DIVIDER, "toolbarCornerTopLeft", "toolbarCornerTopRight",
-      "toolbarCornerBottomLeft", "toolbarCornerBottomRight"
+      "toolbarCornerBottomLeft", "toolbarCornerBottomRight", "toolbarCornerShape"
     ] },
     toolbarIcons: { order: [
       "toolbarSize", "toolbarColor", DIVIDER, "toolbarButtonBackground",
@@ -2552,7 +2567,7 @@ const LAYOUTS = {
       DIVIDER, "toolbarButtonBorderRightStyle", "toolbarButtonBorderRightColor",
       "toolbarButtonBorderRightWidth",
       DIVIDER, "toolbarButtonCornerTopLeft", "toolbarButtonCornerTopRight",
-      "toolbarButtonCornerBottomLeft", "toolbarButtonCornerBottomRight"
+      "toolbarButtonCornerBottomLeft", "toolbarButtonCornerBottomRight", "toolbarButtonCornerShape"
     ] },
   },
 };

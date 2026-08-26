@@ -1,54 +1,73 @@
 {{!-- One box family — an edge, its corners, and the space inside and outside it
-      — gathered into four rows instead of twenty-four.
+      — gathered into four runs instead of twenty-four rows.
 
       Every control is still its own `.illuminus-field`, because the state
       switch, the filter, the changed markers and Match all sides all read the
       controls themselves. What this changes is where they are drawn: the four
-      sides of a spacing sit in a cross rather than one under another, and an
-      edge shows the side that is chosen rather than all four at once. --}}
+      sides of a spacing sit in a cross where they belong, an edge shows the
+      side that is chosen rather than all four at once, and a run the style has
+      nothing to say about is folded away behind the line that says so. --}}
 {{#if box.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
 <div class="illuminus-box" data-box="{{box.family}}">
 
   {{#if box.padding.length}}
   {{#if box.lines.padding}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <div class="illuminus-box__run" data-run="padding">
-    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Inner"}}</span>
+  <details class="illuminus-box__run" data-run="padding" {{#if box.paddingSays.open}}open{{/if}}>
+    <summary class="illuminus-box__summary">
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Inner"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.paddingSays}}
+    </summary>
     <div class="illuminus-box__cross">
       {{#each box.padding as |field|}}
       {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
       {{/each}}
     </div>
-  </div>
+  </details>
   {{/if}}
 
   {{#if box.margin.length}}
   {{#if box.lines.margin}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <div class="illuminus-box__run" data-run="margin">
-    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Outer"}}</span>
+  <details class="illuminus-box__run" data-run="margin" {{#if box.marginSays.open}}open{{/if}}>
+    <summary class="illuminus-box__summary">
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Outer"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.marginSays}}
+    </summary>
     <div class="illuminus-box__cross">
       {{#each box.margin as |field|}}
       {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
       {{/each}}
     </div>
-  </div>
+  </details>
   {{/if}}
 
   {{#if box.corners.length}}
   {{#if box.lines.corner}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <div class="illuminus-box__run" data-run="corners">
-    <span class="illuminus-box__name" data-unit="px">{{localize "ILLUMINUS.Box.Corners"}}</span>
+  <details class="illuminus-box__run" data-run="corners" {{#if box.cornersSays.open}}open{{/if}}>
+    <summary class="illuminus-box__summary">
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Corners"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.cornersSays}}
+    </summary>
     <div class="illuminus-box__cross illuminus-box__cross--corners">
       {{#each box.corners as |field|}}
       {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.corner}}
       {{/each}}
     </div>
-  </div>
+    {{!-- What those four corners are cut to, under the four of them. --}}
+    {{#if box.cornerShape}}
+    <div class="illuminus-box__shape">
+      {{> "modules/illuminus/templates/style-field.hbs" field=box.cornerShape}}
+    </div>
+    {{/if}}
+  </details>
   {{/if}}
 
   {{#if box.border.length}}
   {{#if box.lines.border}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <div class="illuminus-box__run" data-run="border">
-    <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edge"}}</span>
+  <details class="illuminus-box__run" data-run="border" {{#if box.borderSays.open}}open{{/if}}>
+    <summary class="illuminus-box__summary">
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edge"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.borderSays}}
+    </summary>
     {{!-- Which side is being set. One at a time, because an edge is four
           controls three times over and a person sets one side or all four. --}}
     <div class="illuminus-box__sides" role="group"
@@ -69,7 +88,7 @@
       </div>
       {{/each}}
     </div>
-  </div>
+  </details>
   {{/if}}
 
 </div>

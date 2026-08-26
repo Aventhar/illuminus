@@ -1,0 +1,8 @@
+{{!-- What a run says while it is folded away: its own values, in the order they
+      are drawn, read from the controls rather than written out — so it needs no
+      wording of its own and cannot fall out of step with what it describes. A
+      run the style says nothing about says so, and stays folded. --}}
+<i class="fa-solid fa-chevron-right illuminus-run-chevron" aria-hidden="true"></i>
+<span class="illuminus-run-says {{#unless says.summary}}is-unset{{/unless}}">
+  {{#if says.summary}}{{says.summary}}{{else}}{{localize "ILLUMINUS.Box.Unset"}}{{/if}}
+</span>

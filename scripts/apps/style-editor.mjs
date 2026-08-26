@@ -109,6 +109,11 @@ function boxPartOf(name) {
   if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
     return { family: `${m[1]}Corner`, kind: "corner", corner: m[2] };
   }
+  // What those four corners are cut to belongs with them: it reads their sizes,
+  // and on its own after the run it read as a control about nothing.
+  if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
+    return { family: `${m[1]}Corner`, kind: "cornerShape" };
+  }
   if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
     return { family: `${m[1]}${m[2]}`, kind: m[2].toLowerCase(), side: m[3] };
   }
@@ -135,6 +140,31 @@ function boxPartOf(name) {
  * @param {object[]} fields  Field contexts, in order.
  * @returns {object[]}       Rows: a control, or a box family holding several.
  */
+/**
+ * What a run says when it is folded away, and whether it says anything at all.
+ *
+ * A run the style has nothing to say about is a run nobody needs open: it sits
+ * closed, showing the one line that says so, and opens on a click. A run the
+ * style *has* set opens by itself, so a tab starts by showing what the style
+ * does rather than what it could do.
+ *
+ * The summary is read from the controls rather than written: their values, in
+ * the order they are drawn, with the ones still at their default left out. It
+ * therefore needs no wording of its own and cannot fall out of step with what
+ * the controls hold.
+ */
+function runSummary(fields) {
+  const set = fields.filter((field) => field.isSet);
+  if (!set.length) return { summary: null, open: false };
+  const said = set.slice(0, 4).map((field) => {
+    const value = field.type === "select"
+      ? field.choices?.find((choice) => choice.selected)?.label ?? field.value
+      : field.value;
+    return `${field.short ?? field.plain ?? field.label}: ${value}${field.unit ?? ""}`;
+  });
+  return { summary: said.join(" · ") + (set.length > 4 ? " …" : ""), open: true };
+}
+
 function boxRows(fields) {
   const rows = [];
   const families = new Map();
@@ -148,6 +178,10 @@ function boxRows(fields) {
         clusters.set(cluster.family, held);
         rows.push({ cluster: held });
       }
+      // Where a category holds one of them there is no qualifier to take, and
+      // the run says plainly what it is instead.
+      held.plainName ??= game.i18n.localize(cluster.kind === "picture"
+        ? "ILLUMINUS.Box.Picture" : "ILLUMINUS.Box.Shadow");
       // The run takes the qualifier the controls give up, which is the whole of
       // what a qualified label adds: "Inner Shadow Softness" less "Softness" is
       // the run's own name. Where a category holds one shadow the two labels
@@ -179,7 +213,8 @@ function boxRows(fields) {
     // A line before any run of the family introduces that run: the corners get
     // the one the schema drew before them, not the family as a whole. The run
     // it belongs to is the one it is the first control of.
-    const holds = { border: "border", corner: "corners", padding: "padding", margin: "margin" };
+    const holds = { border: "border", corner: "corners", cornerShape: "corners",
+      padding: "padding", margin: "margin" };
     const held = box[holds[part.kind]];
     const already = box.border.length + box.corners.length + box.padding.length + box.margin.length;
     if (field.divider && held.length === 0 && already > 0) {
@@ -200,6 +235,8 @@ function boxRows(fields) {
     }
     else if (part.kind === "corner") {
       box.corners.push({ ...field, divider: false, corner: part.corner });
+    } else if (part.kind === "cornerShape") {
+      box.cornerShape = { ...field, divider: false, short: field.plain };
     } else box[part.kind].push({ ...field, divider: false, side: part.side });
   }
   // A line introduces a run, and a state's own run is the same run in another
@@ -213,6 +250,17 @@ function boxRows(fields) {
     if (stem === run.family) continue;
     const ordinary = rows.find(({ box: b, cluster: c }) => (b ?? c)?.family === stem);
     if (ordinary) run.divider = Boolean((ordinary.box ?? ordinary.cluster).divider);
+  }
+  for (const { box, cluster } of rows) {
+    if (cluster) Object.assign(cluster, runSummary(cluster.fields));
+    if (!box) continue;
+    // A box holds up to four runs, and each answers for itself: an edge nobody
+    // has set stays closed while the corners beside it are open.
+    for (const kind of ["padding", "margin", "corners", "border"]) {
+      box[`${kind}Says`] = runSummary(kind === "corners" && box.cornerShape
+        ? [...box.corners, box.cornerShape] : box[kind]);
+    }
+    box.open = ["padding", "margin", "corners", "border"].some((kind) => box[`${kind}Says`].open);
   }
   return rows;
 }
@@ -330,6 +378,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         `modules/${MODULE_ID}/templates/style-box.hbs`,
         `modules/${MODULE_ID}/templates/style-box-cell.hbs`,
         `modules/${MODULE_ID}/templates/style-cluster.hbs`,
+        `modules/${MODULE_ID}/templates/style-run-says.hbs`,
         `modules/${MODULE_ID}/templates/sample-page.hbs`
       ],
       classes: ["illuminus-editor__body"],
