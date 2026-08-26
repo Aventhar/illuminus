@@ -2237,6 +2237,84 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   font-weight: 600;
 }
 
+/* The space inside a thing and the space around it, drawn as the thing itself:
+   five columns and five rows, with the outer four around the edge of the grid,
+   the inner four just inside it, and the box they describe drawn between. */
+.illuminus-box__model {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: auto auto minmax(1.4rem, auto) auto auto;
+  gap: 0.15rem;
+  justify-items: center;
+  align-items: center;
+  padding: 0.1rem 0;
+}
+
+.illuminus-box__model .illuminus-box__cell[data-ring="margin"][data-place="Top"] { grid-area: 1 / 3; }
+.illuminus-box__model .illuminus-box__cell[data-ring="margin"][data-place="Left"] { grid-area: 3 / 1; }
+.illuminus-box__model .illuminus-box__cell[data-ring="margin"][data-place="Right"] { grid-area: 3 / 5; }
+.illuminus-box__model .illuminus-box__cell[data-ring="margin"][data-place="Bottom"] { grid-area: 5 / 3; }
+.illuminus-box__model .illuminus-box__cell[data-ring="padding"][data-place="Top"] { grid-area: 2 / 3; }
+.illuminus-box__model .illuminus-box__cell[data-ring="padding"][data-place="Left"] { grid-area: 3 / 2; }
+.illuminus-box__model .illuminus-box__cell[data-ring="padding"][data-place="Right"] { grid-area: 3 / 4; }
+.illuminus-box__model .illuminus-box__cell[data-ring="padding"][data-place="Bottom"] { grid-area: 4 / 3; }
+
+/* The same box, drawn with what it is drawn with: a thickness on each edge and
+   a radius at each corner, sitting on the line they describe. */
+.illuminus-box__model--edges {
+  grid-template-rows: auto minmax(1.2rem, auto) auto;
+}
+
+.illuminus-box__ring--edge {
+  grid-area: 1 / 1 / 4 / 4;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.illuminus-box__model--edges .illuminus-box__cell[data-place="TopLeft"] { grid-area: 1 / 1; }
+.illuminus-box__model--edges .illuminus-box__cell[data-place="TopRight"] { grid-area: 1 / 3; }
+.illuminus-box__model--edges .illuminus-box__cell[data-place="BottomLeft"] { grid-area: 3 / 1; }
+.illuminus-box__model--edges .illuminus-box__cell[data-place="BottomRight"] { grid-area: 3 / 3; }
+.illuminus-box__model--edges .illuminus-box__cell[data-ring="edge"][data-place="Top"] { grid-area: 1 / 2; }
+.illuminus-box__model--edges .illuminus-box__cell[data-ring="edge"][data-place="Left"] { grid-area: 2 / 1; }
+.illuminus-box__model--edges .illuminus-box__cell[data-ring="edge"][data-place="Right"] { grid-area: 2 / 3; }
+.illuminus-box__model--edges .illuminus-box__cell[data-ring="edge"][data-place="Bottom"] { grid-area: 3 / 2; }
+
+/* The two rings: the outer one dashed, because a gap is not an edge, and the
+   inner one solid, because it is the thing being spaced. */
+.illuminus-box__ring {
+  pointer-events: none;
+  border-radius: 3px;
+}
+
+/* Where a thing has no space around it to set, the ring around it is not drawn
+   — an empty ring would promise a control that does not exist. */
+.illuminus-box__model:not(:has([data-ring="margin"])) .illuminus-box__ring--outer { display: none; }
+
+.illuminus-box__ring--outer {
+  grid-area: 1 / 1 / 6 / 6;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  align-self: stretch;
+  justify-self: stretch;
+  font-size: var(--font-size-11, 0.7rem);
+  opacity: 0.5;
+  padding: 0 0.2rem;
+  text-align: left;
+}
+
+.illuminus-box__ring--inner {
+  grid-area: 2 / 2 / 5 / 5;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  align-self: stretch;
+  justify-self: stretch;
+  font-size: var(--font-size-11, 0.7rem);
+  opacity: 0.6;
+  padding: 0 0.2rem;
+  text-align: left;
+}
+
 /* Top above, left and right either side, bottom below — a side is set where it
    is rather than third in a list of four. */
 .illuminus-box__cross {
@@ -2367,11 +2445,13 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 .illuminus-field__label--short { display: none; }
 
 .illuminus-box__part .illuminus-field__label:not(.illuminus-field__label--short),
+.illuminus-box__shape .illuminus-field__label:not(.illuminus-field__label--short),
 .illuminus-cluster .illuminus-field__label:not(.illuminus-field__label--short) {
   display: none;
 }
 
 .illuminus-box__part .illuminus-field__label--short,
+.illuminus-box__shape .illuminus-field__label--short,
 .illuminus-cluster .illuminus-field__label--short { display: inline; }
 
 /* --- A gathered shadow, and a gathered picture -------------------------- */

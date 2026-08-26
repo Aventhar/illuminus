@@ -10,66 +10,55 @@
 {{#if box.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
 <div class="illuminus-box" data-box="{{box.family}}">
 
-  {{#if box.padding.length}}
+  {{#if box.spacing.length}}
   {{#if box.lines.padding}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="padding" {{#if box.paddingSays.open}}open{{/if}}>
+  <details class="illuminus-box__run" data-run="spacing" {{#if box.spacingSays.open}}open{{/if}}>
     <summary class="illuminus-box__summary">
-      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Inner"}}</span>
-      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.paddingSays}}
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Spacing"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.spacingSays}}
     </summary>
-    <div class="illuminus-box__cross">
-      {{#each box.padding as |field|}}
-      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
+    {{!-- The space inside a thing and the space around it, as one box: the
+          inner four within it and the outer four around it, each where it
+          belongs rather than eighth in a list of eight. --}}
+    <div class="illuminus-box__model">
+      <span class="illuminus-box__ring illuminus-box__ring--outer"
+            aria-hidden="true">{{localize "ILLUMINUS.Box.Outer"}}</span>
+      <span class="illuminus-box__ring illuminus-box__ring--inner"
+            aria-hidden="true">{{localize "ILLUMINUS.Box.Inner"}}</span>
+      {{#each box.spacing as |field|}}
+      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field
+          place=field.side ring=field.ring}}
       {{/each}}
     </div>
   </details>
   {{/if}}
 
-  {{#if box.margin.length}}
-  {{#if box.lines.margin}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="margin" {{#if box.marginSays.open}}open{{/if}}>
+  {{#if box.edges.length}}
+  {{#if box.lines.border}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+  <details class="illuminus-box__run" data-run="edges" {{#if box.edgesSays.open}}open{{/if}}>
     <summary class="illuminus-box__summary">
-      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Outer"}}</span>
-      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.marginSays}}
+      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edges"}}</span>
+      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.edgesSays}}
     </summary>
-    <div class="illuminus-box__cross">
-      {{#each box.margin as |field|}}
-      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side}}
-      {{/each}}
-    </div>
-  </details>
-  {{/if}}
 
-  {{#if box.corners.length}}
-  {{#if box.lines.corner}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="corners" {{#if box.cornersSays.open}}open{{/if}}>
-    <summary class="illuminus-box__summary">
-      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Corners"}}</span>
-      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.cornersSays}}
-    </summary>
-    <div class="illuminus-box__cross illuminus-box__cross--corners">
+    {{!-- The box again, drawn this time with what it is drawn with: a thickness
+          on each edge, a radius at each corner, and beneath it the style and
+          colour of whichever side is chosen. --}}
+    <div class="illuminus-box__model illuminus-box__model--edges">
+      <span class="illuminus-box__ring illuminus-box__ring--edge" aria-hidden="true"></span>
       {{#each box.corners as |field|}}
       {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.corner}}
       {{/each}}
+      {{#each box.border as |field|}}
+      {{#if field.onEdge}}
+      {{> "modules/illuminus/templates/style-box-cell.hbs" field=field place=field.side ring="edge"}}
+      {{/if}}
+      {{/each}}
     </div>
-    {{!-- What those four corners are cut to, under the four of them. --}}
-    {{#if box.cornerShape}}
-    <div class="illuminus-box__shape">
-      {{> "modules/illuminus/templates/style-field.hbs" field=box.cornerShape}}
-    </div>
-    {{/if}}
-  </details>
-  {{/if}}
 
-  {{#if box.border.length}}
-  {{#if box.lines.border}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="border" {{#if box.borderSays.open}}open{{/if}}>
-    <summary class="illuminus-box__summary">
-      <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edge"}}</span>
-      {{> "modules/illuminus/templates/style-run-says.hbs" says=box.borderSays}}
-    </summary>
-    {{!-- Which side is being set. One at a time, because an edge is four
-          controls three times over and a person sets one side or all four. --}}
+    {{!-- Only where there is an edge to set: a family can have corners and no
+          edge of its own, and a chooser for nothing would be a lie. --}}
+    {{#if box.border.length}}
     <div class="illuminus-box__sides" role="group"
          aria-label="{{localize 'ILLUMINUS.Box.WhichSide'}}">
       <button type="button" class="illuminus-box__side is-on" data-side="Top">
@@ -83,11 +72,21 @@
     </div>
     <div class="illuminus-box__edge">
       {{#each box.border as |field|}}
+      {{#unless field.onEdge}}
       <div class="illuminus-box__part" data-side="{{field.side}}" data-part="{{field.part}}">
         {{> "modules/illuminus/templates/style-field.hbs" field=field}}
       </div>
+      {{/unless}}
       {{/each}}
     </div>
+    {{/if}}
+
+    {{!-- What those four corners are cut to, under the box they turn. --}}
+    {{#if box.cornerShape}}
+    <div class="illuminus-box__shape">
+      {{> "modules/illuminus/templates/style-field.hbs" field=box.cornerShape}}
+    </div>
+    {{/if}}
   </details>
   {{/if}}
 

@@ -2740,6 +2740,66 @@ for (const group of GROUPS) {
  * set, so a style that says nothing about the chosen entry paints it as it
  * paints the others.
  */
+/**
+ * The space inside a thing and the space around it, in one category.
+ *
+ * They were two — Inner Spacing and Outer Spacing — because each was four
+ * controls one under another and eight in a row read as a wall. Drawn as a box
+ * they are one question with eight answers: the inner four inside the box and
+ * the outer four around it, each where it belongs. A category cannot hold half
+ * a picture, so the two are merged wherever a tab has both.
+ */
+for (const group of GROUPS) {
+  const inner = group.sections.find((section) => section.id === "padding");
+  const outer = group.sections.find((section) => section.id === "margin");
+  if (!inner) continue;
+  // Named for what it is either way: a category holding only the space inside
+  // draws the same box with nothing around it, and calling one tab's "Inner
+  // Spacing" what another calls "Spacing" would be two names for one picture.
+  inner.id = "spacing";
+  // The tab's own order names its categories, so it follows the rename whether
+  // or not there is an outer half to merge in.
+  if (group.order) group.order = group.order.map((id) => (id === "padding" ? "spacing" : id));
+  if (!outer) continue;
+  inner.fields = [...inner.fields, ...outer.fields];
+  // The order each stated becomes one, inner first: a laid-out category must
+  // name every control it holds, and these two were laid out apart.
+  if (inner.order || outer.order) {
+    inner.order = [...(inner.order ?? inner.fields.map((f) => f.name)),
+      ...(outer.order ?? outer.fields.map((f) => f.name))];
+  }
+  if (outer.dividers?.size) {
+    inner.dividers = new Set([...(inner.dividers ?? []), ...outer.dividers]);
+  }
+  group.sections = group.sections.filter((section) => section !== outer);
+  // A tab that lays itself out names its categories and their controls, so both
+  // lists follow the merge rather than being rewritten by hand forty times.
+  if (group.order) group.order = group.order.filter((id) => id !== "margin");
+}
+
+/**
+ * An edge and the corners it turns, in one category.
+ *
+ * Same reasoning as the spacing above: they are one picture — a box with a
+ * thickness on each edge and a radius at each corner — and a category cannot
+ * hold half of one. Most tabs already keep them together; this is for the rest.
+ */
+for (const group of GROUPS) {
+  const edges = group.sections.find((section) => section.id === "border");
+  const corners = group.sections.find((section) => section.id === "corners");
+  if (!edges || !corners) continue;
+  edges.fields = [...edges.fields, ...corners.fields];
+  if (edges.order || corners.order) {
+    edges.order = [...(edges.order ?? edges.fields.map((f) => f.name)),
+      ...(corners.order ?? corners.fields.map((f) => f.name))];
+  }
+  if (corners.dividers?.size) {
+    edges.dividers = new Set([...(edges.dividers ?? []), ...corners.dividers]);
+  }
+  group.sections = group.sections.filter((section) => section !== corners);
+  if (group.order) group.order = group.order.filter((id) => id !== "corners");
+}
+
 const SELECTED_SECTIONS = new Set(["sidebar.entries", "sidebar.subHeadings"]);
 
 for (const group of GROUPS) {

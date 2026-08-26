@@ -103,19 +103,23 @@ function boxPartOf(name) {
   // gathered the handful of prefixed families and left every plain one — which
   // is most of them — spread down the tab as before.
   let m;
+  // An edge and the corners it turns are one family, so they are drawn as one
+  // box: two families meant two boxes, one of them holding nothing but corners.
   if ((m = name.match(new RegExp(`^(.*?)[Bb]order(${sides})(${BOX_PARTS.join("|")})$`)))) {
-    return { family: `${m[1]}Border`, kind: "border", side: m[2], part: m[3] };
+    return { family: `${m[1]}Edges`, kind: "border", side: m[2], part: m[3] };
   }
   if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
-    return { family: `${m[1]}Corner`, kind: "corner", corner: m[2] };
+    return { family: `${m[1]}Edges`, kind: "corner", corner: m[2] };
   }
   // What those four corners are cut to belongs with them: it reads their sizes,
   // and on its own after the run it read as a control about nothing.
   if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
-    return { family: `${m[1]}Corner`, kind: "cornerShape" };
+    return { family: `${m[1]}Edges`, kind: "cornerShape" };
   }
   if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
-    return { family: `${m[1]}${m[2]}`, kind: m[2].toLowerCase(), side: m[3] };
+    // Both rings belong to one family, so the inner four and the outer four are
+    // gathered into the same run and drawn as one box.
+    return { family: `${m[1]}Spacing`, kind: m[2].toLowerCase(), side: m[3] };
   }
   return null;
 }
@@ -205,7 +209,9 @@ function boxRows(fields) {
         // The line the schema drew before this run stays with the family that
         // replaced it, since the run is what it was introducing.
         divider: field.divider,
-        border: [], corners: [], padding: [], margin: []
+        // Two pictures of a box: one for the space inside it and around it, and
+        // one for the edge it is drawn with and the corners that edge turns.
+        border: [], corners: [], spacing: []
       };
       families.set(part.family, box);
       rows.push({ box });
@@ -214,9 +220,9 @@ function boxRows(fields) {
     // the one the schema drew before them, not the family as a whole. The run
     // it belongs to is the one it is the first control of.
     const holds = { border: "border", corner: "corners", cornerShape: "corners",
-      padding: "padding", margin: "margin" };
+      padding: "spacing", margin: "spacing" };
     const held = box[holds[part.kind]];
-    const already = box.border.length + box.corners.length + box.padding.length + box.margin.length;
+    const already = box.border.length + box.corners.length + box.spacing.length;
     if (field.divider && held.length === 0 && already > 0) {
       box.lines ??= {};
       box.lines[part.kind] = true;
@@ -225,6 +231,9 @@ function boxRows(fields) {
       const side = `${part.side} `;
       box.border.push({
         ...field,
+        // The thickness of a side is drawn on that side of the box; its style
+        // and colour are shown for whichever side is chosen.
+        onEdge: part.part === "Width",
         // The line above this run is the run's now: left on the control as
         // well, it was drawn twice.
         divider: false,
@@ -237,7 +246,7 @@ function boxRows(fields) {
       box.corners.push({ ...field, divider: false, corner: part.corner });
     } else if (part.kind === "cornerShape") {
       box.cornerShape = { ...field, divider: false, short: field.plain };
-    } else box[part.kind].push({ ...field, divider: false, side: part.side });
+    } else box.spacing.push({ ...field, divider: false, side: part.side, ring: part.kind });
   }
   // A line introduces a run, and a state's own run is the same run in another
   // state — so it is introduced by the same line. The schema draws dividers
@@ -256,11 +265,11 @@ function boxRows(fields) {
     if (!box) continue;
     // A box holds up to four runs, and each answers for itself: an edge nobody
     // has set stays closed while the corners beside it are open.
-    for (const kind of ["padding", "margin", "corners", "border"]) {
-      box[`${kind}Says`] = runSummary(kind === "corners" && box.cornerShape
-        ? [...box.corners, box.cornerShape] : box[kind]);
-    }
-    box.open = ["padding", "margin", "corners", "border"].some((kind) => box[`${kind}Says`].open);
+    // The edge, its corners and their shape are one run and answer as one.
+    box.edges = [...box.border, ...box.corners, ...(box.cornerShape ? [box.cornerShape] : [])];
+    box.spacingSays = runSummary(box.spacing);
+    box.edgesSays = runSummary(box.edges);
+    box.open = box.spacingSays.open || box.edgesSays.open;
   }
   return rows;
 }
@@ -912,7 +921,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * at the tab, not about the style.
    */
   #activateBoxes() {
-    for (const run of this.element.querySelectorAll('.illuminus-box__run[data-run="border"]')) {
+    for (const run of this.element.querySelectorAll('.illuminus-box__run[data-run="edges"]')) {
       run.dataset.side ||= "Top";
       for (const button of run.querySelectorAll(".illuminus-box__side")) {
         button.addEventListener("click", () => {

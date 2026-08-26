@@ -33,8 +33,10 @@ put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
 put("ILLUMINUS.Box.Unset", "Nothing set");
 put("ILLUMINUS.Box.Shadow", "Shadow");
 put("ILLUMINUS.Box.Picture", "Picture");
-put("ILLUMINUS.Box.Inner", "Inner Spacing");
-put("ILLUMINUS.Box.Outer", "Outer Spacing");
+put("ILLUMINUS.Box.Spacing", "Spacing");
+put("ILLUMINUS.Box.Edges", "Edges and Corners");
+put("ILLUMINUS.Box.Inner", "Inside");
+put("ILLUMINUS.Box.Outer", "Around");
 put("ILLUMINUS.Box.Corners", "Corners");
 put("ILLUMINUS.Box.Edge", "Edge");
 put("ILLUMINUS.Box.WhichSide", "Which side");
@@ -424,6 +426,7 @@ const SECTION_TEXT = {
   imageCaption: ["Image Caption", "The words printed under a picture"],
   cellStyles: ["Cell Styles", "The room inside a cell and the lines drawn around it"],
   pageFillAndImage: ["Fill and Image", "The color and picture behind the contents, and the shadows they cast — Foundry's window clips the outer one, so it shows in an exported page rather than at the table"],
+  spacing: ["Spacing", "The space inside this and the space around it"],
   toolbar: ["Editing Bar", "The strip the editing controls stand on, above the prose"],
   toolbarIcons: ["Editing Icons", "Each icon on that strip \u2014 bold, italic, and the rest"],
   settingsBar: ["Page Settings Bar", "The strip holding the page's own settings, above the editing bar"],

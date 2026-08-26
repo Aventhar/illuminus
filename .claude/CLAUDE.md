@@ -926,6 +926,16 @@ are drawn — so it needs no wording and cannot drift from what it describes. A 
 style says nothing about reads "Nothing set" and starts folded; one the style has set
 starts open, so a tab opens showing what the style *does*.
 
+**A box is drawn twice, as two pictures.** Spacing is one — the outer four around a
+dashed ring, the inner four on the box, and no outer ring at all where a thing has no
+space around it to set. Edges and corners are the other — a thickness on each edge, a
+radius at each corner, the chosen side's style and colour beneath, and the corner shape
+under it. Both merges happen in the schema, so a tab that kept Inner Spacing and Outer
+Spacing (or Border and Corners) apart ends up with one category and both orders follow;
+the tab maps did not have to be rewritten. **One family key per picture**: padding and
+margin both key to `<prefix>Spacing`, border and corners both to `<prefix>Edges`. Keying
+them apart is what produced two boxes per category, one holding nothing but corners.
+
 **A corner has a size and a shape.** `corner-shape` (Chromium 139+, and this is a
 Chromium app) sits beside `border-radius` and reads the same four sizes, so a corner set
 to 12 becomes a 12px bevel or scoop with no second measurement. It is a value like any

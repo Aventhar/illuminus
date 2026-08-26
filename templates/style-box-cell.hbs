@@ -3,6 +3,6 @@
       whole `.illuminus-field` is kept so that everything reading the controls
       goes on working; its label is hidden by the stylesheet and read by the
       search box, which is how a side is still findable by name. --}}
-<div class="illuminus-box__cell" data-place="{{place}}">
+<div class="illuminus-box__cell" data-place="{{place}}" {{#if ring}}data-ring="{{ring}}"{{/if}}>
   {{> "modules/illuminus/templates/style-field.hbs" field=field}}
 </div>

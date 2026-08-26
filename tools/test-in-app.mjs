@@ -3927,7 +3927,10 @@ try {
   // Show Title, because whether the name is drawn at all comes before how it looks.
   check(sh.textNotFirst.filter((tab) => !sh.ownOrder?.includes(tab)).length === 0,
     `Text comes first wherever it exists${sh.textNotFirst.length ? ` (not on ${sh.textNotFirst.join(", ")})` : ""}`);
-  check(sh.boxes.join() === "Size and Position,Text,Fill and Image,Inner Spacing"
+  // The space inside a thing and the space around it are one category now,
+  // because they are one picture: a box with the inner four in it and the outer
+  // four around it.
+  check(sh.boxes.join() === "Size and Position,Text,Fill and Image,Spacing"
     && sh.tag.join() === sh.boxes.join(),
     `a box and a tag open the same way (${sh.boxes.join(" > ")})`);
   check(!sh.lettering, "and nothing is called Lettering any more");
@@ -5996,7 +5999,7 @@ try {
   const t = JSON.parse(laid);
   const names = t.sections.map((s) => s.name);
   check(JSON.stringify(names) === JSON.stringify(
-    ["Size and Position", "Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border"]),
+    ["Size and Position", "Text", "Fill and Image", "Spacing", "Border"]),
     `the categories read in the order they were given (${names.join(" > ")})`);
   const text = t.sections.find((s) => s.name === "Text").rows;
   check(JSON.stringify(text) === JSON.stringify([
@@ -6015,16 +6018,19 @@ try {
   // are gone with the runs they separated: an edge is gathered into a single
   // run with a side to choose, so Top no longer needs a line to tell it from
   // Bottom — they are never both on show.
-  check(border.slice(0, 3).join(", ") === "Top Style, Top Color, Top Thickness"
-    && border.filter((row) => row === "---").length === 1
-    // The four corners, and under them what they are cut to: the shape reads
-    // their sizes, so it belongs with them rather than on its own.
-    && border.at(-2) === "Bottom-Right Corner" && border.at(-1) === "Corner Shape",
-    `Border reads a side at a time and ends with the corners and their shape `
-    + `(${border.filter((row) => row === "---").length} line, ends ${border.at(-1)})`);
+  // One picture, read in the order it is drawn: the corners at the corners, the
+  // thicknesses on the edges, then the style and color of whichever side is
+  // chosen, and under it all what those corners are cut to. No line anywhere —
+  // a line drawn inside one picture separates nothing.
+  check(border.slice(0, 4).every((row) => row.endsWith("Corner"))
+    && border.includes("Top Thickness") && border.includes("Top Style")
+    && border.filter((row) => row === "---").length === 0
+    && border.at(-1) === "Corner Shape",
+    `Border is one box: corners, thicknesses, the chosen side, and the shape `
+    + `(${border.slice(0, 4).join(", ")} … ${border.at(-1)})`);
   const pageNames = t.page.map((s) => s.name);
   check(JSON.stringify(pageNames) === JSON.stringify(
-    ["Size and Position", "Fill and Image", "Inner Spacing", "Border"]),
+    ["Size and Position", "Fill and Image", "Spacing", "Border"]),
     `the Page tab reads the same way (${pageNames.join(" > ")})`);
   const pageFill = t.page.find((s) => s.name === "Fill and Image").rows;
   check(pageFill[0] === "Fill Color" && pageFill.filter((row) => row === "---").length === 3
@@ -6032,7 +6038,7 @@ try {
     `with the surface's picture and both its shadows in one category (${pageFill.length} rows)`);
   const headingNames = t.heading.map((s) => s.name);
   check(JSON.stringify(headingNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Columns", "Folding"]),
+    ["Text", "Fill and Image", "Spacing", "Border", "Columns", "Folding"]),
     `a heading level reads the same way (${headingNames.join(" > ")})`);
   const headingText = t.heading.find((s) => s.name === "Text").rows;
   check(headingText.filter((row) => row === "---").length === 3
@@ -6073,11 +6079,11 @@ try {
     `a cell's room and its edges in one category (${cells.length} rows)`);
   const boxNames = t.boxes.map((s) => s.name);
   check(JSON.stringify(boxNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Collapsible"]),
+    ["Text", "Fill and Image", "Spacing", "Border", "Collapsible"]),
     `Boxes reads the same way (${boxNames.join(" > ")})`);
   const secretNames = t.secrets.map((s) => s.name);
   check(JSON.stringify(secretNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Inner Spacing", "Outer Spacing", "Border", "Once Revealed",
+    ["Text", "Fill and Image", "Spacing", "Border", "Once Revealed",
      "Reveal Button"]),
     `and Secrets ends with what reveals it (${secretNames.join(" > ")})`);
   const button = t.secrets.find((s) => s.name === "Reveal Button").rows;
@@ -6086,11 +6092,11 @@ try {
   // The seven laid out from the map rather than in their own literal: the
   // categories they were given, in the order they were given them.
   const laidTabs = {
-    images: ["Size and Position", "Inner Spacing", "Outer Spacing", "Border", "Image Caption",
+    images: ["Size and Position", "Spacing", "Border", "Image Caption",
       "Sound and Video"],
-    boxStyles: ["Size and Position", "Text", "Fill and Image", "Inner Spacing", "Outer Spacing",
+    boxStyles: ["Size and Position", "Text", "Fill and Image", "Spacing",
       "Border", "Headings Inside"],
-    sidebar: ["Size and Position", "Fill and Image", "Inner Spacing", "Border", "Categories",
+    sidebar: ["Size and Position", "Fill and Image", "Spacing", "Border", "Categories",
       "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
     window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
     editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
@@ -6501,7 +6507,7 @@ try {
     for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
     await new Promise(r => setTimeout(r, 400));
 
-    const edge = tab.querySelector('.illuminus-box__run[data-run="border"]');
+    const edge = tab.querySelector('.illuminus-box__run[data-run="edges"]');
     // Opened first, as a person opens it: a run the style says nothing about
     // starts folded away behind the line that says so.
     edge.open = true;
