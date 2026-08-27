@@ -371,6 +371,16 @@ explicitly. Its three selectors sat at the head of level 1's selector list; movi
 rules into the generator by cutting from `.journal-page-content h1 {` left them orphaned
 and the title unstyled, which is now covered by a check.
 
+**A page rule reaches the editor's own furniture.** ProseMirror's content element
+carries `journal-page-content` too, and the editing toolbar is built from
+`<menu><ul><li>`. So the Default List rules — written for `.journal-page-content
+ul` — matched every drop-down: core hides those entries with `display: none`
+from its **compatibility** layer, and a module-layer rule beats that however it
+is written, so every menu unfurled at once over the page with our bullets on
+each entry. The list selectors carry `:not(menu *)` for this. Anything else
+matching `ul`, `ol`, `li`, `button` or `input` under the page content wants the
+same thought: the editor is inside the page, not beside it.
+
 ## Folding
 
 A heading can fold the run of text beneath it, and a contents entry can fold the
@@ -390,6 +400,12 @@ inside an editor**, and **it undoes itself first**.
 - **One glyph, turned.** Open is the ordinary glyph rotated by Marker Turn
   (90° by default, pointing a sideways arrow downwards); folded is the same glyph
   at rest. Two glyphs would be two controls saying one thing.
+- **The page's title is a level 1 heading, and usually the only one.** Foundry
+  renders it in `.journal-page-header`, outside the content, so it has no
+  siblings to walk and `runAfter` finds nothing — `markTitle` marks it apart and
+  gives it the whole content to fold. Without that, ticking Can Be Folded on
+  Heading 1 did nothing on any ordinary page, which reads as the control being
+  broken rather than as the title being out of reach.
 - **What a heading governs is what follows it until a heading of its own level
   or shallower** — asked for on every click, because the flow wrappers are
   rebuilt on every render.

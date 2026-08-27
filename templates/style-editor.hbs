@@ -39,6 +39,7 @@
   <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
 
     <div class="illuminus-tab__tools">
+      <h3 class="illuminus-tab__name">{{group.label}}</h3>
       <button type="button" class="illuminus-reset" data-action="resetGroup"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
         <i class="fa-solid fa-rotate-left"></i>
@@ -52,13 +53,6 @@
     </div>
 
     <header class="illuminus-tab__head">
-      {{#if group.hoverOff}}
-      <label class="illuminus-hover-off">
-        <input type="checkbox" name="{{group.hoverOff.path}}" data-dtype="Boolean"
-               {{checked group.hoverOff.checked}}>
-        <span>{{group.hoverOff.label}}</span>
-      </label>
-      {{/if}}
       {{!-- Behind an icon like every other explanation. It stays in the markup
             for the search box, and at a narrow settings column a paragraph
             here pushed the first control most of the way down the pane. --}}
@@ -131,6 +125,7 @@
   <section class="tab illuminus-tab {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
 
     <div class="illuminus-tab__tools">
+      <h3 class="illuminus-tab__name">{{family.current.label}}</h3>
       <button type="button" class="illuminus-reset" data-action="resetGroup"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
         <i class="fa-solid fa-rotate-left"></i>
@@ -144,13 +139,6 @@
     </div>
 
     <header class="illuminus-tab__head illuminus-family__head">
-      {{#if family.current.hoverOff}}
-      <label class="illuminus-hover-off">
-        <input type="checkbox" name="{{family.current.hoverOff.path}}" data-dtype="Boolean"
-               {{checked family.current.hoverOff.checked}}>
-        <span>{{family.current.hoverOff.label}}</span>
-      </label>
-      {{/if}}
       <select data-family-picker="{{family.id}}" aria-label="{{family.nameLabel}}">
         {{#each family.members as |member|}}
         <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>
@@ -234,6 +222,24 @@
          data-tooltip="{{localize 'ILLUMINUS.Editor.ResizePreview'}}"></div>
     <header class="illuminus-preview__head">
       <h4>{{localize "ILLUMINUS.Editor.PreviewTitle"}}</h4>
+      {{!-- How large the sample is drawn. It changes nothing about the style —
+            it is a magnifying glass held over the sample, so that a hairline
+            border or a drop cap's outline can be judged without leaning in. --}}
+      <label class="illuminus-preview__zoom">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span class="illuminus-preview__zoom-label">{{localize "ILLUMINUS.Editor.Zoom"}}</span>
+        <input type="range" min="50" max="200" step="10" value="100"
+               aria-label="{{localize 'ILLUMINUS.Editor.Zoom'}}">
+        <output class="illuminus-preview__zoom-read">100%</output>
+      </label>
+      {{!-- The sample answers the pointer the way a real journal does, which is
+            useful for judging a hovered colour and a nuisance the rest of the
+            time — every stray pass of the mouse repaints something. Off by
+            default; clicking a piece to jump to its settings still works. --}}
+      <label class="illuminus-preview__quiet">
+        <input type="checkbox" class="illuminus-preview__quiet-box" checked>
+        <span>{{localize "ILLUMINUS.Editor.QuietSample"}}</span>
+      </label>
     </header>
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}

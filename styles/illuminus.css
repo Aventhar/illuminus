@@ -1791,22 +1791,6 @@
   margin-top: 0.5rem;
 }
 
-/* The switch that turns a tab's hovered state off, and what it greys out. The
-   controls stay in place rather than disappearing: a control that vanishes
-   leaves you wondering what you lost, and the switch is right there. */
-.illuminus-hover-off {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-.illuminus-field.is-hover-off,
-.illuminus-state__option.is-hover-off {
-  opacity: 0.4;
-  pointer-events: none;
-}
 
 .illuminus-state__copy.is-hidden {
   display: none;
@@ -2165,8 +2149,38 @@
    changes what the tab shows. */
 .illuminus-tab__tools {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 0.4rem;
+}
+
+/* What a control is for, shown on the click that asks.
+   Foundry's tooltip takes plain text, so the paragraphs an explanation is
+   written in survive only if the line breaks are honoured — without this the
+   whole thing runs together into one grey wall. */
+#tooltip.illuminus-hint-tooltip {
+  max-width: 26rem;
+  white-space: pre-line;
+  text-align: left;
+  line-height: 1.45;
+}
+
+/* Which part these settings belong to. The tree marks it on the left of the
+   window, and this says it again over the controls it opened — a person who
+   has scrolled a thousand settings should not have to look back to the tree to
+   remember what they are editing. */
+.illuminus-tab__name {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: none;
+  font-size: var(--font-size-16, 16px);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text-light-highlight, #f0f0e0);
 }
 
 .illuminus-tab__head {
@@ -3054,6 +3068,44 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   background: var(--color-border-highlight, #ff6400);
 }
 
+/* The magnifying glass over the sample. Deliberately small and quiet: it says
+   nothing about the style, and should not read as one of its controls. */
+.illuminus-preview__zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  font-size: var(--font-size-11, 11px);
+  color: var(--color-text-light-6, rgb(255 255 255 / 55%));
+}
+
+/* Nothing inside the sample takes the pointer, so no :hover rule inside it can
+   match. The frame itself still does, so it still scrolls — and a click is
+   answered by asking what sits under it with this lifted for an instant. */
+.illuminus-preview__frame.is-quiet .illuminus-preview__window {
+  pointer-events: none;
+}
+
+.illuminus-preview__quiet {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-11, 11px);
+  color: var(--color-text-light-6, rgb(255 255 255 / 55%));
+  white-space: nowrap;
+}
+
+.illuminus-preview__zoom input[type="range"] {
+  width: 7rem;
+  flex: 0 0 auto;
+}
+
+.illuminus-preview__zoom-read {
+  min-width: 2.6rem;
+  font-family: var(--font-monospace, monospace);
+  text-align: right;
+}
+
 .illuminus-preview__head {
   display: flex;
   align-items: center;
@@ -3086,6 +3138,9 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  /* `zoom` rather than a transform: it reflows, so the frame scrolls honestly
+     and nothing inside becomes a containing block it was not before. */
+  zoom: var(--illuminus-sample-zoom, 1);
 }
 
 .illuminus-preview__sheet {

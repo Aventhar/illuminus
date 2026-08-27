@@ -31,7 +31,7 @@ const fieldText = (group, field, part) =>
 
 /** The state a control is named for, and the name with that word taken out. */
 const stateOf = (name) => (/^active|Active(?=[A-Z])/.test(name) ? "Selected"
-  : /hover/i.test(name) && name !== "hoverOff" ? "Hovered" : "Normal");
+  : /hover/i.test(name) ? "Hovered" : "Normal");
 const stemOf = (name) => {
   const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
   if (stripped === name || !stripped) return name;

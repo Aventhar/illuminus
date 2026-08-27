@@ -3191,30 +3191,9 @@ for (const [parentId, parts] of Object.entries(SPLIT)) {
   GROUPS.splice(at + 1, 0, ...made);
 }
 
-/**
- * The tabs whose switch starts off, so their hovered state is on.
- *
- * Everywhere else a hovered control is derived and starts empty, so leaving the
- * state switched off changes nothing until somebody fills one in. These four
- * spell their hovered colors out by hand and ship real values for them — a
- * button that lights up under the pointer, a page entry that answers to it, a
- * link that brightens, a Reveal button that does — so starting them switched
- * off would take away something the style already does. They are also the four
- * whose elements are pointed at on purpose rather than merely passed over.
- */
-const HOVER_ON = new Set([
-  "window", "links", "secrets",
-  // The contents panel and every part it holds: the entries, the buttons and
-  // the search box are where its hand-written hovered colors live, so leaving
-  // the parts out would switch off exactly what this list exists to protect.
-  "sidebar",
-  "sidebarEntries", "sidebarHeadings", "sidebarCategories",
-  "sidebarSearch", "sidebarButtons", "sidebarNumbers"
-]);
-
 /** Whether a control names a hovered state, in either spelling. */
 export function isHoveredField(name) {
-  return name !== "hoverOff" && /hover/i.test(name);
+  return /hover/i.test(name);
 }
 
 /**
@@ -3306,14 +3285,6 @@ for (const group of GROUPS) {
       }
   }
 
-  // A switch for the whole tab, on every tab that has anything to switch —
-  // derived or written by hand. It rides in the first section as chrome:
-  // stored and exported like any other value, but drawn beside the tab's name
-  // rather than in the list, because it governs the list.
-  if (![...taken].some(isHoveredField)) continue;
-  group.sections[0].fields.push({
-    type: "toggle", name: "hoverOff", default: !HOVER_ON.has(group.id), chrome: true, emit: () => null
-  });
 }
 
 /**
@@ -3458,7 +3429,7 @@ const SECTION_ORDER = [
  * identical wherever they appear, and are left out.
  */
 /** Whether a name belongs to a state rather than to the ordinary control. */
-const stateNamed = (name) => name !== "hoverOff" && /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
+const stateNamed = (name) => /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
 
 const FIELD_ORDER = {
   text: [

@@ -137,16 +137,24 @@ const listTargets = (group) => {
   }
   // A list nobody has treated, and the items inside one — said as "not inside a
   // treated list" so a plain item within a treatment follows the treatment.
-  const plain = (tag) => `${page} ${tag}:not(.illuminus-list)`;
+  //
+  // And never inside a `<menu>`. The page editor's toolbar is built from menus
+  // of lists, and ProseMirror's content element carries `journal-page-content`
+  // too — so without this, the Default List rules reach the editor's drop-downs.
+  // Core hides their entries with `display: none` from its compatibility layer,
+  // which a module layer beats however it is written: every menu unfurled at
+  // once, over the page, with our bullets beside each entry.
+  const loose = ":not(.illuminus-list):not(menu *)";
+  const plain = (tag) => `${page} ${tag}${loose}`;
   return {
     list: `${plain("ul")},\n${plain("ol")}`,
     ul: plain("ul"),
     ol: plain("ol"),
     dl: plain("dl"),
-    item: `${page} li:not(.illuminus-list li)`,
-    marker: `${page} li:not(.illuminus-list li)::marker`,
-    term: `${page} dt:not(.illuminus-list dt)`,
-    detail: `${page} dd:not(.illuminus-list dd)`
+    item: `${page} li:not(.illuminus-list li):not(menu *)`,
+    marker: `${page} li:not(.illuminus-list li):not(menu *)::marker`,
+    term: `${page} dt:not(.illuminus-list dt):not(menu *)`,
+    detail: `${page} dd:not(.illuminus-list dd):not(menu *)`
   };
 };
 

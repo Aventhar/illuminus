@@ -132,6 +132,26 @@ function markHeadings(content, pageId) {
 }
 
 /**
+ * The page's own title, which is a level 1 heading that governs the whole page.
+ *
+ * Foundry renders it in `.journal-page-header`, outside the content — so it has
+ * no siblings to walk and `runAfter` finds nothing. What it governs is simply
+ * the content, which is why it is marked apart from the rest.
+ *
+ * Without this, ticking Can Be Folded on Heading 1 did nothing on any ordinary
+ * page: a page's only level 1 heading is usually its title, and an author who
+ * writes one *inside* the content as well is the rare case rather than the
+ * common one. The stylesheet has always had a rule for a marker here.
+ */
+function markTitle(content, pageId) {
+  const page = content.closest(".journal-entry-page") ?? content.parentElement;
+  const title = page?.querySelector(".journal-page-header h1");
+  if (!title || title.querySelector(`.${FOLD_CLASS}`)) return;
+  const key = `${pageId}:title`;
+  fold(title, title, key, () => [content]);
+}
+
+/**
  * Give every heading that governs something a marker, in a rendered sheet.
  * @param {HTMLElement} root
  */
@@ -145,6 +165,8 @@ export function markFolds(root) {
     // it says what it is instead.
     if (content.closest("prose-mirror, .illuminus-preview__editor")
       || content.isContentEditable) continue;
-    markHeadings(content, content.closest("[data-page-id]")?.dataset.pageId ?? "");
+    const pageId = content.closest("[data-page-id]")?.dataset.pageId ?? "";
+    markHeadings(content, pageId);
+    markTitle(content, pageId);
   }
 }

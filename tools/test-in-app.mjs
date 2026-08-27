@@ -88,7 +88,8 @@ check(await cdp.evaluate(`!!game.modules.get("illuminus")?.active`), "module is 
 check(errorsBefore.length === 0, `no exceptions from illuminus during boot${errorsBefore.length ? `: ${errorsBefore[0].text}` : ""}`);
 check(await cdp.evaluate(`!!game.modules.get("illuminus")?.api?.openManager`), "public API is published");
 
-// The module ships no styles, so the suite makes the one it needs. Everything
+// The bundled samples are cleared away and the suite makes the one it needs, so
+// a run is not shaped by what a fresh world happens to seed. Everything
 // after this looks it up the same way — the first style in the world — so a run
 // that starts dirty fails here, loudly, rather than three checks later.
 console.log("\n[2] A style to work with");
@@ -3270,7 +3271,7 @@ try {
 // the layer selector is right: `a, b::before` attaches the pseudo-element to b
 // alone and puts its declarations on a itself, which took every content link
 // out of the flow of the page.
-console.log("\n[54] Hovered states are off until asked for");
+console.log("\n[54] A hovered value is emitted only once it is filled in");
 try {
   const off = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -3282,7 +3283,7 @@ try {
     }
     const style = await api.createStyle({name: "Hover Off Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-    Object.assign(settings.boxes, {background: "#123456", hoverBackground: "#ff0000"});
+    Object.assign(settings.boxes, {background: "#123456"});
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Hover Off Journal"});
@@ -3296,15 +3297,16 @@ try {
     const sheet = document.getElementById("illuminus-compiled-styles").textContent;
     const link = root.querySelector(".journal-page-content a.content-link");
     const out = {
-      // Switched off by default, so the hovered value is never emitted.
+      // Unset, so it is never emitted — and the :hover rule falls through to
+      // the ordinary value on its own.
       offByDefault: !/--ill-boxes-hover-background/.test(sheet),
       // A content link stays in the line it was written in.
       linkPosition: getComputedStyle(link).position,
       linkInline: getComputedStyle(link).display
     };
 
-    // Turned on, the value reaches the stylesheet.
-    settings.boxes.hoverOff = false;
+    // Filled in, the value reaches the stylesheet.
+    settings.boxes.hoverBackground = "#ff0000";
     await api.updateStyle(style.id, {settings});
     await new Promise(r => setTimeout(r, 400));
     out.onWhenAsked = /--ill-boxes-hover-background/
@@ -3316,8 +3318,8 @@ try {
     return JSON.stringify(out);
   })()`);
   const ho = JSON.parse(off);
-  check(ho.offByDefault, "a tab's hovered values stay out of the stylesheet until the state is switched on");
-  check(ho.onWhenAsked, "and reach it once it is");
+  check(ho.offByDefault, "an unset hovered control stays out of the stylesheet");
+  check(ho.onWhenAsked, "and reaches it once it is filled in");
   check(ho.linkPosition !== "absolute" && ho.linkInline === "inline",
     `a content link stays in its line (${ho.linkPosition}, ${ho.linkInline})`);
 } finally {
@@ -3550,11 +3552,20 @@ try {
     const api = game.modules.get("illuminus").api;
     const out = {};
 
-    // The way back from deleting a sample. The module bundles none at the
-    // moment, so what is checked is that asking says so plainly instead of
-    // throwing or quietly claiming to have done something — and the same call
-    // still works for templates, which are bundled.
+    // The way back from deleting a sample. Every bundled style is deleted and
+    // then asked for again: restoring has to put back exactly what was lost,
+    // under the same ids, rather than a second copy beside it.
+    const { PRESETS } = await import("/modules/illuminus/scripts/presets.mjs");
+    out.bundled = PRESETS.length;
+    for (const preset of PRESETS) {
+      if (api.getStyle(preset.id)) await api.deleteStyle(preset.id);
+    }
+    out.afterDeleting = PRESETS.filter((p) => api.getStyle(p.id)).length;
     out.styleRestore = await api.restorePresets();
+    out.afterRestoring = PRESETS.filter((p) => api.getStyle(p.id)).length;
+    // Asking twice must not double them: a sample already there is left alone.
+    out.secondRestore = await api.restorePresets();
+    out.stillOnce = PRESETS.filter((p) => api.getStyle(p.id)).length;
     out.templatesBefore = api.listTemplates().length;
     const template = api.listTemplates().find(t => t.preset);
     out.hadTemplate = !!template;
@@ -3577,8 +3588,13 @@ try {
     return JSON.stringify(out);
   })()`);
   const ex = JSON.parse(extras);
-  check(ex.styleRestore === 0,
-    `with no sample styles bundled, restoring them puts nothing back (${ex.styleRestore})`);
+  check(ex.bundled > 0, `sample styles ship with the module (${ex.bundled})`);
+  check(ex.afterDeleting === 0 && ex.styleRestore === ex.bundled,
+    `deleting every sample and restoring puts them all back (${ex.styleRestore} of ${ex.bundled})`);
+  check(ex.afterRestoring === ex.bundled,
+    `and each is there under the id it had (${ex.afterRestoring})`);
+  check(ex.secondRestore === 0 && ex.stillOnce === ex.bundled,
+    `while asking again puts back nothing, rather than a second copy (${ex.stillOnce})`);
   check(ex.hadTemplate && ex.templateRestore === 1 && ex.templatesAfter === ex.templatesBefore,
     `a deleted sample template comes back, once (${ex.templateRestore} restored, `
     + `${ex.templatesBefore} before and ${ex.templatesAfter} after)`);
@@ -3606,10 +3622,6 @@ try {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-    // Hovered states are off until asked for, so this asks.
-    settings.heading1.hoverOff = false;
-    settings.boxes.hoverOff = false;
-    settings.heading2.hoverOff = false;
     settings.heading1.hoverColor = "#00ff00";
     settings.boxes.hoverBackground = "#123456";
     settings.heading2.hoverBorderTopColor = "#ff8800";
@@ -3617,7 +3629,6 @@ try {
     settings.heading2.borderTopStyle = "solid";
     // A button's corners, which are a number rather than a color: the twin has
     // to reach a size as well as a paint, and Match must not have flattened it.
-    settings.sidebarButtons.hoverOff = false;
     settings.sidebarButtons.buttonCornerTopLeft = 2;
     settings.sidebarButtons.hoverButtonCornerTopLeft = 24;
     await api.updateStyle(style.id, {settings});
@@ -4962,78 +4973,12 @@ check(new Set(drawn).size === 1, `and all six are drawn at one size (${JSON.stri
 check((hs.titleLayer ?? "").includes("mystery-man"),
   `heading 1's picture reaches the page title (got ${hs.titleLayer})`);
 
-console.log("\n[52] The hovered-state switch, tab by tab");
-// Three tabs used to have no switch at all: Lists had nothing hovered to
-// switch, and the contents panel and the window were left out of the deriving
-// because they state their hovered colors by hand. They have one now, and it
-// has to bite on colors the schema ships rather than only on empty ones.
-{
-  const layout = await cdp.evaluate(`(async () => {
-    const api = game.modules.get("illuminus").api;
-    const style = await api.createStyle({name: "Hover Switch Probe"});
-    try {
-      const app = await api.openEditor(style.id);
-      await new Promise(r => setTimeout(r, 1200));
-      const out = {};
-      for (const tab of ["lists", "sidebar", "sidebarEntries", "window", "links", "secrets"]) {
-        app.changeTab(tab, "sheet");
-        await new Promise(r => setTimeout(r, 250));
-        const el = app.element.querySelector('.illuminus-tab[data-tab="' + tab + '"]');
-        for (const section of el.querySelectorAll("details.illuminus-section")) section.open = true;
-        await new Promise(r => setTimeout(r, 350));
-        const box = el.querySelector('input[name$=".hoverOff"]');
-        out[tab] = {
-          present: !!box,
-          checked: box ? box.checked : null,
-          states: [...el.querySelectorAll(".illuminus-section")]
-            .filter((section) => section.querySelector('.illuminus-state__option[data-state="hover"]'))
-            .length,
-          // Which sections have none, by name: the contents panel and the
-          // window were derived for only where they already stated one by hand,
-          // so most of their settings governed both states at once.
-          without: [...el.querySelectorAll("details.illuminus-section")]
-            .filter((section) => !section.querySelector('.illuminus-state__option[data-state="hover"]'))
-            .map((section) => section.querySelector(".illuminus-section__label")?.textContent.trim()),
-          // The contents panel's switch offers current-page as well as
-          // pointed-at, and turning the hovered state off must not put the
-          // current page out of reach with it.
-          reachable: [...el.querySelectorAll('.illuminus-state__option[data-state="active"]')]
-            .every((option) => !option.classList.contains("is-hover-off"))
-        };
-      }
-      await app.close({force: true});
-      return JSON.stringify(out);
-    } finally { await api.deleteStyle(style.id); }
-  })()`);
-  const sw = JSON.parse(layout);
-  const tabs = ["lists", "sidebar", "window", "links", "secrets"];
-  check(tabs.every((tab) => sw[tab].present),
-    `every tab holding anything hovered has the switch (${tabs.length} of ${tabs.length})`);
-  check(sw.lists.checked === true, `Lists starts switched off (${sw.lists.checked})`);
-  // The four tabs whose hovered colors ship with real values start switched on,
-  // because switching them off would take away what a style already does.
-  check(["sidebar", "window", "links", "secrets"].every((tab) => sw[tab].checked === false),
-    `the panel, the window, links and secrets start switched on `
-    + `(${["sidebar", "window", "links", "secrets"].map((tab) => sw[tab].checked).join(", ")})`);
-  check(sw.lists.states >= 2 && sw.sidebar.states >= 2 && sw.window.states >= 2,
-    `and each offers the two states where it has both (${sw.lists.states}, ${sw.sidebar.states}, ${sw.window.states})`);
-  // Every section of the panel and the window, not the few that spelled a
-  // hovered color out by hand: a control that governs both states at once is a
-  // control that cannot say what it is for.
-  check(sw.sidebar.without.length === 0 && sw.window.without.length === 0,
-    `and every section of the panel and the window offers it`
-    + `${[...sw.sidebar.without, ...sw.window.without].length ? ` (missing from ${[...sw.sidebar.without, ...sw.window.without].join(", ")})` : ""}`);
-  // The current-page controls belong to a listed page, which is a part of its
-  // own now — so the switch that must not put them out of reach is that part's.
-  check(sw.sidebarEntries.reachable,
-    "the current-page controls stay reachable while hovered is off");
-}
 
 try {
   const setup = JSON.parse(await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Effect Probe", settings: {
-      lists: {markerColor: "#112233", markerHoverColor: "#ff0000", hoverOff: false},
+      lists: {markerColor: "#112233", markerHoverColor: "#ff0000"},
       sidebarButtons: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
     }});
     const entry = await JournalEntry.create({name: "Illuminus Hover Journal"});
@@ -5080,32 +5025,7 @@ try {
   check(overItem.marker === "rgb(255, 0, 0)", `a pointed-at list marker takes its hovered color (got ${overItem.marker})`);
   check(overButton.onButton, "the pointer really reaches the panel's button");
   check(overButton.button === "rgb(0, 255, 0)",
-    `and a panel button takes its hovered color while the switch is off (got ${overButton.button})`);
-
-  await cdp.evaluate(`(async () => {
-    const api = game.modules.get("illuminus").api;
-    const style = api.getStyle(${JSON.stringify(setup.styleId)});
-    const settings = foundry.utils.deepClone(style.settings);
-    settings.lists.hoverOff = true;
-    settings.sidebarButtons = {...settings.sidebarButtons, hoverOff: true};
-    await api.updateStyle(style.id, {settings});
-    await new Promise(r => setTimeout(r, 500));
-  })()`);
-
-  await cdp.mouse("mouseMoved", ...setup.li);
-  await new Promise((r) => setTimeout(r, 250));
-  const quietItem = await paint();
-  await cdp.mouse("mouseMoved", ...setup.button);
-  await new Promise((r) => setTimeout(r, 250));
-  const quietButton = await paint();
-
-  check(quietItem.marker === "rgb(17, 34, 51)",
-    `switching the state off leaves the marker alone (got ${quietItem.marker})`);
-  // The one the skeleton's own default used to win: a shipped hovered color is
-  // painted for every style, so switching off has to say something rather than
-  // merely stay quiet.
-  check(quietButton.button === "rgb(17, 34, 51)",
-    `and beats the shipped hovered color on a panel button (got ${quietButton.button})`);
+    `and a panel button takes its hovered color (got ${overButton.button})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -5638,22 +5558,18 @@ try {
   })()`);
 }
 
-// Ticking Disable Hovered State means the ordinary settings are the whole of
-// what a style says: pointing at something may still do whatever Foundry does,
-// and must do nothing more. Proved by comparing a styled journal against an
-// unstyled one — the properties that change under the pointer must be no more
-// than core's own.
-console.log("\n[59] With the hovered state off, only the ordinary settings apply");
+// A style that fills in no hovered value says nothing about being pointed at:
+// every hovered control is derived and starts empty, so the `:hover` rules fall
+// through to the ordinary ones. Pointing may still do whatever Foundry does, and
+// must do nothing more. Proved by comparing a styled journal against an unstyled
+// one — the properties that change under the pointer must be no more than
+// core's own.
+console.log("\n[59] A style that sets no hovered value changes nothing under the pointer");
 try {
   const start = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Off Probe"});
     const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-    // Every tab, not the four that start switched on: this is the question the
-    // tick box asks, and it has to answer the same way everywhere.
-    for (const group of Object.values(settings)) {
-      if (typeof group === "object" && "hoverOff" in group) group.hoverOff = true;
-    }
     await api.updateStyle(style.id, {settings});
 
     const content = "<h2>Heading</h2><p>Some words and a <a class='content-link'>link</a>.</p>"
@@ -5738,12 +5654,15 @@ try {
     if (styled.hovering) reached += 1;
     else missed.push(what + " (pointer reached " + styled.topmost + ")");
     const beyond = styled.changed.filter((name) => !plain.changed.includes(name));
-    if (beyond.length) extra.push(what + ": " + beyond.join(", "));
+    // The contents panel's buttons ship a hovered look of their own — that is
+    // the one place the module deliberately answers the pointer where Foundry
+    // does not, and it is why they are named here rather than quietly passed.
+    if (beyond.length && !/panel button/.test(what)) extra.push(what + ": " + beyond.join(", "));
   }
   check(reached >= 6, `the pointer reached ${reached} of ${targets.length} things to point at`
     + `${missed.length ? `:\n      ${missed.join("\n      ")}` : ""}`);
   check(extra.length === 0,
-    `and with the switch off none of them changes beyond what Foundry does itself`
+    `and none of them changes beyond what Foundry does itself`
     + `${extra.length ? `:\n      ${extra.join("\n      ")}` : ""}`);
 } finally {
   await cdp.evaluate(`(async () => {
@@ -7460,7 +7379,11 @@ try {
       tab: el.querySelector(".illuminus-tab.active")?.dataset.tab,
       picker: el.querySelector('[data-family-picker="headings"]')?.value,
       marked: [...el.querySelectorAll(".illuminus-tree__part.is-current")]
-        .map((p) => p.dataset.member ?? p.dataset.tab)
+        .map((p) => p.dataset.member ?? p.dataset.tab),
+      // What the settings pane says it is showing, against what the tree marks.
+      named: el.querySelector(".illuminus-tab.active .illuminus-tab__name")?.textContent.trim(),
+      treeSays: el.querySelector(".illuminus-tree__part.is-current .illuminus-tree__name")
+        ?.textContent.trim()
     };
     await app.close({force: true});
     return JSON.stringify({
@@ -7481,6 +7404,9 @@ try {
   // One mark, on the level itself rather than on every level of the family.
   check(walked.opened.marked.length === 1 && walked.opened.marked[0] === "heading4",
     `and just that one part is marked (${walked.opened.marked.join(", ") || "none"})`);
+  // The settings say which part they belong to, in the same words the tree uses.
+  check(walked.opened.named === walked.opened.treeSays && Boolean(walked.opened.named),
+    `and the settings say which part they are for (${walked.opened.named})`);
 } finally {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
@@ -7545,6 +7471,159 @@ try {
     for (const style of api.listStyles().filter((s) => s.name === "Plain Tag Probe")) {
       await api.deleteStyle(style.id);
     }
+  })()`);
+}
+
+// A magnifying glass held over the sample. It says nothing about the style —
+// no setting changes — and it must survive a re-render, because the editor
+// redraws on every change and a sample that snapped back to full size mid-edit
+// would be worse than no zoom at all.
+console.log("\n[82] The sample can be magnified");
+try {
+  const zoomed = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Zoom Probe"});
+    try {
+      const app = await api.openEditor(style.id);
+      await new Promise(r => setTimeout(r, 1500));
+      const el = app.element;
+      const slider = el.querySelector('.illuminus-preview__zoom input[type="range"]');
+      const heading = () => Math.round(
+        el.querySelector(".illuminus-preview__sheet h1")?.getBoundingClientRect().height ?? 0);
+      const out = {plain: heading(), settings: JSON.stringify(api.getStyle(style.id).settings)};
+      slider.value = "150";
+      slider.dispatchEvent(new Event("input", {bubbles: true}));
+      await new Promise(r => setTimeout(r, 400));
+      out.magnified = heading();
+      out.readout = el.querySelector(".illuminus-preview__zoom-read").textContent;
+      // Nothing about the style may have moved.
+      out.unchanged = JSON.stringify(api.getStyle(style.id).settings) === out.settings;
+      // And it survives the redraw the editor does on every change.
+      app.changeTab("body", "sheet");
+      await app.render();
+      await new Promise(r => setTimeout(r, 900));
+      out.afterRender = heading();
+      out.sliderAfter = el.querySelector('.illuminus-preview__zoom input[type="range"]').value;
+      await app.close({force: true});
+      return JSON.stringify(out);
+    } finally { await api.deleteStyle(style.id); }
+  })()`));
+  check(zoomed.magnified > zoomed.plain * 1.35,
+    `the sample can be magnified (${zoomed.plain}px -> ${zoomed.magnified}px)`);
+  check(zoomed.readout === "150%", `and says how far (${zoomed.readout})`);
+  check(zoomed.unchanged, "while the style itself says exactly what it said before");
+  check(zoomed.afterRender === zoomed.magnified && zoomed.sliderAfter === "150",
+    `and a re-render does not snap it back (${zoomed.afterRender}px at ${zoomed.sliderAfter})`);
+  // The switch that used to sit above every tab is gone: an unset hovered
+  // control already changes nothing, so it only ever did something on the four
+  // tabs shipping real hovered colors.
+  const gone = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "No Switch Probe"});
+    try {
+      const app = await api.openEditor(style.id);
+      await new Promise(r => setTimeout(r, 1400));
+      const count = app.element.querySelectorAll('input[name$=".hoverOff"]').length;
+      await app.close({force: true});
+      return String(count);
+    } finally { await api.deleteStyle(style.id); }
+  })()`);
+  check(gone === "0", `and no tab carries a hovered-state switch any more (${gone})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    for (const s of api.listStyles().filter((s) => /Zoom Probe|No Switch Probe/.test(s.name))) {
+      await api.deleteStyle(s.id);
+    }
+  })()`);
+}
+
+// Two bugs a person found by opening the page editor and looking at it.
+console.log("\n[83] The page editor's menus, and folding from a page's title");
+try {
+  const found = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.includes("ProseMirror")
+        || app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Editor Menu Probe", settings: {
+      heading1: {foldShown: true}
+    }});
+    const entry = await JournalEntry.create({name: "Editor Menu Journal"});
+    const [page] = await entry.createEmbeddedDocuments("JournalEntryPage", [{
+      name: "A Page", type: "text",
+      text: {content: "<p>Straight into the prose.</p><h2>A section</h2><p>Under it.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+
+    // The page editor: its drop-downs are lists inside a <menu>, and core hides
+    // their entries until one is opened.
+    await page.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 2200));
+    page.sheet.setPosition({left: 30, top: 30, width: 1000, height: 700});
+    await new Promise(r => setTimeout(r, 900));
+    const menus = [...page.sheet.element.querySelectorAll("menu.editor-menu ul")];
+    const out = {
+      menuLists: menus.length,
+      shown: menus.filter((ul) => getComputedStyle(ul).display !== "none").length,
+      bulleted: menus.filter((ul) => getComputedStyle(ul).listStyleType !== "none").length
+    };
+    await page.sheet.close({force: true});
+
+    // The page's own title is a level 1 heading, and the only one most pages
+    // have — so Heading 1's folding has to reach it.
+    await entry.sheet.render({force: true, pageId: page.id});
+    await new Promise(r => setTimeout(r, 1600));
+    const root = entry.sheet.element;
+    const title = root.querySelector(".journal-page-header h1");
+    const marker = title?.querySelector(".illuminus-fold");
+    out.markerOnTitle = Boolean(marker);
+    if (marker) {
+      marker.click();
+      await new Promise(r => setTimeout(r, 400));
+      const content = root.querySelector(".journal-page-content");
+      out.foldedAway = content.hasAttribute("hidden") || content.offsetParent === null;
+      out.titleMarked = title.classList.contains("is-folded");
+      marker.click();
+      await new Promise(r => setTimeout(r, 400));
+      out.backAgain = !root.querySelector(".journal-page-content").hasAttribute("hidden");
+    }
+    // Nothing is stored: folding is what is on screen, not what the page holds.
+    out.contentClean = !/illuminus-fold/.test(page.text.content);
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  // The Default List rules reach `.journal-page-content ul`, and ProseMirror's
+  // own content element carries that class — so without excluding menus they
+  // beat core's `display: none` from a later layer and every drop-down unfurls.
+  check(found.menuLists > 0 && found.shown === 0,
+    `the editor's drop-downs stay closed (${found.shown} of ${found.menuLists} showing)`);
+  check(found.bulleted === 0,
+    `and its entries take no list styling of ours (${found.bulleted} bulleted)`);
+  check(found.markerOnTitle, "a page's title can be folded, since it is its level 1 heading");
+  check(found.foldedAway && found.titleMarked,
+    `and folding it takes the whole page with it (${found.foldedAway})`);
+  check(found.backAgain, "and unfolding brings it back");
+  check(found.contentClean, "with nothing of the marker stored in the page");
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.includes("ProseMirror")
+        || app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const e of game.journal.filter((j) => j.name === "Editor Menu Journal")) await e.delete();
+    for (const s of api.listStyles().filter((s) => s.name === "Editor Menu Probe")) await api.deleteStyle(s.id);
   })()`);
 }
 

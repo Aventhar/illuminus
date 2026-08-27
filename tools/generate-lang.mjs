@@ -32,6 +32,8 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
 put("ILLUMINUS.Menu.Lists", "List");
 put("ILLUMINUS.Menu.Tables", "Table");
+put("ILLUMINUS.Editor.Zoom", "Zoom");
+put("ILLUMINUS.Editor.QuietSample", "Disable hover in preview");
 put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
 put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");
@@ -585,16 +587,72 @@ const unmatched = [];
  */
 const IMAGE_QUALIFIER = () => "";
 const IMAGE_TEXT = {
-  Blur: ["Image Softness", "How far the picture is blurred before it is laid down. A scan softened this way reads as a wash behind the words rather than as a picture under them."],
-  Brightness: ["Image Brightness", "How light or dark the picture is made before it is laid down. Under 100 darkens it, which is how a texture is made to hold ink."],
-  Contrast: ["Image Contrast", "How strongly the picture's lights and darks are separated."],
-  Saturation: ["Image Colour", "How much colour the picture keeps. 0 leaves it grey, which is often what lets it sit under lettering."],
-  Age: ["Image Age", "How far the picture is browned, as an old photograph is. 0 leaves its own colours."],
-  "": ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
-  Fit: ["Image Fit", "How the background image covers the area."],
-  Position: ["Image Position", "Where the background image is anchored."],
-  Blend: ["Image Blending", "How the image mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through."],
-  Opacity: ["Image Strength", "How strongly the background image shows. 0 hides it entirely."]
+  Blur: ["Image Softness",
+    "Blurs the picture before it is laid down behind the words.\n\n"
+    + "This is the single most useful control here. A photograph or a scan at full "
+    + "sharpness competes with the text sitting on top of it and makes it hard to read. "
+    + "Blur it by 3 or 4 and it stops being a picture you look at and becomes a texture "
+    + "you look past — which is what a background is for."],
+  Brightness: ["Image Brightness",
+    "Makes the picture lighter or darker before it is laid down. 100 leaves it alone; "
+    + "below 100 darkens it, above 100 lightens it.\n\n"
+    + "Which way you go depends on your text. Dark lettering needs a pale background, so "
+    + "push a busy texture up to 130 or so until the words sit clearly on top. Pale "
+    + "lettering needs the opposite — down to 60 or 70, until the page can hold light ink."],
+  Contrast: ["Image Contrast",
+    "How big the gap is between the picture's lightest and darkest parts. 100 leaves it "
+    + "alone, lower flattens it towards a single flat grey, higher makes the darks "
+    + "darker and the lights lighter.\n\n"
+    + "Lowering it is usually what you want for a background. A parchment scan at 40 keeps "
+    + "just enough grain to read as paper without any one blotch pulling the eye."],
+  Saturation: ["Image Colour",
+    "How much colour the picture keeps. 100 leaves it as it is; 0 drains it to grey.\n\n"
+    + "Draining it is worth trying even when you want a colourful page. Set this to 0 and "
+    + "then tint the picture with the Fill Color underneath it using Multiply blending — "
+    + "you get the texture of the photograph with a colour you chose, rather than "
+    + "whatever colour the photograph happened to be."],
+  Age: ["Image Age",
+    "Browns the picture, the way an old photograph or a sheet of paper yellows with age. "
+    + "0 leaves its own colours; 100 is fully sepia.\n\n"
+    + "A quick way to make a modern photograph belong on a fantasy page. Try it around "
+    + "60 to 80 together with Image Colour turned down."],
+  "": ["Background Image",
+    "A picture laid behind this — a parchment scan, a stone texture, a photograph.\n\n"
+    + "Point it at any image in your Foundry data: your own art, artwork from a game "
+    + "system, or another module's. Leave it empty for no picture at all.\n\n"
+    + "The picture sits *behind* the lettering on its own layer, so the controls under "
+    + "it — softness, brightness, strength — change the picture without touching the "
+    + "words in front of it."],
+  Fit: ["Image Fit",
+    "What to do when the picture is not the same shape as the area it has to fill.\n\n"
+    + "\"Tile\" repeats it like wallpaper, which is what you want for a seamless "
+    + "texture such as paper grain or stone. \"Fill the area\" scales it up until it "
+    + "covers everything, cropping whatever hangs over the edges — right for a "
+    + "photograph. \"Fit inside\" shrinks it until all of it shows, which may leave "
+    + "gaps. \"Stretch\" squashes it to fit exactly, and usually looks it."],
+  Position: ["Image Position",
+    "Which part of the picture to keep when it is bigger than the area, or where to "
+    + "anchor it when it is smaller.\n\n"
+    + "It matters most with \"Fill the area\", where something always gets cropped. If "
+    + "the interesting part of your picture is at the top — a sky, a castle — anchor it "
+    + "to the top so that is the part that survives."],
+  Blend: ["Image Blending",
+    "How the picture mixes with the Fill Color behind it, rather than simply covering "
+    + "it up.\n\n"
+    + "This is the trick that makes textures work, and it is worth learning one setting: "
+    + "**Multiply**. With a greyscale texture over a coloured fill, Multiply keeps every "
+    + "dark speck of the texture while letting the colour show through the light parts — "
+    + "so one grey parchment scan can be aged ivory on one style and cold slate on "
+    + "another, just by changing the Fill Color under it.\n\n"
+    + "\"Normal\" means no mixing at all: the picture simply sits on top and the fill "
+    + "beneath it does nothing. Use that when the picture already has the colours you "
+    + "want."],
+  Opacity: ["Image Strength",
+    "How strongly the picture shows through. 100 is the picture at full strength, 0 "
+    + "hides it entirely.\n\n"
+    + "Because the picture is on its own layer behind the words, turning this down fades "
+    + "the picture without fading the lettering. Somewhere between 15 and 40 is usually "
+    + "right for a texture that is meant to be felt rather than noticed."]
 };
 
 /**
@@ -630,7 +688,13 @@ const OUTLINE_WORD = {
 for (const name of names) {
   if (!/TextStyleSlant$|^textStyleSlant$/.test(name)) continue;
   put(`ILLUMINUS.Field.${name}.label`, "Italic");
-  put(`ILLUMINUS.Field.${name}.hint`, "Whether this lettering slants.");
+  put(`ILLUMINUS.Field.${name}.hint`,
+    "Slants the lettering, as italics do.\n\n"
+    + "It sits beside Text Style rather than inside it because the two are separate "
+    + "questions: you can have bold italics, light italics, or plain italics. Tick this "
+    + "and set Text Style to Bold and you get both.\n\n"
+    + "Used on a whole read-aloud box it is the traditional way to mark text the "
+    + "gamemaster reads out; used on a whole page it becomes hard work to read.");
 }
 
 for (const name of names) {
@@ -647,8 +711,17 @@ for (const name of names) {
       put(`ILLUMINUS.Field.${name}.label`,
         `${said}Outline ${part === "Width" ? "Thickness" : "Color"}`);
       put(`ILLUMINUS.Field.${name}.hint`, part === "Width"
-        ? `A line drawn around each ${of}letter. Leave at 0 for none.`
-        : `The color of the line drawn around each ${of}letter.`);
+        ? `Draws a line around the outside of each ${of}letter, in pixels. 0 for none.`
+          + "\n\nThis is how you make pale lettering readable on top of a busy "
+          + "background picture: a thin dark outline separates the words from whatever "
+          + "is behind them, the way a subtitle on a film does.\n\n"
+          + "Keep it under about 2. The outline is painted *behind* the letterform "
+          + "rather than over it, so it thickens the shape without eating into it — but "
+          + "past a certain weight it closes up the gaps in letters like e and a."
+        : `What colour the outline around each ${of}letter is drawn in.\n\n`
+          + "Only shows if the Outline Thickness above is more than 0. A colour close "
+          + "to the page's own background works best — the outline is meant to hold the "
+          + "letters apart from what is behind them, not to be noticed itself.");
       continue;
     }
   }
@@ -685,13 +758,28 @@ for (const name of names) {
     const lower = side.toLowerCase();
     if (part === "Width") {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Thickness`);
-      put(`ILLUMINUS.Field.${name}.hint`, `How heavy the ${lower} ${what} line is. 0 draws nothing.`);
+      put(`ILLUMINUS.Field.${name}.hint`,
+        `How thick the ${lower} ${what} line is, in pixels. 0 means no line at all on `
+        + "that side.\n\n"
+        + "You do not have to draw all four. One thick line down the left side and "
+        + "nothing anywhere else is the classic look for a read-aloud box, and it is "
+        + "quieter than a full frame.");
     } else if (part === "Style") {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Style`);
-      put(`ILLUMINUS.Field.${name}.hint`, `What the ${lower} ${what} line looks like.`);
+      put(`ILLUMINUS.Field.${name}.hint`,
+        `What kind of line the ${lower} ${what} is drawn as — solid, dashed, dotted, `
+        + "double, or one of the ridged and grooved kinds that try to look three-"
+        + "dimensional.\n\n"
+        + "Solid is right nearly always. Dashed reads as a cut-out or a note to be "
+        + "filled in; double suits a formal frame around a title. The ridged ones come "
+        + "from very old web design and rarely look good on a printed-page style.");
     } else {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Color`);
-      put(`ILLUMINUS.Field.${name}.hint`, `Color of the ${lower} ${what} line.`);
+      put(`ILLUMINUS.Field.${name}.hint`,
+        `What colour the ${lower} ${what} line is drawn in.\n\n`
+        + "A line that is only slightly darker than the surface it sits on reads as a "
+        + "fold or a crease; one in a strong contrasting colour reads as a deliberate "
+        + "frame. Both are useful — just pick one on purpose.");
     }
     continue;
   }
@@ -701,7 +789,14 @@ for (const name of names) {
     const what = noun(prefix, "");
     put(`ILLUMINUS.Field.${name}.label`, `${CORNER_WORD[corner]} Corner`);
     put(`ILLUMINUS.Field.${name}.hint`,
-      `How rounded the ${CORNER_WORD[corner].toLowerCase()} corner ${what ? `of the ${what} ` : ""}is. 0 is a sharp corner.`);
+      `How far the ${CORNER_WORD[corner].toLowerCase()} corner ${what ? `of the ${what} ` : ""}`
+      + "is cut away, in pixels. 0 leaves it a sharp right angle.\n\n"
+      + "Small numbers — 2 to 6 — read as a printed panel with slightly worn corners. "
+      + "Large ones read as a modern app. Corners do not all have to match: rounding "
+      + "only the two right-hand corners is a neat way to make a box look like a tab or "
+      + "a bookmark.\n\n"
+      + "The Corner Shape control below decides *what* the cut looks like — this only "
+      + "says how big it is.");
     continue;
   }
   // shadow family: <prefix><OffsetX|OffsetY|Blur|Spread|Color>
@@ -715,12 +810,51 @@ for (const name of names) {
     const inner = /[Ii]nnerShadow$/.test(prefix);
     const lettering = /[Tt]extShadow$/.test(prefix);
     const what = NOUN[prefix] ?? (inner ? "inner shading" : lettering ? "text shadow" : "shadow");
+    // Where the light is coming from, said in the words somebody who has never
+    // read a CSS reference would use. A shadow takes five numbers and none of
+    // them mean anything on their own, so each says what it does to the picture
+    // the other four are painting.
+    const cast = inner
+      ? "Inner shading is a shadow cast *inside* the edges, so the surface looks "
+        + "slightly sunken — pressed into the page rather than sitting on top of it. "
+      : lettering
+        ? "A text shadow sits behind the lettering itself. Used gently it lifts words off a busy background; used hard it reads as a printing error. "
+        : "A shadow is what makes something look raised off the page rather than printed flat on it. ";
     const text = {
-      OffsetX: ["Horizontal Offset", `How far the ${what} sits to the right. Negative moves it left.`],
-      OffsetY: ["Vertical Offset", `How far the ${what} sits below. Negative moves it up.`],
-      Blur: ["Softness", `How blurred the ${what} is. 0 is a hard edge.`],
-      Spread: ["Size", `Grows or shrinks the ${what} beyond the shape that casts it.`],
-      Color: ["Color", `Color of the ${what}. A fully transparent color means none at all.`]
+      OffsetX: ["Horizontal Offset",
+        `${cast}This is how far it slides to the right, in pixels. `
+        + "A negative number slides it left instead.\n\n"
+        + "Think of it as where the light is standing. Light from the left throws the "
+        + "shadow right, so a positive number here and a positive Vertical Offset "
+        + "together read as a lamp up and to the left — which is what most people "
+        + "expect, and what almost every printed book uses."],
+      OffsetY: ["Vertical Offset",
+        `${cast}This is how far it slides down, in pixels. A negative number `
+        + "lifts it up instead.\n\n"
+        + "Keep it small. Two or three pixels reads as paper lying on a table; twenty "
+        + "reads as a sticker floating an inch above it, which is rarely what you want "
+        + "on a page people are meant to read."],
+      Blur: ["Softness",
+        `${cast}This is how fuzzy its edge is. 0 gives a hard-edged shape, like a `
+        + "shadow in bright noon sun; a larger number spreads it into a soft haze, "
+        + "like an overcast day.\n\n"
+        + "If a shadow looks fake, this is usually the reason. Real shadows are softer "
+        + "the further the thing sits from what it falls on, so a small offset wants a "
+        + "small softness to match."],
+      Spread: ["Size",
+        `${cast}This grows or shrinks the shadow before it is blurred, so it can be `
+        + "bigger or smaller than the thing casting it.\n\n"
+        + "Leave it at 0 unless you have a reason. A little negative — say -2 — pulls "
+        + "the shadow in so it peeks out only on one side, which is a neat way to get "
+        + "a subtle lift without a dark halo all the way round."],
+      Color: ["Color",
+        `${cast}This is what colour it is painted.\n\n`
+        + "Pure black almost always looks wrong. Real shadows take a colour from what "
+        + "they fall on, so on a warm parchment page a dark brown reads far better "
+        + "than black. Turn the opacity down too — somewhere around 25% to 40% is "
+        + "usually plenty.\n\n"
+        + "Set the colour fully transparent and there is no shadow at all, which is "
+        + "how you switch one off."]
     }[part];
     // The plain label. Where a shadow shares a section, the tab writes a
     // qualified one of its own below.
@@ -734,10 +868,21 @@ for (const name of names) {
     const turn = m[2].toLowerCase() === "turn";
     put(`ILLUMINUS.Field.${name}.label`, turn ? "Turn" : "Size");
     put(`ILLUMINUS.Field.${name}.hint`, turn
-      ? `How far ${of ? `the ${of}` : "it"} is turned, as a photograph pinned to a `
-        + "page sits a little off straight. Nothing is straight up."
-      : `How much bigger or smaller ${of ? `the ${of}` : "it"} is drawn than the room `
-        + "it takes up, so it can overhang what is around it.");
+      ? `Tilts ${of ? `the ${of}` : "this"} by a few degrees, the way a photograph `
+        + "pinned to a corkboard never sits perfectly straight.\n\n"
+        + "Keep it small. One or two degrees reads as a real object placed by hand and "
+        + "is genuinely charming; ten degrees reads as a mistake. Negative numbers tilt "
+        + "it the other way, and using -1 on some pictures and +1.5 on others stops a "
+        + "page of them looking mechanical.\n\n"
+        + "0 leaves it perfectly straight."
+      : `Draws ${of ? `the ${of}` : "this"} larger or smaller than the room it actually `
+        + "takes up on the page. 100 is its normal size.\n\n"
+        + "Because the room it occupies does not change, going above 100 makes it "
+        + "overhang its neighbours rather than pushing them aside — which is how you "
+        + "get a picture that breaks out of its column, or a drop cap that spills into "
+        + "the margin.\n\n"
+        + "Below 100 it shrinks and leaves a gap around itself. Small steps: 105 is "
+        + "noticeable, 150 is a lot.");
     continue;
   }
   // where a part sits: <prefix>Position / <prefix>OffsetTop / <prefix>OffsetLeft,
@@ -746,13 +891,29 @@ for (const name of names) {
       && !/texture$/i.test(m[1])) {
     const wording = {
       position: ["How It Sits",
-        "Whether it sits where the page puts it, or stays put on screen while the "
-        + "page scrolls past it — which needs a distance from the top to stay at."],
+        "Whether this sits wherever the page puts it, or sticks to the screen as the "
+        + "page scrolls past it.\n\n"
+        + "\"Held in view\" is the interesting one: the thing scrolls along with "
+        + "everything else until it reaches the top of the page area, and then it "
+        + "stays there while the rest keeps going. A map or a stat box can follow the "
+        + "reader down a long section that refers back to it.\n\n"
+        + "It needs Nudge Down set to something — that is the distance from the top it "
+        + "stops at. Left at 0 it sticks to the very top edge."],
       offsettop: ["Nudge Down",
-        "How far it is moved from where the page puts it, up or down. For "
-        + "something that stays put, this is the distance from the top it stops at."],
+        "Moves this down from where the page put it, in pixels. A negative number "
+        + "moves it up instead.\n\n"
+        + "Nothing else shifts to make room — it simply slides, and may end up "
+        + "overlapping what is above or below. That is the point: it is how you get a "
+        + "heading to sit slightly over a banner, or lift a tag to line up with the "
+        + "words beside it.\n\n"
+        + "When How It Sits is set to \"Held in view\", this means something "
+        + "different: it is how far below the top of the page the thing comes to rest."],
       offsetleft: ["Nudge Right",
-        "How far it is moved from where the page puts it, left or right."]
+        "Moves this to the right of where the page put it, in pixels. A negative "
+        + "number moves it left.\n\n"
+        + "As with Nudge Down, nothing moves out of the way — it just slides, and can "
+        + "overlap its neighbours. A few pixels either way is usually all you want; "
+        + "large numbers push things off the page entirely."]
     }[m[2].toLowerCase()];
     put(`ILLUMINUS.Field.${name}.label`, wording[0]);
     put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
@@ -763,23 +924,45 @@ for (const name of names) {
     const of = noun(m[1], "");
     put(`ILLUMINUS.Field.${name}.label`, "Frosting");
     put(`ILLUMINUS.Field.${name}.hint`,
-      `How much of what is behind ${of ? `the ${of}` : "it"} is blurred, as frosted `
-      + "glass blurs what is behind it. It shows through a see-through fill and does "
-      + "nothing behind a solid one.");
+      `Blurs whatever sits behind ${of ? `the ${of}` : "this"}, the way frosted `
+      + "bathroom glass blurs what is on the other side of it.\n\n"
+      + "It only shows if the fill in front of it is partly see-through — behind a "
+      + "solid colour there is nothing to see. So this works together with the Fill "
+      + "Color's opacity: drop the fill to something like 60% and then frost what is "
+      + "behind it, and you get a panel that feels like glass laid over the page "
+      + "rather than a hole cut in it.\n\n"
+      + "0 turns it off entirely. Six to twelve is usually enough — heavy blurring "
+      + "costs the browser real work on every frame.");
     continue;
   }
   // how a picture is cropped: pictureShape / pictureCrop / pictureFrom.
   if ((m = name.match(/^(.*?)[Pp]icture(Shape|Crop|From)$/))) {
     const wording = {
       Shape: ["Picture Shape",
-        "The shape the picture is cropped to. Saying nothing keeps the picture's "
-        + "own shape, which is what a journal does now."],
+        "Crops every picture wearing this treatment to the same shape, whatever shape "
+        + "it started as.\n\n"
+        + "This is what makes a page look composed rather than assembled. Half a dozen "
+        + "portraits pulled from different places will all be different shapes; set "
+        + "them all to Square, or all to Widescreen, and they suddenly look like they "
+        + "belong to the same book.\n\n"
+        + "Leave it alone and each picture keeps its own shape, which is what a journal "
+        + "does now."],
       Crop: ["How It Fills The Shape",
-        "Whether a picture that is not the chosen shape is cropped to fill it, "
-        + "fitted whole inside it, or stretched to it."],
+        "What to do when the picture is not the shape you asked for above.\n\n"
+        + "\"Crop to fill\" scales it up until it covers the whole shape and trims "
+        + "whatever hangs over — the picture stays undistorted, but you lose the edges. "
+        + "\"Fit whole inside\" shrinks it until all of it shows, which may leave "
+        + "empty bands at the sides. \"Stretch\" squashes it to fit exactly, which "
+        + "makes faces look wrong and is almost never what you want.\n\n"
+        + "Cropping is the usual choice. Use Which Part Is Kept below to decide what "
+        + "survives the trim."],
       From: ["Which Part Is Kept",
-        "Where a cropped picture is taken from — the middle of it, or one of its "
-        + "edges or corners."]
+        "When a picture is cropped, this says which part of it to keep.\n\n"
+        + "It matters most for portraits: crop a tall picture to a wide shape from the "
+        + "middle and you often behead the subject. Anchor it to the top instead and "
+        + "you keep the face.\n\n"
+        + "Only does anything when a Picture Shape is set and the picture is being "
+        + "cropped to fill it."]
     }[m[2]];
     put(`ILLUMINUS.Field.${name}.label`, wording[0]);
     put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
@@ -790,9 +973,14 @@ for (const name of names) {
     const of = noun(m[1], "");
     put(`ILLUMINUS.Field.${name}.label`, "Hyphenation");
     put(`ILLUMINUS.Field.${name}.hint`,
-      `Whether a long word${of ? ` in the ${of}` : ""} may be broken across two lines `
-      + "with a hyphen, which is what keeps text set in a narrow column from opening "
-      + "gaps between its words.");
+      `Whether a long word${of ? ` in the ${of}` : ""} may be split across two lines `
+      + "with a hyphen, the way a printed book does it.\n\n"
+      + "It matters in narrow columns. Without hyphenation, one long word that will not "
+      + "fit gets pushed to the next line and the browser stretches the gaps on the "
+      + "line before to compensate — you end up with rivers of white space running down "
+      + "the page. Letting it hyphenate keeps the spacing even.\n\n"
+      + "Worth turning on for anything set in columns or in a narrow box; unnecessary "
+      + "for full-width paragraphs, where there is room to breathe.");
     continue;
   }
   // where the lines may break: <prefix>Wrap, one per lettering family.
@@ -800,9 +988,15 @@ for (const name of names) {
     const of = noun(m[1], "");
     put(`ILLUMINUS.Field.${name}.label`, "Line Breaking");
     put(`ILLUMINUS.Field.${name}.hint`,
-      `Where the lines${of ? ` of the ${of}` : ""} are allowed to break. Two lines that `
-      + "come out very uneven can be evened up, and a last line left with one word on it "
-      + "can be avoided.");
+      `Lets the browser be cleverer about where the lines${of ? ` of the ${of}` : ""} `
+      + "break, instead of simply filling each one until it runs out of room.\n\n"
+      + "\"Even up the lines\" is for headings. A two-line heading normally comes out "
+      + "with eight words on the first line and one on the second; this balances them "
+      + "so both lines are about the same length, which looks deliberate rather than "
+      + "accidental.\n\n"
+      + "\"Avoid a lone last word\" is for paragraphs. It stops a paragraph ending "
+      + "with a single word stranded on its own line — printers call that an orphan, "
+      + "and once you notice it you cannot stop noticing it.");
     continue;
   }
   // corner shape: <prefix>Shape, one per corner family.
@@ -810,8 +1004,15 @@ for (const name of names) {
     const of = noun(`${m[1]}Corner`, "");
     put(`ILLUMINUS.Field.${name}.label`, "Corner Shape");
     put(`ILLUMINUS.Field.${name}.hint`,
-      `What the corners${of ? ` of the ${of}` : ""} are cut to. Rounded is the ordinary one; `
-      + "the rest use the same corner sizes and cut a different shape with them.");
+      `What kind of cut the corners${of ? ` of the ${of}` : ""} are given. They all use `
+      + "the four sizes set above — this only changes the shape of the cut.\n\n"
+      + "\"Rounded\" is the ordinary curve everyone expects. \"Bevel\" cuts the "
+      + "corner off flat, like a mitred picture frame or a cut gemstone — good for "
+      + "anything meant to look built rather than printed. \"Notch\" cuts a square "
+      + "step out of it. \"Scoop\" curves inward instead of outward, which makes a "
+      + "box look like a stamped seal or a torn ticket.\n\n"
+      + "If nothing changes when you pick one, the corner sizes above are still 0 — "
+      + "there is no cut yet for this to shape.");
     continue;
   }
   // spacing family: <prefix><Side>
@@ -822,10 +1023,23 @@ for (const name of names) {
     if (/^margin$|Margin$/.test(prefix)) {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Gap`);
       put(`ILLUMINUS.Field.${name}.hint`,
-        `Empty space ${SIDE_PHRASE[side]} this, outside the edge. Negative values pull it closer.`);
+        `Empty space ${SIDE_PHRASE[side]} this, on the OUTSIDE of its edge — the room `
+        + "between it and whatever else is on the page.\n\n"
+        + "This is the one people mix up with padding, so: outer spacing pushes other "
+        + "things away, inner spacing pushes its own contents in. If a box is crowding "
+        + "the paragraph above it, this is the control you want.\n\n"
+        + "A negative number pulls it closer instead, which lets a box overlap what is "
+        + "above or below it — occasionally what you want for a heading that should sit "
+        + "over a banner.");
     } else {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Padding`);
-      put(`ILLUMINUS.Field.${name}.hint`, `Empty space ${SIDE_PHRASE[side]} the ${noun(prefix, "contents")}, inside the edge.`);
+      put(`ILLUMINUS.Field.${name}.hint`,
+        `Empty space ${SIDE_PHRASE[side]} the ${noun(prefix, "contents")}, on the INSIDE `
+        + "of its edge — the breathing room between the words and the border around them."
+        + "\n\nWithout it, lettering sits right against the edge and looks cramped, the "
+        + "way text does when it runs to the very edge of a photocopy. Ten to sixteen is "
+        + "comfortable for a read-aloud box; a tight label might want three or four.\n\n"
+        + "Not to be confused with outer spacing, which is the room *outside* the edge.");
     }
     continue;
   }
@@ -880,20 +1094,99 @@ const FIELD_TEXT = {
   pageButtonTop: ["Distance From Top", "How far below the top of the page the Edit button sits."],
   pageButtonHoldTop: ["Hold At The Top", "The button stays at the top of the page instead of holding its place on screen as the page scrolls under it, which is what puts Foundry's across a heading half way down."],
   wrapEdges: ["Edges On Both Lines", "A tag long enough to break across two lines is one box in two halves, and a browser draws its edges only at the outer ends. Turn this on to draw both halves whole."],
-  gradientFrom: ["Graduated From", "A fill that graduates rather than being one flat colour. This is the colour it starts at; leave both ends clear for a flat fill."],
-  gradientTo: ["Graduated To", "The colour the fill graduates to."],
-  gradientAngle: ["Graduated Direction", "Which way the fill graduates. 180 runs top to bottom, 90 runs left to right."],
-  display: ["Layout", "How this is laid out: a block of its own, part of a line of text, or a row that shares its room out between what is inside it."],
-  flexDirection: ["Row Direction", "Which way a row runs, and whether it runs backwards."],
-  flexWrap: ["Row Wrapping", "Whether what is inside a row moves onto another line when it runs out of room."],
-  justify: ["Along The Row", "How the room left over in a row is shared out between what is inside it."],
-  alignItems: ["Across The Row", "How what is inside a row lines up against the other direction."],
-  gap: ["Gap Between", "Space between the things inside a row."],
-  minWidth: ["Least Width", "How narrow this may be drawn. 0 lets it be as narrow as it likes."],
-  maxWidth: ["Most Width", "How wide this may be drawn. 0 lets it be as wide as it likes."],
-  minHeight: ["Least Height", "How short this may be drawn. 0 lets it be as short as it likes."],
-  maxHeight: ["Most Height", "How tall this may be drawn. 0 lets it be as tall as it likes."],
-  overflow: ["What Will Not Fit", "What happens to anything too big for the room this has."],
+  gradientFrom: ["Graduated From",
+    "Fades the fill from one colour into another across the shape, instead of one flat "
+    + "colour throughout. This is the colour it starts at.\n\n"
+    + "Both ends start fully transparent, which means no fade at all — so nothing "
+    + "happens until you set both this and Graduated To.\n\n"
+    + "Keep the two colours close together. A parchment that fades from cream to a "
+    + "slightly deeper cream looks like real paper catching the light; one that fades "
+    + "from yellow to purple looks like a website from 1998."],
+  gradientTo: ["Graduated To",
+    "The colour the fill fades into, at the far end of the direction set below.\n\n"
+    + "Leave both this and Graduated From fully transparent for an ordinary flat fill."],
+  gradientAngle: ["Graduated Direction",
+    "Which way the fade runs, as an angle in degrees.\n\n"
+    + "180 runs from the top down, which is the usual one — it reads as light falling "
+    + "from above. 90 runs from the left across. 0 runs from the bottom up, and 135 "
+    + "runs diagonally.\n\n"
+    + "If you cannot see any fade at all, the two colours above are probably still "
+    + "transparent."],
+  display: ["Layout",
+    "Whether this stacks its contents down the page or lays them out in a row across "
+    + "it.\n\n"
+    + "Leave it alone and things stack, which is how a page normally reads: one "
+    + "paragraph under the next. Change it to \"Row\" and whatever is inside sits "
+    + "side by side instead — which is how you build a line of trait tags, a stat "
+    + "line, or a two-column aside out of an ordinary box.\n\n"
+    + "The five controls under this one only do anything once you have chosen Row. "
+    + "Until then they are switched off in all but name."],
+  flexDirection: ["Row Direction",
+    "Which way a row runs: left to right as you would expect, or reversed, or turned "
+    + "on its side to run down the page.\n\n"
+    + "Reversed is more useful than it sounds — it flips the order without you having "
+    + "to retype anything, so a rarity tag can be made to sit at the end of a line "
+    + "that was written with it at the start.\n\n"
+    + "Only does anything when Layout is set to Row."],
+  flexWrap: ["Row Wrapping",
+    "What happens when a row has more in it than fits across the page: everything is "
+    + "squashed onto one line, or the overflow drops onto a second line beneath.\n\n"
+    + "Let it wrap for anything whose length you do not control — a list of traits on "
+    + "a monster might be three items or fifteen. Keep it on one line only when you "
+    + "know it is short and want it to stay put.\n\n"
+    + "Only does anything when Layout is set to Row."],
+  justify: ["Along The Row",
+    "Where the spare room in a row goes, once everything in it has been placed.\n\n"
+    + "\"Start\" bunches everything to the left and leaves the gap at the end. "
+    + "\"Space between\" pushes the first thing hard left and the last hard right "
+    + "with the gap shared out in the middle — which is how you get a name on the left "
+    + "and a level on the right of the same line. \"Center\" gathers everything in "
+    + "the middle with the gap split either side.\n\n"
+    + "Only does anything when Layout is set to Row."],
+  alignItems: ["Across The Row",
+    "How things in a row line up top-to-bottom when they are not all the same "
+    + "height.\n\n"
+    + "\"Center\" is usually right: a small tag next to a tall one will sit at its "
+    + "middle rather than hanging from the top. \"Stretch\" makes them all as tall "
+    + "as the tallest, which is how you get a row of boxes with matching heights even "
+    + "though one has more words in it. \"Baseline\" lines up the actual lettering, "
+    + "which matters when the text sizes differ.\n\n"
+    + "Only does anything when Layout is set to Row."],
+  gap: ["Gap Between",
+    "How much space to leave between the things inside a row, in pixels.\n\n"
+    + "Simpler than putting outer spacing on each one, because it only goes *between* "
+    + "them and not around the outside. Six to ten pixels usually separates a line of "
+    + "tags without them drifting apart.\n\n"
+    + "Only does anything when Layout is set to Row."],
+  minWidth: ["Least Width",
+    "The narrowest this may ever be drawn, in pixels, no matter how little is in it. "
+    + "0 lets it shrink to fit its contents.\n\n"
+    + "Its real use is making things line up. Give every tag the same least width and "
+    + "a column of them will have matching edges even though one says \"Rare\" and "
+    + "another says \"Uncommon\"."],
+  maxWidth: ["Most Width",
+    "The widest this may ever be drawn, in pixels. 0 means no limit.\n\n"
+    + "Worth setting on anything holding a lot of text. Lines longer than roughly "
+    + "70 or 80 characters get genuinely hard to read — your eye loses its place on "
+    + "the way back to the start of the next line — which is why books are narrow and "
+    + "newspapers use columns."],
+  minHeight: ["Least Height",
+    "The shortest this may ever be drawn, in pixels, however little is in it. 0 lets "
+    + "it shrink to fit.\n\n"
+    + "Useful for keeping a row of boxes even when one of them is nearly empty."],
+  maxHeight: ["Most Height",
+    "The tallest this may ever be drawn, in pixels. 0 means no limit.\n\n"
+    + "Only set this together with What Will Not Fit below, or you will simply cut "
+    + "the bottom off whatever is too long."],
+  overflow: ["What Will Not Fit",
+    "What to do with contents too big for the room this has — which only happens if "
+    + "you have limited its width or height above.\n\n"
+    + "\"Let it spill out\" lets the contents hang over the edges, ignoring the "
+    + "limit. \"Cut it off\" hides anything past the edge, cleanly but permanently — "
+    + "a reader has no way to see what was trimmed. \"Let it scroll\" puts a scroll "
+    + "bar on it so they can.\n\n"
+    + "Cutting off is also what keeps a background picture inside rounded corners "
+    + "rather than poking out past them."],
   frameMinWidth: ["Minimum Width", "The narrowest the window may be drawn, however far it is dragged in. 0 lets Foundry decide."],
   frameMaxWidth: ["Maximum Width", "The widest the window may be drawn, however far it is dragged out. 0 lets Foundry decide."],
   foldShown: ["Can Be Folded", "Whether a marker appears for folding this away. A reader clicks it to hide what is under it and clicks again to bring it back; nothing is saved, so a page opens as its author left it."],
@@ -903,12 +1196,11 @@ const FIELD_TEXT = {
   foldSize: ["Marker Size", "How large the marker is. 0 follows the lettering beside it."],
   foldGap: ["Marker Gap", "Space between the marker and the words beside it."],
   foldTurn: ["Marker Turn", "How far the marker turns when what it holds is open. 90 points a sideways arrow downwards."],
-  hoverOff: ["Disable Hovered State", "Nothing on this tab changes when the mouse is over it. Turn this off to set how it looks when pointed at."],
-  textureBlur: ["Image Softness", "How far the picture is blurred before it is laid down. A scan softened this way reads as a wash behind the words rather than as a picture under them."],
-  textureBrightness: ["Image Brightness", "How light or dark the picture is made before it is laid down. Under 100 darkens it, which is how a texture is made to hold ink."],
-  textureContrast: ["Image Contrast", "How strongly the picture's lights and darks are separated."],
-  textureSaturation: ["Image Colour", "How much colour the picture keeps. 0 leaves it grey, which is often what lets it sit under lettering."],
-  textureAge: ["Image Age", "How far the picture is browned, as an old photograph is. 0 leaves its own colours."],
+  textureBlur: ["Image Softness", IMAGE_TEXT["Blur"][1]],
+  textureBrightness: ["Image Brightness", IMAGE_TEXT["Brightness"][1]],
+  textureContrast: ["Image Contrast", IMAGE_TEXT["Contrast"][1]],
+  textureSaturation: ["Image Colour", IMAGE_TEXT["Saturation"][1]],
+  textureAge: ["Image Age", IMAGE_TEXT["Age"][1]],
   outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
   outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
   hoverColor: ["Text Color", "Text color while the mouse is over this. Leave empty to keep the ordinary color."],
@@ -973,17 +1265,34 @@ const FIELD_TEXT = {
   pageButtonOffset: ["Distance from the Edge", "How far in from that side the pencil sits. Raise it to slide the button clear of anything it lands on; negative numbers push it outside the page."],
   numberShown: ["Show Page Numbers", "Whether each listed page carries its number. Leaving them off gives the whole row to the page's name."],
   whenEmpty: ["When Empty", "What happens if this box is left with nothing in it. Hiding it keeps a template tidy when a slot goes unused."],
-  lift: ["Lift", "Nudge the tag up or down from the line it sits on, without moving the line itself."],
+  lift: ["Lift",
+    "Nudges the tag up or down from the line of text it sits in, without moving the "
+    + "line itself.\n\n"
+    + "Useful because a tag with padding and a background often looks like it is "
+    + "sitting slightly too low next to the words around it. A pixel or two up usually "
+    + "settles it. Negative numbers push it down."],
   minWidth: ["Least Width", "The narrowest this can be, so a row of short tags lines up. 0 lets it shrink to its words."],
-  texture: ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
-  textureFit: ["Image Fit", "How the background image covers the area."],
-  texturePosition: ["Image Position", "Where the background image is anchored."],
+  texture: ["Background Image", IMAGE_TEXT[""][1]],
+  textureFit: ["Image Fit", IMAGE_TEXT["Fit"][1]],
+  texturePosition: ["Image Position", IMAGE_TEXT["Position"][1]],
   textureAttachment: ["Image Scrolling", "Whether the background image scrolls with the text or stays put."],
-  textureBlend: ["Image Blending", "How the image mixes with the fill color. \"Multiply\" keeps paper texture while letting the color show through."],
-  textureOpacity: ["Image Strength", "How strongly the background image shows. 0 hides it entirely."],
+  textureBlend: ["Image Blending", IMAGE_TEXT["Blend"][1]],
+  textureOpacity: ["Image Strength", IMAGE_TEXT["Opacity"][1]],
   maxWidth: ["Maximum Text Width", "Stops lines growing too long to read comfortably. Set to 0 for no limit."],
-  font: ["Typeface", "Which lettering to use. Add more under Foundry's Configure Font Families menu."],
-  size: ["Text Size", "How large the lettering is."],
+  font: ["Typeface",
+    "Which lettering this is set in.\n\n"
+    + "The list is whatever Foundry knows about, so to add your own — a proper display "
+    + "face for chapter openings, say — install it under Foundry's Configure Font "
+    + "Families menu and it will appear here.\n\n"
+    + "Two typefaces on a page is plenty: one with character for headings, one plain "
+    + "and comfortable for the body. Three or more starts to look like a ransom note."],
+  size: ["Text Size",
+    "How large the lettering is, in pixels.\n\n"
+    + "Leave it at 0 to use whatever the page is already using — which is usually what "
+    + "you want, because then everything stays in proportion if you change the page's "
+    + "own size later.\n\n"
+    + "For body text, 14 to 17 is comfortable on a screen. Much smaller and people lean "
+    + "in; much larger and a paragraph stops fitting in the window."],
   color: ["Text Color", "Color of the lettering."],
   textStyle: ["Text Style", "How the lettering looks \u2014 its weight and whether it is italic."],
   activeTextStyle: ["Text Style", "How the entry for the page being read looks."],
@@ -992,20 +1301,78 @@ const FIELD_TEXT = {
   categoryTextStyle: ["Text Style", "How a category row looks."],
   headerTextStyle: ["Text Style", "How the lettering in a header row looks."],
   captionTextStyle: ["Text Style", "How caption lettering looks."],
-  caps: ["Capitals", "Force capital letters, or use small capitals for a printed-book feel."],
-  letterSpacing: ["Letter Spacing", "Extra space between letters. A little goes a long way on headings."],
-  wordSpacing: ["Word Spacing", "Extra space between words."],
-  lineHeight: ["Line Spacing", "Space between lines within a paragraph. 1.5 is comfortable for long reading."],
-  align: ["Alignment", "Which edge the text lines up against."],
-  firstLineIndent: ["First Line Indent", "Pushes the first line of each paragraph inward, as in a printed novel."],
+  caps: ["Capitals",
+    "Changes the case the lettering is drawn in, without changing what was actually "
+    + "typed.\n\n"
+    + "\"Small capitals\" is the one worth knowing: every letter becomes a capital, "
+    + "but the ones that were lower-case are drawn shorter. It is what printed books "
+    + "use for the first line of a chapter, and it looks considered in a way that plain "
+    + "ALL CAPS does not.\n\n"
+    + "Full capitals shout, and get tiring over more than a few words — fine for a "
+    + "short heading or a tag, poor for a paragraph."],
+  letterSpacing: ["Letter Spacing",
+    "Adds space between every letter, in pixels. Negative numbers pull them together.\n\n"
+    + "A little goes a very long way. Half a pixel to two pixels opens a heading out "
+    + "and makes it feel calm and expensive — this is what most book covers do. Five "
+    + "pixels makes it unreadable.\n\n"
+    + "Body text almost never wants this; it is a heading and small-capitals control."],
+  wordSpacing: ["Word Spacing",
+    "Adds space between words, on top of the ordinary gap. Negative numbers tighten "
+    + "them up.\n\n"
+    + "Rarely needed, and easy to overdo — the eye reads groups of words, and pushing "
+    + "them too far apart breaks a line into a list of separate things. Occasionally "
+    + "useful on a short, widely letter-spaced heading, where the ordinary word gap "
+    + "starts to look too small by comparison."],
+  lineHeight: ["Line Spacing",
+    "How far apart the lines within a paragraph sit. It is a multiple of the text size "
+    + "rather than a pixel measurement, so 1.5 means one and a half times the height of "
+    + "the lettering.\n\n"
+    + "This is the single biggest thing you can change to make a wall of text readable. "
+    + "1.4 to 1.6 is comfortable for long reading; anything under 1.2 makes lines run "
+    + "into each other and the eye lose its place.\n\n"
+    + "Headings want less than body text — around 1.1 — because their lines are short "
+    + "and large, and the default spacing leaves them looking disconnected. Leave it at "
+    + "0 to use the page's own setting."],
+  align: ["Alignment",
+    "Which edge the lines are lined up against.\n\n"
+    + "\"Left\" is the default and the right answer for nearly all body text: every "
+    + "line starts in the same place, so your eye knows where to go. \"Center\" suits "
+    + "a title or a short caption and is hard work for anything longer, since every "
+    + "line starts somewhere different.\n\n"
+    + "\"Justify\" straightens both edges by stretching the spaces, which is what "
+    + "books do — but books also hyphenate. If you justify, turn Hyphenation on too, or "
+    + "you will get ugly gaps."],
+  firstLineIndent: ["First Line Indent",
+    "Pushes the first line of every paragraph inward, the way a printed novel does.\n\n"
+    + "It is the traditional alternative to leaving a blank line between paragraphs — "
+    + "books use one or the other, rarely both. If your paragraphs already have clear "
+    + "space between them, this will look like a mistake.\n\n"
+    + "Around 16 to 24 is the usual amount. The very first paragraph after a heading is "
+    + "left alone, as it should be."],
   whiteSpace: ["Line Wrapping", "Whether long lines wrap, and whether extra spaces are kept."],
   wordBreak: ["Word Splitting", "Whether very long words may be broken across lines."],
-  columnCount: ["Number of Columns", "Split this passage into columns, as printed adventures often do. 1 leaves it running the full width."],
+  columnCount: ["Number of Columns",
+    "Sets this run of text in columns, the way a printed adventure does.\n\n"
+    + "1 leaves it running the full width. 2 is the usual choice for a dense section — "
+    + "shorter lines are easier to read, which is why newspapers have always done it. "
+    + "3 or more only works on a wide window.\n\n"
+    + "This belongs to the heading above the text, not to the page: a chapter opening "
+    + "can run full width while the section beneath it sets in two columns. Turn "
+    + "Hyphenation on as well — narrow columns need it."],
   columnGap: ["Gap Between Columns", "Empty space separating one column from the next."],
   columnRuleWidth: ["Divider Thickness", "A vertical line drawn between columns. 0 draws nothing."],
   columnRuleStyle: ["Divider Style", "What the line between columns looks like."],
   columnRuleColor: ["Divider Color", "Color of the line between columns."],
-  dropCap: ["Opening Capital", "Enlarges the first letter of the page so it spans several lines."],
+  dropCap: ["Opening Capital",
+    "Enlarges the very first letter of the page so it spans several lines of the "
+    + "paragraph beside it — the illuminated capital that gives this module its name."
+    + "\n\nChoose how many lines tall it should be. Three is the traditional height "
+    + "and the safest; five is dramatic and needs a long enough first paragraph to sit "
+    + "against, or it hangs off the bottom.\n\n"
+    + "It is a real letter rather than a typographic trick, so everything else under "
+    + "Opening Capital applies to it — its own typeface, colour, outline and shadow. "
+    + "Setting it in a display face while the rest of the page stays plain is the whole "
+    + "effect."],
   dropCapFont: ["Opening Capital Typeface", "The typeface used for the opening capital. Leave as the journal's normal typeface to match the body."],
   dropCapColor: ["Opening Capital Color", "Color of that enlarged first letter."],
 
@@ -1014,7 +1381,12 @@ const FIELD_TEXT = {
   decorationColor: ["Line Color", "Color of the link's line. May differ from the text itself."],
   decorationThickness: ["Line Thickness", "How heavy the link's line is."],
   decorationOffset: ["Line Distance", "How far the line sits from the lettering."],
-  bullet: ["Bullet Shape", "The mark in front of each item in a bulleted list."],
+  bullet: ["Bullet Shape",
+    "The mark drawn in front of each item in a bulleted list.\n\n"
+    + "The unusual ones are worth a look: a diamond or a dash reads quite differently "
+    + "from the ordinary round dot, and can tie a list to the rest of a style. "
+    + "\"None\" removes the mark entirely, which is how you make a list of items that "
+    + "should not look like a list — a row of trait tags, say."],
   numberStyle: ["Number Style", "How items are numbered in a numbered list."],
   markerSize: ["Bullet Size", "How large bullets and item numbers are. 0 follows the text."],
   markerColor: ["Bullet Color", "Color of bullets and item numbers."],
@@ -1022,8 +1394,17 @@ const FIELD_TEXT = {
   indent: ["Indent", "How far a list is pushed in from the left."],
   itemSpacing: ["Spacing Between Items", "Gap between one list item and the next."],
   textColor: ["Text Color", "Text color in ordinary cells."],
-  verticalAlign: ["Vertical Position", "Where contents sit within a cell, top to bottom."],
-  width: ["Table Width", "How much of the available width the table fills."],
+  verticalAlign: ["Vertical Position",
+    "Where the contents of a table cell sit, top to bottom, when the row is taller than "
+    + "they are.\n\n"
+    + "\"Top\" is right for most tables: when one cell has three lines and its "
+    + "neighbours have one, you want them all starting at the same height so the row "
+    + "reads across. \"Middle\" suits short entries like numbers or single words."],
+  width: ["Table Width",
+    "How much of the width across the page this takes up.\n\n"
+    + "Only interesting together with Float above. A half-width floated box leaves half "
+    + "the page for text to wrap around it; a full-width one leaves none, so nothing "
+    + "can sit beside it however it is floated."],
   headerBackground: ["Fill Color", "Background of the top row of a table."],
   headerColor: ["Text Color", "Text color in the top row of a table."],
   headerFont: ["Typeface", "The typeface used in the top row of a table."],
@@ -1052,9 +1433,24 @@ const FIELD_TEXT = {
   dividerMarginTop: ["Gap Above", "Space between a divider and what comes before it."],
   dividerMarginBottom: ["Gap Below", "Space between a divider and what comes after it."],
 
-  float: ["Float", "Let text wrap around this, on the left or the right of the page."],
-  width: ["Width", "How much of the available width this takes up."],
-  clear: ["Start Below", "Push this down past anything already floated beside it."],
+  float: ["Float",
+    "Lets the text of the page flow around this instead of stopping for it.\n\n"
+    + "Floated left, the box sits against the left margin and the paragraphs wrap down "
+    + "its right-hand side — exactly how a printed adventure sets a sidebar or a "
+    + "portrait. Without it the box takes the full width and the text starts again "
+    + "underneath.\n\n"
+    + "Set a Width below as well, or there is no room left for the text to wrap into."],
+  width: ["Width",
+    "How much of the width across the page this takes up.\n\n"
+    + "Only interesting together with Float above. A half-width floated box leaves half "
+    + "the page for text to wrap around it; a full-width one leaves none, so nothing "
+    + "can sit beside it however it is floated."],
+  clear: ["Start Below",
+    "Pushes this down until it is past anything already floating beside it, instead of "
+    + "sliding up alongside.\n\n"
+    + "Use it when two floated boxes end up stacked next to each other and you wanted "
+    + "one below the other, or when a heading gets pulled up beside a picture it is "
+    + "supposed to come after."],
   flip: ["Mirror", "Flip the picture, so an illustration can face into the page."],
   headingFont: ["Typeface", "The typeface for headings inside this block."],
   headingSize: ["Text Size", "Size of headings inside this box. 0 follows the page."],

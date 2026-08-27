@@ -30,8 +30,7 @@ const fieldText = (group, field, part) =>
   lang[`ILLUMINUS.Field.${group.family ?? group.id}.${field.name}.${part}`]
   ?? lang[`ILLUMINUS.Field.${field.name}.${part}`] ?? "";
 
-const stateNamed = (name) => name !== "hoverOff"
-  && /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
+const stateNamed = (name) => /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
 
 /** The categories the two laid-out tabs merged, and what they became. */
 const MERGE = {

@@ -1641,8 +1641,8 @@
 }
 
 /* lists */
-.illuminus-styled .journal-page-content ul:not(.illuminus-list),
-.illuminus-styled .journal-page-content ol:not(.illuminus-list) {
+.illuminus-styled .journal-page-content ul:not(.illuminus-list):not(menu *),
+.illuminus-styled .journal-page-content ol:not(.illuminus-list):not(menu *) {
   padding-inline-start: var(--ill-lists-indent);
   margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right) var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
   /* A list laid out as a row makes its items a run rather than a column, which
@@ -1660,21 +1660,21 @@
   overflow: var(--ill-lists-overflow);
 }
 
-.illuminus-styled .journal-page-content ul:not(.illuminus-list) {
+.illuminus-styled .journal-page-content ul:not(.illuminus-list):not(menu *) {
   list-style-type: var(--ill-lists-bullet);
 }
 
-.illuminus-styled .journal-page-content ol:not(.illuminus-list) {
+.illuminus-styled .journal-page-content ol:not(.illuminus-list):not(menu *) {
   list-style-type: var(--ill-lists-number-style);
 }
 
-.illuminus-styled .journal-page-content li:not(.illuminus-list li) {
+.illuminus-styled .journal-page-content li:not(.illuminus-list li):not(menu *) {
   margin-bottom: var(--ill-lists-item-spacing);
 }
 
 /* Sizing the marker rather than the item, so a big bullet does not drag the
    text up with it. */
-.illuminus-styled .journal-page-content li:not(.illuminus-list li)::marker {
+.illuminus-styled .journal-page-content li:not(.illuminus-list li):not(menu *)::marker {
   color: var(--ill-lists-marker-color);
   font-family: var(--ill-lists-marker-font);
   font-size: var(--ill-lists-marker-size);
@@ -1683,11 +1683,11 @@
 /* A definition list takes the same margins, and its two parts their own
    lettering: unset, both inherit Foundry's near-white and are all but invisible
    on a pale page. */
-.illuminus-styled .journal-page-content dl:not(.illuminus-list) {
+.illuminus-styled .journal-page-content dl:not(.illuminus-list):not(menu *) {
   margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right) var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
 }
 
-.illuminus-styled .journal-page-content dt:not(.illuminus-list dt) {
+.illuminus-styled .journal-page-content dt:not(.illuminus-list dt):not(menu *) {
   font-family: var(--ill-lists-term-font);
   -webkit-text-stroke: var(--ill-lists-term-outline-width) var(--ill-lists-term-outline-color);
   paint-order: stroke fill;
@@ -1702,7 +1702,7 @@
   margin-top: var(--ill-lists-term-spacing-above);
 }
 
-.illuminus-styled .journal-page-content dd:not(.illuminus-list dd) {
+.illuminus-styled .journal-page-content dd:not(.illuminus-list dd):not(menu *) {
   font-family: var(--ill-lists-detail-font);
   -webkit-text-stroke: var(--ill-lists-detail-outline-width) var(--ill-lists-detail-outline-color);
   paint-order: stroke fill;
@@ -6691,8 +6691,8 @@ h6):hover {
           sepia(var(--ill-tag05-hover-texture-age, var(--ill-tag05-texture-age, 0%)));
 }
 
-.illuminus-styled .journal-page-content ul:not(.illuminus-list):hover,
-.illuminus-styled .journal-page-content ol:not(.illuminus-list):hover {
+.illuminus-styled .journal-page-content ul:not(.illuminus-list):not(menu *):hover,
+.illuminus-styled .journal-page-content ol:not(.illuminus-list):not(menu *):hover {
   padding-inline-start: var(--ill-lists-hover-indent, var(--ill-lists-indent));
   margin: var(--ill-lists-hover-margin-top, var(--ill-lists-margin-top)) var(--ill-lists-hover-margin-right, var(--ill-lists-margin-right)) var(--ill-lists-hover-margin-bottom, var(--ill-lists-margin-bottom)) var(--ill-lists-hover-margin-left, var(--ill-lists-margin-left));
   display: var(--ill-lists-hover-display, var(--ill-lists-display, block));
@@ -6708,29 +6708,29 @@ h6):hover {
   overflow: var(--ill-lists-hover-overflow, var(--ill-lists-overflow));
 }
 
-.illuminus-styled .journal-page-content ul:not(.illuminus-list):hover {
+.illuminus-styled .journal-page-content ul:not(.illuminus-list):not(menu *):hover {
   list-style-type: var(--ill-lists-hover-bullet, var(--ill-lists-bullet));
 }
 
-.illuminus-styled .journal-page-content ol:not(.illuminus-list):hover {
+.illuminus-styled .journal-page-content ol:not(.illuminus-list):not(menu *):hover {
   list-style-type: var(--ill-lists-hover-number-style, var(--ill-lists-number-style));
 }
 
-.illuminus-styled .journal-page-content li:not(.illuminus-list li):hover {
+.illuminus-styled .journal-page-content li:not(.illuminus-list li):not(menu *):hover {
   margin-bottom: var(--ill-lists-hover-item-spacing, var(--ill-lists-item-spacing));
 }
 
-.illuminus-styled .journal-page-content li:not(.illuminus-list li):hover::marker {
+.illuminus-styled .journal-page-content li:not(.illuminus-list li):not(menu *):hover::marker {
   color: var(--ill-lists-marker-hover-color, var(--ill-lists-marker-color));
   font-family: var(--ill-lists-hover-marker-font, var(--ill-lists-marker-font));
   font-size: var(--ill-lists-hover-marker-size, var(--ill-lists-marker-size));
 }
 
-.illuminus-styled .journal-page-content dl:not(.illuminus-list):hover {
+.illuminus-styled .journal-page-content dl:not(.illuminus-list):not(menu *):hover {
   margin: var(--ill-lists-hover-margin-top, var(--ill-lists-margin-top)) var(--ill-lists-hover-margin-right, var(--ill-lists-margin-right)) var(--ill-lists-hover-margin-bottom, var(--ill-lists-margin-bottom)) var(--ill-lists-hover-margin-left, var(--ill-lists-margin-left));
 }
 
-.illuminus-styled .journal-page-content dt:not(.illuminus-list dt):hover {
+.illuminus-styled .journal-page-content dt:not(.illuminus-list dt):not(menu *):hover {
   font-family: var(--ill-lists-hover-term-font, var(--ill-lists-term-font));
   -webkit-text-stroke: var(--ill-lists-hover-term-outline-width, var(--ill-lists-term-outline-width)) var(--ill-lists-hover-term-outline-color, var(--ill-lists-term-outline-color));
   text-shadow: var(--ill-lists-hover-term-text-shadow-offset-x, var(--ill-lists-term-text-shadow-offset-x)) var(--ill-lists-hover-term-text-shadow-offset-y, var(--ill-lists-term-text-shadow-offset-y))
@@ -6744,7 +6744,7 @@ h6):hover {
   margin-top: var(--ill-lists-hover-term-spacing-above, var(--ill-lists-term-spacing-above));
 }
 
-.illuminus-styled .journal-page-content dd:not(.illuminus-list dd):hover {
+.illuminus-styled .journal-page-content dd:not(.illuminus-list dd):not(menu *):hover {
   font-family: var(--ill-lists-hover-detail-font, var(--ill-lists-detail-font));
   -webkit-text-stroke: var(--ill-lists-hover-detail-outline-width, var(--ill-lists-detail-outline-width)) var(--ill-lists-hover-detail-outline-color, var(--ill-lists-detail-outline-color));
   text-shadow: var(--ill-lists-hover-detail-text-shadow-offset-x, var(--ill-lists-detail-text-shadow-offset-x)) var(--ill-lists-hover-detail-text-shadow-offset-y, var(--ill-lists-detail-text-shadow-offset-y))

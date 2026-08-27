@@ -151,8 +151,10 @@ another module's. A grayscale texture works best with a Fill Color under Multipl
 blending, so the texture supplies the grain and the colour supplies the hue; a picture
 carrying its own colour wants Fill Color set to white and Image Blending set to Normal.
 
-**No artwork or styles are included — yet.** A world starts with no styles at all, and
-the library is where you make your first one.
+**Three sample styles ship with the module** — Default Basic, Fantasy Basic and SciFi
+Basic — seeded into a world the first time Illuminus runs there. Delete any you do not
+want; **Restore Samples** in the style library puts them back. They carry no artwork, and
+neither does the module: the images that will come are being made by hand.
 
 ## Taking a journal out of Foundry
 

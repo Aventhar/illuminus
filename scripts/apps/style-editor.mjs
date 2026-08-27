@@ -318,6 +318,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Width the user has dragged the sample pane to, in pixels. */
   #previewWidth;
 
+  /**
+   * How large the sample is drawn, as a percentage.
+   *
+   * Held on the window rather than in the markup for the same reason the open
+   * branches are: the editor re-renders on every change, and a sample that
+   * snapped back to full size mid-edit would be worse than no zoom at all.
+   */
+  #sampleZoom = 100;
+
+  /**
+   * Whether the sample is deaf to the pointer.
+   *
+   * On by default. The sample answers a pointer exactly as a real journal does,
+   * which is how a hovered colour is judged — and a nuisance every other minute,
+   * since merely crossing the pane repaints whatever the mouse passed over.
+   */
+  #quietSample = true;
+
   /** What the filter box holds, kept across re-renders. */
   /**
    * Show only the controls this style has something to say about.
@@ -645,7 +663,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
       active: this.tabGroups.sheet === group.id,
       changedCount: this.#changedCount(group),
-      hoverOff: this.#groupContext(group, fonts).hoverOff,
       // The window's defaults are all "leave it as Foundry draws it", so
       // clearing the tab is exactly that — said in those words on the one tab
       // where "Reset Tab" does not convey it.
@@ -680,13 +697,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /** Sections and controls for one group, shared by page tabs and family tabs. */
   #groupContext(group, fonts) {
-    // A chrome field is stored with the style but drawn beside the tab's name
-    // rather than in the list, because it governs the list.
-    const chrome = groupFields(group).find((field) => field.chrome && field.name === "hoverOff");
     return {
       id: group.id,
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
-      hoverOff: chrome ? this.#fieldContext(group, chrome, fonts) : null,
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
@@ -970,38 +983,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return STATES.filter((state) => found.has(state.id));
   }
 
-  /**
-   * Grey out a tab's hovered controls while its hovered state is switched off.
-   *
-   * Left in place rather than hidden: a control that vanishes when you turn
-   * something off leaves you wondering what you have lost, and the switch is
-   * right there to turn back on.
-   */
-  #applyHoverOff() {
-    for (const box of this.element.querySelectorAll('input[name$=".hoverOff"]')) {
-      const [groupId] = box.name.split(".");
-      const off = box.checked;
-      const tab = box.closest(".illuminus-tab");
-      for (const field of tab?.querySelectorAll(".illuminus-field[data-field]") ?? []) {
-        const [, name] = field.dataset.field.split(".");
-        // The hovered state only. A tab can hold another — the contents panel's
-        // current page is not hovered, and greying it out with the rest would
-        // put the page you are reading behind a switch about pointing.
-        if (stateOf(name) !== "hover") continue;
-        field.classList.toggle("is-hover-off", off);
-      }
-      // The switch keeps its other choices: greying the whole thing put the
-      // sidebar's current-page controls out of reach, since that switch offers
-      // pointed-at and current-page and no ordinary state at all.
-      for (const option of tab?.querySelectorAll('.illuminus-state__option[data-state="hover"]') ?? []) {
-        option.classList.toggle("is-hover-off", off);
-      }
-      if (!tab) continue;
-      tab.dataset.hoverOff = String(off);
-      void groupId;
-    }
-  }
-
+  
 /**
    * Let an edge show one side at a time.
    *
@@ -1264,6 +1246,56 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * is held on the instance so a re-render — which happens on every field
    * change — does not snap the pane back.
    */
+  /**
+   * The switch that stops the sample answering the pointer.
+   *
+   * Nothing inside the sample takes the pointer while it is on, so no `:hover`
+   * rule inside can match — which is the only way to say it, since CSS has no
+   * way to decline a rule. The frame itself still takes the pointer, so the pane
+   * still scrolls, and a click is answered by lifting this for an instant and
+   * asking what sits underneath.
+   */
+  #activateQuiet() {
+    const box = this.element.querySelector(".illuminus-preview__quiet-box");
+    const frame = this.element.querySelector(".illuminus-preview__frame");
+    if (!box || !frame) return;
+    const show = (quiet) => {
+      this.#quietSample = quiet;
+      box.checked = quiet;
+      frame.classList.toggle("is-quiet", quiet);
+    };
+    show(this.#quietSample);
+    box.addEventListener("change", () => show(box.checked));
+
+    // A part is still clickable: the sample is how a person reaches a part they
+    // can see but cannot name.
+    frame.addEventListener("click", (event) => {
+      if (!this.#quietSample) return;
+      const window_ = frame.querySelector(".illuminus-preview__window");
+      if (!window_) return;
+      window_.style.pointerEvents = "auto";
+      const under = document.elementFromPoint(event.clientX, event.clientY);
+      window_.style.pointerEvents = "";
+      under?.closest("[data-part]")?.click();
+    });
+  }
+
+  /** The magnifying glass over the sample. */
+  #activateZoom() {
+    const slider = this.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+    const frame = this.element.querySelector(".illuminus-preview__frame");
+    if (!slider || !frame) return;
+    const readout = this.element.querySelector(".illuminus-preview__zoom-read");
+    const show = (percent) => {
+      this.#sampleZoom = percent;
+      slider.value = String(percent);
+      if (readout) readout.textContent = `${percent}%`;
+      frame.style.setProperty("--illuminus-sample-zoom", String(percent / 100));
+    };
+    show(this.#sampleZoom);
+    slider.addEventListener("input", () => show(Number(slider.value)));
+  }
+
   #activateGrip() {
     const pane = this.element.querySelector(".illuminus-preview");
     const grip = this.element.querySelector(".illuminus-preview__grip");
@@ -1323,15 +1355,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // do rather than being taken on trust.
     markFolds(this.element.querySelector(".illuminus-preview"));
     this.#activateGrip();
+    this.#activateZoom();
+    this.#activateQuiet();
     this.#activateBoxes();
     this.#activateSampleParts();
     this.#focusSample();
     this.#activateStates();
     this.#activateFilter();
-    this.#applyHoverOff();
-    for (const box of this.element.querySelectorAll('input[name$=".hoverOff"]')) {
-      box.addEventListener("change", () => this.#applyHoverOff());
-    }
     this.#markCurrentPart();
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {

@@ -152,8 +152,13 @@ for (const preset of PRESETS) {
       }
     }
   }
+  // A preset that says nothing is a deliberate blank — a named starting point
+  // with every control still at "leave it alone", which is a fair thing to ship.
+  // A preset that *sets* something and still compiles to nothing is a bug: the
+  // values were rejected somewhere between the file and the stylesheet.
+  const says = Object.values(cleaned).some((group) => Object.keys(group ?? {}).length);
   const rule = compileStyle({ id: preset.id, settings: cleaned });
-  if (!rule) fail(`preset "${preset.name}" compiled to nothing`);
+  if (says && !rule) fail(`preset "${preset.name}" sets values but compiled to nothing`);
 }
 if (!failures) ok(`all ${PRESETS.length} presets use valid fields and compile`);
 

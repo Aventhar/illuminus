@@ -55,6 +55,15 @@ Two conventions worth knowing before you read it:
   rather than a rounding, reading the same size `border-radius` does.
 - **Layout controls** on the parts that can carry them: display, row direction and
   wrapping, alignment, gap, and the room a part may take.
+- **Three sample styles**, seeded into a world on first run and restorable from the
+  style library. They are built from exported style files by
+  `tools/build-presets.mjs`, which keeps only what differs from the schema's own
+  defaults — so a preset says what the style says rather than repeating every
+  setting the schema has.
+- **A zoom slider over the Live Sample**, and a switch to stop the sample
+  answering the pointer while you work (on by default).
+- **The settings pane names the part it belongs to**, in the same words the tree
+  uses.
 - **A changelog**, which is this file.
 
 ### Changed
@@ -83,6 +92,18 @@ Two conventions worth knowing before you read it:
 
 ### Fixed
 
+- **The page editor's drop-downs all unfurled at once**, over the page, with
+  bullets on every entry. The Default List rules reached `.journal-page-content
+  ul`, and ProseMirror's content element carries that class while the toolbar is
+  built from `<menu><ul>` — so they beat core's `display: none` from a later
+  cascade layer. The list rules now stay out of menus.
+- **Folding did nothing on Heading 1.** A page's title is its level 1 heading and
+  lives outside the page content, so it never got a marker — which is why
+  Heading 2 worked and Heading 1 appeared broken. The title now folds the page.
+- **A derived hovered control spoke at zero.** A field's own `emit` ran before
+  "nothing to say at zero", so a hovered Size twin emitted `scale(0)` and would
+  have collapsed whatever was pointed at.
+
 - **The Selected state survived the panel split.** It is keyed `group.section`,
   so the current-page and chosen-heading controls would have silently stopped
   being derived.
@@ -99,6 +120,10 @@ Two conventions worth knowing before you read it:
   made `var(--x, fallback)` resolve to nothing.
 
 ### Removed
+
+- **The Disable Hovered State switch.** An unset hovered control already changes
+  nothing, so it only ever did something on the four tabs that ship real hovered
+  colours — and those are meant to answer the pointer.
 
 - **Scroll bar controls.** Foundry states `scrollbar-width` and `scrollbar-color`
   on `*`, and Chromium answers a stated one by drawing the bar itself and ignoring

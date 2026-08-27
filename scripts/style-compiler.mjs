@@ -1,5 +1,5 @@
 import { STYLED_CLASS, STYLE_ATTR } from "./constants.mjs";
-import { GROUPS, allFields, cssVarFor, isHoveredField, ordinaryTwinFor } from "./style-schema.mjs";
+import { GROUPS, allFields, cssVarFor } from "./style-schema.mjs";
 
 /**
  * Turns style data into CSS custom property declarations.
@@ -79,6 +79,13 @@ function fontValue(value, fallback) {
  *   string keys the field's base custom property), or null to emit nothing.
  */
 export function fieldToCss(field, value) {
+  // "Nothing to say at zero" is a statement about the value, so it is answered
+  // before asking how that value would be written. The other way round, a field
+  // with an `emit` of its own never reached this at all — and a derived twin
+  // holds zero to mean silence, so every twin of such a field spoke the moment
+  // a pointer arrived: a gradient turned to 0°, and Size emitted `scale(0)`,
+  // which collapsed whatever was pointed at to nothing.
+  if (field.type === "number" && field.emitZero === false && Number(value) === 0) return null;
   // A field may take full control of how it maps onto CSS.
   if (field.emit) {
     const emitted = field.emit(value);
@@ -132,30 +139,6 @@ export function fieldToCss(field, value) {
   }
 }
 
-/**
- * What a hovered control says while its tab's hovered state is switched off.
- *
- * Nothing at all, usually: a derived hovered control starts empty, so the
- * skeleton paints nothing for it and the `:hover` rule falls through to the
- * ordinary value on its own. The contents panel and the window are the
- * exception — their hovered colors are written by hand and ship with real
- * values, which the skeleton does paint, so switching the state off has to say
- * something louder than nothing: point each one at the ordinary control it
- * stands in for, or at what the ordinary element paints where there is no such
- * control (nothing at all).
- */
-function unhovered(group, field) {
-  const asShipped = fieldToCss(field, field.default);
-  if (!asShipped || !Object.values(asShipped).some((value) => value !== "")) return [];
-  const twin = ordinaryTwinFor(group, field);
-  if (twin) {
-    return Object.keys(asShipped).map((suffix) =>
-      `  ${cssVarFor(group.id, field, suffix)}: var(${cssVarFor(group.id, twin, suffix)});`);
-  }
-  const neutral = { color: "transparent", image: "none" }[field.type];
-  if (!neutral) return [];
-  return [`  ${cssVarFor(group.id, field)}: ${neutral};`];
-}
 
 /**
  * Compile the declarations for a single style.
@@ -166,27 +149,7 @@ function unhovered(group, field) {
  */
 export function compileDeclarations(settings, { withDefaults = false } = {}) {
   const lines = [];
-  // A tab whose hovered state is switched off emits none of its hovered values,
-  // and the `:hover` rules then fall through to the ordinary ones — which is
-  // exactly what "nothing happens when you point at it" means. Done here rather
-  // than in the stylesheet because CSS cannot decline to apply a rule.
-  // Unset means the tab's own default rather than anything about this call:
-  // most tabs start switched off, because their hovered controls are derived
-  // and empty, while the sidebar and the window start on, because theirs are
-  // written by hand and carry real colors.
-  const startsOff = new Map();
   for (const { group, field } of allFields()) {
-    if (field.name === "hoverOff") startsOff.set(group.id, field.default);
-  }
-  const hoverOff = (groupId) => {
-    const stored = settings?.[groupId]?.hoverOff;
-    return stored === undefined ? Boolean(startsOff.get(groupId)) : Boolean(stored);
-  };
-  for (const { group, field } of allFields()) {
-    if (isHoveredField(field.name) && hoverOff(group.id)) {
-      lines.push(...unhovered(group, field));
-      continue;
-    }
     const raw = settings?.[group.id]?.[field.name];
     const value = raw === undefined ? (withDefaults ? field.default : undefined) : raw;
     if (value === undefined) continue;
