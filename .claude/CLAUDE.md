@@ -959,6 +959,24 @@ is one `filter` on the layer, and **every part carries its own fallback**, becau
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
 
+**A frosting is one control because zero has to mean none.** A backdrop filter
+set to anything at all — `blur(0px)`, an identity filter — starts a stacking
+context, and a contents panel that quietly became one would take whatever
+Foundry had put inside it with it. Three controls (blur, brightness, saturation)
+could not stay silent together, since two of them default to 100%; one control
+emitting nothing at zero leaves `backdrop-filter` invalid at computed-value
+time, which is `none`. The same reasoning would apply to anything else whose
+mere presence changes layout.
+
+**A shape is named in words and written as a ratio.** `aspect-ratio` wants
+`21 / 9`; nobody thinks in ratios, so the control says Panorama and `emitShape`
+does the arithmetic — the same trick the gradient angle plays with `deg`. Two
+fallbacks are load-bearing beside it: `aspect-ratio` falls back to `auto` (the
+picture's own shape, which is what a journal does now) and `object-fit` to
+`cover`, because a named shape the picture is squashed into was not what was
+asked for. And a browser answers `object-position: top` as `50% 0%`, so a check
+must read what it says rather than what was written.
+
 **Anything added to a family must be added to the run that gathers it.** `clusterPartOf`
 matched five picture parts by name; the five new ones fell outside it and were drawn as
 loose rows under the picture with a line between them. A gathering pattern is a list that
