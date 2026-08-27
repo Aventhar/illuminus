@@ -2291,11 +2291,11 @@
   display: none;
   flex-direction: column;
   gap: 0.5rem;
-  /* Five hundred pixels of controls, and the sample takes the rest of the
-     window: two columns of a color row and its label need the room, and the
-     sample is the half that benefits from whatever is left. The grip between
-     them writes this width, so dragging still moves the split. */
-  flex: 0 0 var(--illuminus-settings-width, 500px);
+  /* The settings column, and the sample takes the rest of the window: a label
+     and its control need two columns of room, and the sample is the half that
+     benefits from whatever is left. The grip between them writes this width, so
+     dragging still moves the split. */
+  flex: 0 0 var(--illuminus-settings-width, 21rem);
   min-width: 0;
 }
 

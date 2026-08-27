@@ -2504,10 +2504,12 @@ check(ht.before?.startsWith("heading1.") && ht.after?.startsWith("heading5."),
 // to outlive the re-render that every field change causes.
 const paneBox = async () => JSON.parse(await cdp.evaluate(`(() => {
   const app = [...foundry.applications.instances.values()].find(a => a.constructor.name === "IlluminusStyleEditor");
-  const el = app.element.querySelector(".illuminus-preview");
+  const el = app.element.querySelector(".illuminus-tab.active");
   const g = app.element.querySelector(".illuminus-preview__grip").getBoundingClientRect();
   const b = el.getBoundingClientRect();
-  return JSON.stringify({width: Math.round(b.width), gripX: g.left + g.width / 2, gripY: g.top + g.height / 2});
+  const sample = app.element.querySelector(".illuminus-preview").getBoundingClientRect();
+  return JSON.stringify({width: Math.round(b.width), sample: Math.round(sample.width),
+    gripX: g.left + g.width / 2, gripY: g.top + g.height / 2});
 })()`));
 try {
   await cdp.evaluate(`(async () => {
@@ -2524,11 +2526,11 @@ try {
     { type: "mousePressed", x: start.gripX, y: start.gripY, button: "left", clickCount: 1 });
   for (const step of [50, 100, 150]) {
     await cdp.send("Input.dispatchMouseEvent",
-      { type: "mouseMoved", x: start.gripX + step, y: start.gripY, button: "left", buttons: 1 });
+      { type: "mouseMoved", x: start.gripX - step, y: start.gripY, button: "left", buttons: 1 });
     await new Promise((r) => setTimeout(r, 40));
   }
   await cdp.send("Input.dispatchMouseEvent",
-    { type: "mouseReleased", x: start.gripX + 150, y: start.gripY, button: "left", clickCount: 1 });
+    { type: "mouseReleased", x: start.gripX - 150, y: start.gripY, button: "left", clickCount: 1 });
   await new Promise((r) => setTimeout(r, 250));
   const dragged = await paneBox();
   await cdp.evaluate(`(async () => {
@@ -2537,8 +2539,9 @@ try {
     await new Promise(r => setTimeout(r, 400));
   })()`);
   const afterRender = await paneBox();
-  check(dragged.width > start.width + 100,
-    `dragging the grip widens the sample pane (${start.width}px -> ${dragged.width}px)`);
+  check(dragged.width > start.width + 100 && dragged.sample < start.sample - 100,
+    `dragging the grip moves the split (settings ${start.width}px -> ${dragged.width}px, `
+    + `sample ${start.sample}px -> ${dragged.sample}px)`);
   check(afterRender.width === dragged.width,
     `and a re-render does not snap it back (got ${afterRender.width}px)`);
 } finally {
