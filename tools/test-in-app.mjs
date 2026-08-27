@@ -7320,6 +7320,74 @@ try {
   })()`);
 }
 
+// The decorative treatments have to leave Foundry with the page. They are new
+// properties in the module's own stylesheet, which the export carries whole —
+// but the promise is that a look travels, and only reading it outside proves it.
+console.log("\n[79] The new treatments travel with an export");
+const travelDir = fs.mkdtempSync(path.join(os.tmpdir(), "illuminus-travel-"));
+try {
+  const sent = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Travel Probe", settings: {
+      box01: {frost: 9, turn: -2},
+      image01: {pictureShape: "panorama", pictureCrop: "cover"}
+    }});
+    const entry = await JournalEntry.create({name: "Travel Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {
+      content: '<section class="illuminus-box illuminus-box--box01">Frosted and turned</section>'
+        + '<figure class="illuminus-image illuminus-image--image01">'
+        + '<img src="icons/svg/mystery-man.svg"><figcaption>Cropped</figcaption></figure>',
+      format: 1}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1200));
+    const root = entry.sheet.element;
+    const read = (sel, prop) => getComputedStyle(root.querySelector(sel))[prop];
+    const live = {
+      frost: read(".illuminus-box--box01", "backdropFilter"),
+      turn: read(".illuminus-box--box01", "transform"),
+      shape: read(".illuminus-image--image01 img", "aspectRatio"),
+      crop: read(".illuminus-image--image01 img", "objectFit")
+    };
+    const out = await api.buildJournalExport({
+      styleId: style.id, entryIds: [entry.id], format: "file"
+    });
+    await entry.sheet.close({force: true});
+    return JSON.stringify({live, html: out.html});
+  })()`));
+  const page = path.join(travelDir, "travelled.html");
+  fs.writeFileSync(page, sent.html);
+  const away = JSON.parse(await inCleanTab(`file://${page}`, `(() => {
+    const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];
+    return JSON.stringify({
+      frost: read(".illuminus-box--box01", "backdropFilter"),
+      turn: read(".illuminus-box--box01", "transform"),
+      shape: read(".illuminus-image--image01 img", "aspectRatio"),
+      crop: read(".illuminus-image--image01 img", "objectFit")
+    });
+  })()`));
+  for (const [key, what] of [["frost", "a frosted fill"], ["turn", "a turned block"],
+    ["shape", "a cropped picture's shape"], ["crop", "and how it fills it"]]) {
+    check(away[key] === sent.live[key],
+      `${what} reads the same outside Foundry (${away[key]})`);
+  }
+} finally {
+  fs.rmSync(travelDir, {recursive: true, force: true});
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Travel Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Travel Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
