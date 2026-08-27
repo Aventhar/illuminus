@@ -374,12 +374,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
       foundryDefault: IlluminusStyleEditor.#onFoundryDefault,
       openColorPicker: IlluminusStyleEditor.#onOpenColorPicker,
-      showHint: IlluminusStyleEditor.#onShowHint
+      showHint: IlluminusStyleEditor.#onShowHint,
+      showPart: IlluminusStyleEditor.#onShowPart,
+      twistBranch: IlluminusStyleEditor.#onTwistBranch
     }
   };
 
   static PARTS = {
-    tabs: { template: "templates/generic/tab-navigation.hbs" },
     body: {
       template: `modules/${MODULE_ID}/templates/style-editor.hbs`,
       // Registered as partials: the controls, so the page tabs and the block and
@@ -392,6 +393,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         `modules/${MODULE_ID}/templates/style-box-cell.hbs`,
         `modules/${MODULE_ID}/templates/style-cluster.hbs`,
         `modules/${MODULE_ID}/templates/style-run-says.hbs`,
+        `modules/${MODULE_ID}/templates/style-tree-branch.hbs`,
         `modules/${MODULE_ID}/templates/sample-page.hbs`
       ],
       classes: ["illuminus-editor__body"],
@@ -412,6 +414,43 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     { id: "tagStyles", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tagStyles" },
     { id: "imageStyles", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.imageStyles" }
   ];
+
+  /**
+   * Which part holds which, for the tree down the left of the window.
+   *
+   * A journal's parts nest, and the strip could not say so: a heading and the
+   * window frame sat side by side as though they were the same kind of thing.
+   * This is the one place that says what holds what, and everything else about
+   * the tree — its order, its names, its counts — is read from the schema.
+   *
+   * A part named nowhere here sits at the root rather than vanishing, which is
+   * what keeps a new tab from being invisible until somebody remembers this
+   * table.
+   */
+  static HOLDS = {
+    sidebar: "window", page: "window", editor: "window",
+    title: "page", headings: "page", body: "page", links: "page", lists: "page",
+    tables: "page", boxes: "page", secrets: "page", images: "page",
+    boxStyles: "page", tagStyles: "page", imageStyles: "page"
+  };
+
+  /**
+   * The tree, in schema order within each parent.
+   *
+   * Built from the same strip the tabs were built from, so a family is one
+   * entry where its first member is declared and a tab the strip sends to the
+   * end still goes there. What changes is only that an entry can hold others.
+   */
+  static #buildTree() {
+    const strip = IlluminusStyleEditor.#buildStrip();
+    const nodes = new Map(strip.map((entry) => [entry.id, { ...entry, children: [] }]));
+    const roots = [];
+    for (const entry of strip) {
+      const parent = nodes.get(IlluminusStyleEditor.HOLDS[entry.id]);
+      (parent ? parent.children : roots).push(nodes.get(entry.id));
+    }
+    return roots;
+  }
 
   /** Groups that get a tab of their own, in strip order. */
   static get pageGroups() {
@@ -551,6 +590,44 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // showing a different block from the one whose controls are on screen.
     context.preview = Object.fromEntries(context.families.map((family) =>
       [family.id, { id: family.current.id, label: family.current.label }]));
+
+    // The tree down the left of the window. Its counts are the badges the strip
+    // used to carry, and a family entry holds its members so a heading level is
+    // reached by opening Headings rather than by a picker inside a tab.
+    const treeNode = (node) => {
+      const family = IlluminusStyleEditor.FAMILIES.find((one) => one.id === node.id);
+      const members = family ? GROUPS.filter((group) => group.family === family.id) : [];
+      // Which member the family is showing, resolved the same way the tab's own
+      // picker resolves it — an unset family shows its first member, so the
+      // tree must mark that one rather than none.
+      const current = members.find((one) => one.id === this.#showing[node.id]) ?? members[0];
+      const group = GROUPS.find((one) => one.id === node.id);
+      const children = node.children.map(treeNode);
+      return {
+        id: node.id,
+        icon: node.icon,
+        label: family
+          ? game.i18n.localize(family.label)
+          : game.i18n.localize(`ILLUMINUS.Groups.${node.id}.label`),
+        active: this.tabGroups.sheet === node.id,
+        // Held open while what it holds is being looked at, so the tree does
+        // not close the branch a person is working in.
+        open: this.#openBranches.has(node.id)
+          || children.some((child) => child.active || child.open)
+          || this.tabGroups.sheet === node.id,
+        count: group ? this.#changedCount(group)
+          : members.reduce((sum, member) => sum + this.#changedCount(member), 0),
+        members: members.map((member) => ({
+          id: member.id, family: family.id, label: this.#labelFor(member.id),
+          active: member.id === current?.id && this.tabGroups.sheet === family.id,
+          count: this.#changedCount(member)
+        })),
+        children
+      };
+    };
+    context.tree = IlluminusStyleEditor.#buildTree().map(treeNode);
+    // Every tab id, for the anchor core looks a pane up through.
+    context.tabIds = IlluminusStyleEditor.#buildStrip().map((entry) => entry.id);
 
     context.groups = IlluminusStyleEditor.pageGroups.map((group) => ({
       id: group.id,
@@ -1150,7 +1227,10 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       counts.set(tab.dataset.tab, tabMatches);
     }
 
-    for (const item of root.querySelectorAll("nav.tabs [data-tab]")) {
+    // The tree dims what has nothing in it, so the tree itself answers "which
+    // part has the shadow settings?". A family entry follows the member on
+    // show, because a filter can only see the controls that are rendered.
+    for (const item of root.querySelectorAll(".illuminus-tree__part[data-tab]")) {
       const hits = counts.get(item.dataset.tab) ?? 0;
       item.classList.toggle("is-filtered-out", (Boolean(term) || this.#onlySet) && hits === 0);
     }
@@ -1189,11 +1269,14 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       grip.classList.add("is-dragging");
 
 
-      const left = this.element.querySelector(".illuminus-tab.active")?.getBoundingClientRect().left ?? 0;
+      const right = this.element.querySelector(".illuminus-tab.active")?.getBoundingClientRect().right
+        ?? this.element.getBoundingClientRect().right;
       const onMove = (move) => {
-        // Measured from the settings column's left edge, which does not move, so
-        // the split follows the pointer exactly however the window is laid out.
-        const width = Math.round(Math.min(Math.max(move.clientX - left, 260), 900));
+        // Measured from the settings column's right edge, which does not move,
+        // so the split follows the pointer exactly however the window is laid
+        // out. The column sits on the right of the sample, so a drag to the
+        // left widens it.
+        const width = Math.round(Math.min(Math.max(right - move.clientX, 260), 900));
         this.#previewWidth = width;
         columns.style.setProperty("--illuminus-settings-width", `${width}px`);
       };
@@ -1239,6 +1322,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     for (const box of this.element.querySelectorAll('input[name$=".hoverOff"]')) {
       box.addEventListener("change", () => this.#applyHoverOff());
     }
+    this.#markCurrentPart();
     this.#renderTabBadges();
     for (const row of this.element.querySelectorAll('.illuminus-field[data-field]')) {
       const [groupId, fieldName] = row.dataset.field.split(".");
@@ -1269,15 +1353,80 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * the template.
    */
   #renderTabBadges() {
-    for (const group of GROUPS) {
-      const item = this.element.querySelector(`nav.tabs [data-tab="${group.id}"]`);
-      if (!item || item.querySelector(".illuminus-badge")) continue;
-      const badge = document.createElement("span");
-      badge.className = "illuminus-badge";
-      badge.dataset.tooltip = game.i18n.localize("ILLUMINUS.Editor.ChangedTooltip");
-      item.append(badge);
-    }
     for (const group of GROUPS) this.#updateTabBadge(group.id);
+  }
+
+  /**
+   * Showing a part, from the tree.
+   *
+   * A family entry names the member as well as the tab, so opening Heading 3
+   * both switches to the Headings tab and sets its picker — one click where the
+   * strip took two.
+   * @this {IlluminusStyleEditor}
+   */
+  static #onShowPart(event, target) {
+    const tab = target.dataset.tab;
+    const member = target.dataset.member;
+    this.#openBranches.add(tab);
+    target.closest(".illuminus-tree__item")?.classList.add("is-open");
+    if (member && this.#showing[tab] !== member) {
+      this.#showing[tab] = member;
+      this.render();
+    }
+    this.changeTab(tab, "sheet");
+    this.#markCurrentPart();
+  }
+
+  /**
+   * Opening or closing a branch.
+   *
+   * Kept on the window rather than in the markup: the tree is redrawn on every
+   * render, and a branch closing under somebody mid-edit reads as the tree
+   * losing its place.
+   * @this {IlluminusStyleEditor}
+   */
+  static #onTwistBranch(event, target) {
+    const branch = target.dataset.branch;
+    const item = target.closest(".illuminus-tree__item");
+    const open = !item.classList.contains("is-open");
+    item.classList.toggle("is-open", open);
+    target.setAttribute("aria-expanded", String(open));
+    if (open) this.#openBranches.add(branch);
+    else this.#openBranches.delete(branch);
+  }
+
+  /**
+   * Mark the tree entry for the part on show.
+   *
+   * Switching a tab does not re-render, so the mark has to be moved by hand —
+   * the same reason `changeTab` is overridden to move the sample's focus.
+   */
+  #markCurrentPart() {
+    const showing = this.#activeGroupId();
+    const tab = this.tabGroups.sheet;
+    let current = null;
+    for (const part of this.element?.querySelectorAll(".illuminus-tree__part") ?? []) {
+      // A family's own entry is not the part being worked on — one of its
+      // members is, and marking both says the tree cannot tell them apart.
+      const family = IlluminusStyleEditor.FAMILIES.some((one) => one.id === part.dataset.tab);
+      const mine = part.dataset.member
+        ? part.dataset.member === showing && part.dataset.tab === tab
+        : !family && part.dataset.tab === tab;
+      part.classList.toggle("is-current", mine);
+      if (mine) {
+        part.setAttribute("aria-current", "true");
+        current = part;
+      } else part.removeAttribute("aria-current");
+    }
+    // Everything holding the part on show is opened, so a tab reached any other
+    // way — the sample, a search — is visible in the tree rather than folded
+    // away inside a branch.
+    for (let item = current?.closest(".illuminus-tree__item"); item;
+      item = item.parentElement?.closest(".illuminus-tree__item")) {
+      item.classList.add("is-open");
+      const branch = item.querySelector(".illuminus-tree__twist[data-branch]")?.dataset.branch;
+      if (branch) this.#openBranches.add(branch);
+    }
   }
 
   /**
@@ -1287,6 +1436,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   changeTab(...args) {
     const result = super.changeTab(...args);
     this.#focusSample();
+    this.#markCurrentPart();
     return result;
   }
 
@@ -1392,6 +1542,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.#updateTabBadge(groupId);
   }
 
+  /**
+   * Branches of the tree opened by hand.
+   *
+   * Held on the window rather than in the markup, because the tree is redrawn
+   * on every render and a branch closing under somebody mid-edit reads as the
+   * tree losing its place.
+   */
+  #openBranches = new Set(["window", "page"]);
+
   /** Set while a repaint of the sample is already booked. */
   #previewPending = false;
 
@@ -1415,11 +1574,26 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Refresh the "n changed" badge on a tab without re-rendering. */
   #updateTabBadge(groupId) {
     const group = GROUPS.find((g) => g.id === groupId);
-    const badge = this.element.querySelector(`nav.tabs [data-tab="${groupId}"] .illuminus-badge`);
-    if (!group || !badge) return;
+    if (!group || !this.element) return;
     const count = this.#changedCount(group);
-    badge.textContent = count || "";
-    badge.classList.toggle("is-empty", !count);
+    // A member's own entry, and the family entry above it, which counts every
+    // member it holds.
+    const own = this.element.querySelector(
+      `.illuminus-tree__part[data-member="${groupId}"] .illuminus-tree__count`)
+      ?? this.element.querySelector(
+        `.illuminus-tree__part[data-tab="${groupId}"]:not([data-member]) .illuminus-tree__count`);
+    if (own) {
+      own.textContent = count || "";
+      own.classList.toggle("is-empty", !count);
+    }
+    if (!group.family) return;
+    const members = GROUPS.filter((one) => one.family === group.family);
+    const total = members.reduce((sum, one) => sum + this.#changedCount(one), 0);
+    const family = this.element.querySelector(
+      `.illuminus-tree__part[data-tab="${group.family}"]:not([data-member]) .illuminus-tree__count`);
+    if (!family) return;
+    family.textContent = total || "";
+    family.classList.toggle("is-empty", !total);
   }
 
   /**

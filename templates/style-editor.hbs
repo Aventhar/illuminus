@@ -18,6 +18,23 @@
 
   <div class="illuminus-editor__columns">
 
+  {{!-- The parts of a journal, as they hold one another: the window holds the
+        page, the page holds its headings and its boxes. A strip of tabs could
+        not say that — a heading and the window frame sat side by side as though
+        they were the same kind of thing. --}}
+  {{!-- Core's own changeTab finds a pane through `.tabs [data-group][data-tab]`,
+        and its styling for that class is unlayered — worn by the tree it reached
+        every row and drew each one as a button. The class lives on an anchor
+        that exists only to be found, so the tree is styled by this module
+        alone. --}}
+  <nav class="tabs illuminus-tree__anchor" hidden aria-hidden="true">
+    {{#each tabIds as |id|}}<span data-group="sheet" data-tab="{{id}}"></span>{{/each}}
+  </nav>
+
+  <nav class="illuminus-tree" aria-label="{{localize 'ILLUMINUS.Editor.PartsLabel'}}">
+    {{> "modules/illuminus/templates/style-tree-branch.hbs" nodes=tree}}
+  </nav>
+
   {{#each groups as |group|}}
   <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
 
@@ -37,6 +54,17 @@
               aria-label="{{group.hint}}">
         <i class="fa-solid fa-circle-info"></i>
       </button>
+      <button type="button" class="illuminus-reset" data-action="resetGroup"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
+      <button type="button" class="illuminus-reset" data-action="resetAll"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
+        <i class="fa-solid fa-broom"></i>
+        {{localize "ILLUMINUS.Buttons.ResetAll"}}
+      </button>
+
       {{#if group.plainReset}}
       <button type="button" class="illuminus-reset" data-action="foundryDefault"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.FoundryDefaultTooltip'}}">
@@ -129,6 +157,16 @@
         {{localize "ILLUMINUS.Buttons.Rename"}}
       </button>
       {{/if}}
+      <button type="button" class="illuminus-reset" data-action="resetGroup"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
+      <button type="button" class="illuminus-reset" data-action="resetAll"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
+        <i class="fa-solid fa-broom"></i>
+        {{localize "ILLUMINUS.Buttons.ResetAll"}}
+      </button>
     </header>
 
     <p class="hint">{{family.hint}}</p>
@@ -190,16 +228,6 @@
          data-tooltip="{{localize 'ILLUMINUS.Editor.ResizePreview'}}"></div>
     <header class="illuminus-preview__head">
       <h4>{{localize "ILLUMINUS.Editor.PreviewTitle"}}</h4>
-      <button type="button" class="illuminus-reset" data-action="resetGroup"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
-        <i class="fa-solid fa-rotate-left"></i>
-        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
-      </button>
-      <button type="button" class="illuminus-reset" data-action="resetAll"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
-        <i class="fa-solid fa-broom"></i>
-        {{localize "ILLUMINUS.Buttons.ResetAll"}}
-      </button>
     </header>
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}

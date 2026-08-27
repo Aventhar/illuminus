@@ -756,6 +756,37 @@ comparing two styles means two journals rather than one being overwritten.
 
 ## Editor chrome
 
+**The window is a tree, a sample, and the settings, in that order across.** The
+parts of a journal hold one another — the window holds the page, the page holds
+its headings and its boxes — and a strip of tabs could not say so: a heading and
+the window frame sat side by side as though they were the same kind of thing.
+`HOLDS` in `scripts/apps/style-editor.mjs` is the one place that says what holds
+what; everything else about the tree is read from the schema, and **a part named
+nowhere in it sits at the root rather than vanishing**. Four things are
+load-bearing:
+
+- **Core's `changeTab` finds a pane through `.tabs [data-group][data-tab]`,** so
+  the navigation must answer to that class — and core's styling for it is
+  *unlayered*, so worn by the tree it reached every row and drew each one as a
+  button that no module rule could quiet. The class lives on a hidden anchor
+  holding one empty span per tab, and the tree is styled by this module alone.
+- **Switching a tab does not re-render,** so the mark on the current part is
+  moved by hand in `#markCurrentPart` — the same reason `changeTab` is
+  overridden to move the sample's focus. It also opens every branch holding the
+  part on show, so a tab reached from the sample or a search is not folded away.
+- **A family's own entry is not the part being worked on.** One of its members
+  is, and marking both says the tree cannot tell them apart.
+- **Which branches are open lives on the window, not in the markup.** The tree is
+  redrawn on every render, and a branch closing under somebody mid-edit reads as
+  the tree losing its place.
+
+Two consequences reach further than the tree. The settings sit against the
+window's **right** edge now, so the color picker flips to the left of a swatch
+far more often than not — it always could, and a check that assumed one side was
+asserting the layout rather than the picker. And the drag grip sits on the
+sample's right edge, so the settings width is measured from *its* right edge and
+a drag leftwards widens the settings.
+
 **A piece the focused one holds is lit with it.** The Page tab's piece is the surface
 everything else sits on, so dimming everything that is not the focused part greyed the
 whole sample out and left the one tab covering the page with nothing to look at. Neither

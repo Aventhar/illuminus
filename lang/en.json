@@ -240,6 +240,8 @@
   "ILLUMINUS.Editor.FilterCount": "{count} match(es)",
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting…",
   "ILLUMINUS.Editor.OnlySet": "Only what this style sets",
+  "ILLUMINUS.Editor.PartsLabel": "The parts of a journal",
+  "ILLUMINUS.Editor.PartsTwist": "Show what this part holds",
   "ILLUMINUS.Editor.PreviewTitle": "Live Sample",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",
   "ILLUMINUS.Editor.StateActive": "Selected",

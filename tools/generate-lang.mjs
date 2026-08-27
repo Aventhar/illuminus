@@ -30,6 +30,8 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 /* ---------- New chrome strings ---------- */
 // The rows a box family is gathered into, and the sides of an edge.
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
+put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
+put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");
 put("ILLUMINUS.Box.Shadow", "Shadow");
 put("ILLUMINUS.Box.Picture", "Picture");

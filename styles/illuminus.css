@@ -2149,6 +2149,144 @@
   min-height: 0;
 }
 
+/* Three columns: what a journal is made of, what it looks like, and what can be
+   said about the part chosen. The panes are written in the order the markup
+   wants — every tab pane is a sibling of the tree — so which column each lands
+   in is stated here rather than by shuffling the template. */
+.illuminus-editor .illuminus-tree { order: 0; }
+.illuminus-editor .illuminus-preview { order: 1; }
+.illuminus-editor .illuminus-tab { order: 2; }
+
+/* The parts of a journal, as they hold one another. */
+.illuminus-tree {
+  flex: 0 0 15rem;
+  min-width: 0;
+  overflow: hidden auto;
+  padding: 0.15rem 0.35rem 0.5rem 0;
+  border-right: 1px solid var(--color-border, rgb(0 0 0 / 25%));
+  font-size: var(--font-size-13, 0.8125rem);
+}
+
+.illuminus-tree__level {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* What a part holds is shown only while the branch is open, and indented by
+   one twist's width so the names line up under the name above them. */
+.illuminus-tree__item > .illuminus-tree__level {
+  display: none;
+  margin-left: 0.85rem;
+}
+
+.illuminus-tree__item.is-open > .illuminus-tree__level {
+  display: block;
+}
+
+/* A family's members are always shown with their family: opening Headings is
+   the only way to reach a heading level, so hiding them behind a second twist
+   would put a level two clicks away. */
+.illuminus-tree__item > .illuminus-tree__level--members {
+  display: none;
+}
+
+.illuminus-tree__item.is-open > .illuminus-tree__level--members {
+  display: block;
+}
+
+.illuminus-tree__row {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.illuminus-tree__twist {
+  flex: 0 0 0.85rem;
+  width: 0.85rem;
+  height: 1.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  /* Foundry's own faint text, which on this window's dark ground is the light
+     one: the inactive dark color is all but invisible here. */
+  color: var(--color-text-light-6, rgb(255 255 255 / 45%));
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.illuminus-tree__twist--none {
+  cursor: default;
+}
+
+.illuminus-tree__twist i {
+  transition: transform 120ms;
+}
+
+.illuminus-tree__item.is-open > .illuminus-tree__row > .illuminus-tree__twist i {
+  transform: rotate(90deg);
+}
+
+.illuminus-tree__part {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.18rem 0.35rem;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  text-align: left;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.illuminus-tree__part:hover {
+  background: var(--color-cool-5-25, rgb(255 255 255 / 8%));
+}
+
+/* The part being worked on, marked the way a chosen control is elsewhere in
+   this window rather than with a color invented for the tree. */
+.illuminus-tree__part.is-current {
+  background: var(--color-cool-5-50, rgb(255 255 255 / 14%));
+  box-shadow: inset 2px 0 0 var(--color-warm-2, #ff6400);
+}
+
+.illuminus-tree__part > i {
+  flex: 0 0 0.9rem;
+  font-size: 0.75rem;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.illuminus-tree__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A count of what this style sets here. It keeps its space when empty so the
+   names do not shift as values are set. */
+.illuminus-tree__count {
+  flex: 0 0 auto;
+}
+
+.illuminus-tree__count.is-empty {
+  visibility: hidden;
+}
+
+/* Dimmed by the search box, so the tree answers "which part has the shadow
+   settings?" the way the strip used to. */
+.illuminus-tree__part.is-filtered-out {
+  opacity: 0.35;
+}
+
 .illuminus-editor .illuminus-tab {
   display: none;
   flex-direction: column;
@@ -3036,14 +3174,15 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   position: relative;
 }
 
-/* A grabbable strip on the pane's left edge. It sits outside the pane's own
+/* A grabbable strip on the pane's right edge. It sits outside the pane's own
    box so it does not eat into the sample, and widens its hit area beyond the
    line people actually see. */
 .illuminus-preview__grip {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -0.55rem;
+  /* On the sample's right edge, because the settings sit to the right of it. */
+  right: -0.55rem;
   width: 0.7rem;
   cursor: col-resize;
   touch-action: none;

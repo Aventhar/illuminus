@@ -273,7 +273,7 @@ const editor = await cdp.evaluate(`(async () => {
   const el = app.element;
   return JSON.stringify({
     rendered: !!el,
-    tabs: el.querySelectorAll("nav.tabs [data-tab]").length,
+    tabs: el.querySelectorAll(".illuminus-tree__part[data-tab]:not([data-member])").length,
     activeTabs: el.querySelectorAll(".illuminus-tab.active").length,
     fields: el.querySelectorAll(".illuminus-field").length,
     colorPickers: el.querySelectorAll("color-picker").length,
@@ -931,17 +931,21 @@ const tabs = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 900));
 
   const measure = () => {
-    const nav = app.element.querySelector("nav.tabs");
-    const nb = nav.getBoundingClientRect();
-    const items = [...nav.querySelectorAll("[data-tab]")];
+    const tree = app.element.querySelector(".illuminus-tree");
+    const nb = tree.getBoundingClientRect();
+    const items = [...tree.querySelectorAll(".illuminus-tree__part")];
     return {
-      clipped: items.filter(i => {
-        const r = i.getBoundingClientRect();
-        return r.right > nb.right + 1 || r.bottom > nb.bottom + 1;
-      }).map(i => i.dataset.tab),
-      // A tab whose label wrapped internally is taller than a single line.
-      tall: items.filter(i => i.getBoundingClientRect().height > 44).map(i => i.dataset.tab),
-      labels: items.map(i => i.querySelector("span")?.textContent.trim())
+      // The tree scrolls down, so running past the bottom is expected; running
+      // past its right edge is a name with nowhere to go.
+      clipped: items.filter(i => i.getBoundingClientRect().right > nb.right + 1)
+        .map(i => i.dataset.member ?? i.dataset.tab),
+      // A name cut off with an ellipsis: the row is as wide as it can be and the
+      // words still do not fit.
+      tall: items.filter(i => {
+        const name = i.querySelector(".illuminus-tree__name");
+        return name && name.scrollWidth > name.clientWidth + 1;
+      }).map(i => i.dataset.member ?? i.dataset.tab),
+      labels: items.map(i => i.querySelector(".illuminus-tree__name")?.textContent.trim())
     };
   };
 
@@ -956,11 +960,11 @@ const tabs = await cdp.evaluate(`(async () => {
   return JSON.stringify({wide, narrow});
 })()`);
 const tb = JSON.parse(tabs);
-check(tb.wide.clipped.length === 0, `no tab clipped at 1000px${tb.wide.clipped.length ? ": " + tb.wide.clipped : ""}`);
-check(tb.narrow.clipped.length === 0, `no tab clipped at 700px${tb.narrow.clipped.length ? ": " + tb.narrow.clipped : ""}`);
-check(tb.wide.tall.length === 0, `no tab label wraps onto a second line${tb.wide.tall.length ? ": " + tb.wide.tall : ""}`);
+check(tb.wide.clipped.length === 0, `no part runs past the tree at 1000px${tb.wide.clipped.length ? ": " + tb.wide.clipped : ""}`);
+check(tb.narrow.clipped.length === 0, `no part runs past the tree at 700px${tb.narrow.clipped.length ? ": " + tb.narrow.clipped : ""}`);
+check(tb.wide.tall.length === 0, `no part's name is cut off${tb.wide.tall.length ? ": " + tb.wide.tall : ""}`);
 check(tb.wide.labels.every((l) => l && l.split(" ").length <= 2),
-  `every tab label is one or two words (${tb.wide.labels.join(", ")})`);
+  `every part is named in one or two words (${tb.wide.labels.slice(0, 8).join(", ")}…)`);
 
 // The title bar and the page's edit pencil sit outside the page itself, so
 // they need their own rules; core styles them and this must win.
@@ -1329,10 +1333,12 @@ const cp = await cdp.evaluate(`(async () => {
   };
   const num = (group, key) => cp.querySelector('[data-channel="' + group + '-' + key + '"] input[type=number]').value;
 
-  // Opens to the right of the swatch it belongs to.
+  // Opens beside the swatch it belongs to, on whichever side has room: the
+  // controls sit against the window's right edge, so most swatches flip it left.
   const sb = swatch.getBoundingClientRect();
   const pb = cp.getBoundingClientRect();
-  out.toTheRight = pb.left >= sb.right - 1;
+  out.beside = pb.left >= sb.right - 1 || pb.right <= sb.left + 1;
+  out.onScreen = pb.left >= 0 && pb.right <= window.innerWidth + 1;
 
   // Editing RGB moves the ramp with it: the hue knob tracks the color.
   set(cp, '[data-channel="rgb-r"] input[type=range]', 255);
@@ -1401,7 +1407,8 @@ const cp = await cdp.evaluate(`(async () => {
 const pick = JSON.parse(cp);
 check(pick.swatchReachable, `the swatch is what the pointer actually hits (topmost: ${pick.topAtSwatch})`);
 check(pick.opened, "clicking it opens the picker");
-check(pick.toTheRight, "it appears to the right of the swatch");
+check(pick.beside && pick.onScreen,
+  "it appears beside the swatch, on the side with room for it");
 check(pick.afterRed.hex.toLowerCase().startsWith("#ff"), `editing RGB updates the hex (got ${pick.afterRed.hex})`);
 check(Number.isFinite(pick.afterRed.hueKnob),
   `and the ramp's hue knob follows it (at ${pick.afterRed.hueKnob}%)`);
@@ -2470,7 +2477,8 @@ const headingTab = await cdp.evaluate(`(async () => {
   app.changeTab("headings", "sheet");
   await new Promise(r => setTimeout(r, 400));
   const el = app.element;
-  const tabs = [...el.querySelectorAll("nav.tabs [data-tab]")].map(t => t.dataset.tab);
+  const tabs = [...el.querySelectorAll(".illuminus-tree__part[data-tab]:not([data-member])")]
+    .map(t => t.dataset.tab);
   const picker = el.querySelector('[data-family-picker="headings"]');
   const before = el.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
 
@@ -2486,8 +2494,9 @@ const ht = JSON.parse(headingTab);
 check(ht.tabs.includes("headings") && !ht.tabs.includes("heading1"),
   "the six levels share one tab rather than taking six");
 check(ht.levels === 6, `and its picker offers every level (got ${ht.levels})`);
-check(ht.tabs.indexOf("headings") === ht.tabs.indexOf("page") + 1,
-  `which sits where the levels do, after Page (strip: ${ht.tabs.slice(0, 5).join(", ")})`);
+check(ht.tabs.indexOf("headings") > ht.tabs.indexOf("page")
+  && ht.tabs.indexOf("headings") < ht.tabs.indexOf("body"),
+  `which sits inside Page, between Title and Body (${ht.tabs.slice(0, 5).join(", ")})`);
 check(ht.before?.startsWith("heading1.") && ht.after?.startsWith("heading5."),
   `choosing a level builds that level's controls (${ht.before} -> ${ht.after})`);
 
@@ -2515,11 +2524,11 @@ try {
     { type: "mousePressed", x: start.gripX, y: start.gripY, button: "left", clickCount: 1 });
   for (const step of [50, 100, 150]) {
     await cdp.send("Input.dispatchMouseEvent",
-      { type: "mouseMoved", x: start.gripX - step, y: start.gripY, button: "left", buttons: 1 });
+      { type: "mouseMoved", x: start.gripX + step, y: start.gripY, button: "left", buttons: 1 });
     await new Promise((r) => setTimeout(r, 40));
   }
   await cdp.send("Input.dispatchMouseEvent",
-    { type: "mouseReleased", x: start.gripX - 150, y: start.gripY, button: "left", clickCount: 1 });
+    { type: "mouseReleased", x: start.gripX + 150, y: start.gripY, button: "left", clickCount: 1 });
   await new Promise((r) => setTimeout(r, 250));
   const dragged = await paneBox();
   await cdp.evaluate(`(async () => {
@@ -2990,7 +2999,7 @@ try {
     // now that lettering everywhere can cast one, so it narrows a tab without
     // dimming any — which is right, and says nothing about dimming.
     await type("bullet");
-    out.dimmedTabs = [...el.querySelectorAll("nav.tabs [data-tab]")]
+    out.dimmedTabs = [...el.querySelectorAll(".illuminus-tree__part[data-tab]")]
       .filter(t => t.classList.contains("is-filtered-out")).length;
     // A section whose own name matches opens even when its controls are worded
     // differently — an Inner Shadow's are all "shading". Measured on a tab that
@@ -3015,7 +3024,7 @@ try {
     await new Promise(r => setTimeout(r, 200));
     await type("");
     out.restored = visible();
-    out.noneDimmed = [...el.querySelectorAll("nav.tabs [data-tab]")]
+    out.noneDimmed = [...el.querySelectorAll(".illuminus-tree__part[data-tab]")]
       .every(t => !t.classList.contains("is-filtered-out"));
 
     // The pointed-at half of a pair.
@@ -7384,6 +7393,70 @@ try {
     for (const entry of game.journal.filter((e) => e.name === "Travel Journal")) await entry.delete();
     for (const style of api.listStyles().filter((s) => s.name === "Travel Probe")) {
       await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// The parts of a journal hold one another — the window holds the page, the page
+// holds its headings — and a strip of tabs could not say so. The tree can, and
+// it is the navigation now, so it has to reach every part the schema declares.
+console.log("\n[80] The tree reaches every part");
+try {
+  const walked = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.includes("StyleEditor")) await app.close({force: true});
+    }
+    const app = await api.openEditor(api.listStyles()[0].id);
+    await new Promise(r => setTimeout(r, 1400));
+    const el = app.element;
+    const parts = [...el.querySelectorAll(".illuminus-tree__part")];
+    const panes = [...el.querySelectorAll(".illuminus-tab[data-tab]")].map((p) => p.dataset.tab);
+    // Every pane has an entry, and no entry points at a pane that is not there.
+    const reached = new Set(parts.map((p) => p.dataset.tab));
+    // A part held by another is drawn inside it: Page sits under Window, and a
+    // heading level under Headings.
+    const inside = (id) => {
+      const part = el.querySelector(
+        '.illuminus-tree__part[data-tab="' + id + '"]:not([data-member])');
+      const holder = part?.closest(".illuminus-tree__item")?.parentElement
+        ?.closest(".illuminus-tree__item");
+      return holder?.querySelector(".illuminus-tree__part")?.dataset.tab ?? null;
+    };
+    // Opening a heading level from the tree both switches the tab and sets the
+    // picker, which is the one click the strip could not do.
+    const level = el.querySelector('.illuminus-tree__part[data-member="heading4"]');
+    level.click();
+    await new Promise(r => setTimeout(r, 500));
+    const opened = {
+      tab: el.querySelector(".illuminus-tab.active")?.dataset.tab,
+      picker: el.querySelector('[data-family-picker="headings"]')?.value,
+      marked: [...el.querySelectorAll(".illuminus-tree__part.is-current")]
+        .map((p) => p.dataset.member ?? p.dataset.tab)
+    };
+    await app.close({force: true});
+    return JSON.stringify({
+      panes, missing: panes.filter((id) => !reached.has(id)),
+      pageInside: inside("page"), titleInside: inside("title"), sidebarInside: inside("sidebar"),
+      opened
+    });
+  })()`));
+  check(walked.missing.length === 0,
+    `every part the editor holds has an entry (${walked.panes.length} parts)`);
+  check(walked.pageInside === "window" && walked.sidebarInside === "window"
+    && walked.titleInside === "page",
+    `and they are drawn inside what holds them (page in ${walked.pageInside}, `
+    + `title in ${walked.titleInside})`);
+  check(walked.opened.tab === "headings" && walked.opened.picker === "heading4",
+    `opening a heading level switches the tab and picks the level at once `
+    + `(${walked.opened.tab}, ${walked.opened.picker})`);
+  // One mark, on the level itself rather than on every level of the family.
+  check(walked.opened.marked.length === 1 && walked.opened.marked[0] === "heading4",
+    `and just that one part is marked (${walked.opened.marked.join(", ") || "none"})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.includes("StyleEditor")) await app.close({force: true});
     }
   })()`);
 }

@@ -1,0 +1,59 @@
+{{!-- One level of the parts tree, which calls itself for what a part holds.
+      A family draws its members as a level of their own, so a heading level is
+      reached by opening Headings rather than by a picker inside its tab. --}}
+<ul class="illuminus-tree__level">
+  {{#each nodes as |node|}}
+  <li class="illuminus-tree__item {{#if node.open}}is-open{{/if}}">
+    <div class="illuminus-tree__row">
+      {{#if node.children.length}}
+      <button type="button" class="illuminus-tree__twist" data-action="twistBranch"
+              data-branch="{{node.id}}"
+              aria-label="{{localize 'ILLUMINUS.Editor.PartsTwist'}}"
+              aria-expanded="{{#if node.open}}true{{else}}false{{/if}}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      {{else if node.members.length}}
+      <button type="button" class="illuminus-tree__twist" data-action="twistBranch"
+              data-branch="{{node.id}}"
+              aria-label="{{localize 'ILLUMINUS.Editor.PartsTwist'}}"
+              aria-expanded="{{#if node.open}}true{{else}}false{{/if}}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      {{else}}
+      <span class="illuminus-tree__twist illuminus-tree__twist--none"></span>
+      {{/if}}
+      <button type="button" class="illuminus-tree__part {{#if node.active}}is-current{{/if}}"
+              data-action="showPart" data-tab="{{node.id}}"
+              {{#if node.active}}aria-current="true"{{/if}}>
+        <i class="{{node.icon}}"></i>
+        <span class="illuminus-tree__name">{{node.label}}</span>
+        <span class="illuminus-badge illuminus-tree__count {{#unless node.count}}is-empty{{/unless}}"
+              data-tooltip="{{localize 'ILLUMINUS.Editor.ChangedTooltip'}}">{{#if node.count}}{{node.count}}{{/if}}</span>
+      </button>
+    </div>
+
+    {{#if node.members.length}}
+    <ul class="illuminus-tree__level illuminus-tree__level--members">
+      {{#each node.members as |member|}}
+      <li class="illuminus-tree__item">
+        <div class="illuminus-tree__row">
+          <span class="illuminus-tree__twist illuminus-tree__twist--none"></span>
+          <button type="button" class="illuminus-tree__part {{#if member.active}}is-current{{/if}}"
+                  data-action="showPart" data-tab="{{member.family}}" data-member="{{member.id}}"
+                  {{#if member.active}}aria-current="true"{{/if}}>
+            <span class="illuminus-tree__name">{{member.label}}</span>
+            <span class="illuminus-badge illuminus-tree__count {{#unless member.count}}is-empty{{/unless}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Editor.ChangedTooltip'}}">{{#if member.count}}{{member.count}}{{/if}}</span>
+          </button>
+        </div>
+      </li>
+      {{/each}}
+    </ul>
+    {{/if}}
+
+    {{#if node.children.length}}
+    {{> "modules/illuminus/templates/style-tree-branch.hbs" nodes=node.children}}
+    {{/if}}
+  </li>
+  {{/each}}
+</ul>
