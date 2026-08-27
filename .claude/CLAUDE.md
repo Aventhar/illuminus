@@ -702,7 +702,7 @@ menu ignoring a label rather than the store dropping it.
 
 They share a tab each rather than taking thirty: `FAMILIES` in the editor, with a picker
 choosing which member is built. Only the member on show is rendered, which is why the
-editor holds ~670 controls rather than the schema's 1,510.
+editor draws ~4,200 controls rather than the schema's ~10,000.
 
 Text and heading settings mean "use the page setting" by default — a size of 0
 (`zeroAs: "inherit"`), an `inherit` choice, or an empty color, all of which emit either
@@ -899,7 +899,7 @@ and stays where it is.
 
 Three shapes repeat on every tab — a box (twelve edge controls, four corners, four
 spacings), a shadow (five), and a picture (five) — and they are the greater part of the
-2,700 controls. `boxRows()` in `scripts/apps/style-editor.mjs` gathers each into one run
+4,200 controls. `boxRows()` in `scripts/apps/style-editor.mjs` gathers each into one run
 at render, from the field's *name*, the way the generators read it. Four things are
 load-bearing.
 
