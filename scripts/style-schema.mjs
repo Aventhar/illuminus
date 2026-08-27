@@ -55,6 +55,15 @@ const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
 export const DIVIDER = "---";
 
 const CHOICES = {
+  // How a thing is laid out. `inherit` everywhere means "as the journal has it",
+  // so every one of these starts by doing nothing at all.
+  display: ["inherit", "block", "inline", "inlineBlock", "flex", "inlineFlex", "grid", "none"],
+  flexDirection: ["inherit", "row", "rowReverse", "column", "columnReverse"],
+  flexWrap: ["inherit", "nowrap", "wrap", "wrapReverse"],
+  justify: ["inherit", "start", "center", "end", "between", "around", "evenly"],
+  alignItems: ["inherit", "stretch", "start", "center", "end", "baseline"],
+  position: ["inherit", "static", "relative", "sticky"],
+  overflow: ["inherit", "visible", "hidden", "auto", "scroll"],
   // What a corner is cut to. `round` is the browser's own, so it is the default
   // everywhere and a style that says nothing about a corner changes nothing.
   cornerShape: ["round", "bevel", "notch", "scoop", "squircle"],
@@ -91,6 +100,63 @@ const CHOICES = {
 /* -------------------------------------------- */
 /*  Multi-property emitters                     */
 /* -------------------------------------------- */
+
+/**
+ * The words a person uses and the words CSS uses are not always the same, and
+ * the schema keeps the first. These say the second.
+ */
+const CSS_WORD = {
+  inlineBlock: "inline-block", inlineFlex: "inline-flex",
+  rowReverse: "row-reverse", columnReverse: "column-reverse",
+  wrapReverse: "wrap-reverse",
+  start: "flex-start", center: "center", end: "flex-end",
+  between: "space-between", around: "space-around", evenly: "space-evenly",
+  stretch: "stretch", baseline: "baseline"
+};
+
+const emitWord = (value) => (value === "inherit" ? null : CSS_WORD[value] ?? value);
+
+/**
+ * How a thing is laid out: whether it is a block or a row, how a row shares out
+ * its room, whether it floats, how big it may be, and what happens to whatever
+ * will not fit.
+ *
+ * Every control starts at "as the journal has it" and emits nothing until it is
+ * given a value, so a part that says nothing about its layout is laid out
+ * exactly as Foundry lays it out.
+ *
+ * **Where a control is offered is decided per part, not here.** `position` is
+ * the plain warning: forcing one on a window Foundry has already placed drops a
+ * 600px window into normal flow and shoves the whole interface sideways, which
+ * is why the picture layers say `host: false` and why this is never offered on
+ * a window root.
+ */
+function layoutFields(prefix = "", { flex = true, room = true, position = false } = {}) {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  const fields = [
+    select(n("Display"), "inherit", CHOICES.display, { emit: emitWord })
+  ];
+  if (flex) fields.push(
+    select(n("FlexDirection"), "inherit", CHOICES.flexDirection, { emit: emitWord }),
+    select(n("FlexWrap"), "inherit", CHOICES.flexWrap, { emit: emitWord }),
+    select(n("Justify"), "inherit", CHOICES.justify, { emit: emitWord }),
+    select(n("AlignItems"), "inherit", CHOICES.alignItems, { emit: emitWord }),
+    num(n("Gap"), 0, "px", 0, 200, 1, { emitZero: false })
+  );
+  if (room) fields.push(
+    num(n("MinWidth"), 0, "px", 0, 2000, 5, { emitZero: false }),
+    num(n("MaxWidth"), 0, "px", 0, 2000, 5, { emitZero: false }),
+    num(n("MinHeight"), 0, "px", 0, 2000, 5, { emitZero: false }),
+    num(n("MaxHeight"), 0, "px", 0, 2000, 5, { emitZero: false }),
+    select(n("Overflow"), "inherit", CHOICES.overflow, { emit: emitWord })
+  );
+  if (position) fields.push(
+    select(n("Position"), "inherit", CHOICES.position, { emit: emitWord }),
+    num(n("OffsetTop"), 0, "px", -400, 400, 1, { emitZero: false }),
+    num(n("OffsetLeft"), 0, "px", -400, 400, 1, { emitZero: false })
+  );
+  return fields;
+}
 
 /** Capitalization needs both text-transform and font-variant. */
 const emitCaps = (value) => ({
@@ -396,7 +462,10 @@ function boxSections() {
         select("float", "none", CHOICES.blockFloat),
         select("width", "full", CHOICES.blockWidth, { emit: emitBlockWidth }),
         select("clear", "none", CHOICES.blockClear),
-        select("whenEmpty", "show", CHOICES.whenEmpty, { emit: emitWhenEmpty })
+        select("whenEmpty", "show", CHOICES.whenEmpty, { emit: emitWhenEmpty }),
+        // A block holds other things, so it can be a row of them as well as a
+        // block of them: a stat line, a row of trait chips, a two-column aside.
+        ...layoutFields("", { position: false })
       ]
     },
     {
@@ -479,7 +548,10 @@ function tagSections() {
         select("float", "none", CHOICES.blockFloat),
         select("verticalAlign", "baseline", CHOICES.inlineAlign),
         num("lift", 0, "px", -30, 30, 1),
-        num("minWidth", 0, "px", 0, 400, 1, { zeroAs: "auto" })
+        num("minWidth", 0, "px", 0, 400, 1, { zeroAs: "auto" }),
+        // A tag is laid out `inline-block` by the skeleton so its padding grows
+        // its own box; these say what it does with the room that gives it.
+        ...layoutFields("", { position: false })
       ]
     },
     {
@@ -517,6 +589,8 @@ function imageSections() {
         select("align", "center", CHOICES.alignNoJustify, { emit: emitPictureAlign }),
         select("clear", "none", CHOICES.blockClear),
         select("flip", "none", CHOICES.flip, { emit: emitFlip }),
+        // No row settings: a picture holds nothing to lay out inside it.
+        ...layoutFields("", { flex: false, position: false }),
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
@@ -2177,7 +2251,9 @@ const LAYOUTS = {
   boxStyles: {
     order: ["layout", "text", "background", "padding", "margin", "border", "blockHeadings"],
     layout: { order: [
-      "float", "width", "clear", "whenEmpty"
+      "float", "width", "clear", "whenEmpty",
+      DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+      DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
@@ -2214,7 +2290,9 @@ const LAYOUTS = {
   tagStyles: {
     order: ["tagLayout", "text", "background", "padding", "margin", "border"],
     tagLayout: { order: [
-      "verticalAlign", "float", "minWidth", "lift"
+      "verticalAlign", "float", "minWidth", "lift",
+      DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+      DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow"
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
@@ -2247,6 +2325,7 @@ const LAYOUTS = {
       "opacity", "background", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", "float", "width", "align", "clear", "flip",
       "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+      DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER,
       "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
       "innerShadowColor"
     ] },

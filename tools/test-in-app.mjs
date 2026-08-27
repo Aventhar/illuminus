@@ -6698,6 +6698,86 @@ try {
   })()`);
 }
 
+// The parts a person builds themselves — the ten blocks, the ten tags, the ten
+// picture treatments — can now say how they are laid out as well as how they
+// are painted: a block can be a row of what is inside it, with a gap, a width
+// it may not pass, and something to do with whatever will not fit.
+console.log("\n[70] A block can be laid out, not only painted");
+try {
+  const laid = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Layout Probe", settings: {
+      box01: {display: "flex", flexDirection: "row", justify: "between", alignItems: "center",
+              gap: 18, maxWidth: 420, overflow: "hidden"},
+      // And one that says nothing about its layout, which must be laid out as
+      // Foundry lays it out.
+      box02: {background: "#221100"}
+    }});
+    const entry = await JournalEntry.create({name: "Layout Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<blockquote class="illuminus-box illuminus-box--box01"><p>One</p><p>Two</p></blockquote>' +
+      '<blockquote class="illuminus-box illuminus-box--box02"><p>Plain</p></blockquote>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const row = root.querySelector("blockquote.illuminus-box--box01");
+    const plain = root.querySelector("blockquote.illuminus-box--box02");
+    const cs = getComputedStyle(row);
+    const out = {
+      display: cs.display,
+      direction: cs.flexDirection,
+      justify: cs.justifyContent,
+      align: cs.alignItems,
+      gap: cs.gap,
+      maxWidth: cs.maxWidth,
+      overflow: cs.overflow,
+      // Two paragraphs beside one another rather than one above the other is
+      // the whole point, so it is measured rather than taken from the property.
+      // Measured across rather than down: what makes it a row is the second
+      // starting after the first ends. Their tops differ by a few pixels here
+      // for a reason that has nothing to do with rows — the page's opening
+      // letter is a drop cap, and that first paragraph is inside this block.
+      sideBySide: (() => {
+        const [one, two] = row.querySelectorAll("p");
+        return two.getBoundingClientRect().left >= one.getBoundingClientRect().right;
+      })(),
+      plainDisplay: getComputedStyle(plain).display,
+      plainMax: getComputedStyle(plain).maxWidth
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(laid.display === "flex" && laid.direction === "row" && laid.sideBySide,
+    `a block can be a row of what is inside it (${laid.display}, ${laid.direction}, `
+    + `${laid.sideBySide ? "side by side" : "still stacked"})`);
+  check(laid.justify === "space-between" && laid.align === "center" && laid.gap === "18px",
+    `sharing out its room, lined up across it, with a gap (${laid.justify}, ${laid.align}, ${laid.gap})`);
+  check(laid.maxWidth === "420px" && laid.overflow === "hidden",
+    `and it can be given a width it may not pass (${laid.maxWidth}, ${laid.overflow})`);
+  check(laid.plainDisplay === "block" && laid.plainMax === "none",
+    `while a block that says nothing is laid out as Foundry lays it out `
+    + `(${laid.plainDisplay}, ${laid.plainMax})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Layout Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Layout Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);

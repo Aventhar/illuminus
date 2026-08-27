@@ -936,6 +936,24 @@ the tab maps did not have to be rewritten. **One family key per picture**: paddi
 margin both key to `<prefix>Spacing`, border and corners both to `<prefix>Edges`. Keying
 them apart is what produced two boxes per category, one holding nothing but corners.
 
+**A part can say how it is laid out, not only how it is painted.** `layoutFields()`
+gives a part a display, the row settings that follow from it, and how much room it may
+take — all values, so the compiler is untouched. Which of them a part is offered is
+decided per part: `position` is never offered on a window root, for the reason recorded
+above. **`display` must fall back to what the skeleton lays that thing out as**
+(`inline-block` for a tag, `block` for a block or picture): an unset control emits
+nothing, and a `display` reading an unset property is invalid at computed-value time, so
+it takes `inline` rather than leaving the element alone — which spilled every tag over
+the lines around it the moment the control existed. That is the same trap as the tick box
+and the scroll bars, and the rule it keeps teaching is: *where a control can override
+something the skeleton deliberately sets, the fallback must name what the skeleton set.*
+
+**The editor wears Foundry's clothes.** Its own widgets take Foundry's variables —
+`--color-cool-5-25/50` for raised surfaces, `--color-border` for hairlines,
+`--color-warm-2` for a chosen control, `--font-monospace` for values, the `--font-size-*`
+scale for sizes — and set no face of their own, so the window inherits Signika like the
+rest of the interface. Colours invented for the editor date it against the app around it.
+
 **A corner has a size and a shape.** `corner-shape` (Chromium 139+, and this is a
 Chromium app) sits beside `border-radius` and reads the same four sizes, so a corner set
 to 12 becomes a 12px bevel or scoop with no second measurement. It is a value like any

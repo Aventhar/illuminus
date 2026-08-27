@@ -37,6 +37,39 @@ const shadow = (group, prefix) =>
   `${v(group, `${prefix}OffsetX`)} ${v(group, `${prefix}OffsetY`)} `
   + `${v(group, `${prefix}Blur`)} ${v(group, `${prefix}Spread`)} ${v(group, `${prefix}Color`)}`;
 
+/**
+ * How a thing is laid out, for the parts a person builds themselves: whether it
+ * is a block or a row, how a row shares out its room, how much room it may take
+ * and what happens to whatever will not fit.
+ *
+ * Every one of these emits nothing until it is set, so a block, tag or picture
+ * that says nothing about its layout is laid out as Foundry lays it out.
+ */
+/**
+ * `display` falls back to what the thing was laid out as, never to nothing.
+ *
+ * An unset control emits no value, and a `display` reading an unset property is
+ * invalid at computed-value time — which takes the *initial* value, `inline`,
+ * rather than leaving the element alone. A tag is deliberately an inline block
+ * so its padding grows its own box, and it spilled over the lines around it the
+ * moment this control existed. Whatever the skeleton lays a thing out as has to
+ * be said again here as the fallback.
+ */
+const displayed = (group, fallback) => `  display: ${v(group, "display")
+  .replace(/\)$/, `, ${fallback})`)};`;
+
+const layout = (group, fallback = "block") => `${displayed(group, fallback)}
+  flex-direction: ${v(group, "flexDirection")};
+  flex-wrap: ${v(group, "flexWrap")};
+  justify-content: ${v(group, "justify")};
+  align-items: ${v(group, "alignItems")};
+  gap: ${v(group, "gap")};
+  min-width: ${v(group, "minWidth")};
+  max-width: ${v(group, "maxWidth")};
+  min-height: ${v(group, "minHeight")};
+  max-height: ${v(group, "maxHeight")};
+  overflow: ${v(group, "overflow")};`;
+
 const box = (group) => `  background-color: ${v(group, "background")};
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
@@ -65,6 +98,7 @@ ${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
+${layout(group)}
 ${box(group)}
   font-family: ${v(group, "font")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
@@ -109,6 +143,12 @@ ${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
+${displayed(group, "block")}
+  min-width: ${v(group, "minWidth")};
+  max-width: ${v(group, "maxWidth")};
+  min-height: ${v(group, "minHeight")};
+  max-height: ${v(group, "maxHeight")};
+  overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
   margin-top: ${v(group, "marginTop")};
   margin-bottom: ${v(group, "marginBottom")};
@@ -171,6 +211,16 @@ ${memberSelector(group)} {
   vertical-align: ${v(group, "verticalAlign")};
   bottom: ${v(group, "lift")};
   min-width: ${v(group, "minWidth")};
+${displayed(group, "inline-block")}
+  flex-direction: ${v(group, "flexDirection")};
+  flex-wrap: ${v(group, "flexWrap")};
+  justify-content: ${v(group, "justify")};
+  align-items: ${v(group, "alignItems")};
+  gap: ${v(group, "gap")};
+  max-width: ${v(group, "maxWidth")};
+  min-height: ${v(group, "minHeight")};
+  max-height: ${v(group, "maxHeight")};
+  overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
   padding: ${sides(group, "padding")};
   margin: ${sides(group, "margin")};
