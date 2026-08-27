@@ -299,7 +299,9 @@ is checked too, since macOS forgives a wrong case and a Linux-hosted server does
 And the checks no longer have a seeded style to lean on. `tools/fixtures/sample-style.mjs`
 holds the style they work with, and section [2] creates it — so a run starts by making its
 own world state rather than trusting what it finds. Anything bundled later is redistributed
-under the repository's MIT license, so only bundle art that may be licensed that way.
+under the repository's GPLv3 license, so only bundle art that may be licensed that
+way — which is a narrower gate than MIT was, and rules out most "free for personal
+use" art packs.
 
 ## Background images
 

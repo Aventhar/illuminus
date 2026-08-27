@@ -155,4 +155,4 @@ await illuminus.buildJournalExport({            // the archive itself, unsaved
 
 ## License
 
-[MIT](LICENSE).
+[GNU General Public License v3.0 or later](LICENSE). Copyright (C) 2026 Aventhar.
