@@ -105,6 +105,238 @@ ${graduated(group)}
   corner-shape: ${v(group, "cornerShape")};
   box-shadow: ${shadow(group, "shadow")};`;
 
+
+/* ==========================================================================
+   Lists and tables, once per treatment.
+
+   These used to be written by hand in the skeleton, because there was one of
+   each. A family of five means the same rules five times over with different
+   custom properties, which is exactly what this file exists for — and the
+   default is now just another set, written for "carries no treatment class".
+
+   The selectors are passed in rather than derived, because the default and a
+   treatment are shaped differently: a default styles every `ul` that has not
+   been treated, while a treatment styles the element carrying its own class.
+   ========================================================================== */
+
+/** Where a list's rules land: the list itself, its two kinds, and its items. */
+const listTargets = (group) => {
+  const page = ".illuminus-styled .journal-page-content";
+  if (group.id !== "lists") {
+    const own = `${page} .illuminus-list--${group.id}`;
+    return {
+      list: own,
+      ul: `${page} ul.illuminus-list--${group.id}`,
+      ol: `${page} ol.illuminus-list--${group.id}`,
+      dl: `${page} dl.illuminus-list--${group.id}`,
+      item: `${own} > li`,
+      marker: `${own} > li::marker`,
+      term: `${own} > dt`,
+      detail: `${own} > dd`
+    };
+  }
+  // A list nobody has treated, and the items inside one — said as "not inside a
+  // treated list" so a plain item within a treatment follows the treatment.
+  const plain = (tag) => `${page} ${tag}:not(.illuminus-list)`;
+  return {
+    list: `${plain("ul")},\n${plain("ol")}`,
+    ul: plain("ul"),
+    ol: plain("ol"),
+    dl: plain("dl"),
+    item: `${page} li:not(.illuminus-list li)`,
+    marker: `${page} li:not(.illuminus-list li)::marker`,
+    term: `${page} dt:not(.illuminus-list dt)`,
+    detail: `${page} dd:not(.illuminus-list dd)`
+  };
+};
+
+const listRules = (group) => {
+  const at = listTargets(group);
+  return `
+/* ${group.id} */
+${at.list} {
+  padding-inline-start: ${v(group, "indent")};
+  margin: ${sides(group, "margin")};
+  /* A list laid out as a row makes its items a run rather than a column, which
+     is how a line of trait chips is built. It falls back to the list it was. */
+${displayed(group, "block")}
+  flex-direction: ${v(group, "flexDirection")};
+  flex-wrap: ${v(group, "flexWrap")};
+  justify-content: ${v(group, "justify")};
+  align-items: ${v(group, "alignItems")};
+  gap: ${v(group, "gap")};
+  min-width: ${v(group, "minWidth")};
+  max-width: ${v(group, "maxWidth")};
+  min-height: ${v(group, "minHeight")};
+  max-height: ${v(group, "maxHeight")};
+  overflow: ${v(group, "overflow")};
+}
+
+${at.ul} {
+  list-style-type: ${v(group, "bullet")};
+}
+
+${at.ol} {
+  list-style-type: ${v(group, "numberStyle")};
+}
+
+${at.item} {
+  margin-bottom: ${v(group, "itemSpacing")};
+}
+
+/* Sizing the marker rather than the item, so a big bullet does not drag the
+   text up with it. */
+${at.marker} {
+  color: ${v(group, "markerColor")};
+  font-family: ${v(group, "markerFont")};
+  font-size: ${v(group, "markerSize")};
+}
+
+/* A definition list takes the same margins, and its two parts their own
+   lettering: unset, both inherit Foundry's near-white and are all but invisible
+   on a pale page. */
+${at.dl} {
+  margin: ${sides(group, "margin")};
+}
+
+${at.term} {
+  font-family: ${v(group, "termFont")};
+  -webkit-text-stroke: ${v(group, "termOutlineWidth")} ${v(group, "termOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "termTextShadowOffsetX")} ${v(group, "termTextShadowOffsetY")}
+               ${v(group, "termTextShadowBlur")} ${v(group, "termTextShadowColor")};
+  font-size: ${v(group, "termSize")};
+  color: ${v(group, "termColor")};
+  font-weight: ${v(group, "termTextStyle", "weight")};
+  font-style: ${v(group, "termTextStyle", "slant")};
+  font-variant: ${v(group, "termCaps", "variant")};
+  text-transform: ${v(group, "termCaps", "transform")};
+  margin-top: ${v(group, "termSpacingAbove")};
+}
+
+${at.detail} {
+  font-family: ${v(group, "detailFont")};
+  -webkit-text-stroke: ${v(group, "detailOutlineWidth")} ${v(group, "detailOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "detailTextShadowOffsetX")} ${v(group, "detailTextShadowOffsetY")}
+               ${v(group, "detailTextShadowBlur")} ${v(group, "detailTextShadowColor")};
+  font-size: ${v(group, "detailSize")};
+  color: ${v(group, "detailColor")};
+  font-weight: ${v(group, "detailTextStyle", "weight")};
+  font-style: ${v(group, "detailTextStyle", "slant")};
+  margin-left: ${v(group, "detailIndent")};
+  margin-bottom: ${v(group, "detailSpacingBelow")};
+}
+`;
+};
+
+/** Where a table's rules land: the table, its cells, its rows, its caption. */
+const tableTargets = (group) => {
+  const page = ".illuminus-styled .journal-page-content";
+  const own = group.id === "tables"
+    ? `${page} table:not(.illuminus-table)`
+    : `${page} table.illuminus-table--${group.id}`;
+  return {
+    table: own,
+    cells: `${own} th,\n${own} td`,
+    data: `${own} td`,
+    header: `${own} th`,
+    row: `${own} tbody tr`,
+    stripe: `${own} tbody tr:nth-child(even)`,
+    caption: `${own} > caption`
+  };
+};
+
+const tableRules = (group) => {
+  const at = tableTargets(group);
+  return `
+/* ${group.id} */
+/* Separate borders rather than collapsed, so the table can carry its own frame
+   and rounded corners independently of the lines between cells. */
+${at.table} {
+  width: ${v(group, "width")};
+  /* A table laid out as something other than a table is the author's business;
+     it falls back to the table it was. */
+${displayed(group, "table")}
+  min-width: ${v(group, "minWidth")};
+  max-width: ${v(group, "maxWidth")};
+  min-height: ${v(group, "minHeight")};
+  max-height: ${v(group, "maxHeight")};
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: ${vOr(group, "overflow", "hidden")};
+  font-family: ${v(group, "font")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
+  font-size: ${v(group, "size")};
+  line-height: ${v(group, "lineHeight")};
+  color: ${v(group, "textColor")};
+  margin: ${sides(group, "margin")};
+  border-width: ${sides(group, "border", "Width")};
+  border-style: ${sides(group, "border", "Style")};
+  border-color: ${sides(group, "border", "Color")};
+  border-radius: ${corners(group, "corner")};
+  corner-shape: ${v(group, "cornerShape")};
+}
+
+${at.cells} {
+  padding: ${sides(group, "cellPadding")};
+  vertical-align: ${v(group, "verticalAlign")};
+  border-width: ${sides(group, "cellBorder", "Width")};
+  border-style: ${sides(group, "cellBorder", "Style")};
+  border-color: ${sides(group, "cellBorder", "Color")};
+}
+
+${at.data} {
+  text-align: ${v(group, "align")};
+}
+
+${at.header} {
+  font-family: ${v(group, "headerFont")};
+  -webkit-text-stroke: ${v(group, "headerOutlineWidth")} ${v(group, "headerOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "headerTextShadowOffsetX")} ${v(group, "headerTextShadowOffsetY")}
+               ${v(group, "headerTextShadowBlur")} ${v(group, "headerTextShadowColor")};
+  font-size: ${v(group, "headerSize")};
+  font-weight: ${v(group, "headerTextStyle", "weight")};
+  font-style: ${v(group, "headerTextStyle", "slant")};
+  font-variant: ${v(group, "headerCaps", "variant")};
+  text-transform: ${v(group, "headerCaps", "transform")};
+  letter-spacing: ${v(group, "headerLetterSpacing")};
+  text-align: ${v(group, "headerAlign")};
+  background-color: ${v(group, "headerBackground")};
+  color: ${v(group, "headerColor")};
+}
+
+${at.row} {
+  background-color: ${v(group, "rowColor")};
+}
+
+${at.stripe} {
+  background-color: ${v(group, "stripeColor")};
+}
+
+${at.caption} {
+  caption-side: ${v(group, "captionSide")};
+  font-family: ${v(group, "captionFont")};
+  -webkit-text-stroke: ${v(group, "captionOutlineWidth")} ${v(group, "captionOutlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "captionTextShadowOffsetX")} ${v(group, "captionTextShadowOffsetY")}
+               ${v(group, "captionTextShadowBlur")} ${v(group, "captionTextShadowColor")};
+  font-size: ${v(group, "captionSize")};
+  color: ${v(group, "captionColor")};
+  font-weight: ${v(group, "captionTextStyle", "weight")};
+  font-style: ${v(group, "captionTextStyle", "slant")};
+  font-variant: ${v(group, "captionCaps", "variant")};
+  text-transform: ${v(group, "captionCaps", "transform")};
+  text-align: ${v(group, "captionAlign")};
+  padding-bottom: ${v(group, "captionSpacing")};
+}
+`;
+};
+
 /* -------------------------------------------- */
 
 /**
@@ -113,6 +345,13 @@ ${graduated(group)}
  * the stylesheet naming something the editor no longer writes.
  */
 const memberSelector = (group, suffix = "") => {
+  // The one group that is not a member: a tag nobody has given a treatment,
+  // said as "carries no treatment class" rather than by listing the ten, so a
+  // renamed or added treatment cannot leave it behind.
+  if (group.id === "tags") {
+    return `.illuminus-styled .journal-page-content .illuminus-tag`
+      + `:not([class*="illuminus-tag--"])${suffix}`;
+  }
   const kind = group.id.replace(/\d{2}$/, "");
   return `.illuminus-styled .journal-page-content .illuminus-${kind}--${group.id}${suffix}`;
 };
@@ -560,7 +799,12 @@ const IMAGE_LAYERS = [
   ...HEADINGS.map(({ group, level }) =>
     ({ selector: headingSelector(level), group: group.id, prefix: "" })),
   { selector: ".illuminus-styled .journal-page-content a.content-link, .illuminus-styled .journal-page-content a.inline-roll", group: "links", prefix: "" },
-  { selector: ".illuminus-styled .journal-page-content thead th", group: "tables", prefix: "header" },
+  { selector: ".illuminus-styled .journal-page-content table:not(.illuminus-table) thead th", group: "tables", prefix: "header" },
+  // Each table treatment's own header row, on the same terms.
+  ...GROUPS.filter((g) => g.family === "tableStyles").map((g) => ({
+    selector: `.illuminus-styled .journal-page-content table.illuminus-table--${g.id} thead th`,
+    group: g.id, prefix: "header"
+  })),
   { selector: ".illuminus-styled .journal-page-content blockquote:not(.illuminus-box)", group: "boxes", prefix: "" },
   ...GROUPS.filter((g) => g.family === "boxStyles")
     .map((g) => ({ selector: memberSelector(g), group: g.id, prefix: "" })),
@@ -723,7 +967,8 @@ const header = `/* =============================================================
 const blockGroups = GROUPS.filter((g) => g.family === "boxStyles");
 const blocks = blockGroups.map(boxRules).join("");
 const pictures = GROUPS.filter((g) => g.family === "imageStyles").map(imageRules).join("");
-const tags = GROUPS.filter((g) => g.family === "tagStyles").map(tagRules).join("");
+const tags = GROUPS.filter((g) => g.family === "tagStyles" || g.id === "tags")
+  .map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
 /**
  * The text under one heading level.
@@ -967,7 +1212,14 @@ const chosen = (selector) => {
   return out.every(Boolean) ? out.join(",\n") : null;
 };
 
-const ordinary = `${header}${headings}${blocks}${pictures}${tags}${empties}${images}`;
+// Lists and tables, the default and its treatments alike: the default is the
+// set written for "carries no treatment class", so one template serves both.
+const lists = GROUPS.filter((g) => g.family === "listStyles" || g.id === "lists")
+  .map(listRules).join("");
+const tables = GROUPS.filter((g) => g.family === "tableStyles" || g.id === "tables")
+  .map(tableRules).join("");
+
+const ordinary = `${header}${headings}${blocks}${pictures}${tags}${lists}${tables}${empties}${images}`;
 const written = fs.readFileSync(`${ROOT}/styles/illuminus.css`, "utf8");
 const hovers = pointedRules(written) + pointedRules(ordinary);
 const selected = pointedRules(written, { twinOf: activeTwinOf, selector: chosen })

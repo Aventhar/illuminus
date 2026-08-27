@@ -28,6 +28,12 @@ export const IMAGE_CLASS = "illuminus-image";
 /** Class marking an inline treatment, alongside `illuminus-tag--<key>`. */
 export const TAG_CLASS = "illuminus-tag";
 
+/** Class marking a list treatment, alongside `illuminus-list--<key>`. */
+export const LIST_CLASS = "illuminus-list";
+
+/** Class marking a table treatment, alongside `illuminus-table--<key>`. */
+export const TABLE_CLASS = "illuminus-table";
+
 /** Block and picture group ids, in schema order. */
 const membersOf = (family) => GROUPS.filter((group) => group.family === family).map((group) => group.id);
 
@@ -48,7 +54,7 @@ function labelFor(style, groupId) {
 }
 
 /** Any class this module manages, on a node or on a mark. */
-const MANAGED = /^illuminus-(box|image|tag)/;
+const MANAGED = /^illuminus-(box|image|tag|list|table)/;
 
 /** Merge a class onto whatever classes a node already carries. */
 function withClasses(existing, added) {
@@ -125,13 +131,64 @@ function applyPicture(groupId) {
 }
 
 /**
+ * Treat the list or the table the cursor is in.
+ *
+ * Unlike a box or a picture there is nothing to wrap: a list is a list before
+ * anybody styles it, so the command works on one that is already there and
+ * reports false when the cursor is not in one. No group id strips the treatment
+ * instead, which is what Default List and Default Table style.
+ * @param {string[]} typeNames  The nodes this treatment can sit on.
+ * @param {string} marker       The class marking the family.
+ * @param {string|null} groupId
+ */
+function applyToNode(typeNames, marker, groupId) {
+  const classes = groupId ? [marker, `${marker}--${groupId}`] : [];
+  return (state, dispatch) => {
+    let target = null;
+    for (const name of typeNames) {
+      target = ancestorOfType(state, name);
+      if (target) break;
+    }
+    if (!target) return false;
+    if (dispatch) {
+      dispatch(state.tr.setNodeMarkup(target.pos, null, {
+        ...target.node.attrs,
+        classes: classes.length
+          ? withClasses(target.node.attrs.classes, classes)
+          : withoutClasses(target.node.attrs.classes)
+      }));
+    }
+    return true;
+  };
+}
+
+/** The nodes a list treatment can sit on: both kinds, and a definition list. */
+const LIST_NODES = ["bullet_list", "ordered_list", "dl"];
+
+/** Whether the node the cursor is in already carries a given treatment. */
+function nodeIsActive(state, typeNames, marker, groupId) {
+  let target = null;
+  for (const name of typeNames) {
+    target = ancestorOfType(state, name);
+    if (target) break;
+  }
+  if (!target) return false;
+  const classes = String(target.node.attrs.classes ?? "").split(/\s+/);
+  return groupId ? classes.includes(`${marker}--${groupId}`)
+    : !classes.some((one) => one.startsWith(`${marker}--`));
+}
+
+/**
  * Tag the selected words. Unlike a block, an inline treatment is a mark, so it
  * needs words to attach to — with nothing selected there is nothing to tag, and
  * the command reports that rather than doing something invisible.
  * @param {string} groupId
  */
 function applyTag(groupId) {
-  const classes = [TAG_CLASS, `${TAG_CLASS}--${groupId}`].join(" ");
+  // No group id is the plain tag — the Default Tag tab styles it. It cannot be
+  // reached by taking a treatment off, the way a plain box or picture is: a tag
+  // *is* the mark, and removing it leaves bare words.
+  const classes = groupId ? [TAG_CLASS, `${TAG_CLASS}--${groupId}`].join(" ") : TAG_CLASS;
   return (state, dispatch) => {
     if (state.selection.empty) return false;
     const type = state.schema.marks.span;
@@ -151,8 +208,13 @@ function tagIsActive(state, groupId) {
   const type = state.schema.marks.span;
   if (!type) return false;
   const marks = empty ? $from.marks() : null;
-  const has = (mark) => mark.type === type
-    && String(mark.attrs.classes ?? "").split(/\s+/).includes(`${TAG_CLASS}--${groupId}`);
+  const has = (mark) => {
+    const classes = String(mark.attrs.classes ?? "").split(/\s+/);
+    if (!classes.includes(TAG_CLASS)) return false;
+    // The plain tag is the one carrying no treatment at all.
+    return groupId ? classes.includes(`${TAG_CLASS}--${groupId}`)
+      : !classes.some((one) => one.startsWith(`${TAG_CLASS}--`));
+  };
   if (marks) return marks.some(has);
   let found = false;
   state.doc.nodesBetween(from, to, (node) => {
@@ -300,12 +362,58 @@ export function registerEditorMenu() {
         {
           action: "illuminus-tags",
           title: game.i18n.localize("ILLUMINUS.Menu.Tags"),
-          children: membersOf("tagStyles").map((groupId) => ({
-            action: `illuminus-${groupId}`,
-            title: labelFor(style, groupId),
-            active: tagIsActive(state, groupId),
-            cmd: applyTag(groupId)
-          }))
+          children: [
+            // Named first, because a look that needs no choosing should be the
+            // one already under the pointer.
+            {
+              action: "illuminus-tag-default",
+              title: game.i18n.localize("ILLUMINUS.Groups.tags.label"),
+              active: tagIsActive(state, null),
+              cmd: applyTag(null)
+            },
+            ...membersOf("tagStyles").map((groupId) => ({
+              action: `illuminus-${groupId}`,
+              title: labelFor(style, groupId),
+              active: tagIsActive(state, groupId),
+              cmd: applyTag(groupId)
+            }))
+          ]
+        },
+        {
+          action: "illuminus-lists",
+          title: game.i18n.localize("ILLUMINUS.Menu.Lists"),
+          children: [
+            {
+              action: "illuminus-list-default",
+              title: game.i18n.localize("ILLUMINUS.Groups.lists.label"),
+              active: nodeIsActive(state, LIST_NODES, LIST_CLASS, null),
+              cmd: applyToNode(LIST_NODES, LIST_CLASS, null)
+            },
+            ...membersOf("listStyles").map((groupId) => ({
+              action: `illuminus-${groupId}`,
+              title: labelFor(style, groupId),
+              active: nodeIsActive(state, LIST_NODES, LIST_CLASS, groupId),
+              cmd: applyToNode(LIST_NODES, LIST_CLASS, groupId)
+            }))
+          ]
+        },
+        {
+          action: "illuminus-tables",
+          title: game.i18n.localize("ILLUMINUS.Menu.Tables"),
+          children: [
+            {
+              action: "illuminus-table-default",
+              title: game.i18n.localize("ILLUMINUS.Groups.tables.label"),
+              active: nodeIsActive(state, ["table"], TABLE_CLASS, null),
+              cmd: applyToNode(["table"], TABLE_CLASS, null)
+            },
+            ...membersOf("tableStyles").map((groupId) => ({
+              action: `illuminus-${groupId}`,
+              title: labelFor(style, groupId),
+              active: nodeIsActive(state, ["table"], TABLE_CLASS, groupId),
+              cmd: applyToNode(["table"], TABLE_CLASS, groupId)
+            }))
+          ]
         },
         {
           action: "illuminus-templates",

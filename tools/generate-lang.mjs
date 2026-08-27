@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const { GROUPS, allFields, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
+const { GROUPS, allFields, groupFields, FAMILY_SIZE } = await import(`${ROOT}/scripts/style-schema.mjs`);
 const existing = JSON.parse(fs.readFileSync(`${ROOT}/lang/en.json`, "utf8"));
 
 const out = {};
@@ -30,6 +30,8 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 /* ---------- New chrome strings ---------- */
 // The rows a box family is gathered into, and the sides of an edge.
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
+put("ILLUMINUS.Menu.Lists", "List");
+put("ILLUMINUS.Menu.Tables", "Table");
 put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
 put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");
@@ -177,9 +179,15 @@ Object.assign(out, {
   "ILLUMINUS.Families.headings": "Headings",
   "ILLUMINUS.Families.headingsName": "Heading level",
   "ILLUMINUS.Families.headingsHint": "The six heading levels. Level 1 also styles the page title. Pick a level to style it.",
-  "ILLUMINUS.Families.boxStyles": "Box Styles",
-  "ILLUMINUS.Families.imageStyles": "Image Styles",
-  "ILLUMINUS.Families.tagStyles": "Tag Styles",
+  "ILLUMINUS.Families.boxStyles": "More Box Styles",
+  "ILLUMINUS.Families.imageStyles": "More Image Styles",
+  "ILLUMINUS.Families.tagStyles": "More Tag Styles",
+  "ILLUMINUS.Families.listStyles": "More List Styles",
+  "ILLUMINUS.Families.listStylesName": "List name",
+  "ILLUMINUS.Families.listStylesHint": "Styles you apply to one list, overriding the Default List settings. Put the cursor in a list, then pick one. Rename it to suit your content.",
+  "ILLUMINUS.Families.tableStyles": "More Table Styles",
+  "ILLUMINUS.Families.tableStylesName": "Table name",
+  "ILLUMINUS.Families.tableStylesHint": "Styles you apply to one table, overriding the Default Table settings. Put the cursor in a table, then pick one. Rename it to suit your content.",
   "ILLUMINUS.Families.tagStylesName": "Tag name",
   "ILLUMINUS.Families.tagStylesHint": "Styles you apply to a few words inside a paragraph or a heading \u2014 trait tags, rarity badges, the rank at the end of a title line. Select the words first, then pick one. Rename it to suit your content.",
   "ILLUMINUS.Field.sidebar.buttonColor.label": "Icon Color",
@@ -342,21 +350,23 @@ const GROUP_TEXT = {
   heading5: ["Heading 5", "Smaller still, for a labeled paragraph or a short list heading."],
   heading6: ["Heading 6", "The smallest heading level."],
   body: ["Body", "Ordinary paragraphs — the bulk of what people read."],
-  links: ["Links", "Clickable references to other documents, rolls, and web pages."],
-  lists: ["Lists", "Bulleted and numbered lists."],
-  tables: ["Tables", "Tables of results, treasure, encounters, and the like."],
-  secrets: ["Secrets", "GM-only passages, and the button that reveals them to the table."],
-  boxes: ["Boxes", "Set-apart passages, such as read-aloud description. Applies to quote blocks in the editor."],
-  images: ["Images", "Images placed in a page, and their captions."]
+  links: ["Links", "Clickable references to other documents, rolls, and web pages. Foundry builds these itself as a page is read, so unlike a box or a table they cannot carry a treatment of their own."],
+  lists: ["Default List", "A bulleted, numbered or definition list that has been given no list treatment of its own."],
+  tables: ["Default Table", "A table of results, treasure or encounters that has been given no table treatment of its own."],
+  secrets: ["Secret", "A GM-only passage, and the button that reveals it to the table."],
+  boxes: ["Default Box", "A set-apart passage — read-aloud description and the like — that has been given no box treatment of its own. Applies to quote blocks in the editor."],
+  images: ["Default Image", "A picture placed in a page, and its caption, where no picture treatment has been given."],
+  tags: ["Default Tag", "A few words marked out inside a sentence — a trait, a keyword, a condition — where no tag treatment has been chosen. The editor's Tag menu names it first."]
 };
 for (const [id, [label, hint]] of Object.entries(GROUP_TEXT)) {
   put(`ILLUMINUS.Groups.${id}.label`, label);
   put(`ILLUMINUS.Groups.${id}.hint`, hint);
 }
 
-// The ten blocks and ten picture treatments. Their displayed names are stored
-// on the style and editable; these are only the fallbacks.
-for (let i = 1; i <= 10; i++) {
+// Each family's treatments. Their displayed names are stored on the style and
+// editable; these are only the fallbacks. The count comes from the schema, so
+// widening or narrowing a family needs no edit here.
+for (let i = 1; i <= FAMILY_SIZE; i++) {
   const n = String(i).padStart(2, "0");
   put(`ILLUMINUS.Groups.box${n}.label`, `Box${n}`);
   put(`ILLUMINUS.Groups.box${n}.hint`,
@@ -368,6 +378,14 @@ for (let i = 1; i <= 10; i++) {
   put(`ILLUMINUS.Groups.tag${n}.hint`,
     "A style you apply to a few words rather than to a whole box \u2014 a trait tag, a rarity badge, "
     + "or the rank on the right of a title line.");
+  put(`ILLUMINUS.Groups.list${n}.label`, `List${n}`);
+  put(`ILLUMINUS.Groups.list${n}.hint`,
+    "A style you apply to one list, overriding the Default List settings \u2014 a run of trait "
+    + "chips, a numbered procedure, a glossary.");
+  put(`ILLUMINUS.Groups.table${n}.label`, `Table${n}`);
+  put(`ILLUMINUS.Groups.table${n}.hint`,
+    "A style you apply to one table, overriding the Default Table settings \u2014 a stat block "
+    + "reads nothing like a treasure table.");
 }
 
 /* ---------- Sections ---------- */

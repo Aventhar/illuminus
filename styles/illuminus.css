@@ -1009,62 +1009,9 @@
 
 /* --- Definition lists --------------------------------------------------- */
 
-/* `dt` and `dd` inherit Foundry's own colors, which are light — unset, they are
-   nearly invisible on a pale page. */
-.illuminus-styled .journal-page-content dl {
-  margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right)
-          var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
-}
-
-.illuminus-styled .journal-page-content dt {
-  font-family: var(--ill-lists-term-font);
-  -webkit-text-stroke: var(--ill-lists-term-outline-width) var(--ill-lists-term-outline-color);
-  paint-order: stroke fill;
-  text-shadow: var(--ill-lists-term-text-shadow-offset-x) var(--ill-lists-term-text-shadow-offset-y)
-               var(--ill-lists-term-text-shadow-blur) var(--ill-lists-term-text-shadow-color);
-  font-size: var(--ill-lists-term-size);
-  color: var(--ill-lists-term-color);
-  font-weight: var(--ill-lists-term-text-style-weight);
-  font-style: var(--ill-lists-term-text-style-slant);
-  font-variant: var(--ill-lists-term-caps-variant);
-  text-transform: var(--ill-lists-term-caps-transform);
-  margin-top: var(--ill-lists-term-spacing-above);
-}
-
-.illuminus-styled .journal-page-content dd {
-  font-family: var(--ill-lists-detail-font);
-  -webkit-text-stroke: var(--ill-lists-detail-outline-width) var(--ill-lists-detail-outline-color);
-  paint-order: stroke fill;
-  text-shadow: var(--ill-lists-detail-text-shadow-offset-x) var(--ill-lists-detail-text-shadow-offset-y)
-               var(--ill-lists-detail-text-shadow-blur) var(--ill-lists-detail-text-shadow-color);
-  font-size: var(--ill-lists-detail-size);
-  color: var(--ill-lists-detail-color);
-  font-weight: var(--ill-lists-detail-text-style-weight);
-  font-style: var(--ill-lists-detail-text-style-slant);
-  margin-left: var(--ill-lists-detail-indent);
-  margin-bottom: var(--ill-lists-detail-spacing-below);
-}
-
-
 
 /* --- Table captions ----------------------------------------------------- */
 
-.illuminus-styled .journal-page-content table > caption {
-  caption-side: var(--ill-tables-caption-side);
-  font-family: var(--ill-tables-caption-font);
-  -webkit-text-stroke: var(--ill-tables-caption-outline-width) var(--ill-tables-caption-outline-color);
-  paint-order: stroke fill;
-  text-shadow: var(--ill-tables-caption-text-shadow-offset-x) var(--ill-tables-caption-text-shadow-offset-y)
-               var(--ill-tables-caption-text-shadow-blur) var(--ill-tables-caption-text-shadow-color);
-  font-size: var(--ill-tables-caption-size);
-  color: var(--ill-tables-caption-color);
-  font-weight: var(--ill-tables-caption-text-style-weight);
-  font-style: var(--ill-tables-caption-text-style-slant);
-  font-variant: var(--ill-tables-caption-caps-variant);
-  text-transform: var(--ill-tables-caption-caps-transform);
-  text-align: var(--ill-tables-caption-align);
-  padding-bottom: var(--ill-tables-caption-spacing);
-}
 
 /* --- Inline marks ------------------------------------------------------- */
 
@@ -1421,7 +1368,6 @@
 }
 
 
-
 /* --- Horizontal rules --------------------------------------------------- */
 
 /* Only the top edge is drawn, so thickness means what it says rather than
@@ -1472,124 +1418,9 @@
 
 /* --- Lists -------------------------------------------------------------- */
 
-.illuminus-styled .journal-page-content ul,
-.illuminus-styled .journal-page-content ol {
-  padding-inline-start: var(--ill-lists-indent);
-  margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right)
-          var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
-  /* A list laid out as a row makes its items a run rather than a column, which
-     is how a line of trait chips is built. It falls back to the list it was. */
-  display: var(--ill-lists-display, block);
-  flex-direction: var(--ill-lists-flex-direction);
-  flex-wrap: var(--ill-lists-flex-wrap);
-  justify-content: var(--ill-lists-justify);
-  align-items: var(--ill-lists-align-items);
-  gap: var(--ill-lists-gap);
-  min-width: var(--ill-lists-min-width);
-  max-width: var(--ill-lists-max-width);
-  min-height: var(--ill-lists-min-height);
-  max-height: var(--ill-lists-max-height);
-  overflow: var(--ill-lists-overflow);
-}
-
-.illuminus-styled .journal-page-content ul {
-  list-style-type: var(--ill-lists-bullet);
-}
-
-.illuminus-styled .journal-page-content ol {
-  list-style-type: var(--ill-lists-number-style);
-}
-
-.illuminus-styled .journal-page-content li {
-  margin-bottom: var(--ill-lists-item-spacing);
-}
-
-/* Sizing the marker rather than the item, so a big bullet does not drag the
-   text up with it. */
-.illuminus-styled .journal-page-content li::marker {
-  color: var(--ill-lists-marker-color);
-  font-family: var(--ill-lists-marker-font);
-  font-size: var(--ill-lists-marker-size);
-}
 
 /* --- Tables ------------------------------------------------------------- */
 
-/* Separate borders rather than collapsed, so the table can carry its own frame
-   and rounded corners independently of the lines between cells. */
-.illuminus-styled .journal-page-content table {
-  width: var(--ill-tables-width);
-  /* A table laid out as something other than a table is the author's business;
-     it falls back to the table it was. */
-  display: var(--ill-tables-display, table);
-  min-width: var(--ill-tables-min-width);
-  max-width: var(--ill-tables-max-width);
-  min-height: var(--ill-tables-min-height);
-  max-height: var(--ill-tables-max-height);
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow: var(--ill-tables-overflow, hidden);
-  font-family: var(--ill-tables-font);
-  -webkit-text-stroke: var(--ill-tables-outline-width) var(--ill-tables-outline-color);
-  paint-order: stroke fill;
-  text-shadow: var(--ill-tables-text-shadow-offset-x) var(--ill-tables-text-shadow-offset-y)
-               var(--ill-tables-text-shadow-blur) var(--ill-tables-text-shadow-color);
-  font-size: var(--ill-tables-size);
-  line-height: var(--ill-tables-line-height);
-  color: var(--ill-tables-text-color);
-  margin: var(--ill-tables-margin-top) var(--ill-tables-margin-right)
-          var(--ill-tables-margin-bottom) var(--ill-tables-margin-left);
-  border-width: var(--ill-tables-border-top-width) var(--ill-tables-border-right-width)
-                var(--ill-tables-border-bottom-width) var(--ill-tables-border-left-width);
-  border-style: var(--ill-tables-border-top-style) var(--ill-tables-border-right-style)
-                var(--ill-tables-border-bottom-style) var(--ill-tables-border-left-style);
-  border-color: var(--ill-tables-border-top-color) var(--ill-tables-border-right-color)
-                var(--ill-tables-border-bottom-color) var(--ill-tables-border-left-color);
-  border-radius: var(--ill-tables-corner-top-left) var(--ill-tables-corner-top-right)
-                 var(--ill-tables-corner-bottom-right) var(--ill-tables-corner-bottom-left);
-  corner-shape: var(--ill-tables-corner-shape);
-}
-
-.illuminus-styled .journal-page-content th,
-.illuminus-styled .journal-page-content td {
-  padding: var(--ill-tables-cell-padding-top) var(--ill-tables-cell-padding-right)
-           var(--ill-tables-cell-padding-bottom) var(--ill-tables-cell-padding-left);
-  vertical-align: var(--ill-tables-vertical-align);
-  border-width: var(--ill-tables-cell-border-top-width) var(--ill-tables-cell-border-right-width)
-                var(--ill-tables-cell-border-bottom-width) var(--ill-tables-cell-border-left-width);
-  border-style: var(--ill-tables-cell-border-top-style) var(--ill-tables-cell-border-right-style)
-                var(--ill-tables-cell-border-bottom-style) var(--ill-tables-cell-border-left-style);
-  border-color: var(--ill-tables-cell-border-top-color) var(--ill-tables-cell-border-right-color)
-                var(--ill-tables-cell-border-bottom-color) var(--ill-tables-cell-border-left-color);
-}
-
-.illuminus-styled .journal-page-content td {
-  text-align: var(--ill-tables-align);
-}
-
-.illuminus-styled .journal-page-content th {
-  font-family: var(--ill-tables-header-font);
-  -webkit-text-stroke: var(--ill-tables-header-outline-width) var(--ill-tables-header-outline-color);
-  paint-order: stroke fill;
-  text-shadow: var(--ill-tables-header-text-shadow-offset-x) var(--ill-tables-header-text-shadow-offset-y)
-               var(--ill-tables-header-text-shadow-blur) var(--ill-tables-header-text-shadow-color);
-  font-size: var(--ill-tables-header-size);
-  font-weight: var(--ill-tables-header-text-style-weight);
-  font-style: var(--ill-tables-header-text-style-slant);
-  font-variant: var(--ill-tables-header-caps-variant);
-  text-transform: var(--ill-tables-header-caps-transform);
-  letter-spacing: var(--ill-tables-header-letter-spacing);
-  text-align: var(--ill-tables-header-align);
-  background-color: var(--ill-tables-header-background);
-  color: var(--ill-tables-header-color);
-}
-
-.illuminus-styled .journal-page-content tbody tr {
-  background-color: var(--ill-tables-row-color);
-}
-
-.illuminus-styled .journal-page-content tbody tr:nth-child(even) {
-  background-color: var(--ill-tables-stripe-color);
-}
 
 /* --- Boxed / read-aloud text -------------------------------------------- */
 

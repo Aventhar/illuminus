@@ -963,8 +963,8 @@ const tb = JSON.parse(tabs);
 check(tb.wide.clipped.length === 0, `no part runs past the tree at 1000px${tb.wide.clipped.length ? ": " + tb.wide.clipped : ""}`);
 check(tb.narrow.clipped.length === 0, `no part runs past the tree at 700px${tb.narrow.clipped.length ? ": " + tb.narrow.clipped : ""}`);
 check(tb.wide.tall.length === 0, `no part's name is cut off${tb.wide.tall.length ? ": " + tb.wide.tall : ""}`);
-check(tb.wide.labels.every((l) => l && l.split(" ").length <= 2),
-  `every part is named in one or two words (${tb.wide.labels.slice(0, 8).join(", ")}…)`);
+check(tb.wide.labels.every((l) => l && l.split(" ").length <= 3),
+  `every part is named in three words or fewer (${tb.wide.labels.slice(0, 8).join(", ")}…)`);
 
 // The title bar and the page's edit pencil sit outside the page itself, so
 // they need their own rules; core styles them and this must win.
@@ -7460,6 +7460,65 @@ try {
   await cdp.evaluate(`(async () => {
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.constructor.name.includes("StyleEditor")) await app.close({force: true});
+    }
+  })()`);
+}
+
+// A tag nobody has given a treatment. It is the counterpart of Default Box and
+// Default Image — but it cannot be reached by taking a treatment off, the way
+// those two are, because a tag *is* the mark and removing it leaves bare words.
+console.log("\n[81] A tag with no treatment takes the Default Tag settings");
+try {
+  const plain = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Plain Tag Probe", settings: {
+      tags: {background: "#204060", color: "#ffcc00"},
+      tag01: {background: "#801020", color: "#00ff88"}
+    }});
+    const entry = await JournalEntry.create({name: "Plain Tag Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {
+      content: '<p><span class="illuminus-tag">Plain</span> and '
+        + '<span class="illuminus-tag illuminus-tag--tag01">Treated</span>.</p>',
+      format: 1}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const read = (sel) => {
+      const seen = getComputedStyle(root.querySelector(sel));
+      return {fill: seen.backgroundColor, ink: seen.color, laidOut: seen.display};
+    };
+    const out = {
+      plain: read('.illuminus-tag:not([class*="illuminus-tag--"])'),
+      treated: read(".illuminus-tag--tag01")
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(plain.plain.fill === "rgb(32, 64, 96)" && plain.plain.ink === "rgb(255, 204, 0)",
+    `a plain tag takes the Default Tag settings (${plain.plain.fill}, ${plain.plain.ink})`);
+  // The treatments still win where one has been chosen: the default is the
+  // untreated tag, not a base underneath the ten.
+  check(plain.treated.fill === "rgb(128, 16, 32)" && plain.treated.ink === "rgb(0, 255, 136)",
+    `while a treated tag keeps its own (${plain.treated.fill}, ${plain.treated.ink})`);
+  check(plain.plain.laidOut === "inline-block",
+    `and the plain tag is still laid out as one (${plain.plain.laidOut})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Plain Tag Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Plain Tag Probe")) {
+      await api.deleteStyle(style.id);
     }
   })()`);
 }

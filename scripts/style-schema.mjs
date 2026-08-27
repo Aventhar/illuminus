@@ -153,7 +153,8 @@ const emitCrop = (value) => ({ cover: "cover", contain: "contain", stretch: "fil
  * is why the picture layers say `host: false` and why this is never offered on
  * a window root.
  */
-function layoutFields(prefix = "", { flex = true, room = true, position = false } = {}) {
+function layoutFields(prefix = "", { flex = true, room = true, position = false,
+  minWidth = true } = {}) {
   const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
   const fields = [
     select(n("Display"), "inherit", CHOICES.display, { emit: emitWord })
@@ -166,7 +167,10 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false 
     num(n("Gap"), 0, "px", 0, 200, 1, { emitZero: false })
   );
   if (room) fields.push(
-    num(n("MinWidth"), 0, "px", 0, 2000, 5, { emitZero: false }),
+    // A part that already has a least width of its own says so: a tag's is
+    // measured for an inline thing and reads "as wide as its words" at nought,
+    // and two controls writing one setting is worse than either.
+    ...(minWidth ? [num(n("MinWidth"), 0, "px", 0, 2000, 5, { emitZero: false })] : []),
     num(n("MaxWidth"), 0, "px", 0, 2000, 5, { emitZero: false }),
     num(n("MinHeight"), 0, "px", 0, 2000, 5, { emitZero: false }),
     num(n("MaxHeight"), 0, "px", 0, 2000, 5, { emitZero: false }),
@@ -672,8 +676,9 @@ function tagSections() {
         // Turned on, both halves are drawn whole.
         { type: "toggle", name: "wrapEdges", default: false, on: "clone", off: "slice" },
         // A tag is laid out `inline-block` by the skeleton so its padding grows
-        // its own box; these say what it does with the room that gives it.
-        ...layoutFields("", { position: false }),
+        // its own box; these say what it does with the room that gives it. Its
+        // least width is declared above, measured for an inline thing.
+        ...layoutFields("", { position: false, minWidth: false }),
         ...turnFields()
       ]
     },
@@ -893,6 +898,222 @@ function bannerSections(defaults = {}) {
 /* -------------------------------------------- */
 /*  Groups (one tab each)                       */
 /* -------------------------------------------- */
+
+/**
+ * One list's settings: where it sits, the room around it, the mark in front of
+ * each item, and the two-part lettering of a definition list.
+ *
+ * Shared by Default List and by every list treatment, the way `boxSections` is
+ * shared — so a treatment can say anything the default can.
+ */
+function listSections() {
+  return [
+    {
+      id: "marker",
+      order: ["markerFont", "markerSize", "markerColor", "bullet", "numberStyle"],
+      fields: [
+        select("bullet", "disc", CHOICES.bullet, { emit: emitBullet }),
+      select("numberStyle", "decimal", CHOICES.numberStyle, { emit: emitKeyword }),
+      num("markerSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+        col("markerColor", ""),
+        col("markerHoverColor", ""),
+        font("markerFont", "")
+      ]
+    },
+    {
+      // dt and dd inherit Foundry's own colors, which are light — on a
+      // parchment page they are close to invisible until set here.
+      id: "definitions",
+      order: [
+        "termFont", "termSize", "termColor", "termTextStyle", "termTextStyleSlant",
+        "termCaps", "termSpacingAbove",
+        DIVIDER, "termOutlineWidth", "termOutlineColor",
+        DIVIDER, "termTextShadowOffsetX", "termTextShadowOffsetY",
+        "termTextShadowBlur", "termTextShadowColor",
+        DIVIDER, "detailFont", "detailSize", "detailColor", "detailTextStyle",
+        "detailTextStyleSlant", "detailIndent", "detailSpacingBelow",
+        DIVIDER, "detailOutlineWidth", "detailOutlineColor",
+        DIVIDER, "detailTextShadowOffsetX", "detailTextShadowOffsetY",
+        "detailTextShadowBlur", "detailTextShadowColor"
+      ],
+      fields: [
+        font("termFont", ""),
+        num("termSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+        col("termColor", ""),
+        col("termHoverColor", ""),
+        ...textStyleField("termTextStyle", "700", "normal"),
+        select("termCaps", "none", CHOICES.caps, { emit: emitCaps }),
+        num("termSpacingAbove", 8, "px", 0, 100, 1),
+        font("detailFont", ""),
+        num("detailSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+        col("detailColor", ""),
+        col("detailHoverColor", ""),
+        ...textStyleField("detailTextStyle", "400", "normal"),
+        num("detailIndent", 24, "px", 0, 200, 2),
+        num("detailSpacingBelow", 6, "px", 0, 100, 1)
+      ]
+    },
+    {
+      id: "margin",
+      order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+      fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+    },
+    {
+      id: "layout",
+      order: ["indent", "itemSpacing", DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+        DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+      fields: [
+        num("indent", 24, "px", 0, 200, 2),
+        num("itemSpacing", 4, "px", 0, 60, 1),
+        // A list laid out as a row makes its items a run rather than a
+        // column, which is how a line of trait chips is built.
+        ...layoutFields("", { hide: false })
+      ]
+    }
+  ];
+}
+
+/**
+ * One table's settings: the table itself, then the parts of it — the header
+ * row, the rows beneath, a cell, and the caption.
+ */
+function tableSections() {
+  return [
+    // How wide the table is drawn, which is a question about the table rather
+    // than about its lettering.
+    { id: "layout",
+      order: ["width", DIVIDER, "display", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+      fields: [
+        num("width", 100, "%", 10, 100, 1),
+        ...layoutFields("", { flex: false, hide: false })
+      ] },
+    {
+      id: "text",
+      order: [
+        "font", "size", "textColor",
+        DIVIDER, "align", "verticalAlign", "lineHeight", "wrap", "hyphens",
+        DIVIDER, "outlineColor", "outlineWidth",
+        DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+      ],
+      fields: [
+        font("font", ""),
+        num("size", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
+        col("textColor", ""),
+        num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+        select("align", "left", CHOICES.align),
+        select("verticalAlign", "middle", CHOICES.verticalAlign)
+      ]
+    },
+    {
+      id: "margin",
+      order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+      fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
+    },
+    {
+      id: "border",
+      order: [
+        "borderTopStyle", "borderTopColor", "borderTopWidth",
+        DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+        DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+        DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+        DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
+      ],
+      fields: [...borderFields("border"), ...cornerFields("corner")]
+    },
+    {
+      id: "header",
+      order: [
+        "headerBackground",
+        DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
+        DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing",
+        DIVIDER, "headerOutlineColor", "headerOutlineWidth",
+        DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
+        "headerTextShadowBlur", "headerTextShadowColor",
+        DIVIDER, "headerTexture", "headerTextureFit", "headerTexturePosition",
+        "headerTextureBlend", "headerTextureOpacity", "headerTextureBlur", "headerTextureBrightness", "headerTextureContrast", "headerTextureSaturation", "headerTextureAge",
+        DIVIDER, "headerInnerShadowOffsetX", "headerInnerShadowOffsetY", "headerInnerShadowBlur",
+        "headerInnerShadowSpread", "headerInnerShadowColor",
+        DIVIDER, "headerShadowOffsetX", "headerShadowOffsetY", "headerShadowBlur",
+        "headerShadowSpread", "headerShadowColor"
+      ],
+      fields: [
+        col("headerBackground", "#00000000"), ...imageFields("header"),
+        col("headerColor", ""),
+        font("headerFont", ""),
+        num("headerSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
+        ...textStyleField("headerTextStyle", "700", "normal"),
+        select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
+        select("headerAlign", "left", CHOICES.align),
+        num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
+      ]
+    },
+    { id: "rows", order: ["rowColor", "stripeColor"],
+      fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
+    // A cell's own spacing and its edges are one question about a cell, so
+    // they read as one category.
+    {
+      id: "cellPadding",
+      label: "ILLUMINUS.Sections.cellStyles.label",
+      hint: "ILLUMINUS.Sections.cellStyles.hint",
+      order: [
+        "cellPaddingTop", "cellPaddingBottom", "cellPaddingLeft", "cellPaddingRight",
+        DIVIDER, "cellBorderTopStyle", "cellBorderTopColor", "cellBorderTopWidth",
+        DIVIDER, "cellBorderBottomStyle", "cellBorderBottomColor", "cellBorderBottomWidth",
+        DIVIDER, "cellBorderLeftStyle", "cellBorderLeftColor", "cellBorderLeftWidth",
+        DIVIDER, "cellBorderRightStyle", "cellBorderRightColor", "cellBorderRightWidth"
+      ],
+      fields: [
+        ...spacingFields("cellPadding", { top: 8, right: 16, bottom: 8, left: 16 }, { max: 80 }),
+        ...borderFields("cellBorder")
+      ]
+    },
+    {
+      id: "tableCaption",
+      order: [
+        "captionFont", "captionSize", "captionColor", "captionTextStyle", "captionTextStyleSlant",
+        DIVIDER, "captionAlign", "captionCaps",
+        DIVIDER, "captionOutlineColor", "captionOutlineWidth",
+        DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
+        "captionTextShadowBlur", "captionTextShadowColor", "captionSide", "captionSpacing"
+      ],
+      fields: [
+        select("captionSide", "top", ["top", "bottom"]),
+        font("captionFont", ""),
+        num("captionSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
+        col("captionColor", "#5a4326"),
+        ...textStyleField("captionTextStyle", "700", "italic"),
+        select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
+        select("captionAlign", "center", CHOICES.alignNoJustify),
+        num("captionSpacing", 6, "px", 0, 60, 1)
+      ]
+    }
+  ];
+}
+
+/**
+ * How many treatments each family offers.
+ *
+ * Five rather than ten: a style that has to invent ten looks for a thing ends
+ * up with eight nobody uses, and every one of them costs a full set of settings
+ * in every style file. Raising it later is this number and a migration; lowering
+ * it drops what the extra members held, which `cleanSettings` does silently.
+ */
+export const FAMILY_SIZE = 5;
+
+/**
+ * One family's members, named `<word>01`..`<word>0N`.
+ *
+ * The class a member writes is derived from its id — `box01` becomes
+ * `illuminus-box--box01` — so the stylesheet can never name something the
+ * editor no longer writes.
+ */
+const members = (word, family, icon, sections) =>
+  Array.from({ length: FAMILY_SIZE }, (_, i) => ({
+    id: `${word}${String(i + 1).padStart(2, "0")}`,
+    icon,
+    family,
+    sections: sections()
+  }));
 
 /** @type {Array<{id: string, icon: string, sections: Array<{id: string, fields: object[]}>}>} */
 export const GROUPS = [
@@ -1556,6 +1777,123 @@ export const GROUPS = [
   },
 
   {
+    id: "secrets",
+    icon: "fa-solid fa-user-secret",
+    // Laid out by hand: the words, the surface, the room around it, the edges,
+    // then what it looks like once revealed and the button that reveals it.
+    order: ["layout", "text", "background", "padding", "margin", "border", "revealed",
+      "revealButton"],
+    sections: [
+      {
+        // Hiding one is what the Reveal button is for, so it is not offered
+        // here: a passage nobody can see is a passage nobody can reveal.
+        id: "layout",
+        order: ["display", "flexDirection", "flexWrap", "justify", "alignItems", "gap", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+        fields: layoutFields("", { hide: false })
+      },
+      {
+        id: "background",
+        label: "ILLUMINUS.Sections.fillAndImage.label",
+        hint: "ILLUMINUS.Sections.fillAndImage.hint",
+        order: [
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
+          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+          "innerShadowSpread", "innerShadowColor",
+          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
+        ],
+        fields: [col("background", "#3500790d"), ...frostFields(), ...imageFields(), ...shadowFields("shadow")]
+      },
+      {
+        id: "revealed",
+        order: [
+          "revealedBackground",
+          DIVIDER, "revealedTexture", "revealedTextureFit", "revealedTexturePosition",
+          "revealedTextureBlend", "revealedTextureOpacity", "revealedTextureBlur", "revealedTextureBrightness", "revealedTextureContrast", "revealedTextureSaturation", "revealedTextureAge",
+          DIVIDER, "revealedInnerShadowOffsetX", "revealedInnerShadowOffsetY",
+          "revealedInnerShadowBlur", "revealedInnerShadowSpread", "revealedInnerShadowColor",
+          DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
+          "revealedShadowSpread", "revealedShadowColor"
+        ],
+        fields: [col("revealedBackground", "#0035000d"), ...imageFields("revealed")]
+      },
+      {
+        id: "text",
+        order: [
+          "font", "size", "color", "textStyle", "textStyleSlant",
+          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap", "hyphens",
+          DIVIDER, "outlineColor", "outlineWidth",
+          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+        ],
+        fields: [
+          font("font", ""),
+          num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
+          col("color", ""),
+          ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
+          select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+          select("align", "inherit", ["inherit", ...CHOICES.align])
+        ]
+      },
+      {
+        id: "padding",
+        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
+        fields: spacingFields("padding", { top: 4, right: 8, bottom: 4, left: 8 })
+      },
+      {
+        id: "margin",
+        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+        fields: spacingFields("margin", { top: 10, right: 0, bottom: 10, left: 0 }, { min: -100 })
+      },
+      {
+        id: "border",
+        order: [
+          "borderTopStyle", "borderTopColor", "borderTopWidth",
+          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
+          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
+          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
+        ],
+        // Top and bottom only by default, as Foundry draws them.
+        fields: [
+          ...borderFields("border", { color: "#7a6a58" }).map((field) =>
+            ["borderTopWidth", "borderBottomWidth"].includes(field.name)
+              ? { ...field, default: 1 } : field),
+          ...cornerFields("corner")
+        ]
+      },
+      {
+        id: "revealButton",
+        order: [
+          "buttonSize", "buttonColor", "buttonBackground",
+          DIVIDER, "buttonBorderStyle", "buttonBorderColor", "buttonBorderWidth",
+          DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
+          "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape",
+          DIVIDER, "buttonTexture", "buttonTextureFit", "buttonTexturePosition",
+          "buttonTextureBlend", "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge",
+          DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY", "buttonInnerShadowBlur",
+          "buttonInnerShadowSpread", "buttonInnerShadowColor",
+          DIVIDER, "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur",
+          "buttonShadowSpread", "buttonShadowColor"
+        ],
+        fields: [
+          col("buttonColor", "#f0f0e0"),
+          col("buttonBackground", "#00000000"), ...imageFields("button"),
+          col("buttonBorderColor", "#8a8a8a"),
+          col("buttonHoverColor", "#ffffff"),
+          col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
+          col("buttonHoverBorderColor", "#c9a961"),
+          num("buttonSize", 13, "px", 6, 40, 1),
+          num("buttonBorderWidth", 1, "px", 0, 12, 1),
+          select("buttonBorderStyle", "dashed", CHOICES.borderStyle),
+          ...cornerFields("buttonCorner", 3)
+        ]
+      }
+    ]
+  },
+
+  {
     id: "lists",
     icon: "fa-solid fa-list-ul",
     // Laid out by hand: where the list sits, the room around it, the mark in
@@ -1841,123 +2179,6 @@ export const GROUPS = [
   },
 
   {
-    id: "secrets",
-    icon: "fa-solid fa-user-secret",
-    // Laid out by hand: the words, the surface, the room around it, the edges,
-    // then what it looks like once revealed and the button that reveals it.
-    order: ["layout", "text", "background", "padding", "margin", "border", "revealed",
-      "revealButton"],
-    sections: [
-      {
-        // Hiding one is what the Reveal button is for, so it is not offered
-        // here: a passage nobody can see is a passage nobody can reveal.
-        id: "layout",
-        order: ["display", "flexDirection", "flexWrap", "justify", "alignItems", "gap", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
-        fields: layoutFields("", { hide: false })
-      },
-      {
-        id: "background",
-        label: "ILLUMINUS.Sections.fillAndImage.label",
-        hint: "ILLUMINUS.Sections.fillAndImage.hint",
-        order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
-          DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
-          "innerShadowSpread", "innerShadowColor",
-          DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
-        ],
-        fields: [col("background", "#3500790d"), ...frostFields(), ...imageFields(), ...shadowFields("shadow")]
-      },
-      {
-        id: "revealed",
-        order: [
-          "revealedBackground",
-          DIVIDER, "revealedTexture", "revealedTextureFit", "revealedTexturePosition",
-          "revealedTextureBlend", "revealedTextureOpacity", "revealedTextureBlur", "revealedTextureBrightness", "revealedTextureContrast", "revealedTextureSaturation", "revealedTextureAge",
-          DIVIDER, "revealedInnerShadowOffsetX", "revealedInnerShadowOffsetY",
-          "revealedInnerShadowBlur", "revealedInnerShadowSpread", "revealedInnerShadowColor",
-          DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
-          "revealedShadowSpread", "revealedShadowColor"
-        ],
-        fields: [col("revealedBackground", "#0035000d"), ...imageFields("revealed")]
-      },
-      {
-        id: "text",
-        order: [
-          "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap", "hyphens",
-          DIVIDER, "outlineColor", "outlineWidth",
-          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
-        ],
-        fields: [
-          font("font", ""),
-          num("size", 0, "px", 0, 200, 1, { zeroAs: "inherit" }),
-          col("color", ""),
-          ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
-          select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
-          num("letterSpacing", 0, "px", -5, 40, 0.5),
-          num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
-          select("align", "inherit", ["inherit", ...CHOICES.align])
-        ]
-      },
-      {
-        id: "padding",
-        order: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
-        fields: spacingFields("padding", { top: 4, right: 8, bottom: 4, left: 8 })
-      },
-      {
-        id: "margin",
-        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
-        fields: spacingFields("margin", { top: 10, right: 0, bottom: 10, left: 0 }, { min: -100 })
-      },
-      {
-        id: "border",
-        order: [
-          "borderTopStyle", "borderTopColor", "borderTopWidth",
-          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
-          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
-          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
-        ],
-        // Top and bottom only by default, as Foundry draws them.
-        fields: [
-          ...borderFields("border", { color: "#7a6a58" }).map((field) =>
-            ["borderTopWidth", "borderBottomWidth"].includes(field.name)
-              ? { ...field, default: 1 } : field),
-          ...cornerFields("corner")
-        ]
-      },
-      {
-        id: "revealButton",
-        order: [
-          "buttonSize", "buttonColor", "buttonBackground",
-          DIVIDER, "buttonBorderStyle", "buttonBorderColor", "buttonBorderWidth",
-          DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
-          "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape",
-          DIVIDER, "buttonTexture", "buttonTextureFit", "buttonTexturePosition",
-          "buttonTextureBlend", "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge",
-          DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY", "buttonInnerShadowBlur",
-          "buttonInnerShadowSpread", "buttonInnerShadowColor",
-          DIVIDER, "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur",
-          "buttonShadowSpread", "buttonShadowColor"
-        ],
-        fields: [
-          col("buttonColor", "#f0f0e0"),
-          col("buttonBackground", "#00000000"), ...imageFields("button"),
-          col("buttonBorderColor", "#8a8a8a"),
-          col("buttonHoverColor", "#ffffff"),
-          col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
-          col("buttonHoverBorderColor", "#c9a961"),
-          num("buttonSize", 13, "px", 6, 40, 1),
-          num("buttonBorderWidth", 1, "px", 0, 12, 1),
-          select("buttonBorderStyle", "dashed", CHOICES.borderStyle),
-          ...cornerFields("buttonCorner", 3)
-        ]
-      }
-    ]
-  },
-
-  {
     id: "editor",
     icon: "fa-solid fa-pen-to-square",
     // The window Edit Page opens, which Foundry appends to the body and
@@ -2126,6 +2347,19 @@ export const GROUPS = [
     ]
   },
 
+  // A tag nobody has given a treatment, which is the counterpart of Default Box
+  // and Default Image: the shape a style hands the editor's plain Tag entry, so
+  // one look can be had without picking one of ten.
+  //
+  // It cannot be reached by taking a treatment off, the way the other two are —
+  // a tag *is* the mark, and removing it leaves bare words. The editor's Tag
+  // menu names it first instead.
+  {
+    id: "tags",
+    icon: "fa-solid fa-tag",
+    sections: tagSections()
+  },
+
   {
     id: "images",
     icon: "fa-solid fa-image",
@@ -2181,26 +2415,11 @@ export const GROUPS = [
     ]
   },
 
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `box${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-square-dashed",
-    family: "boxStyles",
-    sections: boxSections()
-  })),
-
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `tag${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-tag",
-    family: "tagStyles",
-    sections: tagSections()
-  })),
-
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `image${String(i + 1).padStart(2, "0")}`,
-    icon: "fa-solid fa-image",
-    family: "imageStyles",
-    sections: imageSections()
-  })),
+  ...members("box", "boxStyles", "fa-solid fa-square-dashed", boxSections),
+  ...members("tag", "tagStyles", "fa-solid fa-tag", tagSections),
+  ...members("image", "imageStyles", "fa-solid fa-image", imageSections),
+  ...members("list", "listStyles", "fa-solid fa-list", listSections),
+  ...members("table", "tableStyles", "fa-solid fa-table", tableSections),
 
 ];
 
@@ -2471,6 +2690,38 @@ const LAYOUTS = {
     ] },
   },
   tagStyles: {
+    order: ["tagLayout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border"],
+    tagLayout: { order: [
+      "verticalAlign", "float", "minWidth", "lift", "wrapEdges",
+      DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+      DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER, "turn", "scale"
+    ] },
+    text: { order: [
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
+      "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "textShadowOffsetY", "textShadowBlur", "textShadowColor"
+    ] },
+    background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "shadowBlur", "shadowSpread", "shadowColor"
+    ] },
+    padding: { order: [
+      "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
+    ] },
+    margin: { order: [
+      "marginTop", "marginBottom", "marginLeft", "marginRight"
+    ] },
+    border: { order: [
+      "borderTopStyle", "borderTopColor", "borderTopWidth", DIVIDER, "borderBottomStyle",
+      "borderBottomColor", "borderBottomWidth", DIVIDER, "borderLeftStyle", "borderLeftColor",
+      "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
+      DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape",
+      DIVIDER
+    ] },
+  },
+  tags: {
     order: ["tagLayout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border"],
     tagLayout: { order: [
       "verticalAlign", "float", "minWidth", "lift", "wrapEdges",

@@ -412,7 +412,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     { id: "headings", icon: "fa-solid fa-heading", label: "ILLUMINUS.Families.headings", renamable: false },
     { id: "boxStyles", icon: "fa-solid fa-comment-dots", label: "ILLUMINUS.Families.boxStyles" },
     { id: "tagStyles", icon: "fa-solid fa-tag", label: "ILLUMINUS.Families.tagStyles" },
-    { id: "imageStyles", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.imageStyles" }
+    { id: "imageStyles", icon: "fa-solid fa-images", label: "ILLUMINUS.Families.imageStyles" },
+    { id: "listStyles", icon: "fa-solid fa-list", label: "ILLUMINUS.Families.listStyles" },
+    { id: "tableStyles", icon: "fa-solid fa-table", label: "ILLUMINUS.Families.tableStyles" }
   ];
 
   /**
@@ -430,8 +432,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static HOLDS = {
     sidebar: "window", page: "window", editor: "window",
     title: "page", headings: "page", body: "page", links: "page", lists: "page",
-    tables: "page", boxes: "page", secrets: "page", images: "page",
-    boxStyles: "page", tagStyles: "page", imageStyles: "page"
+    tables: "page", secrets: "page", boxes: "page", tags: "page", images: "page",
+    // The ten treatments of a thing are held by the untreated one: a box style
+    // is a box, and the tree says so rather than listing them alongside.
+    boxStyles: "boxes", tagStyles: "tags", imageStyles: "images",
+    listStyles: "lists", tableStyles: "tables"
   };
 
   /**

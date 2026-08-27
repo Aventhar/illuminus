@@ -272,5 +272,25 @@ try {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+/* Two controls writing one setting.
+ *
+ * A tab gathers its controls from several helpers, and two of them can declare
+ * the same name without either knowing: `tagSections` had a least width of its
+ * own and `layoutFields` added a second, so every tag style drew two "Least
+ * Width" rows writing one value. Nothing else notices — the name is legal, the
+ * property is legal, and the editor draws whatever it is given. */
+console.log("\n[10] No two controls share a name");
+{
+  let clashes = 0;
+  for (const group of GROUPS) {
+    const names = group.sections.flatMap((section) => section.fields.map((field) => field.name));
+    const twice = [...new Set(names.filter((name, at) => names.indexOf(name) !== at))];
+    if (!twice.length) continue;
+    fail(`${group.id} declares ${twice.join(", ")} more than once`);
+    clashes += twice.length;
+  }
+  if (!clashes) ok(`every control in all ${GROUPS.length} tabs has a name of its own`);
+}
+
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

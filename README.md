@@ -38,10 +38,11 @@ Please do [report them](https://github.com/Aventhar/illuminus/issues).
   untouched. A journal with no style looks exactly as Foundry draws it.
 - **Everything is a GUI control.** Around 4,200 settings on 16 tabs in 97 collapsible
   categories — and close to 10,000 once every box, tag, and picture style is counted
-  separately rather than one at a time — labeled in ordinary language — "Top Thickness", "Opening Capital",
-  "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
-  Controls that are always set together are one control: **Text Style** offers Normal,
-  Bold, and Light with or without italics, rather than a thickness dropdown of nine
+  separately rather than one at a time — labeled in ordinary language — "Top Thickness",
+  "Opening Capital", "Image Blending" — with a one-line explanation under each. No CSS is
+  typed or shown. Controls that are always set together are one control: **Text Style** 
+  offers Normal, Bold, and Light with or without italics, rather than a thickness dropdown
+  of nine
   numbers beside a separate slant.
 - **Everything a page can hold.** Not just paragraphs and headings: definition lists,
   table captions, collapsible passages, code, embedded sound and video, and the marks the
