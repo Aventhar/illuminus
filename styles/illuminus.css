@@ -604,6 +604,7 @@
    where a fill belongs. */
 .illuminus-styled.application::after {
   background-color: var(--ill-window-background);
+  backdrop-filter: var(--ill-window-frost);
   background-image: linear-gradient(var(--ill-window-gradient-angle),
       var(--ill-window-gradient-from), var(--ill-window-gradient-to));
 }
@@ -615,6 +616,7 @@
 .illuminus-styled.journal-entry-page.application::after,
 .illuminus-styled .illuminus-preview__editor::after {
   background-color: var(--ill-editor-background);
+  backdrop-filter: var(--ill-editor-frost);
   background-image: linear-gradient(var(--ill-editor-gradient-angle),
       var(--ill-editor-gradient-from), var(--ill-editor-gradient-to));
 }
@@ -636,6 +638,7 @@
 
 .illuminus-styled .journal-sidebar {
   background-color: var(--ill-sidebar-background);
+  backdrop-filter: var(--ill-sidebar-frost);
   background-image: linear-gradient(var(--ill-sidebar-gradient-angle),
       var(--ill-sidebar-gradient-from), var(--ill-sidebar-gradient-to));
   padding: var(--ill-sidebar-padding-top) var(--ill-sidebar-padding-right)
@@ -1273,6 +1276,7 @@
   max-height: var(--ill-secrets-max-height);
   overflow: var(--ill-secrets-overflow);
   background-color: var(--ill-secrets-background);
+  backdrop-filter: var(--ill-secrets-frost);
   box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
               var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
               var(--ill-secrets-shadow-color),

@@ -94,6 +94,10 @@ const CHOICES = {
   textStyle: ["light", "normal", "bold"],
   whenEmpty: ["show", "hide"],
   foldIcon: ["chevron", "caret", "angle", "arrow", "plus"],
+  // The shape a picture is cropped to, named by what it is for rather than by
+  // its numbers: a browser wants a ratio, and nobody thinks in ratios.
+  pictureShape: ["inherit", "square", "landscape", "portrait", "wide", "tall", "panorama"],
+  pictureCrop: ["cover", "contain", "stretch"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
 };
@@ -116,6 +120,15 @@ const CSS_WORD = {
 };
 
 const emitWord = (value) => (value === "inherit" ? null : CSS_WORD[value] ?? value);
+
+/** A shape a person can name, written as the ratio a browser wants. */
+const emitShape = (value) => ({
+  square: "1 / 1", landscape: "4 / 3", portrait: "3 / 4",
+  wide: "16 / 9", tall: "9 / 16", panorama: "21 / 9"
+}[value] ?? null);
+
+/** How a picture fills a shape that is not its own. */
+const emitCrop = (value) => ({ cover: "cover", contain: "contain", stretch: "fill" }[value] ?? null);
 
 /**
  * How a thing is laid out: whether it is a block or a row, how a row shares out
@@ -173,6 +186,26 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false 
  * That is what lets this be offered on every fill without changing any style
  * that says nothing about it.
  */
+/**
+ * Frosted glass: how much what is *behind* a fill is blurred.
+ *
+ * One control rather than several, and zero emits nothing, so a fill nobody has
+ * frosted reads an unset value — which makes the whole declaration invalid at
+ * computed-value time and leaves it at "none". That matters more than it looks:
+ * a backdrop filter set to anything at all, an identity filter included, starts
+ * a stacking context, and a panel that quietly became one would take whatever
+ * Foundry had put inside it with it.
+ *
+ * It shows through a translucent fill and does nothing behind an opaque one,
+ * which is the same bargain a blend mode makes and needs no wording of its own.
+ */
+function frostFields(prefix = "") {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    num(n("Frost"), 0, "px", 0, 40, 1, { emit: (value) => (value ? `blur(${value}px)` : null) })
+  ];
+}
+
 function gradientFields(prefix = "") {
   const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
   return [
@@ -528,7 +561,7 @@ function boxSections() {
         col("headingRuleColor", "#8a6a3d")
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 10) },
     { id: "margin", fields: spacingFields("margin", { top: 12, right: 0, bottom: 12, left: 0 }, { min: -100 }) },
     { id: "border", fields: borderFields("border", { color: "#8a6a3d" }) },
@@ -612,7 +645,7 @@ function tagSections() {
         select("wrap", "inherit", CHOICES.wrap, { emit: emitWord })
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", { top: 2, right: 8, bottom: 2, left: 8 }, { max: 80 }) },
     { id: "margin", fields: spacingFields("margin", { top: 0, right: 4, bottom: 0, left: 0 }, { min: -60, max: 80 }) },
     { id: "border", fields: borderFields("border") },
@@ -635,12 +668,19 @@ function imageSections() {
         select("align", "center", CHOICES.alignNoJustify, { emit: emitPictureAlign }),
         select("clear", "none", CHOICES.blockClear),
         select("flip", "none", CHOICES.flip, { emit: emitFlip }),
+        // The shape the picture is cropped to, and how it fills it. A treatment
+        // that says nothing keeps the picture's own shape, which is what a
+        // journal does now — and where a shape *is* named, the picture fills it
+        // rather than being squashed into it, since the shape was the point.
+        select("pictureShape", "inherit", CHOICES.pictureShape, { emit: emitShape }),
+        select("pictureCrop", "cover", CHOICES.pictureCrop, { emit: emitCrop }),
+        select("pictureFrom", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
         // No row settings: a picture holds nothing to lay out inside it.
         ...layoutFields("", { flex: false, position: false }),
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
     {
       id: "margin",
@@ -819,7 +859,7 @@ export const GROUPS = [
       {
         id: "background",
         fields: [
-          col("background", "#00000000"), ...gradientFields(), ...imageFields()
+          col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields()
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
@@ -973,7 +1013,7 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...gradientFields(), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields(),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -1095,7 +1135,7 @@ export const GROUPS = [
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
           DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
@@ -1151,7 +1191,7 @@ export const GROUPS = [
         // own: Foundry's window clips it, and only an export ever shows it.
         hint: "ILLUMINUS.Sections.pageFillAndImage.hint",
         order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
           DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
@@ -1450,7 +1490,7 @@ export const GROUPS = [
       {
         id: "chip",
         order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
           DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
@@ -1679,7 +1719,7 @@ export const GROUPS = [
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
           DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
@@ -1772,13 +1812,13 @@ export const GROUPS = [
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
           DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
-        fields: [col("background", "#3500790d"), ...imageFields(), ...shadowFields("shadow")]
+        fields: [col("background", "#3500790d"), ...frostFields(), ...imageFields(), ...shadowFields("shadow")]
       },
       {
         id: "revealed",
@@ -1884,7 +1924,7 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...gradientFields(), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields(),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -2355,7 +2395,7 @@ const LAYOUTS = {
       "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
       "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
@@ -2394,7 +2434,7 @@ const LAYOUTS = {
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
       "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
@@ -2416,8 +2456,9 @@ const LAYOUTS = {
   imageStyles: {
     order: ["layout", "padding", "margin", "border", "caption"],
     layout: { order: [
-      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", "float", "width", "align", "clear", "flip",
+      DIVIDER, "pictureShape", "pictureCrop", "pictureFrom", DIVIDER,
       "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
       DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER,
       "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
@@ -2449,7 +2490,7 @@ const LAYOUTS = {
       "sidebarWidth"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
       "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
@@ -2556,7 +2597,7 @@ const LAYOUTS = {
       "frameMinWidth", "frameMaxWidth"
     ] },
     frame: { order: [
-      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
       "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
@@ -2671,7 +2712,7 @@ const LAYOUTS = {
       "frameMinWidth", "frameMaxWidth"
     ] },
     frame: { order: [
-      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
       "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
@@ -3060,7 +3101,8 @@ const FIELD_ORDER = {
   ],
   layout: [
     "shown", "float", "width", "maxWidth", "sidebarWidth", "align", "clear",
-    "flip", "opacity", "indent", "itemSpacing", "whenEmpty"
+    "flip", "pictureShape", "pictureCrop", "pictureFrom",
+    "opacity", "indent", "itemSpacing", "whenEmpty"
   ],
   tagLayout: ["float", "minWidth", "verticalAlign", "lift"],
   caption: [

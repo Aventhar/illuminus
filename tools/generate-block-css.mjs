@@ -82,6 +82,7 @@ const graduated = (group) => `  background-image: linear-gradient(${v(group, "gr
     ${v(group, "gradientFrom")}, ${v(group, "gradientTo")});`;
 
 const box = (group) => `  background-color: ${v(group, "background")};
+  backdrop-filter: ${v(group, "frost")};
 ${graduated(group)}
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
@@ -163,6 +164,7 @@ ${displayed(group, "block")}
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
+  backdrop-filter: ${v(group, "frost")};
 ${graduated(group)}
   margin-top: ${v(group, "marginTop")};
   margin-bottom: ${v(group, "marginBottom")};
@@ -182,6 +184,13 @@ ${memberSelector(group, " img")} {
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: ${vOr(group, "pictureShape", "auto")};
+  object-fit: ${vOr(group, "pictureCrop", "cover")};
+  object-position: ${vOr(group, "pictureFrom", "center")};
   transform: ${v(group, "flip")};
   opacity: ${v(group, "opacity")};
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -241,6 +250,7 @@ ${displayed(group, "inline-block")}
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
+  backdrop-filter: ${v(group, "frost")};
 ${graduated(group)}
   padding: ${sides(group, "padding")};
   margin: ${sides(group, "margin")};

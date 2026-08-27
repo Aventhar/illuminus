@@ -699,6 +699,33 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
+  // frosted glass: <prefix>Frost, one per fill that offers it.
+  if ((m = name.match(/^(.*?)[Ff]rost$/))) {
+    const of = noun(m[1], "");
+    put(`ILLUMINUS.Field.${name}.label`, "Frosting");
+    put(`ILLUMINUS.Field.${name}.hint`,
+      `How much of what is behind ${of ? `the ${of}` : "it"} is blurred, as frosted `
+      + "glass blurs what is behind it. It shows through a see-through fill and does "
+      + "nothing behind a solid one.");
+    continue;
+  }
+  // how a picture is cropped: pictureShape / pictureCrop / pictureFrom.
+  if ((m = name.match(/^(.*?)[Pp]icture(Shape|Crop|From)$/))) {
+    const wording = {
+      Shape: ["Picture Shape",
+        "The shape the picture is cropped to. Saying nothing keeps the picture's "
+        + "own shape, which is what a journal does now."],
+      Crop: ["How It Fills The Shape",
+        "Whether a picture that is not the chosen shape is cropped to fill it, "
+        + "fitted whole inside it, or stretched to it."],
+      From: ["Which Part Is Kept",
+        "Where a cropped picture is taken from — the middle of it, or one of its "
+        + "edges or corners."]
+    }[m[2]];
+    put(`ILLUMINUS.Field.${name}.label`, wording[0]);
+    put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
+    continue;
+  }
   // where the lines may break: <prefix>Wrap, one per lettering family.
   if ((m = name.match(/^(.*?)[Ww]rap$/)) && !/[Ff]lex$/.test(m[1])) {
     const of = noun(m[1], "");
@@ -1099,6 +1126,10 @@ const CHOICE_TEXT = {
   same: "Same as normal", on: "Yes", off: "No",
   // Where the lines of a run of words may break.
   balance: "Even up the lines", pretty: "Avoid a lone last word",
+  // The shape a picture is cropped to, and how it fills it.
+  square: "Square", landscape: "Landscape", portrait: "Portrait",
+  wide: "Widescreen", tall: "Tall", panorama: "Panorama",
+  cover: "Crop to fill", contain: "Fit whole inside", stretch: "Stretch to fit",
   // How a thing is laid out, in the words a person would use for it.
   block: "A block of its own", inline: "Part of the line of text",
   inlineBlock: "In the line, but a block", flex: "A row of what is inside it",

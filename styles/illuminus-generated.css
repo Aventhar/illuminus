@@ -556,6 +556,7 @@
   max-height: var(--ill-box01-max-height);
   overflow: var(--ill-box01-overflow);
   background-color: var(--ill-box01-background);
+  backdrop-filter: var(--ill-box01-frost);
   background-image: linear-gradient(var(--ill-box01-gradient-angle),
     var(--ill-box01-gradient-from), var(--ill-box01-gradient-to));
   margin: var(--ill-box01-margin-top) var(--ill-box01-margin-right) var(--ill-box01-margin-bottom) var(--ill-box01-margin-left);
@@ -620,6 +621,7 @@
   max-height: var(--ill-box02-max-height);
   overflow: var(--ill-box02-overflow);
   background-color: var(--ill-box02-background);
+  backdrop-filter: var(--ill-box02-frost);
   background-image: linear-gradient(var(--ill-box02-gradient-angle),
     var(--ill-box02-gradient-from), var(--ill-box02-gradient-to));
   margin: var(--ill-box02-margin-top) var(--ill-box02-margin-right) var(--ill-box02-margin-bottom) var(--ill-box02-margin-left);
@@ -684,6 +686,7 @@
   max-height: var(--ill-box03-max-height);
   overflow: var(--ill-box03-overflow);
   background-color: var(--ill-box03-background);
+  backdrop-filter: var(--ill-box03-frost);
   background-image: linear-gradient(var(--ill-box03-gradient-angle),
     var(--ill-box03-gradient-from), var(--ill-box03-gradient-to));
   margin: var(--ill-box03-margin-top) var(--ill-box03-margin-right) var(--ill-box03-margin-bottom) var(--ill-box03-margin-left);
@@ -748,6 +751,7 @@
   max-height: var(--ill-box04-max-height);
   overflow: var(--ill-box04-overflow);
   background-color: var(--ill-box04-background);
+  backdrop-filter: var(--ill-box04-frost);
   background-image: linear-gradient(var(--ill-box04-gradient-angle),
     var(--ill-box04-gradient-from), var(--ill-box04-gradient-to));
   margin: var(--ill-box04-margin-top) var(--ill-box04-margin-right) var(--ill-box04-margin-bottom) var(--ill-box04-margin-left);
@@ -812,6 +816,7 @@
   max-height: var(--ill-box05-max-height);
   overflow: var(--ill-box05-overflow);
   background-color: var(--ill-box05-background);
+  backdrop-filter: var(--ill-box05-frost);
   background-image: linear-gradient(var(--ill-box05-gradient-angle),
     var(--ill-box05-gradient-from), var(--ill-box05-gradient-to));
   margin: var(--ill-box05-margin-top) var(--ill-box05-margin-right) var(--ill-box05-margin-bottom) var(--ill-box05-margin-left);
@@ -876,6 +881,7 @@
   max-height: var(--ill-box06-max-height);
   overflow: var(--ill-box06-overflow);
   background-color: var(--ill-box06-background);
+  backdrop-filter: var(--ill-box06-frost);
   background-image: linear-gradient(var(--ill-box06-gradient-angle),
     var(--ill-box06-gradient-from), var(--ill-box06-gradient-to));
   margin: var(--ill-box06-margin-top) var(--ill-box06-margin-right) var(--ill-box06-margin-bottom) var(--ill-box06-margin-left);
@@ -940,6 +946,7 @@
   max-height: var(--ill-box07-max-height);
   overflow: var(--ill-box07-overflow);
   background-color: var(--ill-box07-background);
+  backdrop-filter: var(--ill-box07-frost);
   background-image: linear-gradient(var(--ill-box07-gradient-angle),
     var(--ill-box07-gradient-from), var(--ill-box07-gradient-to));
   margin: var(--ill-box07-margin-top) var(--ill-box07-margin-right) var(--ill-box07-margin-bottom) var(--ill-box07-margin-left);
@@ -1004,6 +1011,7 @@
   max-height: var(--ill-box08-max-height);
   overflow: var(--ill-box08-overflow);
   background-color: var(--ill-box08-background);
+  backdrop-filter: var(--ill-box08-frost);
   background-image: linear-gradient(var(--ill-box08-gradient-angle),
     var(--ill-box08-gradient-from), var(--ill-box08-gradient-to));
   margin: var(--ill-box08-margin-top) var(--ill-box08-margin-right) var(--ill-box08-margin-bottom) var(--ill-box08-margin-left);
@@ -1068,6 +1076,7 @@
   max-height: var(--ill-box09-max-height);
   overflow: var(--ill-box09-overflow);
   background-color: var(--ill-box09-background);
+  backdrop-filter: var(--ill-box09-frost);
   background-image: linear-gradient(var(--ill-box09-gradient-angle),
     var(--ill-box09-gradient-from), var(--ill-box09-gradient-to));
   margin: var(--ill-box09-margin-top) var(--ill-box09-margin-right) var(--ill-box09-margin-bottom) var(--ill-box09-margin-left);
@@ -1132,6 +1141,7 @@
   max-height: var(--ill-box10-max-height);
   overflow: var(--ill-box10-overflow);
   background-color: var(--ill-box10-background);
+  backdrop-filter: var(--ill-box10-frost);
   background-image: linear-gradient(var(--ill-box10-gradient-angle),
     var(--ill-box10-gradient-from), var(--ill-box10-gradient-to));
   margin: var(--ill-box10-margin-top) var(--ill-box10-margin-right) var(--ill-box10-margin-bottom) var(--ill-box10-margin-left);
@@ -1191,6 +1201,7 @@
   max-height: var(--ill-image01-max-height);
   overflow: var(--ill-image01-overflow);
   background-color: var(--ill-image01-background);
+  backdrop-filter: var(--ill-image01-frost);
   background-image: linear-gradient(var(--ill-image01-gradient-angle),
     var(--ill-image01-gradient-from), var(--ill-image01-gradient-to));
   margin-top: var(--ill-image01-margin-top);
@@ -1211,6 +1222,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image01-picture-shape, auto);
+  object-fit: var(--ill-image01-picture-crop, cover);
+  object-position: var(--ill-image01-picture-from, center);
   transform: var(--ill-image01-flip);
   opacity: var(--ill-image01-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1248,6 +1266,7 @@
   max-height: var(--ill-image02-max-height);
   overflow: var(--ill-image02-overflow);
   background-color: var(--ill-image02-background);
+  backdrop-filter: var(--ill-image02-frost);
   background-image: linear-gradient(var(--ill-image02-gradient-angle),
     var(--ill-image02-gradient-from), var(--ill-image02-gradient-to));
   margin-top: var(--ill-image02-margin-top);
@@ -1268,6 +1287,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image02-picture-shape, auto);
+  object-fit: var(--ill-image02-picture-crop, cover);
+  object-position: var(--ill-image02-picture-from, center);
   transform: var(--ill-image02-flip);
   opacity: var(--ill-image02-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1305,6 +1331,7 @@
   max-height: var(--ill-image03-max-height);
   overflow: var(--ill-image03-overflow);
   background-color: var(--ill-image03-background);
+  backdrop-filter: var(--ill-image03-frost);
   background-image: linear-gradient(var(--ill-image03-gradient-angle),
     var(--ill-image03-gradient-from), var(--ill-image03-gradient-to));
   margin-top: var(--ill-image03-margin-top);
@@ -1325,6 +1352,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image03-picture-shape, auto);
+  object-fit: var(--ill-image03-picture-crop, cover);
+  object-position: var(--ill-image03-picture-from, center);
   transform: var(--ill-image03-flip);
   opacity: var(--ill-image03-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1362,6 +1396,7 @@
   max-height: var(--ill-image04-max-height);
   overflow: var(--ill-image04-overflow);
   background-color: var(--ill-image04-background);
+  backdrop-filter: var(--ill-image04-frost);
   background-image: linear-gradient(var(--ill-image04-gradient-angle),
     var(--ill-image04-gradient-from), var(--ill-image04-gradient-to));
   margin-top: var(--ill-image04-margin-top);
@@ -1382,6 +1417,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image04-picture-shape, auto);
+  object-fit: var(--ill-image04-picture-crop, cover);
+  object-position: var(--ill-image04-picture-from, center);
   transform: var(--ill-image04-flip);
   opacity: var(--ill-image04-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1419,6 +1461,7 @@
   max-height: var(--ill-image05-max-height);
   overflow: var(--ill-image05-overflow);
   background-color: var(--ill-image05-background);
+  backdrop-filter: var(--ill-image05-frost);
   background-image: linear-gradient(var(--ill-image05-gradient-angle),
     var(--ill-image05-gradient-from), var(--ill-image05-gradient-to));
   margin-top: var(--ill-image05-margin-top);
@@ -1439,6 +1482,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image05-picture-shape, auto);
+  object-fit: var(--ill-image05-picture-crop, cover);
+  object-position: var(--ill-image05-picture-from, center);
   transform: var(--ill-image05-flip);
   opacity: var(--ill-image05-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1476,6 +1526,7 @@
   max-height: var(--ill-image06-max-height);
   overflow: var(--ill-image06-overflow);
   background-color: var(--ill-image06-background);
+  backdrop-filter: var(--ill-image06-frost);
   background-image: linear-gradient(var(--ill-image06-gradient-angle),
     var(--ill-image06-gradient-from), var(--ill-image06-gradient-to));
   margin-top: var(--ill-image06-margin-top);
@@ -1496,6 +1547,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image06-picture-shape, auto);
+  object-fit: var(--ill-image06-picture-crop, cover);
+  object-position: var(--ill-image06-picture-from, center);
   transform: var(--ill-image06-flip);
   opacity: var(--ill-image06-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1533,6 +1591,7 @@
   max-height: var(--ill-image07-max-height);
   overflow: var(--ill-image07-overflow);
   background-color: var(--ill-image07-background);
+  backdrop-filter: var(--ill-image07-frost);
   background-image: linear-gradient(var(--ill-image07-gradient-angle),
     var(--ill-image07-gradient-from), var(--ill-image07-gradient-to));
   margin-top: var(--ill-image07-margin-top);
@@ -1553,6 +1612,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image07-picture-shape, auto);
+  object-fit: var(--ill-image07-picture-crop, cover);
+  object-position: var(--ill-image07-picture-from, center);
   transform: var(--ill-image07-flip);
   opacity: var(--ill-image07-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1590,6 +1656,7 @@
   max-height: var(--ill-image08-max-height);
   overflow: var(--ill-image08-overflow);
   background-color: var(--ill-image08-background);
+  backdrop-filter: var(--ill-image08-frost);
   background-image: linear-gradient(var(--ill-image08-gradient-angle),
     var(--ill-image08-gradient-from), var(--ill-image08-gradient-to));
   margin-top: var(--ill-image08-margin-top);
@@ -1610,6 +1677,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image08-picture-shape, auto);
+  object-fit: var(--ill-image08-picture-crop, cover);
+  object-position: var(--ill-image08-picture-from, center);
   transform: var(--ill-image08-flip);
   opacity: var(--ill-image08-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1647,6 +1721,7 @@
   max-height: var(--ill-image09-max-height);
   overflow: var(--ill-image09-overflow);
   background-color: var(--ill-image09-background);
+  backdrop-filter: var(--ill-image09-frost);
   background-image: linear-gradient(var(--ill-image09-gradient-angle),
     var(--ill-image09-gradient-from), var(--ill-image09-gradient-to));
   margin-top: var(--ill-image09-margin-top);
@@ -1667,6 +1742,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image09-picture-shape, auto);
+  object-fit: var(--ill-image09-picture-crop, cover);
+  object-position: var(--ill-image09-picture-from, center);
   transform: var(--ill-image09-flip);
   opacity: var(--ill-image09-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1704,6 +1786,7 @@
   max-height: var(--ill-image10-max-height);
   overflow: var(--ill-image10-overflow);
   background-color: var(--ill-image10-background);
+  backdrop-filter: var(--ill-image10-frost);
   background-image: linear-gradient(var(--ill-image10-gradient-angle),
     var(--ill-image10-gradient-from), var(--ill-image10-gradient-to));
   margin-top: var(--ill-image10-margin-top);
@@ -1724,6 +1807,13 @@
   display: block;
   width: 100%;
   height: auto;
+  /* The shape the picture is cropped to. A treatment that names none keeps the
+     picture's own, which is what auto means — and the fallbacks matter: an
+     unset control emits nothing, and a property reading an unset value takes
+     its initial value rather than leaving the picture alone. */
+  aspect-ratio: var(--ill-image10-picture-shape, auto);
+  object-fit: var(--ill-image10-picture-crop, cover);
+  object-position: var(--ill-image10-picture-from, center);
   transform: var(--ill-image10-flip);
   opacity: var(--ill-image10-opacity);
   /* The page-wide picture frame would otherwise apply on top of this one. */
@@ -1771,6 +1861,7 @@
   max-height: var(--ill-tag01-max-height);
   overflow: var(--ill-tag01-overflow);
   background-color: var(--ill-tag01-background);
+  backdrop-filter: var(--ill-tag01-frost);
   background-image: linear-gradient(var(--ill-tag01-gradient-angle),
     var(--ill-tag01-gradient-from), var(--ill-tag01-gradient-to));
   padding: var(--ill-tag01-padding-top) var(--ill-tag01-padding-right) var(--ill-tag01-padding-bottom) var(--ill-tag01-padding-left);
@@ -1833,6 +1924,7 @@
   max-height: var(--ill-tag02-max-height);
   overflow: var(--ill-tag02-overflow);
   background-color: var(--ill-tag02-background);
+  backdrop-filter: var(--ill-tag02-frost);
   background-image: linear-gradient(var(--ill-tag02-gradient-angle),
     var(--ill-tag02-gradient-from), var(--ill-tag02-gradient-to));
   padding: var(--ill-tag02-padding-top) var(--ill-tag02-padding-right) var(--ill-tag02-padding-bottom) var(--ill-tag02-padding-left);
@@ -1895,6 +1987,7 @@
   max-height: var(--ill-tag03-max-height);
   overflow: var(--ill-tag03-overflow);
   background-color: var(--ill-tag03-background);
+  backdrop-filter: var(--ill-tag03-frost);
   background-image: linear-gradient(var(--ill-tag03-gradient-angle),
     var(--ill-tag03-gradient-from), var(--ill-tag03-gradient-to));
   padding: var(--ill-tag03-padding-top) var(--ill-tag03-padding-right) var(--ill-tag03-padding-bottom) var(--ill-tag03-padding-left);
@@ -1957,6 +2050,7 @@
   max-height: var(--ill-tag04-max-height);
   overflow: var(--ill-tag04-overflow);
   background-color: var(--ill-tag04-background);
+  backdrop-filter: var(--ill-tag04-frost);
   background-image: linear-gradient(var(--ill-tag04-gradient-angle),
     var(--ill-tag04-gradient-from), var(--ill-tag04-gradient-to));
   padding: var(--ill-tag04-padding-top) var(--ill-tag04-padding-right) var(--ill-tag04-padding-bottom) var(--ill-tag04-padding-left);
@@ -2019,6 +2113,7 @@
   max-height: var(--ill-tag05-max-height);
   overflow: var(--ill-tag05-overflow);
   background-color: var(--ill-tag05-background);
+  backdrop-filter: var(--ill-tag05-frost);
   background-image: linear-gradient(var(--ill-tag05-gradient-angle),
     var(--ill-tag05-gradient-from), var(--ill-tag05-gradient-to));
   padding: var(--ill-tag05-padding-top) var(--ill-tag05-padding-right) var(--ill-tag05-padding-bottom) var(--ill-tag05-padding-left);
@@ -2081,6 +2176,7 @@
   max-height: var(--ill-tag06-max-height);
   overflow: var(--ill-tag06-overflow);
   background-color: var(--ill-tag06-background);
+  backdrop-filter: var(--ill-tag06-frost);
   background-image: linear-gradient(var(--ill-tag06-gradient-angle),
     var(--ill-tag06-gradient-from), var(--ill-tag06-gradient-to));
   padding: var(--ill-tag06-padding-top) var(--ill-tag06-padding-right) var(--ill-tag06-padding-bottom) var(--ill-tag06-padding-left);
@@ -2143,6 +2239,7 @@
   max-height: var(--ill-tag07-max-height);
   overflow: var(--ill-tag07-overflow);
   background-color: var(--ill-tag07-background);
+  backdrop-filter: var(--ill-tag07-frost);
   background-image: linear-gradient(var(--ill-tag07-gradient-angle),
     var(--ill-tag07-gradient-from), var(--ill-tag07-gradient-to));
   padding: var(--ill-tag07-padding-top) var(--ill-tag07-padding-right) var(--ill-tag07-padding-bottom) var(--ill-tag07-padding-left);
@@ -2205,6 +2302,7 @@
   max-height: var(--ill-tag08-max-height);
   overflow: var(--ill-tag08-overflow);
   background-color: var(--ill-tag08-background);
+  backdrop-filter: var(--ill-tag08-frost);
   background-image: linear-gradient(var(--ill-tag08-gradient-angle),
     var(--ill-tag08-gradient-from), var(--ill-tag08-gradient-to));
   padding: var(--ill-tag08-padding-top) var(--ill-tag08-padding-right) var(--ill-tag08-padding-bottom) var(--ill-tag08-padding-left);
@@ -2267,6 +2365,7 @@
   max-height: var(--ill-tag09-max-height);
   overflow: var(--ill-tag09-overflow);
   background-color: var(--ill-tag09-background);
+  backdrop-filter: var(--ill-tag09-frost);
   background-image: linear-gradient(var(--ill-tag09-gradient-angle),
     var(--ill-tag09-gradient-from), var(--ill-tag09-gradient-to));
   padding: var(--ill-tag09-padding-top) var(--ill-tag09-padding-right) var(--ill-tag09-padding-bottom) var(--ill-tag09-padding-left);
@@ -2329,6 +2428,7 @@
   max-height: var(--ill-tag10-max-height);
   overflow: var(--ill-tag10-overflow);
   background-color: var(--ill-tag10-background);
+  backdrop-filter: var(--ill-tag10-frost);
   background-image: linear-gradient(var(--ill-tag10-gradient-angle),
     var(--ill-tag10-gradient-from), var(--ill-tag10-gradient-to));
   padding: var(--ill-tag10-padding-top) var(--ill-tag10-padding-right) var(--ill-tag10-padding-bottom) var(--ill-tag10-padding-left);
@@ -4578,6 +4678,7 @@
 
 .illuminus-styled.application:hover::after {
   background-color: var(--ill-window-hover-background, var(--ill-window-background));
+  backdrop-filter: var(--ill-window-hover-frost, var(--ill-window-frost));
   background-image: linear-gradient(var(--ill-window-hover-gradient-angle, var(--ill-window-gradient-angle)),
       var(--ill-window-hover-gradient-from, var(--ill-window-gradient-from)), var(--ill-window-hover-gradient-to, var(--ill-window-gradient-to)));
 }
@@ -4589,6 +4690,7 @@
 .illuminus-styled.journal-entry-page.application:hover::after,
 .illuminus-styled .illuminus-preview__editor:hover::after {
   background-color: var(--ill-editor-hover-background, var(--ill-editor-background));
+  backdrop-filter: var(--ill-editor-hover-frost, var(--ill-editor-frost));
   background-image: linear-gradient(var(--ill-editor-hover-gradient-angle, var(--ill-editor-gradient-angle)),
       var(--ill-editor-hover-gradient-from, var(--ill-editor-gradient-from)), var(--ill-editor-hover-gradient-to, var(--ill-editor-gradient-to)));
 }
@@ -4605,6 +4707,7 @@
 
 .illuminus-styled .journal-sidebar:hover {
   background-color: var(--ill-sidebar-hover-background, var(--ill-sidebar-background));
+  backdrop-filter: var(--ill-sidebar-hover-frost, var(--ill-sidebar-frost));
   background-image: linear-gradient(var(--ill-sidebar-hover-gradient-angle, var(--ill-sidebar-gradient-angle)),
       var(--ill-sidebar-hover-gradient-from, var(--ill-sidebar-gradient-from)), var(--ill-sidebar-hover-gradient-to, var(--ill-sidebar-gradient-to)));
   padding: var(--ill-sidebar-hover-padding-top, var(--ill-sidebar-padding-top)) var(--ill-sidebar-hover-padding-right, var(--ill-sidebar-padding-right))
@@ -5056,6 +5159,7 @@ iframe):hover {
   max-height: var(--ill-secrets-hover-max-height, var(--ill-secrets-max-height));
   overflow: var(--ill-secrets-hover-overflow, var(--ill-secrets-overflow));
   background-color: var(--ill-secrets-hover-background, var(--ill-secrets-background));
+  backdrop-filter: var(--ill-secrets-hover-frost, var(--ill-secrets-frost));
   box-shadow: var(--ill-secrets-hover-shadow-offset-x, var(--ill-secrets-shadow-offset-x)) var(--ill-secrets-hover-shadow-offset-y, var(--ill-secrets-shadow-offset-y))
               var(--ill-secrets-hover-shadow-blur, var(--ill-secrets-shadow-blur)) var(--ill-secrets-hover-shadow-spread, var(--ill-secrets-shadow-spread))
               var(--ill-secrets-hover-shadow-color, var(--ill-secrets-shadow-color)),
@@ -5821,6 +5925,7 @@ iframe):hover {
   max-height: var(--ill-box01-hover-max-height, var(--ill-box01-max-height));
   overflow: var(--ill-box01-hover-overflow, var(--ill-box01-overflow));
   background-color: var(--ill-box01-hover-background, var(--ill-box01-background));
+  backdrop-filter: var(--ill-box01-hover-frost, var(--ill-box01-frost));
   background-image: linear-gradient(var(--ill-box01-hover-gradient-angle, var(--ill-box01-gradient-angle)),
     var(--ill-box01-hover-gradient-from, var(--ill-box01-gradient-from)), var(--ill-box01-hover-gradient-to, var(--ill-box01-gradient-to)));
   margin: var(--ill-box01-hover-margin-top, var(--ill-box01-margin-top)) var(--ill-box01-hover-margin-right, var(--ill-box01-margin-right)) var(--ill-box01-hover-margin-bottom, var(--ill-box01-margin-bottom)) var(--ill-box01-hover-margin-left, var(--ill-box01-margin-left));
@@ -5887,6 +5992,7 @@ h6):hover {
   max-height: var(--ill-box02-hover-max-height, var(--ill-box02-max-height));
   overflow: var(--ill-box02-hover-overflow, var(--ill-box02-overflow));
   background-color: var(--ill-box02-hover-background, var(--ill-box02-background));
+  backdrop-filter: var(--ill-box02-hover-frost, var(--ill-box02-frost));
   background-image: linear-gradient(var(--ill-box02-hover-gradient-angle, var(--ill-box02-gradient-angle)),
     var(--ill-box02-hover-gradient-from, var(--ill-box02-gradient-from)), var(--ill-box02-hover-gradient-to, var(--ill-box02-gradient-to)));
   margin: var(--ill-box02-hover-margin-top, var(--ill-box02-margin-top)) var(--ill-box02-hover-margin-right, var(--ill-box02-margin-right)) var(--ill-box02-hover-margin-bottom, var(--ill-box02-margin-bottom)) var(--ill-box02-hover-margin-left, var(--ill-box02-margin-left));
@@ -5953,6 +6059,7 @@ h6):hover {
   max-height: var(--ill-box03-hover-max-height, var(--ill-box03-max-height));
   overflow: var(--ill-box03-hover-overflow, var(--ill-box03-overflow));
   background-color: var(--ill-box03-hover-background, var(--ill-box03-background));
+  backdrop-filter: var(--ill-box03-hover-frost, var(--ill-box03-frost));
   background-image: linear-gradient(var(--ill-box03-hover-gradient-angle, var(--ill-box03-gradient-angle)),
     var(--ill-box03-hover-gradient-from, var(--ill-box03-gradient-from)), var(--ill-box03-hover-gradient-to, var(--ill-box03-gradient-to)));
   margin: var(--ill-box03-hover-margin-top, var(--ill-box03-margin-top)) var(--ill-box03-hover-margin-right, var(--ill-box03-margin-right)) var(--ill-box03-hover-margin-bottom, var(--ill-box03-margin-bottom)) var(--ill-box03-hover-margin-left, var(--ill-box03-margin-left));
@@ -6019,6 +6126,7 @@ h6):hover {
   max-height: var(--ill-box04-hover-max-height, var(--ill-box04-max-height));
   overflow: var(--ill-box04-hover-overflow, var(--ill-box04-overflow));
   background-color: var(--ill-box04-hover-background, var(--ill-box04-background));
+  backdrop-filter: var(--ill-box04-hover-frost, var(--ill-box04-frost));
   background-image: linear-gradient(var(--ill-box04-hover-gradient-angle, var(--ill-box04-gradient-angle)),
     var(--ill-box04-hover-gradient-from, var(--ill-box04-gradient-from)), var(--ill-box04-hover-gradient-to, var(--ill-box04-gradient-to)));
   margin: var(--ill-box04-hover-margin-top, var(--ill-box04-margin-top)) var(--ill-box04-hover-margin-right, var(--ill-box04-margin-right)) var(--ill-box04-hover-margin-bottom, var(--ill-box04-margin-bottom)) var(--ill-box04-hover-margin-left, var(--ill-box04-margin-left));
@@ -6085,6 +6193,7 @@ h6):hover {
   max-height: var(--ill-box05-hover-max-height, var(--ill-box05-max-height));
   overflow: var(--ill-box05-hover-overflow, var(--ill-box05-overflow));
   background-color: var(--ill-box05-hover-background, var(--ill-box05-background));
+  backdrop-filter: var(--ill-box05-hover-frost, var(--ill-box05-frost));
   background-image: linear-gradient(var(--ill-box05-hover-gradient-angle, var(--ill-box05-gradient-angle)),
     var(--ill-box05-hover-gradient-from, var(--ill-box05-gradient-from)), var(--ill-box05-hover-gradient-to, var(--ill-box05-gradient-to)));
   margin: var(--ill-box05-hover-margin-top, var(--ill-box05-margin-top)) var(--ill-box05-hover-margin-right, var(--ill-box05-margin-right)) var(--ill-box05-hover-margin-bottom, var(--ill-box05-margin-bottom)) var(--ill-box05-hover-margin-left, var(--ill-box05-margin-left));
@@ -6151,6 +6260,7 @@ h6):hover {
   max-height: var(--ill-box06-hover-max-height, var(--ill-box06-max-height));
   overflow: var(--ill-box06-hover-overflow, var(--ill-box06-overflow));
   background-color: var(--ill-box06-hover-background, var(--ill-box06-background));
+  backdrop-filter: var(--ill-box06-hover-frost, var(--ill-box06-frost));
   background-image: linear-gradient(var(--ill-box06-hover-gradient-angle, var(--ill-box06-gradient-angle)),
     var(--ill-box06-hover-gradient-from, var(--ill-box06-gradient-from)), var(--ill-box06-hover-gradient-to, var(--ill-box06-gradient-to)));
   margin: var(--ill-box06-hover-margin-top, var(--ill-box06-margin-top)) var(--ill-box06-hover-margin-right, var(--ill-box06-margin-right)) var(--ill-box06-hover-margin-bottom, var(--ill-box06-margin-bottom)) var(--ill-box06-hover-margin-left, var(--ill-box06-margin-left));
@@ -6217,6 +6327,7 @@ h6):hover {
   max-height: var(--ill-box07-hover-max-height, var(--ill-box07-max-height));
   overflow: var(--ill-box07-hover-overflow, var(--ill-box07-overflow));
   background-color: var(--ill-box07-hover-background, var(--ill-box07-background));
+  backdrop-filter: var(--ill-box07-hover-frost, var(--ill-box07-frost));
   background-image: linear-gradient(var(--ill-box07-hover-gradient-angle, var(--ill-box07-gradient-angle)),
     var(--ill-box07-hover-gradient-from, var(--ill-box07-gradient-from)), var(--ill-box07-hover-gradient-to, var(--ill-box07-gradient-to)));
   margin: var(--ill-box07-hover-margin-top, var(--ill-box07-margin-top)) var(--ill-box07-hover-margin-right, var(--ill-box07-margin-right)) var(--ill-box07-hover-margin-bottom, var(--ill-box07-margin-bottom)) var(--ill-box07-hover-margin-left, var(--ill-box07-margin-left));
@@ -6283,6 +6394,7 @@ h6):hover {
   max-height: var(--ill-box08-hover-max-height, var(--ill-box08-max-height));
   overflow: var(--ill-box08-hover-overflow, var(--ill-box08-overflow));
   background-color: var(--ill-box08-hover-background, var(--ill-box08-background));
+  backdrop-filter: var(--ill-box08-hover-frost, var(--ill-box08-frost));
   background-image: linear-gradient(var(--ill-box08-hover-gradient-angle, var(--ill-box08-gradient-angle)),
     var(--ill-box08-hover-gradient-from, var(--ill-box08-gradient-from)), var(--ill-box08-hover-gradient-to, var(--ill-box08-gradient-to)));
   margin: var(--ill-box08-hover-margin-top, var(--ill-box08-margin-top)) var(--ill-box08-hover-margin-right, var(--ill-box08-margin-right)) var(--ill-box08-hover-margin-bottom, var(--ill-box08-margin-bottom)) var(--ill-box08-hover-margin-left, var(--ill-box08-margin-left));
@@ -6349,6 +6461,7 @@ h6):hover {
   max-height: var(--ill-box09-hover-max-height, var(--ill-box09-max-height));
   overflow: var(--ill-box09-hover-overflow, var(--ill-box09-overflow));
   background-color: var(--ill-box09-hover-background, var(--ill-box09-background));
+  backdrop-filter: var(--ill-box09-hover-frost, var(--ill-box09-frost));
   background-image: linear-gradient(var(--ill-box09-hover-gradient-angle, var(--ill-box09-gradient-angle)),
     var(--ill-box09-hover-gradient-from, var(--ill-box09-gradient-from)), var(--ill-box09-hover-gradient-to, var(--ill-box09-gradient-to)));
   margin: var(--ill-box09-hover-margin-top, var(--ill-box09-margin-top)) var(--ill-box09-hover-margin-right, var(--ill-box09-margin-right)) var(--ill-box09-hover-margin-bottom, var(--ill-box09-margin-bottom)) var(--ill-box09-hover-margin-left, var(--ill-box09-margin-left));
@@ -6415,6 +6528,7 @@ h6):hover {
   max-height: var(--ill-box10-hover-max-height, var(--ill-box10-max-height));
   overflow: var(--ill-box10-hover-overflow, var(--ill-box10-overflow));
   background-color: var(--ill-box10-hover-background, var(--ill-box10-background));
+  backdrop-filter: var(--ill-box10-hover-frost, var(--ill-box10-frost));
   background-image: linear-gradient(var(--ill-box10-hover-gradient-angle, var(--ill-box10-gradient-angle)),
     var(--ill-box10-hover-gradient-from, var(--ill-box10-gradient-from)), var(--ill-box10-hover-gradient-to, var(--ill-box10-gradient-to)));
   margin: var(--ill-box10-hover-margin-top, var(--ill-box10-margin-top)) var(--ill-box10-hover-margin-right, var(--ill-box10-margin-right)) var(--ill-box10-hover-margin-bottom, var(--ill-box10-margin-bottom)) var(--ill-box10-hover-margin-left, var(--ill-box10-margin-left));
@@ -6476,6 +6590,7 @@ h6):hover {
   max-height: var(--ill-image01-hover-max-height, var(--ill-image01-max-height));
   overflow: var(--ill-image01-hover-overflow, var(--ill-image01-overflow));
   background-color: var(--ill-image01-hover-background, var(--ill-image01-background));
+  backdrop-filter: var(--ill-image01-hover-frost, var(--ill-image01-frost));
   background-image: linear-gradient(var(--ill-image01-hover-gradient-angle, var(--ill-image01-gradient-angle)),
     var(--ill-image01-hover-gradient-from, var(--ill-image01-gradient-from)), var(--ill-image01-hover-gradient-to, var(--ill-image01-gradient-to)));
   margin-top: var(--ill-image01-hover-margin-top, var(--ill-image01-margin-top));
@@ -6492,6 +6607,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image01 img:hover {
+  aspect-ratio: var(--ill-image01-hover-picture-shape, var(--ill-image01-picture-shape, auto));
+  object-fit: var(--ill-image01-hover-picture-crop, var(--ill-image01-picture-crop, cover));
+  object-position: var(--ill-image01-hover-picture-from, var(--ill-image01-picture-from, center));
   transform: var(--ill-image01-hover-flip, var(--ill-image01-flip));
   opacity: var(--ill-image01-hover-opacity, var(--ill-image01-opacity));
 }
@@ -6520,6 +6638,7 @@ h6):hover {
   max-height: var(--ill-image02-hover-max-height, var(--ill-image02-max-height));
   overflow: var(--ill-image02-hover-overflow, var(--ill-image02-overflow));
   background-color: var(--ill-image02-hover-background, var(--ill-image02-background));
+  backdrop-filter: var(--ill-image02-hover-frost, var(--ill-image02-frost));
   background-image: linear-gradient(var(--ill-image02-hover-gradient-angle, var(--ill-image02-gradient-angle)),
     var(--ill-image02-hover-gradient-from, var(--ill-image02-gradient-from)), var(--ill-image02-hover-gradient-to, var(--ill-image02-gradient-to)));
   margin-top: var(--ill-image02-hover-margin-top, var(--ill-image02-margin-top));
@@ -6536,6 +6655,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image02 img:hover {
+  aspect-ratio: var(--ill-image02-hover-picture-shape, var(--ill-image02-picture-shape, auto));
+  object-fit: var(--ill-image02-hover-picture-crop, var(--ill-image02-picture-crop, cover));
+  object-position: var(--ill-image02-hover-picture-from, var(--ill-image02-picture-from, center));
   transform: var(--ill-image02-hover-flip, var(--ill-image02-flip));
   opacity: var(--ill-image02-hover-opacity, var(--ill-image02-opacity));
 }
@@ -6564,6 +6686,7 @@ h6):hover {
   max-height: var(--ill-image03-hover-max-height, var(--ill-image03-max-height));
   overflow: var(--ill-image03-hover-overflow, var(--ill-image03-overflow));
   background-color: var(--ill-image03-hover-background, var(--ill-image03-background));
+  backdrop-filter: var(--ill-image03-hover-frost, var(--ill-image03-frost));
   background-image: linear-gradient(var(--ill-image03-hover-gradient-angle, var(--ill-image03-gradient-angle)),
     var(--ill-image03-hover-gradient-from, var(--ill-image03-gradient-from)), var(--ill-image03-hover-gradient-to, var(--ill-image03-gradient-to)));
   margin-top: var(--ill-image03-hover-margin-top, var(--ill-image03-margin-top));
@@ -6580,6 +6703,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image03 img:hover {
+  aspect-ratio: var(--ill-image03-hover-picture-shape, var(--ill-image03-picture-shape, auto));
+  object-fit: var(--ill-image03-hover-picture-crop, var(--ill-image03-picture-crop, cover));
+  object-position: var(--ill-image03-hover-picture-from, var(--ill-image03-picture-from, center));
   transform: var(--ill-image03-hover-flip, var(--ill-image03-flip));
   opacity: var(--ill-image03-hover-opacity, var(--ill-image03-opacity));
 }
@@ -6608,6 +6734,7 @@ h6):hover {
   max-height: var(--ill-image04-hover-max-height, var(--ill-image04-max-height));
   overflow: var(--ill-image04-hover-overflow, var(--ill-image04-overflow));
   background-color: var(--ill-image04-hover-background, var(--ill-image04-background));
+  backdrop-filter: var(--ill-image04-hover-frost, var(--ill-image04-frost));
   background-image: linear-gradient(var(--ill-image04-hover-gradient-angle, var(--ill-image04-gradient-angle)),
     var(--ill-image04-hover-gradient-from, var(--ill-image04-gradient-from)), var(--ill-image04-hover-gradient-to, var(--ill-image04-gradient-to)));
   margin-top: var(--ill-image04-hover-margin-top, var(--ill-image04-margin-top));
@@ -6624,6 +6751,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image04 img:hover {
+  aspect-ratio: var(--ill-image04-hover-picture-shape, var(--ill-image04-picture-shape, auto));
+  object-fit: var(--ill-image04-hover-picture-crop, var(--ill-image04-picture-crop, cover));
+  object-position: var(--ill-image04-hover-picture-from, var(--ill-image04-picture-from, center));
   transform: var(--ill-image04-hover-flip, var(--ill-image04-flip));
   opacity: var(--ill-image04-hover-opacity, var(--ill-image04-opacity));
 }
@@ -6652,6 +6782,7 @@ h6):hover {
   max-height: var(--ill-image05-hover-max-height, var(--ill-image05-max-height));
   overflow: var(--ill-image05-hover-overflow, var(--ill-image05-overflow));
   background-color: var(--ill-image05-hover-background, var(--ill-image05-background));
+  backdrop-filter: var(--ill-image05-hover-frost, var(--ill-image05-frost));
   background-image: linear-gradient(var(--ill-image05-hover-gradient-angle, var(--ill-image05-gradient-angle)),
     var(--ill-image05-hover-gradient-from, var(--ill-image05-gradient-from)), var(--ill-image05-hover-gradient-to, var(--ill-image05-gradient-to)));
   margin-top: var(--ill-image05-hover-margin-top, var(--ill-image05-margin-top));
@@ -6668,6 +6799,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image05 img:hover {
+  aspect-ratio: var(--ill-image05-hover-picture-shape, var(--ill-image05-picture-shape, auto));
+  object-fit: var(--ill-image05-hover-picture-crop, var(--ill-image05-picture-crop, cover));
+  object-position: var(--ill-image05-hover-picture-from, var(--ill-image05-picture-from, center));
   transform: var(--ill-image05-hover-flip, var(--ill-image05-flip));
   opacity: var(--ill-image05-hover-opacity, var(--ill-image05-opacity));
 }
@@ -6696,6 +6830,7 @@ h6):hover {
   max-height: var(--ill-image06-hover-max-height, var(--ill-image06-max-height));
   overflow: var(--ill-image06-hover-overflow, var(--ill-image06-overflow));
   background-color: var(--ill-image06-hover-background, var(--ill-image06-background));
+  backdrop-filter: var(--ill-image06-hover-frost, var(--ill-image06-frost));
   background-image: linear-gradient(var(--ill-image06-hover-gradient-angle, var(--ill-image06-gradient-angle)),
     var(--ill-image06-hover-gradient-from, var(--ill-image06-gradient-from)), var(--ill-image06-hover-gradient-to, var(--ill-image06-gradient-to)));
   margin-top: var(--ill-image06-hover-margin-top, var(--ill-image06-margin-top));
@@ -6712,6 +6847,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image06 img:hover {
+  aspect-ratio: var(--ill-image06-hover-picture-shape, var(--ill-image06-picture-shape, auto));
+  object-fit: var(--ill-image06-hover-picture-crop, var(--ill-image06-picture-crop, cover));
+  object-position: var(--ill-image06-hover-picture-from, var(--ill-image06-picture-from, center));
   transform: var(--ill-image06-hover-flip, var(--ill-image06-flip));
   opacity: var(--ill-image06-hover-opacity, var(--ill-image06-opacity));
 }
@@ -6740,6 +6878,7 @@ h6):hover {
   max-height: var(--ill-image07-hover-max-height, var(--ill-image07-max-height));
   overflow: var(--ill-image07-hover-overflow, var(--ill-image07-overflow));
   background-color: var(--ill-image07-hover-background, var(--ill-image07-background));
+  backdrop-filter: var(--ill-image07-hover-frost, var(--ill-image07-frost));
   background-image: linear-gradient(var(--ill-image07-hover-gradient-angle, var(--ill-image07-gradient-angle)),
     var(--ill-image07-hover-gradient-from, var(--ill-image07-gradient-from)), var(--ill-image07-hover-gradient-to, var(--ill-image07-gradient-to)));
   margin-top: var(--ill-image07-hover-margin-top, var(--ill-image07-margin-top));
@@ -6756,6 +6895,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image07 img:hover {
+  aspect-ratio: var(--ill-image07-hover-picture-shape, var(--ill-image07-picture-shape, auto));
+  object-fit: var(--ill-image07-hover-picture-crop, var(--ill-image07-picture-crop, cover));
+  object-position: var(--ill-image07-hover-picture-from, var(--ill-image07-picture-from, center));
   transform: var(--ill-image07-hover-flip, var(--ill-image07-flip));
   opacity: var(--ill-image07-hover-opacity, var(--ill-image07-opacity));
 }
@@ -6784,6 +6926,7 @@ h6):hover {
   max-height: var(--ill-image08-hover-max-height, var(--ill-image08-max-height));
   overflow: var(--ill-image08-hover-overflow, var(--ill-image08-overflow));
   background-color: var(--ill-image08-hover-background, var(--ill-image08-background));
+  backdrop-filter: var(--ill-image08-hover-frost, var(--ill-image08-frost));
   background-image: linear-gradient(var(--ill-image08-hover-gradient-angle, var(--ill-image08-gradient-angle)),
     var(--ill-image08-hover-gradient-from, var(--ill-image08-gradient-from)), var(--ill-image08-hover-gradient-to, var(--ill-image08-gradient-to)));
   margin-top: var(--ill-image08-hover-margin-top, var(--ill-image08-margin-top));
@@ -6800,6 +6943,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image08 img:hover {
+  aspect-ratio: var(--ill-image08-hover-picture-shape, var(--ill-image08-picture-shape, auto));
+  object-fit: var(--ill-image08-hover-picture-crop, var(--ill-image08-picture-crop, cover));
+  object-position: var(--ill-image08-hover-picture-from, var(--ill-image08-picture-from, center));
   transform: var(--ill-image08-hover-flip, var(--ill-image08-flip));
   opacity: var(--ill-image08-hover-opacity, var(--ill-image08-opacity));
 }
@@ -6828,6 +6974,7 @@ h6):hover {
   max-height: var(--ill-image09-hover-max-height, var(--ill-image09-max-height));
   overflow: var(--ill-image09-hover-overflow, var(--ill-image09-overflow));
   background-color: var(--ill-image09-hover-background, var(--ill-image09-background));
+  backdrop-filter: var(--ill-image09-hover-frost, var(--ill-image09-frost));
   background-image: linear-gradient(var(--ill-image09-hover-gradient-angle, var(--ill-image09-gradient-angle)),
     var(--ill-image09-hover-gradient-from, var(--ill-image09-gradient-from)), var(--ill-image09-hover-gradient-to, var(--ill-image09-gradient-to)));
   margin-top: var(--ill-image09-hover-margin-top, var(--ill-image09-margin-top));
@@ -6844,6 +6991,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image09 img:hover {
+  aspect-ratio: var(--ill-image09-hover-picture-shape, var(--ill-image09-picture-shape, auto));
+  object-fit: var(--ill-image09-hover-picture-crop, var(--ill-image09-picture-crop, cover));
+  object-position: var(--ill-image09-hover-picture-from, var(--ill-image09-picture-from, center));
   transform: var(--ill-image09-hover-flip, var(--ill-image09-flip));
   opacity: var(--ill-image09-hover-opacity, var(--ill-image09-opacity));
 }
@@ -6872,6 +7022,7 @@ h6):hover {
   max-height: var(--ill-image10-hover-max-height, var(--ill-image10-max-height));
   overflow: var(--ill-image10-hover-overflow, var(--ill-image10-overflow));
   background-color: var(--ill-image10-hover-background, var(--ill-image10-background));
+  backdrop-filter: var(--ill-image10-hover-frost, var(--ill-image10-frost));
   background-image: linear-gradient(var(--ill-image10-hover-gradient-angle, var(--ill-image10-gradient-angle)),
     var(--ill-image10-hover-gradient-from, var(--ill-image10-gradient-from)), var(--ill-image10-hover-gradient-to, var(--ill-image10-gradient-to)));
   margin-top: var(--ill-image10-hover-margin-top, var(--ill-image10-margin-top));
@@ -6888,6 +7039,9 @@ h6):hover {
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image10 img:hover {
+  aspect-ratio: var(--ill-image10-hover-picture-shape, var(--ill-image10-picture-shape, auto));
+  object-fit: var(--ill-image10-hover-picture-crop, var(--ill-image10-picture-crop, cover));
+  object-position: var(--ill-image10-hover-picture-from, var(--ill-image10-picture-from, center));
   transform: var(--ill-image10-hover-flip, var(--ill-image10-flip));
   opacity: var(--ill-image10-hover-opacity, var(--ill-image10-opacity));
 }
@@ -6923,6 +7077,7 @@ h6):hover {
   max-height: var(--ill-tag01-hover-max-height, var(--ill-tag01-max-height));
   overflow: var(--ill-tag01-hover-overflow, var(--ill-tag01-overflow));
   background-color: var(--ill-tag01-hover-background, var(--ill-tag01-background));
+  backdrop-filter: var(--ill-tag01-hover-frost, var(--ill-tag01-frost));
   background-image: linear-gradient(var(--ill-tag01-hover-gradient-angle, var(--ill-tag01-gradient-angle)),
     var(--ill-tag01-hover-gradient-from, var(--ill-tag01-gradient-from)), var(--ill-tag01-hover-gradient-to, var(--ill-tag01-gradient-to)));
   padding: var(--ill-tag01-hover-padding-top, var(--ill-tag01-padding-top)) var(--ill-tag01-hover-padding-right, var(--ill-tag01-padding-right)) var(--ill-tag01-hover-padding-bottom, var(--ill-tag01-padding-bottom)) var(--ill-tag01-hover-padding-left, var(--ill-tag01-padding-left));
@@ -6980,6 +7135,7 @@ h6):hover {
   max-height: var(--ill-tag02-hover-max-height, var(--ill-tag02-max-height));
   overflow: var(--ill-tag02-hover-overflow, var(--ill-tag02-overflow));
   background-color: var(--ill-tag02-hover-background, var(--ill-tag02-background));
+  backdrop-filter: var(--ill-tag02-hover-frost, var(--ill-tag02-frost));
   background-image: linear-gradient(var(--ill-tag02-hover-gradient-angle, var(--ill-tag02-gradient-angle)),
     var(--ill-tag02-hover-gradient-from, var(--ill-tag02-gradient-from)), var(--ill-tag02-hover-gradient-to, var(--ill-tag02-gradient-to)));
   padding: var(--ill-tag02-hover-padding-top, var(--ill-tag02-padding-top)) var(--ill-tag02-hover-padding-right, var(--ill-tag02-padding-right)) var(--ill-tag02-hover-padding-bottom, var(--ill-tag02-padding-bottom)) var(--ill-tag02-hover-padding-left, var(--ill-tag02-padding-left));
@@ -7037,6 +7193,7 @@ h6):hover {
   max-height: var(--ill-tag03-hover-max-height, var(--ill-tag03-max-height));
   overflow: var(--ill-tag03-hover-overflow, var(--ill-tag03-overflow));
   background-color: var(--ill-tag03-hover-background, var(--ill-tag03-background));
+  backdrop-filter: var(--ill-tag03-hover-frost, var(--ill-tag03-frost));
   background-image: linear-gradient(var(--ill-tag03-hover-gradient-angle, var(--ill-tag03-gradient-angle)),
     var(--ill-tag03-hover-gradient-from, var(--ill-tag03-gradient-from)), var(--ill-tag03-hover-gradient-to, var(--ill-tag03-gradient-to)));
   padding: var(--ill-tag03-hover-padding-top, var(--ill-tag03-padding-top)) var(--ill-tag03-hover-padding-right, var(--ill-tag03-padding-right)) var(--ill-tag03-hover-padding-bottom, var(--ill-tag03-padding-bottom)) var(--ill-tag03-hover-padding-left, var(--ill-tag03-padding-left));
@@ -7094,6 +7251,7 @@ h6):hover {
   max-height: var(--ill-tag04-hover-max-height, var(--ill-tag04-max-height));
   overflow: var(--ill-tag04-hover-overflow, var(--ill-tag04-overflow));
   background-color: var(--ill-tag04-hover-background, var(--ill-tag04-background));
+  backdrop-filter: var(--ill-tag04-hover-frost, var(--ill-tag04-frost));
   background-image: linear-gradient(var(--ill-tag04-hover-gradient-angle, var(--ill-tag04-gradient-angle)),
     var(--ill-tag04-hover-gradient-from, var(--ill-tag04-gradient-from)), var(--ill-tag04-hover-gradient-to, var(--ill-tag04-gradient-to)));
   padding: var(--ill-tag04-hover-padding-top, var(--ill-tag04-padding-top)) var(--ill-tag04-hover-padding-right, var(--ill-tag04-padding-right)) var(--ill-tag04-hover-padding-bottom, var(--ill-tag04-padding-bottom)) var(--ill-tag04-hover-padding-left, var(--ill-tag04-padding-left));
@@ -7151,6 +7309,7 @@ h6):hover {
   max-height: var(--ill-tag05-hover-max-height, var(--ill-tag05-max-height));
   overflow: var(--ill-tag05-hover-overflow, var(--ill-tag05-overflow));
   background-color: var(--ill-tag05-hover-background, var(--ill-tag05-background));
+  backdrop-filter: var(--ill-tag05-hover-frost, var(--ill-tag05-frost));
   background-image: linear-gradient(var(--ill-tag05-hover-gradient-angle, var(--ill-tag05-gradient-angle)),
     var(--ill-tag05-hover-gradient-from, var(--ill-tag05-gradient-from)), var(--ill-tag05-hover-gradient-to, var(--ill-tag05-gradient-to)));
   padding: var(--ill-tag05-hover-padding-top, var(--ill-tag05-padding-top)) var(--ill-tag05-hover-padding-right, var(--ill-tag05-padding-right)) var(--ill-tag05-hover-padding-bottom, var(--ill-tag05-padding-bottom)) var(--ill-tag05-hover-padding-left, var(--ill-tag05-padding-left));
@@ -7208,6 +7367,7 @@ h6):hover {
   max-height: var(--ill-tag06-hover-max-height, var(--ill-tag06-max-height));
   overflow: var(--ill-tag06-hover-overflow, var(--ill-tag06-overflow));
   background-color: var(--ill-tag06-hover-background, var(--ill-tag06-background));
+  backdrop-filter: var(--ill-tag06-hover-frost, var(--ill-tag06-frost));
   background-image: linear-gradient(var(--ill-tag06-hover-gradient-angle, var(--ill-tag06-gradient-angle)),
     var(--ill-tag06-hover-gradient-from, var(--ill-tag06-gradient-from)), var(--ill-tag06-hover-gradient-to, var(--ill-tag06-gradient-to)));
   padding: var(--ill-tag06-hover-padding-top, var(--ill-tag06-padding-top)) var(--ill-tag06-hover-padding-right, var(--ill-tag06-padding-right)) var(--ill-tag06-hover-padding-bottom, var(--ill-tag06-padding-bottom)) var(--ill-tag06-hover-padding-left, var(--ill-tag06-padding-left));
@@ -7265,6 +7425,7 @@ h6):hover {
   max-height: var(--ill-tag07-hover-max-height, var(--ill-tag07-max-height));
   overflow: var(--ill-tag07-hover-overflow, var(--ill-tag07-overflow));
   background-color: var(--ill-tag07-hover-background, var(--ill-tag07-background));
+  backdrop-filter: var(--ill-tag07-hover-frost, var(--ill-tag07-frost));
   background-image: linear-gradient(var(--ill-tag07-hover-gradient-angle, var(--ill-tag07-gradient-angle)),
     var(--ill-tag07-hover-gradient-from, var(--ill-tag07-gradient-from)), var(--ill-tag07-hover-gradient-to, var(--ill-tag07-gradient-to)));
   padding: var(--ill-tag07-hover-padding-top, var(--ill-tag07-padding-top)) var(--ill-tag07-hover-padding-right, var(--ill-tag07-padding-right)) var(--ill-tag07-hover-padding-bottom, var(--ill-tag07-padding-bottom)) var(--ill-tag07-hover-padding-left, var(--ill-tag07-padding-left));
@@ -7322,6 +7483,7 @@ h6):hover {
   max-height: var(--ill-tag08-hover-max-height, var(--ill-tag08-max-height));
   overflow: var(--ill-tag08-hover-overflow, var(--ill-tag08-overflow));
   background-color: var(--ill-tag08-hover-background, var(--ill-tag08-background));
+  backdrop-filter: var(--ill-tag08-hover-frost, var(--ill-tag08-frost));
   background-image: linear-gradient(var(--ill-tag08-hover-gradient-angle, var(--ill-tag08-gradient-angle)),
     var(--ill-tag08-hover-gradient-from, var(--ill-tag08-gradient-from)), var(--ill-tag08-hover-gradient-to, var(--ill-tag08-gradient-to)));
   padding: var(--ill-tag08-hover-padding-top, var(--ill-tag08-padding-top)) var(--ill-tag08-hover-padding-right, var(--ill-tag08-padding-right)) var(--ill-tag08-hover-padding-bottom, var(--ill-tag08-padding-bottom)) var(--ill-tag08-hover-padding-left, var(--ill-tag08-padding-left));
@@ -7379,6 +7541,7 @@ h6):hover {
   max-height: var(--ill-tag09-hover-max-height, var(--ill-tag09-max-height));
   overflow: var(--ill-tag09-hover-overflow, var(--ill-tag09-overflow));
   background-color: var(--ill-tag09-hover-background, var(--ill-tag09-background));
+  backdrop-filter: var(--ill-tag09-hover-frost, var(--ill-tag09-frost));
   background-image: linear-gradient(var(--ill-tag09-hover-gradient-angle, var(--ill-tag09-gradient-angle)),
     var(--ill-tag09-hover-gradient-from, var(--ill-tag09-gradient-from)), var(--ill-tag09-hover-gradient-to, var(--ill-tag09-gradient-to)));
   padding: var(--ill-tag09-hover-padding-top, var(--ill-tag09-padding-top)) var(--ill-tag09-hover-padding-right, var(--ill-tag09-padding-right)) var(--ill-tag09-hover-padding-bottom, var(--ill-tag09-padding-bottom)) var(--ill-tag09-hover-padding-left, var(--ill-tag09-padding-left));
@@ -7436,6 +7599,7 @@ h6):hover {
   max-height: var(--ill-tag10-hover-max-height, var(--ill-tag10-max-height));
   overflow: var(--ill-tag10-hover-overflow, var(--ill-tag10-overflow));
   background-color: var(--ill-tag10-hover-background, var(--ill-tag10-background));
+  backdrop-filter: var(--ill-tag10-hover-frost, var(--ill-tag10-frost));
   background-image: linear-gradient(var(--ill-tag10-hover-gradient-angle, var(--ill-tag10-gradient-angle)),
     var(--ill-tag10-hover-gradient-from, var(--ill-tag10-gradient-from)), var(--ill-tag10-hover-gradient-to, var(--ill-tag10-gradient-to)));
   padding: var(--ill-tag10-hover-padding-top, var(--ill-tag10-padding-top)) var(--ill-tag10-hover-padding-right, var(--ill-tag10-padding-right)) var(--ill-tag10-hover-padding-bottom, var(--ill-tag10-padding-bottom)) var(--ill-tag10-hover-padding-left, var(--ill-tag10-padding-left));

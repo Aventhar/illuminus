@@ -7076,6 +7076,122 @@ try {
   })()`);
 }
 
+// A picture treatment can crop a picture to a shape. Foundry's own icons are
+// square, so a treatment asking for a panorama is visible in the geometry.
+console.log("\n[75] A picture can be cropped to a shape");
+try {
+  const cut = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Picture Shape Probe", settings: {
+      image01: {pictureShape: "panorama", pictureCrop: "cover", pictureFrom: "top"}
+    }});
+    const shot = '<figure class="illuminus-image illuminus-image--image01">'
+      + '<img src="icons/svg/mystery-man.svg"><figcaption>Cropped</figcaption></figure>';
+    const plain = '<figure class="illuminus-image illuminus-image--image02">'
+      + '<img src="icons/svg/mystery-man.svg"><figcaption>As it is</figcaption></figure>';
+    const entry = await JournalEntry.create({name: "Picture Shape Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [
+      {name: "P", type: "text", text: {content: shot + plain}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const read = (cls) => {
+      const img = root.querySelector(".illuminus-image--" + cls + " img");
+      const seen = getComputedStyle(img);
+      const box = img.getBoundingClientRect();
+      return {ratio: seen.aspectRatio, fit: seen.objectFit, from: seen.objectPosition,
+        wide: Math.round(box.width / box.height * 100) / 100};
+    };
+    const out = {cropped: read("image01"), asIs: read("image02")};
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(cut.cropped.ratio === "21 / 9",
+    `a treatment can name a shape in words and get the ratio (${cut.cropped.ratio})`);
+  check(Math.abs(cut.cropped.wide - 21 / 9) < 0.15,
+    `and the picture is drawn to it (${cut.cropped.wide} wide for one tall)`);
+  check(cut.cropped.fit === "cover" && cut.cropped.from === "50% 0%",
+    `filling the shape from the part that was asked for (${cut.cropped.fit}, ${cut.cropped.from})`);
+  // A treatment that names no shape keeps the picture's own, which is what a
+  // journal does now.
+  check(cut.asIs.ratio === "auto" && Math.abs(cut.asIs.wide - 1) < 0.1,
+    `while a treatment naming none keeps the picture's own shape (${cut.asIs.ratio}, ${cut.asIs.wide})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Picture Shape Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Picture Shape Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// Frosted glass. The control is one number, and zero has to emit nothing: a
+// backdrop filter set to anything at all — an identity filter included — starts
+// a stacking context, so a panel nobody frosted must read "none" rather than a
+// blur of nothing.
+console.log("\n[76] A fill can be frosted");
+try {
+  const frosted = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Frost Probe", settings: {
+      box01: {frost: 8},
+      sidebar: {frost: 12}
+    }});
+    const entry = await JournalEntry.create({name: "Frost Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<section class="illuminus-box illuminus-box--box01">Frosted</section>' +
+      '<section class="illuminus-box illuminus-box--box02">Clear</section>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const at = (sel) => getComputedStyle(root.querySelector(sel)).backdropFilter;
+    const out = {
+      box: at(".illuminus-box--box01"),
+      plain: at(".illuminus-box--box02"),
+      panel: at(".journal-sidebar")
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(frosted.box === "blur(8px)",
+    `a block can frost what is behind it (${frosted.box})`);
+  check(frosted.panel === "blur(12px)",
+    `and so can the contents panel (${frosted.panel})`);
+  check(frosted.plain === "none",
+    `while a fill nobody frosted starts no stacking context of its own (${frosted.plain})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Frost Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Frost Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
