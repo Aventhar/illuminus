@@ -36,8 +36,9 @@ Please do [report them](https://github.com/Aventhar/illuminus/issues).
 
 - **Styles are per journal.** Assigning a style to one journal leaves every other journal
   untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** 2,717 settings across 15 tabs and 381 collapsible
-  sections, labeled in ordinary language — "Top Thickness", "Opening Capital",
+- **Everything is a GUI control.** Around 4,200 settings on 16 tabs in 97 collapsible
+  categories — and close to 10,000 once every box, tag, and picture style is counted
+  separately rather than one at a time — labeled in ordinary language — "Top Thickness", "Opening Capital",
   "Image Blending" — with a one-line explanation under each. No CSS is typed or shown.
   Controls that are always set together are one control: **Text Style** offers Normal,
   Bold, and Light with or without italics, rather than a thickness dropdown of nine
@@ -109,6 +110,19 @@ Please do [report them](https://github.com/Aventhar/illuminus/issues).
   is best combined with a Fill Color under Multiply blending, so the texture supplies the
   grain and the color supplies the hue; a picture carrying its own color wants Fill Color
   set to white and Image Blending set to Normal.
+- **How a part is laid out, not only how it is painted.** A box can be a row of things
+  as well as a stack of them, with the spacing and alignment that follows; it can be held
+  in view while the page scrolls past it, nudged aside, turned a little as a photograph
+  pinned to a page is, or drawn larger than the room it takes. A picture treatment can
+  crop its picture to a named shape — square, landscape, widescreen, panorama — and say
+  which part of it to keep. None of it is typed: they are the same kind of control as a
+  color.
+- **Treatments a page could not ask for before.** A fill can graduate from one color to
+  another, or frost what is behind it as frosted glass does. A background picture can be
+  softened, brightened, drained of its color, or aged before it is laid down. A corner
+  can be a bevel, a notch, or a scoop rather than a rounding. Lettering can be told where
+  its lines may break, and whether a long word may be broken with a hyphen rather than
+  open a gap.
 - **No artwork or styles included — yet.** The sample textures and the sample styles that
   will ship with the module are being made. Until then a world starts empty, and the style
   library is where you make your first one.
