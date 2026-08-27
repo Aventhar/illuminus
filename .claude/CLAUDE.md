@@ -14,6 +14,17 @@ That has already triggered a database repair on a real world once. Use `tools/sa
 which builds a throwaway data directory that only symlinks the module and the game
 system in.
 
+**The sandbox is on 30002, and 30000 is the desktop app's live world.** A one-off
+script that hardcodes 30000 does not fail — it joins the live server as
+Gamemaster and drives the user's real world, and nothing about the page it shows
+says so. It happened here: three throwaway styles were created and deleted in a
+live world before the port was noticed. The lock rule above is about a second
+*server* on the same `dataPath`; this is the other way in, through the running
+server's own API, and it is just as much "testing against a live world".
+Anything driving the sandbox by hand must take the port from
+`ILLUMINUS_TEST_PORT ?? 30002`, as `tools/test-in-app.mjs` does, and check
+`game.world.id` before it writes anything.
+
 ## Verifying a change
 
 Two layers. Both must pass before anything is committed.
