@@ -2,3 +2,7 @@
 node_modules/
 dist/
 *.log
+
+# Written on demand by tools/generate-settings-doc.mjs; a list of ten thousand
+# controls is out of date by the end of the week.
+SETTINGS.md
