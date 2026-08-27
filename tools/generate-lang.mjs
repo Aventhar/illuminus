@@ -699,6 +699,16 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
+  // where the lines may break: <prefix>Wrap, one per lettering family.
+  if ((m = name.match(/^(.*?)[Ww]rap$/)) && !/[Ff]lex$/.test(m[1])) {
+    const of = noun(m[1], "");
+    put(`ILLUMINUS.Field.${name}.label`, "Line Breaking");
+    put(`ILLUMINUS.Field.${name}.hint`,
+      `Where the lines${of ? ` of the ${of}` : ""} are allowed to break. Two lines that `
+      + "come out very uneven can be evened up, and a last line left with one word on it "
+      + "can be avoided.");
+    continue;
+  }
   // corner shape: <prefix>Shape, one per corner family.
   if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
     const of = noun(`${m[1]}Corner`, "");
@@ -1087,6 +1097,8 @@ const CHOICE_TEXT = {
   // The three answers a state's own tick box has: its own yes, its own no, and
   // whichever the ordinary one gave.
   same: "Same as normal", on: "Yes", off: "No",
+  // Where the lines of a run of words may break.
+  balance: "Even up the lines", pretty: "Avoid a lone last word",
   // How a thing is laid out, in the words a person would use for it.
   block: "A block of its own", inline: "Part of the line of text",
   inlineBlock: "In the line, but a block", flex: "A row of what is inside it",

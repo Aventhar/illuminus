@@ -6005,6 +6005,7 @@ try {
   check(JSON.stringify(text) === JSON.stringify([
     "Typeface", "Text Size", "Text Color", "Text Style", "Italic",
     "---", "Alignment", "Capitals", "Letter Spacing", "Word Spacing", "Line Spacing",
+    "Line Breaking",
     "---", "Outline Color", "Outline Thickness",
     "---", "Shadow Horizontal Offset", "Shadow Vertical Offset",
     "Shadow Softness", "Shadow Color"]),
@@ -7006,6 +7007,70 @@ try {
     }
     for (const entry of game.journal.filter((e) => e.name === "Wrap Journal")) await entry.delete();
     for (const style of api.listStyles().filter((s) => s.name === "Wrap Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// Where a run of words is allowed to break. A heading set over two lines breaks
+// where the measure runs out, which leaves one word alone as often as not.
+console.log("\n[74] Lines can be told where to break");
+try {
+  const broke = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Wrap Lines Probe", settings: {
+      heading2: {wrap: "balance"},
+      body: {wrap: "pretty"}
+    }});
+    const entry = await JournalEntry.create({name: "Wrap Lines Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<h2>A heading long enough that it has to be set over more than one line</h2>" +
+      "<h3>Another heading, which nobody asked anything of</h3>" +
+      "<p>A paragraph of prose, long enough to run to several lines on any measure a page is likely to have.</p>"}}]);
+    const show = async () => {
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      await new Promise(r => setTimeout(r, 1400));
+      const root = entry.sheet.element;
+      const at = (sel) => getComputedStyle(root.querySelector(sel)).textWrap
+        || getComputedStyle(root.querySelector(sel)).textWrapStyle;
+      return {
+        heading: at(".journal-page-content h2"),
+        other: at(".journal-page-content h3"),
+        body: at(".journal-page-content p")
+      };
+    };
+    const plain = await show();
+    await api.assignStyle(entry, style.id);
+    const out = {...await show(), plain: plain.heading};
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(/balance/.test(broke.heading),
+    `a heading can have its lines evened up (${broke.heading})`);
+  check(/pretty/.test(broke.body),
+    `and a paragraph can avoid a lone last word (${broke.body})`);
+  // Where the lines may break is inherited, so a part with nothing of its own
+  // follows the page rather than the browser — which is what an unset control
+  // means everywhere else too.
+  check(broke.other === broke.body,
+    `a heading with nothing of its own follows the page (${broke.other})`);
+  check(!/balance|pretty/.test(broke.plain),
+    `while an unstyled journal breaks as it always did (${broke.plain})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Wrap Lines Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Wrap Lines Probe")) {
       await api.deleteStyle(style.id);
     }
   })()`);

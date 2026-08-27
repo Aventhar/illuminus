@@ -64,6 +64,7 @@ const CHOICES = {
   alignItems: ["inherit", "stretch", "start", "center", "end", "baseline"],
   position: ["inherit", "static", "relative", "sticky"],
   overflow: ["inherit", "visible", "hidden", "auto", "scroll"],
+  wrap: ["inherit", "balance", "pretty", "nowrap"],
   // What a corner is cut to. `round` is the browser's own, so it is the default
   // everywhere and a style that says nothing about a corner changes nothing.
   cornerShape: ["round", "bevel", "notch", "scoop", "squircle"],
@@ -462,6 +463,10 @@ function textFields(prefix, defaults = {}) {
     num(n("LetterSpacing"), d("letterSpacing", 0), "px", -5, 40, 0.5),
     num(n("WordSpacing"), d("wordSpacing", 0), "px", -10, 60, 0.5),
     num(n("LineHeight"), d("lineHeight", 0), "", 0, 4, 0.05, { zeroAs: "inherit" }),
+    // Where the lines are allowed to break. A heading set over two lines breaks
+    // where the measure runs out, which leaves one word alone as often as not;
+    // balancing it evens the lines instead.
+    select(n("Wrap"), "inherit", CHOICES.wrap, { emit: emitWord }),
     select(n("Align"), d("align", "inherit"), d("choices", ["inherit", ...CHOICES.alignNoJustify]))
   ];
 }
@@ -503,6 +508,7 @@ function boxSections() {
         select("caps", "inherit", inheritCaps, { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+        select("wrap", "inherit", CHOICES.wrap, { emit: emitWord }),
         select("align", "inherit", inheritAlign)
       ]
     },
@@ -602,7 +608,8 @@ function tagSections() {
         ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
-        num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
+        num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+        select("wrap", "inherit", CHOICES.wrap, { emit: emitWord })
       ]
     },
     { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
@@ -728,7 +735,7 @@ function bannerSections(defaults = {}) {
       // until it closes up.
       order: [
         "font", "size", "color", "textStyle", "textStyleSlant",
-        DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+        DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
         DIVIDER, "outlineColor", "outlineWidth",
         DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
       ],
@@ -905,7 +912,8 @@ export const GROUPS = [
           // rather than to a row in it — so there is no such thing as the
           // indent of the heading a reader chose.
           num("headingIndent", 16, "px", 0, 120, 2, { noSelected: true }),
-          num("headingLineHeight", 2.3, "", 0.5, 5, 0.05)
+          num("headingLineHeight", 2.3, "", 0.5, 5, 0.05),
+          select("headingWrap", "inherit", CHOICES.wrap, { emit: emitWord })
         ]
       },
       {
@@ -1071,7 +1079,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1267,7 +1275,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight"
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap"
         ],
         // Every one of these follows whatever is painting the page until it is
         // set: an empty color, a size of 0, an alignment of "inherit". A new
@@ -1550,7 +1558,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "textColor",
-          DIVIDER, "align", "verticalAlign", "lineHeight",
+          DIVIDER, "align", "verticalAlign", "lineHeight", "wrap",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1660,7 +1668,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1789,7 +1797,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "lineHeight",
+          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -2343,7 +2351,7 @@ const LAYOUTS = {
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", "lineHeight", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
+      "letterSpacing", "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
       "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
@@ -2382,7 +2390,7 @@ const LAYOUTS = {
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
-      "lineHeight", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
@@ -2461,7 +2469,7 @@ const LAYOUTS = {
     ] },
     entries: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", "wordSpacing", "lineHeight", DIVIDER, "outlineColor", "outlineWidth",
+      "letterSpacing", "wordSpacing", "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "entryBackground", DIVIDER, "entryTexture", "entryTextureFit",
       "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", "entryTextureBlur", "entryTextureBrightness", "entryTextureContrast", "entryTextureSaturation", "entryTextureAge", DIVIDER,
@@ -2479,7 +2487,7 @@ const LAYOUTS = {
     ] },
     subHeadings: { order: [
       "headingFont", "headingSize", "headingColor", "headingTextStyle",
-      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingIndent", DIVIDER,
+      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingIndent", DIVIDER,
       "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
       "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
       "headingBackground", DIVIDER, "headingTexture", "headingTextureFit",
@@ -2636,7 +2644,7 @@ const LAYOUTS = {
     settingsBar: { order: [
       "settingsBarFont", "settingsBarSize", "settingsBarColor", "settingsBarTextStyle",
       "settingsBarTextStyleSlant", DIVIDER, "settingsBarAlign", "settingsBarCaps",
-      "settingsBarLetterSpacing", "settingsBarWordSpacing", "settingsBarLineHeight",
+      "settingsBarLetterSpacing", "settingsBarWordSpacing", "settingsBarLineHeight", "settingsBarWrap",
       DIVIDER, "settingsBarOutlineColor", "settingsBarOutlineWidth",
       DIVIDER, "settingsBarTextShadowOffsetX", "settingsBarTextShadowOffsetY",
       "settingsBarTextShadowBlur", "settingsBarTextShadowColor",
@@ -3038,7 +3046,7 @@ const FIELD_ORDER = {
   text: [
     "font", "size", "color", "textColor", "textStyle", "textStyleSlant", "outlineWidth",
     "outlineColor", "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur",
-    "textShadowColor", "caps", "letterSpacing", "wordSpacing", "lineHeight",
+    "textShadowColor", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
     "align", "verticalAlign", "width"
   ],
   background: [
@@ -3076,7 +3084,7 @@ const SUFFIX_ORDER = [
   "Font", "Size", "Color", "TextStyle", "TextStyleSlant",
   "OutlineWidth", "OutlineColor",
   "TextShadowOffsetX", "TextShadowOffsetY", "TextShadowBlur", "TextShadowColor",
-  "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Align", "VerticalAlign"
+  "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Wrap", "Align", "VerticalAlign"
 ];
 
 /**

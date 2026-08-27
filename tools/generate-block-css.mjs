@@ -124,6 +124,7 @@ ${box(group)}
   text-transform: ${v(group, "caps", "transform")};
   letter-spacing: ${v(group, "letterSpacing")};
   line-height: ${v(group, "lineHeight")};
+  text-wrap: ${v(group, "wrap")};
   text-align: ${v(group, "align")};
   color: ${vOr(group, "color", "inherit")};
 }
@@ -261,6 +262,7 @@ ${graduated(group)}
   text-transform: ${v(group, "caps", "transform")};
   letter-spacing: ${v(group, "letterSpacing")};
   line-height: ${v(group, "lineHeight")};
+  text-wrap: ${v(group, "wrap")};
   color: ${vOr(group, "color", "inherit")};
 }
 
@@ -337,6 +339,7 @@ ${layout(group, "block")}
   letter-spacing: ${v(group, "letterSpacing")};
   word-spacing: ${v(group, "wordSpacing")};
   line-height: ${v(group, "lineHeight")};
+  text-wrap: ${v(group, "wrap")};
   text-align: ${v(group, "align")};
   color: ${v(group, "color")};
   text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}

@@ -376,6 +376,7 @@
   letter-spacing: var(--ill-editor-settings-bar-letter-spacing);
   word-spacing: var(--ill-editor-settings-bar-word-spacing);
   line-height: var(--ill-editor-settings-bar-line-height);
+  text-wrap: var(--ill-editor-settings-bar-wrap);
   text-align: var(--ill-editor-settings-bar-align);
   -webkit-text-stroke: var(--ill-editor-settings-bar-outline-width) var(--ill-editor-settings-bar-outline-color);
   paint-order: stroke fill;
@@ -686,6 +687,7 @@
   letter-spacing: var(--ill-sidebar-letter-spacing);
   word-spacing: var(--ill-sidebar-word-spacing);
   line-height: var(--ill-sidebar-line-height);
+  text-wrap: var(--ill-sidebar-wrap);
   text-align: var(--ill-sidebar-align);
   color: var(--ill-sidebar-color);
 }
@@ -758,6 +760,7 @@
   font-weight: var(--ill-sidebar-heading-text-style-weight);
   font-style: var(--ill-sidebar-heading-text-style-slant);
   line-height: var(--ill-sidebar-heading-line-height);
+  text-wrap: var(--ill-sidebar-heading-wrap);
   color: var(--ill-sidebar-heading-color);
 }
 
@@ -905,6 +908,7 @@
   letter-spacing: var(--ill-title-letter-spacing);
   word-spacing: var(--ill-title-word-spacing);
   line-height: var(--ill-title-line-height);
+  text-wrap: var(--ill-title-wrap);
   text-align: var(--ill-title-align);
   color: var(--ill-title-color);
   text-shadow: var(--ill-title-text-shadow-offset-x) var(--ill-title-text-shadow-offset-y)
@@ -942,6 +946,7 @@
   letter-spacing: var(--ill-body-letter-spacing);
   word-spacing: var(--ill-body-word-spacing);
   line-height: var(--ill-body-line-height);
+  text-wrap: var(--ill-body-wrap);
   color: var(--ill-body-color);
   text-align: var(--ill-body-align);
 }
@@ -1596,6 +1601,7 @@
   letter-spacing: var(--ill-boxes-letter-spacing);
   word-spacing: var(--ill-boxes-word-spacing);
   line-height: var(--ill-boxes-line-height);
+  text-wrap: var(--ill-boxes-wrap);
   text-align: var(--ill-boxes-align);
   color: var(--ill-boxes-color);
   background-color: var(--ill-boxes-background);
