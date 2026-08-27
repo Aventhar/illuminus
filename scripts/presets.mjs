@@ -7,7 +7,7 @@
  * defaults, so what is written here is what each style actually says rather
  * than every setting the schema has. Regenerate rather than patch:
  *
- *   node tools/build-presets.mjs "Sample Styles"/*.json
+ *   node tools/build-presets.mjs sample/styles/*.json
  *
  * The ids are derived from the names and are stable, so restoring a deleted
  * sample puts back the same one rather than a second copy. Anything bundled

@@ -6,8 +6,8 @@
  * from the schema's own defaults — or the file is a megabyte of numbers that
  * mean "leave it alone", and no one reading it can tell what the style does.
  *
- * Run it over the files in `Sample Styles/`:
- *   node tools/build-presets.mjs "Sample Styles"/*.json
+ * Run it over the files in `sample/styles/`:
+ *   node tools/build-presets.mjs sample/styles/*.json
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -68,7 +68,7 @@ fs.writeFileSync(`${ROOT}/scripts/presets.mjs`, `/**
  * defaults, so what is written here is what each style actually says rather
  * than every setting the schema has. Regenerate rather than patch:
  *
- *   node tools/build-presets.mjs "Sample Styles"/*.json
+ *   node tools/build-presets.mjs sample/styles/*.json
  *
  * The ids are derived from the names and are stable, so restoring a deleted
  * sample puts back the same one rather than a second copy. Anything bundled
