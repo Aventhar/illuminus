@@ -758,6 +758,28 @@ comparing two styles means two journals rather than one being overwritten.
 
 ## Editor chrome
 
+**A tab can hold parts of its own, and `SPLIT` is where that is said.** The
+contents panel and the page editor were one tab each holding seven and nine
+hundred settings; each is now a tab keeping what is true of the whole of it,
+with Page Entries, the Search Box, the Page Settings Bar and the rest lifted out
+as parts. The split runs *after* the layout pass, because that is what settles
+which category holds what, and **every setting keeps the name it had** — only
+its tab changes — so `v10_to_v11` is that same table read backwards, from the
+schema rather than repeated. Three things had to move with the settings, and
+each was a silent failure until a check caught it:
+
+- **`SELECTED_SECTIONS` is keyed `group.section`.** `sidebar.entries` became
+  `sidebarEntries.entries`, and without that the current-page and chosen-heading
+  states stop being derived at all — the controls simply vanish.
+- **`HOVER_ON` names the tabs that ship real hovered colors**, and a part lifted
+  out of one needs naming too, or every panel button quietly loses its hover.
+- **`IMAGE_LAYERS` and `HOVER_TWIN_ELSEWHERE` name a group per element**, so an
+  element whose settings moved must be repointed at the part that holds them.
+
+A stylesheet sweep comes with it: derive the rename table from the schema's own
+fields rather than from what the *defaults* emit — an unset color emits nothing,
+so a list built from `compileBaseRule()` misses every inherited control.
+
 **The window is a tree, a sample, and the settings, in that order across.** The
 parts of a journal hold one another — the window holds the page, the page holds
 its headings and its boxes — and a strip of tabs could not say so: a heading and

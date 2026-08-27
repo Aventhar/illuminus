@@ -328,18 +328,18 @@
    is styled by what it is, and it carries the same class each time. */
 .illuminus-styled.journal-entry-page menu.editor-menu,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu {
-  background-color: var(--ill-editor-toolbar-background);
-  padding: var(--ill-editor-toolbar-padding-top) var(--ill-editor-toolbar-padding-right)
-           var(--ill-editor-toolbar-padding-bottom) var(--ill-editor-toolbar-padding-left);
-  border-width: var(--ill-editor-toolbar-border-top-width) var(--ill-editor-toolbar-border-right-width)
-                var(--ill-editor-toolbar-border-bottom-width) var(--ill-editor-toolbar-border-left-width);
-  border-style: var(--ill-editor-toolbar-border-top-style) var(--ill-editor-toolbar-border-right-style)
-                var(--ill-editor-toolbar-border-bottom-style) var(--ill-editor-toolbar-border-left-style);
-  border-color: var(--ill-editor-toolbar-border-top-color) var(--ill-editor-toolbar-border-right-color)
-                var(--ill-editor-toolbar-border-bottom-color) var(--ill-editor-toolbar-border-left-color);
-  border-radius: var(--ill-editor-toolbar-corner-top-left) var(--ill-editor-toolbar-corner-top-right)
-                 var(--ill-editor-toolbar-corner-bottom-right) var(--ill-editor-toolbar-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-corner-shape);
+  background-color: var(--ill-editor-toolbar-toolbar-background);
+  padding: var(--ill-editor-toolbar-toolbar-padding-top) var(--ill-editor-toolbar-toolbar-padding-right)
+           var(--ill-editor-toolbar-toolbar-padding-bottom) var(--ill-editor-toolbar-toolbar-padding-left);
+  border-width: var(--ill-editor-toolbar-toolbar-border-top-width) var(--ill-editor-toolbar-toolbar-border-right-width)
+                var(--ill-editor-toolbar-toolbar-border-bottom-width) var(--ill-editor-toolbar-toolbar-border-left-width);
+  border-style: var(--ill-editor-toolbar-toolbar-border-top-style) var(--ill-editor-toolbar-toolbar-border-right-style)
+                var(--ill-editor-toolbar-toolbar-border-bottom-style) var(--ill-editor-toolbar-toolbar-border-left-style);
+  border-color: var(--ill-editor-toolbar-toolbar-border-top-color) var(--ill-editor-toolbar-toolbar-border-right-color)
+                var(--ill-editor-toolbar-toolbar-border-bottom-color) var(--ill-editor-toolbar-toolbar-border-left-color);
+  border-radius: var(--ill-editor-toolbar-toolbar-corner-top-left) var(--ill-editor-toolbar-toolbar-corner-top-right)
+                 var(--ill-editor-toolbar-toolbar-corner-bottom-right) var(--ill-editor-toolbar-toolbar-corner-bottom-left);
+  corner-shape: var(--ill-editor-toolbar-toolbar-corner-shape);
 }
 
 /* Its controls: the drop-downs and the icon buttons alike. Core feeds a
@@ -348,17 +348,17 @@
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown {
-  --button-text-color: var(--ill-editor-toolbar-color);
-  color: var(--ill-editor-toolbar-color);
-  font-size: var(--ill-editor-toolbar-size);
+  --button-text-color: var(--ill-editor-toolbar-toolbar-color);
+  color: var(--ill-editor-toolbar-toolbar-color);
+  font-size: var(--ill-editor-toolbar-toolbar-size);
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:hover,
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
-  --button-text-color: var(--ill-editor-toolbar-hover-color, var(--ill-editor-toolbar-color));
-  color: var(--ill-editor-toolbar-hover-color, var(--ill-editor-toolbar-color));
+  --button-text-color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
+  color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
 }
 
 
@@ -366,43 +366,43 @@
    controls standing on it. */
 .illuminus-styled.journal-entry-page .page-metadata,
 .illuminus-styled .illuminus-preview__editor .page-metadata {
-  font-family: var(--ill-editor-settings-bar-font);
-  font-size: var(--ill-editor-settings-bar-size);
-  color: var(--ill-editor-settings-bar-color);
-  font-weight: var(--ill-editor-settings-bar-text-style-weight);
-  font-style: var(--ill-editor-settings-bar-text-style-slant);
-  font-variant: var(--ill-editor-settings-bar-caps-variant);
-  text-transform: var(--ill-editor-settings-bar-caps-transform);
-  letter-spacing: var(--ill-editor-settings-bar-letter-spacing);
-  word-spacing: var(--ill-editor-settings-bar-word-spacing);
-  line-height: var(--ill-editor-settings-bar-line-height);
-  text-wrap: var(--ill-editor-settings-bar-wrap);
-  hyphens: var(--ill-editor-settings-bar-hyphens);
-  text-align: var(--ill-editor-settings-bar-align);
-  -webkit-text-stroke: var(--ill-editor-settings-bar-outline-width) var(--ill-editor-settings-bar-outline-color);
+  font-family: var(--ill-editor-settings-bar-settings-bar-font);
+  font-size: var(--ill-editor-settings-bar-settings-bar-size);
+  color: var(--ill-editor-settings-bar-settings-bar-color);
+  font-weight: var(--ill-editor-settings-bar-settings-bar-text-style-weight);
+  font-style: var(--ill-editor-settings-bar-settings-bar-text-style-slant);
+  font-variant: var(--ill-editor-settings-bar-settings-bar-caps-variant);
+  text-transform: var(--ill-editor-settings-bar-settings-bar-caps-transform);
+  letter-spacing: var(--ill-editor-settings-bar-settings-bar-letter-spacing);
+  word-spacing: var(--ill-editor-settings-bar-settings-bar-word-spacing);
+  line-height: var(--ill-editor-settings-bar-settings-bar-line-height);
+  text-wrap: var(--ill-editor-settings-bar-settings-bar-wrap);
+  hyphens: var(--ill-editor-settings-bar-settings-bar-hyphens);
+  text-align: var(--ill-editor-settings-bar-settings-bar-align);
+  -webkit-text-stroke: var(--ill-editor-settings-bar-settings-bar-outline-width) var(--ill-editor-settings-bar-settings-bar-outline-color);
   paint-order: stroke fill;
-  text-shadow: var(--ill-editor-settings-bar-text-shadow-offset-x) var(--ill-editor-settings-bar-text-shadow-offset-y)
-               var(--ill-editor-settings-bar-text-shadow-blur) var(--ill-editor-settings-bar-text-shadow-color);
-  background-color: var(--ill-editor-settings-bar-background);
-  padding: var(--ill-editor-settings-bar-padding-top) var(--ill-editor-settings-bar-padding-right)
-           var(--ill-editor-settings-bar-padding-bottom) var(--ill-editor-settings-bar-padding-left);
-  margin: var(--ill-editor-settings-bar-margin-top) var(--ill-editor-settings-bar-margin-right)
-          var(--ill-editor-settings-bar-margin-bottom) var(--ill-editor-settings-bar-margin-left);
-  border-width: var(--ill-editor-settings-bar-border-top-width) var(--ill-editor-settings-bar-border-right-width)
-                var(--ill-editor-settings-bar-border-bottom-width) var(--ill-editor-settings-bar-border-left-width);
-  border-style: var(--ill-editor-settings-bar-border-top-style) var(--ill-editor-settings-bar-border-right-style)
-                var(--ill-editor-settings-bar-border-bottom-style) var(--ill-editor-settings-bar-border-left-style);
-  border-color: var(--ill-editor-settings-bar-border-top-color) var(--ill-editor-settings-bar-border-right-color)
-                var(--ill-editor-settings-bar-border-bottom-color) var(--ill-editor-settings-bar-border-left-color);
-  border-radius: var(--ill-editor-settings-bar-corner-top-left) var(--ill-editor-settings-bar-corner-top-right)
-                 var(--ill-editor-settings-bar-corner-bottom-right) var(--ill-editor-settings-bar-corner-bottom-left);
-  corner-shape: var(--ill-editor-settings-bar-corner-shape);
-  box-shadow: var(--ill-editor-settings-bar-shadow-offset-x) var(--ill-editor-settings-bar-shadow-offset-y)
-              var(--ill-editor-settings-bar-shadow-blur) var(--ill-editor-settings-bar-shadow-spread)
-              var(--ill-editor-settings-bar-shadow-color),
-    inset var(--ill-editor-settings-bar-inner-shadow-offset-x) var(--ill-editor-settings-bar-inner-shadow-offset-y)
-          var(--ill-editor-settings-bar-inner-shadow-blur) var(--ill-editor-settings-bar-inner-shadow-spread)
-          var(--ill-editor-settings-bar-inner-shadow-color);
+  text-shadow: var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-y)
+               var(--ill-editor-settings-bar-settings-bar-text-shadow-blur) var(--ill-editor-settings-bar-settings-bar-text-shadow-color);
+  background-color: var(--ill-editor-settings-bar-settings-bar-background);
+  padding: var(--ill-editor-settings-bar-settings-bar-padding-top) var(--ill-editor-settings-bar-settings-bar-padding-right)
+           var(--ill-editor-settings-bar-settings-bar-padding-bottom) var(--ill-editor-settings-bar-settings-bar-padding-left);
+  margin: var(--ill-editor-settings-bar-settings-bar-margin-top) var(--ill-editor-settings-bar-settings-bar-margin-right)
+          var(--ill-editor-settings-bar-settings-bar-margin-bottom) var(--ill-editor-settings-bar-settings-bar-margin-left);
+  border-width: var(--ill-editor-settings-bar-settings-bar-border-top-width) var(--ill-editor-settings-bar-settings-bar-border-right-width)
+                var(--ill-editor-settings-bar-settings-bar-border-bottom-width) var(--ill-editor-settings-bar-settings-bar-border-left-width);
+  border-style: var(--ill-editor-settings-bar-settings-bar-border-top-style) var(--ill-editor-settings-bar-settings-bar-border-right-style)
+                var(--ill-editor-settings-bar-settings-bar-border-bottom-style) var(--ill-editor-settings-bar-settings-bar-border-left-style);
+  border-color: var(--ill-editor-settings-bar-settings-bar-border-top-color) var(--ill-editor-settings-bar-settings-bar-border-right-color)
+                var(--ill-editor-settings-bar-settings-bar-border-bottom-color) var(--ill-editor-settings-bar-settings-bar-border-left-color);
+  border-radius: var(--ill-editor-settings-bar-settings-bar-corner-top-left) var(--ill-editor-settings-bar-settings-bar-corner-top-right)
+                 var(--ill-editor-settings-bar-settings-bar-corner-bottom-right) var(--ill-editor-settings-bar-settings-bar-corner-bottom-left);
+  corner-shape: var(--ill-editor-settings-bar-settings-bar-corner-shape);
+  box-shadow: var(--ill-editor-settings-bar-settings-bar-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-shadow-offset-y)
+              var(--ill-editor-settings-bar-settings-bar-shadow-blur) var(--ill-editor-settings-bar-settings-bar-shadow-spread)
+              var(--ill-editor-settings-bar-settings-bar-shadow-color),
+    inset var(--ill-editor-settings-bar-settings-bar-inner-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-inner-shadow-offset-y)
+          var(--ill-editor-settings-bar-settings-bar-inner-shadow-blur) var(--ill-editor-settings-bar-settings-bar-inner-shadow-spread)
+          var(--ill-editor-settings-bar-settings-bar-inner-shadow-color);
 }
 
 /* The page's own fields, above the prose: what the page is called is the
@@ -412,32 +412,32 @@
 .illuminus-styled.journal-entry-page .page-metadata label,
 .illuminus-styled .illuminus-preview__editor .page-metadata select,
 .illuminus-styled .illuminus-preview__editor .page-metadata label {
-  background-color: var(--ill-editor-field-background);
-  padding: var(--ill-editor-field-padding-top) var(--ill-editor-field-padding-right)
-           var(--ill-editor-field-padding-bottom) var(--ill-editor-field-padding-left);
-  border-width: var(--ill-editor-field-border-top-width) var(--ill-editor-field-border-right-width)
-                var(--ill-editor-field-border-bottom-width) var(--ill-editor-field-border-left-width);
-  border-style: var(--ill-editor-field-border-top-style) var(--ill-editor-field-border-right-style)
-                var(--ill-editor-field-border-bottom-style) var(--ill-editor-field-border-left-style);
-  border-color: var(--ill-editor-field-border-top-color) var(--ill-editor-field-border-right-color)
-                var(--ill-editor-field-border-bottom-color) var(--ill-editor-field-border-left-color);
-  border-radius: var(--ill-editor-field-corner-top-left) var(--ill-editor-field-corner-top-right)
-                 var(--ill-editor-field-corner-bottom-right) var(--ill-editor-field-corner-bottom-left);
-  corner-shape: var(--ill-editor-field-corner-shape);
-  box-shadow: var(--ill-editor-field-shadow-offset-x) var(--ill-editor-field-shadow-offset-y)
-              var(--ill-editor-field-shadow-blur) var(--ill-editor-field-shadow-spread)
-              var(--ill-editor-field-shadow-color),
-    inset var(--ill-editor-field-inner-shadow-offset-x) var(--ill-editor-field-inner-shadow-offset-y)
-          var(--ill-editor-field-inner-shadow-blur) var(--ill-editor-field-inner-shadow-spread)
-          var(--ill-editor-field-inner-shadow-color);
-  font-family: var(--ill-editor-field-font);
-  font-size: var(--ill-editor-field-size);
-  font-weight: var(--ill-editor-field-text-style-weight);
-  font-style: var(--ill-editor-field-text-style-slant);
-  color: var(--ill-editor-field-color);
-  -webkit-text-stroke: var(--ill-editor-field-outline-width) var(--ill-editor-field-outline-color);
-  text-shadow: var(--ill-editor-field-text-shadow-offset-x) var(--ill-editor-field-text-shadow-offset-y)
-               var(--ill-editor-field-text-shadow-blur) var(--ill-editor-field-text-shadow-color);
+  background-color: var(--ill-editor-settings-bar-field-background);
+  padding: var(--ill-editor-settings-bar-field-padding-top) var(--ill-editor-settings-bar-field-padding-right)
+           var(--ill-editor-settings-bar-field-padding-bottom) var(--ill-editor-settings-bar-field-padding-left);
+  border-width: var(--ill-editor-settings-bar-field-border-top-width) var(--ill-editor-settings-bar-field-border-right-width)
+                var(--ill-editor-settings-bar-field-border-bottom-width) var(--ill-editor-settings-bar-field-border-left-width);
+  border-style: var(--ill-editor-settings-bar-field-border-top-style) var(--ill-editor-settings-bar-field-border-right-style)
+                var(--ill-editor-settings-bar-field-border-bottom-style) var(--ill-editor-settings-bar-field-border-left-style);
+  border-color: var(--ill-editor-settings-bar-field-border-top-color) var(--ill-editor-settings-bar-field-border-right-color)
+                var(--ill-editor-settings-bar-field-border-bottom-color) var(--ill-editor-settings-bar-field-border-left-color);
+  border-radius: var(--ill-editor-settings-bar-field-corner-top-left) var(--ill-editor-settings-bar-field-corner-top-right)
+                 var(--ill-editor-settings-bar-field-corner-bottom-right) var(--ill-editor-settings-bar-field-corner-bottom-left);
+  corner-shape: var(--ill-editor-settings-bar-field-corner-shape);
+  box-shadow: var(--ill-editor-settings-bar-field-shadow-offset-x) var(--ill-editor-settings-bar-field-shadow-offset-y)
+              var(--ill-editor-settings-bar-field-shadow-blur) var(--ill-editor-settings-bar-field-shadow-spread)
+              var(--ill-editor-settings-bar-field-shadow-color),
+    inset var(--ill-editor-settings-bar-field-inner-shadow-offset-x) var(--ill-editor-settings-bar-field-inner-shadow-offset-y)
+          var(--ill-editor-settings-bar-field-inner-shadow-blur) var(--ill-editor-settings-bar-field-inner-shadow-spread)
+          var(--ill-editor-settings-bar-field-inner-shadow-color);
+  font-family: var(--ill-editor-settings-bar-field-font);
+  font-size: var(--ill-editor-settings-bar-field-size);
+  font-weight: var(--ill-editor-settings-bar-field-text-style-weight);
+  font-style: var(--ill-editor-settings-bar-field-text-style-slant);
+  color: var(--ill-editor-settings-bar-field-color);
+  -webkit-text-stroke: var(--ill-editor-settings-bar-field-outline-width) var(--ill-editor-settings-bar-field-outline-color);
+  text-shadow: var(--ill-editor-settings-bar-field-text-shadow-offset-x) var(--ill-editor-settings-bar-field-text-shadow-offset-y)
+               var(--ill-editor-settings-bar-field-text-shadow-blur) var(--ill-editor-settings-bar-field-text-shadow-color);
 }
 
 /* The list a named control opens. Core clones it into a `#prosemirror-dropdown`
@@ -446,50 +446,50 @@
    whatever was clicked, and these are what reach it. Its own placement is
    Foundry's: only paint is set here, never position. */
 .illuminus-styled#prosemirror-dropdown ul {
-  background-color: var(--ill-editor-list-background);
-  padding: var(--ill-editor-list-padding-top) var(--ill-editor-list-padding-right)
-           var(--ill-editor-list-padding-bottom) var(--ill-editor-list-padding-left);
-  border-width: var(--ill-editor-list-border-top-width) var(--ill-editor-list-border-right-width)
-                var(--ill-editor-list-border-bottom-width) var(--ill-editor-list-border-left-width);
-  border-style: var(--ill-editor-list-border-top-style) var(--ill-editor-list-border-right-style)
-                var(--ill-editor-list-border-bottom-style) var(--ill-editor-list-border-left-style);
-  border-color: var(--ill-editor-list-border-top-color) var(--ill-editor-list-border-right-color)
-                var(--ill-editor-list-border-bottom-color) var(--ill-editor-list-border-left-color);
-  border-radius: var(--ill-editor-list-corner-top-left) var(--ill-editor-list-corner-top-right)
-                 var(--ill-editor-list-corner-bottom-right) var(--ill-editor-list-corner-bottom-left);
-  corner-shape: var(--ill-editor-list-corner-shape);
-  box-shadow: var(--ill-editor-list-shadow-offset-x) var(--ill-editor-list-shadow-offset-y)
-              var(--ill-editor-list-shadow-blur) var(--ill-editor-list-shadow-spread)
-              var(--ill-editor-list-shadow-color),
-    inset var(--ill-editor-list-inner-shadow-offset-x) var(--ill-editor-list-inner-shadow-offset-y)
-          var(--ill-editor-list-inner-shadow-blur) var(--ill-editor-list-inner-shadow-spread)
-          var(--ill-editor-list-inner-shadow-color);
+  background-color: var(--ill-editor-dropdowns-list-background);
+  padding: var(--ill-editor-dropdowns-list-padding-top) var(--ill-editor-dropdowns-list-padding-right)
+           var(--ill-editor-dropdowns-list-padding-bottom) var(--ill-editor-dropdowns-list-padding-left);
+  border-width: var(--ill-editor-dropdowns-list-border-top-width) var(--ill-editor-dropdowns-list-border-right-width)
+                var(--ill-editor-dropdowns-list-border-bottom-width) var(--ill-editor-dropdowns-list-border-left-width);
+  border-style: var(--ill-editor-dropdowns-list-border-top-style) var(--ill-editor-dropdowns-list-border-right-style)
+                var(--ill-editor-dropdowns-list-border-bottom-style) var(--ill-editor-dropdowns-list-border-left-style);
+  border-color: var(--ill-editor-dropdowns-list-border-top-color) var(--ill-editor-dropdowns-list-border-right-color)
+                var(--ill-editor-dropdowns-list-border-bottom-color) var(--ill-editor-dropdowns-list-border-left-color);
+  border-radius: var(--ill-editor-dropdowns-list-corner-top-left) var(--ill-editor-dropdowns-list-corner-top-right)
+                 var(--ill-editor-dropdowns-list-corner-bottom-right) var(--ill-editor-dropdowns-list-corner-bottom-left);
+  corner-shape: var(--ill-editor-dropdowns-list-corner-shape);
+  box-shadow: var(--ill-editor-dropdowns-list-shadow-offset-x) var(--ill-editor-dropdowns-list-shadow-offset-y)
+              var(--ill-editor-dropdowns-list-shadow-blur) var(--ill-editor-dropdowns-list-shadow-spread)
+              var(--ill-editor-dropdowns-list-shadow-color),
+    inset var(--ill-editor-dropdowns-list-inner-shadow-offset-x) var(--ill-editor-dropdowns-list-inner-shadow-offset-y)
+          var(--ill-editor-dropdowns-list-inner-shadow-blur) var(--ill-editor-dropdowns-list-inner-shadow-spread)
+          var(--ill-editor-dropdowns-list-inner-shadow-color);
 }
 
 /* One entry in that list. A heading entry carries its own size from core, which
    is how the Format list shows what it is offering, so a size set here is what
    the entries take unless core has said otherwise. */
 .illuminus-styled#prosemirror-dropdown li {
-  font-family: var(--ill-editor-item-font);
-  font-size: var(--ill-editor-item-size);
-  color: var(--ill-editor-item-color);
-  font-weight: var(--ill-editor-item-text-style-weight);
-  font-style: var(--ill-editor-item-text-style-slant);
-  -webkit-text-stroke: var(--ill-editor-item-outline-width) var(--ill-editor-item-outline-color);
+  font-family: var(--ill-editor-dropdowns-item-font);
+  font-size: var(--ill-editor-dropdowns-item-size);
+  color: var(--ill-editor-dropdowns-item-color);
+  font-weight: var(--ill-editor-dropdowns-item-text-style-weight);
+  font-style: var(--ill-editor-dropdowns-item-text-style-slant);
+  -webkit-text-stroke: var(--ill-editor-dropdowns-item-outline-width) var(--ill-editor-dropdowns-item-outline-color);
   paint-order: stroke fill;
-  text-shadow: var(--ill-editor-item-text-shadow-offset-x) var(--ill-editor-item-text-shadow-offset-y)
-               var(--ill-editor-item-text-shadow-blur) var(--ill-editor-item-text-shadow-color);
-  background-color: var(--ill-editor-item-background);
-  padding: var(--ill-editor-item-padding-top) var(--ill-editor-item-padding-right)
-           var(--ill-editor-item-padding-bottom) var(--ill-editor-item-padding-left);
-  border-radius: var(--ill-editor-item-corner-top-left) var(--ill-editor-item-corner-top-right)
-                 var(--ill-editor-item-corner-bottom-right) var(--ill-editor-item-corner-bottom-left);
-  corner-shape: var(--ill-editor-item-corner-shape);
+  text-shadow: var(--ill-editor-dropdowns-item-text-shadow-offset-x) var(--ill-editor-dropdowns-item-text-shadow-offset-y)
+               var(--ill-editor-dropdowns-item-text-shadow-blur) var(--ill-editor-dropdowns-item-text-shadow-color);
+  background-color: var(--ill-editor-dropdowns-item-background);
+  padding: var(--ill-editor-dropdowns-item-padding-top) var(--ill-editor-dropdowns-item-padding-right)
+           var(--ill-editor-dropdowns-item-padding-bottom) var(--ill-editor-dropdowns-item-padding-left);
+  border-radius: var(--ill-editor-dropdowns-item-corner-top-left) var(--ill-editor-dropdowns-item-corner-top-right)
+                 var(--ill-editor-dropdowns-item-corner-bottom-right) var(--ill-editor-dropdowns-item-corner-bottom-left);
+  corner-shape: var(--ill-editor-dropdowns-item-corner-shape);
 }
 
 /* The line core draws between one run of entries and the next. */
 .illuminus-styled#prosemirror-dropdown li.divider {
-  border-bottom-color: var(--ill-editor-item-divider-color);
+  border-bottom-color: var(--ill-editor-dropdowns-item-divider-color);
 }
 
 /* The tick box beside them, which is not a box: Foundry sets `appearance: none`
@@ -509,28 +509,28 @@
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]::after,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::before,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::after {
-  width: var(--ill-editor-field-check-size, var(--checkbox-size));
-  height: var(--ill-editor-field-check-size, var(--checkbox-size));
-  font-size: var(--ill-editor-field-check-size, var(--checkbox-size));
-  line-height: var(--ill-editor-field-check-size, var(--checkbox-size));
+  width: var(--ill-editor-settings-bar-field-check-size, var(--checkbox-size));
+  height: var(--ill-editor-settings-bar-field-check-size, var(--checkbox-size));
+  font-size: var(--ill-editor-settings-bar-field-check-size, var(--checkbox-size));
+  line-height: var(--ill-editor-settings-bar-field-check-size, var(--checkbox-size));
 }
 
 /* The empty box. */
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]::before,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]::before {
-  color: var(--ill-editor-field-check-color, var(--checkbox-background-color));
+  color: var(--ill-editor-settings-bar-field-check-color, var(--checkbox-background-color));
 }
 
 /* Once it is ticked, the box is the layer behind and the tick the one in front,
    which is why the tick is transparent by default: it is cut out of the box. */
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked::after,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked::after {
-  color: var(--ill-editor-field-check-ticked-color, var(--checkbox-checked-color));
+  color: var(--ill-editor-settings-bar-field-check-ticked-color, var(--checkbox-checked-color));
 }
 
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:checked::before,
 .illuminus-styled .illuminus-preview__editor .page-metadata input[type="checkbox"]:checked::before {
-  color: var(--ill-editor-field-check-mark-color, var(--checkbox-checkmark-color));
+  color: var(--ill-editor-settings-bar-field-check-mark-color, var(--checkbox-checkmark-color));
 }
 
 /* Each icon on the editing row, which is a key of its own: the bar's fill
@@ -538,24 +538,24 @@
    The two named controls are not icons and have a category of their own. */
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown),
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown) {
-  background-color: var(--ill-editor-toolbar-button-background);
-  padding: var(--ill-editor-toolbar-button-padding-top) var(--ill-editor-toolbar-button-padding-right)
-           var(--ill-editor-toolbar-button-padding-bottom) var(--ill-editor-toolbar-button-padding-left);
-  border-width: var(--ill-editor-toolbar-button-border-top-width) var(--ill-editor-toolbar-button-border-right-width)
-                var(--ill-editor-toolbar-button-border-bottom-width) var(--ill-editor-toolbar-button-border-left-width);
-  border-style: var(--ill-editor-toolbar-button-border-top-style) var(--ill-editor-toolbar-button-border-right-style)
-                var(--ill-editor-toolbar-button-border-bottom-style) var(--ill-editor-toolbar-button-border-left-style);
-  border-color: var(--ill-editor-toolbar-button-border-top-color) var(--ill-editor-toolbar-button-border-right-color)
-                var(--ill-editor-toolbar-button-border-bottom-color) var(--ill-editor-toolbar-button-border-left-color);
-  border-radius: var(--ill-editor-toolbar-button-corner-top-left) var(--ill-editor-toolbar-button-corner-top-right)
-                 var(--ill-editor-toolbar-button-corner-bottom-right) var(--ill-editor-toolbar-button-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-button-corner-shape);
-  box-shadow: var(--ill-editor-toolbar-button-shadow-offset-x) var(--ill-editor-toolbar-button-shadow-offset-y)
-              var(--ill-editor-toolbar-button-shadow-blur) var(--ill-editor-toolbar-button-shadow-spread)
-              var(--ill-editor-toolbar-button-shadow-color),
-    inset var(--ill-editor-toolbar-button-inner-shadow-offset-x) var(--ill-editor-toolbar-button-inner-shadow-offset-y)
-          var(--ill-editor-toolbar-button-inner-shadow-blur) var(--ill-editor-toolbar-button-inner-shadow-spread)
-          var(--ill-editor-toolbar-button-inner-shadow-color);
+  background-color: var(--ill-editor-toolbar-toolbar-button-background);
+  padding: var(--ill-editor-toolbar-toolbar-button-padding-top) var(--ill-editor-toolbar-toolbar-button-padding-right)
+           var(--ill-editor-toolbar-toolbar-button-padding-bottom) var(--ill-editor-toolbar-toolbar-button-padding-left);
+  border-width: var(--ill-editor-toolbar-toolbar-button-border-top-width) var(--ill-editor-toolbar-toolbar-button-border-right-width)
+                var(--ill-editor-toolbar-toolbar-button-border-bottom-width) var(--ill-editor-toolbar-toolbar-button-border-left-width);
+  border-style: var(--ill-editor-toolbar-toolbar-button-border-top-style) var(--ill-editor-toolbar-toolbar-button-border-right-style)
+                var(--ill-editor-toolbar-toolbar-button-border-bottom-style) var(--ill-editor-toolbar-toolbar-button-border-left-style);
+  border-color: var(--ill-editor-toolbar-toolbar-button-border-top-color) var(--ill-editor-toolbar-toolbar-button-border-right-color)
+                var(--ill-editor-toolbar-toolbar-button-border-bottom-color) var(--ill-editor-toolbar-toolbar-button-border-left-color);
+  border-radius: var(--ill-editor-toolbar-toolbar-button-corner-top-left) var(--ill-editor-toolbar-toolbar-button-corner-top-right)
+                 var(--ill-editor-toolbar-toolbar-button-corner-bottom-right) var(--ill-editor-toolbar-toolbar-button-corner-bottom-left);
+  corner-shape: var(--ill-editor-toolbar-toolbar-button-corner-shape);
+  box-shadow: var(--ill-editor-toolbar-toolbar-button-shadow-offset-x) var(--ill-editor-toolbar-toolbar-button-shadow-offset-y)
+              var(--ill-editor-toolbar-toolbar-button-shadow-blur) var(--ill-editor-toolbar-toolbar-button-shadow-spread)
+              var(--ill-editor-toolbar-toolbar-button-shadow-color),
+    inset var(--ill-editor-toolbar-toolbar-button-inner-shadow-offset-x) var(--ill-editor-toolbar-toolbar-button-inner-shadow-offset-y)
+          var(--ill-editor-toolbar-toolbar-button-inner-shadow-blur) var(--ill-editor-toolbar-toolbar-button-inner-shadow-spread)
+          var(--ill-editor-toolbar-toolbar-button-inner-shadow-color);
 }
 
 
@@ -563,33 +563,33 @@
    a button's color through a variable as well, so both are set. */
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown {
-  --button-text-color: var(--ill-editor-dropdown-color, var(--ill-editor-toolbar-color));
-  background-color: var(--ill-editor-dropdown-background);
-  padding: var(--ill-editor-dropdown-padding-top) var(--ill-editor-dropdown-padding-right)
-           var(--ill-editor-dropdown-padding-bottom) var(--ill-editor-dropdown-padding-left);
-  border-width: var(--ill-editor-dropdown-border-top-width) var(--ill-editor-dropdown-border-right-width)
-                var(--ill-editor-dropdown-border-bottom-width) var(--ill-editor-dropdown-border-left-width);
-  border-style: var(--ill-editor-dropdown-border-top-style) var(--ill-editor-dropdown-border-right-style)
-                var(--ill-editor-dropdown-border-bottom-style) var(--ill-editor-dropdown-border-left-style);
-  border-color: var(--ill-editor-dropdown-border-top-color) var(--ill-editor-dropdown-border-right-color)
-                var(--ill-editor-dropdown-border-bottom-color) var(--ill-editor-dropdown-border-left-color);
-  border-radius: var(--ill-editor-dropdown-corner-top-left) var(--ill-editor-dropdown-corner-top-right)
-                 var(--ill-editor-dropdown-corner-bottom-right) var(--ill-editor-dropdown-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdown-corner-shape);
-  box-shadow: var(--ill-editor-dropdown-shadow-offset-x) var(--ill-editor-dropdown-shadow-offset-y)
-              var(--ill-editor-dropdown-shadow-blur) var(--ill-editor-dropdown-shadow-spread)
-              var(--ill-editor-dropdown-shadow-color),
-    inset var(--ill-editor-dropdown-inner-shadow-offset-x) var(--ill-editor-dropdown-inner-shadow-offset-y)
-          var(--ill-editor-dropdown-inner-shadow-blur) var(--ill-editor-dropdown-inner-shadow-spread)
-          var(--ill-editor-dropdown-inner-shadow-color);
-  font-family: var(--ill-editor-dropdown-font);
-  font-size: var(--ill-editor-dropdown-size, var(--ill-editor-toolbar-size));
-  font-weight: var(--ill-editor-dropdown-text-style-weight);
-  font-style: var(--ill-editor-dropdown-text-style-slant);
-  color: var(--ill-editor-dropdown-color, var(--ill-editor-toolbar-color));
-  -webkit-text-stroke: var(--ill-editor-dropdown-outline-width) var(--ill-editor-dropdown-outline-color);
-  text-shadow: var(--ill-editor-dropdown-text-shadow-offset-x) var(--ill-editor-dropdown-text-shadow-offset-y)
-               var(--ill-editor-dropdown-text-shadow-blur) var(--ill-editor-dropdown-text-shadow-color);
+  --button-text-color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color));
+  background-color: var(--ill-editor-dropdowns-dropdown-background);
+  padding: var(--ill-editor-dropdowns-dropdown-padding-top) var(--ill-editor-dropdowns-dropdown-padding-right)
+           var(--ill-editor-dropdowns-dropdown-padding-bottom) var(--ill-editor-dropdowns-dropdown-padding-left);
+  border-width: var(--ill-editor-dropdowns-dropdown-border-top-width) var(--ill-editor-dropdowns-dropdown-border-right-width)
+                var(--ill-editor-dropdowns-dropdown-border-bottom-width) var(--ill-editor-dropdowns-dropdown-border-left-width);
+  border-style: var(--ill-editor-dropdowns-dropdown-border-top-style) var(--ill-editor-dropdowns-dropdown-border-right-style)
+                var(--ill-editor-dropdowns-dropdown-border-bottom-style) var(--ill-editor-dropdowns-dropdown-border-left-style);
+  border-color: var(--ill-editor-dropdowns-dropdown-border-top-color) var(--ill-editor-dropdowns-dropdown-border-right-color)
+                var(--ill-editor-dropdowns-dropdown-border-bottom-color) var(--ill-editor-dropdowns-dropdown-border-left-color);
+  border-radius: var(--ill-editor-dropdowns-dropdown-corner-top-left) var(--ill-editor-dropdowns-dropdown-corner-top-right)
+                 var(--ill-editor-dropdowns-dropdown-corner-bottom-right) var(--ill-editor-dropdowns-dropdown-corner-bottom-left);
+  corner-shape: var(--ill-editor-dropdowns-dropdown-corner-shape);
+  box-shadow: var(--ill-editor-dropdowns-dropdown-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-shadow-offset-y)
+              var(--ill-editor-dropdowns-dropdown-shadow-blur) var(--ill-editor-dropdowns-dropdown-shadow-spread)
+              var(--ill-editor-dropdowns-dropdown-shadow-color),
+    inset var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-y)
+          var(--ill-editor-dropdowns-dropdown-inner-shadow-blur) var(--ill-editor-dropdowns-dropdown-inner-shadow-spread)
+          var(--ill-editor-dropdowns-dropdown-inner-shadow-color);
+  font-family: var(--ill-editor-dropdowns-dropdown-font);
+  font-size: var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size));
+  font-weight: var(--ill-editor-dropdowns-dropdown-text-style-weight);
+  font-style: var(--ill-editor-dropdowns-dropdown-text-style-slant);
+  color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color));
+  -webkit-text-stroke: var(--ill-editor-dropdowns-dropdown-outline-width) var(--ill-editor-dropdowns-dropdown-outline-color);
+  text-shadow: var(--ill-editor-dropdowns-dropdown-text-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-text-shadow-offset-y)
+               var(--ill-editor-dropdowns-dropdown-text-shadow-blur) var(--ill-editor-dropdowns-dropdown-text-shadow-color);
 }
 
 
@@ -661,40 +661,40 @@
 
 /* Page entries */
 .illuminus-styled .journal-sidebar .toc li.page {
-  background-color: var(--ill-sidebar-entry-background);
-  padding: var(--ill-sidebar-entry-padding-top) var(--ill-sidebar-entry-padding-right)
-           var(--ill-sidebar-entry-padding-bottom) var(--ill-sidebar-entry-padding-left);
-  margin: var(--ill-sidebar-entry-margin-top) var(--ill-sidebar-entry-margin-right)
-          var(--ill-sidebar-entry-margin-bottom) var(--ill-sidebar-entry-margin-left);
-  border-radius: var(--ill-sidebar-entry-corner-top-left) var(--ill-sidebar-entry-corner-top-right)
-                 var(--ill-sidebar-entry-corner-bottom-right) var(--ill-sidebar-entry-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-entry-corner-shape);
-  border-width: var(--ill-sidebar-entry-border-top-width) var(--ill-sidebar-entry-border-right-width)
-                var(--ill-sidebar-entry-border-bottom-width) var(--ill-sidebar-entry-border-left-width);
-  border-style: var(--ill-sidebar-entry-border-top-style) var(--ill-sidebar-entry-border-right-style)
-                var(--ill-sidebar-entry-border-bottom-style) var(--ill-sidebar-entry-border-left-style);
-  border-color: var(--ill-sidebar-entry-border-top-color) var(--ill-sidebar-entry-border-right-color)
-                var(--ill-sidebar-entry-border-bottom-color) var(--ill-sidebar-entry-border-left-color);
+  background-color: var(--ill-sidebar-entries-entry-background);
+  padding: var(--ill-sidebar-entries-entry-padding-top) var(--ill-sidebar-entries-entry-padding-right)
+           var(--ill-sidebar-entries-entry-padding-bottom) var(--ill-sidebar-entries-entry-padding-left);
+  margin: var(--ill-sidebar-entries-entry-margin-top) var(--ill-sidebar-entries-entry-margin-right)
+          var(--ill-sidebar-entries-entry-margin-bottom) var(--ill-sidebar-entries-entry-margin-left);
+  border-radius: var(--ill-sidebar-entries-entry-corner-top-left) var(--ill-sidebar-entries-entry-corner-top-right)
+                 var(--ill-sidebar-entries-entry-corner-bottom-right) var(--ill-sidebar-entries-entry-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-entries-entry-corner-shape);
+  border-width: var(--ill-sidebar-entries-entry-border-top-width) var(--ill-sidebar-entries-entry-border-right-width)
+                var(--ill-sidebar-entries-entry-border-bottom-width) var(--ill-sidebar-entries-entry-border-left-width);
+  border-style: var(--ill-sidebar-entries-entry-border-top-style) var(--ill-sidebar-entries-entry-border-right-style)
+                var(--ill-sidebar-entries-entry-border-bottom-style) var(--ill-sidebar-entries-entry-border-left-style);
+  border-color: var(--ill-sidebar-entries-entry-border-top-color) var(--ill-sidebar-entries-entry-border-right-color)
+                var(--ill-sidebar-entries-entry-border-bottom-color) var(--ill-sidebar-entries-entry-border-left-color);
 }
 
 .illuminus-styled .journal-sidebar .toc .page-title {
-  font-family: var(--ill-sidebar-font);
-  -webkit-text-stroke: var(--ill-sidebar-outline-width) var(--ill-sidebar-outline-color);
+  font-family: var(--ill-sidebar-entries-font);
+  -webkit-text-stroke: var(--ill-sidebar-entries-outline-width) var(--ill-sidebar-entries-outline-color);
   paint-order: stroke fill;
-  text-shadow: var(--ill-sidebar-text-shadow-offset-x) var(--ill-sidebar-text-shadow-offset-y)
-               var(--ill-sidebar-text-shadow-blur) var(--ill-sidebar-text-shadow-color);
-  font-size: var(--ill-sidebar-size);
-  font-weight: var(--ill-sidebar-text-style-weight);
-  font-style: var(--ill-sidebar-text-style-slant);
-  font-variant: var(--ill-sidebar-caps-variant);
-  text-transform: var(--ill-sidebar-caps-transform);
-  letter-spacing: var(--ill-sidebar-letter-spacing);
-  word-spacing: var(--ill-sidebar-word-spacing);
-  line-height: var(--ill-sidebar-line-height);
-  text-wrap: var(--ill-sidebar-wrap);
-  hyphens: var(--ill-sidebar-hyphens);
-  text-align: var(--ill-sidebar-align);
-  color: var(--ill-sidebar-color);
+  text-shadow: var(--ill-sidebar-entries-text-shadow-offset-x) var(--ill-sidebar-entries-text-shadow-offset-y)
+               var(--ill-sidebar-entries-text-shadow-blur) var(--ill-sidebar-entries-text-shadow-color);
+  font-size: var(--ill-sidebar-entries-size);
+  font-weight: var(--ill-sidebar-entries-text-style-weight);
+  font-style: var(--ill-sidebar-entries-text-style-slant);
+  font-variant: var(--ill-sidebar-entries-caps-variant);
+  text-transform: var(--ill-sidebar-entries-caps-transform);
+  letter-spacing: var(--ill-sidebar-entries-letter-spacing);
+  word-spacing: var(--ill-sidebar-entries-word-spacing);
+  line-height: var(--ill-sidebar-entries-line-height);
+  text-wrap: var(--ill-sidebar-entries-wrap);
+  hyphens: var(--ill-sidebar-entries-hyphens);
+  text-align: var(--ill-sidebar-entries-align);
+  color: var(--ill-sidebar-entries-color);
 }
 
 /* The row being read and the row a reader chose are written by the generator,
@@ -720,54 +720,54 @@
 /* Page numbers */
 .illuminus-styled .journal-sidebar .toc .page-index,
 .illuminus-styled .journal-sidebar .toc .page-number {
-  display: var(--ill-sidebar-number-shown);
-  color: var(--ill-sidebar-number-color);
-  font-size: var(--ill-sidebar-number-size);
-  font-weight: var(--ill-sidebar-number-text-style-weight);
-  font-style: var(--ill-sidebar-number-text-style-slant);
-  text-align: var(--ill-sidebar-number-align);
-  width: var(--ill-sidebar-number-width);
+  display: var(--ill-sidebar-numbers-number-shown);
+  color: var(--ill-sidebar-numbers-number-color);
+  font-size: var(--ill-sidebar-numbers-number-size);
+  font-weight: var(--ill-sidebar-numbers-number-text-style-weight);
+  font-style: var(--ill-sidebar-numbers-number-text-style-slant);
+  text-align: var(--ill-sidebar-numbers-number-align);
+  width: var(--ill-sidebar-numbers-number-width);
 }
 
 /* Sub-headings listed beneath the current page */
 .illuminus-styled .journal-sidebar .toc .headings {
-  margin-left: var(--ill-sidebar-heading-indent);
+  margin-left: var(--ill-sidebar-headings-heading-indent);
 }
 
 /* The box is on the listed item and the lettering on the link inside it, as
    the page entry above it is built: a link is inline, and an inline box cannot
    carry spacing that pushes the rows apart. */
 .illuminus-styled .journal-sidebar .toc li.heading {
-  background-color: var(--ill-sidebar-heading-background);
-  padding: var(--ill-sidebar-heading-padding-top) var(--ill-sidebar-heading-padding-right)
-           var(--ill-sidebar-heading-padding-bottom) var(--ill-sidebar-heading-padding-left);
-  margin: var(--ill-sidebar-heading-margin-top) var(--ill-sidebar-heading-margin-right)
-          var(--ill-sidebar-heading-margin-bottom) var(--ill-sidebar-heading-margin-left);
-  border-width: var(--ill-sidebar-heading-border-top-width) var(--ill-sidebar-heading-border-right-width)
-                var(--ill-sidebar-heading-border-bottom-width) var(--ill-sidebar-heading-border-left-width);
-  border-style: var(--ill-sidebar-heading-border-top-style) var(--ill-sidebar-heading-border-right-style)
-                var(--ill-sidebar-heading-border-bottom-style) var(--ill-sidebar-heading-border-left-style);
-  border-color: var(--ill-sidebar-heading-border-top-color) var(--ill-sidebar-heading-border-right-color)
-                var(--ill-sidebar-heading-border-bottom-color) var(--ill-sidebar-heading-border-left-color);
-  border-radius: var(--ill-sidebar-heading-corner-top-left) var(--ill-sidebar-heading-corner-top-right)
-                 var(--ill-sidebar-heading-corner-bottom-right) var(--ill-sidebar-heading-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-heading-corner-shape);
+  background-color: var(--ill-sidebar-headings-heading-background);
+  padding: var(--ill-sidebar-headings-heading-padding-top) var(--ill-sidebar-headings-heading-padding-right)
+           var(--ill-sidebar-headings-heading-padding-bottom) var(--ill-sidebar-headings-heading-padding-left);
+  margin: var(--ill-sidebar-headings-heading-margin-top) var(--ill-sidebar-headings-heading-margin-right)
+          var(--ill-sidebar-headings-heading-margin-bottom) var(--ill-sidebar-headings-heading-margin-left);
+  border-width: var(--ill-sidebar-headings-heading-border-top-width) var(--ill-sidebar-headings-heading-border-right-width)
+                var(--ill-sidebar-headings-heading-border-bottom-width) var(--ill-sidebar-headings-heading-border-left-width);
+  border-style: var(--ill-sidebar-headings-heading-border-top-style) var(--ill-sidebar-headings-heading-border-right-style)
+                var(--ill-sidebar-headings-heading-border-bottom-style) var(--ill-sidebar-headings-heading-border-left-style);
+  border-color: var(--ill-sidebar-headings-heading-border-top-color) var(--ill-sidebar-headings-heading-border-right-color)
+                var(--ill-sidebar-headings-heading-border-bottom-color) var(--ill-sidebar-headings-heading-border-left-color);
+  border-radius: var(--ill-sidebar-headings-heading-corner-top-left) var(--ill-sidebar-headings-heading-corner-top-right)
+                 var(--ill-sidebar-headings-heading-corner-bottom-right) var(--ill-sidebar-headings-heading-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-headings-heading-corner-shape);
 }
 
 
 .illuminus-styled .journal-sidebar .toc .heading-link {
-  font-family: var(--ill-sidebar-heading-font);
-  -webkit-text-stroke: var(--ill-sidebar-heading-outline-width) var(--ill-sidebar-heading-outline-color);
+  font-family: var(--ill-sidebar-headings-heading-font);
+  -webkit-text-stroke: var(--ill-sidebar-headings-heading-outline-width) var(--ill-sidebar-headings-heading-outline-color);
   paint-order: stroke fill;
-  text-shadow: var(--ill-sidebar-heading-text-shadow-offset-x) var(--ill-sidebar-heading-text-shadow-offset-y)
-               var(--ill-sidebar-heading-text-shadow-blur) var(--ill-sidebar-heading-text-shadow-color);
-  font-size: var(--ill-sidebar-heading-size);
-  font-weight: var(--ill-sidebar-heading-text-style-weight);
-  font-style: var(--ill-sidebar-heading-text-style-slant);
-  line-height: var(--ill-sidebar-heading-line-height);
-  text-wrap: var(--ill-sidebar-heading-wrap);
-  hyphens: var(--ill-sidebar-heading-hyphens);
-  color: var(--ill-sidebar-heading-color);
+  text-shadow: var(--ill-sidebar-headings-heading-text-shadow-offset-x) var(--ill-sidebar-headings-heading-text-shadow-offset-y)
+               var(--ill-sidebar-headings-heading-text-shadow-blur) var(--ill-sidebar-headings-heading-text-shadow-color);
+  font-size: var(--ill-sidebar-headings-heading-size);
+  font-weight: var(--ill-sidebar-headings-heading-text-style-weight);
+  font-style: var(--ill-sidebar-headings-heading-text-style-slant);
+  line-height: var(--ill-sidebar-headings-heading-line-height);
+  text-wrap: var(--ill-sidebar-headings-heading-wrap);
+  hyphens: var(--ill-sidebar-headings-heading-hyphens);
+  color: var(--ill-sidebar-headings-heading-color);
 }
 
 
@@ -802,59 +802,59 @@
 .illuminus-styled .journal-sidebar .toc li.category {
   /* On the row, not on the lettering inside it: `strong` is inline, and an
      inline box cannot be aligned — the Alignment control did nothing at all. */
-  text-align: var(--ill-sidebar-category-align);
-  background-color: var(--ill-sidebar-category-background);
-  padding: var(--ill-sidebar-category-padding-top) var(--ill-sidebar-category-padding-right)
-           var(--ill-sidebar-category-padding-bottom) var(--ill-sidebar-category-padding-left);
-  margin: var(--ill-sidebar-category-margin-top) var(--ill-sidebar-category-margin-right)
-          var(--ill-sidebar-category-margin-bottom) var(--ill-sidebar-category-margin-left);
-  border-width: var(--ill-sidebar-category-border-top-width) var(--ill-sidebar-category-border-right-width)
-                var(--ill-sidebar-category-border-bottom-width) var(--ill-sidebar-category-border-left-width);
-  border-style: var(--ill-sidebar-category-border-top-style) var(--ill-sidebar-category-border-right-style)
-                var(--ill-sidebar-category-border-bottom-style) var(--ill-sidebar-category-border-left-style);
-  border-color: var(--ill-sidebar-category-border-top-color) var(--ill-sidebar-category-border-right-color)
-                var(--ill-sidebar-category-border-bottom-color) var(--ill-sidebar-category-border-left-color);
-  border-radius: var(--ill-sidebar-category-corner-top-left) var(--ill-sidebar-category-corner-top-right)
-                 var(--ill-sidebar-category-corner-bottom-right) var(--ill-sidebar-category-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-category-corner-shape);
+  text-align: var(--ill-sidebar-categories-category-align);
+  background-color: var(--ill-sidebar-categories-category-background);
+  padding: var(--ill-sidebar-categories-category-padding-top) var(--ill-sidebar-categories-category-padding-right)
+           var(--ill-sidebar-categories-category-padding-bottom) var(--ill-sidebar-categories-category-padding-left);
+  margin: var(--ill-sidebar-categories-category-margin-top) var(--ill-sidebar-categories-category-margin-right)
+          var(--ill-sidebar-categories-category-margin-bottom) var(--ill-sidebar-categories-category-margin-left);
+  border-width: var(--ill-sidebar-categories-category-border-top-width) var(--ill-sidebar-categories-category-border-right-width)
+                var(--ill-sidebar-categories-category-border-bottom-width) var(--ill-sidebar-categories-category-border-left-width);
+  border-style: var(--ill-sidebar-categories-category-border-top-style) var(--ill-sidebar-categories-category-border-right-style)
+                var(--ill-sidebar-categories-category-border-bottom-style) var(--ill-sidebar-categories-category-border-left-style);
+  border-color: var(--ill-sidebar-categories-category-border-top-color) var(--ill-sidebar-categories-category-border-right-color)
+                var(--ill-sidebar-categories-category-border-bottom-color) var(--ill-sidebar-categories-category-border-left-color);
+  border-radius: var(--ill-sidebar-categories-category-corner-top-left) var(--ill-sidebar-categories-category-corner-top-right)
+                 var(--ill-sidebar-categories-category-corner-bottom-right) var(--ill-sidebar-categories-category-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-categories-category-corner-shape);
 }
 
 .illuminus-styled .journal-sidebar .toc li.category strong {
-  font-family: var(--ill-sidebar-category-font);
-  -webkit-text-stroke: var(--ill-sidebar-category-outline-width) var(--ill-sidebar-category-outline-color);
+  font-family: var(--ill-sidebar-categories-category-font);
+  -webkit-text-stroke: var(--ill-sidebar-categories-category-outline-width) var(--ill-sidebar-categories-category-outline-color);
   paint-order: stroke fill;
-  text-shadow: var(--ill-sidebar-category-text-shadow-offset-x) var(--ill-sidebar-category-text-shadow-offset-y)
-               var(--ill-sidebar-category-text-shadow-blur) var(--ill-sidebar-category-text-shadow-color);
-  font-size: var(--ill-sidebar-category-size);
-  font-weight: var(--ill-sidebar-category-text-style-weight);
-  font-style: var(--ill-sidebar-category-text-style-slant);
-  font-variant: var(--ill-sidebar-category-caps-variant);
-  text-transform: var(--ill-sidebar-category-caps-transform);
-  letter-spacing: var(--ill-sidebar-category-letter-spacing);
-  color: var(--ill-sidebar-category-color);
+  text-shadow: var(--ill-sidebar-categories-category-text-shadow-offset-x) var(--ill-sidebar-categories-category-text-shadow-offset-y)
+               var(--ill-sidebar-categories-category-text-shadow-blur) var(--ill-sidebar-categories-category-text-shadow-color);
+  font-size: var(--ill-sidebar-categories-category-size);
+  font-weight: var(--ill-sidebar-categories-category-text-style-weight);
+  font-style: var(--ill-sidebar-categories-category-text-style-slant);
+  font-variant: var(--ill-sidebar-categories-category-caps-variant);
+  text-transform: var(--ill-sidebar-categories-category-caps-transform);
+  letter-spacing: var(--ill-sidebar-categories-category-letter-spacing);
+  color: var(--ill-sidebar-categories-category-color);
 }
 
 /* Search box */
 .illuminus-styled .journal-sidebar search input[type="search"] {
-  --input-background-color: var(--ill-sidebar-search-background);
-  --input-text-color: var(--ill-sidebar-search-color);
-  --input-placeholder-color: var(--ill-sidebar-search-placeholder-color);
-  background-color: var(--ill-sidebar-search-background);
-  color: var(--ill-sidebar-search-color);
-  font-size: var(--ill-sidebar-search-size);
-  border-width: var(--ill-sidebar-search-border-top-width) var(--ill-sidebar-search-border-right-width)
-                var(--ill-sidebar-search-border-bottom-width) var(--ill-sidebar-search-border-left-width);
-  border-style: var(--ill-sidebar-search-border-top-style) var(--ill-sidebar-search-border-right-style)
-                var(--ill-sidebar-search-border-bottom-style) var(--ill-sidebar-search-border-left-style);
-  border-color: var(--ill-sidebar-search-border-top-color) var(--ill-sidebar-search-border-right-color)
-                var(--ill-sidebar-search-border-bottom-color) var(--ill-sidebar-search-border-left-color);
-  border-radius: var(--ill-sidebar-search-corner-top-left) var(--ill-sidebar-search-corner-top-right)
-                 var(--ill-sidebar-search-corner-bottom-right) var(--ill-sidebar-search-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-search-corner-shape);
+  --input-background-color: var(--ill-sidebar-search-search-background);
+  --input-text-color: var(--ill-sidebar-search-search-color);
+  --input-placeholder-color: var(--ill-sidebar-search-search-placeholder-color);
+  background-color: var(--ill-sidebar-search-search-background);
+  color: var(--ill-sidebar-search-search-color);
+  font-size: var(--ill-sidebar-search-search-size);
+  border-width: var(--ill-sidebar-search-search-border-top-width) var(--ill-sidebar-search-search-border-right-width)
+                var(--ill-sidebar-search-search-border-bottom-width) var(--ill-sidebar-search-search-border-left-width);
+  border-style: var(--ill-sidebar-search-search-border-top-style) var(--ill-sidebar-search-search-border-right-style)
+                var(--ill-sidebar-search-search-border-bottom-style) var(--ill-sidebar-search-search-border-left-style);
+  border-color: var(--ill-sidebar-search-search-border-top-color) var(--ill-sidebar-search-search-border-right-color)
+                var(--ill-sidebar-search-search-border-bottom-color) var(--ill-sidebar-search-search-border-left-color);
+  border-radius: var(--ill-sidebar-search-search-corner-top-left) var(--ill-sidebar-search-search-corner-top-right)
+                 var(--ill-sidebar-search-search-corner-bottom-right) var(--ill-sidebar-search-search-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-search-search-corner-shape);
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]::placeholder {
-  color: var(--ill-sidebar-search-placeholder-color);
+  color: var(--ill-sidebar-search-search-placeholder-color);
 }
 
 /* Footer buttons, and the small controls beside the search box.
@@ -864,16 +864,16 @@
    Foundry's own — a marker taking a button's fill and edges would be a box
    around every folded row. */
 .illuminus-styled .journal-sidebar button:not(.illuminus-fold) {
-  --button-text-color: var(--ill-sidebar-button-color);
-  --button-border-color: var(--ill-sidebar-button-border-color);
-  --button-hover-border-color: var(--ill-sidebar-button-hover-border-color);
-  color: var(--ill-sidebar-button-color);
-  background-color: var(--ill-sidebar-button-background);
-  border-width: var(--ill-sidebar-button-border-width);
-  border-color: var(--ill-sidebar-button-border-color);
-  border-radius: var(--ill-sidebar-button-corner-top-left) var(--ill-sidebar-button-corner-top-right)
-                 var(--ill-sidebar-button-corner-bottom-right) var(--ill-sidebar-button-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-button-corner-shape);
+  --button-text-color: var(--ill-sidebar-buttons-button-color);
+  --button-border-color: var(--ill-sidebar-buttons-button-border-color);
+  --button-hover-border-color: var(--ill-sidebar-buttons-button-hover-border-color);
+  color: var(--ill-sidebar-buttons-button-color);
+  background-color: var(--ill-sidebar-buttons-button-background);
+  border-width: var(--ill-sidebar-buttons-button-border-width);
+  border-color: var(--ill-sidebar-buttons-button-border-color);
+  border-radius: var(--ill-sidebar-buttons-button-corner-top-left) var(--ill-sidebar-buttons-button-corner-top-right)
+                 var(--ill-sidebar-buttons-button-corner-bottom-right) var(--ill-sidebar-buttons-button-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-buttons-button-corner-shape);
 }
 
 
@@ -1990,8 +1990,16 @@
 
 /* The parts of a journal, as they hold one another. */
 .illuminus-tree {
-  flex: 0 0 15rem;
-  min-width: 0;
+  /* Sized to what it holds rather than to a guess. The names are short and the
+     nesting is shallow, so a fixed column left a strip of empty ground down the
+     window that the sample could have had. It does not shrink: a name that had
+     to be cut off would defeat the point of the tree. */
+  flex: 0 0 auto;
+  width: max-content;
+  /* A treatment can be renamed to anything, so past this the names give way
+     rather than the pane. */
+  max-width: 16rem;
+  min-width: 8rem;
   overflow: hidden auto;
   padding: 0.15rem 0.35rem 0.5rem 0;
   border-right: 1px solid var(--color-border, rgb(0 0 0 / 25%));
@@ -2150,6 +2158,15 @@
 .illuminus-family__name {
   flex: 1;
   min-width: 6rem;
+}
+
+/* What clears the tab, on a row of its own above what the tab says: the two are
+   different kinds of thing, and mixing them put Reset All beside a switch that
+   changes what the tab shows. */
+.illuminus-tab__tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .illuminus-tab__head {

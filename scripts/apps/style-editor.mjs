@@ -436,7 +436,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // The ten treatments of a thing are held by the untreated one: a box style
     // is a box, and the tree says so rather than listing them alongside.
     boxStyles: "boxes", tagStyles: "tags", imageStyles: "images",
-    listStyles: "lists", tableStyles: "tables"
+    listStyles: "lists", tableStyles: "tables",
+    // The contents panel and the page editor hold parts of their own, the way
+    // the page does.
+    sidebarEntries: "sidebar", sidebarHeadings: "sidebar", sidebarCategories: "sidebar",
+    sidebarSearch: "sidebar", sidebarButtons: "sidebar", sidebarNumbers: "sidebar",
+    editorSettingsBar: "editor", editorDropdowns: "editor", editorToolbar: "editor"
   };
 
   /**

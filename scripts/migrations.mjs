@@ -1,4 +1,5 @@
 import { SCHEMA_VERSION, log } from "./constants.mjs";
+import { GROUPS, SPLIT } from "./style-schema.mjs";
 
 /**
  * Forward migration of stored style data.
@@ -388,6 +389,40 @@ function v9_to_v10(settings) {
   return out;
 }
 
+/**
+ * Version 10 -> 11.
+ *
+ * The contents panel and the page editor were each one tab holding seven and
+ * nine hundred settings, and both are now a tab that holds parts of its own —
+ * Page Entries, Sub-headings, the Search Box, the Page Settings Bar, and so on.
+ * Every setting kept the name it had; only the tab it belongs to changed.
+ *
+ * So the migration is that table read backwards: for each control the schema
+ * now keeps in a part, take it from the tab it used to live in. Reading it from
+ * the schema rather than repeating it here means a part added later cannot be
+ * forgotten — and a setting whose part no longer exists is simply left where it
+ * was, for `cleanSettings` to drop as it drops anything else it does not know.
+ */
+function v10_to_v11(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  for (const [parentId, parts] of Object.entries(SPLIT)) {
+    const parent = out[parentId];
+    if (!parent || typeof parent !== "object") continue;
+    for (const part of parts) {
+      const group = GROUPS.find((one) => one.id === part.id);
+      if (!group) continue;
+      for (const section of group.sections) {
+        for (const field of section.fields) {
+          if (parent[field.name] === undefined) continue;
+          (out[part.id] ??= {})[field.name] = parent[field.name];
+          delete parent[field.name];
+        }
+      }
+    }
+  }
+  return out;
+}
+
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
@@ -397,7 +432,8 @@ const MIGRATIONS = {
   6: v6_to_v7,
   7: v7_to_v8,
   8: v8_to_v9,
-  9: v9_to_v10
+  9: v9_to_v10,
+  10: v10_to_v11
 };
 
 /**

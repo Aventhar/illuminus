@@ -497,8 +497,8 @@ check(mx.kept.body.textStyle === "bold" && mx.kept.body.textStyleSlant === true,
   `a heavy italic arrives as bold and italic (got ${mx.kept.body.textStyle}, slant ${mx.kept.body.textStyleSlant})`);
 check(mx.kept.heading1.textStyle === "light",
   `and a hairline one as light (got ${mx.kept.heading1.textStyle})`);
-check(mx.kept.sidebar.activeTextStyle === "bold",
-  `a thickness that never had a slant still converts (got ${mx.kept.sidebar.activeTextStyle})`);
+check(mx.kept.sidebarEntries.activeTextStyle === "bold",
+  `a thickness that never had a slant still converts (got ${mx.kept.sidebarEntries?.activeTextStyle})`);
 check(mx.kept.box01.textStyle === "inherit",
   `"use the page setting" survives on both halves, under the renamed group (got ${mx.kept.box01.textStyle})`);
 check(mx.kept.images.captionTextStyle === "normal" && mx.kept.images.captionTextStyleSlant === true,
@@ -589,16 +589,16 @@ const matchedStates = await cdp.evaluate(`(async () => {
   };
   const read = (path) => Number(el.querySelector('[data-field="' + path + '"] range-picker').value);
 
-  set("sidebar.buttonCornerTopLeft", 2);
-  set("sidebar.hoverButtonCornerTopLeft", 24);
+  set("sidebarButtons.buttonCornerTopLeft", 2);
+  set("sidebarButtons.hoverButtonCornerTopLeft", 24);
   await new Promise(r => setTimeout(r, 400));
-  el.querySelector('[data-action="matchSides"][data-group="sidebar"][data-section="buttons"]').click();
+  el.querySelector('[data-action="matchSides"][data-group="sidebarButtons"][data-section="buttons"]').click();
   await new Promise(r => setTimeout(r, 600));
 
   const corners = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
   const after = {
-    ordinary: corners.map(c => read("sidebar.buttonCorner" + c)),
-    hovered: corners.map(c => read("sidebar.hoverButtonCorner" + c))
+    ordinary: corners.map(c => read("sidebarButtons.buttonCorner" + c)),
+    hovered: corners.map(c => read("sidebarButtons.hoverButtonCorner" + c))
   };
   await app.close({force: true});
   return JSON.stringify(after);
@@ -643,8 +643,10 @@ check(pb.bg === "rgb(236, 224, 198)", `and is still painted with the style color
 console.log("\n[16] Sidebar styling reaches a real journal sheet");
 const sidebar = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
-  const style = await api.createStyle({name: "Sidebar Probe", settings: {sidebar: {
-      background: "#12151b", color: "#c8d2de",
+  const style = await api.createStyle({name: "Sidebar Probe", settings: {
+    sidebar: { background: "#12151b" },
+    sidebarEntries: {
+      color: "#c8d2de",
       activeColor: "#e8c979", activeTextStyle: "bold", activeTextStyleSlant: true,
       entryBorderLeftWidth: 3, entryBorderLeftColor: "#00000000",
       activeEntryBorderLeftColor: "#e8c979",
@@ -654,9 +656,11 @@ const sidebar = await cdp.evaluate(`(async () => {
       // always had: a chosen row can sit differently as well as be painted
       // differently, and one left unset follows the ordinary row.
       entryPaddingTop: 4, activeEntryPaddingTop: 12, activeEntryCornerTopLeft: 9,
-      size: 15, activeSize: 21,
-      numberShown: true, numberColor: "#6b7688", searchBackground: "#0d1015"
-    }}});
+      size: 15, activeSize: 21
+    },
+    sidebarNumbers: { numberShown: true, numberColor: "#6b7688" },
+    sidebarSearch: { searchBackground: "#0d1015" }
+  }});
   let entry = game.journal.getName("Sidebar Test Journal");
   if (!entry) {
     entry = await JournalEntry.create({name: "Sidebar Test Journal"});
@@ -709,7 +713,7 @@ const sidebar = await cdp.evaluate(`(async () => {
   // And with the numbers turned off, which is what the panel looks like when
   // the page's name is the whole of the entry.
   const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
-  settings.sidebar.numberShown = false;
+  settings.sidebarNumbers.numberShown = false;
   await api.updateStyle(style.id, {settings});
   await new Promise(r => setTimeout(r, 400));
   out.numberHidden = cs(root.querySelector(".toc .page-index")).display;
@@ -2273,7 +2277,7 @@ try {
     const IMG = "icons/svg/mystery-man.svg";
     Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
     Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
-    Object.assign(settings.sidebar, {buttonBackground: "#222222", buttonTexture: IMG});
+    Object.assign(settings.sidebarButtons, {buttonBackground: "#222222", buttonTexture: IMG});
     Object.assign(settings.title, {background: "#2b1d12", texture: IMG});
     settings.box01.texture = IMG;
     await api.updateStyle(style.id, {settings});
@@ -3030,10 +3034,11 @@ try {
     out.noneDimmed = [...el.querySelectorAll(".illuminus-tree__part[data-tab]")]
       .every(t => !t.classList.contains("is-filtered-out"));
 
-    // The pointed-at half of a pair.
-    app.changeTab("sidebar", "sheet");
+    // The pointed-at half of a pair. The panel's buttons are a part of their
+    // own now, as is everything else the panel holds.
+    app.changeTab("sidebarButtons", "sheet");
     await new Promise(r => setTimeout(r, 400));
-    const buttons = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+    const buttons = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarButtons"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "buttons");
     buttons.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3051,7 +3056,9 @@ try {
     // A listed page is set in one section, in its three states — which is what
     // the switch is for. It was three sections, and the same entry could not be
     // compared with itself.
-    const entryStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+    app.changeTab("sidebarEntries", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    const entryStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarEntries"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "entries");
     entryStates.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3069,7 +3076,9 @@ try {
 
     // And the list of headings under a page, which has the same three states:
     // the heading a reader chose is as much a state as the page being read.
-    const headingStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebar"] .illuminus-section')]
+    app.changeTab("sidebarHeadings", "sheet");
+    await new Promise(r => setTimeout(r, 300));
+    const headingStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarHeadings"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "subHeadings");
     headingStates.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3608,9 +3617,9 @@ try {
     settings.heading2.borderTopStyle = "solid";
     // A button's corners, which are a number rather than a color: the twin has
     // to reach a size as well as a paint, and Match must not have flattened it.
-    settings.sidebar.hoverOff = false;
-    settings.sidebar.buttonCornerTopLeft = 2;
-    settings.sidebar.hoverButtonCornerTopLeft = 24;
+    settings.sidebarButtons.hoverOff = false;
+    settings.sidebarButtons.buttonCornerTopLeft = 2;
+    settings.sidebarButtons.hoverButtonCornerTopLeft = 24;
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Hover Test Journal"});
@@ -4966,7 +4975,7 @@ console.log("\n[52] The hovered-state switch, tab by tab");
       const app = await api.openEditor(style.id);
       await new Promise(r => setTimeout(r, 1200));
       const out = {};
-      for (const tab of ["lists", "sidebar", "window", "links", "secrets"]) {
+      for (const tab of ["lists", "sidebar", "sidebarEntries", "window", "links", "secrets"]) {
         app.changeTab(tab, "sheet");
         await new Promise(r => setTimeout(r, 250));
         const el = app.element.querySelector('.illuminus-tab[data-tab="' + tab + '"]');
@@ -5014,7 +5023,10 @@ console.log("\n[52] The hovered-state switch, tab by tab");
   check(sw.sidebar.without.length === 0 && sw.window.without.length === 0,
     `and every section of the panel and the window offers it`
     + `${[...sw.sidebar.without, ...sw.window.without].length ? ` (missing from ${[...sw.sidebar.without, ...sw.window.without].join(", ")})` : ""}`);
-  check(sw.sidebar.reachable, "the current-page controls stay reachable while hovered is off");
+  // The current-page controls belong to a listed page, which is a part of its
+  // own now — so the switch that must not put them out of reach is that part's.
+  check(sw.sidebarEntries.reachable,
+    "the current-page controls stay reachable while hovered is off");
 }
 
 try {
@@ -5022,7 +5034,7 @@ try {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Effect Probe", settings: {
       lists: {markerColor: "#112233", markerHoverColor: "#ff0000", hoverOff: false},
-      sidebar: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
+      sidebarButtons: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
     }});
     const entry = await JournalEntry.create({name: "Illuminus Hover Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{
@@ -5075,7 +5087,7 @@ try {
     const style = api.getStyle(${JSON.stringify(setup.styleId)});
     const settings = foundry.utils.deepClone(style.settings);
     settings.lists.hoverOff = true;
-    settings.sidebar = {...settings.sidebar, hoverOff: true};
+    settings.sidebarButtons = {...settings.sidebarButtons, hoverOff: true};
     await api.updateStyle(style.id, {settings});
     await new Promise(r => setTimeout(r, 500));
   })()`);
@@ -5393,7 +5405,6 @@ try {
     settings.heading2.foldIcon = "plus";
     settings.heading2.foldColor = "#00aa00";
     settings.heading3.foldShown = false;
-    settings.sidebar.foldShown = true;
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Fold Journal"});
@@ -5766,12 +5777,13 @@ try {
       // The journal window, and a title bar the editor must not borrow.
       window: {frameMinWidth: 400, frameMaxWidth: 620, color: "#ff0000", size: 12},
       editor: {background: "#123456", color: "#00ff00", size: 26, frameMinWidth: 700,
-               borderTopWidth: 4, borderTopStyle: "solid", borderTopColor: "#ff00ff",
-               toolbarBackground: "#ff8800", toolbarColor: "#0000ff", toolbarSize: 20,
-               // The bar, one icon on it, the two named controls, and the page's
-               // own settings are four different things to paint.
-               toolbarButtonBackground: "#00ffff", toolbarButtonHoverBackground: "#ff00aa",
-               dropdownBackground: "#222266", dropdownColor: "#ffee00",
+               borderTopWidth: 4, borderTopStyle: "solid", borderTopColor: "#ff00ff"},
+      // The bar, one icon on it, the two named controls, and the page's own
+      // settings are four different things to paint, and three different parts.
+      editorToolbar: {toolbarBackground: "#ff8800", toolbarColor: "#0000ff", toolbarSize: 20,
+               toolbarButtonBackground: "#00ffff", toolbarButtonHoverBackground: "#ff00aa"},
+      editorDropdowns: {dropdownBackground: "#222266", dropdownColor: "#ffee00"},
+      editorSettingsBar: {
                fieldBackground: "#663322", fieldColor: "#00ddaa", fieldSize: 19,
                fieldCheckColor: "#ff00ff", fieldCheckTickedColor: "#00ff88",
                fieldCheckMarkColor: "#2200ff", fieldCheckSize: 22,
@@ -5938,7 +5950,10 @@ try {
     const laidOut = {};
     // The six levels share one tab, so the family's id is what opens it.
     for (const which of ["title", "page", "headings", "body", "links", "lists",
-      "tables", "boxes", "secrets", "images", "boxStyles", "sidebar", "window", "editor"]) {
+      "tables", "boxes", "secrets", "images", "boxStyles", "window", "editor",
+      "sidebar", "sidebarEntries", "sidebarHeadings", "sidebarCategories",
+      "sidebarSearch", "sidebarButtons", "sidebarNumbers",
+      "editorSettingsBar", "editorToolbar", "editorDropdowns"]) {
       laidOut[which] = app.element.querySelector('.illuminus-tab[data-tab="' + which + '"]');
     }
     const tab = laidOut.title;
@@ -6005,8 +6020,12 @@ try {
       above: seen.marginTop, below: seen.marginBottom
     };
     await app.close({force: true});
+    const parts = Object.fromEntries(["sidebarEntries", "sidebarHeadings",
+      "sidebarCategories", "sidebarSearch", "sidebarButtons", "sidebarNumbers",
+      "editorSettingsBar", "editorToolbar", "editorDropdowns"]
+      .map((id) => [id, named(laidOut[id])]));
     return JSON.stringify({sections, page, heading, body, links, lists, tables, boxes, secrets,
-      images, boxStyles, sidebar, window: window_, editor, hovered, ...drawn});
+      images, boxStyles, sidebar, window: window_, editor, ...parts, hovered, ...drawn});
   })()`);
   const t = JSON.parse(laid);
   const names = t.sections.map((s) => s.name);
@@ -6109,12 +6128,18 @@ try {
       "Sound and Video"],
     boxStyles: ["Size and Position", "Text", "Fill and Image", "Spacing",
       "Border", "Headings Inside"],
-    sidebar: ["Size and Position", "Fill and Image", "Spacing", "Border", "Categories",
-      "Numbering", "Page Entries", "Sub-Headings", "Search Box", "Buttons"],
+    sidebar: ["Size and Position", "Fill and Image", "Spacing", "Border"],
+    sidebarEntries: ["Page Entries"],
+    sidebarHeadings: ["Sub-Headings"],
+    sidebarCategories: ["Categories"],
+    sidebarSearch: ["Search Box"],
+    sidebarButtons: ["Buttons"],
+    sidebarNumbers: ["Numbering"],
     window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
-    editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons",
-      "Page Settings Bar", "Page Settings", "Editing Bar", "Editing Icons", "Named Controls",
-      "Drop-down List", "Drop-down Entries"]
+    editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons"],
+    editorSettingsBar: ["Page Settings Bar", "Page Settings"],
+    editorToolbar: ["Editing Bar", "Editing Icons"],
+    editorDropdowns: ["Named Controls", "Drop-down List", "Drop-down Entries"]
   };
   for (const [tab, wanted] of Object.entries(laidTabs)) {
     const got = t[tab].map((s) => s.name);
@@ -6236,7 +6261,7 @@ try {
       if (app.document?.documentName?.startsWith("JournalEntry")
         || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
     }
-    const style = await api.createStyle({name: "Drop-down List Probe", settings: {editor: {
+    const style = await api.createStyle({name: "Drop-down List Probe", settings: {editorDropdowns: {
       listBackground: "#2b0057", listPaddingTop: 9, listCornerTopLeft: 12,
       itemColor: "#ffd400", itemBackground: "#004422", itemPaddingLeft: 11,
       itemDividerColor: "#ff0000"

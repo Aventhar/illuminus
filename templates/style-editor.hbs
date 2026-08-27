@@ -38,6 +38,19 @@
   {{#each groups as |group|}}
   <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
 
+    <div class="illuminus-tab__tools">
+      <button type="button" class="illuminus-reset" data-action="resetGroup"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
+      <button type="button" class="illuminus-reset" data-action="resetAll"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
+        <i class="fa-solid fa-broom"></i>
+        {{localize "ILLUMINUS.Buttons.ResetAll"}}
+      </button>
+    </div>
+
     <header class="illuminus-tab__head">
       {{#if group.hoverOff}}
       <label class="illuminus-hover-off">
@@ -53,16 +66,6 @@
       <button type="button" class="illuminus-info" data-action="showHint"
               aria-label="{{group.hint}}">
         <i class="fa-solid fa-circle-info"></i>
-      </button>
-      <button type="button" class="illuminus-reset" data-action="resetGroup"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
-        <i class="fa-solid fa-rotate-left"></i>
-        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
-      </button>
-      <button type="button" class="illuminus-reset" data-action="resetAll"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
-        <i class="fa-solid fa-broom"></i>
-        {{localize "ILLUMINUS.Buttons.ResetAll"}}
       </button>
 
       {{#if group.plainReset}}
@@ -127,6 +130,19 @@
   {{#each families as |family|}}
   <section class="tab illuminus-tab {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
 
+    <div class="illuminus-tab__tools">
+      <button type="button" class="illuminus-reset" data-action="resetGroup"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
+        <i class="fa-solid fa-rotate-left"></i>
+        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
+      </button>
+      <button type="button" class="illuminus-reset" data-action="resetAll"
+              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
+        <i class="fa-solid fa-broom"></i>
+        {{localize "ILLUMINUS.Buttons.ResetAll"}}
+      </button>
+    </div>
+
     <header class="illuminus-tab__head illuminus-family__head">
       {{#if family.current.hoverOff}}
       <label class="illuminus-hover-off">
@@ -157,16 +173,6 @@
         {{localize "ILLUMINUS.Buttons.Rename"}}
       </button>
       {{/if}}
-      <button type="button" class="illuminus-reset" data-action="resetGroup"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
-        <i class="fa-solid fa-rotate-left"></i>
-        {{localize "ILLUMINUS.Buttons.ResetGroup"}}
-      </button>
-      <button type="button" class="illuminus-reset" data-action="resetAll"
-              data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetAllTooltip'}}">
-        <i class="fa-solid fa-broom"></i>
-        {{localize "ILLUMINUS.Buttons.ResetAll"}}
-      </button>
     </header>
 
     <p class="hint">{{family.hint}}</p>

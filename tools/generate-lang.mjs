@@ -338,10 +338,19 @@ Object.assign(out, {
 
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
-  editor: ["Journal Editor", "The window that opens when you edit a page — its frame, its title bar, and the row of editing controls. What you write on is the page's own surface, set on the Page tab"],
+  editor: ["Journal Editor", "The window that opens when you edit a page \u2014 its frame and its title bar. What you write on is the page's own surface, set on the Page tab, and the rows of controls are the parts this holds."],
+  editorSettingsBar: ["Page Settings Bar", "The strip above the editing controls: the page's name, its level, and whether its title is shown."],
+  editorDropdowns: ["Drop-downs", "The Format and Illuminus menus in the editing bar, and the list each one opens."],
+  editorToolbar: ["Toolbar", "The row of editing controls itself, and the icon buttons along it."],
   page: ["Page", "The paper the text sits on: its color, any background image, and the frame around it."],
   window: ["Window", "The journal window itself: its frame, the title bar across the top, and the icon buttons."],
-  sidebar: ["Sidebar", "The contents panel down the left of the journal window: page list, search box, and buttons."],
+  sidebar: ["Sidebar", "The contents panel down the left of the journal window \u2014 the panel itself. What it lists is styled by the parts it holds."],
+  sidebarEntries: ["Page Entries", "A page listed in the contents panel, and how it looks while pointed at or being read."],
+  sidebarHeadings: ["Sub-headings", "The headings listed under a page in the contents panel, and how deep each tier is indented."],
+  sidebarCategories: ["Category Rows", "The folder rows that group pages in the contents panel."],
+  sidebarSearch: ["Search Box", "The box at the top of the contents panel that narrows the list."],
+  sidebarButtons: ["Panel Buttons", "The buttons along the contents panel \u2014 collapse, search mode, and the rest."],
+  sidebarNumbers: ["Page Numbers", "The number drawn beside each listed page."],
   title: ["Title", "The journal's name, shown across the top of the window."],
   heading1: ["Heading 1", "The largest headings — page titles and chapter openers."],
   heading2: ["Heading 2", "Mid-level headings that break a page into sections."],

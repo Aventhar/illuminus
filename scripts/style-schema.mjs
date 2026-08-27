@@ -3123,6 +3123,74 @@ for (const [key, layout] of Object.entries(LAYOUTS)) {
   }
 }
 
+/* -------------------------------------------- */
+/*  Tabs that hold parts of their own            */
+/* -------------------------------------------- */
+
+/**
+ * Categories lifted out of the tab that held them, into parts of their own.
+ *
+ * The contents panel and the page editor are the two largest things a style can
+ * say anything about — seven hundred and nine hundred settings apiece — and
+ * both were one tab. A reader looking for the search box's fill had one entry
+ * in the tree standing for all of it.
+ *
+ * They are split the way the page is: the thing itself keeps what is true of
+ * the whole of it (its fill, its edges, the room inside it), and each piece it
+ * holds becomes a part with its own entry, its own count and its own hovered
+ * state. Every setting keeps the name it had — only the tab it belongs to
+ * changes — so a migration is a table of which category went where.
+ *
+ * Run after the layout pass, because that is what settles which category holds
+ * what.
+ */
+export const SPLIT = {
+  sidebar: [
+    { id: "sidebarEntries", icon: "fa-solid fa-file-lines", sections: ["entries"] },
+    { id: "sidebarHeadings", icon: "fa-solid fa-list-tree", sections: ["subHeadings"] },
+    { id: "sidebarCategories", icon: "fa-solid fa-folder", sections: ["category"] },
+    { id: "sidebarSearch", icon: "fa-solid fa-magnifying-glass", sections: ["search"] },
+    { id: "sidebarButtons", icon: "fa-solid fa-square-caret-down", sections: ["buttons"] },
+    { id: "sidebarNumbers", icon: "fa-solid fa-hashtag", sections: ["number"] }
+  ],
+  editor: [
+    { id: "editorSettingsBar", icon: "fa-solid fa-sliders", sections: ["settingsBar", "pageFields"] },
+    { id: "editorDropdowns", icon: "fa-solid fa-caret-down",
+      sections: ["dropdowns", "dropdownList", "dropdownItems"] },
+    { id: "editorToolbar", icon: "fa-solid fa-toolbox", sections: ["toolbar", "toolbarIcons"] }
+  ]
+};
+
+/** Which tab each moved category now belongs to, for the migration to read. */
+export const SPLIT_HOME = Object.fromEntries(
+  Object.entries(SPLIT).flatMap(([parentId, parts]) =>
+    parts.flatMap((part) => part.sections.map((sectionId) => [`${parentId}.${sectionId}`, part.id]))));
+
+for (const [parentId, parts] of Object.entries(SPLIT)) {
+  const parent = GROUPS.find((one) => one.id === parentId);
+  if (!parent) throw new Error(`nothing called "${parentId}" to split`);
+  const at = GROUPS.indexOf(parent);
+  const made = [];
+  for (const part of parts) {
+    const taken = part.sections.map((id) => {
+      const section = parent.sections.find((one) => one.id === id);
+      if (!section) throw new Error(`${parentId}: no category "${id}" to lift out`);
+      return section;
+    });
+    parent.sections = parent.sections.filter((one) => !taken.includes(one));
+    made.push({
+      id: part.id,
+      icon: part.icon,
+      // Where the tab it came from sits, since it is part of that thing.
+      strip: parent.strip,
+      order: taken.map((one) => one.id),
+      sections: taken
+    });
+  }
+  parent.order = parent.order?.filter((id) => parent.sections.some((one) => one.id === id));
+  GROUPS.splice(at + 1, 0, ...made);
+}
+
 /**
  * The tabs whose switch starts off, so their hovered state is on.
  *
@@ -3134,7 +3202,15 @@ for (const [key, layout] of Object.entries(LAYOUTS)) {
  * off would take away something the style already does. They are also the four
  * whose elements are pointed at on purpose rather than merely passed over.
  */
-const HOVER_ON = new Set(["window", "sidebar", "links", "secrets"]);
+const HOVER_ON = new Set([
+  "window", "links", "secrets",
+  // The contents panel and every part it holds: the entries, the buttons and
+  // the search box are where its hand-written hovered colors live, so leaving
+  // the parts out would switch off exactly what this list exists to protect.
+  "sidebar",
+  "sidebarEntries", "sidebarHeadings", "sidebarCategories",
+  "sidebarSearch", "sidebarButtons", "sidebarNumbers"
+]);
 
 /** Whether a control names a hovered state, in either spelling. */
 export function isHoveredField(name) {
@@ -3161,7 +3237,7 @@ export function ordinaryNameFor(name) {
  * when pointed at in the next, because the pointed-at entry and the current
  * page belong together. Everything else pairs inside its own section.
  */
-const HOVER_TWIN_ELSEWHERE = new Map([["sidebar.hoverColor", "color"]]);
+const HOVER_TWIN_ELSEWHERE = new Map([["sidebarEntries.hoverColor", "color"]]);
 
 /**
  * The field a hovered control falls back to when its tab's hovered state is
@@ -3315,7 +3391,7 @@ for (const group of GROUPS) {
   if (group.order) group.order = group.order.filter((id) => id !== "corners");
 }
 
-const SELECTED_SECTIONS = new Set(["sidebar.entries", "sidebar.subHeadings"]);
+const SELECTED_SECTIONS = new Set(["sidebarEntries.entries", "sidebarHeadings.subHeadings"]);
 
 for (const group of GROUPS) {
   for (const section of group.sections) {
