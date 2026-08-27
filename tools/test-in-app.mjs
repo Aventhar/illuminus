@@ -6038,7 +6038,7 @@ try {
     `with the surface's picture and both its shadows in one category (${pageFill.length} rows)`);
   const headingNames = t.heading.map((s) => s.name);
   check(JSON.stringify(headingNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Spacing", "Border", "Columns", "Folding"]),
+    ["Size and Position", "Text", "Fill and Image", "Spacing", "Border", "Columns", "Folding"]),
     `a heading level reads the same way (${headingNames.join(" > ")})`);
   const headingText = t.heading.find((s) => s.name === "Text").rows;
   check(headingText.filter((row) => row === "---").length === 3
@@ -6083,7 +6083,7 @@ try {
     `Boxes reads the same way (${boxNames.join(" > ")})`);
   const secretNames = t.secrets.map((s) => s.name);
   check(JSON.stringify(secretNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Spacing", "Border", "Once Revealed",
+    ["Size and Position", "Text", "Fill and Image", "Spacing", "Border", "Once Revealed",
      "Reveal Button"]),
     `and Secrets ends with what reveals it (${secretNames.join(" > ")})`);
   const button = t.secrets.find((s) => s.name === "Reveal Button").rows;
@@ -6765,6 +6765,63 @@ try {
   check(laid.plainDisplay === "block" && laid.plainMax === "none",
     `while a block that says nothing is laid out as Foundry lays it out `
     + `(${laid.plainDisplay}, ${laid.plainMax})`);
+
+  // The page's own parts take the same vocabulary — a list becomes a run of
+  // chips, a heading a name with something beside it — and each falls back to
+  // what it was rather than to nothing.
+  const parts = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Layout Probe", settings: {
+      lists: {display: "flex", flexWrap: "wrap", gap: 12},
+      heading2: {display: "flex", justify: "between", alignItems: "center"},
+      tables: {maxWidth: 380},
+      secrets: {display: "flex", gap: 9}
+    }});
+    const entry = await JournalEntry.create({name: "Layout Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<h2>A heading</h2><ul><li>One</li><li>Two</li></ul>" +
+      "<table><tbody><tr><td>Cell</td></tr></tbody></table>" +
+      '<section class="secret" id="secret-laid"><p>Hidden.</p></section>' +
+      "<p>Plain words.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const at = (sel) => getComputedStyle(root.querySelector(sel));
+    const items = [...root.querySelectorAll(".journal-page-content li")];
+    const out = {
+      list: at(".journal-page-content ul").display,
+      listWrap: at(".journal-page-content ul").flexWrap,
+      // Two items beside one another is what a row means.
+      itemsInARow: items.length > 1
+        && items[1].getBoundingClientRect().left >= items[0].getBoundingClientRect().right,
+      heading: at(".journal-page-content h2").display,
+      // A table still lays out as a table, and a paragraph as a block: neither
+      // was given a layout, and neither may be wiped by one.
+      table: at(".journal-page-content table").display,
+      tableMax: at(".journal-page-content table").maxWidth,
+      secret: at(".journal-page-content section.secret").display,
+      paragraph: at(".journal-page-content p").display
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(parts.list === "flex" && parts.listWrap === "wrap" && parts.itemsInARow,
+    `a list can be a run of its items rather than a column (${parts.list}, ${parts.listWrap}, `
+    + `${parts.itemsInARow ? "in a row" : "still stacked"})`);
+  check(parts.heading === "flex" && parts.secret === "flex",
+    `a heading and a secret passage take it too (${parts.heading}, ${parts.secret})`);
+  check(parts.table === "table" && parts.tableMax === "380px",
+    `a table keeps being a table while taking a width (${parts.table}, ${parts.tableMax})`);
+  check(parts.paragraph === "block",
+    `and a part nobody laid out is laid out as it was (${parts.paragraph})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -6773,6 +6830,182 @@ try {
     }
     for (const entry of game.journal.filter((e) => e.name === "Layout Journal")) await entry.delete();
     for (const style of api.listStyles().filter((s) => s.name === "Layout Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// A fill can graduate from one colour to another. A colour goes in
+// `background-color` and a gradient cannot — it is an image — so it goes on the
+// element's own `background-image`, which is free because a background picture
+// rides on a layer of its own. Both ends start clear, so a fill nobody has
+// graduated is the flat fill it always was.
+console.log("\n[71] A fill can graduate");
+try {
+  const grad = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Gradient Probe", settings: {
+      box01: {background: "#00000000", gradientFrom: "#7a2010", gradientTo: "#2b1d12",
+              gradientAngle: 90},
+      // A block that says nothing about it, and a picture behind which one is
+      // laid: the first must stay flat, the second must show it.
+      box02: {background: "#402010"}
+    }});
+    const entry = await JournalEntry.create({name: "Gradient Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<blockquote class="illuminus-box illuminus-box--box01"><p>Graduated.</p></blockquote>' +
+      '<blockquote class="illuminus-box illuminus-box--box02"><p>Flat.</p></blockquote>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const one = getComputedStyle(root.querySelector("blockquote.illuminus-box--box01"));
+    const two = getComputedStyle(root.querySelector("blockquote.illuminus-box--box02"));
+    const out = {
+      image: one.backgroundImage,
+      fill: one.backgroundColor,
+      // A fill nobody graduated: both ends clear, which paints nothing at all.
+      plainImage: two.backgroundImage,
+      plainFill: two.backgroundColor
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(/linear-gradient/.test(grad.image) && /122, 32, 16/.test(grad.image)
+    && /43, 29, 18/.test(grad.image),
+    `a fill graduates from one colour to the other (${grad.image.slice(0, 78)})`);
+  check(/90deg/.test(grad.image),
+    `in the direction it was given (${(grad.image.match(/[0-9]+deg/) ?? ["none"])[0]})`);
+  // Both ends clear is a gradient from nothing to nothing, which is the flat
+  // fill it always was — the whole reason this could be offered on every fill.
+  check(/rgba\(0, 0, 0, 0\)/.test(grad.plainImage) || grad.plainImage === "none",
+    `while a fill nobody graduated paints nothing over its colour (${grad.plainImage.slice(0, 60)})`);
+  check(grad.plainFill === "rgb(64, 32, 16)",
+    `and keeps the flat colour it was given (${grad.plainFill})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Gradient Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Gradient Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// What is done to a picture before it is laid down. Every part of the filter
+// carries its own fallback, because one unset part makes the whole declaration
+// invalid — and a picture somebody had blurred would then not be blurred at all.
+console.log("\n[72] A picture can be worked before it is laid down");
+try {
+  const worked = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Filter Probe", settings: {
+      box01: {texture: "icons/svg/book.svg", textureBlur: 6, textureSaturation: 0,
+              textureBrightness: 60},
+      // One that says nothing about it: its picture is laid down as it is.
+      box02: {texture: "icons/svg/book.svg"}
+    }});
+    const entry = await JournalEntry.create({name: "Filter Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<blockquote class="illuminus-box illuminus-box--box01"><p>Worked.</p></blockquote>' +
+      '<blockquote class="illuminus-box illuminus-box--box02"><p>Plain.</p></blockquote>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const layer = (sel) => getComputedStyle(root.querySelector(sel), "::after").filter;
+    const out = {
+      worked: layer("blockquote.illuminus-box--box01"),
+      plain: layer("blockquote.illuminus-box--box02")
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(/blur\(6px\)/.test(worked.worked) && /saturate\(0%?\)/.test(worked.worked),
+    `a picture can be softened and drained of its colour (${worked.worked.slice(0, 70)})`);
+  check(/brightness\(0?\.6\)|brightness\(60%\)/.test(worked.worked),
+    `and darkened, which is how a texture is made to hold ink`);
+  // Every part at its own default is a filter that does nothing, which is what
+  // lets this be offered on every picture.
+  check(/blur\(0px\)/.test(worked.plain) && /saturate\(1\)|saturate\(100%\)/.test(worked.plain),
+    `while a picture nobody worked is laid down as it is (${worked.plain.slice(0, 70)})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Filter Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Filter Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+// A tag long enough to break across two lines is one box in two halves, and a
+// browser draws its edges only at the outer ends — so the tag's middle has no
+// edge and the halves do not read as one thing.
+console.log("\n[73] A tag can keep its edges when it breaks");
+try {
+  const wrapped = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Wrap Probe", settings: {
+      tag01: {wrapEdges: true, borderTopWidth: 2, borderTopStyle: "solid", borderTopColor: "#c9a961"},
+      tag02: {borderTopWidth: 2, borderTopStyle: "solid", borderTopColor: "#c9a961"}
+    }});
+    const entry = await JournalEntry.create({name: "Wrap Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<p><span class="illuminus-tag illuminus-tag--tag01">A tag with enough words in it to break</span></p>' +
+      '<p><span class="illuminus-tag illuminus-tag--tag02">Another tag</span></p>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const out = {
+      asked: getComputedStyle(root.querySelector(".illuminus-tag--tag01")).boxDecorationBreak,
+      plain: getComputedStyle(root.querySelector(".illuminus-tag--tag02")).boxDecorationBreak
+    };
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(wrapped.asked === "clone",
+    `a tag asked to keep its edges draws both halves whole (${wrapped.asked})`);
+  // The fallback is what a browser does anyway, so a tag nobody asked about is
+  // sliced as it always was.
+  check(wrapped.plain === "slice",
+    `while one nobody asked about breaks as it always did (${wrapped.plain})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Wrap Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Wrap Probe")) {
       await api.deleteStyle(style.id);
     }
   })()`);

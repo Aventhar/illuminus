@@ -70,7 +70,19 @@ const layout = (group, fallback = "block") => `${displayed(group, fallback)}
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};`;
 
+/**
+ * A fill that graduates from one colour to another.
+ *
+ * A colour goes in `background-color` and a gradient cannot — it is an image —
+ * so it goes on the element's own `background-image`, which is free: a
+ * background *picture* rides on a layer of its own. Both ends start
+ * transparent, so a fill nobody has graduated is the fill alone.
+ */
+const graduated = (group) => `  background-image: linear-gradient(${v(group, "gradientAngle")},
+    ${v(group, "gradientFrom")}, ${v(group, "gradientTo")});`;
+
 const box = (group) => `  background-color: ${v(group, "background")};
+${graduated(group)}
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
   border-width: ${sides(group, "border", "Width")};
@@ -150,6 +162,7 @@ ${displayed(group, "block")}
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
+${graduated(group)}
   margin-top: ${v(group, "marginTop")};
   margin-bottom: ${v(group, "marginBottom")};
   /* Horizontal placement comes from the alignment control, as auto margins. */
@@ -211,6 +224,11 @@ ${memberSelector(group)} {
   vertical-align: ${v(group, "verticalAlign")};
   bottom: ${v(group, "lift")};
   min-width: ${v(group, "minWidth")};
+  /* Whether both halves of a tag broken across two lines are drawn whole. The
+     fallback is what a browser does anyway, so a tag nobody has asked about is
+     sliced as it always was. */
+  -webkit-box-decoration-break: ${v(group, "wrapEdges").replace(/\)$/, ", slice)")};
+  box-decoration-break: ${v(group, "wrapEdges").replace(/\)$/, ", slice)")};
 ${displayed(group, "inline-block")}
   flex-direction: ${v(group, "flexDirection")};
   flex-wrap: ${v(group, "flexWrap")};
@@ -222,6 +240,7 @@ ${displayed(group, "inline-block")}
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};
   background-color: ${v(group, "background")};
+${graduated(group)}
   padding: ${sides(group, "padding")};
   margin: ${sides(group, "margin")};
   border-width: ${sides(group, "border", "Width")};
@@ -252,6 +271,11 @@ ${memberSelector(group, "::before")} {
   background-position: ${v(group, "texturePosition")};
   mix-blend-mode: ${v(group, "textureBlend")};
   opacity: ${v(group, "textureOpacity")};
+  filter: blur(${v(group, "textureBlur").replace(/\)$/, ", 0px)")})
+          brightness(${v(group, "textureBrightness").replace(/\)$/, ", 100%)")})
+          contrast(${v(group, "textureContrast").replace(/\)$/, ", 100%)")})
+          saturate(${v(group, "textureSaturation").replace(/\)$/, ", 100%)")})
+          sepia(${v(group, "textureAge").replace(/\)$/, ", 0%)")});
 }
 `;
 
@@ -299,6 +323,7 @@ const headingSelector = (level) => {
 const headingRules = (group, level) => `
 /* ${group.id} */
 ${headingSelector(level)} {
+${layout(group, "block")}
   font-family: ${v(group, "font")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
   paint-order: stroke fill;
@@ -321,6 +346,7 @@ ${headingSelector(level)} {
   text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
                ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   background-color: ${v(group, "background")};
+${graduated(group)}
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
   border-width: ${sides(group, "border", "Width")};
@@ -562,6 +588,14 @@ ${eachAfter(layer.selector)} {
   background-position: ${imageVar(layer, "Position")};
   mix-blend-mode: ${imageVar(layer, "Blend")};
   opacity: ${imageVar(layer, "Opacity")};
+  /* What is done to the picture before it is laid down. Every part carries its
+     own fallback: one unset part makes the whole declaration invalid, and a
+     picture somebody had blurred would then not be blurred at all. */
+  filter: blur(${imageVar(layer, "Blur").replace(/\)$/, ", 0px)")})
+          brightness(${imageVar(layer, "Brightness").replace(/\)$/, ", 100%)")})
+          contrast(${imageVar(layer, "Contrast").replace(/\)$/, ", 100%)")})
+          saturate(${imageVar(layer, "Saturation").replace(/\)$/, ", 100%)")})
+          sepia(${imageVar(layer, "Age").replace(/\)$/, ", 0%)")});
 }
 `;
 

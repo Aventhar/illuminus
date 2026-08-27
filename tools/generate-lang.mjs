@@ -556,6 +556,11 @@ const unmatched = [];
  */
 const IMAGE_QUALIFIER = () => "";
 const IMAGE_TEXT = {
+  Blur: ["Image Softness", "How far the picture is blurred before it is laid down. A scan softened this way reads as a wash behind the words rather than as a picture under them."],
+  Brightness: ["Image Brightness", "How light or dark the picture is made before it is laid down. Under 100 darkens it, which is how a texture is made to hold ink."],
+  Contrast: ["Image Contrast", "How strongly the picture's lights and darks are separated."],
+  Saturation: ["Image Colour", "How much colour the picture keeps. 0 leaves it grey, which is often what lets it sit under lettering."],
+  Age: ["Image Age", "How far the picture is browned, as an old photograph is. 0 leaves its own colours."],
   "": ["Background Image", "An image laid over the fill color, such as a parchment scan. Leave empty for none."],
   Fit: ["Image Fit", "How the background image covers the area."],
   Position: ["Image Position", "Where the background image is anchored."],
@@ -620,7 +625,8 @@ for (const name of names) {
   }
   // background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity).
   // Only prefixed ones — the Page tab's own set is worded by hand.
-  if ((m = name.match(/^(.+?)Texture(Fit|Position|Blend|Opacity)?$/))) {
+  if ((m = name.match(
+    /^(.+?)Texture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/))) {
     const [, prefix, part] = m;
     const [label, hint] = IMAGE_TEXT[part ?? ""];
     put(`ILLUMINUS.Field.${name}.label`, label + IMAGE_QUALIFIER(prefix));
@@ -767,6 +773,10 @@ const FIELD_TEXT = {
   pageButtonAnchor: ["Measured From", "What the two distances are measured from. The page clips whatever scrolls inside it, so a pencil pushed above the page's own top is not drawn there — measured from the window it sits beside the journal's name instead, which needs one page on show rather than a journal read as one long scroll."],
   pageButtonTop: ["Distance From Top", "How far below the top of the page the Edit button sits."],
   pageButtonHoldTop: ["Hold At The Top", "The button stays at the top of the page instead of holding its place on screen as the page scrolls under it, which is what puts Foundry's across a heading half way down."],
+  wrapEdges: ["Edges On Both Lines", "A tag long enough to break across two lines is one box in two halves, and a browser draws its edges only at the outer ends. Turn this on to draw both halves whole."],
+  gradientFrom: ["Graduated From", "A fill that graduates rather than being one flat colour. This is the colour it starts at; leave both ends clear for a flat fill."],
+  gradientTo: ["Graduated To", "The colour the fill graduates to."],
+  gradientAngle: ["Graduated Direction", "Which way the fill graduates. 180 runs top to bottom, 90 runs left to right."],
   display: ["Layout", "How this is laid out: a block of its own, part of a line of text, or a row that shares its room out between what is inside it."],
   flexDirection: ["Row Direction", "Which way a row runs, and whether it runs backwards."],
   flexWrap: ["Row Wrapping", "Whether what is inside a row moves onto another line when it runs out of room."],
@@ -788,6 +798,11 @@ const FIELD_TEXT = {
   foldGap: ["Marker Gap", "Space between the marker and the words beside it."],
   foldTurn: ["Marker Turn", "How far the marker turns when what it holds is open. 90 points a sideways arrow downwards."],
   hoverOff: ["Disable Hovered State", "Nothing on this tab changes when the mouse is over it. Turn this off to set how it looks when pointed at."],
+  textureBlur: ["Image Softness", "How far the picture is blurred before it is laid down. A scan softened this way reads as a wash behind the words rather than as a picture under them."],
+  textureBrightness: ["Image Brightness", "How light or dark the picture is made before it is laid down. Under 100 darkens it, which is how a texture is made to hold ink."],
+  textureContrast: ["Image Contrast", "How strongly the picture's lights and darks are separated."],
+  textureSaturation: ["Image Colour", "How much colour the picture keeps. 0 leaves it grey, which is often what lets it sit under lettering."],
+  textureAge: ["Image Age", "How far the picture is browned, as an old photograph is. 0 leaves its own colours."],
   outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
   outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
   hoverColor: ["Text Color", "Text color while the mouse is over this. Leave empty to keep the ordinary color."],

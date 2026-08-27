@@ -158,6 +158,31 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false 
   return fields;
 }
 
+/**
+ * A fill that graduates from one colour to another.
+ *
+ * A colour goes in `background-color`, and a gradient cannot: it is an image.
+ * The element's own `background-image` is free for it, because a background
+ * *picture* rides on a layer of its own — which is what keeps a picture's
+ * strength and blend mode independent of the lettering in front of it — so the
+ * two never fight.
+ *
+ * Both ends start transparent, which is a gradient from nothing to nothing:
+ * invisible until somebody sets a colour, and no different from the fill alone.
+ * That is what lets this be offered on every fill without changing any style
+ * that says nothing about it.
+ */
+function gradientFields(prefix = "") {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    col(n("GradientFrom"), "#00000000"),
+    col(n("GradientTo"), "#00000000"),
+    // Shown as a degree sign and written as `deg`: a gradient given "90°" is a
+    // gradient a browser throws away, and the fill then paints nothing at all.
+    num(n("GradientAngle"), 180, "°", 0, 360, 5, { emit: (value) => `${value}deg` })
+  ];
+}
+
 /** Capitalization needs both text-transform and font-variant. */
 const emitCaps = (value) => ({
   inherit: { transform: "inherit", variant: "inherit" },
@@ -497,7 +522,7 @@ function boxSections() {
         col("headingRuleColor", "#8a6a3d")
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 10) },
     { id: "margin", fields: spacingFields("margin", { top: 12, right: 0, bottom: 12, left: 0 }, { min: -100 }) },
     { id: "border", fields: borderFields("border", { color: "#8a6a3d" }) },
@@ -518,7 +543,16 @@ function imageFields(prefix = "") {
     select(n("TextureFit"), "cover", CHOICES.textureFit, { emit: emitTextureFit }),
     select(n("TexturePosition"), "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
     select(n("TextureBlend"), "normal", CHOICES.blend, { emit: emitKeyword }),
-    num(n("TextureOpacity"), 100, "%", 0, 100, 1)
+    num(n("TextureOpacity"), 100, "%", 0, 100, 1),
+    // What is done to the picture itself before it is laid down: a scan softened
+    // until it reads as a wash, a photograph drained of its colour until it sits
+    // under lettering, a texture darkened to hold ink. Each of these does
+    // nothing at its default, so a picture nobody has touched is the picture.
+    num(n("TextureBlur"), 0, "px", 0, 40, 0.5),
+    num(n("TextureBrightness"), 100, "%", 0, 300, 5),
+    num(n("TextureContrast"), 100, "%", 0, 300, 5),
+    num(n("TextureSaturation"), 100, "%", 0, 300, 5),
+    num(n("TextureAge"), 0, "%", 0, 100, 5)
   ];
 }
 
@@ -549,6 +583,11 @@ function tagSections() {
         select("verticalAlign", "baseline", CHOICES.inlineAlign),
         num("lift", 0, "px", -30, 30, 1),
         num("minWidth", 0, "px", 0, 400, 1, { zeroAs: "auto" }),
+        // A tag long enough to break across two lines is one box sliced in two,
+        // and a browser paints its edges only at the outer ends — so the middle
+        // of the tag has no edge and the halves do not read as one thing.
+        // Turned on, both halves are drawn whole.
+        { type: "toggle", name: "wrapEdges", default: false, on: "clone", off: "slice" },
         // A tag is laid out `inline-block` by the skeleton so its padding grows
         // its own box; these say what it does with the room that gives it.
         ...layoutFields("", { position: false })
@@ -566,7 +605,7 @@ function tagSections() {
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" })
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", { top: 2, right: 8, bottom: 2, left: 8 }, { max: 80 }) },
     { id: "margin", fields: spacingFields("margin", { top: 0, right: 4, bottom: 0, left: 0 }, { min: -60, max: 80 }) },
     { id: "border", fields: borderFields("border") },
@@ -594,7 +633,7 @@ function imageSections() {
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
-    { id: "background", fields: [col("background", "#00000000"), ...imageFields()] },
+    { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields()] },
     { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
     {
       id: "margin",
@@ -667,10 +706,20 @@ function outlineFields(prefix = "") {
  * shadow are one question, the fill and its picture and both its shadows are
  * another, and the edges keep their corners.
  */
-const HEADING_ORDER = ["text", "background", "padding", "margin", "border", "columns", "fold"];
+const HEADING_ORDER = ["layout", "text", "background", "padding", "margin", "border",
+  "columns", "fold"];
 
 function bannerSections(defaults = {}) {
   return [
+    {
+      // A heading is a thing a page has many of, so it may be laid out as a row
+      // — a name with a rule running off it, a number beside a title — given a
+      // measure of its own, or left out of a style's pages entirely.
+      id: "layout",
+      order: ["display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+        DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+      fields: layoutFields()
+    },
     {
       id: "text",
       // An outline is drawn *behind* the letterform rather than centred on its
@@ -690,13 +739,14 @@ function bannerSections(defaults = {}) {
       label: "ILLUMINUS.Sections.fillAndImage.label",
       hint: "ILLUMINUS.Sections.fillAndImage.hint",
       order: [
-        "background",
-        DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+        "background", "gradientFrom", "gradientTo", "gradientAngle",
+        DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
         DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
         "innerShadowSpread", "innerShadowColor",
         DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
       ],
-      fields: [col("background", defaults.background ?? "#00000000"), ...imageFields()]
+      fields: [col("background", defaults.background ?? "#00000000"),
+        ...gradientFields(), ...imageFields()]
     },
     {
       id: "padding",
@@ -762,7 +812,7 @@ export const GROUPS = [
       {
         id: "background",
         fields: [
-          col("background", "#00000000"), ...imageFields()
+          col("background", "#00000000"), ...gradientFields(), ...imageFields()
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
@@ -915,7 +965,7 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...imageFields(),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -1037,8 +1087,8 @@ export const GROUPS = [
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
@@ -1077,7 +1127,15 @@ export const GROUPS = [
     // corners are one question about what is drawn around it.
     order: ["layout", "background", "padding", "border"],
     sections: [
-      { id: "layout", fields: [num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" })] },
+      { id: "layout",
+        order: ["maxWidth", DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+          DIVIDER, "minWidth", "minHeight", "maxHeight", "overflow"],
+        fields: [
+          num("maxWidth", 0, "px", 0, 2000, 10, { zeroAs: "none" }),
+          // The page's own max width is stated above and kept, so the shared
+          // one is left out here rather than offered twice.
+          ...layoutFields("", { hide: false }).filter((field) => field.name !== "maxWidth")
+        ] },
       {
         id: "background",
         label: "ILLUMINUS.Sections.fillAndImage.label",
@@ -1085,8 +1143,8 @@ export const GROUPS = [
         // own: Foundry's window clips it, and only an export ever shows it.
         hint: "ILLUMINUS.Sections.pageFillAndImage.hint",
         order: [
-          "background",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
@@ -1098,6 +1156,15 @@ export const GROUPS = [
           select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
           select("textureBlend", "normal", CHOICES.blend, { emit: emitKeyword }),
           num("textureOpacity", 100, "%", 0, 100, 1),
+          // The page states its picture by hand rather than through the shared
+          // builder, because its defaults are Foundry's own — so the rest of
+          // what a picture can be given is stated here as well.
+          num("textureBlur", 0, "px", 0, 40, 0.5),
+          num("textureBrightness", 100, "%", 0, 300, 5),
+          num("textureContrast", 100, "%", 0, 300, 5),
+          num("textureSaturation", 100, "%", 0, 300, 5),
+          num("textureAge", 0, "%", 0, 100, 5),
+          ...gradientFields(),
           ...shadowFields("shadow"),
           ...shadowFields("innerShadow")
         ]
@@ -1254,7 +1321,7 @@ export const GROUPS = [
           "codeFont", "codeSize", "codeColor", "codeBorderColor",
           DIVIDER, "codeBackground",
           DIVIDER, "codeTexture", "codeTextureFit", "codeTexturePosition",
-          "codeTextureBlend", "codeTextureOpacity",
+          "codeTextureBlend", "codeTextureOpacity", "codeTextureBlur", "codeTextureBrightness", "codeTextureContrast", "codeTextureSaturation", "codeTextureAge",
           DIVIDER, "codeInnerShadowOffsetX", "codeInnerShadowOffsetY", "codeInnerShadowBlur",
           "codeInnerShadowSpread", "codeInnerShadowColor",
           DIVIDER, "codeShadowOffsetX", "codeShadowOffsetY", "codeShadowBlur",
@@ -1375,8 +1442,8 @@ export const GROUPS = [
       {
         id: "chip",
         order: [
-          "background",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
@@ -1451,9 +1518,14 @@ export const GROUPS = [
       },
       {
         id: "layout",
+        order: ["indent", "itemSpacing", DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+          DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
         fields: [
           num("indent", 24, "px", 0, 200, 2),
-          num("itemSpacing", 4, "px", 0, 60, 1)
+          num("itemSpacing", 4, "px", 0, 60, 1),
+          // A list laid out as a row makes its items a run rather than a
+          // column, which is how a line of trait chips is built.
+          ...layoutFields("", { hide: false })
         ]
       }
     ]
@@ -1468,7 +1540,12 @@ export const GROUPS = [
     sections: [
       // How wide the table is drawn, which is a question about the table rather
       // than about its lettering.
-      { id: "layout", order: ["width"], fields: [num("width", 100, "%", 10, 100, 1)] },
+      { id: "layout",
+        order: ["width", DIVIDER, "display", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+        fields: [
+          num("width", 100, "%", 10, 100, 1),
+          ...layoutFields("", { flex: false, hide: false })
+        ] },
       {
         id: "text",
         order: [
@@ -1512,7 +1589,7 @@ export const GROUPS = [
           DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
           "headerTextShadowBlur", "headerTextShadowColor",
           DIVIDER, "headerTexture", "headerTextureFit", "headerTexturePosition",
-          "headerTextureBlend", "headerTextureOpacity",
+          "headerTextureBlend", "headerTextureOpacity", "headerTextureBlur", "headerTextureBrightness", "headerTextureContrast", "headerTextureSaturation", "headerTextureAge",
           DIVIDER, "headerInnerShadowOffsetX", "headerInnerShadowOffsetY", "headerInnerShadowBlur",
           "headerInnerShadowSpread", "headerInnerShadowColor",
           DIVIDER, "headerShadowOffsetX", "headerShadowOffsetY", "headerShadowBlur",
@@ -1594,13 +1671,14 @@ export const GROUPS = [
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
-        fields: [col("background", "#00000000"), ...imageFields(), ...shadowFields("shadow")]
+        fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields(),
+          ...shadowFields("shadow")]
       },
       {
         id: "padding",
@@ -1637,7 +1715,7 @@ export const GROUPS = [
           DIVIDER, "summaryTextShadowOffsetX", "summaryTextShadowOffsetY",
           "summaryTextShadowBlur", "summaryTextShadowColor",
           DIVIDER, "summaryTexture", "summaryTextureFit", "summaryTexturePosition",
-          "summaryTextureBlend", "summaryTextureOpacity",
+          "summaryTextureBlend", "summaryTextureOpacity", "summaryTextureBlur", "summaryTextureBrightness", "summaryTextureContrast", "summaryTextureSaturation", "summaryTextureAge",
           DIVIDER, "summaryInnerShadowOffsetX", "summaryInnerShadowOffsetY", "summaryInnerShadowBlur",
           "summaryInnerShadowSpread", "summaryInnerShadowColor",
           DIVIDER, "summaryShadowOffsetX", "summaryShadowOffsetY", "summaryShadowBlur",
@@ -1671,15 +1749,23 @@ export const GROUPS = [
     icon: "fa-solid fa-user-secret",
     // Laid out by hand: the words, the surface, the room around it, the edges,
     // then what it looks like once revealed and the button that reveals it.
-    order: ["text", "background", "padding", "margin", "border", "revealed", "revealButton"],
+    order: ["layout", "text", "background", "padding", "margin", "border", "revealed",
+      "revealButton"],
     sections: [
+      {
+        // Hiding one is what the Reveal button is for, so it is not offered
+        // here: a passage nobody can see is a passage nobody can reveal.
+        id: "layout",
+        order: ["display", "flexDirection", "flexWrap", "justify", "alignItems", "gap", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+        fields: layoutFields("", { hide: false })
+      },
       {
         id: "background",
         label: "ILLUMINUS.Sections.fillAndImage.label",
         hint: "ILLUMINUS.Sections.fillAndImage.hint",
         order: [
-          "background",
-          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+          "background", "gradientFrom", "gradientTo", "gradientAngle",
+          DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
           DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
@@ -1691,7 +1777,7 @@ export const GROUPS = [
         order: [
           "revealedBackground",
           DIVIDER, "revealedTexture", "revealedTextureFit", "revealedTexturePosition",
-          "revealedTextureBlend", "revealedTextureOpacity",
+          "revealedTextureBlend", "revealedTextureOpacity", "revealedTextureBlur", "revealedTextureBrightness", "revealedTextureContrast", "revealedTextureSaturation", "revealedTextureAge",
           DIVIDER, "revealedInnerShadowOffsetX", "revealedInnerShadowOffsetY",
           "revealedInnerShadowBlur", "revealedInnerShadowSpread", "revealedInnerShadowColor",
           DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
@@ -1753,7 +1839,7 @@ export const GROUPS = [
           DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
           "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape",
           DIVIDER, "buttonTexture", "buttonTextureFit", "buttonTexturePosition",
-          "buttonTextureBlend", "buttonTextureOpacity",
+          "buttonTextureBlend", "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge",
           DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY", "buttonInnerShadowBlur",
           "buttonInnerShadowSpread", "buttonInnerShadowColor",
           DIVIDER, "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur",
@@ -1790,7 +1876,7 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...imageFields(),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -1957,7 +2043,7 @@ export const GROUPS = [
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
-      { id: "background", fields: [col("background", "#00000000")] },
+      { id: "background", fields: [col("background", "#00000000"), ...gradientFields()] },
       { id: "border", fields: borderFields("border") },
       { id: "corners", fields: cornerFields("corner") },
       { id: "shadow", fields: shadowFields("shadow") },
@@ -2045,7 +2131,7 @@ export const GROUPS = [
  */
 const HOVERABLE = [
   "color",
-  "background",
+  "background", "gradientFrom", "gradientTo", "gradientAngle",
   // A shadow is paint, like the outline beside it: it lifts the letter off what
   // is behind it and moves nothing. Sharing one between the states meant a
   // shadow set for the ordinary look was the shadow you got when pointed at.
@@ -2214,7 +2300,7 @@ const LAYOUTS = {
   images: {
     order: ["layout", "padding", "margin", "border", "caption", "media"],
     layout: { order: [
-      "opacity", "background", DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
+      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
       DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
       "maxWidth"
     ] },
@@ -2249,7 +2335,7 @@ const LAYOUTS = {
     ] },
   },
   boxStyles: {
-    order: ["layout", "text", "background", "padding", "margin", "border", "blockHeadings"],
+    order: ["layout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border", "blockHeadings"],
     layout: { order: [
       "float", "width", "clear", "whenEmpty",
       DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
@@ -2261,8 +2347,8 @@ const LAYOUTS = {
       "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
-      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
     ] },
@@ -2288,9 +2374,9 @@ const LAYOUTS = {
     ] },
   },
   tagStyles: {
-    order: ["tagLayout", "text", "background", "padding", "margin", "border"],
+    order: ["tagLayout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border"],
     tagLayout: { order: [
-      "verticalAlign", "float", "minWidth", "lift",
+      "verticalAlign", "float", "minWidth", "lift", "wrapEdges",
       DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
       DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow"
     ] },
@@ -2300,8 +2386,8 @@ const LAYOUTS = {
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
-      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
     ] },
@@ -2322,9 +2408,9 @@ const LAYOUTS = {
   imageStyles: {
     order: ["layout", "padding", "margin", "border", "caption"],
     layout: { order: [
-      "opacity", "background", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
+      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", "float", "width", "align", "clear", "flip",
-      "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity",
+      "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
       DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER,
       "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
       "innerShadowColor"
@@ -2349,14 +2435,14 @@ const LAYOUTS = {
     ] },
   },
   sidebar: {
-    order: ["layout", "background", "padding", "border", "category", "number", "entries",
+    order: ["layout", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "border", "category", "number", "entries",
       "subHeadings", "search", "buttons"],
     layout: { order: [
       "sidebarWidth"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
-      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
-      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor"
     ] },
@@ -2378,7 +2464,7 @@ const LAYOUTS = {
       "letterSpacing", "wordSpacing", "lineHeight", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "entryBackground", DIVIDER, "entryTexture", "entryTextureFit",
-      "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", DIVIDER,
+      "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", "entryTextureBlur", "entryTextureBrightness", "entryTextureContrast", "entryTextureSaturation", "entryTextureAge", DIVIDER,
       "entryInnerShadowOffsetX", "entryInnerShadowOffsetY", "entryInnerShadowBlur",
       "entryInnerShadowSpread", "entryInnerShadowColor", DIVIDER, "entryShadowOffsetX",
       "entryShadowOffsetY", "entryShadowBlur", "entryShadowSpread", "entryShadowColor",
@@ -2397,7 +2483,7 @@ const LAYOUTS = {
       "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
       "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
       "headingBackground", DIVIDER, "headingTexture", "headingTextureFit",
-      "headingTexturePosition", "headingTextureBlend", "headingTextureOpacity", DIVIDER,
+      "headingTexturePosition", "headingTextureBlend", "headingTextureOpacity", "headingTextureBlur", "headingTextureBrightness", "headingTextureContrast", "headingTextureSaturation", "headingTextureAge", DIVIDER,
       "headingInnerShadowOffsetX", "headingInnerShadowOffsetY", "headingInnerShadowBlur",
       "headingInnerShadowSpread", "headingInnerShadowColor", DIVIDER, "headingShadowOffsetX",
       "headingShadowOffsetY", "headingShadowBlur", "headingShadowSpread", "headingShadowColor",
@@ -2418,7 +2504,7 @@ const LAYOUTS = {
       DIVIDER, "categoryTextShadowOffsetX", "categoryTextShadowOffsetY",
       "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground",
       DIVIDER, "categoryTexture", "categoryTextureFit", "categoryTexturePosition",
-      "categoryTextureBlend", "categoryTextureOpacity", DIVIDER, "categoryInnerShadowOffsetX",
+      "categoryTextureBlend", "categoryTextureOpacity", "categoryTextureBlur", "categoryTextureBrightness", "categoryTextureContrast", "categoryTextureSaturation", "categoryTextureAge", DIVIDER, "categoryInnerShadowOffsetX",
       "categoryInnerShadowOffsetY", "categoryInnerShadowBlur", "categoryInnerShadowSpread",
       "categoryInnerShadowColor", DIVIDER, "categoryShadowOffsetX", "categoryShadowOffsetY",
       "categoryShadowBlur", "categoryShadowSpread", "categoryShadowColor", DIVIDER,
@@ -2435,7 +2521,7 @@ const LAYOUTS = {
     search: { order: [
       "searchSize", "searchPlaceholderColor", "searchColor", DIVIDER, "searchBackground",
       DIVIDER, "searchTexture", "searchTextureFit", "searchTexturePosition",
-      "searchTextureBlend", "searchTextureOpacity", DIVIDER, "searchInnerShadowOffsetX",
+      "searchTextureBlend", "searchTextureOpacity", "searchTextureBlur", "searchTextureBrightness", "searchTextureContrast", "searchTextureSaturation", "searchTextureAge", DIVIDER, "searchInnerShadowOffsetX",
       "searchInnerShadowOffsetY", "searchInnerShadowBlur", "searchInnerShadowSpread",
       "searchInnerShadowColor", DIVIDER, "searchShadowOffsetX", "searchShadowOffsetY",
       "searchShadowBlur", "searchShadowSpread", "searchShadowColor", DIVIDER,
@@ -2449,7 +2535,7 @@ const LAYOUTS = {
     buttons: { order: [
       "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", DIVIDER,
       "buttonTexture", "buttonTextureFit", "buttonTexturePosition", "buttonTextureBlend",
-      "buttonTextureOpacity", DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY",
+      "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge", DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY",
       "buttonInnerShadowBlur", "buttonInnerShadowSpread", "buttonInnerShadowColor", DIVIDER,
       "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur", "buttonShadowSpread",
       "buttonShadowColor", DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
@@ -2462,8 +2548,8 @@ const LAYOUTS = {
       "frameMinWidth", "frameMaxWidth"
     ] },
     frame: { order: [
-      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
-      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
       "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
@@ -2476,7 +2562,7 @@ const LAYOUTS = {
       "letterSpacing", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor", DIVIDER, "titleBarBackground",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
-      "titleBarTextureBlend", "titleBarTextureOpacity", DIVIDER, "titleBarInnerShadowOffsetX",
+      "titleBarTextureBlend", "titleBarTextureOpacity", "titleBarTextureBlur", "titleBarTextureBrightness", "titleBarTextureContrast", "titleBarTextureSaturation", "titleBarTextureAge", DIVIDER, "titleBarInnerShadowOffsetX",
       "titleBarInnerShadowOffsetY", "titleBarInnerShadowBlur", "titleBarInnerShadowSpread",
       "titleBarInnerShadowColor", DIVIDER, "titleBarShadowOffsetX", "titleBarShadowOffsetY",
       "titleBarShadowBlur", "titleBarShadowSpread", "titleBarShadowColor", DIVIDER,
@@ -2485,7 +2571,7 @@ const LAYOUTS = {
     headerButtons: { order: [
       "headerButtonSize", "headerButtonColor", DIVIDER, "headerButtonBackground", DIVIDER,
       "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
-      "headerButtonTextureBlend", "headerButtonTextureOpacity", DIVIDER,
+      "headerButtonTextureBlend", "headerButtonTextureOpacity", "headerButtonTextureBlur", "headerButtonTextureBrightness", "headerButtonTextureContrast", "headerButtonTextureSaturation", "headerButtonTextureAge", DIVIDER,
       "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
       "headerButtonInnerShadowBlur", "headerButtonInnerShadowSpread",
       "headerButtonInnerShadowColor", DIVIDER, "headerButtonShadowOffsetX",
@@ -2504,7 +2590,7 @@ const LAYOUTS = {
       "pageButtonAnchor", "pageButtonSide", "pageButtonOffset", "pageButtonTop", "pageButtonHoldTop",
       DIVIDER, "pageButtonSize", "pageButtonColor",
       "pageButtonBackground", DIVIDER, "pageButtonTexture", "pageButtonTextureFit",
-      "pageButtonTexturePosition", "pageButtonTextureBlend", "pageButtonTextureOpacity",
+      "pageButtonTexturePosition", "pageButtonTextureBlend", "pageButtonTextureOpacity", "pageButtonTextureBlur", "pageButtonTextureBrightness", "pageButtonTextureContrast", "pageButtonTextureSaturation", "pageButtonTextureAge",
       DIVIDER, "pageButtonInnerShadowOffsetX", "pageButtonInnerShadowOffsetY",
       "pageButtonInnerShadowBlur", "pageButtonInnerShadowSpread", "pageButtonInnerShadowColor",
       DIVIDER, "pageButtonShadowOffsetX", "pageButtonShadowOffsetY", "pageButtonShadowBlur",
@@ -2523,7 +2609,7 @@ const LAYOUTS = {
       "toolbar", "toolbarIcons", "dropdowns", "dropdownList", "dropdownItems"],
     dropdownList: { order: [
       "listBackground", DIVIDER, "listTexture", "listTextureFit", "listTexturePosition",
-      "listTextureBlend", "listTextureOpacity",
+      "listTextureBlend", "listTextureOpacity", "listTextureBlur", "listTextureBrightness", "listTextureContrast", "listTextureSaturation", "listTextureAge",
       DIVIDER, "listInnerShadowOffsetX", "listInnerShadowOffsetY", "listInnerShadowBlur",
       "listInnerShadowSpread", "listInnerShadowColor",
       DIVIDER, "listShadowOffsetX", "listShadowOffsetY", "listShadowBlur", "listShadowSpread",
@@ -2555,7 +2641,7 @@ const LAYOUTS = {
       DIVIDER, "settingsBarTextShadowOffsetX", "settingsBarTextShadowOffsetY",
       "settingsBarTextShadowBlur", "settingsBarTextShadowColor",
       DIVIDER, "settingsBarBackground", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
-      "settingsBarTexturePosition", "settingsBarTextureBlend", "settingsBarTextureOpacity",
+      "settingsBarTexturePosition", "settingsBarTextureBlend", "settingsBarTextureOpacity", "settingsBarTextureBlur", "settingsBarTextureBrightness", "settingsBarTextureContrast", "settingsBarTextureSaturation", "settingsBarTextureAge",
       DIVIDER, "settingsBarInnerShadowOffsetX", "settingsBarInnerShadowOffsetY",
       "settingsBarInnerShadowBlur", "settingsBarInnerShadowSpread", "settingsBarInnerShadowColor",
       DIVIDER, "settingsBarShadowOffsetX", "settingsBarShadowOffsetY", "settingsBarShadowBlur",
@@ -2577,8 +2663,8 @@ const LAYOUTS = {
       "frameMinWidth", "frameMaxWidth"
     ] },
     frame: { order: [
-      "background", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
-      "textureOpacity", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
+      "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge", DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
       "innerShadowSpread", "innerShadowColor", DIVIDER, "shadowOffsetX", "shadowOffsetY",
       "shadowBlur", "shadowSpread", "shadowColor", DIVIDER, "borderTopStyle", "borderTopColor",
       "borderTopWidth", DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
@@ -2591,7 +2677,7 @@ const LAYOUTS = {
       DIVIDER, "align", "caps", "letterSpacing", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
-      "titleBarTextureBlend", "titleBarTextureOpacity", DIVIDER, "titleBarInnerShadowOffsetX",
+      "titleBarTextureBlend", "titleBarTextureOpacity", "titleBarTextureBlur", "titleBarTextureBrightness", "titleBarTextureContrast", "titleBarTextureSaturation", "titleBarTextureAge", DIVIDER, "titleBarInnerShadowOffsetX",
       "titleBarInnerShadowOffsetY", "titleBarInnerShadowBlur", "titleBarInnerShadowSpread",
       "titleBarInnerShadowColor", DIVIDER, "titleBarShadowOffsetX", "titleBarShadowOffsetY",
       "titleBarShadowBlur", "titleBarShadowSpread", "titleBarShadowColor", DIVIDER,
@@ -2600,7 +2686,7 @@ const LAYOUTS = {
     headerButtons: { order: [
       "headerButtonSize", "headerButtonColor", "headerButtonBackground", DIVIDER,
       "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
-      "headerButtonTextureBlend", "headerButtonTextureOpacity", DIVIDER,
+      "headerButtonTextureBlend", "headerButtonTextureOpacity", "headerButtonTextureBlur", "headerButtonTextureBrightness", "headerButtonTextureContrast", "headerButtonTextureSaturation", "headerButtonTextureAge", DIVIDER,
       "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
       "headerButtonInnerShadowBlur", "headerButtonInnerShadowSpread",
       "headerButtonInnerShadowColor", DIVIDER, "headerButtonShadowOffsetX",
@@ -2617,7 +2703,7 @@ const LAYOUTS = {
     ] },
     toolbar: { order: [
       "toolbarBackground", DIVIDER, "toolbarTexture", "toolbarTextureFit",
-      "toolbarTexturePosition", "toolbarTextureBlend", "toolbarTextureOpacity", DIVIDER,
+      "toolbarTexturePosition", "toolbarTextureBlend", "toolbarTextureOpacity", "toolbarTextureBlur", "toolbarTextureBrightness", "toolbarTextureContrast", "toolbarTextureSaturation", "toolbarTextureAge", DIVIDER,
       "toolbarInnerShadowOffsetX", "toolbarInnerShadowOffsetY", "toolbarInnerShadowBlur",
       "toolbarInnerShadowSpread", "toolbarInnerShadowColor", DIVIDER, "toolbarShadowOffsetX",
       "toolbarShadowOffsetY", "toolbarShadowBlur", "toolbarShadowSpread", "toolbarShadowColor",
@@ -2632,7 +2718,7 @@ const LAYOUTS = {
     toolbarIcons: { order: [
       "toolbarSize", "toolbarColor", DIVIDER, "toolbarButtonBackground",
       DIVIDER, "toolbarButtonTexture", "toolbarButtonTextureFit", "toolbarButtonTexturePosition",
-      "toolbarButtonTextureBlend", "toolbarButtonTextureOpacity",
+      "toolbarButtonTextureBlend", "toolbarButtonTextureOpacity", "toolbarButtonTextureBlur", "toolbarButtonTextureBrightness", "toolbarButtonTextureContrast", "toolbarButtonTextureSaturation", "toolbarButtonTextureAge",
       DIVIDER, "toolbarButtonInnerShadowOffsetX", "toolbarButtonInnerShadowOffsetY",
       "toolbarButtonInnerShadowBlur", "toolbarButtonInnerShadowSpread", "toolbarButtonInnerShadowColor",
       DIVIDER, "toolbarButtonShadowOffsetX", "toolbarButtonShadowOffsetY", "toolbarButtonShadowBlur",
@@ -2957,7 +3043,7 @@ const FIELD_ORDER = {
   ],
   background: [
     "background", "texture", "textureFit", "texturePosition",
-    "textureBlend", "textureOpacity",
+    "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
     // A shadow is derived beside every picture, so the shared Fill section
     // carries one wherever it appears.
     "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",

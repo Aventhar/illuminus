@@ -29,6 +29,10 @@
 .illuminus-styled.journal-entry-page > .window-content,
 .illuminus-styled .illuminus-preview__editor > .window-content {
   background-color: var(--ill-page-background);
+  /* A surface that graduates rather than being one flat colour. Both ends start
+     clear, so a page nobody has graduated is the flat colour it always was. */
+  background-image: linear-gradient(var(--ill-page-gradient-angle),
+      var(--ill-page-gradient-from), var(--ill-page-gradient-to));
   border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
                 var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
   border-style: var(--ill-page-border-top-style) var(--ill-page-border-right-style)
@@ -78,6 +82,14 @@
   background-position: var(--ill-page-texture-position);
   mix-blend-mode: var(--ill-page-texture-blend);
   opacity: var(--ill-page-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-page-texture-blur, 0px))
+          brightness(var(--ill-page-texture-brightness, 100%))
+          contrast(var(--ill-page-texture-contrast, 100%))
+          saturate(var(--ill-page-texture-saturation, 100%))
+          sepia(var(--ill-page-texture-age, 0%));
 }
 
 .illuminus-styled .journal-entry-content > *,
@@ -92,10 +104,23 @@
            var(--ill-page-padding-bottom) var(--ill-page-padding-left);
 }
 
-/* Constrain measure without moving the page background. */
+/* Constrain measure without moving the page background, and lay the run of the
+   page out: a page can be a row of what is on it — two columns of cards, a
+   sheet of stat blocks — as well as one thing after another. `display` falls
+   back to the block it was, never to nothing. */
 .illuminus-styled .journal-entry-page > div {
   max-width: var(--ill-page-max-width);
   margin-inline: auto;
+  display: var(--ill-page-display, block);
+  flex-direction: var(--ill-page-flex-direction);
+  flex-wrap: var(--ill-page-flex-wrap);
+  justify-content: var(--ill-page-justify);
+  align-items: var(--ill-page-align-items);
+  gap: var(--ill-page-gap);
+  min-width: var(--ill-page-min-width);
+  min-height: var(--ill-page-min-height);
+  max-height: var(--ill-page-max-height);
+  overflow: var(--ill-page-overflow);
 }
 
 /* --- Window frame, title bar, and its buttons --------------------------- */
@@ -578,6 +603,8 @@
    where a fill belongs. */
 .illuminus-styled.application::after {
   background-color: var(--ill-window-background);
+  background-image: linear-gradient(var(--ill-window-gradient-angle),
+      var(--ill-window-gradient-from), var(--ill-window-gradient-to));
 }
 
 .illuminus-styled .window-header::after {
@@ -587,6 +614,8 @@
 .illuminus-styled.journal-entry-page.application::after,
 .illuminus-styled .illuminus-preview__editor::after {
   background-color: var(--ill-editor-background);
+  background-image: linear-gradient(var(--ill-editor-gradient-angle),
+      var(--ill-editor-gradient-from), var(--ill-editor-gradient-to));
 }
 
 .illuminus-styled.journal-entry-page .window-header::after,
@@ -606,6 +635,8 @@
 
 .illuminus-styled .journal-sidebar {
   background-color: var(--ill-sidebar-background);
+  background-image: linear-gradient(var(--ill-sidebar-gradient-angle),
+      var(--ill-sidebar-gradient-from), var(--ill-sidebar-gradient-to));
   padding: var(--ill-sidebar-padding-top) var(--ill-sidebar-padding-right)
            var(--ill-sidebar-padding-bottom) var(--ill-sidebar-padding-left);
   border-width: var(--ill-sidebar-border-top-width) var(--ill-sidebar-border-right-width)
@@ -1094,6 +1125,14 @@
   background-position: var(--ill-body-code-texture-position);
   mix-blend-mode: var(--ill-body-code-texture-blend);
   opacity: var(--ill-body-code-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-body-code-texture-blur, 0px))
+          brightness(var(--ill-body-code-texture-brightness, 100%))
+          contrast(var(--ill-body-code-texture-contrast, 100%))
+          saturate(var(--ill-body-code-texture-saturation, 100%))
+          sepia(var(--ill-body-code-texture-age, 0%));
 }
 
 /* A code block gets its own room; the code inside it keeps the same skin. */
@@ -1177,6 +1216,14 @@
   background-position: var(--ill-boxes-summary-texture-position);
   mix-blend-mode: var(--ill-boxes-summary-texture-blend);
   opacity: var(--ill-boxes-summary-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-boxes-summary-texture-blur, 0px))
+          brightness(var(--ill-boxes-summary-texture-brightness, 100%))
+          contrast(var(--ill-boxes-summary-texture-contrast, 100%))
+          saturate(var(--ill-boxes-summary-texture-saturation, 100%))
+          sepia(var(--ill-boxes-summary-texture-age, 0%));
 }
 
 /* --- Embedded media ----------------------------------------------------- */
@@ -1207,6 +1254,19 @@
 .illuminus-styled .journal-page-content section.secret {
   position: relative;
   isolation: isolate;
+  /* A passage can be a row of what is inside it, and be given a measure of its
+     own. It falls back to the block it was. */
+  display: var(--ill-secrets-display, block);
+  flex-direction: var(--ill-secrets-flex-direction);
+  flex-wrap: var(--ill-secrets-flex-wrap);
+  justify-content: var(--ill-secrets-justify);
+  align-items: var(--ill-secrets-align-items);
+  gap: var(--ill-secrets-gap);
+  min-width: var(--ill-secrets-min-width);
+  max-width: var(--ill-secrets-max-width);
+  min-height: var(--ill-secrets-min-height);
+  max-height: var(--ill-secrets-max-height);
+  overflow: var(--ill-secrets-overflow);
   background-color: var(--ill-secrets-background);
   box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
               var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
@@ -1259,6 +1319,14 @@
   background-position: var(--ill-secrets-texture-position);
   mix-blend-mode: var(--ill-secrets-texture-blend);
   opacity: var(--ill-secrets-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-secrets-texture-blur, 0px))
+          brightness(var(--ill-secrets-texture-brightness, 100%))
+          contrast(var(--ill-secrets-texture-contrast, 100%))
+          saturate(var(--ill-secrets-texture-saturation, 100%))
+          sepia(var(--ill-secrets-texture-age, 0%));
 }
 
 /* Once revealed, a second fill so a GM can tell at a glance which passages the
@@ -1280,6 +1348,14 @@
   background-position: var(--ill-secrets-revealed-texture-position);
   mix-blend-mode: var(--ill-secrets-revealed-texture-blend);
   opacity: var(--ill-secrets-revealed-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-secrets-revealed-texture-blur, 0px))
+          brightness(var(--ill-secrets-revealed-texture-brightness, 100%))
+          contrast(var(--ill-secrets-revealed-texture-contrast, 100%))
+          saturate(var(--ill-secrets-revealed-texture-saturation, 100%))
+          sepia(var(--ill-secrets-revealed-texture-age, 0%));
 }
 
 /* The button Foundry prints inside the block. Core feeds its colors through
@@ -1320,6 +1396,14 @@
   background-position: var(--ill-secrets-button-texture-position);
   mix-blend-mode: var(--ill-secrets-button-texture-blend);
   opacity: var(--ill-secrets-button-texture-opacity);
+  /* What is done to the picture before it is laid down. Each part carries
+     its own fallback: one unset part would make the whole declaration
+     invalid, and a picture somebody had blurred would not be blurred. */
+  filter: blur(var(--ill-secrets-button-texture-blur, 0px))
+          brightness(var(--ill-secrets-button-texture-brightness, 100%))
+          contrast(var(--ill-secrets-button-texture-contrast, 100%))
+          saturate(var(--ill-secrets-button-texture-saturation, 100%))
+          sepia(var(--ill-secrets-button-texture-age, 0%));
 }
 
 
@@ -1379,6 +1463,19 @@
   padding-inline-start: var(--ill-lists-indent);
   margin: var(--ill-lists-margin-top) var(--ill-lists-margin-right)
           var(--ill-lists-margin-bottom) var(--ill-lists-margin-left);
+  /* A list laid out as a row makes its items a run rather than a column, which
+     is how a line of trait chips is built. It falls back to the list it was. */
+  display: var(--ill-lists-display, block);
+  flex-direction: var(--ill-lists-flex-direction);
+  flex-wrap: var(--ill-lists-flex-wrap);
+  justify-content: var(--ill-lists-justify);
+  align-items: var(--ill-lists-align-items);
+  gap: var(--ill-lists-gap);
+  min-width: var(--ill-lists-min-width);
+  max-width: var(--ill-lists-max-width);
+  min-height: var(--ill-lists-min-height);
+  max-height: var(--ill-lists-max-height);
+  overflow: var(--ill-lists-overflow);
 }
 
 .illuminus-styled .journal-page-content ul {
@@ -1407,9 +1504,16 @@
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table {
   width: var(--ill-tables-width);
+  /* A table laid out as something other than a table is the author's business;
+     it falls back to the table it was. */
+  display: var(--ill-tables-display, table);
+  min-width: var(--ill-tables-min-width);
+  max-width: var(--ill-tables-max-width);
+  min-height: var(--ill-tables-min-height);
+  max-height: var(--ill-tables-max-height);
   border-collapse: separate;
   border-spacing: 0;
-  overflow: hidden;
+  overflow: var(--ill-tables-overflow, hidden);
   font-family: var(--ill-tables-font);
   -webkit-text-stroke: var(--ill-tables-outline-width) var(--ill-tables-outline-color);
   paint-order: stroke fill;
@@ -1495,6 +1599,8 @@
   text-align: var(--ill-boxes-align);
   color: var(--ill-boxes-color);
   background-color: var(--ill-boxes-background);
+  background-image: linear-gradient(var(--ill-boxes-gradient-angle),
+      var(--ill-boxes-gradient-from), var(--ill-boxes-gradient-to));
   margin: var(--ill-boxes-margin-top) var(--ill-boxes-margin-right)
           var(--ill-boxes-margin-bottom) var(--ill-boxes-margin-left);
   padding: var(--ill-boxes-padding-top) var(--ill-boxes-padding-right)
@@ -1534,6 +1640,10 @@
   max-width: var(--ill-images-max-width);
   opacity: var(--ill-images-opacity);
   background: var(--ill-images-background);
+  /* After the shorthand above, which resets it. A picture with transparency
+     shows whatever is behind it, which is what this fill is for. */
+  background-image: linear-gradient(var(--ill-images-gradient-angle),
+      var(--ill-images-gradient-from), var(--ill-images-gradient-to));
   margin: var(--ill-images-margin-top) var(--ill-images-margin-right)
           var(--ill-images-margin-bottom) var(--ill-images-margin-left);
   padding: var(--ill-images-padding-top) var(--ill-images-padding-right)

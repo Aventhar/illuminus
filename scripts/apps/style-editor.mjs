@@ -90,7 +90,11 @@ function clusterPartOf(name) {
   if ((m = name.match(/^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
     return { family: `${m[1]}${m[2]}`, kind: "shadow" };
   }
-  if ((m = name.match(/^(.*?)[Tt]exture(Fit|Position|Blend|Opacity)?$/))) {
+  // Everything a picture is given, including what is done to it before it is
+  // laid down: they are one run, and the five worked out of the picture were
+  // being drawn as loose rows under it.
+  if ((m = name.match(
+    /^(.*?)[Tt]exture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/))) {
     return { family: `${m[1]}Texture`, kind: "picture" };
   }
   return null;

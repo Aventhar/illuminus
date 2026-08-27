@@ -948,6 +948,22 @@ the lines around it the moment the control existed. That is the same trap as the
 and the scroll bars, and the rule it keeps teaching is: *where a control can override
 something the skeleton deliberately sets, the fallback must name what the skeleton set.*
 
+**A fill can graduate, and a picture can be worked.** A colour goes in
+`background-color` and a gradient cannot — it is an image — so it goes on the element's
+own `background-image`, which is free precisely because a background *picture* rides on a
+layer of its own. Both ends start transparent, which is why it could be offered on all 35
+fills without changing a style. The angle is **shown** as a degree sign and **written** as
+`deg`: a gradient given "90°" is one a browser throws away, and the fill then paints
+nothing at all. What is done to a picture — softness, brightness, contrast, colour, age —
+is one `filter` on the layer, and **every part carries its own fallback**, because one
+unset part makes the whole declaration invalid and a picture somebody had blurred would
+come out sharp.
+
+**Anything added to a family must be added to the run that gathers it.** `clusterPartOf`
+matched five picture parts by name; the five new ones fell outside it and were drawn as
+loose rows under the picture with a line between them. A gathering pattern is a list that
+has to be kept, and the symptom is cosmetic enough to miss.
+
 **The editor wears Foundry's clothes.** Its own widgets take Foundry's variables —
 `--color-cool-5-25/50` for raised surfaces, `--color-border` for hairlines,
 `--color-warm-2` for a chosen control, `--font-monospace` for values, the `--font-size-*`
