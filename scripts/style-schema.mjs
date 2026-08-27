@@ -199,6 +199,33 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false 
  * It shows through a translucent fill and does nothing behind an opaque one,
  * which is the same bargain a blend mode makes and needs no wording of its own.
  */
+/**
+ * A turn and a size, as one transform.
+ *
+ * A photograph pinned to a page at a slight angle is the thing this is for, and
+ * it is one of the few decorative moves a journal cannot make at all otherwise.
+ *
+ * Each control emits its *whole* function or nothing at all, and the rule reads
+ * them with empty fallbacks — so one of them set is that one alone, and neither
+ * set leaves the declaration with nothing in it, which is `none`. That last part
+ * is the whole reason for the shape: an identity transform is not `none`, it
+ * makes the element a containing block, which is the same trap the frosting has.
+ *
+ * The turn is written as `deg` and shown as a degree sign, as the gradient angle
+ * is — a transform given "5°" is one a browser throws away.
+ */
+function turnFields(prefix = "") {
+  const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
+  return [
+    num(n("Turn"), 0, "°", -30, 30, 0.5,
+      { emit: (value) => (value ? `rotate(${value}deg)` : null) }),
+    // Written as the ratio a browser wants, and shown as the percentage
+    // everybody else thinks in.
+    num(n("Scale"), 100, "%", 25, 200, 1,
+      { emit: (value) => (value === 100 ? null : `scale(${value / 100})`) })
+  ];
+}
+
 function frostFields(prefix = "") {
   const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
   return [
@@ -530,7 +557,8 @@ function boxSections() {
         // block of them: a stat line, a row of trait chips, a two-column aside.
         // It may also be nudged, or made to stay put while the page scrolls past
         // it — an aside that holds its place beside the text.
-        ...layoutFields("", { position: true })
+        ...layoutFields("", { position: true }),
+        ...turnFields()
       ]
     },
     {
@@ -631,7 +659,8 @@ function tagSections() {
         { type: "toggle", name: "wrapEdges", default: false, on: "clone", off: "slice" },
         // A tag is laid out `inline-block` by the skeleton so its padding grows
         // its own box; these say what it does with the room that gives it.
-        ...layoutFields("", { position: false })
+        ...layoutFields("", { position: false }),
+        ...turnFields()
       ]
     },
     {
@@ -679,6 +708,7 @@ function imageSections() {
         select("pictureFrom", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
         // No row settings: a picture holds nothing to lay out inside it.
         ...layoutFields("", { flex: false, position: true }),
+        ...turnFields(),
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
@@ -2390,7 +2420,7 @@ const LAYOUTS = {
       "float", "width", "clear", "whenEmpty",
       DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
       DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
-      DIVIDER, "position", "offsetTop", "offsetLeft"
+      DIVIDER, "position", "offsetTop", "offsetLeft", "turn", "scale"
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
@@ -2429,7 +2459,7 @@ const LAYOUTS = {
     tagLayout: { order: [
       "verticalAlign", "float", "minWidth", "lift", "wrapEdges",
       DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
-      DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow"
+      DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER, "turn", "scale"
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
@@ -2464,7 +2494,7 @@ const LAYOUTS = {
       DIVIDER, "pictureShape", "pictureCrop", "pictureFrom", DIVIDER,
       "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
       DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
-      DIVIDER, "position", "offsetTop", "offsetLeft", DIVIDER,
+      DIVIDER, "position", "offsetTop", "offsetLeft", "turn", "scale", DIVIDER,
       "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
       "innerShadowColor"
     ] },

@@ -78,6 +78,18 @@ const layout = (group, fallback = "block") => `${displayed(group, fallback)}
  * background *picture* rides on a layer of its own. Both ends start
  * transparent, so a fill nobody has graduated is the fill alone.
  */
+/**
+ * A turn and a size, as one transform.
+ *
+ * Each control emits its whole function or nothing, and both are read with an
+ * empty fallback — so one set is that one alone, and neither set leaves the
+ * declaration holding nothing, which is "none". An identity transform is not
+ * "none": it makes the element a containing block, which is the same trap the
+ * frosting has and the reason that one is a single control.
+ */
+const turned = (group) =>
+  `  transform: ${vOr(group, "turn", "")} ${vOr(group, "scale", "")};`;
+
 const graduated = (group) => `  background-image: linear-gradient(${v(group, "gradientAngle")},
     ${v(group, "gradientFrom")}, ${v(group, "gradientTo")});`;
 
@@ -115,6 +127,7 @@ ${memberSelector(group)} {
      ready to hold a picture layer, so that one place decides it. */
   top: ${v(group, "offsetTop")};
   left: ${v(group, "offsetLeft")};
+${turned(group)}
 ${layout(group)}
 ${box(group)}
   font-family: ${v(group, "font")};
@@ -165,6 +178,7 @@ ${memberSelector(group)} {
      ready to hold a picture layer, so that one place decides it. */
   top: ${v(group, "offsetTop")};
   left: ${v(group, "offsetLeft")};
+${turned(group)}
 ${displayed(group, "block")}
   min-width: ${v(group, "minWidth")};
   max-width: ${v(group, "maxWidth")};
@@ -257,6 +271,7 @@ ${displayed(group, "inline-block")}
   min-height: ${v(group, "minHeight")};
   max-height: ${v(group, "maxHeight")};
   overflow: ${v(group, "overflow")};
+${turned(group)}
   background-color: ${v(group, "background")};
   backdrop-filter: ${v(group, "frost")};
 ${graduated(group)}

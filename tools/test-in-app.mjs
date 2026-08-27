@@ -7252,6 +7252,68 @@ try {
   })()`);
 }
 
+// A photograph pinned to a page at a slight angle. Both parts of the transform
+// carry their own fallback: one unset part would take the whole declaration to
+// "none" and a picture somebody had turned would come out straight.
+console.log("\n[78] A part can be turned, and drawn larger than its room");
+try {
+  const turned = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Turn Probe", settings: {
+      image01: {turn: -3},
+      box01: {scale: 110},
+      box02: {turn: 2, scale: 90}
+    }});
+    const entry = await JournalEntry.create({name: "Turn Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<figure class="illuminus-image illuminus-image--image01">'
+      + '<img src="icons/svg/mystery-man.svg"><figcaption>Pinned</figcaption></figure>' +
+      '<section class="illuminus-box illuminus-box--box01">Larger</section>' +
+      '<section class="illuminus-box illuminus-box--box02">Both</section>' +
+      '<section class="illuminus-box illuminus-box--box03">As it is</section>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const at = (sel) => getComputedStyle(root.querySelector(sel)).transform;
+    return JSON.stringify({
+      picture: at(".illuminus-image--image01"),
+      bigger: at(".illuminus-box--box01"),
+      both: at(".illuminus-box--box02"),
+      asIs: at(".illuminus-box--box03")
+    });
+  })()`));
+  // A browser answers a transform as a matrix, so the numbers are read rather
+  // than the words: a turn of -3° is cos(3°) with the sines either side of it.
+  const nums = (value) => (value.match(/-?[\d.]+/g) ?? []).map(Number);
+  const picture = nums(turned.picture);
+  check(picture.length === 6 && Math.abs(picture[1] + Math.sin(3 * Math.PI / 180)) < 0.001,
+    `a picture treatment can be pinned at an angle (${turned.picture})`);
+  check(nums(turned.bigger)[0] === 1.1,
+    `a block can be drawn larger than its room (${turned.bigger})`);
+  const both = nums(turned.both);
+  check(Math.abs(both[0] - 0.9 * Math.cos(2 * Math.PI / 180)) < 0.001,
+    `and turned and resized at once, neither part rubbing out the other (${turned.both})`);
+  // An identity transform is not "none" — it would make the block a containing
+  // block — so a part nobody turned must have no transform at all.
+  check(turned.asIs === "none",
+    `while a block nobody turned has none of it (${turned.asIs})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Turn Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Turn Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);

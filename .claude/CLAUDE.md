@@ -959,6 +959,17 @@ is one `filter` on the layer, and **every part carries its own fallback**, becau
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
 
+**A control can emit its whole function, which is how two of them share one
+property.** Turn and Size are one `transform`, and neither may force the other
+into existence: each emits `rotate(…)` or `scale(…)` or nothing, and the rule
+reads both with an *empty* fallback — `transform: var(--turn, ) var(--scale, )`.
+One set is that one alone; neither set leaves the declaration holding nothing,
+which is invalid at computed-value time and therefore `none`. That last part is
+the whole reason for the shape, and it is the frosting's reason too: an identity
+transform is not `none`, it makes the element a containing block. Note this is
+the *opposite* of the empty-custom-property trap — an empty **fallback** is
+deliberate and works; an empty **value** is what rubs a property out.
+
 **Where a part is placed, only two answers are on offer.** A block and a picture
 treatment can be held in view while the page scrolls past, or nudged from where
 the page puts them — and nothing else. Both host a background picture layer,

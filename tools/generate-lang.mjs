@@ -699,6 +699,18 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
+  // a turn and a size: <prefix>Turn / <prefix>Scale, in both spellings.
+  if ((m = name.match(/^(.*?)([Tt]urn|[Ss]cale)$/)) && !/fold$/i.test(m[1])) {
+    const of = noun(m[1], "");
+    const turn = m[2].toLowerCase() === "turn";
+    put(`ILLUMINUS.Field.${name}.label`, turn ? "Turn" : "Size");
+    put(`ILLUMINUS.Field.${name}.hint`, turn
+      ? `How far ${of ? `the ${of}` : "it"} is turned, as a photograph pinned to a `
+        + "page sits a little off straight. Nothing is straight up."
+      : `How much bigger or smaller ${of ? `the ${of}` : "it"} is drawn than the room `
+        + "it takes up, so it can overhang what is around it.");
+    continue;
+  }
   // where a part sits: <prefix>Position / <prefix>OffsetTop / <prefix>OffsetLeft,
   // in both spellings — a family with no prefix writes the first letter small.
   if ((m = name.match(/^(.*?)([Pp]osition|[Oo]ffsetTop|[Oo]ffsetLeft)$/))
