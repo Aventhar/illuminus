@@ -1,7 +1,7 @@
 {
   "id": "illuminus",
   "title": "Illuminus",
-  "description": "Decorative styling for Foundry journals, applied per journal and configured entirely through a plain-language GUI. 570 controls across 13 tabs covering the page and the contents sidebar \u2014 every border side, corner, and shadow component set independently. Build looks like those in professionally produced adventures, then export them to share between worlds.",
+  "description": "Decorative styling for Foundry journals, applied per journal and configured entirely through a plain-language GUI — no CSS is typed or shown. Around 4,200 controls on 16 tabs cover the page, its contents panel, the window frame, and the page editor: every border side, corner, spacing and shadow set on its own, a pointed-at value beside every one of them, and ten renameable box, tag, and picture treatments to wrap around your content. Fills can graduate or frost what is behind them, pictures can be worked and cropped to a shape, and a block can be turned or held in view as the page scrolls. Build looks like those in professionally produced adventures, share them between worlds, and export a journal as web pages, one file, a PDF, or a stylesheet on its own.",
   "version": "0.9.0",
   "compatibility": {
     "minimum": "14",
