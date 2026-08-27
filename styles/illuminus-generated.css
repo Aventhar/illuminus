@@ -86,6 +86,7 @@
   word-spacing: var(--ill-heading1-word-spacing);
   line-height: var(--ill-heading1-line-height);
   text-wrap: var(--ill-heading1-wrap);
+  hyphens: var(--ill-heading1-hyphens);
   text-align: var(--ill-heading1-align);
   color: var(--ill-heading1-color);
   text-shadow: var(--ill-heading1-text-shadow-offset-x) var(--ill-heading1-text-shadow-offset-y)
@@ -176,6 +177,7 @@
   word-spacing: var(--ill-heading2-word-spacing);
   line-height: var(--ill-heading2-line-height);
   text-wrap: var(--ill-heading2-wrap);
+  hyphens: var(--ill-heading2-hyphens);
   text-align: var(--ill-heading2-align);
   color: var(--ill-heading2-color);
   text-shadow: var(--ill-heading2-text-shadow-offset-x) var(--ill-heading2-text-shadow-offset-y)
@@ -254,6 +256,7 @@
   word-spacing: var(--ill-heading3-word-spacing);
   line-height: var(--ill-heading3-line-height);
   text-wrap: var(--ill-heading3-wrap);
+  hyphens: var(--ill-heading3-hyphens);
   text-align: var(--ill-heading3-align);
   color: var(--ill-heading3-color);
   text-shadow: var(--ill-heading3-text-shadow-offset-x) var(--ill-heading3-text-shadow-offset-y)
@@ -332,6 +335,7 @@
   word-spacing: var(--ill-heading4-word-spacing);
   line-height: var(--ill-heading4-line-height);
   text-wrap: var(--ill-heading4-wrap);
+  hyphens: var(--ill-heading4-hyphens);
   text-align: var(--ill-heading4-align);
   color: var(--ill-heading4-color);
   text-shadow: var(--ill-heading4-text-shadow-offset-x) var(--ill-heading4-text-shadow-offset-y)
@@ -410,6 +414,7 @@
   word-spacing: var(--ill-heading5-word-spacing);
   line-height: var(--ill-heading5-line-height);
   text-wrap: var(--ill-heading5-wrap);
+  hyphens: var(--ill-heading5-hyphens);
   text-align: var(--ill-heading5-align);
   color: var(--ill-heading5-color);
   text-shadow: var(--ill-heading5-text-shadow-offset-x) var(--ill-heading5-text-shadow-offset-y)
@@ -488,6 +493,7 @@
   word-spacing: var(--ill-heading6-word-spacing);
   line-height: var(--ill-heading6-line-height);
   text-wrap: var(--ill-heading6-wrap);
+  hyphens: var(--ill-heading6-hyphens);
   text-align: var(--ill-heading6-align);
   color: var(--ill-heading6-color);
   text-shadow: var(--ill-heading6-text-shadow-offset-x) var(--ill-heading6-text-shadow-offset-y)
@@ -585,6 +591,7 @@
   letter-spacing: var(--ill-box01-letter-spacing);
   line-height: var(--ill-box01-line-height);
   text-wrap: var(--ill-box01-wrap);
+  hyphens: var(--ill-box01-hyphens);
   text-align: var(--ill-box01-align);
   color: var(--ill-box01-color, inherit);
 }
@@ -655,6 +662,7 @@
   letter-spacing: var(--ill-box02-letter-spacing);
   line-height: var(--ill-box02-line-height);
   text-wrap: var(--ill-box02-wrap);
+  hyphens: var(--ill-box02-hyphens);
   text-align: var(--ill-box02-align);
   color: var(--ill-box02-color, inherit);
 }
@@ -725,6 +733,7 @@
   letter-spacing: var(--ill-box03-letter-spacing);
   line-height: var(--ill-box03-line-height);
   text-wrap: var(--ill-box03-wrap);
+  hyphens: var(--ill-box03-hyphens);
   text-align: var(--ill-box03-align);
   color: var(--ill-box03-color, inherit);
 }
@@ -795,6 +804,7 @@
   letter-spacing: var(--ill-box04-letter-spacing);
   line-height: var(--ill-box04-line-height);
   text-wrap: var(--ill-box04-wrap);
+  hyphens: var(--ill-box04-hyphens);
   text-align: var(--ill-box04-align);
   color: var(--ill-box04-color, inherit);
 }
@@ -865,6 +875,7 @@
   letter-spacing: var(--ill-box05-letter-spacing);
   line-height: var(--ill-box05-line-height);
   text-wrap: var(--ill-box05-wrap);
+  hyphens: var(--ill-box05-hyphens);
   text-align: var(--ill-box05-align);
   color: var(--ill-box05-color, inherit);
 }
@@ -935,6 +946,7 @@
   letter-spacing: var(--ill-box06-letter-spacing);
   line-height: var(--ill-box06-line-height);
   text-wrap: var(--ill-box06-wrap);
+  hyphens: var(--ill-box06-hyphens);
   text-align: var(--ill-box06-align);
   color: var(--ill-box06-color, inherit);
 }
@@ -1005,6 +1017,7 @@
   letter-spacing: var(--ill-box07-letter-spacing);
   line-height: var(--ill-box07-line-height);
   text-wrap: var(--ill-box07-wrap);
+  hyphens: var(--ill-box07-hyphens);
   text-align: var(--ill-box07-align);
   color: var(--ill-box07-color, inherit);
 }
@@ -1075,6 +1088,7 @@
   letter-spacing: var(--ill-box08-letter-spacing);
   line-height: var(--ill-box08-line-height);
   text-wrap: var(--ill-box08-wrap);
+  hyphens: var(--ill-box08-hyphens);
   text-align: var(--ill-box08-align);
   color: var(--ill-box08-color, inherit);
 }
@@ -1145,6 +1159,7 @@
   letter-spacing: var(--ill-box09-letter-spacing);
   line-height: var(--ill-box09-line-height);
   text-wrap: var(--ill-box09-wrap);
+  hyphens: var(--ill-box09-hyphens);
   text-align: var(--ill-box09-align);
   color: var(--ill-box09-color, inherit);
 }
@@ -1215,6 +1230,7 @@
   letter-spacing: var(--ill-box10-letter-spacing);
   line-height: var(--ill-box10-line-height);
   text-wrap: var(--ill-box10-wrap);
+  hyphens: var(--ill-box10-hyphens);
   text-align: var(--ill-box10-align);
   color: var(--ill-box10-color, inherit);
 }
@@ -1986,6 +2002,7 @@
   letter-spacing: var(--ill-tag01-letter-spacing);
   line-height: var(--ill-tag01-line-height);
   text-wrap: var(--ill-tag01-wrap);
+  hyphens: var(--ill-tag01-hyphens);
   color: var(--ill-tag01-color, inherit);
 }
 
@@ -2050,6 +2067,7 @@
   letter-spacing: var(--ill-tag02-letter-spacing);
   line-height: var(--ill-tag02-line-height);
   text-wrap: var(--ill-tag02-wrap);
+  hyphens: var(--ill-tag02-hyphens);
   color: var(--ill-tag02-color, inherit);
 }
 
@@ -2114,6 +2132,7 @@
   letter-spacing: var(--ill-tag03-letter-spacing);
   line-height: var(--ill-tag03-line-height);
   text-wrap: var(--ill-tag03-wrap);
+  hyphens: var(--ill-tag03-hyphens);
   color: var(--ill-tag03-color, inherit);
 }
 
@@ -2178,6 +2197,7 @@
   letter-spacing: var(--ill-tag04-letter-spacing);
   line-height: var(--ill-tag04-line-height);
   text-wrap: var(--ill-tag04-wrap);
+  hyphens: var(--ill-tag04-hyphens);
   color: var(--ill-tag04-color, inherit);
 }
 
@@ -2242,6 +2262,7 @@
   letter-spacing: var(--ill-tag05-letter-spacing);
   line-height: var(--ill-tag05-line-height);
   text-wrap: var(--ill-tag05-wrap);
+  hyphens: var(--ill-tag05-hyphens);
   color: var(--ill-tag05-color, inherit);
 }
 
@@ -2306,6 +2327,7 @@
   letter-spacing: var(--ill-tag06-letter-spacing);
   line-height: var(--ill-tag06-line-height);
   text-wrap: var(--ill-tag06-wrap);
+  hyphens: var(--ill-tag06-hyphens);
   color: var(--ill-tag06-color, inherit);
 }
 
@@ -2370,6 +2392,7 @@
   letter-spacing: var(--ill-tag07-letter-spacing);
   line-height: var(--ill-tag07-line-height);
   text-wrap: var(--ill-tag07-wrap);
+  hyphens: var(--ill-tag07-hyphens);
   color: var(--ill-tag07-color, inherit);
 }
 
@@ -2434,6 +2457,7 @@
   letter-spacing: var(--ill-tag08-letter-spacing);
   line-height: var(--ill-tag08-line-height);
   text-wrap: var(--ill-tag08-wrap);
+  hyphens: var(--ill-tag08-hyphens);
   color: var(--ill-tag08-color, inherit);
 }
 
@@ -2498,6 +2522,7 @@
   letter-spacing: var(--ill-tag09-letter-spacing);
   line-height: var(--ill-tag09-line-height);
   text-wrap: var(--ill-tag09-wrap);
+  hyphens: var(--ill-tag09-hyphens);
   color: var(--ill-tag09-color, inherit);
 }
 
@@ -2562,6 +2587,7 @@
   letter-spacing: var(--ill-tag10-letter-spacing);
   line-height: var(--ill-tag10-line-height);
   text-wrap: var(--ill-tag10-wrap);
+  hyphens: var(--ill-tag10-hyphens);
   color: var(--ill-tag10-color, inherit);
 }
 
@@ -4608,6 +4634,7 @@
   word-spacing: var(--ill-editor-hover-settings-bar-word-spacing, var(--ill-editor-settings-bar-word-spacing));
   line-height: var(--ill-editor-hover-settings-bar-line-height, var(--ill-editor-settings-bar-line-height));
   text-wrap: var(--ill-editor-hover-settings-bar-wrap, var(--ill-editor-settings-bar-wrap));
+  hyphens: var(--ill-editor-hover-settings-bar-hyphens, var(--ill-editor-settings-bar-hyphens));
   text-align: var(--ill-editor-hover-settings-bar-align, var(--ill-editor-settings-bar-align));
   -webkit-text-stroke: var(--ill-editor-hover-settings-bar-outline-width, var(--ill-editor-settings-bar-outline-width)) var(--ill-editor-hover-settings-bar-outline-color, var(--ill-editor-settings-bar-outline-color));
   text-shadow: var(--ill-editor-hover-settings-bar-text-shadow-offset-x, var(--ill-editor-settings-bar-text-shadow-offset-x)) var(--ill-editor-hover-settings-bar-text-shadow-offset-y, var(--ill-editor-settings-bar-text-shadow-offset-y))
@@ -4868,6 +4895,7 @@
   word-spacing: var(--ill-sidebar-hover-word-spacing, var(--ill-sidebar-word-spacing));
   line-height: var(--ill-sidebar-hover-line-height, var(--ill-sidebar-line-height));
   text-wrap: var(--ill-sidebar-hover-wrap, var(--ill-sidebar-wrap));
+  hyphens: var(--ill-sidebar-hover-hyphens, var(--ill-sidebar-hyphens));
   text-align: var(--ill-sidebar-hover-align, var(--ill-sidebar-align));
   color: var(--ill-sidebar-hover-color, var(--ill-sidebar-color));
 }
@@ -4914,6 +4942,7 @@
   font-style: var(--ill-sidebar-hover-heading-text-style-slant, var(--ill-sidebar-heading-text-style-slant));
   line-height: var(--ill-sidebar-hover-heading-line-height, var(--ill-sidebar-heading-line-height));
   text-wrap: var(--ill-sidebar-hover-heading-wrap, var(--ill-sidebar-heading-wrap));
+  hyphens: var(--ill-sidebar-hover-heading-hyphens, var(--ill-sidebar-heading-hyphens));
   color: var(--ill-sidebar-heading-hover-color, var(--ill-sidebar-heading-color));
 }
 
@@ -5012,6 +5041,7 @@
   word-spacing: var(--ill-title-hover-word-spacing, var(--ill-title-word-spacing));
   line-height: var(--ill-title-hover-line-height, var(--ill-title-line-height));
   text-wrap: var(--ill-title-hover-wrap, var(--ill-title-wrap));
+  hyphens: var(--ill-title-hover-hyphens, var(--ill-title-hyphens));
   text-align: var(--ill-title-hover-align, var(--ill-title-align));
   color: var(--ill-title-hover-color, var(--ill-title-color));
   text-shadow: var(--ill-title-hover-text-shadow-offset-x, var(--ill-title-text-shadow-offset-x)) var(--ill-title-hover-text-shadow-offset-y, var(--ill-title-text-shadow-offset-y))
@@ -5032,6 +5062,7 @@
   word-spacing: var(--ill-body-hover-word-spacing, var(--ill-body-word-spacing));
   line-height: var(--ill-body-hover-line-height, var(--ill-body-line-height));
   text-wrap: var(--ill-body-hover-wrap, var(--ill-body-wrap));
+  hyphens: var(--ill-body-hover-hyphens, var(--ill-body-hyphens));
   color: var(--ill-body-hover-color, var(--ill-body-color));
   text-align: var(--ill-body-hover-align, var(--ill-body-align));
 }
@@ -5540,6 +5571,7 @@ iframe):hover {
   word-spacing: var(--ill-boxes-hover-word-spacing, var(--ill-boxes-word-spacing));
   line-height: var(--ill-boxes-hover-line-height, var(--ill-boxes-line-height));
   text-wrap: var(--ill-boxes-hover-wrap, var(--ill-boxes-wrap));
+  hyphens: var(--ill-boxes-hover-hyphens, var(--ill-boxes-hyphens));
   text-align: var(--ill-boxes-hover-align, var(--ill-boxes-align));
   color: var(--ill-boxes-hover-color, var(--ill-boxes-color));
   background-color: var(--ill-boxes-hover-background, var(--ill-boxes-background));
@@ -5633,6 +5665,7 @@ iframe):hover {
   word-spacing: var(--ill-heading1-hover-word-spacing, var(--ill-heading1-word-spacing));
   line-height: var(--ill-heading1-hover-line-height, var(--ill-heading1-line-height));
   text-wrap: var(--ill-heading1-hover-wrap, var(--ill-heading1-wrap));
+  hyphens: var(--ill-heading1-hover-hyphens, var(--ill-heading1-hyphens));
   text-align: var(--ill-heading1-hover-align, var(--ill-heading1-align));
   color: var(--ill-heading1-hover-color, var(--ill-heading1-color));
   text-shadow: var(--ill-heading1-hover-text-shadow-offset-x, var(--ill-heading1-text-shadow-offset-x)) var(--ill-heading1-hover-text-shadow-offset-y, var(--ill-heading1-text-shadow-offset-y))
@@ -5709,6 +5742,7 @@ iframe):hover {
   word-spacing: var(--ill-heading2-hover-word-spacing, var(--ill-heading2-word-spacing));
   line-height: var(--ill-heading2-hover-line-height, var(--ill-heading2-line-height));
   text-wrap: var(--ill-heading2-hover-wrap, var(--ill-heading2-wrap));
+  hyphens: var(--ill-heading2-hover-hyphens, var(--ill-heading2-hyphens));
   text-align: var(--ill-heading2-hover-align, var(--ill-heading2-align));
   color: var(--ill-heading2-hover-color, var(--ill-heading2-color));
   text-shadow: var(--ill-heading2-hover-text-shadow-offset-x, var(--ill-heading2-text-shadow-offset-x)) var(--ill-heading2-hover-text-shadow-offset-y, var(--ill-heading2-text-shadow-offset-y))
@@ -5776,6 +5810,7 @@ iframe):hover {
   word-spacing: var(--ill-heading3-hover-word-spacing, var(--ill-heading3-word-spacing));
   line-height: var(--ill-heading3-hover-line-height, var(--ill-heading3-line-height));
   text-wrap: var(--ill-heading3-hover-wrap, var(--ill-heading3-wrap));
+  hyphens: var(--ill-heading3-hover-hyphens, var(--ill-heading3-hyphens));
   text-align: var(--ill-heading3-hover-align, var(--ill-heading3-align));
   color: var(--ill-heading3-hover-color, var(--ill-heading3-color));
   text-shadow: var(--ill-heading3-hover-text-shadow-offset-x, var(--ill-heading3-text-shadow-offset-x)) var(--ill-heading3-hover-text-shadow-offset-y, var(--ill-heading3-text-shadow-offset-y))
@@ -5843,6 +5878,7 @@ iframe):hover {
   word-spacing: var(--ill-heading4-hover-word-spacing, var(--ill-heading4-word-spacing));
   line-height: var(--ill-heading4-hover-line-height, var(--ill-heading4-line-height));
   text-wrap: var(--ill-heading4-hover-wrap, var(--ill-heading4-wrap));
+  hyphens: var(--ill-heading4-hover-hyphens, var(--ill-heading4-hyphens));
   text-align: var(--ill-heading4-hover-align, var(--ill-heading4-align));
   color: var(--ill-heading4-hover-color, var(--ill-heading4-color));
   text-shadow: var(--ill-heading4-hover-text-shadow-offset-x, var(--ill-heading4-text-shadow-offset-x)) var(--ill-heading4-hover-text-shadow-offset-y, var(--ill-heading4-text-shadow-offset-y))
@@ -5910,6 +5946,7 @@ iframe):hover {
   word-spacing: var(--ill-heading5-hover-word-spacing, var(--ill-heading5-word-spacing));
   line-height: var(--ill-heading5-hover-line-height, var(--ill-heading5-line-height));
   text-wrap: var(--ill-heading5-hover-wrap, var(--ill-heading5-wrap));
+  hyphens: var(--ill-heading5-hover-hyphens, var(--ill-heading5-hyphens));
   text-align: var(--ill-heading5-hover-align, var(--ill-heading5-align));
   color: var(--ill-heading5-hover-color, var(--ill-heading5-color));
   text-shadow: var(--ill-heading5-hover-text-shadow-offset-x, var(--ill-heading5-text-shadow-offset-x)) var(--ill-heading5-hover-text-shadow-offset-y, var(--ill-heading5-text-shadow-offset-y))
@@ -5977,6 +6014,7 @@ iframe):hover {
   word-spacing: var(--ill-heading6-hover-word-spacing, var(--ill-heading6-word-spacing));
   line-height: var(--ill-heading6-hover-line-height, var(--ill-heading6-line-height));
   text-wrap: var(--ill-heading6-hover-wrap, var(--ill-heading6-wrap));
+  hyphens: var(--ill-heading6-hover-hyphens, var(--ill-heading6-hyphens));
   text-align: var(--ill-heading6-hover-align, var(--ill-heading6-align));
   color: var(--ill-heading6-hover-color, var(--ill-heading6-color));
   text-shadow: var(--ill-heading6-hover-text-shadow-offset-x, var(--ill-heading6-text-shadow-offset-x)) var(--ill-heading6-hover-text-shadow-offset-y, var(--ill-heading6-text-shadow-offset-y))
@@ -6061,6 +6099,7 @@ iframe):hover {
   letter-spacing: var(--ill-box01-hover-letter-spacing, var(--ill-box01-letter-spacing));
   line-height: var(--ill-box01-hover-line-height, var(--ill-box01-line-height));
   text-wrap: var(--ill-box01-hover-wrap, var(--ill-box01-wrap));
+  hyphens: var(--ill-box01-hover-hyphens, var(--ill-box01-hyphens));
   text-align: var(--ill-box01-hover-align, var(--ill-box01-align));
   color: var(--ill-box01-hover-color, var(--ill-box01-color, inherit));
 }
@@ -6131,6 +6170,7 @@ h6):hover {
   letter-spacing: var(--ill-box02-hover-letter-spacing, var(--ill-box02-letter-spacing));
   line-height: var(--ill-box02-hover-line-height, var(--ill-box02-line-height));
   text-wrap: var(--ill-box02-hover-wrap, var(--ill-box02-wrap));
+  hyphens: var(--ill-box02-hover-hyphens, var(--ill-box02-hyphens));
   text-align: var(--ill-box02-hover-align, var(--ill-box02-align));
   color: var(--ill-box02-hover-color, var(--ill-box02-color, inherit));
 }
@@ -6201,6 +6241,7 @@ h6):hover {
   letter-spacing: var(--ill-box03-hover-letter-spacing, var(--ill-box03-letter-spacing));
   line-height: var(--ill-box03-hover-line-height, var(--ill-box03-line-height));
   text-wrap: var(--ill-box03-hover-wrap, var(--ill-box03-wrap));
+  hyphens: var(--ill-box03-hover-hyphens, var(--ill-box03-hyphens));
   text-align: var(--ill-box03-hover-align, var(--ill-box03-align));
   color: var(--ill-box03-hover-color, var(--ill-box03-color, inherit));
 }
@@ -6271,6 +6312,7 @@ h6):hover {
   letter-spacing: var(--ill-box04-hover-letter-spacing, var(--ill-box04-letter-spacing));
   line-height: var(--ill-box04-hover-line-height, var(--ill-box04-line-height));
   text-wrap: var(--ill-box04-hover-wrap, var(--ill-box04-wrap));
+  hyphens: var(--ill-box04-hover-hyphens, var(--ill-box04-hyphens));
   text-align: var(--ill-box04-hover-align, var(--ill-box04-align));
   color: var(--ill-box04-hover-color, var(--ill-box04-color, inherit));
 }
@@ -6341,6 +6383,7 @@ h6):hover {
   letter-spacing: var(--ill-box05-hover-letter-spacing, var(--ill-box05-letter-spacing));
   line-height: var(--ill-box05-hover-line-height, var(--ill-box05-line-height));
   text-wrap: var(--ill-box05-hover-wrap, var(--ill-box05-wrap));
+  hyphens: var(--ill-box05-hover-hyphens, var(--ill-box05-hyphens));
   text-align: var(--ill-box05-hover-align, var(--ill-box05-align));
   color: var(--ill-box05-hover-color, var(--ill-box05-color, inherit));
 }
@@ -6411,6 +6454,7 @@ h6):hover {
   letter-spacing: var(--ill-box06-hover-letter-spacing, var(--ill-box06-letter-spacing));
   line-height: var(--ill-box06-hover-line-height, var(--ill-box06-line-height));
   text-wrap: var(--ill-box06-hover-wrap, var(--ill-box06-wrap));
+  hyphens: var(--ill-box06-hover-hyphens, var(--ill-box06-hyphens));
   text-align: var(--ill-box06-hover-align, var(--ill-box06-align));
   color: var(--ill-box06-hover-color, var(--ill-box06-color, inherit));
 }
@@ -6481,6 +6525,7 @@ h6):hover {
   letter-spacing: var(--ill-box07-hover-letter-spacing, var(--ill-box07-letter-spacing));
   line-height: var(--ill-box07-hover-line-height, var(--ill-box07-line-height));
   text-wrap: var(--ill-box07-hover-wrap, var(--ill-box07-wrap));
+  hyphens: var(--ill-box07-hover-hyphens, var(--ill-box07-hyphens));
   text-align: var(--ill-box07-hover-align, var(--ill-box07-align));
   color: var(--ill-box07-hover-color, var(--ill-box07-color, inherit));
 }
@@ -6551,6 +6596,7 @@ h6):hover {
   letter-spacing: var(--ill-box08-hover-letter-spacing, var(--ill-box08-letter-spacing));
   line-height: var(--ill-box08-hover-line-height, var(--ill-box08-line-height));
   text-wrap: var(--ill-box08-hover-wrap, var(--ill-box08-wrap));
+  hyphens: var(--ill-box08-hover-hyphens, var(--ill-box08-hyphens));
   text-align: var(--ill-box08-hover-align, var(--ill-box08-align));
   color: var(--ill-box08-hover-color, var(--ill-box08-color, inherit));
 }
@@ -6621,6 +6667,7 @@ h6):hover {
   letter-spacing: var(--ill-box09-hover-letter-spacing, var(--ill-box09-letter-spacing));
   line-height: var(--ill-box09-hover-line-height, var(--ill-box09-line-height));
   text-wrap: var(--ill-box09-hover-wrap, var(--ill-box09-wrap));
+  hyphens: var(--ill-box09-hover-hyphens, var(--ill-box09-hyphens));
   text-align: var(--ill-box09-hover-align, var(--ill-box09-align));
   color: var(--ill-box09-hover-color, var(--ill-box09-color, inherit));
 }
@@ -6691,6 +6738,7 @@ h6):hover {
   letter-spacing: var(--ill-box10-hover-letter-spacing, var(--ill-box10-letter-spacing));
   line-height: var(--ill-box10-hover-line-height, var(--ill-box10-line-height));
   text-wrap: var(--ill-box10-hover-wrap, var(--ill-box10-wrap));
+  hyphens: var(--ill-box10-hover-hyphens, var(--ill-box10-hyphens));
   text-align: var(--ill-box10-hover-align, var(--ill-box10-align));
   color: var(--ill-box10-hover-color, var(--ill-box10-color, inherit));
 }
@@ -7271,6 +7319,7 @@ h6):hover {
   letter-spacing: var(--ill-tag01-hover-letter-spacing, var(--ill-tag01-letter-spacing));
   line-height: var(--ill-tag01-hover-line-height, var(--ill-tag01-line-height));
   text-wrap: var(--ill-tag01-hover-wrap, var(--ill-tag01-wrap));
+  hyphens: var(--ill-tag01-hover-hyphens, var(--ill-tag01-hyphens));
   color: var(--ill-tag01-hover-color, var(--ill-tag01-color, inherit));
 }
 
@@ -7330,6 +7379,7 @@ h6):hover {
   letter-spacing: var(--ill-tag02-hover-letter-spacing, var(--ill-tag02-letter-spacing));
   line-height: var(--ill-tag02-hover-line-height, var(--ill-tag02-line-height));
   text-wrap: var(--ill-tag02-hover-wrap, var(--ill-tag02-wrap));
+  hyphens: var(--ill-tag02-hover-hyphens, var(--ill-tag02-hyphens));
   color: var(--ill-tag02-hover-color, var(--ill-tag02-color, inherit));
 }
 
@@ -7389,6 +7439,7 @@ h6):hover {
   letter-spacing: var(--ill-tag03-hover-letter-spacing, var(--ill-tag03-letter-spacing));
   line-height: var(--ill-tag03-hover-line-height, var(--ill-tag03-line-height));
   text-wrap: var(--ill-tag03-hover-wrap, var(--ill-tag03-wrap));
+  hyphens: var(--ill-tag03-hover-hyphens, var(--ill-tag03-hyphens));
   color: var(--ill-tag03-hover-color, var(--ill-tag03-color, inherit));
 }
 
@@ -7448,6 +7499,7 @@ h6):hover {
   letter-spacing: var(--ill-tag04-hover-letter-spacing, var(--ill-tag04-letter-spacing));
   line-height: var(--ill-tag04-hover-line-height, var(--ill-tag04-line-height));
   text-wrap: var(--ill-tag04-hover-wrap, var(--ill-tag04-wrap));
+  hyphens: var(--ill-tag04-hover-hyphens, var(--ill-tag04-hyphens));
   color: var(--ill-tag04-hover-color, var(--ill-tag04-color, inherit));
 }
 
@@ -7507,6 +7559,7 @@ h6):hover {
   letter-spacing: var(--ill-tag05-hover-letter-spacing, var(--ill-tag05-letter-spacing));
   line-height: var(--ill-tag05-hover-line-height, var(--ill-tag05-line-height));
   text-wrap: var(--ill-tag05-hover-wrap, var(--ill-tag05-wrap));
+  hyphens: var(--ill-tag05-hover-hyphens, var(--ill-tag05-hyphens));
   color: var(--ill-tag05-hover-color, var(--ill-tag05-color, inherit));
 }
 
@@ -7566,6 +7619,7 @@ h6):hover {
   letter-spacing: var(--ill-tag06-hover-letter-spacing, var(--ill-tag06-letter-spacing));
   line-height: var(--ill-tag06-hover-line-height, var(--ill-tag06-line-height));
   text-wrap: var(--ill-tag06-hover-wrap, var(--ill-tag06-wrap));
+  hyphens: var(--ill-tag06-hover-hyphens, var(--ill-tag06-hyphens));
   color: var(--ill-tag06-hover-color, var(--ill-tag06-color, inherit));
 }
 
@@ -7625,6 +7679,7 @@ h6):hover {
   letter-spacing: var(--ill-tag07-hover-letter-spacing, var(--ill-tag07-letter-spacing));
   line-height: var(--ill-tag07-hover-line-height, var(--ill-tag07-line-height));
   text-wrap: var(--ill-tag07-hover-wrap, var(--ill-tag07-wrap));
+  hyphens: var(--ill-tag07-hover-hyphens, var(--ill-tag07-hyphens));
   color: var(--ill-tag07-hover-color, var(--ill-tag07-color, inherit));
 }
 
@@ -7684,6 +7739,7 @@ h6):hover {
   letter-spacing: var(--ill-tag08-hover-letter-spacing, var(--ill-tag08-letter-spacing));
   line-height: var(--ill-tag08-hover-line-height, var(--ill-tag08-line-height));
   text-wrap: var(--ill-tag08-hover-wrap, var(--ill-tag08-wrap));
+  hyphens: var(--ill-tag08-hover-hyphens, var(--ill-tag08-hyphens));
   color: var(--ill-tag08-hover-color, var(--ill-tag08-color, inherit));
 }
 
@@ -7743,6 +7799,7 @@ h6):hover {
   letter-spacing: var(--ill-tag09-hover-letter-spacing, var(--ill-tag09-letter-spacing));
   line-height: var(--ill-tag09-hover-line-height, var(--ill-tag09-line-height));
   text-wrap: var(--ill-tag09-hover-wrap, var(--ill-tag09-wrap));
+  hyphens: var(--ill-tag09-hover-hyphens, var(--ill-tag09-hyphens));
   color: var(--ill-tag09-hover-color, var(--ill-tag09-color, inherit));
 }
 
@@ -7802,6 +7859,7 @@ h6):hover {
   letter-spacing: var(--ill-tag10-hover-letter-spacing, var(--ill-tag10-letter-spacing));
   line-height: var(--ill-tag10-hover-line-height, var(--ill-tag10-line-height));
   text-wrap: var(--ill-tag10-hover-wrap, var(--ill-tag10-wrap));
+  hyphens: var(--ill-tag10-hover-hyphens, var(--ill-tag10-hyphens));
   color: var(--ill-tag10-hover-color, var(--ill-tag10-color, inherit));
 }
 
@@ -9033,6 +9091,7 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-sidebar-active-word-spacing, var(--ill-sidebar-word-spacing));
   line-height: var(--ill-sidebar-active-line-height, var(--ill-sidebar-line-height));
   text-wrap: var(--ill-sidebar-active-wrap, var(--ill-sidebar-wrap));
+  hyphens: var(--ill-sidebar-active-hyphens, var(--ill-sidebar-hyphens));
   text-align: var(--ill-sidebar-active-align, var(--ill-sidebar-align));
   color: var(--ill-sidebar-active-color, var(--ill-sidebar-color));
 }
@@ -9064,6 +9123,7 @@ blockquote):not(:empty))):hover {
   font-style: var(--ill-sidebar-heading-active-text-style-slant, var(--ill-sidebar-heading-text-style-slant));
   line-height: var(--ill-sidebar-active-heading-line-height, var(--ill-sidebar-heading-line-height));
   text-wrap: var(--ill-sidebar-active-heading-wrap, var(--ill-sidebar-heading-wrap));
+  hyphens: var(--ill-sidebar-active-heading-hyphens, var(--ill-sidebar-heading-hyphens));
   color: var(--ill-sidebar-heading-active-color, var(--ill-sidebar-heading-color));
 }
 

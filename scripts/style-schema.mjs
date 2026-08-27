@@ -65,6 +65,7 @@ const CHOICES = {
   position: ["inherit", "relative", "sticky"],
   overflow: ["inherit", "visible", "hidden", "auto", "scroll"],
   wrap: ["inherit", "balance", "pretty", "nowrap"],
+  hyphens: ["inherit", "neverBreak", "breakAsNeeded"],
   // What a corner is cut to. `round` is the browser's own, so it is the default
   // everywhere and a style that says nothing about a corner changes nothing.
   cornerShape: ["round", "bevel", "notch", "scoop", "squircle"],
@@ -120,6 +121,10 @@ const CSS_WORD = {
 };
 
 const emitWord = (value) => (value === "inherit" ? null : CSS_WORD[value] ?? value);
+
+/** Hyphenation, named apart from the browser's own words. */
+const emitHyphens = (value) =>
+  ({ neverBreak: "manual", breakAsNeeded: "auto" }[value] ?? null);
 
 /** A shape a person can name, written as the ratio a browser wants. */
 const emitShape = (value) => ({
@@ -527,6 +532,11 @@ function textFields(prefix, defaults = {}) {
     // where the measure runs out, which leaves one word alone as often as not;
     // balancing it evens the lines instead.
     select(n("Wrap"), "inherit", CHOICES.wrap, { emit: emitWord }),
+    // Whether long words may be broken across a line with a hyphen, which is
+    // what keeps justified text in a narrow column from opening rivers of
+    // white. A browser needs the page's language to do it, and Foundry gives
+    // it one.
+    select(n("Hyphens"), "inherit", CHOICES.hyphens, { emit: emitHyphens }),
     select(n("Align"), d("align", "inherit"), d("choices", ["inherit", ...CHOICES.alignNoJustify]))
   ];
 }
@@ -572,6 +582,7 @@ function boxSections() {
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
         select("wrap", "inherit", CHOICES.wrap, { emit: emitWord }),
+        select("hyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens }),
         select("align", "inherit", inheritAlign)
       ]
     },
@@ -673,7 +684,8 @@ function tagSections() {
         select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
-        select("wrap", "inherit", CHOICES.wrap, { emit: emitWord })
+        select("wrap", "inherit", CHOICES.wrap, { emit: emitWord }),
+        select("hyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens })
       ]
     },
     { id: "background", fields: [col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields()] },
@@ -807,7 +819,7 @@ function bannerSections(defaults = {}) {
       // until it closes up.
       order: [
         "font", "size", "color", "textStyle", "textStyleSlant",
-        DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
+        DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens",
         DIVIDER, "outlineColor", "outlineWidth",
         DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
       ],
@@ -985,7 +997,8 @@ export const GROUPS = [
           // indent of the heading a reader chose.
           num("headingIndent", 16, "px", 0, 120, 2, { noSelected: true }),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05),
-          select("headingWrap", "inherit", CHOICES.wrap, { emit: emitWord })
+          select("headingWrap", "inherit", CHOICES.wrap, { emit: emitWord }),
+          select("headingHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens })
         ]
       },
       {
@@ -1151,7 +1164,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1347,7 +1360,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap"
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens"
         ],
         // Every one of these follows whatever is painting the page until it is
         // set: an empty color, a size of 0, an alignment of "inherit". A new
@@ -1630,7 +1643,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "textColor",
-          DIVIDER, "align", "verticalAlign", "lineHeight", "wrap",
+          DIVIDER, "align", "verticalAlign", "lineHeight", "wrap", "hyphens",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1740,7 +1753,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1869,7 +1882,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap",
+          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap", "hyphens",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -2424,7 +2437,7 @@ const LAYOUTS = {
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
+      "letterSpacing", "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
       "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
@@ -2463,7 +2476,7 @@ const LAYOUTS = {
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
-      "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
@@ -2544,7 +2557,7 @@ const LAYOUTS = {
     ] },
     entries: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", "wordSpacing", "lineHeight", "wrap", DIVIDER, "outlineColor", "outlineWidth",
+      "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "entryBackground", DIVIDER, "entryTexture", "entryTextureFit",
       "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", "entryTextureBlur", "entryTextureBrightness", "entryTextureContrast", "entryTextureSaturation", "entryTextureAge", DIVIDER,
@@ -2562,7 +2575,7 @@ const LAYOUTS = {
     ] },
     subHeadings: { order: [
       "headingFont", "headingSize", "headingColor", "headingTextStyle",
-      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingIndent", DIVIDER,
+      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingHyphens", "headingIndent", DIVIDER,
       "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
       "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
       "headingBackground", DIVIDER, "headingTexture", "headingTextureFit",
@@ -2719,7 +2732,7 @@ const LAYOUTS = {
     settingsBar: { order: [
       "settingsBarFont", "settingsBarSize", "settingsBarColor", "settingsBarTextStyle",
       "settingsBarTextStyleSlant", DIVIDER, "settingsBarAlign", "settingsBarCaps",
-      "settingsBarLetterSpacing", "settingsBarWordSpacing", "settingsBarLineHeight", "settingsBarWrap",
+      "settingsBarLetterSpacing", "settingsBarWordSpacing", "settingsBarLineHeight", "settingsBarWrap", "settingsBarHyphens",
       DIVIDER, "settingsBarOutlineColor", "settingsBarOutlineWidth",
       DIVIDER, "settingsBarTextShadowOffsetX", "settingsBarTextShadowOffsetY",
       "settingsBarTextShadowBlur", "settingsBarTextShadowColor",
@@ -3121,7 +3134,7 @@ const FIELD_ORDER = {
   text: [
     "font", "size", "color", "textColor", "textStyle", "textStyleSlant", "outlineWidth",
     "outlineColor", "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur",
-    "textShadowColor", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap",
+    "textShadowColor", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens",
     "align", "verticalAlign", "width"
   ],
   background: [
@@ -3160,7 +3173,7 @@ const SUFFIX_ORDER = [
   "Font", "Size", "Color", "TextStyle", "TextStyleSlant",
   "OutlineWidth", "OutlineColor",
   "TextShadowOffsetX", "TextShadowOffsetY", "TextShadowBlur", "TextShadowColor",
-  "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Wrap", "Align", "VerticalAlign"
+  "Caps", "LetterSpacing", "WordSpacing", "LineHeight", "Wrap", "Hyphens", "Align", "VerticalAlign"
 ];
 
 /**

@@ -756,6 +756,16 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
     continue;
   }
+  // whether long words may be broken: <prefix>Hyphens.
+  if ((m = name.match(/^(.*?)[Hh]yphens$/))) {
+    const of = noun(m[1], "");
+    put(`ILLUMINUS.Field.${name}.label`, "Hyphenation");
+    put(`ILLUMINUS.Field.${name}.hint`,
+      `Whether a long word${of ? ` in the ${of}` : ""} may be broken across two lines `
+      + "with a hyphen, which is what keeps text set in a narrow column from opening "
+      + "gaps between its words.");
+    continue;
+  }
   // where the lines may break: <prefix>Wrap, one per lettering family.
   if ((m = name.match(/^(.*?)[Ww]rap$/)) && !/[Ff]lex$/.test(m[1])) {
     const of = noun(m[1], "");
@@ -1156,6 +1166,8 @@ const CHOICE_TEXT = {
   same: "Same as normal", on: "Yes", off: "No",
   // Where the lines of a run of words may break.
   balance: "Even up the lines", pretty: "Avoid a lone last word",
+  // Whether long words may be broken with a hyphen.
+  neverBreak: "Only where one is asked for", breakAsNeeded: "Where a word needs it",
   // How a part sits on the page.
   relative: "Where the page puts it", sticky: "Stays put while the page scrolls",
   // The shape a picture is cropped to, and how it fills it.

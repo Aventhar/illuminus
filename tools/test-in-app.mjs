@@ -6005,7 +6005,7 @@ try {
   check(JSON.stringify(text) === JSON.stringify([
     "Typeface", "Text Size", "Text Color", "Text Style", "Italic",
     "---", "Alignment", "Capitals", "Letter Spacing", "Word Spacing", "Line Spacing",
-    "Line Breaking",
+    "Line Breaking", "Hyphenation",
     "---", "Outline Color", "Outline Thickness",
     "---", "Shadow Horizontal Offset", "Shadow Vertical Offset",
     "Shadow Softness", "Shadow Color"]),
@@ -7023,7 +7023,7 @@ try {
     }
     const style = await api.createStyle({name: "Wrap Lines Probe", settings: {
       heading2: {wrap: "balance"},
-      body: {wrap: "pretty"}
+      body: {wrap: "pretty", hyphens: "breakAsNeeded"}
     }});
     const entry = await JournalEntry.create({name: "Wrap Lines Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
@@ -7036,15 +7036,19 @@ try {
       const root = entry.sheet.element;
       const at = (sel) => getComputedStyle(root.querySelector(sel)).textWrap
         || getComputedStyle(root.querySelector(sel)).textWrapStyle;
+      const hyphens = (sel) => getComputedStyle(root.querySelector(sel)).hyphens;
       return {
         heading: at(".journal-page-content h2"),
         other: at(".journal-page-content h3"),
-        body: at(".journal-page-content p")
+        body: at(".journal-page-content p"),
+        hyphens: hyphens(".journal-page-content p")
       };
     };
     const plain = await show();
     await api.assignStyle(entry, style.id);
-    const out = {...await show(), plain: plain.heading};
+    const shown = await show();
+    const out = {...shown, plain: plain.heading,
+      hyphenated: shown.hyphens, plainHyphens: plain.hyphens};
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
@@ -7063,6 +7067,8 @@ try {
     `a heading with nothing of its own follows the page (${broke.other})`);
   check(!/balance|pretty/.test(broke.plain),
     `while an unstyled journal breaks as it always did (${broke.plain})`);
+  check(broke.hyphenated === "auto" && broke.plainHyphens === "manual",
+    `and a long word may be broken with a hyphen, or not (${broke.hyphenated} against ${broke.plainHyphens})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;

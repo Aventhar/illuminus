@@ -959,6 +959,13 @@ is one `filter` on the layer, and **every part carries its own fallback**, becau
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
 
+**Choice wording is shared across the whole schema, so a choice must be named
+for what it means and not for what CSS calls it.** Hyphenation's `auto` would
+have read "Let it scroll", which is what `auto` says on an overflow control. It
+is `breakAsNeeded` in the schema and `auto` on the way out, the same shape the
+picture shapes use. `emitWord` is only safe where a value's own name is already
+unambiguous everywhere it appears.
+
 **A control can emit its whole function, which is how two of them share one
 property.** Turn and Size are one `transform`, and neither may force the other
 into existence: each emits `rotate(…)` or `scale(…)` or nothing, and the rule

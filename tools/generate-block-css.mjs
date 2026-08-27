@@ -143,6 +143,7 @@ ${box(group)}
   letter-spacing: ${v(group, "letterSpacing")};
   line-height: ${v(group, "lineHeight")};
   text-wrap: ${v(group, "wrap")};
+  hyphens: ${v(group, "hyphens")};
   text-align: ${v(group, "align")};
   color: ${vOr(group, "color", "inherit")};
 }
@@ -296,6 +297,7 @@ ${graduated(group)}
   letter-spacing: ${v(group, "letterSpacing")};
   line-height: ${v(group, "lineHeight")};
   text-wrap: ${v(group, "wrap")};
+  hyphens: ${v(group, "hyphens")};
   color: ${vOr(group, "color", "inherit")};
 }
 
@@ -373,6 +375,7 @@ ${layout(group, "block")}
   word-spacing: ${v(group, "wordSpacing")};
   line-height: ${v(group, "lineHeight")};
   text-wrap: ${v(group, "wrap")};
+  hyphens: ${v(group, "hyphens")};
   text-align: ${v(group, "align")};
   color: ${v(group, "color")};
   text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
