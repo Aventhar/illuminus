@@ -1169,7 +1169,8 @@ const CHOICE_TEXT = {
   // Whether long words may be broken with a hyphen.
   neverBreak: "Only where one is asked for", breakAsNeeded: "Where a word needs it",
   // How a part sits on the page.
-  relative: "Where the page puts it", sticky: "Stays put while the page scrolls",
+  asPlaced: "Where the page puts it", heldInView: "Held in view while the page scrolls",
+  ownShape: "The picture's own shape",
   // The shape a picture is cropped to, and how it fills it.
   square: "Square", landscape: "Landscape", portrait: "Portrait",
   wide: "Widescreen", tall: "Tall", panorama: "Panorama",

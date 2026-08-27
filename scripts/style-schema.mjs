@@ -62,7 +62,7 @@ const CHOICES = {
   flexWrap: ["inherit", "nowrap", "wrap", "wrapReverse"],
   justify: ["inherit", "start", "center", "end", "between", "around", "evenly"],
   alignItems: ["inherit", "stretch", "start", "center", "end", "baseline"],
-  position: ["inherit", "relative", "sticky"],
+  position: ["asPlaced", "heldInView"],
   overflow: ["inherit", "visible", "hidden", "auto", "scroll"],
   wrap: ["inherit", "balance", "pretty", "nowrap"],
   hyphens: ["inherit", "neverBreak", "breakAsNeeded"],
@@ -97,7 +97,7 @@ const CHOICES = {
   foldIcon: ["chevron", "caret", "angle", "arrow", "plus"],
   // The shape a picture is cropped to, named by what it is for rather than by
   // its numbers: a browser wants a ratio, and nobody thinks in ratios.
-  pictureShape: ["inherit", "square", "landscape", "portrait", "wide", "tall", "panorama"],
+  pictureShape: ["ownShape", "square", "landscape", "portrait", "wide", "tall", "panorama"],
   pictureCrop: ["cover", "contain", "stretch"],
   whiteSpace: ["normal", "preWrap", "nowrap"],
   wordBreak: ["normal", "breakWord", "breakAll"]
@@ -121,6 +121,9 @@ const CSS_WORD = {
 };
 
 const emitWord = (value) => (value === "inherit" ? null : CSS_WORD[value] ?? value);
+
+/** Where a part sits, named apart from the browser's own words. */
+const emitPlacing = (value) => (value === "heldInView" ? "sticky" : null);
 
 /** Hyphenation, named apart from the browser's own words. */
 const emitHyphens = (value) =>
@@ -170,7 +173,7 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false 
     select(n("Overflow"), "inherit", CHOICES.overflow, { emit: emitWord })
   );
   if (position) fields.push(
-    select(n("Position"), "inherit", CHOICES.position, { emit: emitWord }),
+    select(n("Position"), "asPlaced", CHOICES.position, { emit: emitPlacing }),
     num(n("OffsetTop"), 0, "px", -400, 400, 1, { emitZero: false }),
     num(n("OffsetLeft"), 0, "px", -400, 400, 1, { emitZero: false })
   );
@@ -715,7 +718,7 @@ function imageSections() {
         // that says nothing keeps the picture's own shape, which is what a
         // journal does now — and where a shape *is* named, the picture fills it
         // rather than being squashed into it, since the shape was the point.
-        select("pictureShape", "inherit", CHOICES.pictureShape, { emit: emitShape }),
+        select("pictureShape", "ownShape", CHOICES.pictureShape, { emit: emitShape }),
         select("pictureCrop", "cover", CHOICES.pictureCrop, { emit: emitCrop }),
         select("pictureFrom", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
         // No row settings: a picture holds nothing to lay out inside it.

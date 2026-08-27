@@ -959,6 +959,12 @@ is one `filter` on the layer, and **every part carries its own fallback**, becau
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
 
+**A one-off script that opens a window must close it.** A screenshot script left a
+style editor on screen, and check [37] — which opens one — clicked into the older
+window and timed out with "the editor did not render its controls in forty
+seconds", which reads exactly like the editor being broken. It was not. Anything
+driving the sandbox by hand owes the suite the same `try/finally` a check does.
+
 **Choice wording is shared across the whole schema, so a choice must be named
 for what it means and not for what CSS calls it.** Hyphenation's `auto` would
 have read "Let it scroll", which is what `auto` says on an overflow control. It

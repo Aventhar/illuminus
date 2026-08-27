@@ -7209,7 +7209,7 @@ try {
       if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const style = await api.createStyle({name: "Placing Probe", settings: {
-      box01: {position: "sticky", offsetTop: 12},
+      box01: {position: "heldInView", offsetTop: 12},
       box02: {offsetTop: 20, offsetLeft: -30}
     }});
     const entry = await JournalEntry.create({name: "Placing Journal"});
