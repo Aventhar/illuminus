@@ -1,129 +1,136 @@
 # Illuminus — how it is built
 
-The end-user guide is [README.md](README.md). This file is for anyone changing the
-module: its layout, how a style becomes CSS, how to run the checks, and the public API.
+This is the developer's half of the documentation. [README.md](README.md) covers what the
+module does and how to use it; this covers how it works, where things live, and the one
+decision everything else hangs off.
 
-For the workflow and the Foundry v14 traps that cost real time to rediscover, read
-[.claude/CLAUDE.md](.claude/CLAUDE.md) as well.
+## The idea it all rests on
+
+**A style may only supply values, never rules.**
+
+A style is a plain object of settings. The compiler turns it into CSS custom properties
+and *nothing else* — no selectors, no declarations, no rules of its own. Every rule lives
+in a stylesheet that ships with the module and reads those properties:
+
+```text
+scripts/style-schema.mjs      what a style may say          (the source of truth)
+        ↓
+scripts/style-compiler.mjs    settings → custom properties  (values only)
+        ↓
+styles/illuminus.css          rules that read them          (the skeleton)
+styles/illuminus-generated.css   the repetitive ones, generated
+```
+
+Keep it that way. It is what makes importing a stranger's style file safe: the worst a
+hostile style can do is set a colour you did not expect, because there is nowhere for it
+to put a rule. It is also why every new capability has to be expressed as a *value* —
+which is a real constraint, and most of the interesting problems in this codebase come
+from working inside it.
+
+A journal wearing a style gets a class and an attribute; the injector writes one `<style>`
+block per style in use.
 
 ## Layout
 
-```
-module.json                  Manifest — id, compatibility, entry points
-lang/en.json                 Every user-facing string
-scripts/module.mjs           Entry point; hooks and public API
-scripts/constants.mjs        Module id, setting and flag keys, logger
-scripts/settings.mjs         game.settings registration
-scripts/style-schema.mjs     THE source of truth: every style property
-scripts/migrations.mjs       Forward migration of styles saved by older versions
-scripts/style-compiler.mjs   Style data -> CSS custom properties
-scripts/style-injector.mjs   Keeps the compiled sheet and sheet tagging in sync
-scripts/style-store.mjs      CRUD over the world's styles; journal assignment
-scripts/presets.mjs          The bundled styles (none yet)
-scripts/io.mjs               Export / import as JSON
-scripts/export-html.mjs      Journals -> a folder of standalone web pages
-scripts/zip.mjs              A zip writer, since Foundry ships no archiver
-scripts/export-css.mjs       The CSS actually painting a page, for style-less exports
-scripts/export-terms.mjs     The personal-use notice shown before an export
-scripts/color-tools.mjs      Color conversion, and sampling colors from the page
-scripts/editor-menu.mjs      The Illuminus menu in the journal page editor
-scripts/template-store.mjs   CRUD over the world's page templates
-scripts/template-presets.mjs The bundled templates
-scripts/apps/template-manager.mjs  The template library window
-scripts/apps/                The GUI (library, editor, color picker, assignment dialog)
-styles/illuminus.css         Skeleton rules + GUI styling
-styles/illuminus-generated.css  Heading, box, tag, and image rules; from a generator
-styles/illuminus-export.css  The little Foundry provides that an exported page needs
-templates/                   Handlebars templates
-tools/                       Validation, string generation, and the test sandbox
-tools/fixtures/              Test data, including the style the checks work with
-```
+| Path | What lives there |
+| --- | --- |
+| `scripts/style-schema.mjs` | Every control: its name, type, default, range, and how it emits. The single source of truth |
+| `scripts/style-compiler.mjs` | Settings → custom properties. Emits values, never rules |
+| `scripts/style-store.mjs` | Reading and writing styles in world settings |
+| `scripts/style-injector.mjs` | Putting the compiled CSS into the document, and on the right journals |
+| `scripts/migrations.mjs` | Forward migration of stored styles, one function per schema version |
+| `scripts/apps/style-editor.mjs` | The three-column editor: the parts tree, the sample, the settings |
+| `scripts/apps/style-manager.mjs` | The style library |
+| `scripts/apps/color-picker.mjs` | The colour picker and its eyedropper |
+| `scripts/editor-menu.mjs` | The **Illuminus** menu in the page editor: boxes, tags, pictures, lists, tables, templates |
+| `scripts/export-html.mjs` | Journals out of Foundry: folder, one file, print, stylesheet |
+| `scripts/export-css.mjs` | Gathering the CSS that is actually painting a page |
+| `scripts/heading-sections.mjs`, `collapsible.mjs`, `toc-current.mjs`, `edit-button.mjs` | Render-time markup: column wrappers, folding markers, the chosen heading, the Edit pencil's home |
+| `styles/illuminus.css` | The skeleton: every hand-written rule |
+| `styles/illuminus-generated.css` | Written by `tools/generate-block-css.mjs` — do not hand-edit |
+| `lang/en.json` | Written by `tools/generate-lang.mjs` — do not hand-edit |
+| `tools/` | The checks, the generators, and the sandbox |
 
-## Checks
+## Render-time markup
+
+Four features need an element that the author's markup does not contain — a container for
+a run of columned text, a fold marker, the current heading's mark, and a home for the Edit
+pencil. All four are written **at render**, and all four obey the same three rules:
+
+1. **Nothing is stored.** The page keeps the markup a person typed.
+2. **Never inside an editor.** Moving nodes out from under ProseMirror breaks the
+   selection it holds.
+3. **It undoes itself first**, because a sheet re-renders on every edit.
+
+## The checks
+
+Two layers, and both must pass before anything is committed.
 
 ```bash
-node tools/validate.mjs        # static cross-checks; no Foundry needed
+node tools/validate.mjs        # static; no Foundry needed, ~1s
 tools/sandbox.sh up            # throwaway Foundry + headless Chrome
-node tools/test-in-app.mjs     # drives the real app and asserts computed styles
+node tools/test-in-app.mjs     # drives the real app over CDP
 tools/sandbox.sh down
 ```
 
-The sandbox builds its own data directory so tests never touch a live world. See
-[.claude/CLAUDE.md](.claude/CLAUDE.md) for the workflow and the Foundry v14 API traps.
+**`validate.mjs`** cross-checks the things that rot silently: every custom property is
+emitted by the schema *and* consumed by the stylesheet, in both directions; no two
+controls in a tab share a name; every field, section and choice has a label and a hint;
+presets reference only real fields; hostile values cannot escape a declaration; and an
+exported archive really unzips, proved with the operating system's own `unzip` rather
+than with our reader agreeing with our writer.
 
-## How it works
+**`test-in-app.mjs`** asserts on **computed styles in a running Foundry** — over six
+hundred assertions — because that is the only way to catch what source review misses: a
+rule that parses but never applies, or one core out-specifies. Its expected control counts
+come from the schema, so adding a control cannot make it stale.
 
-A style is stored as plain data, never as CSS text. Two pieces do the work:
+**Never run either against a live world.** `tools/sandbox.sh` builds a throwaway data
+directory that symlinks in only the module and the game system. The sandbox is on **30002**;
+**30000 is the desktop application's live world**, and a script that hardcodes it does not
+fail — it joins the real world as Gamemaster.
 
-1. **The compiler** turns a style into CSS custom properties only —
-   `--ill-page-background: #ece0c6` and so on — scoped to
-   `.illuminus-styled[data-illuminus-style="<id>"]`.
-2. **The skeleton stylesheet** (`styles/illuminus.css`) holds every actual rule, written
-   once against those properties: `.illuminus-styled .journal-entry-content {
-   background-color: var(--ill-page-background) }`.
+## Generated files
 
-A style therefore supplies *values* to rules the module already ships; it can never
-introduce a rule of its own. That is what makes importing a style file from a stranger
-safe, and it is why applying, changing, or clearing a style needs no re-render — only a
-class and a data attribute change on the sheet root.
+Three files are written by tools and must not be hand-edited:
 
-Six heading levels, ten box styles, ten tag styles, ten image styles, and a background
-image layer behind every fill color are all sets of near-identical rules, which CSS
-cannot express once. They live in `styles/illuminus-generated.css`, written by `node
-tools/generate-block-css.mjs` from templates with every property name taken from the
-schema — so a renamed field is a generator error rather than a rule that quietly stops
-working. Do not hand-edit that file.
+| File | Written by | When to re-run |
+| --- | --- | --- |
+| `styles/illuminus-generated.css` | `tools/generate-block-css.mjs` | After any schema change touching a block, tag, picture, list, table or heading |
+| `lang/en.json` | `tools/generate-lang.mjs` | After adding or renaming any control |
+| `SETTINGS.md` | `tools/generate-settings-doc.mjs` | On demand; it is gitignored, because a list of nine thousand controls is out of date by the end of the week |
 
-Both the compiler and the entire GUI are generated from `scripts/style-schema.mjs`.
-Adding a new style property means adding one line there plus one rule in the stylesheet;
-the tab, the section, the control, and the export format follow automatically.
+The generators fail loudly rather than guessing. If `generate-lang.mjs` has no wording for
+a name, it says so and stops; add the wording to its tables and re-run.
 
-The schema is organized as **groups → sections → fields**. A group is a tab, a section
-is a collapsible block, a field is one control. Since every side and corner is its own
-field, the stylesheet reads them back through CSS shorthands, so one declaration consumes
-four variables:
+## Adding a control
 
-```css
-border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
-              var(--ill-page-border-bottom-width) var(--ill-page-border-left-width);
-```
+Every schema change is three edits and two commands:
 
-### Schema versions
+1. The field in `scripts/style-schema.mjs`.
+2. A rule in `styles/illuminus.css` consuming its custom property — or a line in
+   `tools/generate-block-css.mjs` if it belongs to a family.
+3. Name it in the tab's order list, if that tab states its own order.
+4. `node tools/generate-lang.mjs` and, if needed, `node tools/generate-block-css.mjs`.
+5. `node tools/validate.mjs`, which fails if you missed any of the above.
 
-Splitting a compound property renames it, and `cleanSettings` discards anything it does
-not recognize — so a style saved under an older schema would silently lose those values.
-`scripts/migrations.mjs` translates old keys into new ones on the way out of the store,
-before that filter runs. Migration is not written back on read, only when the style is
-next saved, so opening a world never rewrites data on its own.
+**Renaming a field needs a migration.** `cleanSettings` discards keys the schema does not
+know, so without one, existing styles silently lose those values. Bump `SCHEMA_VERSION` in
+`scripts/constants.mjs`, add the mapping to `scripts/migrations.mjs`, and cover it in the
+checks. Renaming or splitting a *group* needs the same, and reaches further: per-style
+names for treatments are keyed by group id and live outside `settings`.
 
-### Adding a property
+## Schema versions
 
-```js
-// in the relevant section's `fields` array in style-schema.mjs
-col("footerColor", "#5a4326")
-```
+`SCHEMA_VERSION` counts the times stored styles have had to be migrated; it moves
+independently of the module version. Migrations are applied in order for every version
+between the stored one and the current, so a version 1 style loaded today passes through
+all of them.
 
-Then add `ILLUMINUS.Field.footerColor.label` / `.hint` to `lang/en.json`, and a rule in
-`styles/illuminus.css` consuming `var(--ill-<group>-footer-color)`. A field may also
-supply an `emit` function to drive several related properties from one control — see
-how "Opening Capital" sets float, size, leading, weight, and tint together. Builders
-already exist for the repeating families: `borderFields`, `cornerFields`,
-`spacingFields`, `shadowFields`, `textShadowFields`, and `textFields`.
-
-## Development
-
-The Foundry data directory contains a symlink:
-
-```
-/Users/sean/Documents/FoundryVTT/Data/modules/illuminus -> /Users/sean/Local/Development/Illuminus
-```
-
-Edit files here and they are live in Foundry immediately. `module.json` declares hot
-reload for `styles/`, `templates/`, and `lang/`, so CSS, Handlebars, and localization
-changes apply without a refresh once **Hot Reload** is enabled in Foundry's setup
-options. Changes to `.mjs` files need a browser refresh (F5).
-
-Enable **Debug Logging** in the module settings for `illuminus |` console messages.
+The most recent, version 11, is a good example of the shape they take: the contents panel
+and the page editor each became a tab holding parts of its own, every setting keeping the
+name it had, so the migration reads the split table backwards out of the schema rather
+than repeating it — and a part added later cannot be forgotten.
 
 ## Public API
 
@@ -131,27 +138,46 @@ Enable **Debug Logging** in the module settings for `illuminus |` console messag
 const illuminus = game.modules.get("illuminus").api;
 
 illuminus.openManager();                        // the style library
-illuminus.openEditor(styleId);                  // the tabbed editor
+illuminus.openEditor(styleId);                  // the editor
 illuminus.pickStyleFor(journalEntry);           // the assignment dialog
 illuminus.listStyles();                         // every style, sorted by name
 illuminus.assignStyle(journalEntry, styleId);   // apply ("" to clear)
 illuminus.exportStyles([styleId]);              // download as JSON
-illuminus.openExport({styleId, entryIds});      // the web-page export dialog
+illuminus.openExport({styleId, entryIds});      // the export dialog
 illuminus.exportJournals({                      // build and hand it over
-  styleId, entryIds, format: "print"            // "folder" | "file" | "print"
+  styleId, entryIds, format: "print"            // "folder" | "file" | "print" | "css"
 });
 await illuminus.buildJournalExport({            // the archive itself, unsaved
   styleId, entryIds, secrets: false             // -> {blob, filename, report}
 });
 ```
 
+## Development
+
+- **Data directory:** `~/Documents/FoundryVTT`, with `Data/modules/illuminus` symlinked to
+  the repo. Edits are live; there is nothing to compile or copy.
+- **`.mjs` changes need a browser refresh.** CSS, Handlebars and lang changes hot-reload
+  if Hot Reload is enabled in Foundry's setup options — and are deliberately *not*
+  hot-reloaded in the sandbox, so a run reads one consistent set of files.
+- The traps that cost time to rediscover — Foundry's cascade layers, ProseMirror's
+  schema, the ways a check can lie to you — are written down in
+  [.claude/CLAUDE.md](.claude/CLAUDE.md). It is worth reading before changing anything
+  structural.
+
 ## Conventions
 
-- Never hard-code the module id — import `MODULE_ID` from `scripts/constants.mjs`.
-- Never hard-code user-facing text — add a key to `lang/en.json` and localize it.
-- Never write CSS jargon into a label. The GUI is for people who do not write CSS.
-- Register settings in `init`, read world documents no earlier than `ready`.
-- Prefix every CSS class with `illuminus-` so styles cannot leak into core UI.
+- **Never hard-code the module id or a user-facing string.** Import `MODULE_ID` from
+  `scripts/constants.mjs`; add a localization key.
+- **No CSS jargon in anything a person reads.** "Top Thickness", not `border-top-width`.
+  Choice wording is shared across the whole schema, so a value must be named for what it
+  means everywhere it appears — which is why hyphenation's is `breakAsNeeded` rather than
+  `auto`.
+- **US English throughout** — strings, comments and identifiers alike. CSS property names
+  are US spelling anyway, so a stray `colour` in an identifier reads as a typo beside
+  `borderTopColor`.
+- **Prefix every CSS class with `illuminus-`** so styles cannot leak into core UI.
+- **Anything that enumerates the families must be derived, not spelled out.** A hand-kept
+  list that falls out of date fails silently.
 
 ## License
 

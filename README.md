@@ -1,14 +1,25 @@
 # Illuminus
 
 Decorative styling for [Foundry Virtual Tabletop](https://foundryvtt.com/) journals,
-applied **per journal** and configured entirely through a plain-language GUI — no CSS
-knowledge required.
+applied **per journal** and configured entirely through a plain-language GUI. No CSS is
+typed, and none is shown.
 
-The goal is the look of a professionally produced adventure: parchment pages, banner
-headings, boxed read-aloud text, ruled tables, drop caps. Build a look once, then apply
-it to whichever journals should wear it, and export it to carry into another world.
+The name comes from the illuminated manuscripts of the medieval scriptorium — pages where
+the decoration was not applied to the text but grew out of it: a capital swollen into a
+picture, a margin filled with vines and grotesques, gold laid over gesso so the page
+caught the light of whatever lamp you read it by. Those scribes had a working assumption
+worth borrowing, which is that how a page looks is part of what it says. A journal in
+Foundry is a page. This module is an attempt to let you treat it like one.
 
-- **Foundry compatibility:** v14 (minimum `14`, verified `14.365`)
+What you get is the look of a professionally produced adventure: parchment surfaces,
+banner headings, boxed read-aloud text, ruled tables, drop caps, and secret passages your
+players never see. Build a look once, apply it to whichever journals should wear it, and
+carry it into another world — or out of Foundry entirely, as web pages, a single file, or
+a PDF.
+
+![A journal styled with Illuminus](docs/images/styled-journal.png)
+
+- **Foundry compatibility:** v14 (minimum `14`, verified `14.367`)
 - **Game system:** system-agnostic — core Foundry APIs only
 - **Build step:** none. Plain ES modules and CSS, loaded directly by Foundry.
 
@@ -19,11 +30,11 @@ direction. The idea, the design decisions, the priorities, and the artwork are m
 of the code, the tests, and this documentation were drafted by the assistant and shaped
 over many rounds of use and correction.
 
-I mention it because I think you deserve to know how the software you install was made,
-and because the way it was made shows in the result: the module carries an automated
-suite that drives a real Foundry instance and checks what the styling actually computes
-to, rather than what it looks like it ought to do. That is what I lean on instead of
-trusting either of us.
+I mention it because you deserve to know how the software you install was made, and
+because the way it was made shows in the result. The module carries an automated suite
+that drives a real Foundry instance and reads what the styling actually computes to —
+over six hundred assertions, run before anything is committed. That is what I lean on
+instead of trusting either of us.
 
 No artwork ships with the module today. The images that will — artwork, photography, and
 textures alike — are being made by hand with digital tools, without generative AI, and
@@ -32,108 +43,145 @@ this note will say so plainly once they are here.
 Bugs, misjudgements, and anything that misbehaves in your world are mine to answer for.
 Please do [report them](https://github.com/Aventhar/illuminus/issues).
 
-## What it does
+## The editor
 
-- **Styles are per journal.** Assigning a style to one journal leaves every other journal
-  untouched. A journal with no style looks exactly as Foundry draws it.
-- **Everything is a GUI control.** Around 4,200 settings on 16 tabs in 97 collapsible
-  categories — and close to 10,000 once every box, tag, and picture style is counted
-  separately rather than one at a time — labeled in ordinary language — "Top Thickness",
-  "Opening Capital", "Image Blending" — with a one-line explanation under each. No CSS is
-  typed or shown. Controls that are always set together are one control: **Text Style** 
-  offers Normal, Bold, and Light with or without italics, rather than a thickness dropdown
-  of nine
-  numbers beside a separate slant.
+![The style editor](docs/images/style-editor.png)
+
+Three columns, and they answer three different questions.
+
+**Down the left, what a journal is made of.** The parts nest the way they really do: the
+window holds the page, the page holds its headings and its lists and its boxes, and each
+family of treatments sits under the plain thing it varies. Every entry carries a count of
+what this style has set inside it, so you can see at a glance where the work has gone.
+Click a piece of the sample in the middle and the tree follows you to it.
+
+**In the middle, what it looks like.** A miniature journal that repaints as you drag a
+slider, and dims everything that is not the part you are working on — dimmed rather than
+hidden, because a heading alone on a blank page tells you nothing about how it sits in
+the text. Any real journal you have open repaints too.
+
+**Down the right, what can be said about the part you picked.** Around 4,200 settings in
+all, on 16 tabs — and close to 9,000 once every treatment is counted separately rather
+than one at a time — each labelled in ordinary language with a line of explanation under
+it. "Top Thickness", not `border-top-width`.
+
+### What that looks like in practice
+
+Nothing is collapsed into one control that ought to be four. Each of the four borders has
+its own thickness, style and colour; each corner its own rounding *and shape*; each side
+its own padding and margin. But four controls in a column is a poor way to describe a
+box, so the ones that describe a shape are drawn as that shape:
+
+![The edges and corners diagram](docs/images/edges-diagram.png)
+
+A thickness at each corner, a side chosen underneath, and that side's style and colour
+below it. Spacing works the same way — eight inputs around a dashed ring, the outer four
+for the room around the box and the inner four for the room inside it. Each of these
+folds to a single line saying what it is set to, built from the values themselves, and
+one the style says nothing about reads "Nothing set" and starts closed. A tab therefore
+opens showing what the style *does*.
+
+- **Search every setting** from the box across the top. It narrows every part at once and
+  dims the ones with nothing in them, so the tree itself answers "which part has the
+  shadow settings?".
+- **"Only what this style sets"** hides everything you have not touched.
+- **Reset** works at three sizes — a control, a category, a whole part — and always
+  returns to what you last *saved*, not to the factory settings.
+- **Nothing is written to your world until you press Save**, and closing with unsaved
+  changes asks first.
+
+### Its own colour picker
+
+![The colour picker](docs/images/color-picker.png)
+
+Clicking a swatch opens Illuminus's picker rather than the operating system's — because
+the native one cannot express alpha, and a transparent setting would show as solid black.
+A shade square and hue strip to pick by eye, RGB sliders and numeric boxes to be exact,
+opacity, and the hex including its alpha. Saved colours belong to the style and can be
+named — "Parchment", "Rust heading" — and dragged into the order you want.
+
+The eyedropper reads colours **out of the page** rather than off the screen. Point at
+anything in the Foundry window — a fill, a border, lettering — and a readout follows the
+cursor showing exactly what will be taken. Unlike the operating system's sampler it needs
+no screen-capture permission, and it keeps transparency.
+
+## What a style can say
+
 - **Everything a page can hold.** Not just paragraphs and headings: definition lists,
   table captions, collapsible passages, code, embedded sound and video, and the marks the
   editor's own toolbar produces — highlighting, strike-through, underline, abbreviations,
-  quotations. Two of those were not merely unstyled but unreadable: a definition's text
-  inherited Foundry's near-white, and highlighting arrived as yellow on black.
-- **Secret passages are styled too.** Foundry's GM-only blocks arrive tinted purple with
-  a Reveal button inside, which fights any page you build. They get their own tab: a fill
-  before revealing and a second one after, so a GM can see at a glance what the table has
-  already been shown, plus the lettering, the edge, and the button itself.
-- **The whole window, not just the page.** A Sidebar tab styles the contents panel —
-  page entries, the current-page marker, page numbers, sub-headings, category rows, the
-  search box, and its buttons — and a Window tab styles the frame, the title bar, its
-  icon buttons, and the edit pencil that appears over a page.
-- **Nothing is collapsed into one control.** Each of the four borders has its own
-  thickness, style, and color; each corner its own rounding; each side its own padding
-  and margin; each shadow its own offset, softness, size, and color. A **Match** button
-  in each section copies one value across its siblings when you do want them the same.
-- **Finding a setting.** A search box across the top narrows every tab at once and dims
-  the ones with nothing in them, so the strip itself answers "which tab has the shadow
-  settings?". Where a control has a pointed-at twin, the pair shares one switch instead
-  of taking two rows — and a search still reaches the half that is folded away.
-- **Everything has a hovered state.** Any lettering color, fill, or edge can be given a
-  second value that takes over while the mouse is over it — headings, boxes, tags,
-  pictures, table cells, links, sidebar entries. Each starts empty, meaning "leave it
-  alone", so nothing changes until you say so. Sizes and spacing are deliberately not
-  shadowed: changing those under the pointer makes the page slide out from under it.
-- **Saving sets the baseline.** Reset returns a setting, a section, or a whole tab to
-  the values the style was last saved with, and the per-tab badges count what has changed
-  since then.
-- **Live sample.** The editor carries a miniature journal that follows the tab you are
-  on — open Tables and the table comes forward while the rest of the page steps back,
-  dimmed rather than hidden, because a heading alone on a blank page tells you nothing
-  about how it sits in the text. It repaints as you drag a
-  slider, and any real journal already open repaints too. Drag the strip on its left edge
-  to give it more room or hand the room back to the controls. The sample follows the tab:
-  it reveals the sidebar while the Sidebar tab is open and gives the width back to the
-  page otherwise, and Box Styles, Tag Styles, and Image Styles take the pane over
-  entirely, showing what you are editing against the prose it would interrupt — the only
-  way a half-width floated box reads as one. Nothing is written to the world until you
-  press Save.
-- **Its own color picker.** Clicking a swatch opens Illuminus's picker rather than the
-  operating system's: a shade square and hue strip to pick by eye, RGB sliders and numeric
-  boxes to be exact, opacity, and the hex including its alpha. Saved colors belong to the
-  style and can be named — "Parchment", "Rust heading" — dragged into the order you
-  want, and there is a row of the colors you last kept. It is free-floating and
-  draggable, and only OK keeps a change.
-- **Transparency is visible.** Color swatches are drawn over a checkerboard and show
-  their alpha, with a fully transparent one labeled "None" — a native color input
-  cannot show alpha and paints `#00000000` as solid black. Type an eight-digit hex such
-  as `#00000000` for none, or `#ece0c680` for half strength.
-- **Its own color picker.** Every color control can copy the color of anything in the
-  Foundry window — fills, borders, and lettering. Point and click; a readout follows the
-  cursor showing exactly what will be taken. Hold Option/Alt for lettering color.
-  It reads colors out of the page rather than off the screen, so unlike the operating
-  system's sampler and the browser's EyeDropper API it needs no screen-capture permission,
-  and it keeps transparency.
-- **An image behind anything.** Every fill color in the interface has a background
-  image beside it — the window frame, the title bar, its buttons, sidebar entries and
-  their hover states, headings, the journal title, link highlights, table headers, boxes,
-  and every box and image style — each with its own fit, position, blending, and
-  strength. The image rides on a layer behind the lettering, so turning its strength
-  down fades the image and not the words.
-- **Background images from anywhere.** Point the Background Image control at any picture
-  in your Foundry data — your own art, a system's, another module's. A grayscale texture
-  is best combined with a Fill Color under Multiply blending, so the texture supplies the
-  grain and the color supplies the hue; a picture carrying its own color wants Fill Color
-  set to white and Image Blending set to Normal.
-- **How a part is laid out, not only how it is painted.** A box can be a row of things
-  as well as a stack of them, with the spacing and alignment that follows; it can be held
-  in view while the page scrolls past it, nudged aside, turned a little as a photograph
-  pinned to a page is, or drawn larger than the room it takes. A picture treatment can
-  crop its picture to a named shape — square, landscape, widescreen, panorama — and say
-  which part of it to keep. None of it is typed: they are the same kind of control as a
-  color.
-- **Treatments a page could not ask for before.** A fill can graduate from one color to
-  another, or frost what is behind it as frosted glass does. A background picture can be
-  softened, brightened, drained of its color, or aged before it is laid down. A corner
-  can be a bevel, a notch, or a scoop rather than a rounding. Lettering can be told where
-  its lines may break, and whether a long word may be broken with a hyphen rather than
-  open a gap.
-- **No artwork or styles included — yet.** The sample textures and the sample styles that
-  will ship with the module are being made. Until then a world starts empty, and the style
-  library is where you make your first one.
+  quotations. Two of those were not merely unstyled but unreadable before: a definition's
+  text inherited Foundry's near-white, and highlighting arrived as yellow on black.
+- **Secret passages.** Foundry's GM-only blocks arrive tinted purple with a Reveal button
+  inside, which fights any page you build. They get their own part: a fill before
+  revealing and a second one after, so you can see at a glance what the table has already
+  been shown, plus the lettering, the edge, and the button itself.
+- **The whole window, not just the page.** The contents panel — its entries, the page
+  being read, sub-headings, category rows, page numbers, the search box, its buttons —
+  and the window frame, its title bar, its icon buttons, and the Edit pencil. The page
+  editor too: the toolbar, its icons, the drop-down menus, and the settings bar above
+  them.
+- **Treatments you apply by hand.** Five boxes, five inline tags, five picture treatments,
+  five lists and five tables, each renameable per style, applied from an **Illuminus**
+  menu in the page editor. A read-aloud box and an encounter box can look nothing alike;
+  a stat block and a treasure table can disagree.
+- **A hovered state on everything**, and a Selected state where it means something. Each
+  starts empty, meaning "leave it alone", so nothing changes until you say so. Sizes and
+  spacing are deliberately not shadowed on hover: changing those under the pointer makes
+  the page slide out from under it.
+- **Typography that behaves.** Line spacing, letter and word spacing, small caps,
+  outlines and shadows on lettering, a drop cap that is a real element rather than
+  `::first-letter` (so it can carry an outline), columns per heading level, and control
+  over where lines may break and whether a long word may be hyphenated.
+- **Surfaces with depth.** A fill can graduate from one colour to another, or frost what
+  is behind it as frosted glass does. A background picture can sit behind any fill — with
+  its own fit, position, blending and strength — and be softened, brightened, drained of
+  colour or aged before it is laid down. Shadows sit inside and outside.
+- **Shapes and placing.** A corner can be a bevel, a notch, a scoop or a squircle rather
+  than a rounding. A picture can be cropped to a named shape — Square, Landscape,
+  Widescreen, Panorama — saying which part to keep. A block can be turned a little, drawn
+  larger than the room it takes, held in view while the page scrolls past it, or nudged
+  aside.
+- **Folding.** A heading can fold the run of text beneath it, and a contents entry can
+  fold the entries under it. What is folded is remembered for the session but never
+  stored, because a sheet re-renders on every edit.
+
+**Background images come from anywhere in your Foundry data** — your own art, a system's,
+another module's. A grayscale texture works best with a Fill Color under Multiply
+blending, so the texture supplies the grain and the colour supplies the hue; a picture
+carrying its own colour wants Fill Color set to white and Image Blending set to Normal.
+
+**No artwork or styles are included — yet.** A world starts with no styles at all, and
+the library is where you make your first one.
+
+## Taking a journal out of Foundry
+
+A styled journal can leave entirely, in four shapes:
+
+| Format | What you get |
+| --- | --- |
+| **Web pages** | A folder: one HTML file per journal, an index, and the pictures beside them |
+| **One file** | A single self-contained HTML file, pictures inlined — emailable |
+| **Print / PDF** | Opens the browser's print dialogue, opening on a contents page whose entries are real PDF links |
+| **Stylesheet** | The look without the words, renamed to a prefix of your choosing, for someone else's release |
+
+The export mirrors Foundry's own markup, so every rule applies to it unchanged — and
+without a style, it carries the CSS that is actually painting your pages, which is what
+lets a game system's look travel with it.
+
+Two honest notes. **Printing to PDF varies by browser**: Chromium writes its own PDF from
+the print preview and keeps the document's internal links, while Safari and Foundry's
+desktop app hand the job to the operating system's print panel, which flattens them. The
+export says so unless it can see it is running in Chromium. And a **stylesheet export
+carries no typefaces** — a font file is licensed to whoever installed it, so the file
+names the faces and leaves finding them to whatever loads it.
 
 ## Using it
 
 Three ways in, all GM-only:
 
 | Where | What it does |
-|---|---|
+| --- | --- |
 | Journals sidebar → **Journal Styles** button | Opens the style library |
 | Right-click a journal in the sidebar → **Journal Style** | Assigns a style to that journal |
 | A journal's window header → palette icon | Assigns a style to that journal |
@@ -141,36 +189,28 @@ Three ways in, all GM-only:
 | Style library → **Export Journals…** | Saves journals as web pages |
 | Right-click a journal in the sidebar → **Export as Web Pages…** | The same, for that journal |
 
-Adding fonts: Illuminus offers whatever font families Foundry knows about, so install
+**Adding fonts:** Illuminus offers whatever font families Foundry knows about, so install
 custom fonts through Foundry's **Configure Font Families** menu and they appear in every
 Typeface dropdown.
 
-## Where things are
+### Where things are
 
 | I want to… | Go to |
-|---|---|
+| --- | --- |
 | Build or edit a look | Journals sidebar → **Journal Styles** |
 | Put a look on a journal | Right-click the journal → **Journal Style** |
-| Drop a ready-made page structure in | The page editor's **Illuminus** menu → **Template** |
+| Wrap something in a box, tag or picture treatment | The page editor's **Illuminus** menu |
+| Drop a ready-made page structure in | **Illuminus → Template** |
 | Keep something you built for next time | Select it, then **Illuminus → Template → Save selection as template** |
 | Tidy or share templates | Journals sidebar → **Templates** |
-| Get a deleted sample back | Style library → **Restore Samples** |
 | See a style at full size, in a real journal | Style library → tick a style → **Sample Journal** |
-| Set a passage in columns | The heading above it → **Columns**. Level 1 sets the text under the page's title |
-
-## Finding your way around the editor
-
-- **Search every setting** from the box at the top. It narrows every tab at once and
-  dims the ones with nothing in them, so the tab strip tells you where to look.
-- **Sections start closed.** Open the one you want; the editor remembers.
-- **Reset** works at three sizes — one section, one tab, or the whole style — and always
-  returns to what you last *saved*, not to the factory settings.
-- **Nothing is written until you press Save**, and closing with unsaved changes asks first.
+| Set a passage in columns | The heading above it → **Columns**. Level 1 governs the text under the page's title |
 
 ## For developers
 
 How a style becomes CSS, the file layout, the checks, and the public API are in
-[ARCHITECTURE.md](ARCHITECTURE.md).
+[ARCHITECTURE.md](ARCHITECTURE.md). What has changed and when is in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
@@ -178,15 +218,13 @@ How a style becomes CSS, the file layout, the checks, and the public API are in
 
 Copyright (C) 2026 Aventhar.
 
-Illuminus is free software: you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Illuminus is free software: you can redistribute it and/or modify it under the terms of
+the GNU General Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
 
-It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE. See the GNU General Public License for more details.
+It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-Anything bundled with the module — artwork, sample styles, templates — is
-redistributed under the same terms, so only bundle what may be licensed that
-way.
+Anything bundled with the module — artwork, sample styles, templates — is redistributed
+under the same terms, so only bundle what may be licensed that way.

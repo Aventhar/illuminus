@@ -664,6 +664,32 @@ in the template library.
   `foundry is not defined` in whatever check happened to be running — a confusing way to
   learn you were driving the same browser from two places.
 
+## The documentation set
+
+Four files, and they do not overlap:
+
+- **`README.md`** is for somebody deciding whether to install it, and then using it. It
+  opens by saying where the name comes from — the illuminated manuscripts of the medieval
+  scriptorium — because that is the whole design argument in one sentence: how a page
+  looks is part of what it says.
+- **`ARCHITECTURE.md`** is for somebody changing it. It leads with the one rule everything
+  hangs off (**a style supplies values, never rules**) and then says where things live,
+  what the checks are, and what a schema change costs.
+- **`CHANGELOG.md`** takes a line per commit that changes what a person can see or do, and
+  a dated heading per version. Keep a Changelog format. Note the two conventions stated at
+  its head: the schema version is not the module version, and nothing has been released
+  yet, so everything sits under Unreleased.
+- **`.claude/CLAUDE.md`** — this file — is the traps. Anything that cost a round of
+  debugging to find out, so it is found out once.
+
+**Screenshots live in `docs/images/` and are captured cropped to one element.** Never the
+whole viewport: the sandbox world runs a published adventure, and its artwork and text
+would otherwise land in a GPLv3 repository. `Page.captureScreenshot` takes a `clip` from
+the element's own bounding rect — position the window first (`app.setPosition`), because a
+window Foundry has placed can start off-screen and the clip will cut it. Build a journal
+of your own words for anything showing page content, and delete it afterwards; the
+editor's Live Sample is already the module's own text and is safe as it stands.
+
 ## Generated files — do not hand-edit
 
 - **`SETTINGS.md`** is not kept in the repo — a list of two thousand controls is out
