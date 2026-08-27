@@ -7192,6 +7192,66 @@ try {
   })()`);
 }
 
+// Where a block sits. Only two answers are on offer — where the page puts it,
+// and held in view while the page scrolls past — because a block put back into
+// normal flow would send its own background picture to the corner of the page.
+console.log("\n[77] A block can be nudged, or held in view");
+try {
+  const sat = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Placing Probe", settings: {
+      box01: {position: "sticky", offsetTop: 12},
+      box02: {offsetTop: 20, offsetLeft: -30}
+    }});
+    const entry = await JournalEntry.create({name: "Placing Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      '<section class="illuminus-box illuminus-box--box01">Held</section>' +
+      '<section class="illuminus-box illuminus-box--box02">Nudged</section>' +
+      '<section class="illuminus-box illuminus-box--box03">As it is</section>'}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+    await new Promise(r => setTimeout(r, 1400));
+    const root = entry.sheet.element;
+    const read = (cls) => {
+      const seen = getComputedStyle(root.querySelector(".illuminus-box--" + cls));
+      return {how: seen.position, top: seen.top, left: seen.left};
+    };
+    // Where the nudged one ended up, against the one nobody touched.
+    const box = (cls) => root.querySelector(".illuminus-box--" + cls).getBoundingClientRect();
+    const out = {held: read("box01"), nudged: read("box02"), asIs: read("box03"),
+      shift: Math.round(box("box02").left - box("box03").left)};
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    await entry.delete();
+    await api.deleteStyle(style.id);
+    return JSON.stringify(out);
+  })()`));
+  check(sat.held.how === "sticky" && sat.held.top === "12px",
+    `a block can be held in view, stopping where it was told (${sat.held.how} at ${sat.held.top})`);
+  check(sat.nudged.how === "relative" && sat.shift === -30,
+    `and one can be nudged from where the page put it (${sat.shift}px across)`);
+  // The skeleton positions every block so it can hold a picture layer, and an
+  // unset control has to fall back to exactly that. A relatively placed box
+  // reports the offset it used rather than "auto", and nought is not moved.
+  check(sat.asIs.how === "relative" && sat.asIs.top === "0px",
+    `while a block nobody placed keeps what the stylesheet gives it (${sat.asIs.how}, not moved)`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
+    }
+    for (const entry of game.journal.filter((e) => e.name === "Placing Journal")) await entry.delete();
+    for (const style of api.listStyles().filter((s) => s.name === "Placing Probe")) {
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);

@@ -62,7 +62,7 @@ const CHOICES = {
   flexWrap: ["inherit", "nowrap", "wrap", "wrapReverse"],
   justify: ["inherit", "start", "center", "end", "between", "around", "evenly"],
   alignItems: ["inherit", "stretch", "start", "center", "end", "baseline"],
-  position: ["inherit", "static", "relative", "sticky"],
+  position: ["inherit", "relative", "sticky"],
   overflow: ["inherit", "visible", "hidden", "auto", "scroll"],
   wrap: ["inherit", "balance", "pretty", "nowrap"],
   // What a corner is cut to. `round` is the browser's own, so it is the default
@@ -528,7 +528,9 @@ function boxSections() {
         select("whenEmpty", "show", CHOICES.whenEmpty, { emit: emitWhenEmpty }),
         // A block holds other things, so it can be a row of them as well as a
         // block of them: a stat line, a row of trait chips, a two-column aside.
-        ...layoutFields("", { position: false })
+        // It may also be nudged, or made to stay put while the page scrolls past
+        // it — an aside that holds its place beside the text.
+        ...layoutFields("", { position: true })
       ]
     },
     {
@@ -676,7 +678,7 @@ function imageSections() {
         select("pictureCrop", "cover", CHOICES.pictureCrop, { emit: emitCrop }),
         select("pictureFrom", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
         // No row settings: a picture holds nothing to lay out inside it.
-        ...layoutFields("", { flex: false, position: false }),
+        ...layoutFields("", { flex: false, position: true }),
         num("opacity", 100, "%", 0, 100, 1)
       ]
     },
@@ -2387,7 +2389,8 @@ const LAYOUTS = {
     layout: { order: [
       "float", "width", "clear", "whenEmpty",
       DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
-      DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"
+      DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
+      DIVIDER, "position", "offsetTop", "offsetLeft"
     ] },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
@@ -2460,7 +2463,8 @@ const LAYOUTS = {
       "shadowBlur", "shadowSpread", "shadowColor", "float", "width", "align", "clear", "flip",
       DIVIDER, "pictureShape", "pictureCrop", "pictureFrom", DIVIDER,
       "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
-      DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER,
+      DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
+      DIVIDER, "position", "offsetTop", "offsetLeft", DIVIDER,
       "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur", "innerShadowSpread",
       "innerShadowColor"
     ] },

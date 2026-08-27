@@ -699,6 +699,24 @@ for (const name of names) {
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
     continue;
   }
+  // where a part sits: <prefix>Position / <prefix>OffsetTop / <prefix>OffsetLeft,
+  // in both spellings — a family with no prefix writes the first letter small.
+  if ((m = name.match(/^(.*?)([Pp]osition|[Oo]ffsetTop|[Oo]ffsetLeft)$/))
+      && !/texture$/i.test(m[1])) {
+    const wording = {
+      position: ["How It Sits",
+        "Whether it sits where the page puts it, or stays put on screen while the "
+        + "page scrolls past it — which needs a distance from the top to stay at."],
+      offsettop: ["Nudge Down",
+        "How far it is moved from where the page puts it, up or down. For "
+        + "something that stays put, this is the distance from the top it stops at."],
+      offsetleft: ["Nudge Right",
+        "How far it is moved from where the page puts it, left or right."]
+    }[m[2].toLowerCase()];
+    put(`ILLUMINUS.Field.${name}.label`, wording[0]);
+    put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
+    continue;
+  }
   // frosted glass: <prefix>Frost, one per fill that offers it.
   if ((m = name.match(/^(.*?)[Ff]rost$/))) {
     const of = noun(m[1], "");
@@ -1126,6 +1144,8 @@ const CHOICE_TEXT = {
   same: "Same as normal", on: "Yes", off: "No",
   // Where the lines of a run of words may break.
   balance: "Even up the lines", pretty: "Avoid a lone last word",
+  // How a part sits on the page.
+  relative: "Where the page puts it", sticky: "Stays put while the page scrolls",
   // The shape a picture is cropped to, and how it fills it.
   square: "Square", landscape: "Landscape", portrait: "Portrait",
   wide: "Widescreen", tall: "Tall", panorama: "Panorama",

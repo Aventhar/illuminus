@@ -544,6 +544,10 @@
   float: var(--ill-box01-float);
   width: var(--ill-box01-width);
   clear: var(--ill-box01-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box01-offset-top);
+  left: var(--ill-box01-offset-left);
   display: var(--ill-box01-display, block);
   flex-direction: var(--ill-box01-flex-direction);
   flex-wrap: var(--ill-box01-flex-wrap);
@@ -609,6 +613,10 @@
   float: var(--ill-box02-float);
   width: var(--ill-box02-width);
   clear: var(--ill-box02-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box02-offset-top);
+  left: var(--ill-box02-offset-left);
   display: var(--ill-box02-display, block);
   flex-direction: var(--ill-box02-flex-direction);
   flex-wrap: var(--ill-box02-flex-wrap);
@@ -674,6 +682,10 @@
   float: var(--ill-box03-float);
   width: var(--ill-box03-width);
   clear: var(--ill-box03-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box03-offset-top);
+  left: var(--ill-box03-offset-left);
   display: var(--ill-box03-display, block);
   flex-direction: var(--ill-box03-flex-direction);
   flex-wrap: var(--ill-box03-flex-wrap);
@@ -739,6 +751,10 @@
   float: var(--ill-box04-float);
   width: var(--ill-box04-width);
   clear: var(--ill-box04-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box04-offset-top);
+  left: var(--ill-box04-offset-left);
   display: var(--ill-box04-display, block);
   flex-direction: var(--ill-box04-flex-direction);
   flex-wrap: var(--ill-box04-flex-wrap);
@@ -804,6 +820,10 @@
   float: var(--ill-box05-float);
   width: var(--ill-box05-width);
   clear: var(--ill-box05-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box05-offset-top);
+  left: var(--ill-box05-offset-left);
   display: var(--ill-box05-display, block);
   flex-direction: var(--ill-box05-flex-direction);
   flex-wrap: var(--ill-box05-flex-wrap);
@@ -869,6 +889,10 @@
   float: var(--ill-box06-float);
   width: var(--ill-box06-width);
   clear: var(--ill-box06-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box06-offset-top);
+  left: var(--ill-box06-offset-left);
   display: var(--ill-box06-display, block);
   flex-direction: var(--ill-box06-flex-direction);
   flex-wrap: var(--ill-box06-flex-wrap);
@@ -934,6 +958,10 @@
   float: var(--ill-box07-float);
   width: var(--ill-box07-width);
   clear: var(--ill-box07-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box07-offset-top);
+  left: var(--ill-box07-offset-left);
   display: var(--ill-box07-display, block);
   flex-direction: var(--ill-box07-flex-direction);
   flex-wrap: var(--ill-box07-flex-wrap);
@@ -999,6 +1027,10 @@
   float: var(--ill-box08-float);
   width: var(--ill-box08-width);
   clear: var(--ill-box08-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box08-offset-top);
+  left: var(--ill-box08-offset-left);
   display: var(--ill-box08-display, block);
   flex-direction: var(--ill-box08-flex-direction);
   flex-wrap: var(--ill-box08-flex-wrap);
@@ -1064,6 +1096,10 @@
   float: var(--ill-box09-float);
   width: var(--ill-box09-width);
   clear: var(--ill-box09-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box09-offset-top);
+  left: var(--ill-box09-offset-left);
   display: var(--ill-box09-display, block);
   flex-direction: var(--ill-box09-flex-direction);
   flex-wrap: var(--ill-box09-flex-wrap);
@@ -1129,6 +1165,10 @@
   float: var(--ill-box10-float);
   width: var(--ill-box10-width);
   clear: var(--ill-box10-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-box10-offset-top);
+  left: var(--ill-box10-offset-left);
   display: var(--ill-box10-display, block);
   flex-direction: var(--ill-box10-flex-direction);
   flex-wrap: var(--ill-box10-flex-wrap);
@@ -1194,6 +1234,10 @@
   float: var(--ill-image01-float);
   width: var(--ill-image01-width);
   clear: var(--ill-image01-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image01-offset-top);
+  left: var(--ill-image01-offset-left);
   display: var(--ill-image01-display, block);
   min-width: var(--ill-image01-min-width);
   max-width: var(--ill-image01-max-width);
@@ -1259,6 +1303,10 @@
   float: var(--ill-image02-float);
   width: var(--ill-image02-width);
   clear: var(--ill-image02-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image02-offset-top);
+  left: var(--ill-image02-offset-left);
   display: var(--ill-image02-display, block);
   min-width: var(--ill-image02-min-width);
   max-width: var(--ill-image02-max-width);
@@ -1324,6 +1372,10 @@
   float: var(--ill-image03-float);
   width: var(--ill-image03-width);
   clear: var(--ill-image03-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image03-offset-top);
+  left: var(--ill-image03-offset-left);
   display: var(--ill-image03-display, block);
   min-width: var(--ill-image03-min-width);
   max-width: var(--ill-image03-max-width);
@@ -1389,6 +1441,10 @@
   float: var(--ill-image04-float);
   width: var(--ill-image04-width);
   clear: var(--ill-image04-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image04-offset-top);
+  left: var(--ill-image04-offset-left);
   display: var(--ill-image04-display, block);
   min-width: var(--ill-image04-min-width);
   max-width: var(--ill-image04-max-width);
@@ -1454,6 +1510,10 @@
   float: var(--ill-image05-float);
   width: var(--ill-image05-width);
   clear: var(--ill-image05-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image05-offset-top);
+  left: var(--ill-image05-offset-left);
   display: var(--ill-image05-display, block);
   min-width: var(--ill-image05-min-width);
   max-width: var(--ill-image05-max-width);
@@ -1519,6 +1579,10 @@
   float: var(--ill-image06-float);
   width: var(--ill-image06-width);
   clear: var(--ill-image06-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image06-offset-top);
+  left: var(--ill-image06-offset-left);
   display: var(--ill-image06-display, block);
   min-width: var(--ill-image06-min-width);
   max-width: var(--ill-image06-max-width);
@@ -1584,6 +1648,10 @@
   float: var(--ill-image07-float);
   width: var(--ill-image07-width);
   clear: var(--ill-image07-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image07-offset-top);
+  left: var(--ill-image07-offset-left);
   display: var(--ill-image07-display, block);
   min-width: var(--ill-image07-min-width);
   max-width: var(--ill-image07-max-width);
@@ -1649,6 +1717,10 @@
   float: var(--ill-image08-float);
   width: var(--ill-image08-width);
   clear: var(--ill-image08-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image08-offset-top);
+  left: var(--ill-image08-offset-left);
   display: var(--ill-image08-display, block);
   min-width: var(--ill-image08-min-width);
   max-width: var(--ill-image08-max-width);
@@ -1714,6 +1786,10 @@
   float: var(--ill-image09-float);
   width: var(--ill-image09-width);
   clear: var(--ill-image09-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image09-offset-top);
+  left: var(--ill-image09-offset-left);
   display: var(--ill-image09-display, block);
   min-width: var(--ill-image09-min-width);
   max-width: var(--ill-image09-max-width);
@@ -1779,6 +1855,10 @@
   float: var(--ill-image10-float);
   width: var(--ill-image10-width);
   clear: var(--ill-image10-clear);
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: var(--ill-image10-offset-top);
+  left: var(--ill-image10-offset-left);
   display: var(--ill-image10-display, block);
   min-width: var(--ill-image10-min-width);
   max-width: var(--ill-image10-max-width);
@@ -3471,7 +3551,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box01 {
-  position: relative;
+  position: var(--ill-box01-position, relative);
   isolation: isolate;
 }
 
@@ -3499,7 +3579,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box02 {
-  position: relative;
+  position: var(--ill-box02-position, relative);
   isolation: isolate;
 }
 
@@ -3527,7 +3607,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box03 {
-  position: relative;
+  position: var(--ill-box03-position, relative);
   isolation: isolate;
 }
 
@@ -3555,7 +3635,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box04 {
-  position: relative;
+  position: var(--ill-box04-position, relative);
   isolation: isolate;
 }
 
@@ -3583,7 +3663,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box05 {
-  position: relative;
+  position: var(--ill-box05-position, relative);
   isolation: isolate;
 }
 
@@ -3611,7 +3691,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box06 {
-  position: relative;
+  position: var(--ill-box06-position, relative);
   isolation: isolate;
 }
 
@@ -3639,7 +3719,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box07 {
-  position: relative;
+  position: var(--ill-box07-position, relative);
   isolation: isolate;
 }
 
@@ -3667,7 +3747,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box08 {
-  position: relative;
+  position: var(--ill-box08-position, relative);
   isolation: isolate;
 }
 
@@ -3695,7 +3775,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box09 {
-  position: relative;
+  position: var(--ill-box09-position, relative);
   isolation: isolate;
 }
 
@@ -3723,7 +3803,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box10 {
-  position: relative;
+  position: var(--ill-box10-position, relative);
   isolation: isolate;
 }
 
@@ -3751,7 +3831,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image01 {
-  position: relative;
+  position: var(--ill-image01-position, relative);
   isolation: isolate;
 }
 
@@ -3779,7 +3859,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image02 {
-  position: relative;
+  position: var(--ill-image02-position, relative);
   isolation: isolate;
 }
 
@@ -3807,7 +3887,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image03 {
-  position: relative;
+  position: var(--ill-image03-position, relative);
   isolation: isolate;
 }
 
@@ -3835,7 +3915,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image04 {
-  position: relative;
+  position: var(--ill-image04-position, relative);
   isolation: isolate;
 }
 
@@ -3863,7 +3943,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image05 {
-  position: relative;
+  position: var(--ill-image05-position, relative);
   isolation: isolate;
 }
 
@@ -3891,7 +3971,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image06 {
-  position: relative;
+  position: var(--ill-image06-position, relative);
   isolation: isolate;
 }
 
@@ -3919,7 +3999,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image07 {
-  position: relative;
+  position: var(--ill-image07-position, relative);
   isolation: isolate;
 }
 
@@ -3947,7 +4027,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image08 {
-  position: relative;
+  position: var(--ill-image08-position, relative);
   isolation: isolate;
 }
 
@@ -3975,7 +4055,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image09 {
-  position: relative;
+  position: var(--ill-image09-position, relative);
   isolation: isolate;
 }
 
@@ -4003,7 +4083,7 @@
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image10 {
-  position: relative;
+  position: var(--ill-image10-position, relative);
   isolation: isolate;
 }
 
@@ -5913,6 +5993,8 @@ iframe):hover {
   float: var(--ill-box01-hover-float, var(--ill-box01-float));
   width: var(--ill-box01-hover-width, var(--ill-box01-width));
   clear: var(--ill-box01-hover-clear, var(--ill-box01-clear));
+  top: var(--ill-box01-hover-offset-top, var(--ill-box01-offset-top));
+  left: var(--ill-box01-hover-offset-left, var(--ill-box01-offset-left));
   display: var(--ill-box01-hover-display, var(--ill-box01-display, block));
   flex-direction: var(--ill-box01-hover-flex-direction, var(--ill-box01-flex-direction));
   flex-wrap: var(--ill-box01-hover-flex-wrap, var(--ill-box01-flex-wrap));
@@ -5980,6 +6062,8 @@ h6):hover {
   float: var(--ill-box02-hover-float, var(--ill-box02-float));
   width: var(--ill-box02-hover-width, var(--ill-box02-width));
   clear: var(--ill-box02-hover-clear, var(--ill-box02-clear));
+  top: var(--ill-box02-hover-offset-top, var(--ill-box02-offset-top));
+  left: var(--ill-box02-hover-offset-left, var(--ill-box02-offset-left));
   display: var(--ill-box02-hover-display, var(--ill-box02-display, block));
   flex-direction: var(--ill-box02-hover-flex-direction, var(--ill-box02-flex-direction));
   flex-wrap: var(--ill-box02-hover-flex-wrap, var(--ill-box02-flex-wrap));
@@ -6047,6 +6131,8 @@ h6):hover {
   float: var(--ill-box03-hover-float, var(--ill-box03-float));
   width: var(--ill-box03-hover-width, var(--ill-box03-width));
   clear: var(--ill-box03-hover-clear, var(--ill-box03-clear));
+  top: var(--ill-box03-hover-offset-top, var(--ill-box03-offset-top));
+  left: var(--ill-box03-hover-offset-left, var(--ill-box03-offset-left));
   display: var(--ill-box03-hover-display, var(--ill-box03-display, block));
   flex-direction: var(--ill-box03-hover-flex-direction, var(--ill-box03-flex-direction));
   flex-wrap: var(--ill-box03-hover-flex-wrap, var(--ill-box03-flex-wrap));
@@ -6114,6 +6200,8 @@ h6):hover {
   float: var(--ill-box04-hover-float, var(--ill-box04-float));
   width: var(--ill-box04-hover-width, var(--ill-box04-width));
   clear: var(--ill-box04-hover-clear, var(--ill-box04-clear));
+  top: var(--ill-box04-hover-offset-top, var(--ill-box04-offset-top));
+  left: var(--ill-box04-hover-offset-left, var(--ill-box04-offset-left));
   display: var(--ill-box04-hover-display, var(--ill-box04-display, block));
   flex-direction: var(--ill-box04-hover-flex-direction, var(--ill-box04-flex-direction));
   flex-wrap: var(--ill-box04-hover-flex-wrap, var(--ill-box04-flex-wrap));
@@ -6181,6 +6269,8 @@ h6):hover {
   float: var(--ill-box05-hover-float, var(--ill-box05-float));
   width: var(--ill-box05-hover-width, var(--ill-box05-width));
   clear: var(--ill-box05-hover-clear, var(--ill-box05-clear));
+  top: var(--ill-box05-hover-offset-top, var(--ill-box05-offset-top));
+  left: var(--ill-box05-hover-offset-left, var(--ill-box05-offset-left));
   display: var(--ill-box05-hover-display, var(--ill-box05-display, block));
   flex-direction: var(--ill-box05-hover-flex-direction, var(--ill-box05-flex-direction));
   flex-wrap: var(--ill-box05-hover-flex-wrap, var(--ill-box05-flex-wrap));
@@ -6248,6 +6338,8 @@ h6):hover {
   float: var(--ill-box06-hover-float, var(--ill-box06-float));
   width: var(--ill-box06-hover-width, var(--ill-box06-width));
   clear: var(--ill-box06-hover-clear, var(--ill-box06-clear));
+  top: var(--ill-box06-hover-offset-top, var(--ill-box06-offset-top));
+  left: var(--ill-box06-hover-offset-left, var(--ill-box06-offset-left));
   display: var(--ill-box06-hover-display, var(--ill-box06-display, block));
   flex-direction: var(--ill-box06-hover-flex-direction, var(--ill-box06-flex-direction));
   flex-wrap: var(--ill-box06-hover-flex-wrap, var(--ill-box06-flex-wrap));
@@ -6315,6 +6407,8 @@ h6):hover {
   float: var(--ill-box07-hover-float, var(--ill-box07-float));
   width: var(--ill-box07-hover-width, var(--ill-box07-width));
   clear: var(--ill-box07-hover-clear, var(--ill-box07-clear));
+  top: var(--ill-box07-hover-offset-top, var(--ill-box07-offset-top));
+  left: var(--ill-box07-hover-offset-left, var(--ill-box07-offset-left));
   display: var(--ill-box07-hover-display, var(--ill-box07-display, block));
   flex-direction: var(--ill-box07-hover-flex-direction, var(--ill-box07-flex-direction));
   flex-wrap: var(--ill-box07-hover-flex-wrap, var(--ill-box07-flex-wrap));
@@ -6382,6 +6476,8 @@ h6):hover {
   float: var(--ill-box08-hover-float, var(--ill-box08-float));
   width: var(--ill-box08-hover-width, var(--ill-box08-width));
   clear: var(--ill-box08-hover-clear, var(--ill-box08-clear));
+  top: var(--ill-box08-hover-offset-top, var(--ill-box08-offset-top));
+  left: var(--ill-box08-hover-offset-left, var(--ill-box08-offset-left));
   display: var(--ill-box08-hover-display, var(--ill-box08-display, block));
   flex-direction: var(--ill-box08-hover-flex-direction, var(--ill-box08-flex-direction));
   flex-wrap: var(--ill-box08-hover-flex-wrap, var(--ill-box08-flex-wrap));
@@ -6449,6 +6545,8 @@ h6):hover {
   float: var(--ill-box09-hover-float, var(--ill-box09-float));
   width: var(--ill-box09-hover-width, var(--ill-box09-width));
   clear: var(--ill-box09-hover-clear, var(--ill-box09-clear));
+  top: var(--ill-box09-hover-offset-top, var(--ill-box09-offset-top));
+  left: var(--ill-box09-hover-offset-left, var(--ill-box09-offset-left));
   display: var(--ill-box09-hover-display, var(--ill-box09-display, block));
   flex-direction: var(--ill-box09-hover-flex-direction, var(--ill-box09-flex-direction));
   flex-wrap: var(--ill-box09-hover-flex-wrap, var(--ill-box09-flex-wrap));
@@ -6516,6 +6614,8 @@ h6):hover {
   float: var(--ill-box10-hover-float, var(--ill-box10-float));
   width: var(--ill-box10-hover-width, var(--ill-box10-width));
   clear: var(--ill-box10-hover-clear, var(--ill-box10-clear));
+  top: var(--ill-box10-hover-offset-top, var(--ill-box10-offset-top));
+  left: var(--ill-box10-hover-offset-left, var(--ill-box10-offset-left));
   display: var(--ill-box10-hover-display, var(--ill-box10-display, block));
   flex-direction: var(--ill-box10-hover-flex-direction, var(--ill-box10-flex-direction));
   flex-wrap: var(--ill-box10-hover-flex-wrap, var(--ill-box10-flex-wrap));
@@ -6583,6 +6683,8 @@ h6):hover {
   float: var(--ill-image01-hover-float, var(--ill-image01-float));
   width: var(--ill-image01-hover-width, var(--ill-image01-width));
   clear: var(--ill-image01-hover-clear, var(--ill-image01-clear));
+  top: var(--ill-image01-hover-offset-top, var(--ill-image01-offset-top));
+  left: var(--ill-image01-hover-offset-left, var(--ill-image01-offset-left));
   display: var(--ill-image01-hover-display, var(--ill-image01-display, block));
   min-width: var(--ill-image01-hover-min-width, var(--ill-image01-min-width));
   max-width: var(--ill-image01-hover-max-width, var(--ill-image01-max-width));
@@ -6631,6 +6733,8 @@ h6):hover {
   float: var(--ill-image02-hover-float, var(--ill-image02-float));
   width: var(--ill-image02-hover-width, var(--ill-image02-width));
   clear: var(--ill-image02-hover-clear, var(--ill-image02-clear));
+  top: var(--ill-image02-hover-offset-top, var(--ill-image02-offset-top));
+  left: var(--ill-image02-hover-offset-left, var(--ill-image02-offset-left));
   display: var(--ill-image02-hover-display, var(--ill-image02-display, block));
   min-width: var(--ill-image02-hover-min-width, var(--ill-image02-min-width));
   max-width: var(--ill-image02-hover-max-width, var(--ill-image02-max-width));
@@ -6679,6 +6783,8 @@ h6):hover {
   float: var(--ill-image03-hover-float, var(--ill-image03-float));
   width: var(--ill-image03-hover-width, var(--ill-image03-width));
   clear: var(--ill-image03-hover-clear, var(--ill-image03-clear));
+  top: var(--ill-image03-hover-offset-top, var(--ill-image03-offset-top));
+  left: var(--ill-image03-hover-offset-left, var(--ill-image03-offset-left));
   display: var(--ill-image03-hover-display, var(--ill-image03-display, block));
   min-width: var(--ill-image03-hover-min-width, var(--ill-image03-min-width));
   max-width: var(--ill-image03-hover-max-width, var(--ill-image03-max-width));
@@ -6727,6 +6833,8 @@ h6):hover {
   float: var(--ill-image04-hover-float, var(--ill-image04-float));
   width: var(--ill-image04-hover-width, var(--ill-image04-width));
   clear: var(--ill-image04-hover-clear, var(--ill-image04-clear));
+  top: var(--ill-image04-hover-offset-top, var(--ill-image04-offset-top));
+  left: var(--ill-image04-hover-offset-left, var(--ill-image04-offset-left));
   display: var(--ill-image04-hover-display, var(--ill-image04-display, block));
   min-width: var(--ill-image04-hover-min-width, var(--ill-image04-min-width));
   max-width: var(--ill-image04-hover-max-width, var(--ill-image04-max-width));
@@ -6775,6 +6883,8 @@ h6):hover {
   float: var(--ill-image05-hover-float, var(--ill-image05-float));
   width: var(--ill-image05-hover-width, var(--ill-image05-width));
   clear: var(--ill-image05-hover-clear, var(--ill-image05-clear));
+  top: var(--ill-image05-hover-offset-top, var(--ill-image05-offset-top));
+  left: var(--ill-image05-hover-offset-left, var(--ill-image05-offset-left));
   display: var(--ill-image05-hover-display, var(--ill-image05-display, block));
   min-width: var(--ill-image05-hover-min-width, var(--ill-image05-min-width));
   max-width: var(--ill-image05-hover-max-width, var(--ill-image05-max-width));
@@ -6823,6 +6933,8 @@ h6):hover {
   float: var(--ill-image06-hover-float, var(--ill-image06-float));
   width: var(--ill-image06-hover-width, var(--ill-image06-width));
   clear: var(--ill-image06-hover-clear, var(--ill-image06-clear));
+  top: var(--ill-image06-hover-offset-top, var(--ill-image06-offset-top));
+  left: var(--ill-image06-hover-offset-left, var(--ill-image06-offset-left));
   display: var(--ill-image06-hover-display, var(--ill-image06-display, block));
   min-width: var(--ill-image06-hover-min-width, var(--ill-image06-min-width));
   max-width: var(--ill-image06-hover-max-width, var(--ill-image06-max-width));
@@ -6871,6 +6983,8 @@ h6):hover {
   float: var(--ill-image07-hover-float, var(--ill-image07-float));
   width: var(--ill-image07-hover-width, var(--ill-image07-width));
   clear: var(--ill-image07-hover-clear, var(--ill-image07-clear));
+  top: var(--ill-image07-hover-offset-top, var(--ill-image07-offset-top));
+  left: var(--ill-image07-hover-offset-left, var(--ill-image07-offset-left));
   display: var(--ill-image07-hover-display, var(--ill-image07-display, block));
   min-width: var(--ill-image07-hover-min-width, var(--ill-image07-min-width));
   max-width: var(--ill-image07-hover-max-width, var(--ill-image07-max-width));
@@ -6919,6 +7033,8 @@ h6):hover {
   float: var(--ill-image08-hover-float, var(--ill-image08-float));
   width: var(--ill-image08-hover-width, var(--ill-image08-width));
   clear: var(--ill-image08-hover-clear, var(--ill-image08-clear));
+  top: var(--ill-image08-hover-offset-top, var(--ill-image08-offset-top));
+  left: var(--ill-image08-hover-offset-left, var(--ill-image08-offset-left));
   display: var(--ill-image08-hover-display, var(--ill-image08-display, block));
   min-width: var(--ill-image08-hover-min-width, var(--ill-image08-min-width));
   max-width: var(--ill-image08-hover-max-width, var(--ill-image08-max-width));
@@ -6967,6 +7083,8 @@ h6):hover {
   float: var(--ill-image09-hover-float, var(--ill-image09-float));
   width: var(--ill-image09-hover-width, var(--ill-image09-width));
   clear: var(--ill-image09-hover-clear, var(--ill-image09-clear));
+  top: var(--ill-image09-hover-offset-top, var(--ill-image09-offset-top));
+  left: var(--ill-image09-hover-offset-left, var(--ill-image09-offset-left));
   display: var(--ill-image09-hover-display, var(--ill-image09-display, block));
   min-width: var(--ill-image09-hover-min-width, var(--ill-image09-min-width));
   max-width: var(--ill-image09-hover-max-width, var(--ill-image09-max-width));
@@ -7015,6 +7133,8 @@ h6):hover {
   float: var(--ill-image10-hover-float, var(--ill-image10-float));
   width: var(--ill-image10-hover-width, var(--ill-image10-width));
   clear: var(--ill-image10-hover-clear, var(--ill-image10-clear));
+  top: var(--ill-image10-hover-offset-top, var(--ill-image10-offset-top));
+  left: var(--ill-image10-hover-offset-left, var(--ill-image10-offset-left));
   display: var(--ill-image10-hover-display, var(--ill-image10-display, block));
   min-width: var(--ill-image10-hover-min-width, var(--ill-image10-min-width));
   max-width: var(--ill-image10-hover-max-width, var(--ill-image10-max-width));
@@ -8206,6 +8326,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-boxes-hover-texture-age, var(--ill-boxes-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-box--box01:hover {
+  position: var(--ill-box01-hover-position, var(--ill-box01-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-box--box01:hover::after {
   background-image: var(--ill-box01-hover-texture, var(--ill-box01-texture));
   background-size: var(--ill-box01-hover-texture-fit-size, var(--ill-box01-texture-fit-size));
@@ -8218,6 +8342,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-box01-hover-texture-contrast, var(--ill-box01-texture-contrast, 100%)))
           saturate(var(--ill-box01-hover-texture-saturation, var(--ill-box01-texture-saturation, 100%)))
           sepia(var(--ill-box01-hover-texture-age, var(--ill-box01-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box02:hover {
+  position: var(--ill-box02-hover-position, var(--ill-box02-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box02:hover::after {
@@ -8234,6 +8362,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-box02-hover-texture-age, var(--ill-box02-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-box--box03:hover {
+  position: var(--ill-box03-hover-position, var(--ill-box03-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-box--box03:hover::after {
   background-image: var(--ill-box03-hover-texture, var(--ill-box03-texture));
   background-size: var(--ill-box03-hover-texture-fit-size, var(--ill-box03-texture-fit-size));
@@ -8246,6 +8378,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-box03-hover-texture-contrast, var(--ill-box03-texture-contrast, 100%)))
           saturate(var(--ill-box03-hover-texture-saturation, var(--ill-box03-texture-saturation, 100%)))
           sepia(var(--ill-box03-hover-texture-age, var(--ill-box03-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box04:hover {
+  position: var(--ill-box04-hover-position, var(--ill-box04-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box04:hover::after {
@@ -8262,6 +8398,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-box04-hover-texture-age, var(--ill-box04-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-box--box05:hover {
+  position: var(--ill-box05-hover-position, var(--ill-box05-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-box--box05:hover::after {
   background-image: var(--ill-box05-hover-texture, var(--ill-box05-texture));
   background-size: var(--ill-box05-hover-texture-fit-size, var(--ill-box05-texture-fit-size));
@@ -8274,6 +8414,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-box05-hover-texture-contrast, var(--ill-box05-texture-contrast, 100%)))
           saturate(var(--ill-box05-hover-texture-saturation, var(--ill-box05-texture-saturation, 100%)))
           sepia(var(--ill-box05-hover-texture-age, var(--ill-box05-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box06:hover {
+  position: var(--ill-box06-hover-position, var(--ill-box06-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box06:hover::after {
@@ -8290,6 +8434,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-box06-hover-texture-age, var(--ill-box06-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-box--box07:hover {
+  position: var(--ill-box07-hover-position, var(--ill-box07-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-box--box07:hover::after {
   background-image: var(--ill-box07-hover-texture, var(--ill-box07-texture));
   background-size: var(--ill-box07-hover-texture-fit-size, var(--ill-box07-texture-fit-size));
@@ -8302,6 +8450,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-box07-hover-texture-contrast, var(--ill-box07-texture-contrast, 100%)))
           saturate(var(--ill-box07-hover-texture-saturation, var(--ill-box07-texture-saturation, 100%)))
           sepia(var(--ill-box07-hover-texture-age, var(--ill-box07-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box08:hover {
+  position: var(--ill-box08-hover-position, var(--ill-box08-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box08:hover::after {
@@ -8318,6 +8470,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-box08-hover-texture-age, var(--ill-box08-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-box--box09:hover {
+  position: var(--ill-box09-hover-position, var(--ill-box09-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-box--box09:hover::after {
   background-image: var(--ill-box09-hover-texture, var(--ill-box09-texture));
   background-size: var(--ill-box09-hover-texture-fit-size, var(--ill-box09-texture-fit-size));
@@ -8330,6 +8486,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-box09-hover-texture-contrast, var(--ill-box09-texture-contrast, 100%)))
           saturate(var(--ill-box09-hover-texture-saturation, var(--ill-box09-texture-saturation, 100%)))
           sepia(var(--ill-box09-hover-texture-age, var(--ill-box09-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-box--box10:hover {
+  position: var(--ill-box10-hover-position, var(--ill-box10-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-box--box10:hover::after {
@@ -8346,6 +8506,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-box10-hover-texture-age, var(--ill-box10-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-image--image01:hover {
+  position: var(--ill-image01-hover-position, var(--ill-image01-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-image--image01:hover::after {
   background-image: var(--ill-image01-hover-texture, var(--ill-image01-texture));
   background-size: var(--ill-image01-hover-texture-fit-size, var(--ill-image01-texture-fit-size));
@@ -8358,6 +8522,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-image01-hover-texture-contrast, var(--ill-image01-texture-contrast, 100%)))
           saturate(var(--ill-image01-hover-texture-saturation, var(--ill-image01-texture-saturation, 100%)))
           sepia(var(--ill-image01-hover-texture-age, var(--ill-image01-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image02:hover {
+  position: var(--ill-image02-hover-position, var(--ill-image02-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image02:hover::after {
@@ -8374,6 +8542,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-image02-hover-texture-age, var(--ill-image02-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-image--image03:hover {
+  position: var(--ill-image03-hover-position, var(--ill-image03-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-image--image03:hover::after {
   background-image: var(--ill-image03-hover-texture, var(--ill-image03-texture));
   background-size: var(--ill-image03-hover-texture-fit-size, var(--ill-image03-texture-fit-size));
@@ -8386,6 +8558,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-image03-hover-texture-contrast, var(--ill-image03-texture-contrast, 100%)))
           saturate(var(--ill-image03-hover-texture-saturation, var(--ill-image03-texture-saturation, 100%)))
           sepia(var(--ill-image03-hover-texture-age, var(--ill-image03-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image04:hover {
+  position: var(--ill-image04-hover-position, var(--ill-image04-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image04:hover::after {
@@ -8402,6 +8578,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-image04-hover-texture-age, var(--ill-image04-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-image--image05:hover {
+  position: var(--ill-image05-hover-position, var(--ill-image05-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-image--image05:hover::after {
   background-image: var(--ill-image05-hover-texture, var(--ill-image05-texture));
   background-size: var(--ill-image05-hover-texture-fit-size, var(--ill-image05-texture-fit-size));
@@ -8414,6 +8594,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-image05-hover-texture-contrast, var(--ill-image05-texture-contrast, 100%)))
           saturate(var(--ill-image05-hover-texture-saturation, var(--ill-image05-texture-saturation, 100%)))
           sepia(var(--ill-image05-hover-texture-age, var(--ill-image05-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image06:hover {
+  position: var(--ill-image06-hover-position, var(--ill-image06-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image06:hover::after {
@@ -8430,6 +8614,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-image06-hover-texture-age, var(--ill-image06-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-image--image07:hover {
+  position: var(--ill-image07-hover-position, var(--ill-image07-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-image--image07:hover::after {
   background-image: var(--ill-image07-hover-texture, var(--ill-image07-texture));
   background-size: var(--ill-image07-hover-texture-fit-size, var(--ill-image07-texture-fit-size));
@@ -8442,6 +8630,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-image07-hover-texture-contrast, var(--ill-image07-texture-contrast, 100%)))
           saturate(var(--ill-image07-hover-texture-saturation, var(--ill-image07-texture-saturation, 100%)))
           sepia(var(--ill-image07-hover-texture-age, var(--ill-image07-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image08:hover {
+  position: var(--ill-image08-hover-position, var(--ill-image08-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image08:hover::after {
@@ -8458,6 +8650,10 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-image08-hover-texture-age, var(--ill-image08-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-page-content .illuminus-image--image09:hover {
+  position: var(--ill-image09-hover-position, var(--ill-image09-position, relative));
+}
+
 .illuminus-styled .journal-page-content .illuminus-image--image09:hover::after {
   background-image: var(--ill-image09-hover-texture, var(--ill-image09-texture));
   background-size: var(--ill-image09-hover-texture-fit-size, var(--ill-image09-texture-fit-size));
@@ -8470,6 +8666,10 @@ blockquote):not(:empty))):hover {
           contrast(var(--ill-image09-hover-texture-contrast, var(--ill-image09-texture-contrast, 100%)))
           saturate(var(--ill-image09-hover-texture-saturation, var(--ill-image09-texture-saturation, 100%)))
           sepia(var(--ill-image09-hover-texture-age, var(--ill-image09-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-page-content .illuminus-image--image10:hover {
+  position: var(--ill-image10-hover-position, var(--ill-image10-position, relative));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image10:hover::after {

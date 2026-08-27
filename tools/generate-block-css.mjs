@@ -111,6 +111,10 @@ ${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: ${v(group, "offsetTop")};
+  left: ${v(group, "offsetLeft")};
 ${layout(group)}
 ${box(group)}
   font-family: ${v(group, "font")};
@@ -157,6 +161,10 @@ ${memberSelector(group)} {
   float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
+  /* Where it is nudged to. Its position is written by the rule that makes it
+     ready to hold a picture layer, so that one place decides it. */
+  top: ${v(group, "offsetTop")};
+  left: ${v(group, "offsetLeft")};
 ${displayed(group, "block")}
   min-width: ${v(group, "minWidth")};
   max-width: ${v(group, "maxWidth")};
@@ -583,9 +591,30 @@ const eachAfter = (selector) => selector
  */
 const layerHost = (selector) => selector.replace(/:hover|\.active(?=$|[\s,])/g, "");
 
+/**
+ * Whether a layer's host is positioned, and by what.
+ *
+ * A layer is placed against its host, so the host has to be positioned — but
+ * where the part *offers* a placing control, the control decides and the
+ * skeleton's own value is what an unset one falls back to. That is the same
+ * bargain `display` makes: a control that can override something the skeleton
+ * deliberately sets must name what the skeleton set.
+ *
+ * Only "relative" and "stay put" are on offer for exactly this reason. A part
+ * put back into normal flow would send its own background picture to the corner
+ * of the page.
+ */
+const hostPosition = (layer) => {
+  const group = GROUPS.find((g) => g.id === layer.group);
+  const name = layer.prefix ? `${layer.prefix}Position` : "position";
+  const offered = (group?.sections ?? []).some((section) =>
+    section.fields.some((field) => field.name === name));
+  return offered ? vOr(group, name, "relative") : "relative";
+};
+
 const imageLayer = (layer) => `
 ${layerHost(layer.selector)} {
-${layer.host === false ? "" : "  position: relative;\n"}  isolation: isolate;
+${layer.host === false ? "" : `  position: ${hostPosition(layer)};\n`}  isolation: isolate;
 }
 
 ${eachAfter(layer.selector)} {

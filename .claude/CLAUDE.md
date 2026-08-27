@@ -959,6 +959,16 @@ is one `filter` on the layer, and **every part carries its own fallback**, becau
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
 
+**Where a part is placed, only two answers are on offer.** A block and a picture
+treatment can be held in view while the page scrolls past, or nudged from where
+the page puts them — and nothing else. Both host a background picture layer,
+which is placed against them, so a part put back into normal flow would send its
+own picture to the corner of the page. `hostPosition()` in the generator writes
+the layer host's position from the control where a part offers one, falling back
+to `relative`, so one place decides it and an unset control changes nothing.
+Reading it back: a relatively placed box reports the offset it *used*, so
+`getComputedStyle().top` is `0px` and never `auto`.
+
 **A frosting is one control because zero has to mean none.** A backdrop filter
 set to anything at all — `blur(0px)`, an identity filter — starts a stacking
 context, and a contents panel that quietly became one would take whatever
