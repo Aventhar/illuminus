@@ -820,6 +820,12 @@ const picked = await cdp.evaluate(`(async () => {
   row.querySelector(".illuminus-eyedropper").click();
   await new Promise(r => setTimeout(r, 100));
   const cursorArmed = document.documentElement.classList.contains("illuminus-picking");
+  // Asked while pointing is still active, not after: the sample is deaf to the
+  // pointer by default, and pointing reads what is under the cursor — so the
+  // guard has to lift for the duration or it answers with the frame behind the
+  // sample rather than the page. It is put back when the picker closes, which
+  // is what the next question asks.
+  const guardLifted = !el.querySelector(".illuminus-preview__frame").classList.contains("is-quiet");
   point("mousemove");
   await new Promise(r => setTimeout(r, 100));
   const readout = document.querySelector(".illuminus-picker-readout")?.textContent ?? "";
@@ -827,7 +833,7 @@ const picked = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 300));
 
   const out = {
-    buttons, colorFields, cursorArmed, readout,
+    buttons, colorFields, cursorArmed, readout, guardLifted,
     pickerValue: picker.value,
     cursorReleased: !document.documentElement.classList.contains("illuminus-picking"),
     readoutGone: !document.querySelector(".illuminus-picker-readout"),
@@ -841,6 +847,7 @@ const picked = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 200));
   out.afterEscape = picker.value;
   out.escapeCleanedUp = !document.documentElement.classList.contains("illuminus-picking");
+  out.guardBack = el.querySelector(".illuminus-preview__frame").classList.contains("is-quiet");
 
   await app.close({force: true});
   return JSON.stringify(out);
@@ -849,11 +856,14 @@ const pk = JSON.parse(picked);
 check(pk.buttons === pk.colorFields,
   `every color control has a picker (${pk.buttons} buttons, ${pk.colorFields} color fields)`);
 check(pk.cursorArmed, "clicking it arms pointing mode");
+check(pk.guardLifted,
+  "the sample takes the pointer again while the eyedropper is out");
 check(pk.readout.includes("#ece0c6"), `the readout previews the color under the pointer (got "${pk.readout}")`);
 check(pk.pickerValue.toLowerCase() === "#ece0c6", `clicking applies that color (got ${pk.pickerValue})`);
 check(pk.cursorReleased && pk.readoutGone, "pointing mode cleans up after the click");
 check(pk.stored !== "#ece0c6" || true, `saved style untouched until Save (stored ${pk.stored})`);
 check(pk.afterEscape.toLowerCase() === "#ece0c6", "Escape cancels without changing the value");
+check(pk.guardBack, "and is quiet again once it is put away");
 check(pk.escapeCleanedUp, "Escape cleans up pointing mode");
 
 // Transparency is preserved, which neither screen-based sampler manages.
@@ -2522,6 +2532,10 @@ try {
     for (const a of [...foundry.applications.instances.values()]) {
       if (a.constructor.name.startsWith("Illuminus")) await a.close({force: true});
     }
+    // The editor remembers how it was last left, which is right for a person
+    // and wrong for a check: starting from yesterday's dragged width, there may
+    // be no room left to drag into. A run makes its own state here as elsewhere.
+    await game.settings.set("illuminus", "editorView", {});
     await api.openEditor(api.listStyles()[0].id);
     await new Promise(r => setTimeout(r, 1300));
   })()`);
@@ -5041,6 +5055,14 @@ console.log("\n[53] The sample journal, and columns per heading level");
 try {
   const built = JSON.parse(await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
+    // Nothing else on screen first. The editor repaints the sample on every
+    // change and refreshes every open journal sheet with it, so opening it over
+    // the windows earlier checks left behind costs that render many times over
+    // — which is how this check came to outlast the protocol's own patience.
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.document?.documentName?.startsWith("JournalEntry")
+        || app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
     // Two columns under the page's title, one under level 2, three under level
     // 3: if each heading really governs its own passage, one page shows all
     // three at once — and level 1 governs the opening text, since the title is
@@ -5060,10 +5082,50 @@ try {
     const stored = document.createElement("div");
     stored.innerHTML = entry.pages.contents[0].text.content;
 
+    // The same reading of a tree of elements both halves take, so what they
+    // compare is the shape of the markup rather than its wording.
+    const outline = (root) => [...root.querySelectorAll("*")]
+      .filter((el) => el.tagName !== "BUTTON")
+      .map((el) => el.tagName).join(",");
+
+    // How wide a heading's run of text is set, and in how many columns.
+    const flow = (name) => {
+      const el = content.querySelector(".illuminus-flow--" + name);
+      if (!el) return null;
+      return { count: getComputedStyle(el).columnCount, width: Math.round(el.getBoundingClientRect().width) };
+    };
+
+    window.__sample = { styleId: style.id, entryId: entry.id };
+    return JSON.stringify({
+      styleId: style.id, entryId: entry.id,
+      folder: entry.folder?.name ?? null,
+      pages: entry.pages.size,
+      storedOutline: outline(stored),
+      partsLeft: stored.querySelectorAll("[data-part]").length,
+      mockButtons: stored.querySelectorAll("button").length,
+      headingParagraphs: [...stored.querySelectorAll("h2, h3, h4, h5, h6")]
+        .filter((heading) => heading.nextElementSibling?.tagName === "P").length,
+      storedFlows: /illuminus-flow/.test(entry.pages.contents[0].text.content),
+      flows: [...content.querySelectorAll(":scope > .illuminus-flow")]
+        .map((el) => el.className.split(" ")[1]),
+      lead: flow("h1"), h2: flow("h2"), h3: flow("h3")
+    });
+  })()`));
+
+  // The editor in a call of its own. It is the heaviest thing this module
+  // draws and a sandbox renders it in software, so asking for the journal and
+  // the editor together spent the protocol's whole patience on the pair — and
+  // the failure then named neither of them.
+  const shown = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const { styleId } = window.__sample;
+    const outline = (root) => [...root.querySelectorAll("*")]
+      .filter((el) => el.tagName !== "BUTTON")
+      .map((el) => el.tagName).join(",");
     // The editor's own sample, to compare against: one markup file feeds both,
     // and this is what proves it still does. The render-time wrappers come out
     // of the comparison, since the stored page has none.
-    const app = await api.openEditor(style.id);
+    const app = await api.openEditor(styleId);
     await new Promise(r => setTimeout(r, 1200));
     // The first page in the frame is the sample proper; the Box, Tag, and
     // Picture panes that follow are pages of their own and wrapped as well.
@@ -5076,35 +5138,15 @@ try {
     // taken out whole, since the icon inside one is an element of its own and
     // skipping the button alone left it in the comparison.
     for (const marker of sample.querySelectorAll(".illuminus-fold")) marker.remove();
-    const outline = (root) => [...root.querySelectorAll("*")]
-      .filter((el) => el.tagName !== "BUTTON")
-      .map((el) => el.tagName).join(",");
-
-    const flow = (name) => {
-      const el = content.querySelector(".illuminus-flow--" + name);
-      if (!el) return null;
-      return { count: getComputedStyle(el).columnCount, width: Math.round(el.getBoundingClientRect().width) };
-    };
-    const out = {
-      styleId: style.id, entryId: entry.id,
-      folder: entry.folder?.name ?? null,
-      pages: entry.pages.size,
-      sameOutline: outline(stored) === outline(sample),
-      journalOutline: outline(stored).slice(0, 120),
-      sampleOutline: outline(sample).slice(0, 120),
-      partsLeft: stored.querySelectorAll("[data-part]").length,
-      mockButtons: stored.querySelectorAll("button").length,
-      headingParagraphs: [...stored.querySelectorAll("h2, h3, h4, h5, h6")]
-        .filter((heading) => heading.nextElementSibling?.tagName === "P").length,
-      storedFlows: /illuminus-flow/.test(entry.pages.contents[0].text.content),
-      sampleFlows,
-      flows: [...content.querySelectorAll(":scope > .illuminus-flow")]
-        .map((el) => el.className.split(" ")[1]),
-      lead: flow("h1"), h2: flow("h2"), h3: flow("h3")
-    };
+    const out = { sampleFlows, sampleOutline: outline(sample) };
     await app.close({force: true});
     return JSON.stringify(out);
   })()`));
+  // Read back together, so the checks below say what they always said.
+  built.sampleFlows = shown.sampleFlows;
+  built.sameOutline = built.storedOutline === shown.sampleOutline;
+  built.journalOutline = built.storedOutline.slice(0, 120);
+  built.sampleOutline = shown.sampleOutline.slice(0, 120);
 
   check(built.folder === "Samples", `the journal lands in its own folder (${built.folder})`);
   check(built.pages === 1, `with the sample on one page (${built.pages})`);
@@ -7351,8 +7393,12 @@ console.log("\n[80] The tree reaches every part");
 try {
   const walked = JSON.parse(await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
+    // Journal sheets as well as editors: the editor repaints its sample on
+    // every change and refreshes each open sheet with it, so a screenful of
+    // leftovers is paid for on every redraw this check asks for.
     for (const app of [...foundry.applications.instances.values()]) {
-      if (app.constructor.name.includes("StyleEditor")) await app.close({force: true});
+      if (app.constructor.name.startsWith("Illuminus")
+        || app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const app = await api.openEditor(api.listStyles()[0].id);
     await new Promise(r => setTimeout(r, 1400));
@@ -7370,12 +7416,29 @@ try {
         ?.closest(".illuminus-tree__item");
       return holder?.querySelector(".illuminus-tree__part")?.dataset.tab ?? null;
     };
-    // Opening a heading level from the tree both switches the tab and sets the
-    // picker, which is the one click the strip could not do.
+    window.__walk = { app, inside: {
+      page: inside("page"), title: inside("title"), sidebar: inside("sidebar")
+    } };
+    return JSON.stringify({
+      panes, missing: panes.filter((id) => !reached.has(id)),
+      pageInside: window.__walk.inside.page,
+      titleInside: window.__walk.inside.title,
+      sidebarInside: window.__walk.inside.sidebar
+    });
+  })()`));
+
+  // Opening a heading level from the tree both switches the tab and sets the
+  // picker, which is the one click the strip could not do. In a call of its
+  // own: choosing a member rebuilds the tab, and this sandbox draws the editor
+  // in software — two of those renders in one call outlast any patience worth
+  // giving a call that might genuinely be lost.
+  const opened = JSON.parse(await cdp.evaluate(`(async () => {
+    const { app } = window.__walk;
+    const el = app.element;
     const level = el.querySelector('.illuminus-tree__part[data-member="heading4"]');
     level.click();
-    await new Promise(r => setTimeout(r, 500));
-    const opened = {
+    await new Promise(r => setTimeout(r, 800));
+    const out = {
       tab: el.querySelector(".illuminus-tab.active")?.dataset.tab,
       picker: el.querySelector('[data-family-picker="headings"]')?.value,
       marked: [...el.querySelectorAll(".illuminus-tree__part.is-current")]
@@ -7386,12 +7449,10 @@ try {
         ?.textContent.trim()
     };
     await app.close({force: true});
-    return JSON.stringify({
-      panes, missing: panes.filter((id) => !reached.has(id)),
-      pageInside: inside("page"), titleInside: inside("title"), sidebarInside: inside("sidebar"),
-      opened
-    });
+    return JSON.stringify(out);
   })()`));
+  walked.opened = opened;
+
   check(walked.missing.length === 0,
     `every part the editor holds has an entry (${walked.panes.length} parts)`);
   check(walked.pageInside === "window" && walked.sidebarInside === "window"
@@ -7501,16 +7562,34 @@ try {
       out.readout = el.querySelector(".illuminus-preview__zoom-read").textContent;
       // Nothing about the style may have moved.
       out.unchanged = JSON.stringify(api.getStyle(style.id).settings) === out.settings;
-      // And it survives the redraw the editor does on every change.
+      window.__zoom = { app, styleId: style.id, magnified: out.magnified };
+      return JSON.stringify(out);
+    } catch (error) { await api.deleteStyle(style.id); throw error; }
+  })()`));
+
+  // Whether it survives a redraw, in a call of its own: the editor lays out
+  // some four and a half thousand controls and this sandbox draws in software,
+  // so a second render belongs to a second call rather than sharing a budget
+  // with the first.
+  const kept = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const { app, styleId } = window.__zoom;
+    try {
+      const el = app.element;
       app.changeTab("body", "sheet");
       await app.render();
       await new Promise(r => setTimeout(r, 900));
-      out.afterRender = heading();
-      out.sliderAfter = el.querySelector('.illuminus-preview__zoom input[type="range"]').value;
+      const out = {
+        afterRender: Math.round(
+          el.querySelector(".illuminus-preview__sheet h1")?.getBoundingClientRect().height ?? 0),
+        sliderAfter: el.querySelector('.illuminus-preview__zoom input[type="range"]').value
+      };
       await app.close({force: true});
       return JSON.stringify(out);
-    } finally { await api.deleteStyle(style.id); }
+    } finally { await api.deleteStyle(styleId); }
   })()`));
+  zoomed.afterRender = kept.afterRender;
+  zoomed.sliderAfter = kept.sliderAfter;
   check(zoomed.magnified > zoomed.plain * 1.35,
     `the sample can be magnified (${zoomed.plain}px -> ${zoomed.magnified}px)`);
   check(zoomed.readout === "150%", `and says how far (${zoomed.readout})`);
@@ -7554,12 +7633,19 @@ try {
         || app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
     }
     const style = await api.createStyle({name: "Editor Menu Probe", settings: {
-      heading1: {foldShown: true}
+      heading1: {foldShown: true},
+      // A mark no browser picks by itself, so whatever wears it can only have
+      // taken it from us. Not "square": disc, circle, square is the sequence a
+      // browser walks for nested lists, and the editor's menus nest three deep —
+      // which is what made an earlier form of this check fail on the browser's
+      // own styling rather than on ours.
+      lists: {bullet: "diamond"}
     }});
     const entry = await JournalEntry.create({name: "Editor Menu Journal"});
     const [page] = await entry.createEmbeddedDocuments("JournalEntryPage", [{
       name: "A Page", type: "text",
-      text: {content: "<p>Straight into the prose.</p><h2>A section</h2><p>Under it.</p>"}}]);
+      text: {content: "<p>Straight into the prose.</p><ul><li>An item</li></ul>"
+        + "<h2>A section</h2><p>Under it.</p>"}}]);
     await api.assignStyle(entry, style.id);
 
     // The page editor: its drop-downs are lists inside a <menu>, and core hides
@@ -7572,9 +7658,16 @@ try {
     const out = {
       menuLists: menus.length,
       shown: menus.filter((ul) => getComputedStyle(ul).display !== "none").length,
-      bulleted: menus.filter((ul) => getComputedStyle(ul).listStyleType !== "none").length
+      ours: menus.filter((ul) => /2726|\u2726/.test(getComputedStyle(ul).listStyleType)).length
     };
     await page.sheet.close({force: true});
+
+    // The same style, on the page, where the rule is meant to reach.
+    await entry.sheet.render({force: true, pageId: page.id});
+    await new Promise(r => setTimeout(r, 1400));
+    out.pageList = getComputedStyle(
+      entry.sheet.element.querySelector(".journal-page-content ul")).listStyleType;
+    await entry.sheet.close({force: true});
 
     // The page's own title is a level 1 heading, and the only one most pages
     // have — so Heading 1's folding has to reach it.
@@ -7608,8 +7701,10 @@ try {
   // beat core's `display: none` from a later layer and every drop-down unfurls.
   check(found.menuLists > 0 && found.shown === 0,
     `the editor's drop-downs stay closed (${found.shown} of ${found.menuLists} showing)`);
-  check(found.bulleted === 0,
-    `and its entries take no list styling of ours (${found.bulleted} bulleted)`);
+  check(found.ours === 0,
+    `and its entries take no list styling of ours (${found.ours} of ${found.menuLists})`);
+  check(/2726|\u2726/.test(found.pageList),
+    `while a list on the page does take it (${found.pageList})`);
   check(found.markerOnTitle, "a page's title can be folded, since it is its level 1 heading");
   check(found.foldedAway && found.titleMarked,
     `and folding it takes the whole page with it (${found.foldedAway})`);

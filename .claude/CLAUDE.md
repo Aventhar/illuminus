@@ -618,6 +618,25 @@ in the template library.
 
 ## Testing traps found the hard way
 
+- **One call may open the editor or redraw it, never both.** The editor lays out
+  some 4,600 controls and the sandbox draws in software with no GPU: a render is
+  25–35 seconds, so two in one `Runtime.evaluate` outlast any limit worth setting
+  — and the failure then names a call that was doing two unrelated things rather
+  than the render that was slow. Checks [53], [80] and [82] each hit this; each
+  is split now. `CALL_TIMEOUT` is 300s so a stall is unambiguous rather than
+  merely slow. Before diagnosing a timeout, time the steps in isolation: all
+  three of those turned out to be honest work, not a hang.
+- **Pick a test value the browser would never pick.** A check asserting our
+  bullet did not reach the editor's menus used `square` — and `disc, circle,
+  square` is the sequence a browser walks for nested lists, which the menus are.
+  It failed on the user agent's own styling while the module was behaving.
+  `CSS.getMatchedStylesForNode` settled it in one call: `matches()` on the rule's
+  own selector was already false.
+- **The editor remembers how it was left, so a check must not inherit it.** The
+  pane width, the zoom and the hover switch are kept per person now. The grip
+  check began from a width a previous run had dragged to and had no room left to
+  drag into. It clears `editorView` first, as the world fixtures clear the world.
+
 - **A lost protocol call used to stop a run dead and quietly.** `tools/cdp.mjs` now
   rejects anything in flight when the socket closes, and times a call out at 90s, so the
   failure names the call instead of leaving "fewer checks passed, none failed" — which

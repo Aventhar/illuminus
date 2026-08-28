@@ -59,7 +59,13 @@ export async function connect(port = 9222) {
    * browser with no hardware behind it. Short enough that a call which is never
    * coming back still names itself rather than hanging the run.
    */
-  const CALL_TIMEOUT = 180000;
+  // Long enough for the heaviest thing the module draws. The style editor lays
+  // out some four and a half thousand controls, and a sandbox renders in
+  // software with no GPU — around twenty-five seconds a time, so a check that
+  // opens it and then makes it redraw spends the best part of a minute inside
+  // one call. The limit is here to name a call that was lost, not to hurry a
+  // slow one: keep it well clear of honest work.
+  const CALL_TIMEOUT = 300000;
 
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const msgId = ++id;

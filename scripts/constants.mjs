@@ -12,6 +12,8 @@ export const SETTINGS = {
   templates: "templates",
   recentColors: "recentColors",
   exportTermsSeen: "exportTermsSeen",
+  eyedropper: "eyedropper",
+  editorView: "editorView",
   debug: "debug"
 };
 

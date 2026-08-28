@@ -32,6 +32,20 @@ for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWit
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
 put("ILLUMINUS.Menu.Lists", "List");
 put("ILLUMINUS.Menu.Tables", "Table");
+put("ILLUMINUS.Settings.Eyedropper.Name", "Eyedropper");
+put("ILLUMINUS.Settings.Eyedropper.Hint",
+  "Where the eyedropper takes a color from. Reading it out of the page can see "
+  + "anything Foundry has drawn \u2014 a fill, an edge, lettering \u2014 keeps transparency, "
+  + "and needs no permission, but it cannot sample a background picture or "
+  + "anything outside the Foundry window. The operating system's picker can take "
+  + "any pixel on the screen, including a reference image open beside Foundry, "
+  + "but gives back a solid color with no transparency. Hold Shift when you "
+  + "click an eyedropper to use whichever one you have not chosen here.");
+put("ILLUMINUS.Settings.Eyedropper.Page", "Read colors out of the page");
+put("ILLUMINUS.Settings.Eyedropper.Screen", "Take any pixel on the screen");
+put("ILLUMINUS.Notifications.NoScreenPicker",
+  "This browser offers no screen eyedropper, so there is nothing to take a pixel with. "
+  + "Reading colors out of the page still works.");
 put("ILLUMINUS.Editor.Zoom", "Zoom");
 put("ILLUMINUS.Editor.QuietSample", "Disable hover in preview");
 put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
@@ -332,7 +346,7 @@ Object.assign(out, {
   "ILLUMINUS.Preview.Search": "Search box",
   "ILLUMINUS.Preview.Button": "Button",
   "ILLUMINUS.Buttons.PickColor": "Pick a color from the screen",
-  "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its color — fills, borders, and lettering. Hold Option/Alt for lettering, Escape to cancel.",
+  "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its color \u2014 fills, borders, and lettering. Hold Option/Alt for lettering, Escape to cancel. Hold Shift to use the other eyedropper instead: whichever of the two you have not made your usual one, under Configure Settings.",
   "ILLUMINUS.Picker.BackgroundMode": "Fill",
   "ILLUMINUS.Picker.BorderMode": "Border",
   "ILLUMINUS.Picker.TextMode": "Text",

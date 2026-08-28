@@ -63,6 +63,36 @@ export function registerSettings() {
     default: false
   });
 
+  // How the editor was left last time: how large the sample was drawn, whether
+  // it was answering the pointer, and how the room was split between the sample
+  // and the settings. None of it is part of any style — it is how one person
+  // likes to work, so it is theirs and not the world's.
+  game.settings.register(MODULE_ID, SETTINGS.editorView, {
+    scope: "client",
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  // Where the eyedropper takes its color from. Reading it out of the page needs
+  // no screen-capture permission and keeps transparency, but it can only see
+  // inside the Foundry window and cannot sample a background picture. The
+  // browser's own picker can take any pixel on the screen — a reference image in
+  // another window — but returns an opaque color, and on some systems it has
+  // been unreliable. Per person rather than per world: it is about the machine.
+  game.settings.register(MODULE_ID, SETTINGS.eyedropper, {
+    name: "ILLUMINUS.Settings.Eyedropper.Name",
+    hint: "ILLUMINUS.Settings.Eyedropper.Hint",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: {
+      page: "ILLUMINUS.Settings.Eyedropper.Page",
+      screen: "ILLUMINUS.Settings.Eyedropper.Screen"
+    },
+    default: "page"
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "ILLUMINUS.Settings.Debug.Name",
     hint: "ILLUMINUS.Settings.Debug.Hint",

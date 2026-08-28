@@ -1,6 +1,6 @@
 import { wrapHeadingSections } from "../heading-sections.mjs";
 import { markFolds } from "../collapsible.mjs";
-import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, log } from "../constants.mjs";
+import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, SETTINGS, getSetting, setSetting, log } from "../constants.mjs";
 import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
@@ -335,6 +335,38 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * since merely crossing the pane repaints whatever the mouse passed over.
    */
   #quietSample = true;
+
+  /** Set once the stored view has been read, so a re-render does not re-read it. */
+  #viewLoaded = false;
+
+  /**
+   * How this person last left the editor, remembered across openings.
+   *
+   * None of it belongs to a style: it is how somebody likes to work, so it is
+   * kept per person and written as it changes rather than on save. Read once
+   * when the window is built, so a second editor opened later starts where the
+   * last one was left rather than at the defaults.
+   */
+  #loadView() {
+    // Once per window. The editor re-renders on every change, and reading the
+    // stored view again each time would race a write that has not landed yet —
+    // a slider would jump back to where it was a moment ago.
+    if (this.#viewLoaded) return;
+    this.#viewLoaded = true;
+    const view = getSetting(SETTINGS.editorView) ?? {};
+    if (Number.isFinite(view.zoom)) this.#sampleZoom = view.zoom;
+    if (typeof view.quiet === "boolean") this.#quietSample = view.quiet;
+    if (Number.isFinite(view.settingsWidth)) this.#previewWidth = view.settingsWidth;
+  }
+
+  /** Keep how it is being used now, for the next time it is opened. */
+  #keepView() {
+    setSetting(SETTINGS.editorView, {
+      zoom: this.#sampleZoom,
+      quiet: this.#quietSample,
+      settingsWidth: this.#previewWidth
+    }).catch((error) => log.debug(`could not keep the editor's view: ${error?.message}`));
+  }
 
   /** What the filter box holds, kept across re-renders. */
   /**
@@ -1265,7 +1297,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       frame.classList.toggle("is-quiet", quiet);
     };
     show(this.#quietSample);
-    box.addEventListener("change", () => show(box.checked));
+    box.addEventListener("change", () => { show(box.checked); this.#keepView(); });
 
     // A part is still clickable: the sample is how a person reaches a part they
     // can see but cannot name.
@@ -1294,6 +1326,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     };
     show(this.#sampleZoom);
     slider.addEventListener("input", () => show(Number(slider.value)));
+    slider.addEventListener("change", () => this.#keepView());
   }
 
   #activateGrip() {
@@ -1323,6 +1356,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         columns.style.setProperty("--illuminus-settings-width", `${width}px`);
       };
       const onUp = () => {
+        this.#keepView();
         grip.classList.remove("is-dragging");
         grip.releasePointerCapture(event.pointerId);
         grip.removeEventListener("pointermove", onMove);
@@ -1354,6 +1388,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // The sample folds as a page does, so the Folding controls show what they
     // do rather than being taken on trust.
     markFolds(this.element.querySelector(".illuminus-preview"));
+    this.#loadView();
     this.#activateGrip();
     this.#activateZoom();
     this.#activateQuiet();
@@ -1755,12 +1790,47 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * The trade-off is that it samples elements rather than raw pixels: colors
    * from a background picture are not available this way.
    */
-  static async #onPickColor(_event, target) {
+  static async #onPickColor(event, target) {
     const path = target.dataset.path;
     const picker = this.element.querySelector(`[data-field="${path}"] color-picker`);
     if (!picker) return;
-    const hex = await IlluminusStyleEditor.#pickFromWindow();
+    // The setting says which one is ordinary; holding Shift asks for the other,
+    // so whichever a person keeps is one key away from the one they keep for
+    // the odd occasion — a picture's colour, or a reference open beside Foundry.
+    const screen = (getSetting(SETTINGS.eyedropper) === "screen") !== Boolean(event?.shiftKey);
+    const hex = screen
+      ? await IlluminusStyleEditor.#pickFromScreen()
+      : await IlluminusStyleEditor.#pickFromWindow();
     if (hex) picker.value = hex;
+  }
+
+  /**
+   * The browser's own eyedropper, which can take any pixel on the screen.
+   *
+   * Offered because reading out of the page cannot see a background picture, or
+   * anything outside the Foundry window — a reference image open beside it, say.
+   * What it gives back is an opaque sRGB color: the API has no way to express
+   * transparency, so an alpha a person wanted has to be set afterwards.
+   *
+   * It needs the click that asked for it to still count as a gesture, so it is
+   * opened straight from the handler rather than after any awaiting. Where the
+   * browser does not provide it — or the person dismisses it — nothing is
+   * changed and the reason is said out loud rather than swallowed.
+   * @returns {Promise<string|null>}
+   */
+  static async #pickFromScreen() {
+    if (typeof EyeDropper !== "function") {
+      ui.notifications.warn(game.i18n.localize("ILLUMINUS.Notifications.NoScreenPicker"));
+      return null;
+    }
+    try {
+      const { sRGBHex } = await new EyeDropper().open();
+      return sRGBHex ?? null;
+    } catch (error) {
+      // Dismissing it throws, which is not a failure worth reporting.
+      log.debug(`screen eyedropper closed without a color: ${error?.message}`);
+      return null;
+    }
   }
 
   /**
@@ -1773,6 +1843,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       readout.className = "illuminus-picker-readout";
       document.body.append(readout);
       document.documentElement.classList.add("illuminus-picking");
+
+      // Pointing reads what is under the cursor with `elementFromPoint`, and
+      // the sample is deaf to the pointer while its own switch is on — so it
+      // would answer with the frame behind it rather than the page. The guard
+      // is lifted for as long as the eyedropper is out, and put back after.
+      const quiet = [...document.querySelectorAll(".illuminus-preview__frame.is-quiet")];
+      for (const frame of quiet) frame.classList.remove("is-quiet");
 
       let current = null;
       let wantText = false;
@@ -1834,6 +1911,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         document.removeEventListener("keydown", onKey, true);
         document.removeEventListener("keyup", onKeyUp, true);
         document.documentElement.classList.remove("illuminus-picking");
+        for (const frame of quiet) frame.classList.add("is-quiet");
         readout.remove();
         resolve(value);
       }
