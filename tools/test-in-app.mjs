@@ -3410,6 +3410,83 @@ try {
   check(ic.painted.icon === "rgb(255, 0, 255)" && ic.painted.link === "rgb(0, 255, 0)",
     `and its own color apart from the words when it is (${ic.painted.icon} beside ${ic.painted.link})`);
 
+  // A secret passage's inner shading. The rule said `box-shadow` twice — the
+  // whole of it, and then an outer-only one thirty lines later that replaced it
+  // — so the inner controls wrote a custom property nothing read, and it looked
+  // exactly like a setting that did not work.
+  const shading = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Secret Shading Probe"});
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    Object.assign(settings.secrets, {innerShadowOffsetX: 2, innerShadowOffsetY: 3,
+      innerShadowBlur: 20, innerShadowSpread: 12, innerShadowColor: "#ff00ff"});
+    await api.updateStyle(style.id, {settings});
+    const entry = await JournalEntry.create({name: "Secret Shading Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<section class=\\"secret\\" id=\\"s1\\"><p>Hidden.</p></section>", format: 1}}]);
+    await api.assignStyle(entry, style.id);
+    try {
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      await new Promise(r => setTimeout(r, 1200));
+      const sec = entry.sheet.element.querySelector("section.secret");
+      return JSON.stringify({shadow: getComputedStyle(sec).boxShadow});
+    } finally {
+      await entry.sheet?.close({force: true});
+      await entry.delete();
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+  // The picker says a color two ways. RGB is what it keeps, HSL is worked out
+  // for the sliders, so going there and back cannot drift the color — and the
+  // hue shown is the one kept beside the color rather than read back out of it,
+  // since a grey has none to read and the slider would snap to red.
+  const said = await cdp.evaluate(`(async () => {
+    const { openColorPicker } = await import("/modules/illuminus/scripts/apps/color-picker.mjs");
+    const anchor = document.createElement("div");
+    anchor.style.cssText = "position:fixed;left:400px;top:300px;width:20px;height:20px";
+    document.body.append(anchor);
+    openColorPicker({ anchor, value: "#3f7fbf", onChange: () => {}, onCommit: () => {} });
+    await new Promise(r => setTimeout(r, 400));
+    const cp = document.querySelector(".illuminus-cp");
+    const shown = () => cp.querySelector(".illuminus-cp__sliders:not(.is-hidden)")?.dataset.group;
+    const slider = (g, k) => cp.querySelector('[data-channel="' + g + '-' + k + '"] input[type=range]');
+    const hex = () => cp.querySelector(".illuminus-cp__hex").value;
+    const set = (g, k, v) => {
+      const el = slider(g, k);
+      el.value = String(v);
+      el.dispatchEvent(new Event("input", {bubbles: true}));
+    };
+    const out = {first: shown(), start: hex(),
+      hsl: ["h","s","l"].map((k) => slider("hsl", k).value).join(",")};
+    cp.querySelector('[data-cp="swap"]').click();
+    await new Promise(r => setTimeout(r, 120));
+    out.swapped = shown();
+    cp.querySelector('.illuminus-cp__sliders:not(.is-hidden) [data-cp="swap"]').click();
+    await new Promise(r => setTimeout(r, 120));
+    out.back = shown();
+    out.hexBack = hex();
+    const hue = slider("hsl", "h").value;
+    set("hsl", "s", 0);
+    await new Promise(r => setTimeout(r, 120));
+    set("hsl", "s", 80);
+    await new Promise(r => setTimeout(r, 120));
+    out.hueKept = slider("hsl", "h").value === hue;
+    cp.querySelector('.illuminus-cp__foot [data-cp="cancel"]').click();
+    anchor.remove();
+    await game.settings.set("illuminus", "colorSliders", "hsl");
+    return JSON.stringify(out);
+  })()`);
+  const cw = JSON.parse(said);
+  check(cw.first === "hsl" && cw.hsl === "210,50,50",
+    `the picker offers hue, saturation and lightness first (${cw.hsl} for ${cw.start})`);
+  check(cw.swapped === "rgb" && cw.back === "hsl" && cw.hexBack === "#3f7fbf",
+    `and says the same color either way (${cw.hexBack})`);
+  check(cw.hueKept, "a color drained of its color keeps the hue it was working in");
+
+  const sh = JSON.parse(shading);
+  check(/inset/.test(sh.shadow) && /255, 0, 255/.test(sh.shadow),
+    `a secret passage takes an inner shading (${sh.shadow})`);
+
   const ho = JSON.parse(off);
   check(ho.offByDefault, "an unset hovered control stays out of the stylesheet");
   check(ho.onWhenAsked, "and reaches it once it is filled in");

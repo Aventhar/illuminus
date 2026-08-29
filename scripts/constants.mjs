@@ -15,6 +15,7 @@ export const SETTINGS = {
   eyedropper: "eyedropper",
   editorView: "editorView",
   wording: "wording",
+  colorSliders: "colorSliders",
   debug: "debug"
 };
 

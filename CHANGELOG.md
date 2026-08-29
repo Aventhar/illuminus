@@ -19,6 +19,13 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **The color picker says a color both ways.** Hue, saturation and lightness by
+  default — which is how a person thinks about a color — with a switch beside
+  the sliders for red, green and blue, remembered per person. The color it keeps
+  is the red-green-blue one and the other is worked out for the sliders, so
+  going there and back cannot drift it; and the hue shown is the one kept beside
+  the color rather than read back out of it, so draining a color of its color
+  and bringing it back leaves you in the hue you were working in.
 - **A link's icon can be colored.** Foundry puts a mark in front of a link to
   something in your world — a figure beside a character's name, dice beside a
   roll — and drags one in when you drop a record into a page. Links → Text now
@@ -132,6 +139,13 @@ Two conventions worth knowing before you read it:
   which is a narrower gate for artwork than MIT was.
 
 ### Fixed
+
+- **A secret passage's Inner Shadow did nothing.** Its rule said `box-shadow`
+  twice — the whole of it, and then an outer-only one further down that quietly
+  replaced it. Legal CSS with no warning: the later declaration simply wins, and
+  the inner-shading controls went on writing a value nothing read. Both
+  stylesheets were swept for the same fault and this was the only one; a check
+  now refuses any rule that states a property two ways.
 
 - **Pointing at anything no longer changed it.** Every hovered and selected
   control is derived from an ordinary one and starts empty, meaning "leave it

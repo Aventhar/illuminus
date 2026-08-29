@@ -53,6 +53,18 @@ export function registerSettings() {
     default: []
   });
 
+  // Which sliders the color picker offers. Changed in the picker itself rather
+  // than here, so it is remembered rather than configured — a second place to
+  // set it would be a second answer to one question. HSL by default: hue,
+  // saturation and lightness are what a person picking a color is thinking in,
+  // and red-green-blue is the machine's way of saying it.
+  game.settings.register(MODULE_ID, SETTINGS.colorSliders, {
+    scope: "client",
+    config: false,
+    type: String,
+    default: "hsl"
+  });
+
   // Whether this person has read the personal-use notice and asked not to be
   // shown it again. Per person rather than per world: it is about what someone
   // has read, and a second GM has not read it just because the first one did.

@@ -251,6 +251,7 @@ Object.assign(out, {
   "ILLUMINUS.ColorPicker.Hex": "Color code",
   "ILLUMINUS.ColorPicker.Rgb": "Red, Green, Blue",
   "ILLUMINUS.ColorPicker.Hsl": "Hue, Saturation, Lightness",
+  "ILLUMINUS.ColorPicker.SwapSliders": "Say this color the other way. Hue, saturation and lightness are how a person usually thinks about a color; red, green and blue are how a screen makes one. Either sets the same color, and the picker remembers which you prefer.",
   "ILLUMINUS.ColorPicker.Ramp": "Shade and brightness",
   "ILLUMINUS.ColorPicker.Hue": "Hue",
   "ILLUMINUS.ColorPicker.Recent": "Recently used",

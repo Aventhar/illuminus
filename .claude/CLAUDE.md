@@ -849,6 +849,25 @@ adding a control to a family, check `order` against `fields` in both directions;
 `tools/` has no check for the second, and the way to find them is to ask the
 schema rather than to read it.
 
+**A rule can quietly override itself, and the tools will not say so.** The secret
+passage's rule declared `box-shadow` twice — the whole of it, then an outer-only
+one thirty lines further down. Legal CSS: the later one wins, and the inner
+shading controls went on writing a custom property nothing read, which reads
+exactly like a setting that does not work. Two things about finding it:
+
+- **`CSS.getMatchedStylesForNode` will agree with you.** It reported the rule,
+  `parsedOk: true`, and a value carrying both halves — because
+  `cssProperties.find()` returns the *first* declaration of that name. Read them
+  all, or the tool that usually settles an argument will confirm the wrong one.
+- **What settled it was putting the same declaration inline on the same
+  element.** Two shadows inline, one from the stylesheet, same variables, same
+  node: the difference had to be in the rule rather than in the values. Worth
+  reaching for whenever a declaration that looks right computes wrong.
+
+`validate.mjs` [13] refuses any rule that states a property two ways. An
+identical repeat is allowed — a generator assembling a rule from pieces makes
+those, and they change nothing.
+
 **The mirror restates a selector by putting `:hover` on the end**, which is right
 only where the element that is pointed at is the element being painted. A link's
 icon is an element inside the link, so the mirror wrote `a.content-link > i:hover`

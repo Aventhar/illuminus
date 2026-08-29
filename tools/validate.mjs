@@ -367,5 +367,42 @@ console.log("\n[12] CSS wording");
   }
 }
 
+/* A rule that quietly overrides itself.
+ *
+ * The secret passage's rule declared `box-shadow` twice — the complete one with
+ * its inner shading, and later an outer-only one that replaced it. Nothing
+ * complains: it is legal CSS, the later declaration simply wins, and the
+ * control it took away goes on writing a custom property nobody reads. It
+ * looked exactly like an Inner Shadow that did not work.
+ *
+ * Only a repeat that *differs* is a fault. An identical one is noise a
+ * generator makes when two pieces both state the same thing, and says nothing
+ * about what the browser will do. */
+console.log("\n[13] No rule overrides itself");
+{
+  const twice = [];
+  for (const [file, text] of [["skeleton", fs.readFileSync(path.join(ROOT, "styles/illuminus.css"), "utf8")],
+                              ["generated", fs.readFileSync(path.join(ROOT, "styles/illuminus-generated.css"), "utf8")]]) {
+    const plain = text.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [, selector, body] of plain.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const said = new Map();
+      for (const [, , property, value] of body.matchAll(/(^|;)\s*([a-z-]+)\s*:([^;]*)/g)) {
+        if (!said.has(property)) said.set(property, new Set());
+        said.get(property).add(value.replace(/\s+/g, " ").trim());
+      }
+      for (const [property, values] of said) {
+        if (values.size < 2) continue;
+        twice.push(`${file}: ${selector.trim().split(",")[0].trim().slice(0, 54)} says ${property} two ways`);
+      }
+    }
+  }
+  if (twice.length) {
+    fail(`${twice.length} rules say one property two ways, and the later one wins`);
+    for (const one of twice.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok("no rule states a property twice with different values");
+  }
+}
+
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

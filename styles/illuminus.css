@@ -1304,9 +1304,6 @@
   border-radius: var(--ill-secrets-corner-top-left) var(--ill-secrets-corner-top-right)
                  var(--ill-secrets-corner-bottom-right) var(--ill-secrets-corner-bottom-left);
   corner-shape: var(--ill-secrets-corner-shape);
-  box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
-              var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
-              var(--ill-secrets-shadow-color);
   font-family: var(--ill-secrets-font);
   -webkit-text-stroke: var(--ill-secrets-outline-width) var(--ill-secrets-outline-color);
   paint-order: stroke fill;
@@ -3766,6 +3763,24 @@ html.illuminus-picking * {
   width: auto;
   padding: 0 0.35rem;
   font-size: var(--font-size-10, 10px);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* One set of sliders at a time. Both are in the markup so the switch swaps
+   them without a re-render, and the set nobody is looking at stays in step. */
+.illuminus-cp__sliders.is-hidden {
+  display: none;
+}
+
+/* The switch, which says what it would change to rather than what is on show —
+   the heading beside it already says that. */
+.illuminus-cp__swap {
+  float: right;
+  width: auto;
+  padding: 0 0.35rem;
+  font-size: var(--font-size-10, 10px);
+  line-height: 1.6;
   text-transform: none;
   letter-spacing: 0;
 }

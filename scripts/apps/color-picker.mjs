@@ -25,11 +25,18 @@ const SWATCH_SLOTS = 30;
 
 /** Slider definitions, in display order. Each reads and writes the shared color. */
 const CHANNELS = [
+  { group: "hsl", key: "h", label: "H", min: 0, max: 360, step: 1, unit: "°" },
+  { group: "hsl", key: "s", label: "S", min: 0, max: 100, step: 1, unit: "%" },
+  { group: "hsl", key: "l", label: "L", min: 0, max: 100, step: 1, unit: "%" },
+  { group: "hsl", key: "a", label: "A", min: 0, max: 100, step: 1, unit: "%" },
   { group: "rgb", key: "r", label: "R", min: 0, max: 255, step: 1, unit: "" },
   { group: "rgb", key: "g", label: "G", min: 0, max: 255, step: 1, unit: "" },
   { group: "rgb", key: "b", label: "B", min: 0, max: 255, step: 1, unit: "" },
   { group: "rgb", key: "a", label: "A", min: 0, max: 100, step: 1, unit: "%" }
 ];
+
+/** The two ways of saying a color, and which is on show. */
+const GROUPS = ["hsl", "rgb"];
 
 /** How many recently used colors to offer back. */
 const RECENT_SLOTS = 10;
@@ -88,9 +95,18 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
         </div>
       </section>
 
-      ${["rgb"].map((group) => `
-        <section class="illuminus-cp__group" data-group="${group}">
-          <h4>${game.i18n.localize("ILLUMINUS.ColorPicker.Rgb")}</h4>
+      ${GROUPS.map((group) => `
+        <section class="illuminus-cp__group illuminus-cp__sliders" data-group="${group}">
+          <h4>
+            ${game.i18n.localize(group === "hsl"
+              ? "ILLUMINUS.ColorPicker.Hsl" : "ILLUMINUS.ColorPicker.Rgb")}
+            <button type="button" class="illuminus-cp__swap" data-cp="swap"
+                    data-tooltip="${game.i18n.localize("ILLUMINUS.ColorPicker.SwapSliders")}">
+              <i class="fa-solid fa-right-left"></i>
+              ${game.i18n.localize(group === "hsl"
+                ? "ILLUMINUS.ColorPicker.Rgb" : "ILLUMINUS.ColorPicker.Hsl")}
+            </button>
+          </h4>
           ${CHANNELS.filter((c) => c.group === group).map((c) => `
             <div class="illuminus-cp__channel" data-channel="${group}-${c.key}">
               <label for="illuminus-cp-${group}-${c.key}">${c.label}</label>
@@ -133,7 +149,14 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
   const currentHex = () => rgbaToHex({ r: state.r, g: state.g, b: state.b, a: state.a / 100 });
 
   /** Values for one group, derived from the shared colour. */
-  const valuesFor = (group) => ({ r: state.r, g: state.g, b: state.b, a: state.a });
+  const valuesFor = (group) => {
+    if (group !== "hsl") return { r: state.r, g: state.g, b: state.b, a: state.a };
+    // The hue shown is the one kept beside the color rather than the one read
+    // back out of it. They agree wherever there is a hue to read, and where
+    // there is not — a grey, or anything at full lightness — reading it back
+    // says zero, and the slider would jump to red while the color stood still.
+    return { ...rgbToHsl(state), h: hue, a: state.a };
+  };
 
   /**
    * Hue is kept beside the color rather than read back from it.
@@ -175,9 +198,34 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       case "rgb.r": return `linear-gradient(to right, ${at({ r: 0 })}, ${at({ r: 255 })})`;
       case "rgb.g": return `linear-gradient(to right, ${at({ g: 0 })}, ${at({ g: 255 })})`;
       case "rgb.b": return `linear-gradient(to right, ${at({ b: 0 })}, ${at({ b: 255 })})`;
+      // Each track shows what moving it would do, so the hue track is the whole
+      // wheel at this saturation and lightness, and the other two run from one
+      // end of their own range to the other.
+      case "hsl.h": return `linear-gradient(to right, ${[0, 60, 120, 180, 240, 300, 360]
+        .map((h) => rgbaToHex({ ...hslToRgb({ ...hsl, h }), a: 1 })).join(", ")})`;
+      case "hsl.s": return `linear-gradient(to right, `
+        + `${rgbaToHex({ ...hslToRgb({ ...hsl, h: hue, s: 0 }), a: 1 })}, `
+        + `${rgbaToHex({ ...hslToRgb({ ...hsl, h: hue, s: 100 }), a: 1 })})`;
+      case "hsl.l": return `linear-gradient(to right, #000000, `
+        + `${rgbaToHex({ ...hslToRgb({ ...hsl, h: hue, l: 50 }), a: 1 })}, #ffffff)`;
       default: return `linear-gradient(to right, ${rgbaToHex({ ...state, a: 0 })}, ${rgbaToHex({ ...state, a: 1 })})`;
     }
   };
+
+  /**
+   * Which of the two sets of sliders is on show.
+   *
+   * Both are in the markup and one is hidden, rather than the hidden one being
+   * left out: the switch swaps them without a re-render, and the values in the
+   * set nobody is looking at are kept in step anyway, so there is nothing to
+   * catch up when it comes back.
+   */
+  const showSliders = (which) => {
+    for (const section of root.querySelectorAll(".illuminus-cp__sliders")) {
+      section.classList.toggle("is-hidden", section.dataset.group !== which);
+    }
+  };
+  showSliders(getSetting(SETTINGS.colorSliders) ?? "hsl");
 
   const emit = (options) => onChange(refresh(options));
 
@@ -188,7 +236,21 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     if (!Number.isFinite(value)) return;
 
     if (key === "a") state.a = value;
-    else state[key] = value;
+    else if (group === "hsl") {
+      // Read as a whole and written back as a whole: hue, saturation and
+      // lightness only mean anything together, and the color the picker keeps
+      // is the red-green-blue one — so switching between the two ways of
+      // saying it cannot drift the color, and nothing is lost in a round trip
+      // that was not lost already.
+      const said = { ...valuesFor("hsl"), [key]: value };
+      Object.assign(state, hslToRgb(said));
+      // Said rather than recovered, for the reason above: a grey has no hue to
+      // read back, and dragging saturation to nothing would otherwise throw
+      // away the hue a person was working in.
+      hue = said.h;
+      emit(options);
+      return;
+    } else state[key] = value;
     // Typing an RGB value moves the ramp with it.
     hue = rgbToHsv(state).h;
     emit(options);
@@ -377,6 +439,11 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       // goes on offering shades of the hue before it.
       hue = rgbToHsv(state).h;
       emit();
+    } else if (action === "swap") {
+      const now = root.querySelector(".illuminus-cp__sliders:not(.is-hidden)")?.dataset.group;
+      const next = now === "hsl" ? "rgb" : "hsl";
+      showSliders(next);
+      setSetting(SETTINGS.colorSliders, next);
     } else if (action === "save") {
       const hex = currentHex();
       if (!saved.includes(hex)) saved.push(hex);

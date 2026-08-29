@@ -224,6 +224,7 @@
   "ILLUMINUS.ColorPicker.Rgb": "Red, Green, Blue",
   "ILLUMINUS.ColorPicker.SaveColor": "Save",
   "ILLUMINUS.ColorPicker.Saved": "Saved Colors",
+  "ILLUMINUS.ColorPicker.SwapSliders": "Say this color the other way. Hue, saturation and lightness are how a person usually thinks about a color; red, green and blue are how a screen makes one. Either sets the same color, and the picker remembers which you prefer.",
   "ILLUMINUS.ColorPicker.Title": "Color",
   "ILLUMINUS.Confirm.Delete": "Delete the style \"{name}\"? This cannot be undone.",
   "ILLUMINUS.Confirm.DeleteInUse": "{count} journal(s) currently use this style. They will go back to Foundry's default appearance.",

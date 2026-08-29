@@ -5189,9 +5189,6 @@ iframe):hover {
   border-radius: var(--ill-secrets-hover-corner-top-left, var(--ill-secrets-corner-top-left)) var(--ill-secrets-hover-corner-top-right, var(--ill-secrets-corner-top-right))
                  var(--ill-secrets-hover-corner-bottom-right, var(--ill-secrets-corner-bottom-right)) var(--ill-secrets-hover-corner-bottom-left, var(--ill-secrets-corner-bottom-left));
   corner-shape: var(--ill-secrets-hover-corner-shape, var(--ill-secrets-corner-shape));
-  box-shadow: var(--ill-secrets-hover-shadow-offset-x, var(--ill-secrets-shadow-offset-x)) var(--ill-secrets-hover-shadow-offset-y, var(--ill-secrets-shadow-offset-y))
-              var(--ill-secrets-hover-shadow-blur, var(--ill-secrets-shadow-blur)) var(--ill-secrets-hover-shadow-spread, var(--ill-secrets-shadow-spread))
-              var(--ill-secrets-hover-shadow-color, var(--ill-secrets-shadow-color));
   font-family: var(--ill-secrets-hover-font, var(--ill-secrets-font));
   -webkit-text-stroke: var(--ill-secrets-hover-outline-width, var(--ill-secrets-outline-width)) var(--ill-secrets-hover-outline-color, var(--ill-secrets-outline-color));
   text-shadow: var(--ill-secrets-hover-text-shadow-offset-x, var(--ill-secrets-text-shadow-offset-x)) var(--ill-secrets-hover-text-shadow-offset-y, var(--ill-secrets-text-shadow-offset-y))
