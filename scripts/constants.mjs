@@ -14,6 +14,7 @@ export const SETTINGS = {
   exportTermsSeen: "exportTermsSeen",
   eyedropper: "eyedropper",
   editorView: "editorView",
+  wording: "wording",
   debug: "debug"
 };
 

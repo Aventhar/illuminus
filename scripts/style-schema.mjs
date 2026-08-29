@@ -2484,9 +2484,9 @@ function stateTwin(original, name, word) {
     // "whatever the ordinary one says". Left as a tick box, an untouched twin
     // would read as *off* — which is how hovering the journal's name came to
     // hide it.
-    return select(name, "same", ["same", "on", "off"], {
+    return { ...select(name, "same", ["same", "on", "off"], {
       emit: (value) => (value === "on" ? original.on : value === "off" ? original.off : null)
-    });
+    }), twin: true, origin: original.name };
   }
   // A twin says nothing until it is filled in, and zero is how a number says
   // it — so the twin's range has to start at zero however narrow the ordinary
@@ -2511,7 +2511,7 @@ function stateTwin(original, name, word) {
   // has a picture of its own, whose strength of 100% is meant — and those
   // controls wear "hover" in their name exactly as a derived twin does. Only a
   // derived twin owes its element silence when it is empty.
-  return { ...original, name, twin: true, ...quiet, ...link };
+  return { ...original, name, twin: true, origin: original.name, ...quiet, ...link };
 }
 
 /** A state's name for a control, e.g. `hover` + `borderTopColor`. */

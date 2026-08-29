@@ -81,6 +81,15 @@ folds to a single line saying what it is set to, built from the values themselve
 one the style says nothing about reads "Nothing set" and starts closed. A tab therefore
 opens showing what the style *does*.
 
+**And if you already write CSS**, there is a switch for you. Configure Settings →
+Illuminus → **Setting Names** renames every control to the property it writes:
+"Top Padding" becomes `padding-top`, "Top-Left Corner" becomes
+`border-top-left-radius`, "Frosting" becomes `backdrop-filter`. Only the names
+change — the explanation under each control is the same either way, and the
+setting is per person, so it does not rename anything for anyone else at your
+table. Plain language remains the default and the point: you never need to know
+any of this to use the module.
+
 - **Search every setting** from the box across the top. It narrows every part at once and
   dims the ones with nothing in them, so the tree itself answers "which part has the
   shadow settings?".

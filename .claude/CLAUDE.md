@@ -840,6 +840,50 @@ window Foundry has placed can start off-screen and the clip will cut it. Build a
 of your own words for anything showing page content, and delete it afterwards; the
 editor's Live Sample is already the module's own text and is safe as it stands.
 
+## The editor's two vocabularies
+
+A control has a plain-language name and, for somebody who already writes CSS, the
+name of the property it feeds. `SETTINGS.wording` chooses between them, per person
+rather than per world, and plain language is the default — that is the whole
+argument for the module, and nothing about it should read as though CSS were the
+real interface and plain language a translation of it.
+
+**The CSS wording is read, not written.** `tools/css-names.mjs` finds the
+declaration each custom property lands in, so a rule that changes takes its
+wording with it and 2,264 names cost nobody an afternoon. Four things it has to
+work out, and each was wrong before it was right:
+
+- **A shorthand names its parts by position**, and each position has a longhand
+  worth naming instead: `padding: var(a) var(b) var(c) var(d)` gives
+  `padding-top` for the first rather than `padding` four times, and
+  `border-radius` gives `border-top-left-radius`. A state's rule wraps the
+  ordinary variable inside the twin's fallback, so the positions are the
+  *outermost* calls and there are two per position.
+- **A control emitting several properties suffixes its variable**, so
+  `--x-texture-fit` is found through `--x-texture-fit-size` and `-repeat`.
+- **Some feed one of core's own variables**, which is the honest answer for
+  those: the contents panel's width is `--sidebar-width-expanded`.
+- **Where several controls feed one property, each is told apart by what its own
+  name says that the property does not** — `shadowBlur` against `box-shadow`
+  leaves "blur", `innerShadowBlur` leaves "inner blur". Read from the property
+  and not from the siblings, which is what makes it the same wherever a control
+  appears: comparing against siblings gave a different answer per section, and
+  the panel's Color came out as "color (color)" while every other tab's read
+  "color". That alone accounted for 27 of 49 apparent disagreements between tabs.
+
+**A state's control takes its ordinary control's wording**, since it writes the
+same property in a rule of its own — and stays out of the comparison above. Left
+in, every control was told apart from its own twin and came out as
+"max-width (max-width)". `stateTwin` records `origin` for this, rather than the
+wording being guessed back out of the name.
+
+**Only the names are translated.** A hint says what a control *does*, which is the
+same thing whichever words name it — so hints are written once, and a control
+with nothing to say in CSS keeps its plain name rather than showing nothing.
+
+**`validate.mjs` [12] holds both ends**: every control that writes CSS can say so,
+and no plain label reads like a property name.
+
 ## Generated files — do not hand-edit
 
 - **`SETTINGS.md`** is not kept in the repo — a list of two thousand controls is out

@@ -331,5 +331,41 @@ console.log("\n[11] A state's control can say nothing");
   }
 }
 
+/* The same controls in CSS's own words.
+ *
+ * The editor can be switched into CSS property names for somebody who already
+ * writes stylesheets, and the wording is read out of the stylesheets rather
+ * than written by hand — so a control added without re-running the lang
+ * generator would simply have no name in that vocabulary, and would quietly
+ * keep its plain one. Only the names are translated: a hint says what a control
+ * does, which is the same thing whichever words name it. */
+console.log("\n[12] CSS wording");
+{
+  const unnamed = [];
+  for (const group of GROUPS) {
+    for (const field of groupFields(group)) {
+      if (field.noCss || field.chrome) continue;
+      const own = `ILLUMINUS.Field.${group.family ?? group.id}.${field.name}.css`;
+      if (own in lang) continue;
+      if (!(`ILLUMINUS.Field.${field.name}.css` in lang)) unnamed.push(`${group.id}.${field.name}`);
+    }
+  }
+  if (unnamed.length) {
+    fail(`${unnamed.length} controls have no CSS wording (${unnamed.slice(0, 4).join(", ")})`);
+  } else {
+    ok("every control that writes CSS can say so in CSS's own words");
+  }
+  // And the plain wording stays plain: the whole argument for the module is
+  // that nobody has to read a property name to use it.
+  const jargon = Object.entries(lang).filter(([key, said]) =>
+    key.startsWith("ILLUMINUS.Field.") && key.endsWith(".label")
+    && /^[a-z-]+(-[a-z]+)+$/.test(String(said)));
+  if (jargon.length) {
+    fail(`${jargon.length} plain labels read like CSS (${jargon.slice(0, 3).map(([k]) => k).join(", ")})`);
+  } else {
+    ok("and no plain label reads like a property name");
+  }
+}
+
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

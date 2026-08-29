@@ -766,9 +766,25 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * wins when one exists.
    */
   #fieldText(group, field, part) {
+    // Names in CSS's own words for somebody who asked for them, and only the
+    // names: a hint says what a control does, which is the same thing whichever
+    // vocabulary names it. A control with nothing to say in CSS — where an
+    // element hangs, which member a family is showing — keeps its plain name
+    // rather than showing nothing.
+    if (part === "label" && this.#wording() === "css") {
+      const said = this.#fieldText(group, field, "css");
+      if (said) return said;
+    }
     const specific = `ILLUMINUS.Field.${group.family ?? group.id}.${field.name}.${part}`;
     if (game.i18n.has(specific)) return game.i18n.localize(specific);
-    return game.i18n.localize(`ILLUMINUS.Field.${field.name}.${part}`);
+    const shared = `ILLUMINUS.Field.${field.name}.${part}`;
+    if (part === "css" && !game.i18n.has(shared)) return "";
+    return game.i18n.localize(shared);
+  }
+
+  /** Which vocabulary this person reads the editor in. */
+  #wording() {
+    return getSetting(SETTINGS.wording) ?? "plain";
   }
 
   /** Build the template data for one control. */
@@ -785,7 +801,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       // it: "Inner Shadow Softness" is "Softness" once the run it sits in is
       // the inner shadow. Both are in the markup — the search box reads what it
       // always read, and a gathered run shows the shorter one.
-      plain: game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
+      plain: this.#wording() === "css"
+        ? this.#fieldText(group, field, "label")
+        : game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
       hint: this.#fieldText(group, field, "hint"),
       value,
       isDefault: value === this.#baselineFor(group.id, field),

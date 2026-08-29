@@ -19,6 +19,14 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **The editor can be read in CSS's own words.** Configure Settings → Illuminus
+  → Setting Names switches every control from plain language to the property it
+  writes — "Top Padding" to `padding-top`, "Top-Left Corner" to
+  `border-top-left-radius` — for somebody who already writes stylesheets. Only
+  the names change; the explanation under each control is the same either way,
+  and it is per person rather than per world. Plain language stays the default.
+  The wording is read out of the stylesheets rather than written by hand, so a
+  rule that changes takes its wording with it.
 - **A parts tree in place of the tab strip.** The editor is three columns now —
   what a journal is made of down the left, what it looks like in the middle, and
   what can be said about the part you picked on the right. The tree nests by

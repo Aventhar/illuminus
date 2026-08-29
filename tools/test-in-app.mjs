@@ -3463,6 +3463,52 @@ try {
       await api.deleteStyle(style.id);
     }
   })()`);
+  // The editor can be read in CSS's own words. Only the names change: a hint
+  // says what a control does, which is the same thing whichever vocabulary
+  // names it, and a control that writes no CSS keeps its plain name rather than
+  // showing nothing.
+  const worded = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Wording Probe"});
+    let app = null;
+    try {
+      const say = async (mode) => {
+        await game.settings.set("illuminus", "wording", mode);
+        await new Promise(r => setTimeout(r, 300));
+        if (!app) {
+          app = await api.openEditor(style.id);
+          for (let i = 0; i < 200 && !app.element?.querySelector(".illuminus-field"); i++) {
+            await new Promise(r => setTimeout(r, 100));
+          }
+        } else {
+          await app.render();
+          await new Promise(r => setTimeout(r, 2500));
+        }
+        const label = (path) => app.element
+          .querySelector('[data-field="' + path + '"] label')?.textContent.trim().split("\\n")[0];
+        const hint = (path) => app.element
+          .querySelector('[data-field="' + path + '"] .illuminus-field__hint')?.textContent.trim();
+        return {padding: label("page.paddingTop"), corner: label("page.cornerTopLeft"),
+                hint: hint("page.paddingTop")};
+      };
+      const plain = await say("plain");
+      const css = await say("css");
+      await game.settings.set("illuminus", "wording", "plain");
+      return JSON.stringify({plain, css});
+    } finally {
+      await app?.close({force: true});
+      await api.deleteStyle(style.id);
+      await game.settings.set("illuminus", "wording", "plain");
+    }
+  })()`);
+  const wd = JSON.parse(worded);
+  check(wd.plain.padding === "Top Padding" && wd.css.padding === "padding-top",
+    `controls can be named in CSS's own words ("${wd.plain.padding}" -> "${wd.css.padding}")`);
+  check(wd.css.corner === "border-top-left-radius",
+    `including where the name gives no clue ("${wd.plain.corner}" -> "${wd.css.corner}")`);
+  check(Boolean(wd.plain.hint) && wd.plain.hint === wd.css.hint,
+    "and the explanation under a control is the same either way");
+
   const re = JSON.parse(reopened);
   check(re.drew > 100, `opening the editor as one closes still draws it (${re.drew} controls)`);
 

@@ -103,7 +103,7 @@ Three files are written by tools and must not be hand-edited:
 | File | Written by | When to re-run |
 | --- | --- | --- |
 | `styles/illuminus-generated.css` | `tools/generate-block-css.mjs` | After any schema change touching a block, tag, picture, list, table or heading |
-| `lang/en.json` | `tools/generate-lang.mjs` | After adding or renaming any control |
+| `lang/en.json` | `tools/generate-lang.mjs` | After adding or renaming any control, or after changing which property a rule reads — the CSS wording is read out of the stylesheets |
 | `SETTINGS.md` | `tools/generate-settings-doc.mjs` | On demand; it is gitignored, because a list of nine thousand controls is out of date by the end of the week |
 
 The generators fail loudly rather than guessing. If `generate-lang.mjs` has no wording for

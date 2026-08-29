@@ -93,6 +93,29 @@ export function registerSettings() {
     default: "page"
   });
 
+  // Which words the editor names its controls with. Plain language is the
+  // whole point of the module and stays the default; somebody who already
+  // writes CSS can have the property names instead. Per person rather than per
+  // world, because it is about who is reading the interface — one GM writing
+  // CSS should not rename every control for the one who does not.
+  game.settings.register(MODULE_ID, SETTINGS.wording, {
+    name: "ILLUMINUS.Settings.Wording.Name",
+    hint: "ILLUMINUS.Settings.Wording.Hint",
+    scope: "client",
+    config: true,
+    type: String,
+    default: "plain",
+    choices: {
+      plain: "ILLUMINUS.Settings.Wording.Plain",
+      css: "ILLUMINUS.Settings.Wording.Css"
+    },
+    onChange: () => {
+      for (const app of foundry.applications.instances.values()) {
+        if (app.constructor.name.startsWith("Illuminus")) app.render();
+      }
+    }
+  });
+
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "ILLUMINUS.Settings.Debug.Name",
     hint: "ILLUMINUS.Settings.Debug.Hint",

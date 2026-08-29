@@ -11,7 +11,8 @@ import { fileURLToPath } from "node:url";
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const { GROUPS, allFields, groupFields, FAMILY_SIZE } = await import(`${ROOT}/scripts/style-schema.mjs`);
+const { GROUPS, allFields, groupFields, FAMILY_SIZE, cssVarFor } = await import(`${ROOT}/scripts/style-schema.mjs`);
+const { cssNames } = await import(`${ROOT}/tools/css-names.mjs`);
 const existing = JSON.parse(fs.readFileSync(`${ROOT}/lang/en.json`, "utf8"));
 
 const out = {};
@@ -28,6 +29,18 @@ const CARRY = [
 for (const [k, v] of Object.entries(existing)) if (CARRY.some((p) => k.startsWith(p))) put(k, v);
 
 /* ---------- New chrome strings ---------- */
+// The vocabulary the editor names its controls in.
+put("ILLUMINUS.Settings.Wording.Name", "Setting Names");
+put("ILLUMINUS.Settings.Wording.Hint",
+  "What the style editor calls its settings. Plain language describes what each one does, "
+  + "in ordinary words — this is how Illuminus is meant to be used, and you never need to "
+  + "know any CSS. Choose CSS property names instead if you already write stylesheets and "
+  + "would rather see which property each control writes. Only the names change; the "
+  + "explanation under each one stays the same either way.");
+put("ILLUMINUS.Settings.Wording.Plain", "Plain language");
+put("ILLUMINUS.Settings.Wording.Css", "CSS property names");
+
+
 // The rows a box family is gathered into, and the sides of an edge.
 put("ILLUMINUS.Editor.OnlySet", "Only what this style sets");
 put("ILLUMINUS.Menu.Lists", "List");
@@ -1700,6 +1713,56 @@ for (const group of GROUPS) {
 if (missing.length) {
   console.error("MISSING:\n  " + [...new Set(missing)].join("\n  "));
   process.exit(1);
+}
+
+/* ---------- The same controls in CSS's own words ---------- */
+
+/*
+ * Illuminus names everything in plain language on purpose, and this is the
+ * other half of that bargain: somebody who already writes CSS can switch the
+ * editor into the vocabulary they know. The wording is read out of the
+ * stylesheets rather than written here — see `tools/css-names.mjs` — so a rule
+ * that changes takes its wording with it.
+ *
+ * Keyed like every other label, by the control's own name, with a tab's own key
+ * where one tab means something different by it: the contents panel holds two
+ * controls feeding `color`, so there one of them has to say which.
+ */
+{
+  const css = ["styles/illuminus.css", "styles/illuminus-generated.css"]
+    .map((file) => fs.readFileSync(`${ROOT}/${file}`, "utf8")).join("\n");
+  const { names, missing: unnamed } = cssNames(GROUPS, css, cssVarFor);
+  if (unnamed.length) {
+    console.error("NO CSS WORDING FOR:\n  " + unnamed.slice(0, 20).join("\n  "));
+    process.exit(1);
+  }
+
+  // What each control writes, per tab, and what it writes most often.
+  const said = new Map();
+  for (const group of GROUPS) {
+    for (const field of groupFields(group)) {
+      const wording = names.get(`${group.id}.${field.name}`);
+      if (!wording) continue;
+      if (!said.has(field.name)) said.set(field.name, new Map());
+      const perTab = said.get(field.name);
+      if (!perTab.has(wording)) perTab.set(wording, []);
+      perTab.get(wording).push(group.family ?? group.id);
+    }
+  }
+
+  let specific = 0;
+  for (const [name, perTab] of said) {
+    const ranked = [...perTab.entries()].sort((a, b) => b[1].length - a[1].length);
+    const [common] = ranked[0];
+    put(`ILLUMINUS.Field.${name}.css`, common);
+    for (const [wording, tabs] of ranked.slice(1)) {
+      for (const tab of new Set(tabs)) {
+        put(`ILLUMINUS.Field.${tab}.${name}.css`, wording);
+        specific += 1;
+      }
+    }
+  }
+  console.log(`css wording: ${said.size} controls, ${specific} with a tab of their own`);
 }
 
 const sorted = Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));

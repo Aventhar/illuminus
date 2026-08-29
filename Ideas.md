@@ -10,4 +10,3 @@
 ## Changes ?
 - Add one more row for saved colors
 - Gray out 'Copy Normal' buttons when settings already match.
-- For Borders and Corners settings move the match button down to the relevent section and rename it 'Match All to Top'
