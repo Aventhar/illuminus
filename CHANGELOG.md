@@ -92,6 +92,26 @@ Two conventions worth knowing before you read it:
 
 ### Fixed
 
+- **A new style now looks like an unstyled journal**, which is what it always
+  claimed to do. Measured across every element of the journal and the page
+  editor, a brand new style differed from a plain Foundry in 380 places; it
+  differs in 8, and each of those is a decision written down rather than an
+  oversight. Two things got it there. Where a rule can carry it, an unset
+  control now hands the element back to whoever painted it — Foundry, the game
+  system, or another module — rather than quietly taking that painting away;
+  and where it cannot, because four controls share one declaration, the default
+  is now the value Foundry actually paints, measured rather than guessed.
+- **An unstyled journal showed a folding marker beside every heading.** The
+  markers are written into every page the module renders, so that a page gaining
+  a style needs no re-render — but the rule that hides an unwanted one was
+  written for styled journals alone. Installing Illuminus and assigning nothing
+  now leaves a journal exactly as Foundry drew it.
+- **The Category and Level icons in the page editor** came out as an empty box.
+  Foundry hangs the FontAwesome classes on the label itself, so a typeface set
+  for the page's own settings landed on the element the icon font was named on.
+  The words beside those controls still take the style's lettering; the icons
+  keep their own face — and the fill, edges and spacing now go to the control
+  rather than to the caption beside it, which is where Foundry puts them.
 - **The page editor's drop-downs all unfurled at once**, over the page, with
   bullets on every entry. The Default List rules reached `.journal-page-content
   ul`, and ProseMirror's content element carries that class while the toolbar is

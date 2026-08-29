@@ -1219,7 +1219,7 @@ export const GROUPS = [
           // How far the whole list is pushed in, which belongs to the list
           // rather than to a row in it — so there is no such thing as the
           // indent of the heading a reader chose.
-          num("headingIndent", 16, "px", 0, 120, 2, { noSelected: true }),
+          num("headingIndent", 40, "px", 0, 120, 2, { noSelected: true }),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05),
           select("headingWrap", "inherit", CHOICES.wrap, { emit: emitWord }),
           select("headingHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens })
@@ -1249,24 +1249,24 @@ export const GROUPS = [
         id: "search",
         fields: [
           col("searchBackground", "#00000000"), ...imageFields("search"),
-          col("searchColor", ""),
+          col("searchColor", "#e7d1b1"),
           col("searchPlaceholderColor", "#8a8a8a"),
           num("searchSize", 14, "px", 6, 40, 1),
-          ...borderFields("searchBorder", { color: "#00000000" }),
-          ...cornerFields("searchCorner", 3)
+          ...borderFields("searchBorder", { width: 1, color: "#00000000" }),
+          ...cornerFields("searchCorner", 4)
         ]
       },
       {
         id: "buttons",
         fields: [
           col("buttonColor", ""),
-          col("buttonBackground", "#00000000"), ...imageFields("button"),
+          col("buttonBackground", ""), ...imageFields("button"),
           col("buttonBorderColor", ""),
           col("buttonHoverColor", ""),
           col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
           col("buttonHoverBorderColor", "#c9a961"),
           num("buttonBorderWidth", 1, "px", 0, 12, 1),
-          ...cornerFields("buttonCorner", 3)
+          ...cornerFields("buttonCorner", 4)
         ]
       }
     ]
@@ -1307,11 +1307,11 @@ export const GROUPS = [
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
-          ...textStyleField("textStyle", "700", "normal"),
+          ...textStyleField("textStyle", "normal", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
-          ...spacingFields("padding", 0, { max: 60 })
+          ...spacingFields("padding", { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 })
         ]
       },
       {
@@ -1323,7 +1323,7 @@ export const GROUPS = [
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
-          ...cornerFields("headerButtonCorner", 3)
+          ...cornerFields("headerButtonCorner", 4)
         ]
       },
       {
@@ -1500,7 +1500,7 @@ export const GROUPS = [
           DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
           DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
         ],
-        fields: [...borderFields("border"), ...cornerFields("corner")]
+        fields: [...borderFields("border"), ...cornerFields("corner", 6)]
       }
     ]
   },
@@ -1600,7 +1600,7 @@ export const GROUPS = [
           "whiteSpace", "wordBreak"
         ],
         fields: [
-          ...spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 }),
+          ...spacingFields("margin", { top: 8, right: 0, bottom: 8, left: 0 }, { min: -100 }),
           num("firstLineIndent", 0, "px", -100, 200, 2),
           select("whiteSpace", "normal", CHOICES.whiteSpace, { emit: emitKeyword }),
           select("wordBreak", "normal", CHOICES.wordBreak, { emit: emitKeyword })
@@ -2212,11 +2212,11 @@ export const GROUPS = [
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
-          ...textStyleField("textStyle", "700", "normal"),
+          ...textStyleField("textStyle", "normal", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
-          ...spacingFields("padding", 0, { max: 60 })
+          ...spacingFields("padding", { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 })
         ]
       },
       {
@@ -2228,7 +2228,7 @@ export const GROUPS = [
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
-          ...cornerFields("headerButtonCorner", 3)
+          ...cornerFields("headerButtonCorner", 4)
         ]
       },
       // The bar of controls above the prose, and the icons on it. Two
@@ -2238,10 +2238,10 @@ export const GROUPS = [
       {
         id: "toolbar",
         fields: [
-          col("toolbarBackground", "#00000000"), ...imageFields("toolbar"),
+          col("toolbarBackground", ""), ...imageFields("toolbar"),
           ...borderFields("toolbarBorder", { color: "#00000000" }),
-          ...cornerFields("toolbarCorner"),
-          ...spacingFields("toolbarPadding", 0, { max: 60 })
+          ...cornerFields("toolbarCorner", 6),
+          ...spacingFields("toolbarPadding", 8, { max: 60 })
         ]
       },
       {
@@ -2250,11 +2250,12 @@ export const GROUPS = [
           col("toolbarColor", ""),
           col("toolbarHoverColor", ""),
           num("toolbarSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
-          col("toolbarButtonBackground", "#00000000"), ...imageFields("toolbarButton"),
+          col("toolbarButtonBackground", ""), ...imageFields("toolbarButton"),
           col("toolbarButtonHoverBackground", "#00000000"),
           ...borderFields("toolbarButtonBorder", { color: "#00000000" }),
-          ...cornerFields("toolbarButtonCorner"),
-          ...spacingFields("toolbarButtonPadding", 0, { max: 40 })
+          ...cornerFields("toolbarButtonCorner", 4),
+          ...spacingFields("toolbarButtonPadding",
+            { top: 0, right: 5, bottom: 0, left: 5 }, { max: 40 })
         ]
       },
       // The two named controls on that row — Format, and Illuminus — which open
@@ -2273,8 +2274,9 @@ export const GROUPS = [
           col("dropdownBackground", "#00000000"), ...imageFields("dropdown"),
           col("dropdownHoverBackground", "#00000000"),
           ...borderFields("dropdownBorder", { color: "#00000000" }),
-          ...cornerFields("dropdownCorner"),
-          ...spacingFields("dropdownPadding", 0, { max: 40 })
+          ...cornerFields("dropdownCorner", 4),
+          ...spacingFields("dropdownPadding",
+            { top: 1, right: 5, bottom: 1, left: 5 }, { max: 40 })
         ]
       },
       // The row those settings sit on, which is an area of its own: the
@@ -2329,10 +2331,11 @@ export const GROUPS = [
           num("fieldSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
           col("fieldColor", ""),
           ...textStyleField("fieldTextStyle", "inherit", "inherit", { inherit: true }),
-          col("fieldBackground", "#00000000"), ...imageFields("field"),
-          ...borderFields("fieldBorder", { color: "#00000000" }),
-          ...cornerFields("fieldCorner"),
-          ...spacingFields("fieldPadding", 0, { max: 40 }),
+          col("fieldBackground", ""), ...imageFields("field"),
+          ...borderFields("fieldBorder", { width: 1, color: "#00000000" }),
+          ...cornerFields("fieldCorner", 4),
+          ...spacingFields("fieldPadding",
+            { top: 0, right: 8, bottom: 0, left: 8 }, { max: 40 }),
           // The tick box beside them is not a box at all: Foundry turns the
           // browser's own drawing off and prints a glyph in its place, so a
           // fill, an edge and a corner land on nothing. What it answers to is

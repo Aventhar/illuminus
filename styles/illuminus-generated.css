@@ -4289,8 +4289,8 @@
 }
 
 .illuminus-styled.application:hover {
-  min-width: var(--ill-window-hover-frame-min-width, var(--ill-window-frame-min-width));
-  max-width: var(--ill-window-hover-frame-max-width, var(--ill-window-frame-max-width));
+  min-width: var(--ill-window-hover-frame-min-width, var(--ill-window-frame-min-width, revert-layer));
+  max-width: var(--ill-window-hover-frame-max-width, var(--ill-window-frame-max-width, revert-layer));
   border-width: var(--ill-window-hover-border-top-width, var(--ill-window-border-top-width)) var(--ill-window-hover-border-right-width, var(--ill-window-border-right-width))
                 var(--ill-window-hover-border-bottom-width, var(--ill-window-border-bottom-width)) var(--ill-window-hover-border-left-width, var(--ill-window-border-left-width));
   border-style: var(--ill-window-hover-border-top-style, var(--ill-window-border-top-style)) var(--ill-window-hover-border-right-style, var(--ill-window-border-right-style))
@@ -4299,7 +4299,7 @@
                 var(--ill-window-hover-border-bottom-color, var(--ill-window-border-bottom-color)) var(--ill-window-hover-border-left-color, var(--ill-window-border-left-color));
   border-radius: var(--ill-window-hover-corner-top-left, var(--ill-window-corner-top-left)) var(--ill-window-hover-corner-top-right, var(--ill-window-corner-top-right))
                  var(--ill-window-hover-corner-bottom-right, var(--ill-window-corner-bottom-right)) var(--ill-window-hover-corner-bottom-left, var(--ill-window-corner-bottom-left));
-  corner-shape: var(--ill-window-hover-corner-shape, var(--ill-window-corner-shape));
+  corner-shape: var(--ill-window-hover-corner-shape, var(--ill-window-corner-shape, revert-layer));
 }
 
 .illuminus-styled .window-header:hover {
@@ -4308,27 +4308,27 @@
 }
 
 .illuminus-styled .window-header .window-title:hover {
-  font-family: var(--ill-window-hover-font, var(--ill-window-font));
+  font-family: var(--ill-window-hover-font, var(--ill-window-font, revert-layer));
   -webkit-text-stroke: var(--ill-window-hover-outline-width, var(--ill-window-outline-width)) var(--ill-window-hover-outline-color, var(--ill-window-outline-color));
   text-shadow: var(--ill-window-hover-text-shadow-offset-x, var(--ill-window-text-shadow-offset-x)) var(--ill-window-hover-text-shadow-offset-y, var(--ill-window-text-shadow-offset-y))
                var(--ill-window-hover-text-shadow-blur, var(--ill-window-text-shadow-blur)) var(--ill-window-hover-text-shadow-color, var(--ill-window-text-shadow-color));
-  font-size: var(--ill-window-hover-size, var(--ill-window-size));
-  font-weight: var(--ill-window-hover-text-style-weight, var(--ill-window-text-style-weight));
-  font-style: var(--ill-window-hover-text-style-slant, var(--ill-window-text-style-slant));
-  font-variant: var(--ill-window-hover-caps-variant, var(--ill-window-caps-variant));
-  text-transform: var(--ill-window-hover-caps-transform, var(--ill-window-caps-transform));
-  letter-spacing: var(--ill-window-hover-letter-spacing, var(--ill-window-letter-spacing));
-  text-align: var(--ill-window-hover-align, var(--ill-window-align));
-  color: var(--ill-window-hover-color, var(--ill-window-color));
+  font-size: var(--ill-window-hover-size, var(--ill-window-size, revert-layer));
+  font-weight: var(--ill-window-hover-text-style-weight, var(--ill-window-text-style-weight, revert-layer));
+  font-style: var(--ill-window-hover-text-style-slant, var(--ill-window-text-style-slant, revert-layer));
+  font-variant: var(--ill-window-hover-caps-variant, var(--ill-window-caps-variant, revert-layer));
+  text-transform: var(--ill-window-hover-caps-transform, var(--ill-window-caps-transform, revert-layer));
+  letter-spacing: var(--ill-window-hover-letter-spacing, var(--ill-window-letter-spacing, revert-layer));
+  text-align: var(--ill-window-hover-align, var(--ill-window-align, revert-layer));
+  color: var(--ill-window-hover-color, var(--ill-window-color, revert-layer));
 }
 
 .illuminus-styled .window-header button.header-control:hover {
-  --button-text-color: var(--ill-window-header-button-hover-color, var(--ill-window-header-button-color));
-  --button-background-color: var(--ill-window-header-button-hover-background, var(--ill-window-header-button-background));
+  --button-text-color: var(--ill-window-header-button-hover-color, var(--ill-window-header-button-color, revert-layer));
+  --button-background-color: var(--ill-window-header-button-hover-background, var(--ill-window-header-button-background, revert-layer));
   --button-size: calc(var(--ill-window-hover-header-button-size, var(--ill-window-header-button-size)) * 1.7);
-  color: var(--ill-window-header-button-hover-color, var(--ill-window-header-button-color));
-  background-color: var(--ill-window-header-button-hover-background, var(--ill-window-header-button-background));
-  font-size: var(--ill-window-hover-header-button-size, var(--ill-window-header-button-size));
+  color: var(--ill-window-header-button-hover-color, var(--ill-window-header-button-color, revert-layer));
+  background-color: var(--ill-window-header-button-hover-background, var(--ill-window-header-button-background, revert-layer));
+  font-size: var(--ill-window-hover-header-button-size, var(--ill-window-header-button-size, revert-layer));
   border-width: var(--ill-window-hover-header-button-border-top-width, var(--ill-window-header-button-border-top-width)) var(--ill-window-hover-header-button-border-right-width, var(--ill-window-header-button-border-right-width))
                 var(--ill-window-hover-header-button-border-bottom-width, var(--ill-window-header-button-border-bottom-width)) var(--ill-window-hover-header-button-border-left-width, var(--ill-window-header-button-border-left-width));
   border-style: var(--ill-window-hover-header-button-border-top-style, var(--ill-window-header-button-border-top-style)) var(--ill-window-hover-header-button-border-right-style, var(--ill-window-header-button-border-right-style))
@@ -4337,15 +4337,15 @@
                 var(--ill-window-hover-header-button-border-bottom-color, var(--ill-window-header-button-border-bottom-color)) var(--ill-window-hover-header-button-border-left-color, var(--ill-window-header-button-border-left-color));
   border-radius: var(--ill-window-hover-header-button-corner-top-left, var(--ill-window-header-button-corner-top-left)) var(--ill-window-hover-header-button-corner-top-right, var(--ill-window-header-button-corner-top-right))
                  var(--ill-window-hover-header-button-corner-bottom-right, var(--ill-window-header-button-corner-bottom-right)) var(--ill-window-hover-header-button-corner-bottom-left, var(--ill-window-header-button-corner-bottom-left));
-  corner-shape: var(--ill-window-hover-header-button-corner-shape, var(--ill-window-header-button-corner-shape));
+  corner-shape: var(--ill-window-hover-header-button-corner-shape, var(--ill-window-header-button-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-entry-page .edit-container button:hover {
-  --button-text-color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color));
-  --button-background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background));
-  color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color));
-  background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background));
-  font-size: var(--ill-window-hover-page-button-size, var(--ill-window-page-button-size));
+  --button-text-color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color, revert-layer));
+  --button-background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background, revert-layer));
+  color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color, revert-layer));
+  background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background, revert-layer));
+  font-size: var(--ill-window-hover-page-button-size, var(--ill-window-page-button-size, revert-layer));
   border-width: var(--ill-window-hover-page-button-border-top-width, var(--ill-window-page-button-border-top-width)) var(--ill-window-hover-page-button-border-right-width, var(--ill-window-page-button-border-right-width))
                 var(--ill-window-hover-page-button-border-bottom-width, var(--ill-window-page-button-border-bottom-width)) var(--ill-window-hover-page-button-border-left-width, var(--ill-window-page-button-border-left-width));
   border-style: var(--ill-window-hover-page-button-border-top-style, var(--ill-window-page-button-border-top-style)) var(--ill-window-hover-page-button-border-right-style, var(--ill-window-page-button-border-right-style))
@@ -4354,13 +4354,13 @@
                 var(--ill-window-hover-page-button-border-bottom-color, var(--ill-window-page-button-border-bottom-color)) var(--ill-window-hover-page-button-border-left-color, var(--ill-window-page-button-border-left-color));
   border-radius: var(--ill-window-hover-page-button-corner-top-left, var(--ill-window-page-button-corner-top-left)) var(--ill-window-hover-page-button-corner-top-right, var(--ill-window-page-button-corner-top-right))
                  var(--ill-window-hover-page-button-corner-bottom-right, var(--ill-window-page-button-corner-bottom-right)) var(--ill-window-hover-page-button-corner-bottom-left, var(--ill-window-page-button-corner-bottom-left));
-  corner-shape: var(--ill-window-hover-page-button-corner-shape, var(--ill-window-page-button-corner-shape));
+  corner-shape: var(--ill-window-hover-page-button-corner-shape, var(--ill-window-page-button-corner-shape, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page.application:hover,
 .illuminus-styled .illuminus-preview__editor:hover {
-  min-width: var(--ill-editor-hover-frame-min-width, var(--ill-editor-frame-min-width));
-  max-width: var(--ill-editor-hover-frame-max-width, var(--ill-editor-frame-max-width));
+  min-width: var(--ill-editor-hover-frame-min-width, var(--ill-editor-frame-min-width, revert-layer));
+  max-width: var(--ill-editor-hover-frame-max-width, var(--ill-editor-frame-max-width, revert-layer));
   border-width: var(--ill-editor-hover-border-top-width, var(--ill-editor-border-top-width)) var(--ill-editor-hover-border-right-width, var(--ill-editor-border-right-width))
                 var(--ill-editor-hover-border-bottom-width, var(--ill-editor-border-bottom-width)) var(--ill-editor-hover-border-left-width, var(--ill-editor-border-left-width));
   border-style: var(--ill-editor-hover-border-top-style, var(--ill-editor-border-top-style)) var(--ill-editor-hover-border-right-style, var(--ill-editor-border-right-style))
@@ -4369,7 +4369,7 @@
                 var(--ill-editor-hover-border-bottom-color, var(--ill-editor-border-bottom-color)) var(--ill-editor-hover-border-left-color, var(--ill-editor-border-left-color));
   border-radius: var(--ill-editor-hover-corner-top-left, var(--ill-editor-corner-top-left)) var(--ill-editor-hover-corner-top-right, var(--ill-editor-corner-top-right))
                  var(--ill-editor-hover-corner-bottom-right, var(--ill-editor-corner-bottom-right)) var(--ill-editor-hover-corner-bottom-left, var(--ill-editor-corner-bottom-left));
-  corner-shape: var(--ill-editor-hover-corner-shape, var(--ill-editor-corner-shape));
+  corner-shape: var(--ill-editor-hover-corner-shape, var(--ill-editor-corner-shape, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page .window-header:hover,
@@ -4380,28 +4380,28 @@
 
 .illuminus-styled.journal-entry-page .window-header .window-title:hover,
 .illuminus-styled .illuminus-preview__editor .window-header .window-title:hover {
-  font-family: var(--ill-editor-hover-font, var(--ill-editor-font));
+  font-family: var(--ill-editor-hover-font, var(--ill-editor-font, revert-layer));
   -webkit-text-stroke: var(--ill-editor-hover-outline-width, var(--ill-editor-outline-width)) var(--ill-editor-hover-outline-color, var(--ill-editor-outline-color));
   text-shadow: var(--ill-editor-hover-text-shadow-offset-x, var(--ill-editor-text-shadow-offset-x)) var(--ill-editor-hover-text-shadow-offset-y, var(--ill-editor-text-shadow-offset-y))
                var(--ill-editor-hover-text-shadow-blur, var(--ill-editor-text-shadow-blur)) var(--ill-editor-hover-text-shadow-color, var(--ill-editor-text-shadow-color));
-  font-size: var(--ill-editor-hover-size, var(--ill-editor-size));
-  font-weight: var(--ill-editor-hover-text-style-weight, var(--ill-editor-text-style-weight));
-  font-style: var(--ill-editor-hover-text-style-slant, var(--ill-editor-text-style-slant));
-  font-variant: var(--ill-editor-hover-caps-variant, var(--ill-editor-caps-variant));
-  text-transform: var(--ill-editor-hover-caps-transform, var(--ill-editor-caps-transform));
-  letter-spacing: var(--ill-editor-hover-letter-spacing, var(--ill-editor-letter-spacing));
-  text-align: var(--ill-editor-hover-align, var(--ill-editor-align));
-  color: var(--ill-editor-hover-color, var(--ill-editor-color));
+  font-size: var(--ill-editor-hover-size, var(--ill-editor-size, revert-layer));
+  font-weight: var(--ill-editor-hover-text-style-weight, var(--ill-editor-text-style-weight, revert-layer));
+  font-style: var(--ill-editor-hover-text-style-slant, var(--ill-editor-text-style-slant, revert-layer));
+  font-variant: var(--ill-editor-hover-caps-variant, var(--ill-editor-caps-variant, revert-layer));
+  text-transform: var(--ill-editor-hover-caps-transform, var(--ill-editor-caps-transform, revert-layer));
+  letter-spacing: var(--ill-editor-hover-letter-spacing, var(--ill-editor-letter-spacing, revert-layer));
+  text-align: var(--ill-editor-hover-align, var(--ill-editor-align, revert-layer));
+  color: var(--ill-editor-hover-color, var(--ill-editor-color, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page .window-header button.header-control:hover,
 .illuminus-styled .illuminus-preview__editor .window-header button.header-control:hover {
-  --button-text-color: var(--ill-editor-header-button-hover-color, var(--ill-editor-header-button-color));
-  --button-background-color: var(--ill-editor-header-button-hover-background, var(--ill-editor-header-button-background));
+  --button-text-color: var(--ill-editor-header-button-hover-color, var(--ill-editor-header-button-color, revert-layer));
+  --button-background-color: var(--ill-editor-header-button-hover-background, var(--ill-editor-header-button-background, revert-layer));
   --button-size: calc(var(--ill-editor-hover-header-button-size, var(--ill-editor-header-button-size)) * 1.7);
-  color: var(--ill-editor-header-button-hover-color, var(--ill-editor-header-button-color));
-  background-color: var(--ill-editor-header-button-hover-background, var(--ill-editor-header-button-background));
-  font-size: var(--ill-editor-hover-header-button-size, var(--ill-editor-header-button-size));
+  color: var(--ill-editor-header-button-hover-color, var(--ill-editor-header-button-color, revert-layer));
+  background-color: var(--ill-editor-header-button-hover-background, var(--ill-editor-header-button-background, revert-layer));
+  font-size: var(--ill-editor-hover-header-button-size, var(--ill-editor-header-button-size, revert-layer));
   border-width: var(--ill-editor-hover-header-button-border-top-width, var(--ill-editor-header-button-border-top-width)) var(--ill-editor-hover-header-button-border-right-width, var(--ill-editor-header-button-border-right-width))
                 var(--ill-editor-hover-header-button-border-bottom-width, var(--ill-editor-header-button-border-bottom-width)) var(--ill-editor-hover-header-button-border-left-width, var(--ill-editor-header-button-border-left-width));
   border-style: var(--ill-editor-hover-header-button-border-top-style, var(--ill-editor-header-button-border-top-style)) var(--ill-editor-hover-header-button-border-right-style, var(--ill-editor-header-button-border-right-style))
@@ -4410,12 +4410,12 @@
                 var(--ill-editor-hover-header-button-border-bottom-color, var(--ill-editor-header-button-border-bottom-color)) var(--ill-editor-hover-header-button-border-left-color, var(--ill-editor-header-button-border-left-color));
   border-radius: var(--ill-editor-hover-header-button-corner-top-left, var(--ill-editor-header-button-corner-top-left)) var(--ill-editor-hover-header-button-corner-top-right, var(--ill-editor-header-button-corner-top-right))
                  var(--ill-editor-hover-header-button-corner-bottom-right, var(--ill-editor-header-button-corner-bottom-right)) var(--ill-editor-hover-header-button-corner-bottom-left, var(--ill-editor-header-button-corner-bottom-left));
-  corner-shape: var(--ill-editor-hover-header-button-corner-shape, var(--ill-editor-header-button-corner-shape));
+  corner-shape: var(--ill-editor-hover-header-button-corner-shape, var(--ill-editor-header-button-corner-shape, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu:hover {
-  background-color: var(--ill-editor-toolbar-hover-toolbar-background, var(--ill-editor-toolbar-toolbar-background));
+  background-color: var(--ill-editor-toolbar-hover-toolbar-background, var(--ill-editor-toolbar-toolbar-background, revert-layer));
   padding: var(--ill-editor-toolbar-hover-toolbar-padding-top, var(--ill-editor-toolbar-toolbar-padding-top)) var(--ill-editor-toolbar-hover-toolbar-padding-right, var(--ill-editor-toolbar-toolbar-padding-right))
            var(--ill-editor-toolbar-hover-toolbar-padding-bottom, var(--ill-editor-toolbar-toolbar-padding-bottom)) var(--ill-editor-toolbar-hover-toolbar-padding-left, var(--ill-editor-toolbar-toolbar-padding-left));
   border-width: var(--ill-editor-toolbar-hover-toolbar-border-top-width, var(--ill-editor-toolbar-toolbar-border-top-width)) var(--ill-editor-toolbar-hover-toolbar-border-right-width, var(--ill-editor-toolbar-toolbar-border-right-width))
@@ -4426,37 +4426,37 @@
                 var(--ill-editor-toolbar-hover-toolbar-border-bottom-color, var(--ill-editor-toolbar-toolbar-border-bottom-color)) var(--ill-editor-toolbar-hover-toolbar-border-left-color, var(--ill-editor-toolbar-toolbar-border-left-color));
   border-radius: var(--ill-editor-toolbar-hover-toolbar-corner-top-left, var(--ill-editor-toolbar-toolbar-corner-top-left)) var(--ill-editor-toolbar-hover-toolbar-corner-top-right, var(--ill-editor-toolbar-toolbar-corner-top-right))
                  var(--ill-editor-toolbar-hover-toolbar-corner-bottom-right, var(--ill-editor-toolbar-toolbar-corner-bottom-right)) var(--ill-editor-toolbar-hover-toolbar-corner-bottom-left, var(--ill-editor-toolbar-toolbar-corner-bottom-left));
-  corner-shape: var(--ill-editor-toolbar-hover-toolbar-corner-shape, var(--ill-editor-toolbar-toolbar-corner-shape));
+  corner-shape: var(--ill-editor-toolbar-hover-toolbar-corner-shape, var(--ill-editor-toolbar-toolbar-corner-shape, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:hover,
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
-  --button-text-color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
-  color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
-  font-size: var(--ill-editor-toolbar-hover-toolbar-size, var(--ill-editor-toolbar-toolbar-size));
+  --button-text-color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
+  color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
+  font-size: var(--ill-editor-toolbar-hover-toolbar-size, var(--ill-editor-toolbar-toolbar-size, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page .page-metadata:hover,
 .illuminus-styled .illuminus-preview__editor .page-metadata:hover {
-  font-family: var(--ill-editor-settings-bar-hover-settings-bar-font, var(--ill-editor-settings-bar-settings-bar-font));
-  font-size: var(--ill-editor-settings-bar-hover-settings-bar-size, var(--ill-editor-settings-bar-settings-bar-size));
-  color: var(--ill-editor-settings-bar-hover-settings-bar-color, var(--ill-editor-settings-bar-settings-bar-color));
-  font-weight: var(--ill-editor-settings-bar-hover-settings-bar-text-style-weight, var(--ill-editor-settings-bar-settings-bar-text-style-weight));
-  font-style: var(--ill-editor-settings-bar-hover-settings-bar-text-style-slant, var(--ill-editor-settings-bar-settings-bar-text-style-slant));
-  font-variant: var(--ill-editor-settings-bar-hover-settings-bar-caps-variant, var(--ill-editor-settings-bar-settings-bar-caps-variant));
-  text-transform: var(--ill-editor-settings-bar-hover-settings-bar-caps-transform, var(--ill-editor-settings-bar-settings-bar-caps-transform));
-  letter-spacing: var(--ill-editor-settings-bar-hover-settings-bar-letter-spacing, var(--ill-editor-settings-bar-settings-bar-letter-spacing));
-  word-spacing: var(--ill-editor-settings-bar-hover-settings-bar-word-spacing, var(--ill-editor-settings-bar-settings-bar-word-spacing));
-  line-height: var(--ill-editor-settings-bar-hover-settings-bar-line-height, var(--ill-editor-settings-bar-settings-bar-line-height));
-  text-wrap: var(--ill-editor-settings-bar-hover-settings-bar-wrap, var(--ill-editor-settings-bar-settings-bar-wrap));
-  hyphens: var(--ill-editor-settings-bar-hover-settings-bar-hyphens, var(--ill-editor-settings-bar-settings-bar-hyphens));
-  text-align: var(--ill-editor-settings-bar-hover-settings-bar-align, var(--ill-editor-settings-bar-settings-bar-align));
+  font-family: var(--ill-editor-settings-bar-hover-settings-bar-font, var(--ill-editor-settings-bar-settings-bar-font, revert-layer));
+  font-size: var(--ill-editor-settings-bar-hover-settings-bar-size, var(--ill-editor-settings-bar-settings-bar-size, revert-layer));
+  color: var(--ill-editor-settings-bar-hover-settings-bar-color, var(--ill-editor-settings-bar-settings-bar-color, revert-layer));
+  font-weight: var(--ill-editor-settings-bar-hover-settings-bar-text-style-weight, var(--ill-editor-settings-bar-settings-bar-text-style-weight, revert-layer));
+  font-style: var(--ill-editor-settings-bar-hover-settings-bar-text-style-slant, var(--ill-editor-settings-bar-settings-bar-text-style-slant, revert-layer));
+  font-variant: var(--ill-editor-settings-bar-hover-settings-bar-caps-variant, var(--ill-editor-settings-bar-settings-bar-caps-variant, revert-layer));
+  text-transform: var(--ill-editor-settings-bar-hover-settings-bar-caps-transform, var(--ill-editor-settings-bar-settings-bar-caps-transform, revert-layer));
+  letter-spacing: var(--ill-editor-settings-bar-hover-settings-bar-letter-spacing, var(--ill-editor-settings-bar-settings-bar-letter-spacing, revert-layer));
+  word-spacing: var(--ill-editor-settings-bar-hover-settings-bar-word-spacing, var(--ill-editor-settings-bar-settings-bar-word-spacing, revert-layer));
+  line-height: var(--ill-editor-settings-bar-hover-settings-bar-line-height, var(--ill-editor-settings-bar-settings-bar-line-height, revert-layer));
+  text-wrap: var(--ill-editor-settings-bar-hover-settings-bar-wrap, var(--ill-editor-settings-bar-settings-bar-wrap, revert-layer));
+  hyphens: var(--ill-editor-settings-bar-hover-settings-bar-hyphens, var(--ill-editor-settings-bar-settings-bar-hyphens, revert-layer));
+  text-align: var(--ill-editor-settings-bar-hover-settings-bar-align, var(--ill-editor-settings-bar-settings-bar-align, revert-layer));
   -webkit-text-stroke: var(--ill-editor-settings-bar-hover-settings-bar-outline-width, var(--ill-editor-settings-bar-settings-bar-outline-width)) var(--ill-editor-settings-bar-hover-settings-bar-outline-color, var(--ill-editor-settings-bar-settings-bar-outline-color));
   text-shadow: var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-offset-x, var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-x)) var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-offset-y, var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-y))
                var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-blur, var(--ill-editor-settings-bar-settings-bar-text-shadow-blur)) var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-color, var(--ill-editor-settings-bar-settings-bar-text-shadow-color));
-  background-color: var(--ill-editor-settings-bar-hover-settings-bar-background, var(--ill-editor-settings-bar-settings-bar-background));
+  background-color: var(--ill-editor-settings-bar-hover-settings-bar-background, var(--ill-editor-settings-bar-settings-bar-background, revert-layer));
   padding: var(--ill-editor-settings-bar-hover-settings-bar-padding-top, var(--ill-editor-settings-bar-settings-bar-padding-top)) var(--ill-editor-settings-bar-hover-settings-bar-padding-right, var(--ill-editor-settings-bar-settings-bar-padding-right))
            var(--ill-editor-settings-bar-hover-settings-bar-padding-bottom, var(--ill-editor-settings-bar-settings-bar-padding-bottom)) var(--ill-editor-settings-bar-hover-settings-bar-padding-left, var(--ill-editor-settings-bar-settings-bar-padding-left));
   margin: var(--ill-editor-settings-bar-hover-settings-bar-margin-top, var(--ill-editor-settings-bar-settings-bar-margin-top)) var(--ill-editor-settings-bar-hover-settings-bar-margin-right, var(--ill-editor-settings-bar-settings-bar-margin-right))
@@ -4469,7 +4469,7 @@
                 var(--ill-editor-settings-bar-hover-settings-bar-border-bottom-color, var(--ill-editor-settings-bar-settings-bar-border-bottom-color)) var(--ill-editor-settings-bar-hover-settings-bar-border-left-color, var(--ill-editor-settings-bar-settings-bar-border-left-color));
   border-radius: var(--ill-editor-settings-bar-hover-settings-bar-corner-top-left, var(--ill-editor-settings-bar-settings-bar-corner-top-left)) var(--ill-editor-settings-bar-hover-settings-bar-corner-top-right, var(--ill-editor-settings-bar-settings-bar-corner-top-right))
                  var(--ill-editor-settings-bar-hover-settings-bar-corner-bottom-right, var(--ill-editor-settings-bar-settings-bar-corner-bottom-right)) var(--ill-editor-settings-bar-hover-settings-bar-corner-bottom-left, var(--ill-editor-settings-bar-settings-bar-corner-bottom-left));
-  corner-shape: var(--ill-editor-settings-bar-hover-settings-bar-corner-shape, var(--ill-editor-settings-bar-settings-bar-corner-shape));
+  corner-shape: var(--ill-editor-settings-bar-hover-settings-bar-corner-shape, var(--ill-editor-settings-bar-settings-bar-corner-shape, revert-layer));
   box-shadow: var(--ill-editor-settings-bar-hover-settings-bar-shadow-offset-x, var(--ill-editor-settings-bar-settings-bar-shadow-offset-x)) var(--ill-editor-settings-bar-hover-settings-bar-shadow-offset-y, var(--ill-editor-settings-bar-settings-bar-shadow-offset-y))
               var(--ill-editor-settings-bar-hover-settings-bar-shadow-blur, var(--ill-editor-settings-bar-settings-bar-shadow-blur)) var(--ill-editor-settings-bar-hover-settings-bar-shadow-spread, var(--ill-editor-settings-bar-settings-bar-shadow-spread))
               var(--ill-editor-settings-bar-hover-settings-bar-shadow-color, var(--ill-editor-settings-bar-settings-bar-shadow-color)),
@@ -4479,10 +4479,8 @@
 }
 
 .illuminus-styled.journal-entry-page .page-metadata select:hover,
-.illuminus-styled.journal-entry-page .page-metadata label:hover,
-.illuminus-styled .illuminus-preview__editor .page-metadata select:hover,
-.illuminus-styled .illuminus-preview__editor .page-metadata label:hover {
-  background-color: var(--ill-editor-settings-bar-hover-field-background, var(--ill-editor-settings-bar-field-background));
+.illuminus-styled .illuminus-preview__editor .page-metadata select:hover {
+  background-color: var(--ill-editor-settings-bar-hover-field-background, var(--ill-editor-settings-bar-field-background, revert-layer));
   padding: var(--ill-editor-settings-bar-hover-field-padding-top, var(--ill-editor-settings-bar-field-padding-top)) var(--ill-editor-settings-bar-hover-field-padding-right, var(--ill-editor-settings-bar-field-padding-right))
            var(--ill-editor-settings-bar-hover-field-padding-bottom, var(--ill-editor-settings-bar-field-padding-bottom)) var(--ill-editor-settings-bar-hover-field-padding-left, var(--ill-editor-settings-bar-field-padding-left));
   border-width: var(--ill-editor-settings-bar-hover-field-border-top-width, var(--ill-editor-settings-bar-field-border-top-width)) var(--ill-editor-settings-bar-hover-field-border-right-width, var(--ill-editor-settings-bar-field-border-right-width))
@@ -4493,25 +4491,37 @@
                 var(--ill-editor-settings-bar-hover-field-border-bottom-color, var(--ill-editor-settings-bar-field-border-bottom-color)) var(--ill-editor-settings-bar-hover-field-border-left-color, var(--ill-editor-settings-bar-field-border-left-color));
   border-radius: var(--ill-editor-settings-bar-hover-field-corner-top-left, var(--ill-editor-settings-bar-field-corner-top-left)) var(--ill-editor-settings-bar-hover-field-corner-top-right, var(--ill-editor-settings-bar-field-corner-top-right))
                  var(--ill-editor-settings-bar-hover-field-corner-bottom-right, var(--ill-editor-settings-bar-field-corner-bottom-right)) var(--ill-editor-settings-bar-hover-field-corner-bottom-left, var(--ill-editor-settings-bar-field-corner-bottom-left));
-  corner-shape: var(--ill-editor-settings-bar-hover-field-corner-shape, var(--ill-editor-settings-bar-field-corner-shape));
+  corner-shape: var(--ill-editor-settings-bar-hover-field-corner-shape, var(--ill-editor-settings-bar-field-corner-shape, revert-layer));
   box-shadow: var(--ill-editor-settings-bar-hover-field-shadow-offset-x, var(--ill-editor-settings-bar-field-shadow-offset-x)) var(--ill-editor-settings-bar-hover-field-shadow-offset-y, var(--ill-editor-settings-bar-field-shadow-offset-y))
               var(--ill-editor-settings-bar-hover-field-shadow-blur, var(--ill-editor-settings-bar-field-shadow-blur)) var(--ill-editor-settings-bar-hover-field-shadow-spread, var(--ill-editor-settings-bar-field-shadow-spread))
               var(--ill-editor-settings-bar-hover-field-shadow-color, var(--ill-editor-settings-bar-field-shadow-color)),
     inset var(--ill-editor-settings-bar-hover-field-inner-shadow-offset-x, var(--ill-editor-settings-bar-field-inner-shadow-offset-x)) var(--ill-editor-settings-bar-hover-field-inner-shadow-offset-y, var(--ill-editor-settings-bar-field-inner-shadow-offset-y))
           var(--ill-editor-settings-bar-hover-field-inner-shadow-blur, var(--ill-editor-settings-bar-field-inner-shadow-blur)) var(--ill-editor-settings-bar-hover-field-inner-shadow-spread, var(--ill-editor-settings-bar-field-inner-shadow-spread))
           var(--ill-editor-settings-bar-hover-field-inner-shadow-color, var(--ill-editor-settings-bar-field-inner-shadow-color));
-  font-family: var(--ill-editor-settings-bar-hover-field-font, var(--ill-editor-settings-bar-field-font));
-  font-size: var(--ill-editor-settings-bar-hover-field-size, var(--ill-editor-settings-bar-field-size));
-  font-weight: var(--ill-editor-settings-bar-hover-field-text-style-weight, var(--ill-editor-settings-bar-field-text-style-weight));
-  font-style: var(--ill-editor-settings-bar-hover-field-text-style-slant, var(--ill-editor-settings-bar-field-text-style-slant));
-  color: var(--ill-editor-settings-bar-hover-field-color, var(--ill-editor-settings-bar-field-color));
+}
+
+.illuminus-styled.journal-entry-page .page-metadata select:hover,
+.illuminus-styled.journal-entry-page .page-metadata label:hover,
+.illuminus-styled .illuminus-preview__editor .page-metadata select:hover,
+.illuminus-styled .illuminus-preview__editor .page-metadata label:hover {
+  font-size: var(--ill-editor-settings-bar-hover-field-size, var(--ill-editor-settings-bar-field-size, revert-layer));
+  font-weight: var(--ill-editor-settings-bar-hover-field-text-style-weight, var(--ill-editor-settings-bar-field-text-style-weight, revert-layer));
+  font-style: var(--ill-editor-settings-bar-hover-field-text-style-slant, var(--ill-editor-settings-bar-field-text-style-slant, revert-layer));
+  color: var(--ill-editor-settings-bar-hover-field-color, var(--ill-editor-settings-bar-field-color, revert-layer));
   -webkit-text-stroke: var(--ill-editor-settings-bar-hover-field-outline-width, var(--ill-editor-settings-bar-field-outline-width)) var(--ill-editor-settings-bar-hover-field-outline-color, var(--ill-editor-settings-bar-field-outline-color));
   text-shadow: var(--ill-editor-settings-bar-hover-field-text-shadow-offset-x, var(--ill-editor-settings-bar-field-text-shadow-offset-x)) var(--ill-editor-settings-bar-hover-field-text-shadow-offset-y, var(--ill-editor-settings-bar-field-text-shadow-offset-y))
                var(--ill-editor-settings-bar-hover-field-text-shadow-blur, var(--ill-editor-settings-bar-field-text-shadow-blur)) var(--ill-editor-settings-bar-hover-field-text-shadow-color, var(--ill-editor-settings-bar-field-text-shadow-color));
 }
 
+.illuminus-styled.journal-entry-page .page-metadata select:hover,
+.illuminus-styled.journal-entry-page .page-metadata label:not([class*="fa-"]):hover,
+.illuminus-styled .illuminus-preview__editor .page-metadata select:hover,
+.illuminus-styled .illuminus-preview__editor .page-metadata label:not([class*="fa-"]):hover {
+  font-family: var(--ill-editor-settings-bar-hover-field-font, var(--ill-editor-settings-bar-field-font, revert-layer));
+}
+
 .illuminus-styled#prosemirror-dropdown ul:hover {
-  background-color: var(--ill-editor-dropdowns-hover-list-background, var(--ill-editor-dropdowns-list-background));
+  background-color: var(--ill-editor-dropdowns-hover-list-background, var(--ill-editor-dropdowns-list-background, revert-layer));
   padding: var(--ill-editor-dropdowns-hover-list-padding-top, var(--ill-editor-dropdowns-list-padding-top)) var(--ill-editor-dropdowns-hover-list-padding-right, var(--ill-editor-dropdowns-list-padding-right))
            var(--ill-editor-dropdowns-hover-list-padding-bottom, var(--ill-editor-dropdowns-list-padding-bottom)) var(--ill-editor-dropdowns-hover-list-padding-left, var(--ill-editor-dropdowns-list-padding-left));
   border-width: var(--ill-editor-dropdowns-hover-list-border-top-width, var(--ill-editor-dropdowns-list-border-top-width)) var(--ill-editor-dropdowns-hover-list-border-right-width, var(--ill-editor-dropdowns-list-border-right-width))
@@ -4522,7 +4532,7 @@
                 var(--ill-editor-dropdowns-hover-list-border-bottom-color, var(--ill-editor-dropdowns-list-border-bottom-color)) var(--ill-editor-dropdowns-hover-list-border-left-color, var(--ill-editor-dropdowns-list-border-left-color));
   border-radius: var(--ill-editor-dropdowns-hover-list-corner-top-left, var(--ill-editor-dropdowns-list-corner-top-left)) var(--ill-editor-dropdowns-hover-list-corner-top-right, var(--ill-editor-dropdowns-list-corner-top-right))
                  var(--ill-editor-dropdowns-hover-list-corner-bottom-right, var(--ill-editor-dropdowns-list-corner-bottom-right)) var(--ill-editor-dropdowns-hover-list-corner-bottom-left, var(--ill-editor-dropdowns-list-corner-bottom-left));
-  corner-shape: var(--ill-editor-dropdowns-hover-list-corner-shape, var(--ill-editor-dropdowns-list-corner-shape));
+  corner-shape: var(--ill-editor-dropdowns-hover-list-corner-shape, var(--ill-editor-dropdowns-list-corner-shape, revert-layer));
   box-shadow: var(--ill-editor-dropdowns-hover-list-shadow-offset-x, var(--ill-editor-dropdowns-list-shadow-offset-x)) var(--ill-editor-dropdowns-hover-list-shadow-offset-y, var(--ill-editor-dropdowns-list-shadow-offset-y))
               var(--ill-editor-dropdowns-hover-list-shadow-blur, var(--ill-editor-dropdowns-list-shadow-blur)) var(--ill-editor-dropdowns-hover-list-shadow-spread, var(--ill-editor-dropdowns-list-shadow-spread))
               var(--ill-editor-dropdowns-hover-list-shadow-color, var(--ill-editor-dropdowns-list-shadow-color)),
@@ -4532,24 +4542,24 @@
 }
 
 .illuminus-styled#prosemirror-dropdown li:hover {
-  font-family: var(--ill-editor-dropdowns-hover-item-font, var(--ill-editor-dropdowns-item-font));
-  font-size: var(--ill-editor-dropdowns-hover-item-size, var(--ill-editor-dropdowns-item-size));
-  color: var(--ill-editor-dropdowns-hover-item-color, var(--ill-editor-dropdowns-item-color));
-  font-weight: var(--ill-editor-dropdowns-hover-item-text-style-weight, var(--ill-editor-dropdowns-item-text-style-weight));
-  font-style: var(--ill-editor-dropdowns-hover-item-text-style-slant, var(--ill-editor-dropdowns-item-text-style-slant));
+  font-family: var(--ill-editor-dropdowns-hover-item-font, var(--ill-editor-dropdowns-item-font, revert-layer));
+  font-size: var(--ill-editor-dropdowns-hover-item-size, var(--ill-editor-dropdowns-item-size, revert-layer));
+  color: var(--ill-editor-dropdowns-hover-item-color, var(--ill-editor-dropdowns-item-color, revert-layer));
+  font-weight: var(--ill-editor-dropdowns-hover-item-text-style-weight, var(--ill-editor-dropdowns-item-text-style-weight, revert-layer));
+  font-style: var(--ill-editor-dropdowns-hover-item-text-style-slant, var(--ill-editor-dropdowns-item-text-style-slant, revert-layer));
   -webkit-text-stroke: var(--ill-editor-dropdowns-hover-item-outline-width, var(--ill-editor-dropdowns-item-outline-width)) var(--ill-editor-dropdowns-hover-item-outline-color, var(--ill-editor-dropdowns-item-outline-color));
   text-shadow: var(--ill-editor-dropdowns-hover-item-text-shadow-offset-x, var(--ill-editor-dropdowns-item-text-shadow-offset-x)) var(--ill-editor-dropdowns-hover-item-text-shadow-offset-y, var(--ill-editor-dropdowns-item-text-shadow-offset-y))
                var(--ill-editor-dropdowns-hover-item-text-shadow-blur, var(--ill-editor-dropdowns-item-text-shadow-blur)) var(--ill-editor-dropdowns-hover-item-text-shadow-color, var(--ill-editor-dropdowns-item-text-shadow-color));
-  background-color: var(--ill-editor-dropdowns-hover-item-background, var(--ill-editor-dropdowns-item-background));
+  background-color: var(--ill-editor-dropdowns-hover-item-background, var(--ill-editor-dropdowns-item-background, revert-layer));
   padding: var(--ill-editor-dropdowns-hover-item-padding-top, var(--ill-editor-dropdowns-item-padding-top)) var(--ill-editor-dropdowns-hover-item-padding-right, var(--ill-editor-dropdowns-item-padding-right))
            var(--ill-editor-dropdowns-hover-item-padding-bottom, var(--ill-editor-dropdowns-item-padding-bottom)) var(--ill-editor-dropdowns-hover-item-padding-left, var(--ill-editor-dropdowns-item-padding-left));
   border-radius: var(--ill-editor-dropdowns-hover-item-corner-top-left, var(--ill-editor-dropdowns-item-corner-top-left)) var(--ill-editor-dropdowns-hover-item-corner-top-right, var(--ill-editor-dropdowns-item-corner-top-right))
                  var(--ill-editor-dropdowns-hover-item-corner-bottom-right, var(--ill-editor-dropdowns-item-corner-bottom-right)) var(--ill-editor-dropdowns-hover-item-corner-bottom-left, var(--ill-editor-dropdowns-item-corner-bottom-left));
-  corner-shape: var(--ill-editor-dropdowns-hover-item-corner-shape, var(--ill-editor-dropdowns-item-corner-shape));
+  corner-shape: var(--ill-editor-dropdowns-hover-item-corner-shape, var(--ill-editor-dropdowns-item-corner-shape, revert-layer));
 }
 
 .illuminus-styled#prosemirror-dropdown li.divider:hover {
-  border-bottom-color: var(--ill-editor-dropdowns-hover-item-divider-color, var(--ill-editor-dropdowns-item-divider-color));
+  border-bottom-color: var(--ill-editor-dropdowns-hover-item-divider-color, var(--ill-editor-dropdowns-item-divider-color, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page .page-metadata input[type="checkbox"]:hover::before,
@@ -4579,7 +4589,7 @@
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown):hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown):hover {
-  background-color: var(--ill-editor-toolbar-toolbar-button-hover-background, var(--ill-editor-toolbar-toolbar-button-background));
+  background-color: var(--ill-editor-toolbar-toolbar-button-hover-background, var(--ill-editor-toolbar-toolbar-button-background, revert-layer));
   padding: var(--ill-editor-toolbar-hover-toolbar-button-padding-top, var(--ill-editor-toolbar-toolbar-button-padding-top)) var(--ill-editor-toolbar-hover-toolbar-button-padding-right, var(--ill-editor-toolbar-toolbar-button-padding-right))
            var(--ill-editor-toolbar-hover-toolbar-button-padding-bottom, var(--ill-editor-toolbar-toolbar-button-padding-bottom)) var(--ill-editor-toolbar-hover-toolbar-button-padding-left, var(--ill-editor-toolbar-toolbar-button-padding-left));
   border-width: var(--ill-editor-toolbar-hover-toolbar-button-border-top-width, var(--ill-editor-toolbar-toolbar-button-border-top-width)) var(--ill-editor-toolbar-hover-toolbar-button-border-right-width, var(--ill-editor-toolbar-toolbar-button-border-right-width))
@@ -4590,7 +4600,7 @@
                 var(--ill-editor-toolbar-hover-toolbar-button-border-bottom-color, var(--ill-editor-toolbar-toolbar-button-border-bottom-color)) var(--ill-editor-toolbar-hover-toolbar-button-border-left-color, var(--ill-editor-toolbar-toolbar-button-border-left-color));
   border-radius: var(--ill-editor-toolbar-hover-toolbar-button-corner-top-left, var(--ill-editor-toolbar-toolbar-button-corner-top-left)) var(--ill-editor-toolbar-hover-toolbar-button-corner-top-right, var(--ill-editor-toolbar-toolbar-button-corner-top-right))
                  var(--ill-editor-toolbar-hover-toolbar-button-corner-bottom-right, var(--ill-editor-toolbar-toolbar-button-corner-bottom-right)) var(--ill-editor-toolbar-hover-toolbar-button-corner-bottom-left, var(--ill-editor-toolbar-toolbar-button-corner-bottom-left));
-  corner-shape: var(--ill-editor-toolbar-hover-toolbar-button-corner-shape, var(--ill-editor-toolbar-toolbar-button-corner-shape));
+  corner-shape: var(--ill-editor-toolbar-hover-toolbar-button-corner-shape, var(--ill-editor-toolbar-toolbar-button-corner-shape, revert-layer));
   box-shadow: var(--ill-editor-toolbar-hover-toolbar-button-shadow-offset-x, var(--ill-editor-toolbar-toolbar-button-shadow-offset-x)) var(--ill-editor-toolbar-hover-toolbar-button-shadow-offset-y, var(--ill-editor-toolbar-toolbar-button-shadow-offset-y))
               var(--ill-editor-toolbar-hover-toolbar-button-shadow-blur, var(--ill-editor-toolbar-toolbar-button-shadow-blur)) var(--ill-editor-toolbar-hover-toolbar-button-shadow-spread, var(--ill-editor-toolbar-toolbar-button-shadow-spread))
               var(--ill-editor-toolbar-hover-toolbar-button-shadow-color, var(--ill-editor-toolbar-toolbar-button-shadow-color)),
@@ -4601,8 +4611,8 @@
 
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
-  --button-text-color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color)));
-  background-color: var(--ill-editor-dropdowns-dropdown-hover-background, var(--ill-editor-dropdowns-dropdown-background));
+  --button-text-color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer)));
+  background-color: var(--ill-editor-dropdowns-dropdown-hover-background, var(--ill-editor-dropdowns-dropdown-background, revert-layer));
   padding: var(--ill-editor-dropdowns-hover-dropdown-padding-top, var(--ill-editor-dropdowns-dropdown-padding-top)) var(--ill-editor-dropdowns-hover-dropdown-padding-right, var(--ill-editor-dropdowns-dropdown-padding-right))
            var(--ill-editor-dropdowns-hover-dropdown-padding-bottom, var(--ill-editor-dropdowns-dropdown-padding-bottom)) var(--ill-editor-dropdowns-hover-dropdown-padding-left, var(--ill-editor-dropdowns-dropdown-padding-left));
   border-width: var(--ill-editor-dropdowns-hover-dropdown-border-top-width, var(--ill-editor-dropdowns-dropdown-border-top-width)) var(--ill-editor-dropdowns-hover-dropdown-border-right-width, var(--ill-editor-dropdowns-dropdown-border-right-width))
@@ -4613,55 +4623,55 @@
                 var(--ill-editor-dropdowns-hover-dropdown-border-bottom-color, var(--ill-editor-dropdowns-dropdown-border-bottom-color)) var(--ill-editor-dropdowns-hover-dropdown-border-left-color, var(--ill-editor-dropdowns-dropdown-border-left-color));
   border-radius: var(--ill-editor-dropdowns-hover-dropdown-corner-top-left, var(--ill-editor-dropdowns-dropdown-corner-top-left)) var(--ill-editor-dropdowns-hover-dropdown-corner-top-right, var(--ill-editor-dropdowns-dropdown-corner-top-right))
                  var(--ill-editor-dropdowns-hover-dropdown-corner-bottom-right, var(--ill-editor-dropdowns-dropdown-corner-bottom-right)) var(--ill-editor-dropdowns-hover-dropdown-corner-bottom-left, var(--ill-editor-dropdowns-dropdown-corner-bottom-left));
-  corner-shape: var(--ill-editor-dropdowns-hover-dropdown-corner-shape, var(--ill-editor-dropdowns-dropdown-corner-shape));
+  corner-shape: var(--ill-editor-dropdowns-hover-dropdown-corner-shape, var(--ill-editor-dropdowns-dropdown-corner-shape, revert-layer));
   box-shadow: var(--ill-editor-dropdowns-hover-dropdown-shadow-offset-x, var(--ill-editor-dropdowns-dropdown-shadow-offset-x)) var(--ill-editor-dropdowns-hover-dropdown-shadow-offset-y, var(--ill-editor-dropdowns-dropdown-shadow-offset-y))
               var(--ill-editor-dropdowns-hover-dropdown-shadow-blur, var(--ill-editor-dropdowns-dropdown-shadow-blur)) var(--ill-editor-dropdowns-hover-dropdown-shadow-spread, var(--ill-editor-dropdowns-dropdown-shadow-spread))
               var(--ill-editor-dropdowns-hover-dropdown-shadow-color, var(--ill-editor-dropdowns-dropdown-shadow-color)),
     inset var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-offset-x, var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-x)) var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-offset-y, var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-y))
           var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-blur, var(--ill-editor-dropdowns-dropdown-inner-shadow-blur)) var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-spread, var(--ill-editor-dropdowns-dropdown-inner-shadow-spread))
           var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-color, var(--ill-editor-dropdowns-dropdown-inner-shadow-color));
-  font-family: var(--ill-editor-dropdowns-hover-dropdown-font, var(--ill-editor-dropdowns-dropdown-font));
-  font-size: var(--ill-editor-dropdowns-hover-dropdown-size, var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size)));
-  font-weight: var(--ill-editor-dropdowns-hover-dropdown-text-style-weight, var(--ill-editor-dropdowns-dropdown-text-style-weight));
-  font-style: var(--ill-editor-dropdowns-hover-dropdown-text-style-slant, var(--ill-editor-dropdowns-dropdown-text-style-slant));
-  color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color)));
+  font-family: var(--ill-editor-dropdowns-hover-dropdown-font, var(--ill-editor-dropdowns-dropdown-font, revert-layer));
+  font-size: var(--ill-editor-dropdowns-hover-dropdown-size, var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size, revert-layer)));
+  font-weight: var(--ill-editor-dropdowns-hover-dropdown-text-style-weight, var(--ill-editor-dropdowns-dropdown-text-style-weight, revert-layer));
+  font-style: var(--ill-editor-dropdowns-hover-dropdown-text-style-slant, var(--ill-editor-dropdowns-dropdown-text-style-slant, revert-layer));
+  color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer)));
   -webkit-text-stroke: var(--ill-editor-dropdowns-hover-dropdown-outline-width, var(--ill-editor-dropdowns-dropdown-outline-width)) var(--ill-editor-dropdowns-hover-dropdown-outline-color, var(--ill-editor-dropdowns-dropdown-outline-color));
   text-shadow: var(--ill-editor-dropdowns-hover-dropdown-text-shadow-offset-x, var(--ill-editor-dropdowns-dropdown-text-shadow-offset-x)) var(--ill-editor-dropdowns-hover-dropdown-text-shadow-offset-y, var(--ill-editor-dropdowns-dropdown-text-shadow-offset-y))
                var(--ill-editor-dropdowns-hover-dropdown-text-shadow-blur, var(--ill-editor-dropdowns-dropdown-text-shadow-blur)) var(--ill-editor-dropdowns-hover-dropdown-text-shadow-color, var(--ill-editor-dropdowns-dropdown-text-shadow-color));
 }
 
 .illuminus-styled.application:hover::after {
-  background-color: var(--ill-window-hover-background, var(--ill-window-background));
-  backdrop-filter: var(--ill-window-hover-frost, var(--ill-window-frost));
+  background-color: var(--ill-window-hover-background, var(--ill-window-background, revert-layer));
+  backdrop-filter: var(--ill-window-hover-frost, var(--ill-window-frost, revert-layer));
   background-image: linear-gradient(var(--ill-window-hover-gradient-angle, var(--ill-window-gradient-angle)),
       var(--ill-window-hover-gradient-from, var(--ill-window-gradient-from)), var(--ill-window-hover-gradient-to, var(--ill-window-gradient-to)));
 }
 
 .illuminus-styled .window-header:hover::after {
-  background-color: var(--ill-window-hover-title-bar-background, var(--ill-window-title-bar-background));
+  background-color: var(--ill-window-hover-title-bar-background, var(--ill-window-title-bar-background, revert-layer));
 }
 
 .illuminus-styled.journal-entry-page.application:hover::after,
 .illuminus-styled .illuminus-preview__editor:hover::after {
-  background-color: var(--ill-editor-hover-background, var(--ill-editor-background));
-  backdrop-filter: var(--ill-editor-hover-frost, var(--ill-editor-frost));
+  background-color: var(--ill-editor-hover-background, var(--ill-editor-background, revert-layer));
+  backdrop-filter: var(--ill-editor-hover-frost, var(--ill-editor-frost, revert-layer));
   background-image: linear-gradient(var(--ill-editor-hover-gradient-angle, var(--ill-editor-gradient-angle)),
       var(--ill-editor-hover-gradient-from, var(--ill-editor-gradient-from)), var(--ill-editor-hover-gradient-to, var(--ill-editor-gradient-to)));
 }
 
 .illuminus-styled.journal-entry-page .window-header:hover::after,
 .illuminus-styled .illuminus-preview__editor .window-header:hover::after {
-  background-color: var(--ill-editor-hover-title-bar-background, var(--ill-editor-title-bar-background));
+  background-color: var(--ill-editor-hover-title-bar-background, var(--ill-editor-title-bar-background, revert-layer));
 }
 
 .illuminus-styled.sheet.journal-entry:hover,
 .illuminus-preview__frame.illuminus-styled:hover {
-  --sidebar-width-expanded: var(--ill-sidebar-hover-sidebar-width, var(--ill-sidebar-sidebar-width));
+  --sidebar-width-expanded: var(--ill-sidebar-hover-sidebar-width, var(--ill-sidebar-sidebar-width, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar:hover {
-  background-color: var(--ill-sidebar-hover-background, var(--ill-sidebar-background));
-  backdrop-filter: var(--ill-sidebar-hover-frost, var(--ill-sidebar-frost));
+  background-color: var(--ill-sidebar-hover-background, var(--ill-sidebar-background, revert-layer));
+  backdrop-filter: var(--ill-sidebar-hover-frost, var(--ill-sidebar-frost, revert-layer));
   background-image: linear-gradient(var(--ill-sidebar-hover-gradient-angle, var(--ill-sidebar-gradient-angle)),
       var(--ill-sidebar-hover-gradient-from, var(--ill-sidebar-gradient-from)), var(--ill-sidebar-hover-gradient-to, var(--ill-sidebar-gradient-to)));
   padding: var(--ill-sidebar-hover-padding-top, var(--ill-sidebar-padding-top)) var(--ill-sidebar-hover-padding-right, var(--ill-sidebar-padding-right))
@@ -4674,7 +4684,7 @@
                 var(--ill-sidebar-hover-border-bottom-color, var(--ill-sidebar-border-bottom-color)) var(--ill-sidebar-hover-border-left-color, var(--ill-sidebar-border-left-color));
   border-radius: var(--ill-sidebar-hover-corner-top-left, var(--ill-sidebar-corner-top-left)) var(--ill-sidebar-hover-corner-top-right, var(--ill-sidebar-corner-top-right))
                  var(--ill-sidebar-hover-corner-bottom-right, var(--ill-sidebar-corner-bottom-right)) var(--ill-sidebar-hover-corner-bottom-left, var(--ill-sidebar-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-hover-corner-shape, var(--ill-sidebar-corner-shape));
+  corner-shape: var(--ill-sidebar-hover-corner-shape, var(--ill-sidebar-corner-shape, revert-layer));
   box-shadow:
     inset var(--ill-sidebar-hover-inner-shadow-offset-x, var(--ill-sidebar-inner-shadow-offset-x)) var(--ill-sidebar-hover-inner-shadow-offset-y, var(--ill-sidebar-inner-shadow-offset-y))
     var(--ill-sidebar-hover-inner-shadow-blur, var(--ill-sidebar-inner-shadow-blur)) var(--ill-sidebar-hover-inner-shadow-spread, var(--ill-sidebar-inner-shadow-spread))
@@ -4682,14 +4692,14 @@
 }
 
 .illuminus-styled .journal-sidebar .toc li.page:hover {
-  background-color: var(--ill-sidebar-entries-entry-hover-background, var(--ill-sidebar-entries-entry-background));
+  background-color: var(--ill-sidebar-entries-entry-hover-background, var(--ill-sidebar-entries-entry-background, revert-layer));
   padding: var(--ill-sidebar-entries-hover-entry-padding-top, var(--ill-sidebar-entries-entry-padding-top)) var(--ill-sidebar-entries-hover-entry-padding-right, var(--ill-sidebar-entries-entry-padding-right))
            var(--ill-sidebar-entries-hover-entry-padding-bottom, var(--ill-sidebar-entries-entry-padding-bottom)) var(--ill-sidebar-entries-hover-entry-padding-left, var(--ill-sidebar-entries-entry-padding-left));
   margin: var(--ill-sidebar-entries-hover-entry-margin-top, var(--ill-sidebar-entries-entry-margin-top)) var(--ill-sidebar-entries-hover-entry-margin-right, var(--ill-sidebar-entries-entry-margin-right))
           var(--ill-sidebar-entries-hover-entry-margin-bottom, var(--ill-sidebar-entries-entry-margin-bottom)) var(--ill-sidebar-entries-hover-entry-margin-left, var(--ill-sidebar-entries-entry-margin-left));
   border-radius: var(--ill-sidebar-entries-hover-entry-corner-top-left, var(--ill-sidebar-entries-entry-corner-top-left)) var(--ill-sidebar-entries-hover-entry-corner-top-right, var(--ill-sidebar-entries-entry-corner-top-right))
                  var(--ill-sidebar-entries-hover-entry-corner-bottom-right, var(--ill-sidebar-entries-entry-corner-bottom-right)) var(--ill-sidebar-entries-hover-entry-corner-bottom-left, var(--ill-sidebar-entries-entry-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-entries-hover-entry-corner-shape, var(--ill-sidebar-entries-entry-corner-shape));
+  corner-shape: var(--ill-sidebar-entries-hover-entry-corner-shape, var(--ill-sidebar-entries-entry-corner-shape, revert-layer));
   border-width: var(--ill-sidebar-entries-hover-entry-border-top-width, var(--ill-sidebar-entries-entry-border-top-width)) var(--ill-sidebar-entries-hover-entry-border-right-width, var(--ill-sidebar-entries-entry-border-right-width))
                 var(--ill-sidebar-entries-hover-entry-border-bottom-width, var(--ill-sidebar-entries-entry-border-bottom-width)) var(--ill-sidebar-entries-hover-entry-border-left-width, var(--ill-sidebar-entries-entry-border-left-width));
   border-style: var(--ill-sidebar-entries-hover-entry-border-top-style, var(--ill-sidebar-entries-entry-border-top-style)) var(--ill-sidebar-entries-hover-entry-border-right-style, var(--ill-sidebar-entries-entry-border-right-style))
@@ -4699,41 +4709,41 @@
 }
 
 .illuminus-styled .journal-sidebar .toc .page-title:hover {
-  font-family: var(--ill-sidebar-entries-hover-font, var(--ill-sidebar-entries-font));
+  font-family: var(--ill-sidebar-entries-hover-font, var(--ill-sidebar-entries-font, revert-layer));
   -webkit-text-stroke: var(--ill-sidebar-entries-hover-outline-width, var(--ill-sidebar-entries-outline-width)) var(--ill-sidebar-entries-hover-outline-color, var(--ill-sidebar-entries-outline-color));
   text-shadow: var(--ill-sidebar-entries-hover-text-shadow-offset-x, var(--ill-sidebar-entries-text-shadow-offset-x)) var(--ill-sidebar-entries-hover-text-shadow-offset-y, var(--ill-sidebar-entries-text-shadow-offset-y))
                var(--ill-sidebar-entries-hover-text-shadow-blur, var(--ill-sidebar-entries-text-shadow-blur)) var(--ill-sidebar-entries-hover-text-shadow-color, var(--ill-sidebar-entries-text-shadow-color));
-  font-size: var(--ill-sidebar-entries-hover-size, var(--ill-sidebar-entries-size));
-  font-weight: var(--ill-sidebar-entries-hover-text-style-weight, var(--ill-sidebar-entries-text-style-weight));
-  font-style: var(--ill-sidebar-entries-hover-text-style-slant, var(--ill-sidebar-entries-text-style-slant));
-  font-variant: var(--ill-sidebar-entries-hover-caps-variant, var(--ill-sidebar-entries-caps-variant));
-  text-transform: var(--ill-sidebar-entries-hover-caps-transform, var(--ill-sidebar-entries-caps-transform));
-  letter-spacing: var(--ill-sidebar-entries-hover-letter-spacing, var(--ill-sidebar-entries-letter-spacing));
-  word-spacing: var(--ill-sidebar-entries-hover-word-spacing, var(--ill-sidebar-entries-word-spacing));
-  line-height: var(--ill-sidebar-entries-hover-line-height, var(--ill-sidebar-entries-line-height));
-  text-wrap: var(--ill-sidebar-entries-hover-wrap, var(--ill-sidebar-entries-wrap));
-  hyphens: var(--ill-sidebar-entries-hover-hyphens, var(--ill-sidebar-entries-hyphens));
-  text-align: var(--ill-sidebar-entries-hover-align, var(--ill-sidebar-entries-align));
-  color: var(--ill-sidebar-entries-hover-color, var(--ill-sidebar-entries-color));
+  font-size: var(--ill-sidebar-entries-hover-size, var(--ill-sidebar-entries-size, revert-layer));
+  font-weight: var(--ill-sidebar-entries-hover-text-style-weight, var(--ill-sidebar-entries-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-entries-hover-text-style-slant, var(--ill-sidebar-entries-text-style-slant, revert-layer));
+  font-variant: var(--ill-sidebar-entries-hover-caps-variant, var(--ill-sidebar-entries-caps-variant, revert-layer));
+  text-transform: var(--ill-sidebar-entries-hover-caps-transform, var(--ill-sidebar-entries-caps-transform, revert-layer));
+  letter-spacing: var(--ill-sidebar-entries-hover-letter-spacing, var(--ill-sidebar-entries-letter-spacing, revert-layer));
+  word-spacing: var(--ill-sidebar-entries-hover-word-spacing, var(--ill-sidebar-entries-word-spacing, revert-layer));
+  line-height: var(--ill-sidebar-entries-hover-line-height, var(--ill-sidebar-entries-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-entries-hover-wrap, var(--ill-sidebar-entries-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-entries-hover-hyphens, var(--ill-sidebar-entries-hyphens, revert-layer));
+  text-align: var(--ill-sidebar-entries-hover-align, var(--ill-sidebar-entries-align, revert-layer));
+  color: var(--ill-sidebar-entries-hover-color, var(--ill-sidebar-entries-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc .page-index:hover,
 .illuminus-styled .journal-sidebar .toc .page-number:hover {
-  display: var(--ill-sidebar-numbers-hover-number-shown, var(--ill-sidebar-numbers-number-shown));
-  color: var(--ill-sidebar-numbers-hover-number-color, var(--ill-sidebar-numbers-number-color));
-  font-size: var(--ill-sidebar-numbers-hover-number-size, var(--ill-sidebar-numbers-number-size));
-  font-weight: var(--ill-sidebar-numbers-hover-number-text-style-weight, var(--ill-sidebar-numbers-number-text-style-weight));
-  font-style: var(--ill-sidebar-numbers-hover-number-text-style-slant, var(--ill-sidebar-numbers-number-text-style-slant));
-  text-align: var(--ill-sidebar-numbers-hover-number-align, var(--ill-sidebar-numbers-number-align));
-  width: var(--ill-sidebar-numbers-hover-number-width, var(--ill-sidebar-numbers-number-width));
+  display: var(--ill-sidebar-numbers-hover-number-shown, var(--ill-sidebar-numbers-number-shown, revert-layer));
+  color: var(--ill-sidebar-numbers-hover-number-color, var(--ill-sidebar-numbers-number-color, revert-layer));
+  font-size: var(--ill-sidebar-numbers-hover-number-size, var(--ill-sidebar-numbers-number-size, revert-layer));
+  font-weight: var(--ill-sidebar-numbers-hover-number-text-style-weight, var(--ill-sidebar-numbers-number-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-numbers-hover-number-text-style-slant, var(--ill-sidebar-numbers-number-text-style-slant, revert-layer));
+  text-align: var(--ill-sidebar-numbers-hover-number-align, var(--ill-sidebar-numbers-number-align, revert-layer));
+  width: var(--ill-sidebar-numbers-hover-number-width, var(--ill-sidebar-numbers-number-width, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc .headings:hover {
-  margin-left: var(--ill-sidebar-headings-hover-heading-indent, var(--ill-sidebar-headings-heading-indent));
+  margin-left: var(--ill-sidebar-headings-hover-heading-indent, var(--ill-sidebar-headings-heading-indent, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.heading:hover {
-  background-color: var(--ill-sidebar-headings-hover-heading-background, var(--ill-sidebar-headings-heading-background));
+  background-color: var(--ill-sidebar-headings-hover-heading-background, var(--ill-sidebar-headings-heading-background, revert-layer));
   padding: var(--ill-sidebar-headings-hover-heading-padding-top, var(--ill-sidebar-headings-heading-padding-top)) var(--ill-sidebar-headings-hover-heading-padding-right, var(--ill-sidebar-headings-heading-padding-right))
            var(--ill-sidebar-headings-hover-heading-padding-bottom, var(--ill-sidebar-headings-heading-padding-bottom)) var(--ill-sidebar-headings-hover-heading-padding-left, var(--ill-sidebar-headings-heading-padding-left));
   margin: var(--ill-sidebar-headings-hover-heading-margin-top, var(--ill-sidebar-headings-heading-margin-top)) var(--ill-sidebar-headings-hover-heading-margin-right, var(--ill-sidebar-headings-heading-margin-right))
@@ -4746,26 +4756,26 @@
                 var(--ill-sidebar-headings-hover-heading-border-bottom-color, var(--ill-sidebar-headings-heading-border-bottom-color)) var(--ill-sidebar-headings-hover-heading-border-left-color, var(--ill-sidebar-headings-heading-border-left-color));
   border-radius: var(--ill-sidebar-headings-hover-heading-corner-top-left, var(--ill-sidebar-headings-heading-corner-top-left)) var(--ill-sidebar-headings-hover-heading-corner-top-right, var(--ill-sidebar-headings-heading-corner-top-right))
                  var(--ill-sidebar-headings-hover-heading-corner-bottom-right, var(--ill-sidebar-headings-heading-corner-bottom-right)) var(--ill-sidebar-headings-hover-heading-corner-bottom-left, var(--ill-sidebar-headings-heading-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-headings-hover-heading-corner-shape, var(--ill-sidebar-headings-heading-corner-shape));
+  corner-shape: var(--ill-sidebar-headings-hover-heading-corner-shape, var(--ill-sidebar-headings-heading-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc .heading-link:hover {
-  font-family: var(--ill-sidebar-headings-hover-heading-font, var(--ill-sidebar-headings-heading-font));
+  font-family: var(--ill-sidebar-headings-hover-heading-font, var(--ill-sidebar-headings-heading-font, revert-layer));
   -webkit-text-stroke: var(--ill-sidebar-headings-hover-heading-outline-width, var(--ill-sidebar-headings-heading-outline-width)) var(--ill-sidebar-headings-hover-heading-outline-color, var(--ill-sidebar-headings-heading-outline-color));
   text-shadow: var(--ill-sidebar-headings-hover-heading-text-shadow-offset-x, var(--ill-sidebar-headings-heading-text-shadow-offset-x)) var(--ill-sidebar-headings-hover-heading-text-shadow-offset-y, var(--ill-sidebar-headings-heading-text-shadow-offset-y))
                var(--ill-sidebar-headings-hover-heading-text-shadow-blur, var(--ill-sidebar-headings-heading-text-shadow-blur)) var(--ill-sidebar-headings-hover-heading-text-shadow-color, var(--ill-sidebar-headings-heading-text-shadow-color));
-  font-size: var(--ill-sidebar-headings-hover-heading-size, var(--ill-sidebar-headings-heading-size));
-  font-weight: var(--ill-sidebar-headings-hover-heading-text-style-weight, var(--ill-sidebar-headings-heading-text-style-weight));
-  font-style: var(--ill-sidebar-headings-hover-heading-text-style-slant, var(--ill-sidebar-headings-heading-text-style-slant));
-  line-height: var(--ill-sidebar-headings-hover-heading-line-height, var(--ill-sidebar-headings-heading-line-height));
-  text-wrap: var(--ill-sidebar-headings-hover-heading-wrap, var(--ill-sidebar-headings-heading-wrap));
-  hyphens: var(--ill-sidebar-headings-hover-heading-hyphens, var(--ill-sidebar-headings-heading-hyphens));
-  color: var(--ill-sidebar-headings-heading-hover-color, var(--ill-sidebar-headings-heading-color));
+  font-size: var(--ill-sidebar-headings-hover-heading-size, var(--ill-sidebar-headings-heading-size, revert-layer));
+  font-weight: var(--ill-sidebar-headings-hover-heading-text-style-weight, var(--ill-sidebar-headings-heading-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-headings-hover-heading-text-style-slant, var(--ill-sidebar-headings-heading-text-style-slant, revert-layer));
+  line-height: var(--ill-sidebar-headings-hover-heading-line-height, var(--ill-sidebar-headings-heading-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-headings-hover-heading-wrap, var(--ill-sidebar-headings-heading-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-headings-hover-heading-hyphens, var(--ill-sidebar-headings-heading-hyphens, revert-layer));
+  color: var(--ill-sidebar-headings-heading-hover-color, var(--ill-sidebar-headings-heading-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.category:hover {
-  text-align: var(--ill-sidebar-categories-hover-category-align, var(--ill-sidebar-categories-category-align));
-  background-color: var(--ill-sidebar-categories-hover-category-background, var(--ill-sidebar-categories-category-background));
+  text-align: var(--ill-sidebar-categories-hover-category-align, var(--ill-sidebar-categories-category-align, revert-layer));
+  background-color: var(--ill-sidebar-categories-hover-category-background, var(--ill-sidebar-categories-category-background, revert-layer));
   padding: var(--ill-sidebar-categories-hover-category-padding-top, var(--ill-sidebar-categories-category-padding-top)) var(--ill-sidebar-categories-hover-category-padding-right, var(--ill-sidebar-categories-category-padding-right))
            var(--ill-sidebar-categories-hover-category-padding-bottom, var(--ill-sidebar-categories-category-padding-bottom)) var(--ill-sidebar-categories-hover-category-padding-left, var(--ill-sidebar-categories-category-padding-left));
   margin: var(--ill-sidebar-categories-hover-category-margin-top, var(--ill-sidebar-categories-category-margin-top)) var(--ill-sidebar-categories-hover-category-margin-right, var(--ill-sidebar-categories-category-margin-right))
@@ -4778,30 +4788,30 @@
                 var(--ill-sidebar-categories-hover-category-border-bottom-color, var(--ill-sidebar-categories-category-border-bottom-color)) var(--ill-sidebar-categories-hover-category-border-left-color, var(--ill-sidebar-categories-category-border-left-color));
   border-radius: var(--ill-sidebar-categories-hover-category-corner-top-left, var(--ill-sidebar-categories-category-corner-top-left)) var(--ill-sidebar-categories-hover-category-corner-top-right, var(--ill-sidebar-categories-category-corner-top-right))
                  var(--ill-sidebar-categories-hover-category-corner-bottom-right, var(--ill-sidebar-categories-category-corner-bottom-right)) var(--ill-sidebar-categories-hover-category-corner-bottom-left, var(--ill-sidebar-categories-category-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-categories-hover-category-corner-shape, var(--ill-sidebar-categories-category-corner-shape));
+  corner-shape: var(--ill-sidebar-categories-hover-category-corner-shape, var(--ill-sidebar-categories-category-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.category strong:hover {
-  font-family: var(--ill-sidebar-categories-hover-category-font, var(--ill-sidebar-categories-category-font));
+  font-family: var(--ill-sidebar-categories-hover-category-font, var(--ill-sidebar-categories-category-font, revert-layer));
   -webkit-text-stroke: var(--ill-sidebar-categories-hover-category-outline-width, var(--ill-sidebar-categories-category-outline-width)) var(--ill-sidebar-categories-hover-category-outline-color, var(--ill-sidebar-categories-category-outline-color));
   text-shadow: var(--ill-sidebar-categories-hover-category-text-shadow-offset-x, var(--ill-sidebar-categories-category-text-shadow-offset-x)) var(--ill-sidebar-categories-hover-category-text-shadow-offset-y, var(--ill-sidebar-categories-category-text-shadow-offset-y))
                var(--ill-sidebar-categories-hover-category-text-shadow-blur, var(--ill-sidebar-categories-category-text-shadow-blur)) var(--ill-sidebar-categories-hover-category-text-shadow-color, var(--ill-sidebar-categories-category-text-shadow-color));
-  font-size: var(--ill-sidebar-categories-hover-category-size, var(--ill-sidebar-categories-category-size));
-  font-weight: var(--ill-sidebar-categories-hover-category-text-style-weight, var(--ill-sidebar-categories-category-text-style-weight));
-  font-style: var(--ill-sidebar-categories-hover-category-text-style-slant, var(--ill-sidebar-categories-category-text-style-slant));
-  font-variant: var(--ill-sidebar-categories-hover-category-caps-variant, var(--ill-sidebar-categories-category-caps-variant));
-  text-transform: var(--ill-sidebar-categories-hover-category-caps-transform, var(--ill-sidebar-categories-category-caps-transform));
-  letter-spacing: var(--ill-sidebar-categories-hover-category-letter-spacing, var(--ill-sidebar-categories-category-letter-spacing));
-  color: var(--ill-sidebar-categories-hover-category-color, var(--ill-sidebar-categories-category-color));
+  font-size: var(--ill-sidebar-categories-hover-category-size, var(--ill-sidebar-categories-category-size, revert-layer));
+  font-weight: var(--ill-sidebar-categories-hover-category-text-style-weight, var(--ill-sidebar-categories-category-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-categories-hover-category-text-style-slant, var(--ill-sidebar-categories-category-text-style-slant, revert-layer));
+  font-variant: var(--ill-sidebar-categories-hover-category-caps-variant, var(--ill-sidebar-categories-category-caps-variant, revert-layer));
+  text-transform: var(--ill-sidebar-categories-hover-category-caps-transform, var(--ill-sidebar-categories-category-caps-transform, revert-layer));
+  letter-spacing: var(--ill-sidebar-categories-hover-category-letter-spacing, var(--ill-sidebar-categories-category-letter-spacing, revert-layer));
+  color: var(--ill-sidebar-categories-hover-category-color, var(--ill-sidebar-categories-category-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]:hover {
-  --input-background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background));
-  --input-text-color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color));
-  --input-placeholder-color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color));
-  background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background));
-  color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color));
-  font-size: var(--ill-sidebar-search-hover-search-size, var(--ill-sidebar-search-search-size));
+  --input-background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  --input-text-color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  --input-placeholder-color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
+  background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  font-size: var(--ill-sidebar-search-hover-search-size, var(--ill-sidebar-search-search-size, revert-layer));
   border-width: var(--ill-sidebar-search-hover-search-border-top-width, var(--ill-sidebar-search-search-border-top-width)) var(--ill-sidebar-search-hover-search-border-right-width, var(--ill-sidebar-search-search-border-right-width))
                 var(--ill-sidebar-search-hover-search-border-bottom-width, var(--ill-sidebar-search-search-border-bottom-width)) var(--ill-sidebar-search-hover-search-border-left-width, var(--ill-sidebar-search-search-border-left-width));
   border-style: var(--ill-sidebar-search-hover-search-border-top-style, var(--ill-sidebar-search-search-border-top-style)) var(--ill-sidebar-search-hover-search-border-right-style, var(--ill-sidebar-search-search-border-right-style))
@@ -4810,23 +4820,23 @@
                 var(--ill-sidebar-search-hover-search-border-bottom-color, var(--ill-sidebar-search-search-border-bottom-color)) var(--ill-sidebar-search-hover-search-border-left-color, var(--ill-sidebar-search-search-border-left-color));
   border-radius: var(--ill-sidebar-search-hover-search-corner-top-left, var(--ill-sidebar-search-search-corner-top-left)) var(--ill-sidebar-search-hover-search-corner-top-right, var(--ill-sidebar-search-search-corner-top-right))
                  var(--ill-sidebar-search-hover-search-corner-bottom-right, var(--ill-sidebar-search-search-corner-bottom-right)) var(--ill-sidebar-search-hover-search-corner-bottom-left, var(--ill-sidebar-search-search-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-search-hover-search-corner-shape, var(--ill-sidebar-search-search-corner-shape));
+  corner-shape: var(--ill-sidebar-search-hover-search-corner-shape, var(--ill-sidebar-search-search-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]:hover::placeholder {
-  color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color));
+  color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar button:not(.illuminus-fold):hover {
-  --button-text-color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color));
-  --button-border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color));
-  color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color));
-  background-color: var(--ill-sidebar-buttons-button-hover-background, var(--ill-sidebar-buttons-button-background));
-  border-width: var(--ill-sidebar-buttons-hover-button-border-width, var(--ill-sidebar-buttons-button-border-width));
-  border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color));
+  --button-text-color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color, revert-layer));
+  --button-border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
+  color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color, revert-layer));
+  background-color: var(--ill-sidebar-buttons-button-hover-background, var(--ill-sidebar-buttons-button-background, revert-layer));
+  border-width: var(--ill-sidebar-buttons-hover-button-border-width, var(--ill-sidebar-buttons-button-border-width, revert-layer));
+  border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
   border-radius: var(--ill-sidebar-buttons-hover-button-corner-top-left, var(--ill-sidebar-buttons-button-corner-top-left)) var(--ill-sidebar-buttons-hover-button-corner-top-right, var(--ill-sidebar-buttons-button-corner-top-right))
                  var(--ill-sidebar-buttons-hover-button-corner-bottom-right, var(--ill-sidebar-buttons-button-corner-bottom-right)) var(--ill-sidebar-buttons-hover-button-corner-bottom-left, var(--ill-sidebar-buttons-button-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-buttons-hover-button-corner-shape, var(--ill-sidebar-buttons-button-corner-shape));
+  corner-shape: var(--ill-sidebar-buttons-hover-button-corner-shape, var(--ill-sidebar-buttons-button-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-header:hover {
@@ -4868,7 +4878,8 @@
                var(--ill-title-hover-text-shadow-blur, var(--ill-title-text-shadow-blur)) var(--ill-title-hover-text-shadow-color, var(--ill-title-text-shadow-color));
 }
 
-.illuminus-styled .journal-page-content:hover {
+.illuminus-styled section.journal-page-content:hover,
+.illuminus-styled .journal-page-content .editor-content:hover {
   font-family: var(--ill-body-hover-font, var(--ill-body-font));
   font-size: var(--ill-body-hover-size, var(--ill-body-size));
   font-weight: var(--ill-body-hover-text-style-weight, var(--ill-body-text-style-weight));
@@ -8512,14 +8523,14 @@ blockquote):not(:empty))):hover {
 }
 
 .illuminus-styled .journal-sidebar .toc li.page.active {
-  background-color: var(--ill-sidebar-entries-entry-active-background, var(--ill-sidebar-entries-entry-background));
+  background-color: var(--ill-sidebar-entries-entry-active-background, var(--ill-sidebar-entries-entry-background, revert-layer));
   padding: var(--ill-sidebar-entries-active-entry-padding-top, var(--ill-sidebar-entries-entry-padding-top)) var(--ill-sidebar-entries-active-entry-padding-right, var(--ill-sidebar-entries-entry-padding-right))
            var(--ill-sidebar-entries-active-entry-padding-bottom, var(--ill-sidebar-entries-entry-padding-bottom)) var(--ill-sidebar-entries-active-entry-padding-left, var(--ill-sidebar-entries-entry-padding-left));
   margin: var(--ill-sidebar-entries-active-entry-margin-top, var(--ill-sidebar-entries-entry-margin-top)) var(--ill-sidebar-entries-active-entry-margin-right, var(--ill-sidebar-entries-entry-margin-right))
           var(--ill-sidebar-entries-active-entry-margin-bottom, var(--ill-sidebar-entries-entry-margin-bottom)) var(--ill-sidebar-entries-active-entry-margin-left, var(--ill-sidebar-entries-entry-margin-left));
   border-radius: var(--ill-sidebar-entries-active-entry-corner-top-left, var(--ill-sidebar-entries-entry-corner-top-left)) var(--ill-sidebar-entries-active-entry-corner-top-right, var(--ill-sidebar-entries-entry-corner-top-right))
                  var(--ill-sidebar-entries-active-entry-corner-bottom-right, var(--ill-sidebar-entries-entry-corner-bottom-right)) var(--ill-sidebar-entries-active-entry-corner-bottom-left, var(--ill-sidebar-entries-entry-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-entries-active-entry-corner-shape, var(--ill-sidebar-entries-entry-corner-shape));
+  corner-shape: var(--ill-sidebar-entries-active-entry-corner-shape, var(--ill-sidebar-entries-entry-corner-shape, revert-layer));
   border-width: var(--ill-sidebar-entries-active-entry-border-top-width, var(--ill-sidebar-entries-entry-border-top-width)) var(--ill-sidebar-entries-active-entry-border-right-width, var(--ill-sidebar-entries-entry-border-right-width))
                 var(--ill-sidebar-entries-active-entry-border-bottom-width, var(--ill-sidebar-entries-entry-border-bottom-width)) var(--ill-sidebar-entries-active-entry-border-left-width, var(--ill-sidebar-entries-entry-border-left-width));
   border-style: var(--ill-sidebar-entries-active-entry-border-top-style, var(--ill-sidebar-entries-entry-border-top-style)) var(--ill-sidebar-entries-active-entry-border-right-style, var(--ill-sidebar-entries-entry-border-right-style))
@@ -8529,26 +8540,26 @@ blockquote):not(:empty))):hover {
 }
 
 .illuminus-styled .journal-sidebar .toc li.page.active .page-title {
-  font-family: var(--ill-sidebar-entries-active-font, var(--ill-sidebar-entries-font));
+  font-family: var(--ill-sidebar-entries-active-font, var(--ill-sidebar-entries-font, revert-layer));
   -webkit-text-stroke: var(--ill-sidebar-entries-active-outline-width, var(--ill-sidebar-entries-outline-width)) var(--ill-sidebar-entries-active-outline-color, var(--ill-sidebar-entries-outline-color));
   text-shadow: var(--ill-sidebar-entries-active-text-shadow-offset-x, var(--ill-sidebar-entries-text-shadow-offset-x)) var(--ill-sidebar-entries-active-text-shadow-offset-y, var(--ill-sidebar-entries-text-shadow-offset-y))
                var(--ill-sidebar-entries-active-text-shadow-blur, var(--ill-sidebar-entries-text-shadow-blur)) var(--ill-sidebar-entries-active-text-shadow-color, var(--ill-sidebar-entries-text-shadow-color));
-  font-size: var(--ill-sidebar-entries-active-size, var(--ill-sidebar-entries-size));
-  font-weight: var(--ill-sidebar-entries-active-text-style-weight, var(--ill-sidebar-entries-text-style-weight));
-  font-style: var(--ill-sidebar-entries-active-text-style-slant, var(--ill-sidebar-entries-text-style-slant));
-  font-variant: var(--ill-sidebar-entries-active-caps-variant, var(--ill-sidebar-entries-caps-variant));
-  text-transform: var(--ill-sidebar-entries-active-caps-transform, var(--ill-sidebar-entries-caps-transform));
-  letter-spacing: var(--ill-sidebar-entries-active-letter-spacing, var(--ill-sidebar-entries-letter-spacing));
-  word-spacing: var(--ill-sidebar-entries-active-word-spacing, var(--ill-sidebar-entries-word-spacing));
-  line-height: var(--ill-sidebar-entries-active-line-height, var(--ill-sidebar-entries-line-height));
-  text-wrap: var(--ill-sidebar-entries-active-wrap, var(--ill-sidebar-entries-wrap));
-  hyphens: var(--ill-sidebar-entries-active-hyphens, var(--ill-sidebar-entries-hyphens));
-  text-align: var(--ill-sidebar-entries-active-align, var(--ill-sidebar-entries-align));
-  color: var(--ill-sidebar-entries-active-color, var(--ill-sidebar-entries-color));
+  font-size: var(--ill-sidebar-entries-active-size, var(--ill-sidebar-entries-size, revert-layer));
+  font-weight: var(--ill-sidebar-entries-active-text-style-weight, var(--ill-sidebar-entries-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-entries-active-text-style-slant, var(--ill-sidebar-entries-text-style-slant, revert-layer));
+  font-variant: var(--ill-sidebar-entries-active-caps-variant, var(--ill-sidebar-entries-caps-variant, revert-layer));
+  text-transform: var(--ill-sidebar-entries-active-caps-transform, var(--ill-sidebar-entries-caps-transform, revert-layer));
+  letter-spacing: var(--ill-sidebar-entries-active-letter-spacing, var(--ill-sidebar-entries-letter-spacing, revert-layer));
+  word-spacing: var(--ill-sidebar-entries-active-word-spacing, var(--ill-sidebar-entries-word-spacing, revert-layer));
+  line-height: var(--ill-sidebar-entries-active-line-height, var(--ill-sidebar-entries-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-entries-active-wrap, var(--ill-sidebar-entries-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-entries-active-hyphens, var(--ill-sidebar-entries-hyphens, revert-layer));
+  text-align: var(--ill-sidebar-entries-active-align, var(--ill-sidebar-entries-align, revert-layer));
+  color: var(--ill-sidebar-entries-active-color, var(--ill-sidebar-entries-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.heading.illuminus-current {
-  background-color: var(--ill-sidebar-headings-heading-active-background, var(--ill-sidebar-headings-heading-background));
+  background-color: var(--ill-sidebar-headings-heading-active-background, var(--ill-sidebar-headings-heading-background, revert-layer));
   padding: var(--ill-sidebar-headings-active-heading-padding-top, var(--ill-sidebar-headings-heading-padding-top)) var(--ill-sidebar-headings-active-heading-padding-right, var(--ill-sidebar-headings-heading-padding-right))
            var(--ill-sidebar-headings-active-heading-padding-bottom, var(--ill-sidebar-headings-heading-padding-bottom)) var(--ill-sidebar-headings-active-heading-padding-left, var(--ill-sidebar-headings-heading-padding-left));
   margin: var(--ill-sidebar-headings-active-heading-margin-top, var(--ill-sidebar-headings-heading-margin-top)) var(--ill-sidebar-headings-active-heading-margin-right, var(--ill-sidebar-headings-heading-margin-right))
@@ -8561,21 +8572,21 @@ blockquote):not(:empty))):hover {
                 var(--ill-sidebar-headings-heading-active-border-bottom-color, var(--ill-sidebar-headings-heading-border-bottom-color)) var(--ill-sidebar-headings-heading-active-border-left-color, var(--ill-sidebar-headings-heading-border-left-color));
   border-radius: var(--ill-sidebar-headings-active-heading-corner-top-left, var(--ill-sidebar-headings-heading-corner-top-left)) var(--ill-sidebar-headings-active-heading-corner-top-right, var(--ill-sidebar-headings-heading-corner-top-right))
                  var(--ill-sidebar-headings-active-heading-corner-bottom-right, var(--ill-sidebar-headings-heading-corner-bottom-right)) var(--ill-sidebar-headings-active-heading-corner-bottom-left, var(--ill-sidebar-headings-heading-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-headings-active-heading-corner-shape, var(--ill-sidebar-headings-heading-corner-shape));
+  corner-shape: var(--ill-sidebar-headings-active-heading-corner-shape, var(--ill-sidebar-headings-heading-corner-shape, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.heading.illuminus-current .heading-link {
-  font-family: var(--ill-sidebar-headings-active-heading-font, var(--ill-sidebar-headings-heading-font));
+  font-family: var(--ill-sidebar-headings-active-heading-font, var(--ill-sidebar-headings-heading-font, revert-layer));
   -webkit-text-stroke: var(--ill-sidebar-headings-heading-active-outline-width, var(--ill-sidebar-headings-heading-outline-width)) var(--ill-sidebar-headings-heading-active-outline-color, var(--ill-sidebar-headings-heading-outline-color));
   text-shadow: var(--ill-sidebar-headings-active-heading-text-shadow-offset-x, var(--ill-sidebar-headings-heading-text-shadow-offset-x)) var(--ill-sidebar-headings-active-heading-text-shadow-offset-y, var(--ill-sidebar-headings-heading-text-shadow-offset-y))
                var(--ill-sidebar-headings-active-heading-text-shadow-blur, var(--ill-sidebar-headings-heading-text-shadow-blur)) var(--ill-sidebar-headings-active-heading-text-shadow-color, var(--ill-sidebar-headings-heading-text-shadow-color));
-  font-size: var(--ill-sidebar-headings-active-heading-size, var(--ill-sidebar-headings-heading-size));
-  font-weight: var(--ill-sidebar-headings-heading-active-text-style-weight, var(--ill-sidebar-headings-heading-text-style-weight));
-  font-style: var(--ill-sidebar-headings-heading-active-text-style-slant, var(--ill-sidebar-headings-heading-text-style-slant));
-  line-height: var(--ill-sidebar-headings-active-heading-line-height, var(--ill-sidebar-headings-heading-line-height));
-  text-wrap: var(--ill-sidebar-headings-active-heading-wrap, var(--ill-sidebar-headings-heading-wrap));
-  hyphens: var(--ill-sidebar-headings-active-heading-hyphens, var(--ill-sidebar-headings-heading-hyphens));
-  color: var(--ill-sidebar-headings-heading-active-color, var(--ill-sidebar-headings-heading-color));
+  font-size: var(--ill-sidebar-headings-active-heading-size, var(--ill-sidebar-headings-heading-size, revert-layer));
+  font-weight: var(--ill-sidebar-headings-heading-active-text-style-weight, var(--ill-sidebar-headings-heading-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-headings-heading-active-text-style-slant, var(--ill-sidebar-headings-heading-text-style-slant, revert-layer));
+  line-height: var(--ill-sidebar-headings-active-heading-line-height, var(--ill-sidebar-headings-heading-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-headings-active-heading-wrap, var(--ill-sidebar-headings-heading-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-headings-active-heading-hyphens, var(--ill-sidebar-headings-heading-hyphens, revert-layer));
+  color: var(--ill-sidebar-headings-heading-active-color, var(--ill-sidebar-headings-heading-color, revert-layer));
 }
 
 .illuminus-styled .journal-sidebar .toc li.page.active::after {

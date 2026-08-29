@@ -9,8 +9,26 @@ export async function connect(port = 9222) {
     } catch {}
     await new Promise((r) => setTimeout(r, 250));
   }
-  const page = targets.find((t) => t.type === "page");
+  // Foundry's own tab, not something a previous run left behind. Printing
+  // writes into an `about:blank` iframe, and a written blank frame reports its
+  // *parent's* URL — so a leftover print frame is a page target sitting at
+  // /game, indistinguishable from the real tab by URL alone. Its title is the
+  // document that was printed; the real tab's is Foundry's own.
+  const pages = targets.filter((t) => t.type === "page");
+  const page = pages.find((t) => t.title === "Foundry Virtual Tabletop") ?? pages[0];
   if (!page) throw new Error("no page target");
+
+  // And take the leftovers away. `afterprint` never fires in a headless
+  // browser, so the module's own tidy-up waits out its five-minute fallback and
+  // the frame outlives the run — which is why a browser that had served several
+  // long runs would lose its page target mid-check and fail the suite with a
+  // dead socket rather than with anything to do with what was being tested.
+  for (const stray of pages) {
+    if (stray.id === page.id) continue;
+    try {
+      await fetch(`http://127.0.0.1:${port}/json/close/${stray.id}`);
+    } catch {}
+  }
 
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });

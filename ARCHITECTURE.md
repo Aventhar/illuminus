@@ -85,6 +85,12 @@ hundred assertions — because that is the only way to catch what source review 
 rule that parses but never applies, or one core out-specifies. Its expected control counts
 come from the schema, so adding a control cannot make it stale.
 
+**`tools/sameness.mjs`** answers one question the other two cannot: how far a brand
+new style is from no style at all. It opens the journal and the page editor twice
+each — once wearing a new style, once wearing none — and compares every element
+property by property. The module's promise is that every control starts by doing
+nothing, and this is what holds it to that.
+
 **Never run either against a live world.** `tools/sandbox.sh` builds a throwaway data
 directory that symlinks in only the module and the game system. The sandbox is on **30002**;
 **30000 is the desktop application's live world**, and a script that hardcodes it does not

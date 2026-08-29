@@ -144,6 +144,42 @@ These are all load-bearing and none are obvious from the code.
   lost its size with it. Paint the pseudo-elements instead, each falling back to the
   variable it stands in for: `color: var(--ill-…, var(--checkbox-checkmark-color))`.
   Note the tick is transparent by default — a cut-out through the box, not a mark on it.
+- **An unset control is not neutral — it takes away what was there.** A rule
+  reads `color: var(--ill-…)` with no fallback, and an unset control emits
+  nothing, so the property is undefined. That does **not** make the declaration
+  go away: it still wins the cascade over whatever core or the game system
+  wrote, and *then* becomes invalid at computed-value time, which for an
+  inherited property means `unset` — inherit. So a control nobody has touched
+  strips the system's own value and makes the element inherit instead. It cost
+  343 of 357 differences between a styled editor and an unstyled one, all of
+  them the same pair: pf2e's `rgb(231, 209, 177)` becoming Foundry's
+  `rgb(239, 230, 216)`. The fix is `var(--ill-…, revert-layer)`, which hands the
+  element back to whoever painted it — measured, and it restores the system's
+  value exactly. Three things to know about it:
+  - **It works as a `var()` fallback**, and it is the *only* honest answer where
+    the module has no business having an opinion. Prefer it to copying a value
+    out of a running Foundry: a copied number is right in the world you measured
+    and wrong in the next system along.
+  - **Only for a declaration that is one `var()` on its own.** `border-radius`
+    and `padding` read four custom properties each, and `revert-layer` is a
+    CSS-wide keyword — it is the whole value or nothing. Those need defaults
+    that match instead, which is why some do.
+  - **A nested chain needs it on the innermost fallback.**
+    `var(--a, var(--b))` with both unset is invalid exactly as a bare one is;
+    it must read `var(--a, var(--b, revert-layer))`. Five rules were written the
+    nested way and none of them was fixed by the first pass over the file —
+    `CSS.getMatchedStylesForNode` is what found them, and reading the stylesheet
+    would not have.
+  - **It reverts to the previous *layer*, not to "what would have won without
+    us"**, so it is not a general undo. Where it gives the wrong answer, the
+    control wanted a default.
+- **A control that defaults to a value cannot defer.** `revert-layer` fires only
+  when the custom property is undefined, so a fill defaulting to `#00000000` or
+  a corner defaulting to `0` overrides Foundry however the rule is written. Where
+  Foundry paints one element two ways — the contents panel's Previous and Next
+  are opaque and Create is at half strength, from one rule of ours — no default
+  can be right, and the honest default is an empty one that lets each element
+  keep its own.
 - **An empty custom property is not an absent one.** `--x: ;` is a *defined*
   property whose value is the empty token stream, so `var(--x, fallback)`
   resolves to nothing rather than to the fallback — and the property it feeds
@@ -612,20 +648,48 @@ used to keep a `Set` and re-render on every tick to show a count in the button, 
 threw away the scroll position and made ticking four styles in a row a fight. If a
 count is ever wanted again, write it without re-rendering.
 
+**The Sample badge is a fact about the record, not about the file.** Only
+`seedPresetsIfEmpty` and `restorePresets` set `preset: true`, and the first returns
+early the moment a world holds any style at all — so a world that already had one
+never gets the bundled samples, and importing the very same JSON produces unbadged
+styles, because `importStyles` deliberately drops the flag (a downloaded file must not
+be able to claim it shipped with the module). "The red tags are missing" therefore
+means "these are your imports, not the presets", and the fix is Restore Samples. The
+badge itself is fine; nothing about it is worth investigating first.
+
 The preset badge in the style library wore `illuminus-tag` — the same class a journal's
 inline tag styles now write, which a style can paint. It is `illuminus-badge-text`, as
 in the template library.
 
 ## Testing traps found the hard way
 
-- **One call may open the editor or redraw it, never both.** The editor lays out
-  some 4,600 controls and the sandbox draws in software with no GPU: a render is
-  25–35 seconds, so two in one `Runtime.evaluate` outlast any limit worth setting
-  — and the failure then names a call that was doing two unrelated things rather
-  than the render that was slow. Checks [53], [80] and [82] each hit this; each
-  is split now. `CALL_TIMEOUT` is 300s so a stall is unambiguous rather than
-  merely slow. Before diagnosing a timeout, time the steps in isolation: all
-  three of those turned out to be honest work, not a hang.
+- **Turn Foundry's canvas off, or the sandbox strangles itself.** The sandbox
+  browser has no GPU, so Foundry's render loop runs in SwiftShader — and it never
+  stops: the GPU helper process sat at **811% CPU and 1.77GB** drawing five frames
+  a second of a scene no check has ever read, with the machine's load average at
+  19. `joinAndWait` sets `core.noCanvas` and reloads once per freshly built
+  sandbox, which drops that process to about 15%. Everything timing-shaped in this
+  file was tuned against the starved machine, so treat old timing notes with
+  suspicion. Symptoms it caused, none of which pointed at it: the join form not
+  appearing inside 60s, a closing window outlasting 30s of patience in check [37],
+  and `Runtime.evaluate never answered: the devtools socket errored` at two
+  different checks on two different runs.
+- **The editor renders in about two and a half seconds, not thirty.** It lays out
+  some 4,600 controls, and 25–35s was this project's most expensive wrong number:
+  it is what `CALL_TIMEOUT` of 300s was set for, and why checks [53], [80] and
+  [82] were split so one call would never open the editor *and* redraw it. On a
+  machine that is not being starved by the canvas it is 2.2–2.4s, measured
+  repeatedly. Splitting those calls is still tidy and the timeout is still a
+  cheap safety net, but do not reason from the old figure — and before diagnosing
+  any timeout, time the steps in isolation rather than believing a note.
+- **A whole run is about fifteen minutes** (640 assertions, 15m25s), so budget
+  for that rather than killing one that looks stuck.
+- **No backticks in anything written into a template literal.** The checks and
+  every one-off probe pass their work to the page as a template literal, so a
+  backtick inside it — in a *comment* as readily as in code — ends the string,
+  and node fails to parse the file with an error pointing at a line some way
+  from the one at fault. It has cost four rounds in one sitting. Write the
+  comment without them.
 - **Pick a test value the browser would never pick.** A check asserting our
   bullet did not reach the editor's menus used `square` — and `disc, circle,
   square` is the sequence a browser walks for nested lists, which the menus are.
@@ -683,12 +747,20 @@ in the template library.
   lands on nothing, the prompt still on screen goes unanswered, and the editor sitting
   there open reads as Discard declining to close. Find the dialog whose element holds the
   button about to be pressed, and report whether it was pressed.
-- **A tab that vanishes mid-run is the browser, not a check.** After several long
-  runs on one browser instance the page target dies: the run stops with
-  `Runtime.evaluate never answered: the devtools socket errored`, `curl :9222/json`
-  comes back `[ ]`, and Foundry and Chrome are both still up. It has happened twice,
-  each time at a different check. Rebuild with `tools/sandbox.sh down && up` rather than
-  reading anything into where it stopped — and start a long run on a fresh sandbox.
+- **A tab that vanishes mid-run was the print frames piling up.** After several
+  long runs the page target dies: the run stops with `Runtime.evaluate never
+  answered: the devtools socket errored`, and Foundry and Chrome are both still
+  up. The cause was ours. `afterprint` never fires in a headless browser, so the
+  frame `printDocument` writes into outlives its five-minute fallback and the run
+  that made it — and a written `about:blank` frame reports its *parent's* URL, so
+  each leftover is a page target sitting at `/game` that only its title tells apart
+  from the real tab. Twenty-two of them and 275 workers had accumulated before a
+  browser gave out. Two things follow, both now in `connect`: **pick the tab whose
+  title is Foundry's**, since `targets.find(t => t.type === "page")` will happily
+  attach a whole suite to a leftover print frame; and **close every other page
+  target on connect**, so a run cannot inherit the last one's mess. A run that
+  still dies this way wants `tools/sandbox.sh down && up`, and `curl :9222/json`
+  will say whether targets are piling up again.
 - **A crashed run leaves fixtures behind**, and a stray style breaks the seeded-style
   counts three checks in — which looks like a bug in those checks. When counts are wrong
   in section [2], the world is dirty: `tools/sandbox.sh reset`.
@@ -1000,8 +1072,21 @@ doing nothing. Two mechanisms carry that:
   Foundry-in-the-abstract — a system that restyles journals will differ, and the honest
   fix if that matters is to defer rather than to copy.
 
-`tools/…` has no check for this on its own; **section [62] and the delta probe are what
-prove it** — a new style beside an unstyled journal, compared property by property.
+**`tools/sameness.mjs` is what measures it**, beside section [62]: it opens the journal
+and the page editor twice each, once wearing a brand new style and once wearing none,
+and compares every element property by property. Section [62] and the delta probe still
+prove the ones a person cares about; this says how many are left. It went from 380
+differences to 8, and the last of those are recorded above as decisions rather than
+faults. Two things it had to learn before its answer could be believed, both of which
+had it reporting differences that were not there:
+
+- **Freeze transitions first.** A corner radius came back as `3.00706px` part way
+  through an animation, so the same button differed in one run and not the next.
+- **A difference nobody can see is not one.** The folding markers sit in every page
+  whatever the style and are drawn in none of them, so their color and size wandered
+  freely through the count. It asks whether an element has a box at all
+  (`getClientRects()`), not whether its own `display` is `none` — the icon inside a
+  hidden marker is not itself hidden.
 
 **A hovered twin must be free to say nothing.** A twin holds 0 to mean "nothing to say",
 and `cleanSettings` clamps a number into its control's range — so a twin that copied its

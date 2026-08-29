@@ -66,6 +66,20 @@ const joinAndWait = async () => {
       ?? document.querySelector('button[name="join"], button[type="submit"]')).click();
   })()`);
   await cdp.waitFor("window.game && game.ready", { label: "game.ready", timeout: 120000 });
+
+  // Nothing here looks at the canvas, and drawing it costs more than everything
+  // else put together: the sandbox has no GPU, so Foundry's render loop runs in
+  // software and pegged eight cores at a steady five frames a second — for a
+  // scene no check has ever read. Every timing in this file was tuned against
+  // that, which is why the editor appeared to take half a minute to render when
+  // it takes two and a half seconds on a machine that is not being strangled.
+  // The setting is per browser profile, so this costs one extra reload on a
+  // freshly built sandbox and nothing on any run after it.
+  if (!await cdp.evaluate(`game.settings.get("core", "noCanvas")`)) {
+    await cdp.evaluate(`game.settings.set("core", "noCanvas", true)`);
+    await cdp.goto(`${BASE}/game`);
+    await cdp.waitFor("window.game && game.ready", { label: "game.ready without a canvas", timeout: 120000 });
+  }
 };
 
 /* --- Enable the module and reload ---------------------------------------- */
@@ -5414,6 +5428,32 @@ try {
   check(fold.color === "rgb(0, 170, 0)", `in the color it named (got ${fold.color})`);
   check(fold.deeperHidden === "none", `a level that does not fold keeps its marker out of sight (${fold.deeperHidden})`);
   check(fold.topmost, "and the marker is what the pointer reaches");
+
+  // And a journal wearing no style at all shows none of them. The markers are
+  // written into every page the module renders, styled or not, so that a page
+  // gaining a style need not re-render — but what hides an unwanted one was a
+  // rule scoped to a styled journal, which left an unstyled one carrying an
+  // arrow beside every heading that governs something. Installing the module
+  // and assigning nothing must leave a journal exactly as Foundry drew it.
+  const bare = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const entry = game.journal.get(window.__fold.entryId);
+    await api.assignStyle(entry, "");
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 900));
+    const marks = [...entry.sheet.element.querySelectorAll(".illuminus-fold")];
+    const out = JSON.stringify({
+      written: marks.length,
+      shown: marks.filter((m) => getComputedStyle(m).display !== "none").length
+    });
+    await api.assignStyle(entry, window.__fold.styleId);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 900));
+    return out;
+  })()`);
+  const nude = JSON.parse(bare);
+  check(nude.written > 0 && nude.shown === 0,
+    `an unstyled journal shows no folding markers at all (${nude.written} written, ${nude.shown} on show)`);
 
   // Measured again on the click itself: the page settles after it renders, and
   // a marker is a small target.

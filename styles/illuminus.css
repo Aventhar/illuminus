@@ -139,8 +139,8 @@
   /* Foundry gives a window its width inline, which these clamp: a maximum keeps
      a journal from stretching to the width of a large screen, and a minimum
      keeps it from being dragged down to a column of one word. */
-  min-width: var(--ill-window-frame-min-width);
-  max-width: var(--ill-window-frame-max-width);
+  min-width: var(--ill-window-frame-min-width, revert-layer);
+  max-width: var(--ill-window-frame-max-width, revert-layer);
   border-width: var(--ill-window-border-top-width) var(--ill-window-border-right-width)
                 var(--ill-window-border-bottom-width) var(--ill-window-border-left-width);
   border-style: var(--ill-window-border-top-style) var(--ill-window-border-right-style)
@@ -149,7 +149,7 @@
                 var(--ill-window-border-bottom-color) var(--ill-window-border-left-color);
   border-radius: var(--ill-window-corner-top-left) var(--ill-window-corner-top-right)
                  var(--ill-window-corner-bottom-right) var(--ill-window-corner-bottom-left);
-  corner-shape: var(--ill-window-corner-shape);
+  corner-shape: var(--ill-window-corner-shape, revert-layer);
 }
 
 .illuminus-styled .window-header {
@@ -158,19 +158,19 @@
 }
 
 .illuminus-styled .window-header .window-title {
-  font-family: var(--ill-window-font);
+  font-family: var(--ill-window-font, revert-layer);
   -webkit-text-stroke: var(--ill-window-outline-width) var(--ill-window-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-window-text-shadow-offset-x) var(--ill-window-text-shadow-offset-y)
                var(--ill-window-text-shadow-blur) var(--ill-window-text-shadow-color);
-  font-size: var(--ill-window-size);
-  font-weight: var(--ill-window-text-style-weight);
-  font-style: var(--ill-window-text-style-slant);
-  font-variant: var(--ill-window-caps-variant);
-  text-transform: var(--ill-window-caps-transform);
-  letter-spacing: var(--ill-window-letter-spacing);
-  text-align: var(--ill-window-align);
-  color: var(--ill-window-color);
+  font-size: var(--ill-window-size, revert-layer);
+  font-weight: var(--ill-window-text-style-weight, revert-layer);
+  font-style: var(--ill-window-text-style-slant, revert-layer);
+  font-variant: var(--ill-window-caps-variant, revert-layer);
+  text-transform: var(--ill-window-caps-transform, revert-layer);
+  letter-spacing: var(--ill-window-letter-spacing, revert-layer);
+  text-align: var(--ill-window-align, revert-layer);
+  color: var(--ill-window-color, revert-layer);
 }
 
 /* The icon buttons in the title bar: close and the controls menu. Matching
@@ -180,12 +180,12 @@
   /* Core sets --button-text-color on the button itself and lets the generic
      button rule resolve it, so overriding `color` alone is not enough — the
      variables have to be fed too. The sidebar buttons work for this reason. */
-  --button-text-color: var(--ill-window-header-button-color);
-  --button-background-color: var(--ill-window-header-button-background);
+  --button-text-color: var(--ill-window-header-button-color, revert-layer);
+  --button-background-color: var(--ill-window-header-button-background, revert-layer);
   --button-size: calc(var(--ill-window-header-button-size) * 1.7);
-  color: var(--ill-window-header-button-color);
-  background-color: var(--ill-window-header-button-background);
-  font-size: var(--ill-window-header-button-size);
+  color: var(--ill-window-header-button-color, revert-layer);
+  background-color: var(--ill-window-header-button-background, revert-layer);
+  font-size: var(--ill-window-header-button-size, revert-layer);
   border-width: var(--ill-window-header-button-border-top-width) var(--ill-window-header-button-border-right-width)
                 var(--ill-window-header-button-border-bottom-width) var(--ill-window-header-button-border-left-width);
   border-style: var(--ill-window-header-button-border-top-style) var(--ill-window-header-button-border-right-style)
@@ -194,7 +194,7 @@
                 var(--ill-window-header-button-border-bottom-color) var(--ill-window-header-button-border-left-color);
   border-radius: var(--ill-window-header-button-corner-top-left) var(--ill-window-header-button-corner-top-right)
                  var(--ill-window-header-button-corner-bottom-right) var(--ill-window-header-button-corner-bottom-left);
-  corner-shape: var(--ill-window-header-button-corner-shape);
+  corner-shape: var(--ill-window-header-button-corner-shape, revert-layer);
 }
 
 
@@ -202,9 +202,9 @@
 /* Which side the pencil sits on. Core pins it to the top right; both edges are
    set here so that choosing the left actually releases the right. */
 .illuminus-styled .journal-entry-page .edit-container {
-  left: var(--ill-window-page-button-side-left);
-  right: var(--ill-window-page-button-side-right);
-  top: var(--ill-window-page-button-top);
+  left: var(--ill-window-page-button-side-left, revert-layer);
+  right: var(--ill-window-page-button-side-right, revert-layer);
+  top: var(--ill-window-page-button-top, revert-layer);
 }
 
 /* Anchored to the window, the container hangs off the area holding the contents
@@ -215,9 +215,9 @@
    page it belongs to is no longer the thing it sits on. */
 .illuminus-styled .journal-entry-content > .edit-container {
   position: absolute;
-  top: var(--ill-window-page-button-top);
-  left: var(--ill-window-page-button-side-left);
-  right: var(--ill-window-page-button-side-right);
+  top: var(--ill-window-page-button-top, revert-layer);
+  left: var(--ill-window-page-button-side-left, revert-layer);
+  right: var(--ill-window-page-button-side-right, revert-layer);
   height: auto;
   z-index: 2;
   pointer-events: none;
@@ -234,15 +234,15 @@
    at the top, it stays where the container puts it and scrolls away with the
    words above it. */
 .illuminus-styled .journal-entry-page .edit-container button {
-  position: var(--ill-window-page-button-hold-top);
+  position: var(--ill-window-page-button-hold-top, revert-layer);
 }
 
 .illuminus-styled .journal-entry-page .edit-container button {
-  --button-text-color: var(--ill-window-page-button-color);
-  --button-background-color: var(--ill-window-page-button-background);
-  color: var(--ill-window-page-button-color);
-  background-color: var(--ill-window-page-button-background);
-  font-size: var(--ill-window-page-button-size);
+  --button-text-color: var(--ill-window-page-button-color, revert-layer);
+  --button-background-color: var(--ill-window-page-button-background, revert-layer);
+  color: var(--ill-window-page-button-color, revert-layer);
+  background-color: var(--ill-window-page-button-background, revert-layer);
+  font-size: var(--ill-window-page-button-size, revert-layer);
   border-width: var(--ill-window-page-button-border-top-width) var(--ill-window-page-button-border-right-width)
                 var(--ill-window-page-button-border-bottom-width) var(--ill-window-page-button-border-left-width);
   border-style: var(--ill-window-page-button-border-top-style) var(--ill-window-page-button-border-right-style)
@@ -251,7 +251,7 @@
                 var(--ill-window-page-button-border-bottom-color) var(--ill-window-page-button-border-left-color);
   border-radius: var(--ill-window-page-button-corner-top-left) var(--ill-window-page-button-corner-top-right)
                  var(--ill-window-page-button-corner-bottom-right) var(--ill-window-page-button-corner-bottom-left);
-  corner-shape: var(--ill-window-page-button-corner-shape);
+  corner-shape: var(--ill-window-page-button-corner-shape, revert-layer);
 }
 
 
@@ -268,8 +268,8 @@
    sideways. */
 .illuminus-styled.journal-entry-page.application,
 .illuminus-styled .illuminus-preview__editor {
-  min-width: var(--ill-editor-frame-min-width);
-  max-width: var(--ill-editor-frame-max-width);
+  min-width: var(--ill-editor-frame-min-width, revert-layer);
+  max-width: var(--ill-editor-frame-max-width, revert-layer);
   border-width: var(--ill-editor-border-top-width) var(--ill-editor-border-right-width)
                 var(--ill-editor-border-bottom-width) var(--ill-editor-border-left-width);
   border-style: var(--ill-editor-border-top-style) var(--ill-editor-border-right-style)
@@ -278,7 +278,7 @@
                 var(--ill-editor-border-bottom-color) var(--ill-editor-border-left-color);
   border-radius: var(--ill-editor-corner-top-left) var(--ill-editor-corner-top-right)
                  var(--ill-editor-corner-bottom-right) var(--ill-editor-corner-bottom-left);
-  corner-shape: var(--ill-editor-corner-shape);
+  corner-shape: var(--ill-editor-corner-shape, revert-layer);
 }
 
 .illuminus-styled.journal-entry-page .window-header,
@@ -289,29 +289,29 @@
 
 .illuminus-styled.journal-entry-page .window-header .window-title,
 .illuminus-styled .illuminus-preview__editor .window-header .window-title {
-  font-family: var(--ill-editor-font);
+  font-family: var(--ill-editor-font, revert-layer);
   -webkit-text-stroke: var(--ill-editor-outline-width) var(--ill-editor-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-editor-text-shadow-offset-x) var(--ill-editor-text-shadow-offset-y)
                var(--ill-editor-text-shadow-blur) var(--ill-editor-text-shadow-color);
-  font-size: var(--ill-editor-size);
-  font-weight: var(--ill-editor-text-style-weight);
-  font-style: var(--ill-editor-text-style-slant);
-  font-variant: var(--ill-editor-caps-variant);
-  text-transform: var(--ill-editor-caps-transform);
-  letter-spacing: var(--ill-editor-letter-spacing);
-  text-align: var(--ill-editor-align);
-  color: var(--ill-editor-color);
+  font-size: var(--ill-editor-size, revert-layer);
+  font-weight: var(--ill-editor-text-style-weight, revert-layer);
+  font-style: var(--ill-editor-text-style-slant, revert-layer);
+  font-variant: var(--ill-editor-caps-variant, revert-layer);
+  text-transform: var(--ill-editor-caps-transform, revert-layer);
+  letter-spacing: var(--ill-editor-letter-spacing, revert-layer);
+  text-align: var(--ill-editor-align, revert-layer);
+  color: var(--ill-editor-color, revert-layer);
 }
 
 .illuminus-styled.journal-entry-page .window-header button.header-control,
 .illuminus-styled .illuminus-preview__editor .window-header button.header-control {
-  --button-text-color: var(--ill-editor-header-button-color);
-  --button-background-color: var(--ill-editor-header-button-background);
+  --button-text-color: var(--ill-editor-header-button-color, revert-layer);
+  --button-background-color: var(--ill-editor-header-button-background, revert-layer);
   --button-size: calc(var(--ill-editor-header-button-size) * 1.7);
-  color: var(--ill-editor-header-button-color);
-  background-color: var(--ill-editor-header-button-background);
-  font-size: var(--ill-editor-header-button-size);
+  color: var(--ill-editor-header-button-color, revert-layer);
+  background-color: var(--ill-editor-header-button-background, revert-layer);
+  font-size: var(--ill-editor-header-button-size, revert-layer);
   border-width: var(--ill-editor-header-button-border-top-width) var(--ill-editor-header-button-border-right-width)
                 var(--ill-editor-header-button-border-bottom-width) var(--ill-editor-header-button-border-left-width);
   border-style: var(--ill-editor-header-button-border-top-style) var(--ill-editor-header-button-border-right-style)
@@ -320,7 +320,7 @@
                 var(--ill-editor-header-button-border-bottom-color) var(--ill-editor-header-button-border-left-color);
   border-radius: var(--ill-editor-header-button-corner-top-left) var(--ill-editor-header-button-corner-top-right)
                  var(--ill-editor-header-button-corner-bottom-right) var(--ill-editor-header-button-corner-bottom-left);
-  corner-shape: var(--ill-editor-header-button-corner-shape);
+  corner-shape: var(--ill-editor-header-button-corner-shape, revert-layer);
 }
 
 /* The bar of controls above the prose. It is rebuilt from scratch on every
@@ -328,7 +328,7 @@
    is styled by what it is, and it carries the same class each time. */
 .illuminus-styled.journal-entry-page menu.editor-menu,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu {
-  background-color: var(--ill-editor-toolbar-toolbar-background);
+  background-color: var(--ill-editor-toolbar-toolbar-background, revert-layer);
   padding: var(--ill-editor-toolbar-toolbar-padding-top) var(--ill-editor-toolbar-toolbar-padding-right)
            var(--ill-editor-toolbar-toolbar-padding-bottom) var(--ill-editor-toolbar-toolbar-padding-left);
   border-width: var(--ill-editor-toolbar-toolbar-border-top-width) var(--ill-editor-toolbar-toolbar-border-right-width)
@@ -339,7 +339,7 @@
                 var(--ill-editor-toolbar-toolbar-border-bottom-color) var(--ill-editor-toolbar-toolbar-border-left-color);
   border-radius: var(--ill-editor-toolbar-toolbar-corner-top-left) var(--ill-editor-toolbar-toolbar-corner-top-right)
                  var(--ill-editor-toolbar-toolbar-corner-bottom-right) var(--ill-editor-toolbar-toolbar-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-toolbar-corner-shape);
+  corner-shape: var(--ill-editor-toolbar-toolbar-corner-shape, revert-layer);
 }
 
 /* Its controls: the drop-downs and the icon buttons alike. Core feeds a
@@ -348,17 +348,17 @@
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown {
-  --button-text-color: var(--ill-editor-toolbar-toolbar-color);
-  color: var(--ill-editor-toolbar-toolbar-color);
-  font-size: var(--ill-editor-toolbar-toolbar-size);
+  --button-text-color: var(--ill-editor-toolbar-toolbar-color, revert-layer);
+  color: var(--ill-editor-toolbar-toolbar-color, revert-layer);
+  font-size: var(--ill-editor-toolbar-toolbar-size, revert-layer);
 }
 
 .illuminus-styled.journal-entry-page menu.editor-menu button:hover,
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
-  --button-text-color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
-  color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color));
+  --button-text-color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
+  color: var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
 }
 
 
@@ -366,24 +366,24 @@
    controls standing on it. */
 .illuminus-styled.journal-entry-page .page-metadata,
 .illuminus-styled .illuminus-preview__editor .page-metadata {
-  font-family: var(--ill-editor-settings-bar-settings-bar-font);
-  font-size: var(--ill-editor-settings-bar-settings-bar-size);
-  color: var(--ill-editor-settings-bar-settings-bar-color);
-  font-weight: var(--ill-editor-settings-bar-settings-bar-text-style-weight);
-  font-style: var(--ill-editor-settings-bar-settings-bar-text-style-slant);
-  font-variant: var(--ill-editor-settings-bar-settings-bar-caps-variant);
-  text-transform: var(--ill-editor-settings-bar-settings-bar-caps-transform);
-  letter-spacing: var(--ill-editor-settings-bar-settings-bar-letter-spacing);
-  word-spacing: var(--ill-editor-settings-bar-settings-bar-word-spacing);
-  line-height: var(--ill-editor-settings-bar-settings-bar-line-height);
-  text-wrap: var(--ill-editor-settings-bar-settings-bar-wrap);
-  hyphens: var(--ill-editor-settings-bar-settings-bar-hyphens);
-  text-align: var(--ill-editor-settings-bar-settings-bar-align);
+  font-family: var(--ill-editor-settings-bar-settings-bar-font, revert-layer);
+  font-size: var(--ill-editor-settings-bar-settings-bar-size, revert-layer);
+  color: var(--ill-editor-settings-bar-settings-bar-color, revert-layer);
+  font-weight: var(--ill-editor-settings-bar-settings-bar-text-style-weight, revert-layer);
+  font-style: var(--ill-editor-settings-bar-settings-bar-text-style-slant, revert-layer);
+  font-variant: var(--ill-editor-settings-bar-settings-bar-caps-variant, revert-layer);
+  text-transform: var(--ill-editor-settings-bar-settings-bar-caps-transform, revert-layer);
+  letter-spacing: var(--ill-editor-settings-bar-settings-bar-letter-spacing, revert-layer);
+  word-spacing: var(--ill-editor-settings-bar-settings-bar-word-spacing, revert-layer);
+  line-height: var(--ill-editor-settings-bar-settings-bar-line-height, revert-layer);
+  text-wrap: var(--ill-editor-settings-bar-settings-bar-wrap, revert-layer);
+  hyphens: var(--ill-editor-settings-bar-settings-bar-hyphens, revert-layer);
+  text-align: var(--ill-editor-settings-bar-settings-bar-align, revert-layer);
   -webkit-text-stroke: var(--ill-editor-settings-bar-settings-bar-outline-width) var(--ill-editor-settings-bar-settings-bar-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-y)
                var(--ill-editor-settings-bar-settings-bar-text-shadow-blur) var(--ill-editor-settings-bar-settings-bar-text-shadow-color);
-  background-color: var(--ill-editor-settings-bar-settings-bar-background);
+  background-color: var(--ill-editor-settings-bar-settings-bar-background, revert-layer);
   padding: var(--ill-editor-settings-bar-settings-bar-padding-top) var(--ill-editor-settings-bar-settings-bar-padding-right)
            var(--ill-editor-settings-bar-settings-bar-padding-bottom) var(--ill-editor-settings-bar-settings-bar-padding-left);
   margin: var(--ill-editor-settings-bar-settings-bar-margin-top) var(--ill-editor-settings-bar-settings-bar-margin-right)
@@ -396,7 +396,7 @@
                 var(--ill-editor-settings-bar-settings-bar-border-bottom-color) var(--ill-editor-settings-bar-settings-bar-border-left-color);
   border-radius: var(--ill-editor-settings-bar-settings-bar-corner-top-left) var(--ill-editor-settings-bar-settings-bar-corner-top-right)
                  var(--ill-editor-settings-bar-settings-bar-corner-bottom-right) var(--ill-editor-settings-bar-settings-bar-corner-bottom-left);
-  corner-shape: var(--ill-editor-settings-bar-settings-bar-corner-shape);
+  corner-shape: var(--ill-editor-settings-bar-settings-bar-corner-shape, revert-layer);
   box-shadow: var(--ill-editor-settings-bar-settings-bar-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-shadow-offset-y)
               var(--ill-editor-settings-bar-settings-bar-shadow-blur) var(--ill-editor-settings-bar-settings-bar-shadow-spread)
               var(--ill-editor-settings-bar-settings-bar-shadow-color),
@@ -408,11 +408,13 @@
 /* The page's own fields, above the prose: what the page is called is the
    journal's name control, which the Title tab paints, and beside it the level
    its heading takes and whether that heading is shown at all. */
+/* The box goes to the control alone. Foundry gives the drop-down a fill, a
+   hairline and a rounding, and gives the words beside it none of that — so a
+   box painted on the label too put a bordered, padded panel around a caption
+   that Foundry draws as bare text. */
 .illuminus-styled.journal-entry-page .page-metadata select,
-.illuminus-styled.journal-entry-page .page-metadata label,
-.illuminus-styled .illuminus-preview__editor .page-metadata select,
-.illuminus-styled .illuminus-preview__editor .page-metadata label {
-  background-color: var(--ill-editor-settings-bar-field-background);
+.illuminus-styled .illuminus-preview__editor .page-metadata select {
+  background-color: var(--ill-editor-settings-bar-field-background, revert-layer);
   padding: var(--ill-editor-settings-bar-field-padding-top) var(--ill-editor-settings-bar-field-padding-right)
            var(--ill-editor-settings-bar-field-padding-bottom) var(--ill-editor-settings-bar-field-padding-left);
   border-width: var(--ill-editor-settings-bar-field-border-top-width) var(--ill-editor-settings-bar-field-border-right-width)
@@ -423,21 +425,42 @@
                 var(--ill-editor-settings-bar-field-border-bottom-color) var(--ill-editor-settings-bar-field-border-left-color);
   border-radius: var(--ill-editor-settings-bar-field-corner-top-left) var(--ill-editor-settings-bar-field-corner-top-right)
                  var(--ill-editor-settings-bar-field-corner-bottom-right) var(--ill-editor-settings-bar-field-corner-bottom-left);
-  corner-shape: var(--ill-editor-settings-bar-field-corner-shape);
+  corner-shape: var(--ill-editor-settings-bar-field-corner-shape, revert-layer);
   box-shadow: var(--ill-editor-settings-bar-field-shadow-offset-x) var(--ill-editor-settings-bar-field-shadow-offset-y)
               var(--ill-editor-settings-bar-field-shadow-blur) var(--ill-editor-settings-bar-field-shadow-spread)
               var(--ill-editor-settings-bar-field-shadow-color),
     inset var(--ill-editor-settings-bar-field-inner-shadow-offset-x) var(--ill-editor-settings-bar-field-inner-shadow-offset-y)
           var(--ill-editor-settings-bar-field-inner-shadow-blur) var(--ill-editor-settings-bar-field-inner-shadow-spread)
           var(--ill-editor-settings-bar-field-inner-shadow-color);
-  font-family: var(--ill-editor-settings-bar-field-font);
-  font-size: var(--ill-editor-settings-bar-field-size);
-  font-weight: var(--ill-editor-settings-bar-field-text-style-weight);
-  font-style: var(--ill-editor-settings-bar-field-text-style-slant);
-  color: var(--ill-editor-settings-bar-field-color);
+}
+
+/* The lettering goes to both. A label is words, and a style saying how the
+   page's own settings are lettered means the words as much as the control. */
+.illuminus-styled.journal-entry-page .page-metadata select,
+.illuminus-styled.journal-entry-page .page-metadata label,
+.illuminus-styled .illuminus-preview__editor .page-metadata select,
+.illuminus-styled .illuminus-preview__editor .page-metadata label {
+  font-size: var(--ill-editor-settings-bar-field-size, revert-layer);
+  font-weight: var(--ill-editor-settings-bar-field-text-style-weight, revert-layer);
+  font-style: var(--ill-editor-settings-bar-field-text-style-slant, revert-layer);
+  color: var(--ill-editor-settings-bar-field-color, revert-layer);
   -webkit-text-stroke: var(--ill-editor-settings-bar-field-outline-width) var(--ill-editor-settings-bar-field-outline-color);
   text-shadow: var(--ill-editor-settings-bar-field-text-shadow-offset-x) var(--ill-editor-settings-bar-field-text-shadow-offset-y)
                var(--ill-editor-settings-bar-field-text-shadow-blur) var(--ill-editor-settings-bar-field-text-shadow-color);
+}
+
+/* The typeface, and only to what is really lettering. An icon is a glyph in a
+   FontAwesome family, and the label carrying one names that family on itself —
+   so a typeface stated here rubbed the icon out and left the browser's
+   missing-character box, which is what the Category and Level controls showed.
+   Everything else in the rule above — the fill, the edges, the lettering color
+   — an icon label wants as much as a worded one, which is why the guard is on
+   this declaration rather than on the whole of it. */
+.illuminus-styled.journal-entry-page .page-metadata select,
+.illuminus-styled.journal-entry-page .page-metadata label:not([class*="fa-"]),
+.illuminus-styled .illuminus-preview__editor .page-metadata select,
+.illuminus-styled .illuminus-preview__editor .page-metadata label:not([class*="fa-"]) {
+  font-family: var(--ill-editor-settings-bar-field-font, revert-layer);
 }
 
 /* The list a named control opens. Core clones it into a `#prosemirror-dropdown`
@@ -446,7 +469,7 @@
    whatever was clicked, and these are what reach it. Its own placement is
    Foundry's: only paint is set here, never position. */
 .illuminus-styled#prosemirror-dropdown ul {
-  background-color: var(--ill-editor-dropdowns-list-background);
+  background-color: var(--ill-editor-dropdowns-list-background, revert-layer);
   padding: var(--ill-editor-dropdowns-list-padding-top) var(--ill-editor-dropdowns-list-padding-right)
            var(--ill-editor-dropdowns-list-padding-bottom) var(--ill-editor-dropdowns-list-padding-left);
   border-width: var(--ill-editor-dropdowns-list-border-top-width) var(--ill-editor-dropdowns-list-border-right-width)
@@ -457,7 +480,7 @@
                 var(--ill-editor-dropdowns-list-border-bottom-color) var(--ill-editor-dropdowns-list-border-left-color);
   border-radius: var(--ill-editor-dropdowns-list-corner-top-left) var(--ill-editor-dropdowns-list-corner-top-right)
                  var(--ill-editor-dropdowns-list-corner-bottom-right) var(--ill-editor-dropdowns-list-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-list-corner-shape);
+  corner-shape: var(--ill-editor-dropdowns-list-corner-shape, revert-layer);
   box-shadow: var(--ill-editor-dropdowns-list-shadow-offset-x) var(--ill-editor-dropdowns-list-shadow-offset-y)
               var(--ill-editor-dropdowns-list-shadow-blur) var(--ill-editor-dropdowns-list-shadow-spread)
               var(--ill-editor-dropdowns-list-shadow-color),
@@ -470,26 +493,26 @@
    is how the Format list shows what it is offering, so a size set here is what
    the entries take unless core has said otherwise. */
 .illuminus-styled#prosemirror-dropdown li {
-  font-family: var(--ill-editor-dropdowns-item-font);
-  font-size: var(--ill-editor-dropdowns-item-size);
-  color: var(--ill-editor-dropdowns-item-color);
-  font-weight: var(--ill-editor-dropdowns-item-text-style-weight);
-  font-style: var(--ill-editor-dropdowns-item-text-style-slant);
+  font-family: var(--ill-editor-dropdowns-item-font, revert-layer);
+  font-size: var(--ill-editor-dropdowns-item-size, revert-layer);
+  color: var(--ill-editor-dropdowns-item-color, revert-layer);
+  font-weight: var(--ill-editor-dropdowns-item-text-style-weight, revert-layer);
+  font-style: var(--ill-editor-dropdowns-item-text-style-slant, revert-layer);
   -webkit-text-stroke: var(--ill-editor-dropdowns-item-outline-width) var(--ill-editor-dropdowns-item-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-editor-dropdowns-item-text-shadow-offset-x) var(--ill-editor-dropdowns-item-text-shadow-offset-y)
                var(--ill-editor-dropdowns-item-text-shadow-blur) var(--ill-editor-dropdowns-item-text-shadow-color);
-  background-color: var(--ill-editor-dropdowns-item-background);
+  background-color: var(--ill-editor-dropdowns-item-background, revert-layer);
   padding: var(--ill-editor-dropdowns-item-padding-top) var(--ill-editor-dropdowns-item-padding-right)
            var(--ill-editor-dropdowns-item-padding-bottom) var(--ill-editor-dropdowns-item-padding-left);
   border-radius: var(--ill-editor-dropdowns-item-corner-top-left) var(--ill-editor-dropdowns-item-corner-top-right)
                  var(--ill-editor-dropdowns-item-corner-bottom-right) var(--ill-editor-dropdowns-item-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-item-corner-shape);
+  corner-shape: var(--ill-editor-dropdowns-item-corner-shape, revert-layer);
 }
 
 /* The line core draws between one run of entries and the next. */
 .illuminus-styled#prosemirror-dropdown li.divider {
-  border-bottom-color: var(--ill-editor-dropdowns-item-divider-color);
+  border-bottom-color: var(--ill-editor-dropdowns-item-divider-color, revert-layer);
 }
 
 /* The tick box beside them, which is not a box: Foundry sets `appearance: none`
@@ -538,7 +561,7 @@
    The two named controls are not icons and have a category of their own. */
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown),
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown) {
-  background-color: var(--ill-editor-toolbar-toolbar-button-background);
+  background-color: var(--ill-editor-toolbar-toolbar-button-background, revert-layer);
   padding: var(--ill-editor-toolbar-toolbar-button-padding-top) var(--ill-editor-toolbar-toolbar-button-padding-right)
            var(--ill-editor-toolbar-toolbar-button-padding-bottom) var(--ill-editor-toolbar-toolbar-button-padding-left);
   border-width: var(--ill-editor-toolbar-toolbar-button-border-top-width) var(--ill-editor-toolbar-toolbar-button-border-right-width)
@@ -549,7 +572,7 @@
                 var(--ill-editor-toolbar-toolbar-button-border-bottom-color) var(--ill-editor-toolbar-toolbar-button-border-left-color);
   border-radius: var(--ill-editor-toolbar-toolbar-button-corner-top-left) var(--ill-editor-toolbar-toolbar-button-corner-top-right)
                  var(--ill-editor-toolbar-toolbar-button-corner-bottom-right) var(--ill-editor-toolbar-toolbar-button-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-toolbar-button-corner-shape);
+  corner-shape: var(--ill-editor-toolbar-toolbar-button-corner-shape, revert-layer);
   box-shadow: var(--ill-editor-toolbar-toolbar-button-shadow-offset-x) var(--ill-editor-toolbar-toolbar-button-shadow-offset-y)
               var(--ill-editor-toolbar-toolbar-button-shadow-blur) var(--ill-editor-toolbar-toolbar-button-shadow-spread)
               var(--ill-editor-toolbar-toolbar-button-shadow-color),
@@ -563,8 +586,8 @@
    a button's color through a variable as well, so both are set. */
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown {
-  --button-text-color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color));
-  background-color: var(--ill-editor-dropdowns-dropdown-background);
+  --button-text-color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
+  background-color: var(--ill-editor-dropdowns-dropdown-background, revert-layer);
   padding: var(--ill-editor-dropdowns-dropdown-padding-top) var(--ill-editor-dropdowns-dropdown-padding-right)
            var(--ill-editor-dropdowns-dropdown-padding-bottom) var(--ill-editor-dropdowns-dropdown-padding-left);
   border-width: var(--ill-editor-dropdowns-dropdown-border-top-width) var(--ill-editor-dropdowns-dropdown-border-right-width)
@@ -575,18 +598,18 @@
                 var(--ill-editor-dropdowns-dropdown-border-bottom-color) var(--ill-editor-dropdowns-dropdown-border-left-color);
   border-radius: var(--ill-editor-dropdowns-dropdown-corner-top-left) var(--ill-editor-dropdowns-dropdown-corner-top-right)
                  var(--ill-editor-dropdowns-dropdown-corner-bottom-right) var(--ill-editor-dropdowns-dropdown-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-dropdown-corner-shape);
+  corner-shape: var(--ill-editor-dropdowns-dropdown-corner-shape, revert-layer);
   box-shadow: var(--ill-editor-dropdowns-dropdown-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-shadow-offset-y)
               var(--ill-editor-dropdowns-dropdown-shadow-blur) var(--ill-editor-dropdowns-dropdown-shadow-spread)
               var(--ill-editor-dropdowns-dropdown-shadow-color),
     inset var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-inner-shadow-offset-y)
           var(--ill-editor-dropdowns-dropdown-inner-shadow-blur) var(--ill-editor-dropdowns-dropdown-inner-shadow-spread)
           var(--ill-editor-dropdowns-dropdown-inner-shadow-color);
-  font-family: var(--ill-editor-dropdowns-dropdown-font);
-  font-size: var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size));
-  font-weight: var(--ill-editor-dropdowns-dropdown-text-style-weight);
-  font-style: var(--ill-editor-dropdowns-dropdown-text-style-slant);
-  color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color));
+  font-family: var(--ill-editor-dropdowns-dropdown-font, revert-layer);
+  font-size: var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size, revert-layer));
+  font-weight: var(--ill-editor-dropdowns-dropdown-text-style-weight, revert-layer);
+  font-style: var(--ill-editor-dropdowns-dropdown-text-style-slant, revert-layer);
+  color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
   -webkit-text-stroke: var(--ill-editor-dropdowns-dropdown-outline-width) var(--ill-editor-dropdowns-dropdown-outline-color);
   text-shadow: var(--ill-editor-dropdowns-dropdown-text-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-text-shadow-offset-y)
                var(--ill-editor-dropdowns-dropdown-text-shadow-blur) var(--ill-editor-dropdowns-dropdown-text-shadow-color);
@@ -604,27 +627,27 @@
    above the element's own background and below its content, which is exactly
    where a fill belongs. */
 .illuminus-styled.application::after {
-  background-color: var(--ill-window-background);
-  backdrop-filter: var(--ill-window-frost);
+  background-color: var(--ill-window-background, revert-layer);
+  backdrop-filter: var(--ill-window-frost, revert-layer);
   background-image: linear-gradient(var(--ill-window-gradient-angle),
       var(--ill-window-gradient-from), var(--ill-window-gradient-to));
 }
 
 .illuminus-styled .window-header::after {
-  background-color: var(--ill-window-title-bar-background);
+  background-color: var(--ill-window-title-bar-background, revert-layer);
 }
 
 .illuminus-styled.journal-entry-page.application::after,
 .illuminus-styled .illuminus-preview__editor::after {
-  background-color: var(--ill-editor-background);
-  backdrop-filter: var(--ill-editor-frost);
+  background-color: var(--ill-editor-background, revert-layer);
+  backdrop-filter: var(--ill-editor-frost, revert-layer);
   background-image: linear-gradient(var(--ill-editor-gradient-angle),
       var(--ill-editor-gradient-from), var(--ill-editor-gradient-to));
 }
 
 .illuminus-styled.journal-entry-page .window-header::after,
 .illuminus-styled .illuminus-preview__editor .window-header::after {
-  background-color: var(--ill-editor-title-bar-background);
+  background-color: var(--ill-editor-title-bar-background, revert-layer);
 }
 
 
@@ -634,12 +657,12 @@
    control is fed in there rather than onto the aside itself. */
 .illuminus-styled.sheet.journal-entry,
 .illuminus-preview__frame.illuminus-styled {
-  --sidebar-width-expanded: var(--ill-sidebar-sidebar-width);
+  --sidebar-width-expanded: var(--ill-sidebar-sidebar-width, revert-layer);
 }
 
 .illuminus-styled .journal-sidebar {
-  background-color: var(--ill-sidebar-background);
-  backdrop-filter: var(--ill-sidebar-frost);
+  background-color: var(--ill-sidebar-background, revert-layer);
+  backdrop-filter: var(--ill-sidebar-frost, revert-layer);
   background-image: linear-gradient(var(--ill-sidebar-gradient-angle),
       var(--ill-sidebar-gradient-from), var(--ill-sidebar-gradient-to));
   padding: var(--ill-sidebar-padding-top) var(--ill-sidebar-padding-right)
@@ -652,7 +675,7 @@
                 var(--ill-sidebar-border-bottom-color) var(--ill-sidebar-border-left-color);
   border-radius: var(--ill-sidebar-corner-top-left) var(--ill-sidebar-corner-top-right)
                  var(--ill-sidebar-corner-bottom-right) var(--ill-sidebar-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-corner-shape);
+  corner-shape: var(--ill-sidebar-corner-shape, revert-layer);
   box-shadow:
     inset var(--ill-sidebar-inner-shadow-offset-x) var(--ill-sidebar-inner-shadow-offset-y)
     var(--ill-sidebar-inner-shadow-blur) var(--ill-sidebar-inner-shadow-spread)
@@ -661,14 +684,14 @@
 
 /* Page entries */
 .illuminus-styled .journal-sidebar .toc li.page {
-  background-color: var(--ill-sidebar-entries-entry-background);
+  background-color: var(--ill-sidebar-entries-entry-background, revert-layer);
   padding: var(--ill-sidebar-entries-entry-padding-top) var(--ill-sidebar-entries-entry-padding-right)
            var(--ill-sidebar-entries-entry-padding-bottom) var(--ill-sidebar-entries-entry-padding-left);
   margin: var(--ill-sidebar-entries-entry-margin-top) var(--ill-sidebar-entries-entry-margin-right)
           var(--ill-sidebar-entries-entry-margin-bottom) var(--ill-sidebar-entries-entry-margin-left);
   border-radius: var(--ill-sidebar-entries-entry-corner-top-left) var(--ill-sidebar-entries-entry-corner-top-right)
                  var(--ill-sidebar-entries-entry-corner-bottom-right) var(--ill-sidebar-entries-entry-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-entries-entry-corner-shape);
+  corner-shape: var(--ill-sidebar-entries-entry-corner-shape, revert-layer);
   border-width: var(--ill-sidebar-entries-entry-border-top-width) var(--ill-sidebar-entries-entry-border-right-width)
                 var(--ill-sidebar-entries-entry-border-bottom-width) var(--ill-sidebar-entries-entry-border-left-width);
   border-style: var(--ill-sidebar-entries-entry-border-top-style) var(--ill-sidebar-entries-entry-border-right-style)
@@ -678,23 +701,23 @@
 }
 
 .illuminus-styled .journal-sidebar .toc .page-title {
-  font-family: var(--ill-sidebar-entries-font);
+  font-family: var(--ill-sidebar-entries-font, revert-layer);
   -webkit-text-stroke: var(--ill-sidebar-entries-outline-width) var(--ill-sidebar-entries-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-sidebar-entries-text-shadow-offset-x) var(--ill-sidebar-entries-text-shadow-offset-y)
                var(--ill-sidebar-entries-text-shadow-blur) var(--ill-sidebar-entries-text-shadow-color);
-  font-size: var(--ill-sidebar-entries-size);
-  font-weight: var(--ill-sidebar-entries-text-style-weight);
-  font-style: var(--ill-sidebar-entries-text-style-slant);
-  font-variant: var(--ill-sidebar-entries-caps-variant);
-  text-transform: var(--ill-sidebar-entries-caps-transform);
-  letter-spacing: var(--ill-sidebar-entries-letter-spacing);
-  word-spacing: var(--ill-sidebar-entries-word-spacing);
-  line-height: var(--ill-sidebar-entries-line-height);
-  text-wrap: var(--ill-sidebar-entries-wrap);
-  hyphens: var(--ill-sidebar-entries-hyphens);
-  text-align: var(--ill-sidebar-entries-align);
-  color: var(--ill-sidebar-entries-color);
+  font-size: var(--ill-sidebar-entries-size, revert-layer);
+  font-weight: var(--ill-sidebar-entries-text-style-weight, revert-layer);
+  font-style: var(--ill-sidebar-entries-text-style-slant, revert-layer);
+  font-variant: var(--ill-sidebar-entries-caps-variant, revert-layer);
+  text-transform: var(--ill-sidebar-entries-caps-transform, revert-layer);
+  letter-spacing: var(--ill-sidebar-entries-letter-spacing, revert-layer);
+  word-spacing: var(--ill-sidebar-entries-word-spacing, revert-layer);
+  line-height: var(--ill-sidebar-entries-line-height, revert-layer);
+  text-wrap: var(--ill-sidebar-entries-wrap, revert-layer);
+  hyphens: var(--ill-sidebar-entries-hyphens, revert-layer);
+  text-align: var(--ill-sidebar-entries-align, revert-layer);
+  color: var(--ill-sidebar-entries-color, revert-layer);
 }
 
 /* The row being read and the row a reader chose are written by the generator,
@@ -720,25 +743,25 @@
 /* Page numbers */
 .illuminus-styled .journal-sidebar .toc .page-index,
 .illuminus-styled .journal-sidebar .toc .page-number {
-  display: var(--ill-sidebar-numbers-number-shown);
-  color: var(--ill-sidebar-numbers-number-color);
-  font-size: var(--ill-sidebar-numbers-number-size);
-  font-weight: var(--ill-sidebar-numbers-number-text-style-weight);
-  font-style: var(--ill-sidebar-numbers-number-text-style-slant);
-  text-align: var(--ill-sidebar-numbers-number-align);
-  width: var(--ill-sidebar-numbers-number-width);
+  display: var(--ill-sidebar-numbers-number-shown, revert-layer);
+  color: var(--ill-sidebar-numbers-number-color, revert-layer);
+  font-size: var(--ill-sidebar-numbers-number-size, revert-layer);
+  font-weight: var(--ill-sidebar-numbers-number-text-style-weight, revert-layer);
+  font-style: var(--ill-sidebar-numbers-number-text-style-slant, revert-layer);
+  text-align: var(--ill-sidebar-numbers-number-align, revert-layer);
+  width: var(--ill-sidebar-numbers-number-width, revert-layer);
 }
 
 /* Sub-headings listed beneath the current page */
 .illuminus-styled .journal-sidebar .toc .headings {
-  margin-left: var(--ill-sidebar-headings-heading-indent);
+  margin-left: var(--ill-sidebar-headings-heading-indent, revert-layer);
 }
 
 /* The box is on the listed item and the lettering on the link inside it, as
    the page entry above it is built: a link is inline, and an inline box cannot
    carry spacing that pushes the rows apart. */
 .illuminus-styled .journal-sidebar .toc li.heading {
-  background-color: var(--ill-sidebar-headings-heading-background);
+  background-color: var(--ill-sidebar-headings-heading-background, revert-layer);
   padding: var(--ill-sidebar-headings-heading-padding-top) var(--ill-sidebar-headings-heading-padding-right)
            var(--ill-sidebar-headings-heading-padding-bottom) var(--ill-sidebar-headings-heading-padding-left);
   margin: var(--ill-sidebar-headings-heading-margin-top) var(--ill-sidebar-headings-heading-margin-right)
@@ -751,23 +774,23 @@
                 var(--ill-sidebar-headings-heading-border-bottom-color) var(--ill-sidebar-headings-heading-border-left-color);
   border-radius: var(--ill-sidebar-headings-heading-corner-top-left) var(--ill-sidebar-headings-heading-corner-top-right)
                  var(--ill-sidebar-headings-heading-corner-bottom-right) var(--ill-sidebar-headings-heading-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-headings-heading-corner-shape);
+  corner-shape: var(--ill-sidebar-headings-heading-corner-shape, revert-layer);
 }
 
 
 .illuminus-styled .journal-sidebar .toc .heading-link {
-  font-family: var(--ill-sidebar-headings-heading-font);
+  font-family: var(--ill-sidebar-headings-heading-font, revert-layer);
   -webkit-text-stroke: var(--ill-sidebar-headings-heading-outline-width) var(--ill-sidebar-headings-heading-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-sidebar-headings-heading-text-shadow-offset-x) var(--ill-sidebar-headings-heading-text-shadow-offset-y)
                var(--ill-sidebar-headings-heading-text-shadow-blur) var(--ill-sidebar-headings-heading-text-shadow-color);
-  font-size: var(--ill-sidebar-headings-heading-size);
-  font-weight: var(--ill-sidebar-headings-heading-text-style-weight);
-  font-style: var(--ill-sidebar-headings-heading-text-style-slant);
-  line-height: var(--ill-sidebar-headings-heading-line-height);
-  text-wrap: var(--ill-sidebar-headings-heading-wrap);
-  hyphens: var(--ill-sidebar-headings-heading-hyphens);
-  color: var(--ill-sidebar-headings-heading-color);
+  font-size: var(--ill-sidebar-headings-heading-size, revert-layer);
+  font-weight: var(--ill-sidebar-headings-heading-text-style-weight, revert-layer);
+  font-style: var(--ill-sidebar-headings-heading-text-style-slant, revert-layer);
+  line-height: var(--ill-sidebar-headings-heading-line-height, revert-layer);
+  text-wrap: var(--ill-sidebar-headings-heading-wrap, revert-layer);
+  hyphens: var(--ill-sidebar-headings-heading-hyphens, revert-layer);
+  color: var(--ill-sidebar-headings-heading-color, revert-layer);
 }
 
 
@@ -778,6 +801,17 @@
    seen: "this level folds" has to be a value, because a style supplies values
    and never rules. The chrome below is not a style's to set — a button that
    looked like Foundry's buttons would be a button in the middle of a heading. */
+/* A marker is written into every page the module renders, styled or not, so a
+   page that gains a style need not re-render to gain its folding. What decides
+   whether one can be *seen* is `--ill-<level>-fold-shown`, and that lives in a
+   rule scoped to a styled journal — which left an unstyled one showing an arrow
+   beside every heading that governs something. Installing the module and
+   assigning nothing must leave a journal looking exactly as Foundry drew it, so
+   the marker starts hidden and the styled rule above is what reveals it. */
+.illuminus-fold {
+  display: none;
+}
+
 .illuminus-styled .illuminus-fold {
   appearance: none;
   background: none;
@@ -802,8 +836,8 @@
 .illuminus-styled .journal-sidebar .toc li.category {
   /* On the row, not on the lettering inside it: `strong` is inline, and an
      inline box cannot be aligned — the Alignment control did nothing at all. */
-  text-align: var(--ill-sidebar-categories-category-align);
-  background-color: var(--ill-sidebar-categories-category-background);
+  text-align: var(--ill-sidebar-categories-category-align, revert-layer);
+  background-color: var(--ill-sidebar-categories-category-background, revert-layer);
   padding: var(--ill-sidebar-categories-category-padding-top) var(--ill-sidebar-categories-category-padding-right)
            var(--ill-sidebar-categories-category-padding-bottom) var(--ill-sidebar-categories-category-padding-left);
   margin: var(--ill-sidebar-categories-category-margin-top) var(--ill-sidebar-categories-category-margin-right)
@@ -816,32 +850,32 @@
                 var(--ill-sidebar-categories-category-border-bottom-color) var(--ill-sidebar-categories-category-border-left-color);
   border-radius: var(--ill-sidebar-categories-category-corner-top-left) var(--ill-sidebar-categories-category-corner-top-right)
                  var(--ill-sidebar-categories-category-corner-bottom-right) var(--ill-sidebar-categories-category-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-categories-category-corner-shape);
+  corner-shape: var(--ill-sidebar-categories-category-corner-shape, revert-layer);
 }
 
 .illuminus-styled .journal-sidebar .toc li.category strong {
-  font-family: var(--ill-sidebar-categories-category-font);
+  font-family: var(--ill-sidebar-categories-category-font, revert-layer);
   -webkit-text-stroke: var(--ill-sidebar-categories-category-outline-width) var(--ill-sidebar-categories-category-outline-color);
   paint-order: stroke fill;
   text-shadow: var(--ill-sidebar-categories-category-text-shadow-offset-x) var(--ill-sidebar-categories-category-text-shadow-offset-y)
                var(--ill-sidebar-categories-category-text-shadow-blur) var(--ill-sidebar-categories-category-text-shadow-color);
-  font-size: var(--ill-sidebar-categories-category-size);
-  font-weight: var(--ill-sidebar-categories-category-text-style-weight);
-  font-style: var(--ill-sidebar-categories-category-text-style-slant);
-  font-variant: var(--ill-sidebar-categories-category-caps-variant);
-  text-transform: var(--ill-sidebar-categories-category-caps-transform);
-  letter-spacing: var(--ill-sidebar-categories-category-letter-spacing);
-  color: var(--ill-sidebar-categories-category-color);
+  font-size: var(--ill-sidebar-categories-category-size, revert-layer);
+  font-weight: var(--ill-sidebar-categories-category-text-style-weight, revert-layer);
+  font-style: var(--ill-sidebar-categories-category-text-style-slant, revert-layer);
+  font-variant: var(--ill-sidebar-categories-category-caps-variant, revert-layer);
+  text-transform: var(--ill-sidebar-categories-category-caps-transform, revert-layer);
+  letter-spacing: var(--ill-sidebar-categories-category-letter-spacing, revert-layer);
+  color: var(--ill-sidebar-categories-category-color, revert-layer);
 }
 
 /* Search box */
 .illuminus-styled .journal-sidebar search input[type="search"] {
-  --input-background-color: var(--ill-sidebar-search-search-background);
-  --input-text-color: var(--ill-sidebar-search-search-color);
-  --input-placeholder-color: var(--ill-sidebar-search-search-placeholder-color);
-  background-color: var(--ill-sidebar-search-search-background);
-  color: var(--ill-sidebar-search-search-color);
-  font-size: var(--ill-sidebar-search-search-size);
+  --input-background-color: var(--ill-sidebar-search-search-background, revert-layer);
+  --input-text-color: var(--ill-sidebar-search-search-color, revert-layer);
+  --input-placeholder-color: var(--ill-sidebar-search-search-placeholder-color, revert-layer);
+  background-color: var(--ill-sidebar-search-search-background, revert-layer);
+  color: var(--ill-sidebar-search-search-color, revert-layer);
+  font-size: var(--ill-sidebar-search-search-size, revert-layer);
   border-width: var(--ill-sidebar-search-search-border-top-width) var(--ill-sidebar-search-search-border-right-width)
                 var(--ill-sidebar-search-search-border-bottom-width) var(--ill-sidebar-search-search-border-left-width);
   border-style: var(--ill-sidebar-search-search-border-top-style) var(--ill-sidebar-search-search-border-right-style)
@@ -850,11 +884,11 @@
                 var(--ill-sidebar-search-search-border-bottom-color) var(--ill-sidebar-search-search-border-left-color);
   border-radius: var(--ill-sidebar-search-search-corner-top-left) var(--ill-sidebar-search-search-corner-top-right)
                  var(--ill-sidebar-search-search-corner-bottom-right) var(--ill-sidebar-search-search-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-search-search-corner-shape);
+  corner-shape: var(--ill-sidebar-search-search-corner-shape, revert-layer);
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]::placeholder {
-  color: var(--ill-sidebar-search-search-placeholder-color);
+  color: var(--ill-sidebar-search-search-placeholder-color, revert-layer);
 }
 
 /* Footer buttons, and the small controls beside the search box.
@@ -864,16 +898,16 @@
    Foundry's own — a marker taking a button's fill and edges would be a box
    around every folded row. */
 .illuminus-styled .journal-sidebar button:not(.illuminus-fold) {
-  --button-text-color: var(--ill-sidebar-buttons-button-color);
-  --button-border-color: var(--ill-sidebar-buttons-button-border-color);
-  --button-hover-border-color: var(--ill-sidebar-buttons-button-hover-border-color);
-  color: var(--ill-sidebar-buttons-button-color);
-  background-color: var(--ill-sidebar-buttons-button-background);
-  border-width: var(--ill-sidebar-buttons-button-border-width);
-  border-color: var(--ill-sidebar-buttons-button-border-color);
+  --button-text-color: var(--ill-sidebar-buttons-button-color, revert-layer);
+  --button-border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
+  --button-hover-border-color: var(--ill-sidebar-buttons-button-hover-border-color, revert-layer);
+  color: var(--ill-sidebar-buttons-button-color, revert-layer);
+  background-color: var(--ill-sidebar-buttons-button-background, revert-layer);
+  border-width: var(--ill-sidebar-buttons-button-border-width, revert-layer);
+  border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
   border-radius: var(--ill-sidebar-buttons-button-corner-top-left) var(--ill-sidebar-buttons-button-corner-top-right)
                  var(--ill-sidebar-buttons-button-corner-bottom-right) var(--ill-sidebar-buttons-button-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-buttons-button-corner-shape);
+  corner-shape: var(--ill-sidebar-buttons-button-corner-shape, revert-layer);
 }
 
 
@@ -943,7 +977,16 @@
 
 /* --- Body text ---------------------------------------------------------- */
 
-.illuminus-styled .journal-page-content {
+/* The page's own lettering: the read view, and the prose being typed into.
+   Named apart rather than as the content element they share, because
+   ProseMirror wears `journal-page-content` on a `prose-mirror` that holds the
+   editing bar as well as the prose — so a rule written for the whole of it gave
+   a menu of two hundred entries the page's typeface, size, spacing and ink.
+   That one selector was three hundred of the differences between a new style
+   and an unstyled Foundry. What you type still looks like what you will read;
+   the furniture around it no longer does. */
+.illuminus-styled section.journal-page-content,
+.illuminus-styled .journal-page-content .editor-content {
   font-family: var(--ill-body-font);
   font-size: var(--ill-body-size);
   font-weight: var(--ill-body-text-style-weight);
@@ -2922,12 +2965,16 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 
 /* Marks a template as one that came with the module. Named apart from
    `.illuminus-tag`, which is a journal treatment rather than GUI furniture. */
+/* What came with the module rather than being made here — a sample style, a
+   bundled template. Foundry's warm red rather than its highlight orange, which
+   is the same red the parts tree marks the current part with: it reads as
+   "noted" rather than as the error red, which would say something is wrong. */
 .illuminus-badge-text {
   margin-left: 0.4rem;
   padding: 0 0.35rem;
   border-radius: 3px;
-  background: var(--color-border-highlight, #ff6400);
-  color: var(--color-dark-1, #111);
+  background: var(--color-warm-2, #c9593f);
+  color: var(--color-light-1, #f7f3e8);
   font-size: var(--font-size-10, 10px);
   font-weight: bold;
 }
