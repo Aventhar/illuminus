@@ -19,6 +19,39 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **A link's icon can be colored.** Foundry puts a mark in front of a link to
+  something in your world — a figure beside a character's name, dice beside a
+  roll — and drags one in when you drop a record into a page. Links → Text now
+  has an Icon Color for it, and a hovered one beside it. Left empty it takes the
+  link's own color, as it always did.
+- **A lettering shadow says it is one.** It read "Shadow", which put it beside an
+  Inner Shadow and an Outer Shadow with nothing to tell it from either — and
+  where a tab letters several things, three runs answered to the one word. It
+  reads "Text Shadow" now, with the part that casts it in front where a tab has
+  more than one: the Tables tab reads Text Shadow, Header Text Shadow and
+  Caption Text Shadow. Reported on Links, found on twelve tabs.
+- **The Default Box and the Default Image are what their treatments are.** A
+  plain box could not be given a width, floated, turned, or held in view while
+  the page scrolled past, and a style could not reach a heading inside one —
+  all of which any of its five treatments could do. A plain picture could not be
+  floated, flipped, cropped to a shape, placed, frosted or given an inner
+  shading. Both now have what their treatments have, and the treatments gained
+  the caption capitals only the Default had. Three things are deliberately not
+  shared, and say why in the schema: a plain picture aligns with the margins
+  that tab already offers, states its width as a share of the column, and cannot
+  carry a background picture, because its fill sits on the picture itself rather
+  than behind content.
+- **Gradients and frosting where they were promised and missing.** Five fill
+  categories named a Gradient or a Frosting in their own layout order and never
+  had one — a control named but never created is silently ignored, which is why
+  nobody noticed. Links and the journal's Title gained both, secret passages a
+  gradient, and the page surface and the Default Box a frosting. Frosting on a
+  link is the one worth knowing about: a link sits *over* the page, so blurring
+  what is behind it does something real.
+- **Word Spacing wherever Letter Spacing already was.** Twenty-one lettering
+  categories offered one without the other — the contents panel's category rows,
+  both window title bars, links, secret passages, table headers, and every box
+  and tag treatment. They are the same kind of control and are no use apart.
 - **The editor can be read in CSS's own words.** Configure Settings → Illuminus
   → Setting Names switches every control from plain language to the property it
   writes — "Top Padding" to `padding-top`, "Top-Left Corner" to

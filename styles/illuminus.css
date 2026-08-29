@@ -29,6 +29,7 @@
 .illuminus-styled.journal-entry-page > .window-content,
 .illuminus-styled .illuminus-preview__editor > .window-content {
   background-color: var(--ill-page-background);
+  backdrop-filter: var(--ill-page-frost);
   /* A surface that graduates rather than being one flat colour. Both ends start
      clear, so a page nobody has graduated is the flat colour it always was. */
   background-image: linear-gradient(var(--ill-page-gradient-angle),
@@ -169,6 +170,7 @@
   font-variant: var(--ill-window-caps-variant, revert-layer);
   text-transform: var(--ill-window-caps-transform, revert-layer);
   letter-spacing: var(--ill-window-letter-spacing, revert-layer);
+  word-spacing: var(--ill-window-word-spacing, revert-layer);
   text-align: var(--ill-window-align, revert-layer);
   color: var(--ill-window-color, revert-layer);
 }
@@ -300,6 +302,7 @@
   font-variant: var(--ill-editor-caps-variant, revert-layer);
   text-transform: var(--ill-editor-caps-transform, revert-layer);
   letter-spacing: var(--ill-editor-letter-spacing, revert-layer);
+  word-spacing: var(--ill-editor-word-spacing, revert-layer);
   text-align: var(--ill-editor-align, revert-layer);
   color: var(--ill-editor-color, revert-layer);
 }
@@ -865,6 +868,7 @@
   font-variant: var(--ill-sidebar-categories-category-caps-variant, revert-layer);
   text-transform: var(--ill-sidebar-categories-category-caps-transform, revert-layer);
   letter-spacing: var(--ill-sidebar-categories-category-letter-spacing, revert-layer);
+  word-spacing: var(--ill-sidebar-categories-category-word-spacing, revert-layer);
   color: var(--ill-sidebar-categories-category-color, revert-layer);
 }
 
@@ -926,6 +930,11 @@
   padding: var(--ill-title-padding-top) var(--ill-title-padding-right)
            var(--ill-title-padding-bottom) var(--ill-title-padding-left);
   background: var(--ill-title-background);
+  /* A surface that graduates rather than being one flat color. Both ends start
+     clear, so one nobody has graduated is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-title-gradient-angle),
+      var(--ill-title-gradient-from), var(--ill-title-gradient-to));
+  backdrop-filter: var(--ill-title-frost);
   border-width: var(--ill-title-border-top-width) var(--ill-title-border-right-width)
                 var(--ill-title-border-bottom-width) var(--ill-title-border-left-width);
   border-style: var(--ill-title-border-top-style) var(--ill-title-border-right-style)
@@ -1271,6 +1280,10 @@
   max-height: var(--ill-secrets-max-height);
   overflow: var(--ill-secrets-overflow);
   background-color: var(--ill-secrets-background);
+  /* A surface that graduates rather than being one flat color. Both ends start
+     clear, so one nobody has graduated is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-secrets-gradient-angle),
+      var(--ill-secrets-gradient-from), var(--ill-secrets-gradient-to));
   backdrop-filter: var(--ill-secrets-frost);
   box-shadow: var(--ill-secrets-shadow-offset-x) var(--ill-secrets-shadow-offset-y)
               var(--ill-secrets-shadow-blur) var(--ill-secrets-shadow-spread)
@@ -1305,6 +1318,7 @@
   font-variant: var(--ill-secrets-caps-variant);
   text-transform: var(--ill-secrets-caps-transform);
   letter-spacing: var(--ill-secrets-letter-spacing);
+  word-spacing: var(--ill-secrets-word-spacing);
   line-height: var(--ill-secrets-line-height);
   text-align: var(--ill-secrets-align);
   color: var(--ill-secrets-color, inherit);
@@ -1430,6 +1444,27 @@
 /* --- Links -------------------------------------------------------------- */
 
 .illuminus-styled .journal-page-content a,
+/* The mark in front of a link to something in the world. Foundry builds a
+   content link as an `<i>` followed by the name — a dragged actor arrives with
+   a figure beside it, a roll with dice — so the icon is an element of its own
+   and can be colored apart from the words. Unset it inherits the link's color,
+   which is what it did before there was a control for it. */
+.illuminus-styled .journal-page-content a.content-link > i,
+.illuminus-styled .journal-page-content a.inline-roll > i {
+  color: var(--ill-links-icon-color);
+}
+
+/* Written by hand, because the mirror cannot write this one. It restates a
+   selector by putting `:hover` on the end, which here would be the icon rather
+   than the link — and an icon's own hover is the few pixels of the glyph, not
+   the link a person is pointing at. The mirror leaves a rule that already says
+   `:hover` alone, so this stands rather than fighting it; the one it does write
+   for the glyph says the same thing, and is simply reached less often. */
+.illuminus-styled .journal-page-content a.content-link:hover > i,
+.illuminus-styled .journal-page-content a.inline-roll:hover > i {
+  color: var(--ill-links-hover-icon-color, var(--ill-links-icon-color));
+}
+
 .illuminus-styled .journal-page-content a.content-link,
 .illuminus-styled .journal-page-content a.inline-roll {
   color: var(--ill-links-color);
@@ -1440,12 +1475,18 @@
   font-weight: var(--ill-links-text-style-weight);
   font-style: var(--ill-links-text-style-slant);
   letter-spacing: var(--ill-links-letter-spacing);
+  word-spacing: var(--ill-links-word-spacing);
   text-decoration-line: var(--ill-links-decoration-line);
   text-decoration-style: var(--ill-links-decoration-style);
   text-decoration-color: var(--ill-links-decoration-color);
   text-decoration-thickness: var(--ill-links-decoration-thickness);
   text-underline-offset: var(--ill-links-decoration-offset);
   background: var(--ill-links-background);
+  /* A surface that graduates rather than being one flat color. Both ends start
+     clear, so one nobody has graduated is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-links-gradient-angle),
+      var(--ill-links-gradient-from), var(--ill-links-gradient-to));
+  backdrop-filter: var(--ill-links-frost);
   padding: var(--ill-links-padding-top) var(--ill-links-padding-right)
            var(--ill-links-padding-bottom) var(--ill-links-padding-left);
   border-width: var(--ill-links-border-top-width) var(--ill-links-border-right-width)
@@ -1491,6 +1532,7 @@
   background-color: var(--ill-boxes-background);
   background-image: linear-gradient(var(--ill-boxes-gradient-angle),
       var(--ill-boxes-gradient-from), var(--ill-boxes-gradient-to));
+  backdrop-filter: var(--ill-boxes-frost);
   margin: var(--ill-boxes-margin-top) var(--ill-boxes-margin-right)
           var(--ill-boxes-margin-bottom) var(--ill-boxes-margin-left);
   padding: var(--ill-boxes-padding-top) var(--ill-boxes-padding-right)
@@ -1548,7 +1590,13 @@
                  var(--ill-images-corner-bottom-right) var(--ill-images-corner-bottom-left);
   corner-shape: var(--ill-images-corner-shape);
   box-shadow: var(--ill-images-shadow-offset-x) var(--ill-images-shadow-offset-y)
-              var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color);
+              var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color),
+    inset var(--ill-images-inner-shadow-offset-x) var(--ill-images-inner-shadow-offset-y)
+          var(--ill-images-inner-shadow-blur) var(--ill-images-inner-shadow-spread)
+          var(--ill-images-inner-shadow-color);
+  /* On the picture, as the fill above it is: a picture with transparency shows
+     whatever is behind it, and this is what blurs it. */
+  backdrop-filter: var(--ill-images-frost);
 }
 
 .illuminus-styled .journal-page-content :not(.illuminus-image) > figcaption {
@@ -2215,6 +2263,16 @@
   white-space: pre-line;
   text-align: left;
   line-height: 1.45;
+}
+
+/* The heading at the head of a hint, which names the control in both
+   vocabularies. Drawn by the browser from the text itself rather than wrapped
+   in markup of its own: the tooltip is given words, not HTML, and the hidden
+   element the search box reads would otherwise carry tags through into what it
+   searches. */
+#tooltip.illuminus-hint-tooltip::first-line {
+  font-weight: 700;
+  color: var(--color-text-emphatic, #f0f0e0);
 }
 
 /* Which part these settings belong to. The tree marks it on the left of the

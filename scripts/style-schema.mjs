@@ -587,6 +587,7 @@ function boxSections() {
         ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", inheritCaps, { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
+        num("wordSpacing", 0, "px", -10, 60, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
         select("wrap", "inherit", CHOICES.wrap, { emit: emitWord }),
         select("hyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens }),
@@ -691,6 +692,7 @@ function tagSections() {
         ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
         select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
         num("letterSpacing", 0, "px", -5, 40, 0.5),
+        num("wordSpacing", 0, "px", -10, 60, 0.5),
         num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
         select("wrap", "inherit", CHOICES.wrap, { emit: emitWord }),
         select("hyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens })
@@ -751,6 +753,7 @@ function imageSections() {
         num("captionSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
         col("captionColor", ""),
         ...textStyleField("captionTextStyle", "inherit", "inherit", { inherit: true }),
+        select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
         select("captionAlign", "inherit", ["inherit", ...CHOICES.align]),
         num("captionSpacing", 4, "px", 0, 60, 1)
       ]
@@ -1025,7 +1028,7 @@ function tableSections() {
       order: [
         "headerBackground",
         DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
-        DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing",
+        DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing", "headerWordSpacing",
         DIVIDER, "headerOutlineColor", "headerOutlineWidth",
         DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
         "headerTextShadowBlur", "headerTextShadowColor",
@@ -1044,7 +1047,8 @@ function tableSections() {
         ...textStyleField("headerTextStyle", "700", "normal"),
         select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
         select("headerAlign", "left", CHOICES.align),
-        num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
+        num("headerLetterSpacing", 0, "px", -5, 40, 0.5),
+        num("headerWordSpacing", 0, "px", -10, 60, 0.5)
       ]
     },
     { id: "rows", order: ["rowColor", "stripeColor"],
@@ -1234,6 +1238,7 @@ export const GROUPS = [
           ...textStyleField("categoryTextStyle", "700", "normal"),
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
+          num("categoryWordSpacing", 0, "px", -10, 60, 0.5),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
           col("categoryBackground", "#00000000"), ...imageFields("category"),
           // A category is a heading in a list of pages, so it needs room around
@@ -1310,6 +1315,7 @@ export const GROUPS = [
           ...textStyleField("textStyle", "normal", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("wordSpacing", 0, "px", -10, 60, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
           ...spacingFields("padding", { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 })
         ]
@@ -1410,7 +1416,8 @@ export const GROUPS = [
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
-        fields: [col("background", "#302831"), ...imageFields()]
+        fields: [col("background", "#302831"), ...gradientFields(), ...frostFields(),
+          ...imageFields()]
       },
       {
         id: "padding",
@@ -1467,7 +1474,7 @@ export const GROUPS = [
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
         fields: [
-          col("background", "#0b0a13e6"),
+          col("background", "#0b0a13e6"), ...frostFields(),
           { type: "image", name: "texture", default: "" },
           select("textureFit", "tile", CHOICES.textureFit, { emit: emitTextureFit }),
           select("texturePosition", "topLeft", CHOICES.texturePosition, { emit: emitTexturePosition }),
@@ -1715,17 +1722,23 @@ export const GROUPS = [
       {
         id: "text",
         order: [
-          "color", "textStyle", "textStyleSlant", "letterSpacing",
+          "color", "iconColor", "textStyle", "textStyleSlant", "letterSpacing", "wordSpacing",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
         fields: [
           col("color", ""),
+          // The mark Foundry puts in front of a link to something in the world:
+          // a dragged actor arrives with a figure beside its name, a roll with
+          // dice. It is an element of its own inside the link, and takes the
+          // link's own color until this says otherwise.
+          col("iconColor", ""),
           col("hoverColor", ""),
           ...outlineFields(),
           ...textShadowFields(),
           ...textStyleField("textStyle", "400", "normal"),
-          num("letterSpacing", 0, "px", -5, 40, 0.5)
+          num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("wordSpacing", 0, "px", -10, 60, 0.5)
         ]
       },
       {
@@ -1769,7 +1782,8 @@ export const GROUPS = [
         // The chip Foundry draws a content link on: a dark pill with a hairline
         // edge, which is what an unstyled journal shows.
         fields: [
-          col("background", "#0b0a13e6"), ...imageFields(),
+          col("background", "#0b0a13e6"), ...gradientFields(), ...frostFields(),
+          ...imageFields(),
           ...spacingFields("padding", { top: 0, right: 4, bottom: 0, left: 4 }, { max: 40 })
         ]
       }
@@ -1802,7 +1816,8 @@ export const GROUPS = [
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
-        fields: [col("background", "#3500790d"), ...frostFields(), ...imageFields(), ...shadowFields("shadow")]
+        fields: [col("background", "#3500790d"), ...gradientFields(), ...frostFields(),
+          ...imageFields(), ...shadowFields("shadow")]
       },
       {
         id: "revealed",
@@ -1821,7 +1836,7 @@ export const GROUPS = [
         id: "text",
         order: [
           "font", "size", "color", "textStyle", "textStyleSlant",
-          DIVIDER, "align", "caps", "letterSpacing", "lineHeight", "wrap", "hyphens",
+          DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens",
           DIVIDER, "outlineColor", "outlineWidth",
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
@@ -1832,6 +1847,7 @@ export const GROUPS = [
           ...textStyleField("textStyle", "inherit", "inherit", { inherit: true }),
           select("caps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("wordSpacing", 0, "px", -10, 60, 0.5),
           num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
           select("align", "inherit", ["inherit", ...CHOICES.align])
         ]
@@ -2018,7 +2034,7 @@ export const GROUPS = [
         order: [
           "headerBackground",
           DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
-          DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing",
+          DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing", "headerWordSpacing",
           DIVIDER, "headerOutlineColor", "headerOutlineWidth",
           DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
           "headerTextShadowBlur", "headerTextShadowColor",
@@ -2037,7 +2053,8 @@ export const GROUPS = [
           ...textStyleField("headerTextStyle", "700", "normal"),
           select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("headerAlign", "left", CHOICES.align),
-          num("headerLetterSpacing", 0, "px", -5, 40, 0.5)
+          num("headerLetterSpacing", 0, "px", -5, 40, 0.5),
+          num("headerWordSpacing", 0, "px", -10, 60, 0.5)
         ]
       },
       { id: "rows", order: ["rowColor", "stripeColor"],
@@ -2088,8 +2105,15 @@ export const GROUPS = [
     icon: "fa-solid fa-square-dashed",
     // Laid out by hand: the words, the surface they sit on, the room around
     // them, the edges, and then the disclosure widget that can fold them away.
-    order: ["text", "background", "padding", "margin", "border", "collapsible"],
+    order: ["layout", "text", "background", "padding", "margin", "border",
+      "blockHeadings", "collapsible"],
     sections: [
+      // Laid out and headed by the same function its five treatments use, so
+      // the plain box cannot drift from them again. It was the only box that
+      // could not be given a width, floated, turned, or held in view while the
+      // page scrolled past — and the only one whose headings a style could not
+      // reach.
+      ...boxSections().filter((section) => ["layout", "blockHeadings"].includes(section.id)),
       {
         id: "text",
         order: [
@@ -2111,8 +2135,8 @@ export const GROUPS = [
           "innerShadowSpread", "innerShadowColor",
           DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
         ],
-        fields: [col("background", "#00000000"), ...gradientFields(), ...imageFields(),
-          ...shadowFields("shadow")]
+        fields: [col("background", "#00000000"), ...gradientFields(), ...frostFields(),
+          ...imageFields(), ...shadowFields("shadow")]
       },
       {
         id: "padding",
@@ -2215,6 +2239,7 @@ export const GROUPS = [
           ...textStyleField("textStyle", "normal", "normal"),
           select("caps", "none", CHOICES.caps, { emit: emitCaps }),
           num("letterSpacing", 0, "px", -5, 40, 0.5),
+          num("wordSpacing", 0, "px", -10, 60, 0.5),
           select("align", "left", CHOICES.alignNoJustify),
           ...spacingFields("padding", { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 })
         ]
@@ -2370,13 +2395,34 @@ export const GROUPS = [
       { id: "margin", fields: spacingFields("margin", 0, { min: -100 }) },
       {
         id: "layout",
+        // Laid out as the five picture treatments are, which the plain picture
+        // was not: it could not be floated, flipped, cropped to a shape, held
+        // in view, turned or nudged. Three of theirs are left out on purpose.
+        // Align is one: a treatment's emits the very margins this tab already
+        // offers, so both would write one property. Max Width is another — this
+        // tab states it as a share of the column, which is the more useful
+        // answer for a picture, and `layoutFields` would add a second in pixels.
+        // And a background picture is the third, which an `<img>` cannot carry:
+        // its fill sits behind the picture rather than behind content, so there
+        // is no layer to put one on.
         fields: [
+          select("float", "none", CHOICES.blockFloat),
+          select("width", "full", CHOICES.blockWidth, { emit: emitBlockWidth }),
+          select("clear", "none", CHOICES.blockClear),
+          select("flip", "none", CHOICES.flip, { emit: emitFlip }),
+          select("pictureShape", "ownShape", CHOICES.pictureShape, { emit: emitShape }),
+          select("pictureCrop", "cover", CHOICES.pictureCrop, { emit: emitCrop }),
+          select("pictureFrom", "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
+          ...layoutFields("", { flex: false, position: true })
+            .filter((field) => field.name !== "maxWidth"),
+          ...turnFields(),
           num("maxWidth", 100, "%", 5, 100, 1),
           num("opacity", 100, "%", 0, 100, 1)
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
-      { id: "background", fields: [col("background", "#00000000"), ...gradientFields()] },
+      { id: "background", fields: [col("background", "#00000000"), ...gradientFields(),
+        ...frostFields(), ...shadowFields("innerShadow")] },
       { id: "border", fields: borderFields("border") },
       { id: "corners", fields: cornerFields("corner") },
       { id: "shadow", fields: shadowFields("shadow") },
@@ -2619,13 +2665,44 @@ for (const group of GROUPS) {
  * The runs inside a category are separated by `DIVIDER`, exactly as they are in
  * a section's own `order`.
  */
+/*
+ * How a block lays itself out, and how a heading inside one is set. Stated once
+ * and read twice: the five box treatments have always had these, and the plain
+ * box — which is the same element without a treatment on it — now has them too.
+ * Written apart from the tables below so the two cannot drift, which is how the
+ * Default Box came to be the only box that could not be given a width.
+ */
+const BLOCK_LAYOUT_ORDER = [
+  "float", "width", "clear", "whenEmpty",
+  DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
+  DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
+  DIVIDER, "position", "offsetTop", "offsetLeft", "turn", "scale"
+];
+
+const BLOCK_HEADINGS_ORDER = [
+  "headingFont", "headingSize", "headingColor", "headingRuleColor", "headingTextStyle",
+  "headingTextStyleSlant", DIVIDER, "headingAlign", "headingCaps", DIVIDER,
+  "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
+  "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
+  "headingMarginTop", "headingMarginBottom", "headingRuleWidth", "headingRuleStyle",
+  DIVIDER
+];
+
 const LAYOUTS = {
   images: {
     order: ["layout", "padding", "margin", "border", "caption", "media"],
     layout: { order: [
-      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
+      "opacity", "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
+      DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
+      "innerShadowSpread", "innerShadowColor",
+      DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
       DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
-      "maxWidth"
+      // In the order a treatment reads them, so the plain picture and a treated
+      // one are the same tab with the same settings in the same places.
+      DIVIDER, "float", "width", "clear", "flip",
+      DIVIDER, "pictureShape", "pictureCrop", "pictureFrom",
+      DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
+      DIVIDER, "position", "offsetTop", "offsetLeft", "turn", "scale"
     ] },
     padding: { order: [
       "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
@@ -2657,17 +2734,18 @@ const LAYOUTS = {
       "mediaCornerBottomRight", "mediaCornerShape", DIVIDER
     ] },
   },
+  // The plain box: the same element without a treatment on it, so it is laid
+  // out and headed by the same lists its treatments are.
+  boxes: {
+    layout: { order: BLOCK_LAYOUT_ORDER },
+    blockHeadings: { order: BLOCK_HEADINGS_ORDER }
+  },
   boxStyles: {
     order: ["layout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border", "blockHeadings"],
-    layout: { order: [
-      "float", "width", "clear", "whenEmpty",
-      DIVIDER, "display", "flexDirection", "flexWrap", "justify", "alignItems", "gap",
-      DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
-      DIVIDER, "position", "offsetTop", "offsetLeft", "turn", "scale"
-    ] },
+    layout: { order: BLOCK_LAYOUT_ORDER },
     text: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
+      "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER,
       "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
@@ -2688,14 +2766,7 @@ const LAYOUTS = {
       "borderLeftWidth", DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
       DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
-    blockHeadings: { order: [
-      "headingFont", "headingSize", "headingColor", "headingRuleColor", "headingTextStyle",
-      "headingTextStyleSlant", DIVIDER, "headingAlign", "headingCaps", DIVIDER,
-      "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
-      "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
-      "headingMarginTop", "headingMarginBottom", "headingRuleWidth", "headingRuleStyle",
-      DIVIDER
-    ] },
+    blockHeadings: { order: BLOCK_HEADINGS_ORDER },
   },
   tagStyles: {
     order: ["tagLayout", "text", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "margin", "border"],
@@ -2705,7 +2776,7 @@ const LAYOUTS = {
       DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER, "turn", "scale"
     ] },
     text: { order: [
-      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing", "wordSpacing",
       "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
@@ -2737,7 +2808,7 @@ const LAYOUTS = {
       DIVIDER, "maxWidth", "minHeight", "maxHeight", "overflow", DIVIDER, "turn", "scale"
     ] },
     text: { order: [
-      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing",
+      "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "caps", "letterSpacing", "wordSpacing",
       "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor"
     ] },
@@ -2787,7 +2858,7 @@ const LAYOUTS = {
     ] },
     caption: { label: "ILLUMINUS.Sections.imageCaption.label", hint: "ILLUMINUS.Sections.imageCaption.hint", order: [
       "captionFont", "captionSize", "captionColor", "captionTextStyle",
-      "captionTextStyleSlant", DIVIDER, "captionAlign", DIVIDER, "captionOutlineColor",
+      "captionTextStyleSlant", DIVIDER, "captionAlign", "captionCaps", DIVIDER, "captionOutlineColor",
       "captionOutlineWidth", DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
       "captionTextShadowBlur", "captionTextShadowColor", "captionSpacing"
     ] },
@@ -2858,7 +2929,7 @@ const LAYOUTS = {
     category: { order: [
       "categoryFont", "categorySize", "categoryColor", "categoryTextStyle",
       "categoryTextStyleSlant", DIVIDER, "categoryAlign", "categoryCaps",
-      "categoryLetterSpacing", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
+      "categoryLetterSpacing", "categoryWordSpacing", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
       DIVIDER, "categoryTextShadowOffsetX", "categoryTextShadowOffsetY",
       "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground",
       DIVIDER, "categoryTexture", "categoryTextureFit", "categoryTexturePosition",
@@ -2917,7 +2988,7 @@ const LAYOUTS = {
     ] },
     titleBar: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
-      "letterSpacing", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
+      "letterSpacing", "wordSpacing", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
       "textShadowOffsetY", "textShadowBlur", "textShadowColor", DIVIDER, "titleBarBackground",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
       "titleBarTextureBlend", "titleBarTextureOpacity", "titleBarTextureBlur", "titleBarTextureBrightness", "titleBarTextureContrast", "titleBarTextureSaturation", "titleBarTextureAge", DIVIDER, "titleBarInnerShadowOffsetX",
@@ -3032,7 +3103,7 @@ const LAYOUTS = {
     ] },
     titleBar: { order: [
       "titleBarBackground", DIVIDER, "font", "size", "color", "textStyle", "textStyleSlant",
-      DIVIDER, "align", "caps", "letterSpacing", DIVIDER, "outlineColor", "outlineWidth",
+      DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
       "titleBarTextureBlend", "titleBarTextureOpacity", "titleBarTextureBlur", "titleBarTextureBrightness", "titleBarTextureContrast", "titleBarTextureSaturation", "titleBarTextureAge", DIVIDER, "titleBarInnerShadowOffsetX",
@@ -3121,13 +3192,18 @@ for (const [key, layout] of Object.entries(LAYOUTS)) {
         home.set(name, section);
       }
     }
-    group.order = layout.order;
-    // A category the layout does not name is one the tab no longer has; its
-    // controls have been moved out by now, so an empty one simply goes.
-    group.sections = group.sections.filter((section) =>
-      layout.order.includes(section.id) || section.fields.length);
-    const stray = group.sections.find((section) => !layout.order.includes(section.id));
-    if (stray) throw new Error(`${group.id}: "${stray.id}" has controls but no place in the layout`);
+    // A table may lay out categories without restating the tab's own order of
+    // them — which is what an entry does when it exists only to share a list
+    // with another tab, as the plain box shares its treatments' two.
+    if (layout.order) {
+      group.order = layout.order;
+      // A category the layout does not name is one the tab no longer has; its
+      // controls have been moved out by now, so an empty one simply goes.
+      group.sections = group.sections.filter((section) =>
+        layout.order.includes(section.id) || section.fields.length);
+      const stray = group.sections.find((section) => !layout.order.includes(section.id));
+      if (stray) throw new Error(`${group.id}: "${stray.id}" has controls but no place in the layout`);
+    }
   }
 }
 

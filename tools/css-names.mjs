@@ -160,8 +160,12 @@ export function cssNames(groups, css, varFor) {
         const key = properties.join(" / ");
         // Named plainly where the property says it all, and told apart only
         // where a section really does feed one property from several controls.
+        // Written `box-shadow: blur` rather than `box-shadow (blur)`, because a
+        // hint's heading puts the whole thing in parentheses after the plain
+        // name — and "Outer Shadow Softness (box-shadow (blur))" is a sentence
+        // nobody should have to read.
         const part = byProperty.get(key).length > 1 ? qualifier(name, key) : "";
-        names.set(`${group.id}.${name}`, part ? `${key} (${part})` : key);
+        names.set(`${group.id}.${name}`, part ? `${key}: ${part}` : key);
       }
       for (const field of section.fields ?? []) {
         if (!field.twin) continue;

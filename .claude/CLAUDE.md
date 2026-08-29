@@ -840,6 +840,61 @@ window Foundry has placed can start off-screen and the clip will cut it. Build a
 of your own words for anything showing page content, and delete it afterwards; the
 editor's Live Sample is already the module's own text and is safe as it stands.
 
+**A control named in an order but never created is silently ignored**, and that is
+how five fill categories came to promise a Gradient or a Frosting they did not
+have. The schema throws when a section holds a control its order does not name —
+that bargain is enforced — but not the other way round, because an order is
+written as a layout and naming something absent is not obviously wrong. When
+adding a control to a family, check `order` against `fields` in both directions;
+`tools/` has no check for the second, and the way to find them is to ask the
+schema rather than to read it.
+
+**The mirror restates a selector by putting `:hover` on the end**, which is right
+only where the element that is pointed at is the element being painted. A link's
+icon is an element inside the link, so the mirror wrote `a.content-link > i:hover`
+— an icon's own hover being the few pixels of the glyph rather than the link a
+person is pointing at. A rule that already says `:hover` is left alone by the
+mirror, so the honest answer there is to write that half by hand and let the
+mirror's version stand as the redundant one it is. Anything painting a child
+while a parent is pointed at wants the same thought.
+
+**A name a person reads is read against the whole tab, not one category.** Which
+lettering casts a shadow used to be asked of a category — so a tab whose three
+categories each lettered something gave three runs all called "Shadow", and the
+one word sat beside Inner Shadow and Outer Shadow meaning something else again.
+`SHADOW_OWNERS` asks the group now. Two things fell out of it: a lettering shadow
+says "Text Shadow" rather than "Shadow", and the words naming which part casts one
+are kept apart from the outline words in `SHADOW_WORD`, because an outline sits
+beside its own typeface and needs no qualifier while a shadow is read against
+every other shadow on the tab. `tools/` has no check for a name used twice on one
+tab; the way to find them is to ask the schema and the lang file together.
+
+**A family's Default must be written by the same code as its members, or it
+drifts.** The Default Tag never did, because the generator builds it with
+`family === "tagStyles" || id === "tags"` — one loop, one set of rules. Boxes and
+Images excluded theirs and drifted 38 and 24 controls apart before anyone
+noticed, since nothing compares a tab against its own family. `blockPlacing`,
+`blockHeadings` and `pictureShaped` exist so both are written by the code their
+treatments are; `memberSelector` says what "the plain one" is for each, as
+"carries no treatment class" rather than by listing the five. Where a Default
+genuinely differs, say so in the schema beside the exclusion: a plain picture
+aligns with the margins its tab already offers (a treatment's `align` emits those
+same margins, so both would write one property), states its width as a share of
+the column, and cannot carry a background picture at all.
+
+**A `LAYOUTS` entry need not restate a tab's order of categories.** It did have
+to, which meant sharing a category's field order with another tab cost a second
+copy of the tab's section order as well. An entry with no `order` now lays out
+the categories it names and leaves the tab's own arrangement alone.
+
+**Comparing tabs against each other is how the rest were found.** Controls that
+only ever make sense together — Letter Spacing and Word Spacing, Wrap and
+Hyphens, an outline's width and its color — are one-directional when a set is
+built by hand rather than by `textFields()`: 21 categories had Letter Spacing
+without Word Spacing and none had the reverse. A family's Default against its
+own treatments is the other comparison worth running, and it is how the Default
+Box turned out to be the only box that cannot be given a width.
+
 ## The editor's two vocabularies
 
 A control has a plain-language name and, for somebody who already writes CSS, the

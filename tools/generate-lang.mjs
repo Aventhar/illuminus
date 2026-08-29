@@ -1440,6 +1440,7 @@ const FIELD_TEXT = {
   headerCaps: ["Capitals", "Force capital letters in the top row, or use small capitals."],
   headerAlign: ["Alignment", "Which edge the top row's text lines up against."],
   headerLetterSpacing: ["Letter Spacing", "Extra space between letters in the top row."],
+  headerWordSpacing: ["Word Spacing", "Extra space between words in the top row. Useful where a heading is set in capitals and the words run together."],
   stripeColor: ["Alternating Row Color", "Shading on every other row, to help the eye track across. Use a mostly transparent color."],
   rowColor: ["Row Color", "Background shared by every body row. Use a fully transparent color for none."],
   opacity: ["Opacity", "How solid the picture is. Lower values let the page show through."],
@@ -1527,7 +1528,12 @@ const FIELD_TEXT = {
   categoryColor: ["Text Color", "Color of category headers."],
   categoryWeight: ["Thickness", "How heavy category headers are."],
   categoryCaps: ["Capitals", "Force capital letters in category headers, or use small capitals."],
+  iconColor: ["Icon Color", "Color of the little mark in front of a link — the figure beside a "
+    + "character's name, the dice beside a roll. Foundry puts one there for links to things in "
+    + "your world, and drags one in when you drop a record into a page. Leave this empty and it "
+    + "takes the link's own color, which is what it does now."],
   categoryLetterSpacing: ["Letter Spacing", "Extra space between letters in category headers."],
+  categoryWordSpacing: ["Word Spacing", "Extra space between words in category headers. Useful where a heading is set in capitals and the words run together."],
   categoryAlign: ["Alignment", "Which edge category headers line up against."],
   categoryBackground: ["Fill Color", "Color behind category headers."],
   searchBackground: ["Fill Color", "Color inside the search box."],
@@ -1574,17 +1580,38 @@ for (const name of unmatched) {
  * category holds a single lettering shadow, the category already says whose it
  * is and the shorter label is the better one.
  */
+/*
+ * Which lettering casts a shadow, where a tab letters more than one thing.
+ *
+ * Separate from the outline words above, which are deliberately empty for a
+ * category holding a single typeface: an outline sits beside its own typeface
+ * and needs no qualifier, while a shadow is read against every other shadow on
+ * the tab. Where the outline word would say nothing, or would say what another
+ * part on the same tab already says, this names the part as its own category
+ * does — the disclosure line is a Heading inside the Collapsible category and
+ * also a Heading inside Headings Inside, and one of the two has to give.
+ */
+const SHADOW_WORD = {
+  summary: "Disclosure",
+  settingsBar: "Bar", field: "Setting",
+  dropdown: "Control", item: "Entry"
+};
+
 const SHADOW_OWNERS = new Map();
 for (const group of GROUPS) {
-  for (const section of group.sections) {
-    const families = new Set(section.fields.map((field) => field.name)
-      .filter(isShadow).map((name) => ordinaryName(name).replace(PARTS, "")));
-    const lettering = [...families].filter((family) => /[Tt]extShadow$/.test(family));
-    if (lettering.length < 2) continue;
-    for (const family of lettering) {
-      SHADOW_OWNERS.set(`${group.family ?? group.id}.${family}`,
-        OUTLINE_WORD[family.replace(/TextShadow$/, "")] ?? "");
-    }
+  // Asked of the whole tab rather than of one category. A tab's categories are
+  // read together — the tree lists them, the search box crosses them — so three
+  // categories each holding a lettering shadow gave three runs all called
+  // "Shadow", which is what the Tables tab did. Which lettering casts it is the
+  // only thing that tells them apart.
+  const families = new Set(groupFields(group).map((field) => field.name)
+    .filter(isShadow).map((name) => ordinaryName(name).replace(PARTS, "")));
+  const lettering = [...families].filter((family) => /[Tt]extShadow$/.test(family));
+  if (lettering.length < 2) continue;
+  for (const family of lettering) {
+    const part = family.replace(/TextShadow$/, "");
+    SHADOW_OWNERS.set(`${group.family ?? group.id}.${family}`,
+      SHADOW_WORD[part] ?? OUTLINE_WORD[part] ?? "");
   }
 }
 
@@ -1593,11 +1620,14 @@ for (const key of SHARED_SHADOW) {
   const plain = out[`ILLUMINUS.Field.${name}.label`];
   if (!plain) continue;
   const family = ordinaryName(name).replace(PARTS, "");
-  // A lettering shadow says "Shadow" and no more, unless another lettering in
-  // the same category casts one too.
+  // A lettering shadow says so. It used to say "Shadow" and no more, which put
+  // it beside an Inner Shadow and an Outer Shadow on the same tab with nothing
+  // to tell it from either — and where a tab lettered several things, three
+  // runs answered to the one word. Which lettering casts it comes first where
+  // a tab has more than one.
   const owner = SHADOW_OWNERS.get(`${tab}.${family}`);
   const lead = /[Ii]nnerShadow$/.test(family) ? "Inner Shadow "
-    : /[Tt]extShadow$/.test(family) ? `${owner ? `${owner} ` : ""}Shadow ` : "Outer Shadow ";
+    : /[Tt]extShadow$/.test(family) ? `${owner ? `${owner} ` : ""}Text Shadow ` : "Outer Shadow ";
   put(`ILLUMINUS.Field.${tab}.${name}.label`, `${lead}${plain}`);
   put(`ILLUMINUS.Field.${tab}.${name}.hint`, out[`ILLUMINUS.Field.${name}.hint`]);
 }

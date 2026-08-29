@@ -3369,6 +3369,47 @@ try {
     await api.deleteStyle(style.id);
     return JSON.stringify(out);
   })()`);
+  // The mark Foundry puts in front of a link to something in the world. It is
+  // an element of its own inside the link, so it can be colored apart from the
+  // words — and unset it goes on taking the link's own color, which is what it
+  // did before there was a control for it.
+  const icon = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Link Icon Probe"});
+    const entry = await JournalEntry.create({name: "Link Icon Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<p>A <a class=\\"content-link\\"><i class=\\"fa-solid fa-user\\"></i>Someone</a>."}}]);
+    await api.assignStyle(entry, style.id);
+    try {
+      const look = async () => {
+        await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+        await new Promise(r => setTimeout(r, 900));
+        const link = entry.sheet.element.querySelector(".journal-page-content a.content-link");
+        return {
+          link: getComputedStyle(link).color,
+          icon: getComputedStyle(link.querySelector("i")).color
+        };
+      };
+      const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+      settings.links.color = "#00ff00";
+      await api.updateStyle(style.id, {settings});
+      const inherited = await look();
+      settings.links.iconColor = "#ff00ff";
+      await api.updateStyle(style.id, {settings});
+      const painted = await look();
+      return JSON.stringify({inherited, painted});
+    } finally {
+      await entry.sheet?.close({force: true});
+      await entry.delete();
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+  const ic = JSON.parse(icon);
+  check(ic.inherited.icon === ic.inherited.link && ic.inherited.link === "rgb(0, 255, 0)",
+    `a link's icon takes the link's own color until asked otherwise (${ic.inherited.icon})`);
+  check(ic.painted.icon === "rgb(255, 0, 255)" && ic.painted.link === "rgb(0, 255, 0)",
+    `and its own color apart from the words when it is (${ic.painted.icon} beside ${ic.painted.link})`);
+
   const ho = JSON.parse(off);
   check(ho.offByDefault, "an unset hovered control stays out of the stylesheet");
   check(ho.onWhenAsked, "and reaches it once it is filled in");
@@ -3489,7 +3530,9 @@ try {
         const hint = (path) => app.element
           .querySelector('[data-field="' + path + '"] .illuminus-field__hint')?.textContent.trim();
         return {padding: label("page.paddingTop"), corner: label("page.cornerTopLeft"),
-                hint: hint("page.paddingTop")};
+                hint: hint("page.paddingTop"),
+                heading: hint("page.display")?.split("\\n")[0],
+                shadowHeading: hint("page.shadowBlur")?.split("\\n")[0]};
       };
       const plain = await say("plain");
       const css = await say("css");
@@ -3508,6 +3551,13 @@ try {
     `including where the name gives no clue ("${wd.plain.corner}" -> "${wd.css.corner}")`);
   check(Boolean(wd.plain.hint) && wd.plain.hint === wd.css.hint,
     "and the explanation under a control is the same either way");
+  // The heading over a hint names the control both ways, whichever the editor
+  // is wearing — so nobody has to change a setting to see which property a
+  // control writes, and the search box finds one by its property name.
+  check(wd.plain.heading === "Layout (display)" && wd.css.heading === wd.plain.heading,
+    `a hint is headed by the control named both ways (${wd.plain.heading})`);
+  check(!/\(\S*\(/.test(wd.plain.shadowHeading ?? "("),
+    `and never nests one bracket in another (${wd.plain.shadowHeading})`);
 
   const re = JSON.parse(reopened);
   check(re.drew > 100, `opening the editor as one closes still draws it (${re.drew} controls)`);
@@ -6149,8 +6199,8 @@ try {
     "---", "Alignment", "Capitals", "Letter Spacing", "Word Spacing", "Line Spacing",
     "Line Breaking", "Hyphenation",
     "---", "Outline Color", "Outline Thickness",
-    "---", "Shadow Horizontal Offset", "Shadow Vertical Offset",
-    "Shadow Softness", "Shadow Color"]),
+    "---", "Text Shadow Horizontal Offset", "Text Shadow Vertical Offset",
+    "Text Shadow Softness", "Text Shadow Color"]),
     `Text holds its four runs, lines and all (${text.length} rows)`);
   const fill = t.sections.find((s) => s.name === "Fill and Image").rows;
   check(fill[0] === "Fill Color" && fill.filter((row) => row === "---").length === 3
@@ -6185,8 +6235,8 @@ try {
     `a heading level reads the same way (${headingNames.join(" > ")})`);
   const headingText = t.heading.find((s) => s.name === "Text").rows;
   check(headingText.filter((row) => row === "---").length === 3
-    && headingText.slice(-4).join(", ") === "Shadow Horizontal Offset, Shadow Vertical Offset, "
-      + "Shadow Softness, Shadow Color",
+    && headingText.slice(-4).join(", ") === "Text Shadow Horizontal Offset, "
+      + "Text Shadow Vertical Offset, Text Shadow Softness, Text Shadow Color",
     `with the lettering's own shadow at the foot of its Text (${headingText.slice(-1)[0]})`);
   const bodyNames = t.body.map((s) => s.name);
   check(JSON.stringify(bodyNames) === JSON.stringify(
@@ -6208,7 +6258,7 @@ try {
     `Lists reads where it sits, then the mark, then the definitions (${listNames.join(" > ")})`);
   const defs = t.lists.find((s) => s.name === "Definition Lists").rows;
   check(defs[0] === "Term Typeface" && defs.filter((row) => row === "---").length === 5
-    && defs.at(-1) === "Definition Shadow Color",
+    && defs.at(-1) === "Definition Text Shadow Color",
     `the term and its definition each a lettering, an outline and a shadow (${defs.length} rows)`);
   const tableNames = t.tables.map((s) => s.name);
   check(JSON.stringify(tableNames) === JSON.stringify(
@@ -6221,9 +6271,12 @@ try {
   check(cells[0] === "Top Padding" && cells.filter((row) => row === "---").length === 1,
     `a cell's room and its edges in one category (${cells.length} rows)`);
   const boxNames = t.boxes.map((s) => s.name);
-  check(JSON.stringify(boxNames) === JSON.stringify(
-    ["Text", "Fill and Image", "Spacing", "Border", "Collapsible"]),
-    `Boxes reads the same way (${boxNames.join(" > ")})`);
+  // The plain box reads exactly as its treatments do, being the same element
+  // without a treatment on it, and then adds the one thing only it has: the
+  // disclosure that folds it away.
+  const treatmentNames = t.boxStyles.map((s) => s.name);
+  check(JSON.stringify(boxNames) === JSON.stringify([...treatmentNames, "Collapsible"]),
+    `Boxes reads as its treatments do, then what only it has (${boxNames.join(" > ")})`);
   const secretNames = t.secrets.map((s) => s.name);
   check(JSON.stringify(secretNames) === JSON.stringify(
     ["Size and Position", "Text", "Fill and Image", "Spacing", "Border", "Once Revealed",
@@ -7881,6 +7934,16 @@ await cdp.evaluate(`(async () => {
   const entry = game.journal.getName("Illuminus Test Journal");
   if (entry) await entry.delete();
 })()`);
+
+// What the run actually cost, when asked. The timeout in `cdp.mjs` is set from
+// this rather than from a guess — the last guess was six times too generous and
+// turned a hang into a five-minute wait.
+if (process.env.ILLUMINUS_TIME_CALLS) {
+  console.log("\nslowest calls:");
+  for (const call of cdp.slowest(12)) {
+    console.log(`  ${String(call.ms).padStart(7)}ms  ${call.method}  ${call.said ?? ""}`);
+  }
+}
 
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL IN-APP CHECKS PASSED"}\n`);
 cdp.close();

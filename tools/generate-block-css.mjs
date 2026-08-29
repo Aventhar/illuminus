@@ -313,6 +313,7 @@ ${at.header} {
   font-variant: ${v(group, "headerCaps", "variant")};
   text-transform: ${v(group, "headerCaps", "transform")};
   letter-spacing: ${v(group, "headerLetterSpacing")};
+  word-spacing: ${v(group, "headerWordSpacing")};
   text-align: ${v(group, "headerAlign")};
   background-color: ${v(group, "headerBackground")};
   color: ${v(group, "headerColor")};
@@ -356,6 +357,14 @@ const memberSelector = (group, suffix = "") => {
   // The one group that is not a member: a tag nobody has given a treatment,
   // said as "carries no treatment class" rather than by listing the ten, so a
   // renamed or added treatment cannot leave it behind.
+  // The plain picture, the same.
+  if (group.id === "images") {
+    return `.illuminus-styled .journal-page-content figure:not(.illuminus-image)${suffix}`;
+  }
+  // The plain box, said as "carries no treatment class" for the same reason.
+  if (group.id === "boxes") {
+    return `.illuminus-styled .journal-page-content blockquote:not(.illuminus-box)${suffix}`;
+  }
   if (group.id === "tags") {
     return `.illuminus-styled .journal-page-content .illuminus-tag`
       + `:not([class*="illuminus-tag--"])${suffix}`;
@@ -364,10 +373,13 @@ const memberSelector = (group, suffix = "") => {
   return `.illuminus-styled .journal-page-content .illuminus-${kind}--${group.id}${suffix}`;
 };
 
-const boxRules = (group) => `
-/* ${group.id} */
-${memberSelector(group)} {
-  float: ${v(group, "float")};
+/*
+ * How a block sits on the page: which way it floats, how wide it is, where it
+ * is nudged to, and how it arranges whatever it holds. Written apart from the
+ * rest so the plain box can be laid out by the same code as its treatments —
+ * it was the only box that could not be given a width.
+ */
+const blockPlacing = (group) => `  float: ${v(group, "float")};
   width: ${v(group, "width")};
   clear: ${v(group, "clear")};
   /* Where it is nudged to. Its position is written by the rule that makes it
@@ -375,26 +387,10 @@ ${memberSelector(group)} {
   top: ${v(group, "offsetTop")};
   left: ${v(group, "offsetLeft")};
 ${turned(group)}
-${layout(group)}
-${box(group)}
-  font-family: ${v(group, "font")};
-  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
-  paint-order: stroke fill;
-  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
-               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
-  font-size: ${v(group, "size")};
-  font-weight: ${v(group, "textStyle", "weight")};
-  font-style: ${v(group, "textStyle", "slant")};
-  font-variant: ${v(group, "caps", "variant")};
-  text-transform: ${v(group, "caps", "transform")};
-  letter-spacing: ${v(group, "letterSpacing")};
-  line-height: ${v(group, "lineHeight")};
-  text-wrap: ${v(group, "wrap")};
-  hyphens: ${v(group, "hyphens")};
-  text-align: ${v(group, "align")};
-  color: ${vOr(group, "color", "inherit")};
-}
+${layout(group)}`;
 
+/** A heading inside a block, on the same terms. */
+const blockHeadings = (group) => `
 ${memberSelector(group, " :is(h1, h2, h3, h4, h5, h6)")} {
   font-family: ${v(group, "headingFont")};
   -webkit-text-stroke: ${v(group, "headingOutlineWidth")} ${v(group, "headingOutlineColor")};
@@ -415,6 +411,44 @@ ${memberSelector(group, " :is(h1, h2, h3, h4, h5, h6)")} {
   border-top-color: ${v(group, "headingRuleColor")};
 }
 `;
+
+const boxRules = (group) => `
+/* ${group.id} */
+${memberSelector(group)} {
+${blockPlacing(group)}
+${box(group)}
+  font-family: ${v(group, "font")};
+  -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
+  paint-order: stroke fill;
+  text-shadow: ${v(group, "textShadowOffsetX")} ${v(group, "textShadowOffsetY")}
+               ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
+  font-size: ${v(group, "size")};
+  font-weight: ${v(group, "textStyle", "weight")};
+  font-style: ${v(group, "textStyle", "slant")};
+  font-variant: ${v(group, "caps", "variant")};
+  text-transform: ${v(group, "caps", "transform")};
+  letter-spacing: ${v(group, "letterSpacing")};
+  word-spacing: ${v(group, "wordSpacing")};
+  line-height: ${v(group, "lineHeight")};
+  text-wrap: ${v(group, "wrap")};
+  hyphens: ${v(group, "hyphens")};
+  text-align: ${v(group, "align")};
+  color: ${vOr(group, "color", "inherit")};
+}
+${blockHeadings(group)}`;
+
+/*
+ * The shape a picture is cropped to, and which way it faces. Written apart so
+ * the plain picture is cropped by the same code as a treated one — it was the
+ * only picture that could not be given a shape or flipped.
+ *
+ * The fallbacks matter: an unset control emits nothing, and a property reading
+ * an unset value takes its initial value rather than leaving the picture alone.
+ */
+const pictureShaped = (group) => `  aspect-ratio: ${vOr(group, "pictureShape", "auto")};
+  object-fit: ${vOr(group, "pictureCrop", "cover")};
+  object-position: ${vOr(group, "pictureFrom", "center")};
+  transform: ${v(group, "flip")};`;
 
 const imageRules = (group) => `
 /* ${group.id} */
@@ -454,14 +488,7 @@ ${memberSelector(group, " img")} {
   display: block;
   width: 100%;
   height: auto;
-  /* The shape the picture is cropped to. A treatment that names none keeps the
-     picture's own, which is what auto means — and the fallbacks matter: an
-     unset control emits nothing, and a property reading an unset value takes
-     its initial value rather than leaving the picture alone. */
-  aspect-ratio: ${vOr(group, "pictureShape", "auto")};
-  object-fit: ${vOr(group, "pictureCrop", "cover")};
-  object-position: ${vOr(group, "pictureFrom", "center")};
-  transform: ${v(group, "flip")};
+${pictureShaped(group)}
   opacity: ${v(group, "opacity")};
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
@@ -481,6 +508,8 @@ ${memberSelector(group, " figcaption")} {
   font-size: ${v(group, "captionSize")};
   font-weight: ${v(group, "captionTextStyle", "weight")};
   font-style: ${v(group, "captionTextStyle", "slant")};
+  font-variant: ${v(group, "captionCaps", "variant")};
+  text-transform: ${v(group, "captionCaps", "transform")};
   text-align: ${v(group, "captionAlign")};
   color: ${vOr(group, "captionColor", "inherit")};
   margin-top: ${v(group, "captionSpacing")};
@@ -542,6 +571,7 @@ ${graduated(group)}
   font-variant: ${v(group, "caps", "variant")};
   text-transform: ${v(group, "caps", "transform")};
   letter-spacing: ${v(group, "letterSpacing")};
+  word-spacing: ${v(group, "wordSpacing")};
   line-height: ${v(group, "lineHeight")};
   text-wrap: ${v(group, "wrap")};
   hyphens: ${v(group, "hyphens")};
@@ -974,7 +1004,52 @@ const header = `/* =============================================================
 
 const blockGroups = GROUPS.filter((g) => g.family === "boxStyles");
 const blocks = blockGroups.map(boxRules).join("");
+/*
+ * The plain box, laid out and headed by the same code as its treatments.
+ * Its paint is written by hand in the skeleton — a blockquote nobody has
+ * treated has been painted there since before the treatments existed — so only
+ * the two halves it was missing are written here, rather than a second copy of
+ * a rule that already works.
+ */
+const plainBox = GROUPS.find((group) => group.id === "boxes");
+const defaultBlock = plainBox ? `
+/* boxes — laid out and headed as its treatments are */
+${memberSelector(plainBox)} {
+${blockPlacing(plainBox)}
+}
+${blockHeadings(plainBox)}${emptyRules(plainBox)}` : "";
 const pictures = GROUPS.filter((g) => g.family === "imageStyles").map(imageRules).join("");
+/*
+ * The plain picture, placed and cropped by the same code as its treatments.
+ * Its paint — fill, edges, corners, shadow, caption — is written by hand in the
+ * skeleton, and has been since before the treatments existed, so only the two
+ * halves it was missing are written here.
+ */
+const plainPicture = GROUPS.find((group) => group.id === "images");
+const defaultPicture = plainPicture ? `
+/* images — placed and cropped as its treatments are */
+${memberSelector(plainPicture)} {
+  float: ${v(plainPicture, "float")};
+  width: ${v(plainPicture, "width")};
+  clear: ${v(plainPicture, "clear")};
+  /* Said here rather than by the layer host, as a treatment's is: the plain
+     picture carries no background layer, because its fill sits behind the
+     picture rather than behind content. */
+  position: ${v(plainPicture, "position")};
+  top: ${v(plainPicture, "offsetTop")};
+  left: ${v(plainPicture, "offsetLeft")};
+${turned(plainPicture)}
+${displayed(plainPicture, "block")}
+  min-width: ${v(plainPicture, "minWidth")};
+  min-height: ${v(plainPicture, "minHeight")};
+  max-height: ${v(plainPicture, "maxHeight")};
+  overflow: ${v(plainPicture, "overflow")};
+}
+
+${memberSelector(plainPicture, " img")} {
+${pictureShaped(plainPicture)}
+}
+` : "";
 const tags = GROUPS.filter((g) => g.family === "tagStyles" || g.id === "tags")
   .map(tagRules).join("");
 const empties = blockGroups.map(emptyRules).join("");
@@ -1227,7 +1302,7 @@ const lists = GROUPS.filter((g) => g.family === "listStyles" || g.id === "lists"
 const tables = GROUPS.filter((g) => g.family === "tableStyles" || g.id === "tables")
   .map(tableRules).join("");
 
-const ordinary = `${header}${headings}${blocks}${pictures}${tags}${lists}${tables}${empties}${images}`;
+const ordinary = `${header}${headings}${blocks}${defaultBlock}${pictures}${defaultPicture}${tags}${lists}${tables}${empties}${images}`;
 const written = fs.readFileSync(`${ROOT}/styles/illuminus.css`, "utf8");
 const hovers = pointedRules(written) + pointedRules(ordinary);
 const selected = pointedRules(written, { twinOf: activeTwinOf, selector: chosen })

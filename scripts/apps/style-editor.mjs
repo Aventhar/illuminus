@@ -765,13 +765,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * color", while in a block it is "follow the page" — so a family-specific key
    * wins when one exists.
    */
-  #fieldText(group, field, part) {
+  #fieldText(group, field, part, { translate = true } = {}) {
     // Names in CSS's own words for somebody who asked for them, and only the
     // names: a hint says what a control does, which is the same thing whichever
     // vocabulary names it. A control with nothing to say in CSS — where an
     // element hangs, which member a family is showing — keeps its plain name
-    // rather than showing nothing.
-    if (part === "label" && this.#wording() === "css") {
+    // rather than showing nothing. Asked with `translate: false` for the plain
+    // name itself, which the hint's own heading names whichever words the rest
+    // of the editor is wearing.
+    if (translate && part === "label" && this.#wording() === "css") {
       const said = this.#fieldText(group, field, "css");
       if (said) return said;
     }
@@ -780,6 +782,19 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const shared = `ILLUMINUS.Field.${field.name}.${part}`;
     if (part === "css" && !game.i18n.has(shared)) return "";
     return game.i18n.localize(shared);
+  }
+
+  /**
+   * A control named both ways, for the head of its hint: "Layout (display)".
+   *
+   * A control that writes no CSS — where an element hangs, which member a
+   * family is showing — has only the one name, and says it without empty
+   * parentheses after it.
+   */
+  #heading(group, field) {
+    const plain = this.#fieldText(group, field, "label", { translate: false });
+    const css = this.#fieldText(group, field, "css");
+    return css ? `${plain} (${css})` : plain;
   }
 
   /** Which vocabulary this person reads the editor in. */
@@ -804,7 +819,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       plain: this.#wording() === "css"
         ? this.#fieldText(group, field, "label")
         : game.i18n.localize(`ILLUMINUS.Field.${field.name}.label`),
-      hint: this.#fieldText(group, field, "hint"),
+      // A heading naming the control, above what it says. Both words for it,
+      // whichever the editor is wearing: somebody reading in plain language
+      // can see which property it writes without changing a setting, and
+      // somebody reading in CSS can see what it is called. It goes in the
+      // hint's own text rather than beside it, so the search box finds a
+      // control by its property name as readily as by its name.
+      hint: `${this.#heading(group, field)}\n\n${this.#fieldText(group, field, "hint")}`,
       value,
       isDefault: value === this.#baselineFor(group.id, field),
       // Two different questions, and only one of them is what the fading marks.

@@ -85,17 +85,37 @@ export async function connect(port = 9222) {
   // slow one: keep it well clear of honest work.
   const CALL_TIMEOUT = 300000;
 
+  // What each call cost, when asked for. Set ILLUMINUS_TIME_CALLS=1 to find out
+  // what the timeout above should be, rather than guessing at it again.
+  const timing = process.env.ILLUMINUS_TIME_CALLS ? [] : null;
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const msgId = ++id;
+    const startedAt = timing ? Date.now() : 0;
     const timer = setTimeout(() => {
       if (!pending.has(msgId)) return;
       pending.delete(msgId);
       reject(new Error(`${method} did not answer within ${CALL_TIMEOUT / 1000}s`));
     }, CALL_TIMEOUT);
+    const done = () => {
+      clearTimeout(timer);
+      if (timing) {
+        // The head of the expression as well as the method: "Runtime.evaluate"
+        // twelve times over says which call was slow and nothing about which
+        // check it belonged to.
+        const ms = Date.now() - startedAt;
+        const said = String(params.expression ?? "").replace(/\s+/g, " ").trim().slice(0, 70);
+        timing.push({ method, ms, said });
+        // Said as it happens as well as tallied at the end: every call begins
+        // with the same dozen words, so a snippet cannot tell them apart —
+        // where it lands in the run can, between the two section headings it
+        // falls between.
+        if (ms > 10000) console.log(`      ⏱ ${(ms / 1000).toFixed(1)}s`);
+      }
+    };
     pending.set(msgId, {
       method,
-      resolve: (value) => { clearTimeout(timer); resolve(value); },
-      reject: (error) => { clearTimeout(timer); reject(error); }
+      resolve: (value) => { done(); resolve(value); },
+      reject: (error) => { done(); reject(error); }
     });
     ws.send(JSON.stringify({ id: msgId, method, params }));
   });
@@ -165,5 +185,10 @@ export async function connect(port = 9222) {
     await mouse("mouseReleased", x, y);
   };
 
-  return { send, evaluate, goto, waitFor, mouse, click, logs, close: () => ws.close() };
+  /** The slowest calls of the run, for setting the timeout by measurement. */
+  const slowest = (howMany = 10) => (timing ?? [])
+    .sort((a, b) => b.ms - a.ms).slice(0, howMany);
+
+  return { send, evaluate, goto, waitFor, mouse, click, logs, slowest,
+    close: () => ws.close() };
 }
