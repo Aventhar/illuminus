@@ -86,6 +86,17 @@ export function fieldToCss(field, value) {
   // a pointer arrived: a gradient turned to 0°, and Size emitted `scale(0)`,
   // which collapsed whatever was pointed at to nothing.
   if (field.type === "number" && field.emitZero === false && Number(value) === 0) return null;
+  // A choice says it the same way, with an empty value, and for the same
+  // reason. An `emit` answers a value it does not recognise with a sensible
+  // one — which is right for the ordinary control, where a stray value should
+  // still paint something — but a twin holding nothing is not a stray value,
+  // and that answer then wins the very fallback chain meant to reach past it.
+  // 276 twins spoke this way. Pointing at a background picture re-tiled and
+  // re-cornered it, bold lettering came back at 400, small caps fell away, a
+  // drop cap collapsed, and a list took the browser's own bullet — every one of
+  // them from a control nobody had touched. No ordinary choice defaults to
+  // empty, so this can only ever be a twin with nothing to say.
+  if (field.type === "select" && (value === "" || value === null || value === undefined)) return null;
   // A field may take full control of how it maps onto CSS.
   if (field.emit) {
     const emitted = field.emit(value);
@@ -112,7 +123,13 @@ export function fieldToCss(field, value) {
       return /^#[0-9a-f]{3,8}$/i.test(String(value)) ? { "": String(value) } : null;
     case "image": {
       const path = sanitizePath(value);
-      return { "": path ? `url("${path}")` : "none" };
+      // A picture nobody chose is `none` on an ordinary control — that is how a
+      // texture is taken off again — but silence on a derived twin, which has
+      // to reach past itself to the ordinary picture. Emitting `none` there
+      // took the picture away the moment a pointer arrived, on every fill that
+      // carries one.
+      if (!path) return field.twin ? null : { "": "none" };
+      return { "": `url("${path}")` };
     }
     case "font":
       // A state's own typeface says nothing until it is chosen, so the rule it

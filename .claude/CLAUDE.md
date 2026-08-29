@@ -144,6 +144,44 @@ These are all load-bearing and none are obvious from the code.
   lost its size with it. Paint the pseudo-elements instead, each falling back to the
   variable it stands in for: `color: var(--ill-…, var(--checkbox-checkmark-color))`.
   Note the tick is transparent by default — a cut-out through the box, not a mark on it.
+- **A state's control must be able to say nothing, and an `emit` will not let
+  it.** Every hovered and selected control is derived from an ordinary one and
+  starts empty, and the rule reading it is written `var(--twin, var(--ordinary))`
+  so that emptiness reaches past it. But an `emit` answers a value it does not
+  recognise with a sensible one — right for the ordinary control, where a stray
+  value should still paint something, and wrong for a twin, which then holds a
+  real value and wins the very chain meant to reach past it. **276 twins spoke
+  this way**: pointing at a background picture re-tiled it, moved it to the
+  corner and then took it away altogether; bold lettering came back at 400;
+  small caps fell away; a drop cap collapsed; a list took the browser's own
+  bullet. All from controls nobody had touched. Reported as "the inner shadow
+  looks different on hover", which it did not — the shadow was identical and the
+  picture behind it had gone. Three things to keep:
+  - **The compiler answers silence before asking how a value would be written.**
+    A number already did (`emitZero: false` — a gradient turned to 0°, Size
+    emitted `scale(0)`); a choice does now, and an unset picture on a twin emits
+    nothing rather than `none`. No ordinary choice defaults to empty, so an empty
+    one can only ever be a twin.
+  - **A derived twin is marked `twin: true`, because a name cannot tell one.** A
+    tab may declare a hovered *element* by hand — the contents panel's pointed-at
+    entry has a picture of its own, whose strength of 100% is meant — and those
+    wear "hover" in their name exactly as a derived twin does.
+  - **`validate.mjs` [11] checks it statically**, over every twin in the schema
+    in a second, so an emit written next year is covered without anyone
+    remembering this. The in-app check that was supposed to catch it — "a style
+    that sets no hovered value changes nothing under the pointer" — passed
+    throughout: it compared the right thing about the wrong properties.
+- **An application does not admit to closing.** `close()` marks nothing at the
+  moment it is called: the window goes on reporting `RENDERED`, and only says
+  `CLOSED` a frame or two later, so there is no state to interrogate at that
+  instant. `open()` returned any instance it found in the register, which could
+  therefore be one on its way out — no element, nothing drawn, and the caller
+  waiting for controls that never arrive. Measured: 0 controls against 4,649.
+  It reads as the editor failing to open when Edit is pressed as a window
+  closes. `open()` looks twice now, and waits out a close rather than reviving a
+  window mid-flight. This is what check [37] kept failing on, twice in ten runs
+  and some way from anything it tests — an intermittent failure in a check that
+  opens a window is worth suspecting *this* before blaming the machine.
 - **An unset control is not neutral — it takes away what was there.** A rule
   reads `color: var(--ill-…)` with no fallback, and an unset control emits
   nothing, so the property is undefined. That does **not** make the declaration
@@ -684,6 +722,11 @@ in the template library.
   any timeout, time the steps in isolation rather than believing a note.
 - **A whole run is about fifteen minutes** (640 assertions, 15m25s), so budget
   for that rather than killing one that looks stuck.
+- **A probe measuring module behaviour must reload the page first.** `.mjs`
+  changes need a refresh and the sandbox does not hot-reload, so a script that
+  connects and measures reads the code the page loaded, not the code on disk —
+  and an A/B against `git stash` then shows no difference whichever way round it
+  is run, which reads as the fix being pointless.
 - **No backticks in anything written into a template literal.** The checks and
   every one-off probe pass their work to the page as a template literal, so a
   backtick inside it — in a *comment* as readily as in code — ends the string,

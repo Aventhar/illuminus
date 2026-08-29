@@ -92,6 +92,19 @@ Two conventions worth knowing before you read it:
 
 ### Fixed
 
+- **Pointing at anything no longer changed it.** Every hovered and selected
+  control is derived from an ordinary one and starts empty, meaning "leave it
+  alone" — but an unset one was answering with a sensible default rather than
+  with silence, and that answer then won the very fallback meant to reach past
+  it. 276 controls did this. A background picture re-tiled itself, moved to the
+  corner and then vanished the moment a pointer arrived; bold lettering came
+  back at its ordinary weight; small caps fell away; a drop cap collapsed; a
+  list took the browser's own bullet. Reported as an inner shadow looking
+  different on hover, which it never did — the picture behind it had gone.
+- **The editor opens when pressed as a window closes.** An application goes on
+  saying it is on screen for a frame or two after it is asked to close, so
+  opening one "already open" could hand back a window on its way out — and the
+  editor then drew nothing at all.
 - **A new style now looks like an unstyled journal**, which is what it always
   claimed to do. Measured across every element of the journal and the page
   editor, a brand new style differed from a plain Foundry in 380 places; it

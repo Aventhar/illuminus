@@ -2155,11 +2155,37 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * @returns {Promise<IlluminusStyleEditor>}
    */
   static async open(styleId) {
-    const existing = foundry.applications.instances.get(`illuminus-style-editor-${styleId}`);
-    if (existing) {
-      existing.bringToFront();
-      return existing;
+    const id = `illuminus-style-editor-${styleId}`;
+    let existing = foundry.applications.instances.get(id);
+    // An application stays in the register for the length of its closing
+    // animation, so "one is open already" can mean one on its way out: no
+    // element, nothing drawn, and a caller left waiting for controls that will
+    // never arrive. Give the close its moment rather than reviving a window
+    // mid-flight — pressing Edit again the instant a window closes is exactly
+    // when this happens, and it looks like the editor failing to open.
+    for (let i = 0; i < 20 && existing && !existing.rendered; i++) {
+      await new Promise((done) => setTimeout(done, 50));
+      existing = foundry.applications.instances.get(id);
     }
+    if (existing?.rendered) {
+      existing.bringToFront();
+      // Looked at twice, because a window does not admit to closing. `close()`
+      // marks nothing at the moment it is called — the application still says
+      // RENDERED, and only says CLOSED a frame or two later — so a window that
+      // says it is drawn can already be on its way out. Asking again is the
+      // only way to tell, and it costs nothing on the ordinary path of opening
+      // one that is genuinely there.
+      await new Promise((done) => setTimeout(done, 80));
+      if (existing.rendered) return existing;
+      existing = foundry.applications.instances.get(id);
+      for (let i = 0; i < 20 && existing && !existing.rendered; i++) {
+        await new Promise((done) => setTimeout(done, 50));
+        existing = foundry.applications.instances.get(id);
+      }
+    }
+    // Still registered and still not drawn: draw it rather than hand it back as
+    // it is, since a second window would collide with it on id.
+    if (existing) return existing.render({ force: true });
     return new IlluminusStyleEditor({ styleId }).render({ force: true });
   }
 }

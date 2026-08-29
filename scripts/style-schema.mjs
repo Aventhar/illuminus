@@ -2506,7 +2506,12 @@ function stateTwin(original, name, word) {
   // corners of a button overwrote its other states' corners with the ordinary
   // value, which reads as those settings not working.
   const link = original.link ? { link: stateNameFor(word, original.link) } : {};
-  return { ...original, name, ...quiet, ...link };
+  // Marked as derived, because a name is not enough to tell one by. A tab can
+  // declare a hovered *element* by hand — the contents panel's pointed-at entry
+  // has a picture of its own, whose strength of 100% is meant — and those
+  // controls wear "hover" in their name exactly as a derived twin does. Only a
+  // derived twin owes its element silence when it is empty.
+  return { ...original, name, twin: true, ...quiet, ...link };
 }
 
 /** A state's name for a control, e.g. `hover` + `borderTopColor`. */

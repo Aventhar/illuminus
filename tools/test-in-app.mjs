@@ -3432,6 +3432,40 @@ try {
     await api.deleteStyle(style.id);
     return JSON.stringify(out);
   })()`);
+  // Closing and opening again at once must still give a window with something
+  // in it. An application does not admit to closing — `close()` marks nothing
+  // at the moment it is called, and the window goes on saying it is drawn for a
+  // frame or two — so opening one "already open" could hand back a window on
+  // its way out, and the editor then never drew its controls. That is what
+  // check [37] kept failing on, some way from anything to do with what it
+  // tests.
+  const reopened = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Reopen Probe"});
+    try {
+      const first = await api.openEditor(style.id);
+      for (let i = 0; i < 150 && !first.element?.querySelector(".illuminus-field"); i++) {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      first.close({force: true});
+      const again = await api.openEditor(style.id);
+      let drew = 0;
+      for (let i = 0; i < 120 && !drew; i++) {
+        await new Promise(r => setTimeout(r, 100));
+        drew = again.element?.querySelectorAll(".illuminus-field").length ?? 0;
+      }
+      await again.close({force: true});
+      return JSON.stringify({drew});
+    } finally {
+      for (const a of [...foundry.applications.instances.values()]) {
+        if (a.constructor.name.startsWith("Illuminus")) await a.close({force: true});
+      }
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+  const re = JSON.parse(reopened);
+  check(re.drew > 100, `opening the editor as one closes still draws it (${re.drew} controls)`);
+
   const sc = JSON.parse(copying);
   check(sc.hiddenAtFirst === true, `nothing to copy while the ordinary controls are on show (${sc.hiddenAtFirst})`);
   check(sc.shownForHover, "the button appears with the hovered ones");

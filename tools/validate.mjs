@@ -297,5 +297,39 @@ console.log("\n[10] No two controls share a name");
   if (!clashes) ok(`every control in all ${GROUPS.length} tabs has a name of its own`);
 }
 
+/* A state's control must be able to say nothing.
+ *
+ * Every hovered and selected control is derived from an ordinary one and starts
+ * empty, meaning "leave it as it is" — and the rule that reads it is written
+ * `var(--twin, var(--ordinary))` so that emptiness reaches past it. But an
+ * `emit` answers a value it does not recognise with a sensible one, which is
+ * right for the ordinary control and wrong here: the twin then holds a real
+ * value, wins that chain, and changes the element the moment a pointer arrives.
+ * 276 twins did. Pointing at a background picture re-tiled and re-cornered it,
+ * bold lettering came back at 400, small caps fell away, a drop cap collapsed,
+ * and a list took the browser's own bullet. It is checked here rather than in
+ * the app because one pass covers every twin in the schema, and an emit written
+ * next year is covered by it without anyone remembering this. */
+console.log("\n[11] A state's control can say nothing");
+{
+  const noisy = [];
+  for (const group of GROUPS) {
+    for (const section of group.sections) {
+      for (const field of section.fields) {
+        if (!field.twin) continue;
+        const quiet = field.type === "number" ? 0 : field.default;
+        const said = fieldToCss(field, quiet);
+        if (said !== null && said !== undefined) noisy.push(`${group.id}.${field.name} -> ${JSON.stringify(said)}`);
+      }
+    }
+  }
+  if (noisy.length) {
+    fail(`${noisy.length} state controls speak when they hold nothing`);
+    for (const one of noisy.slice(0, 6)) fail(`  ${one}`);
+  } else {
+    ok("every hovered and selected control leaves its element alone until it is set");
+  }
+}
+
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);
