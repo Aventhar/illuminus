@@ -958,6 +958,31 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
+   * The controls a Copy Normal would actually change.
+   *
+   * Only the ones with an ordinary counterpart move — a thickness with no
+   * hovered twin is already shared — and only where the two differ, which is
+   * what lets the button say whether pressing it would do anything. Nothing in
+   * another section is considered: the sidebar keeps its hovered entry colors
+   * beside the entry they belong to, and copying one section should not reach
+   * into another.
+   */
+  #pendingCopies(groupId, sectionId, chosen) {
+    if (!groupId || !sectionId || !chosen || chosen === "normal") return [];
+    const group = GROUPS.find((candidate) => candidate.id === groupId);
+    const section = group?.sections.find((candidate) => candidate.id === sectionId);
+    if (!section) return [];
+    const names = new Set(section.fields.map((field) => field.name));
+    const settings = this.#working[groupId] ?? {};
+    return section.fields.filter((field) => {
+      if (stateOf(field.name) !== chosen) return false;
+      const ordinary = stateBase(field.name);
+      if (ordinary === field.name || !names.has(ordinary)) return false;
+      return settings[field.name] !== settings[ordinary];
+    });
+  }
+
+  /**
    * Fill a section's controls for the state on show from the ordinary ones.
    *
    * Only the controls that have an ordinary counterpart move: a thickness with
@@ -975,16 +1000,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const chosen = this.#states.get(`${key.group}.${key.section}`) ?? "normal";
     if (chosen === "normal") return;
 
-    const names = new Set(section.fields.map((field) => field.name));
-    let copied = 0;
-    for (const field of section.fields) {
-      if (stateOf(field.name) !== chosen) continue;
-      const ordinary = stateBase(field.name);
-      if (ordinary === field.name || !names.has(ordinary)) continue;
-      this.#working[key.group][field.name] = this.#working[key.group][ordinary];
-      copied += 1;
+    const pending = this.#pendingCopies(key.group, key.section, chosen);
+    if (!pending.length) return;
+    for (const field of pending) {
+      this.#working[key.group][field.name] = this.#working[key.group][stateBase(field.name)];
     }
-    if (!copied) return;
 
     this.#dirty = true;
     this.#applyPreview();
@@ -1089,6 +1109,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       if (copy) {
         const twinned = present.some((state) => state.id === "normal") && chosen !== "normal";
         copy.classList.toggle("is-hidden", !twinned);
+        // Greyed where every control already holds what it would be given, so
+        // the button says whether pressing it would change anything rather than
+        // looking the same either way.
+        copy.disabled = twinned && key
+          && this.#pendingCopies(key.group, key.section, chosen).length === 0;
       }
 
       const fields = [...section.querySelectorAll(".illuminus-field[data-field]")];

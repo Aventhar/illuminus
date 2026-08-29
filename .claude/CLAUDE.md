@@ -1076,8 +1076,21 @@ doing nothing. Two mechanisms carry that:
 and the page editor twice each, once wearing a brand new style and once wearing none,
 and compares every element property by property. Section [62] and the delta probe still
 prove the ones a person cares about; this says how many are left. It went from 380
-differences to 8, and the last of those are recorded above as decisions rather than
-faults. Two things it had to learn before its answer could be believed, both of which
+differences to 8, and the last of those are decisions rather than faults. Five are
+the journal's header and its title control, which are documented above, and the page's
+own surface. One is the contents panel's chosen row, which Foundry gives a hairline.
+One is the Page tab's corners reaching both the journal's content area and the page
+editor's window, which Foundry rounds one of and not the other — a control painting two
+surfaces its owner treats differently, the same shape as the panel buttons, and it is
+set to match the journal because that is the surface a reader looks at.
+
+The last is **a heading's line spacing, and it is deliberate**. Foundry states `28px`
+on an `h1`; an unset heading here follows the page's own line spacing instead, which
+is what every other unset text control does and what "use the page setting" means
+throughout. `revert-layer` would match Foundry exactly and would stop headings
+following the page — which is the whole of the fork, and it is wider than one number:
+it decides what an unset control means for every text setting on a page, not only this
+one. Left as it is on 2026-08-28, to be revisited only if it matters in use. Two things it had to learn before its answer could be believed, both of which
 had it reporting differences that were not there:
 
 - **Freeze transitions first.** A corner radius came back as `3.00706px` part way

@@ -1839,6 +1839,15 @@
   display: none;
 }
 
+/* Shown but greyed where there is nothing to copy: every control in the
+   section already holds what the ordinary one holds, so pressing it would do
+   nothing. Kept in place rather than hidden, because a button that comes and
+   goes as the values change is harder to find than one that dims. */
+.illuminus-state__copy:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .illuminus-export-dialog__option.is-hidden {
   display: none;
 }

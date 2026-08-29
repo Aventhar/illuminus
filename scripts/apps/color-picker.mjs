@@ -21,7 +21,7 @@ import { SETTINGS, getSetting, setSetting } from "../constants.mjs";
 let open = null;
 
 /** How many saved-color slots to show, filled or not. */
-const SWATCH_SLOTS = 20;
+const SWATCH_SLOTS = 30;
 
 /** Slider definitions, in display order. Each reads and writes the shared color. */
 const CHANNELS = [
@@ -371,6 +371,11 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       const value = hexToRgba(control.dataset.hex);
       if (!value) return;
       state.r = value.r; state.g = value.g; state.b = value.b; state.a = value.a * 100;
+      // The ramp moves with it, as it does when the numbers are typed. The hue
+      // is kept beside the color rather than read back out of it, so a color
+      // arriving from anywhere but the ramp has to say so — or the shade square
+      // goes on offering shades of the hue before it.
+      hue = rgbToHsv(state).h;
       emit();
     } else if (action === "save") {
       const hex = currentHex();
@@ -383,6 +388,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       const value = sampled ? hexToRgba(sampled) : null;
       if (!value) return;
       state.r = value.r; state.g = value.g; state.b = value.b; state.a = value.a * 100;
+      hue = rgbToHsv(state).h;
       emit();
     } else if (action === "ok") {
       const hex = currentHex();

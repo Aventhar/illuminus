@@ -1408,6 +1408,26 @@ const cp = await cdp.evaluate(`(async () => {
   out.swatchSlots = cp.querySelectorAll(".illuminus-cp__swatch").length;
   out.swatchSaved = (api.getStyle(style.id).swatches ?? []).length;
 
+  // Choosing a saved color moves the ramp to it. The hue is kept beside the
+  // color rather than read back out of it, so a color arriving from a swatch
+  // has to say so — without that the shade square went on offering shades of
+  // whatever hue was there before, and the next drag in it threw the chosen
+  // color away. The eyedropper takes the same path and had the same fault.
+  set(cp, '[data-channel="rgb-r"] input[type=range]', 0);
+  set(cp, '[data-channel="rgb-g"] input[type=range]', 255);
+  set(cp, '[data-channel="rgb-b"] input[type=range]', 0);
+  await new Promise(r => setTimeout(r, 150));
+  const knobAtGreen = parseFloat(cp.querySelector(".illuminus-cp__hue-knob").style.top);
+  const kept = cp.querySelector('.illuminus-cp__swatch[data-cp="use"]');
+  kept.click();
+  await new Promise(r => setTimeout(r, 200));
+  out.afterSwatch = {
+    wanted: kept.dataset.hex,
+    hex: cp.querySelector(".illuminus-cp__hex").value,
+    knobAtGreen,
+    knob: parseFloat(cp.querySelector(".illuminus-cp__hue-knob").style.top)
+  };
+
   cp.querySelector('.illuminus-cp__foot [data-cp="cancel"]').click();
   await new Promise(r => setTimeout(r, 250));
   out.closedOnCancel = !document.querySelector(".illuminus-cp");
@@ -1448,7 +1468,11 @@ check(pick.afterRamp.minChannel <= 8,
 check(pick.afterAlpha.hex.length === 9, `alpha shows in the hex (got ${pick.afterAlpha.hex})`);
 check(pick.liveValue === pick.afterAlpha.hex, "the control follows live while the picker is open");
 check(pick.storedDuring === "#3366cc", `the saved style is untouched meanwhile (stored ${pick.storedDuring})`);
-check(pick.swatchSlots >= 20, `at least 20 saved-color slots (got ${pick.swatchSlots})`);
+check(pick.swatchSlots >= 30, `three rows of saved-color slots (got ${pick.swatchSlots})`);
+check(pick.afterSwatch.hex.slice(0, 7).toLowerCase() === pick.afterSwatch.wanted.slice(0, 7).toLowerCase(),
+  `choosing a saved color takes it (${pick.afterSwatch.hex} from ${pick.afterSwatch.wanted})`);
+check(Math.abs(pick.afterSwatch.knob - pick.afterSwatch.knobAtGreen) > 1,
+  `and the ramp moves to its hue (knob ${pick.afterSwatch.knobAtGreen} -> ${pick.afterSwatch.knob})`);
 check(pick.swatchSaved === 1, `saving keeps the color on the style (${pick.swatchSaved} saved)`);
 check(pick.closedOnCancel && pick.afterCancel === "#3366cc",
   `Cancel closes and restores the original (got ${pick.afterCancel})`);
@@ -3393,9 +3417,12 @@ try {
     fill().querySelector('.illuminus-state__option[data-state="hover"]').click();
     await new Promise(r => setTimeout(r, 300));
     out.shownForHover = !button()?.classList.contains("is-hidden");
+    // Live while there is something to copy, and greyed once there is not.
+    out.liveBefore = !button().disabled;
 
     button().click();
     await new Promise(r => setTimeout(r, 800));
+    out.greyedAfter = button()?.disabled ?? "missing";
     out.hovered = api.getStyle(style.id).settings.boxes.hoverBackground;
     const working = app.element
       .querySelector('[data-field="boxes.hoverBackground"] color-picker')?.value;
@@ -3408,6 +3435,9 @@ try {
   const sc = JSON.parse(copying);
   check(sc.hiddenAtFirst === true, `nothing to copy while the ordinary controls are on show (${sc.hiddenAtFirst})`);
   check(sc.shownForHover, "the button appears with the hovered ones");
+  check(sc.liveBefore, "live while the hovered controls hold something else");
+  check(sc.greyedAfter === true,
+    `and greyed once they already hold it (${sc.greyedAfter})`);
   check((sc.control ?? "").toLowerCase().startsWith("#123456"),
     `and fills them from the ordinary values (${sc.control})`);
   check(sc.hovered === "#000000",
