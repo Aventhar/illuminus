@@ -61,6 +61,14 @@ put("ILLUMINUS.Notifications.NoScreenPicker",
   + "Reading colors out of the page still works.");
 put("ILLUMINUS.Editor.Zoom", "Zoom");
 put("ILLUMINUS.Editor.QuietSample", "Disable hover in preview");
+// Said because its absence costs a bug report: with this on, every hovered
+// control looks broken, since the sample is where a person looks to judge one.
+put("ILLUMINUS.Editor.QuietSampleHint",
+  "Stops the sample answering the mouse, so it holds still while you work — "
+  + "otherwise every pass of the pointer repaints something.\n\n"
+  + "While this is on, nothing you set for a hovered state will show in the "
+  + "sample. Turn it off when you want to see one; a real journal is unaffected "
+  + "either way.");
 put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
 put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");

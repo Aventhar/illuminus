@@ -3404,6 +3404,42 @@ try {
       await api.deleteStyle(style.id);
     }
   })()`);
+  // The sample is only worth looking at if it is wrong in the same ways a
+  // journal is. Foundry clips a journal's page area, and states that on the
+  // sheet — which the sample is not inside, so it kept its rounded corners on
+  // its own edge while everything it held carried a square one through the
+  // curve.
+  const clips = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    const style = await api.createStyle({name: "Clip Probe"});
+    const entry = await JournalEntry.create({name: "Clip Probe Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<p>Body.</p>", format: 1}}]);
+    await api.assignStyle(entry, style.id);
+    let app = null;
+    try {
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      await new Promise(r => setTimeout(r, 1000));
+      const real = getComputedStyle(entry.sheet.element
+        .querySelector(".journal-entry-content")).overflow;
+      app = await api.openEditor(style.id);
+      for (let i = 0; i < 250 && !app.element?.querySelector(".illuminus-field"); i++) {
+        await new Promise(r => setTimeout(r, 100));
+      }
+      const sample = getComputedStyle(app.element
+        .querySelector(".illuminus-preview__frame .journal-entry-content")).overflow;
+      return JSON.stringify({real, sample});
+    } finally {
+      await app?.close({force: true});
+      await entry.sheet?.close({force: true});
+      await entry.delete();
+      await api.deleteStyle(style.id);
+    }
+  })()`);
+  const cl = JSON.parse(clips);
+  check(cl.sample === cl.real,
+    `the sample clips its page as a journal does (sample ${cl.sample}, journal ${cl.real})`);
+
   const ic = JSON.parse(icon);
   check(ic.inherited.icon === ic.inherited.link && ic.inherited.link === "rgb(0, 255, 0)",
     `a link's icon takes the link's own color until asked otherwise (${ic.inherited.icon})`);

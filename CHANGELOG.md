@@ -164,6 +164,10 @@ Two conventions worth knowing before you read it:
 
 ### Fixed
 
+- **The Live Sample clips its page as a real journal does.** Foundry states that
+  on a journal sheet, and the sample deliberately mirrors the markup without
+  being inside one — so a page given rounded corners kept them on its own edge
+  while everything it held carried a square corner straight through the curve.
 - **A secret passage's Inner Shadow did nothing.** Its rule said `box-shadow`
   twice — the whole of it, and then an outer-only one further down that quietly
   replaced it. Legal CSS with no warning: the later declaration simply wins, and

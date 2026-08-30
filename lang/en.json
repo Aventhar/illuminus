@@ -248,6 +248,7 @@
   "ILLUMINUS.Editor.PartsTwist": "Show what this part holds",
   "ILLUMINUS.Editor.PreviewTitle": "Live Sample",
   "ILLUMINUS.Editor.QuietSample": "Disable hover in preview",
+  "ILLUMINUS.Editor.QuietSampleHint": "Stops the sample answering the mouse, so it holds still while you work — otherwise every pass of the pointer repaints something.\n\nWhile this is on, nothing you set for a hovered state will show in the sample. Turn it off when you want to see one; a real journal is unaffected either way.",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",
   "ILLUMINUS.Editor.StateActive": "Selected",
   "ILLUMINUS.Editor.StateHover": "Hovered",

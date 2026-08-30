@@ -3554,6 +3554,12 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   flex: 1;
   min-width: 0;
   height: auto;
+  /* Clipped, as the real one is. Foundry states this on a journal sheet and the
+     sample is not inside one, so a page given rounded corners kept them on its
+     own edge while everything it held — the header, the first heading's band —
+     carried its square corner straight through the curve. The sample is only
+     worth looking at if it is wrong in the same ways a journal is. */
+  overflow: hidden;
 }
 
 /* The sample's header takes the Title tab's own spacing, like a real journal —
