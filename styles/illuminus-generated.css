@@ -98,6 +98,7 @@
   background-color: var(--ill-heading1-background);
   background-image: linear-gradient(var(--ill-heading1-gradient-angle),
     var(--ill-heading1-gradient-from), var(--ill-heading1-gradient-to));
+  backdrop-filter: var(--ill-heading1-frost);
   margin: var(--ill-heading1-margin-top) var(--ill-heading1-margin-right) var(--ill-heading1-margin-bottom) var(--ill-heading1-margin-left);
   padding: var(--ill-heading1-padding-top) var(--ill-heading1-padding-right) var(--ill-heading1-padding-bottom) var(--ill-heading1-padding-left);
   border-width: var(--ill-heading1-border-top-width) var(--ill-heading1-border-right-width) var(--ill-heading1-border-bottom-width) var(--ill-heading1-border-left-width);
@@ -189,6 +190,7 @@
   background-color: var(--ill-heading2-background);
   background-image: linear-gradient(var(--ill-heading2-gradient-angle),
     var(--ill-heading2-gradient-from), var(--ill-heading2-gradient-to));
+  backdrop-filter: var(--ill-heading2-frost);
   margin: var(--ill-heading2-margin-top) var(--ill-heading2-margin-right) var(--ill-heading2-margin-bottom) var(--ill-heading2-margin-left);
   padding: var(--ill-heading2-padding-top) var(--ill-heading2-padding-right) var(--ill-heading2-padding-bottom) var(--ill-heading2-padding-left);
   border-width: var(--ill-heading2-border-top-width) var(--ill-heading2-border-right-width) var(--ill-heading2-border-bottom-width) var(--ill-heading2-border-left-width);
@@ -268,6 +270,7 @@
   background-color: var(--ill-heading3-background);
   background-image: linear-gradient(var(--ill-heading3-gradient-angle),
     var(--ill-heading3-gradient-from), var(--ill-heading3-gradient-to));
+  backdrop-filter: var(--ill-heading3-frost);
   margin: var(--ill-heading3-margin-top) var(--ill-heading3-margin-right) var(--ill-heading3-margin-bottom) var(--ill-heading3-margin-left);
   padding: var(--ill-heading3-padding-top) var(--ill-heading3-padding-right) var(--ill-heading3-padding-bottom) var(--ill-heading3-padding-left);
   border-width: var(--ill-heading3-border-top-width) var(--ill-heading3-border-right-width) var(--ill-heading3-border-bottom-width) var(--ill-heading3-border-left-width);
@@ -347,6 +350,7 @@
   background-color: var(--ill-heading4-background);
   background-image: linear-gradient(var(--ill-heading4-gradient-angle),
     var(--ill-heading4-gradient-from), var(--ill-heading4-gradient-to));
+  backdrop-filter: var(--ill-heading4-frost);
   margin: var(--ill-heading4-margin-top) var(--ill-heading4-margin-right) var(--ill-heading4-margin-bottom) var(--ill-heading4-margin-left);
   padding: var(--ill-heading4-padding-top) var(--ill-heading4-padding-right) var(--ill-heading4-padding-bottom) var(--ill-heading4-padding-left);
   border-width: var(--ill-heading4-border-top-width) var(--ill-heading4-border-right-width) var(--ill-heading4-border-bottom-width) var(--ill-heading4-border-left-width);
@@ -426,6 +430,7 @@
   background-color: var(--ill-heading5-background);
   background-image: linear-gradient(var(--ill-heading5-gradient-angle),
     var(--ill-heading5-gradient-from), var(--ill-heading5-gradient-to));
+  backdrop-filter: var(--ill-heading5-frost);
   margin: var(--ill-heading5-margin-top) var(--ill-heading5-margin-right) var(--ill-heading5-margin-bottom) var(--ill-heading5-margin-left);
   padding: var(--ill-heading5-padding-top) var(--ill-heading5-padding-right) var(--ill-heading5-padding-bottom) var(--ill-heading5-padding-left);
   border-width: var(--ill-heading5-border-top-width) var(--ill-heading5-border-right-width) var(--ill-heading5-border-bottom-width) var(--ill-heading5-border-left-width);
@@ -505,6 +510,7 @@
   background-color: var(--ill-heading6-background);
   background-image: linear-gradient(var(--ill-heading6-gradient-angle),
     var(--ill-heading6-gradient-from), var(--ill-heading6-gradient-to));
+  backdrop-filter: var(--ill-heading6-frost);
   margin: var(--ill-heading6-margin-top) var(--ill-heading6-margin-right) var(--ill-heading6-margin-bottom) var(--ill-heading6-margin-left);
   padding: var(--ill-heading6-padding-top) var(--ill-heading6-padding-right) var(--ill-heading6-padding-bottom) var(--ill-heading6-padding-left);
   border-width: var(--ill-heading6-border-top-width) var(--ill-heading6-border-right-width) var(--ill-heading6-border-bottom-width) var(--ill-heading6-border-left-width);
@@ -2224,6 +2230,9 @@
   word-spacing: var(--ill-tables-header-word-spacing);
   text-align: var(--ill-tables-header-align);
   background-color: var(--ill-tables-header-background);
+  background-image: linear-gradient(var(--ill-tables-header-gradient-angle),
+    var(--ill-tables-header-gradient-from), var(--ill-tables-header-gradient-to));
+  backdrop-filter: var(--ill-tables-header-frost);
   color: var(--ill-tables-header-color);
 }
 
@@ -2311,6 +2320,9 @@
   word-spacing: var(--ill-table01-header-word-spacing);
   text-align: var(--ill-table01-header-align);
   background-color: var(--ill-table01-header-background);
+  background-image: linear-gradient(var(--ill-table01-header-gradient-angle),
+    var(--ill-table01-header-gradient-from), var(--ill-table01-header-gradient-to));
+  backdrop-filter: var(--ill-table01-header-frost);
   color: var(--ill-table01-header-color);
 }
 
@@ -2398,6 +2410,9 @@
   word-spacing: var(--ill-table02-header-word-spacing);
   text-align: var(--ill-table02-header-align);
   background-color: var(--ill-table02-header-background);
+  background-image: linear-gradient(var(--ill-table02-header-gradient-angle),
+    var(--ill-table02-header-gradient-from), var(--ill-table02-header-gradient-to));
+  backdrop-filter: var(--ill-table02-header-frost);
   color: var(--ill-table02-header-color);
 }
 
@@ -2485,6 +2500,9 @@
   word-spacing: var(--ill-table03-header-word-spacing);
   text-align: var(--ill-table03-header-align);
   background-color: var(--ill-table03-header-background);
+  background-image: linear-gradient(var(--ill-table03-header-gradient-angle),
+    var(--ill-table03-header-gradient-from), var(--ill-table03-header-gradient-to));
+  backdrop-filter: var(--ill-table03-header-frost);
   color: var(--ill-table03-header-color);
 }
 
@@ -2572,6 +2590,9 @@
   word-spacing: var(--ill-table04-header-word-spacing);
   text-align: var(--ill-table04-header-align);
   background-color: var(--ill-table04-header-background);
+  background-image: linear-gradient(var(--ill-table04-header-gradient-angle),
+    var(--ill-table04-header-gradient-from), var(--ill-table04-header-gradient-to));
+  backdrop-filter: var(--ill-table04-header-frost);
   color: var(--ill-table04-header-color);
 }
 
@@ -2659,6 +2680,9 @@
   word-spacing: var(--ill-table05-header-word-spacing);
   text-align: var(--ill-table05-header-align);
   background-color: var(--ill-table05-header-background);
+  background-image: linear-gradient(var(--ill-table05-header-gradient-angle),
+    var(--ill-table05-header-gradient-from), var(--ill-table05-header-gradient-to));
+  backdrop-filter: var(--ill-table05-header-frost);
   color: var(--ill-table05-header-color);
 }
 
@@ -4410,6 +4434,9 @@
   --button-size: calc(var(--ill-window-hover-header-button-size, var(--ill-window-header-button-size)) * 1.7);
   color: var(--ill-window-header-button-hover-color, var(--ill-window-header-button-color, revert-layer));
   background-color: var(--ill-window-header-button-hover-background, var(--ill-window-header-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-window-hover-header-button-gradient-angle, var(--ill-window-header-button-gradient-angle)),
+      var(--ill-window-hover-header-button-gradient-from, var(--ill-window-header-button-gradient-from)), var(--ill-window-hover-header-button-gradient-to, var(--ill-window-header-button-gradient-to)));
+  backdrop-filter: var(--ill-window-hover-header-button-frost, var(--ill-window-header-button-frost));
   font-size: var(--ill-window-hover-header-button-size, var(--ill-window-header-button-size, revert-layer));
   border-width: var(--ill-window-hover-header-button-border-top-width, var(--ill-window-header-button-border-top-width)) var(--ill-window-hover-header-button-border-right-width, var(--ill-window-header-button-border-right-width))
                 var(--ill-window-hover-header-button-border-bottom-width, var(--ill-window-header-button-border-bottom-width)) var(--ill-window-hover-header-button-border-left-width, var(--ill-window-header-button-border-left-width));
@@ -4427,6 +4454,9 @@
   --button-background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background, revert-layer));
   color: var(--ill-window-page-button-hover-color, var(--ill-window-page-button-color, revert-layer));
   background-color: var(--ill-window-page-button-hover-background, var(--ill-window-page-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-window-hover-page-button-gradient-angle, var(--ill-window-page-button-gradient-angle)),
+      var(--ill-window-hover-page-button-gradient-from, var(--ill-window-page-button-gradient-from)), var(--ill-window-hover-page-button-gradient-to, var(--ill-window-page-button-gradient-to)));
+  backdrop-filter: var(--ill-window-hover-page-button-frost, var(--ill-window-page-button-frost));
   font-size: var(--ill-window-hover-page-button-size, var(--ill-window-page-button-size, revert-layer));
   border-width: var(--ill-window-hover-page-button-border-top-width, var(--ill-window-page-button-border-top-width)) var(--ill-window-hover-page-button-border-right-width, var(--ill-window-page-button-border-right-width))
                 var(--ill-window-hover-page-button-border-bottom-width, var(--ill-window-page-button-border-bottom-width)) var(--ill-window-hover-page-button-border-left-width, var(--ill-window-page-button-border-left-width));
@@ -4484,6 +4514,9 @@
   --button-size: calc(var(--ill-editor-hover-header-button-size, var(--ill-editor-header-button-size)) * 1.7);
   color: var(--ill-editor-header-button-hover-color, var(--ill-editor-header-button-color, revert-layer));
   background-color: var(--ill-editor-header-button-hover-background, var(--ill-editor-header-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-hover-header-button-gradient-angle, var(--ill-editor-header-button-gradient-angle)),
+      var(--ill-editor-hover-header-button-gradient-from, var(--ill-editor-header-button-gradient-from)), var(--ill-editor-hover-header-button-gradient-to, var(--ill-editor-header-button-gradient-to)));
+  backdrop-filter: var(--ill-editor-hover-header-button-frost, var(--ill-editor-header-button-frost));
   font-size: var(--ill-editor-hover-header-button-size, var(--ill-editor-header-button-size, revert-layer));
   border-width: var(--ill-editor-hover-header-button-border-top-width, var(--ill-editor-header-button-border-top-width)) var(--ill-editor-hover-header-button-border-right-width, var(--ill-editor-header-button-border-right-width))
                 var(--ill-editor-hover-header-button-border-bottom-width, var(--ill-editor-header-button-border-bottom-width)) var(--ill-editor-hover-header-button-border-left-width, var(--ill-editor-header-button-border-left-width));
@@ -4499,6 +4532,9 @@
 .illuminus-styled.journal-entry-page menu.editor-menu:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu:hover {
   background-color: var(--ill-editor-toolbar-hover-toolbar-background, var(--ill-editor-toolbar-toolbar-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-toolbar-hover-toolbar-gradient-angle, var(--ill-editor-toolbar-toolbar-gradient-angle)),
+      var(--ill-editor-toolbar-hover-toolbar-gradient-from, var(--ill-editor-toolbar-toolbar-gradient-from)), var(--ill-editor-toolbar-hover-toolbar-gradient-to, var(--ill-editor-toolbar-toolbar-gradient-to)));
+  backdrop-filter: var(--ill-editor-toolbar-hover-toolbar-frost, var(--ill-editor-toolbar-toolbar-frost));
   padding: var(--ill-editor-toolbar-hover-toolbar-padding-top, var(--ill-editor-toolbar-toolbar-padding-top)) var(--ill-editor-toolbar-hover-toolbar-padding-right, var(--ill-editor-toolbar-toolbar-padding-right))
            var(--ill-editor-toolbar-hover-toolbar-padding-bottom, var(--ill-editor-toolbar-toolbar-padding-bottom)) var(--ill-editor-toolbar-hover-toolbar-padding-left, var(--ill-editor-toolbar-toolbar-padding-left));
   border-width: var(--ill-editor-toolbar-hover-toolbar-border-top-width, var(--ill-editor-toolbar-toolbar-border-top-width)) var(--ill-editor-toolbar-hover-toolbar-border-right-width, var(--ill-editor-toolbar-toolbar-border-right-width))
@@ -4540,6 +4576,9 @@
   text-shadow: var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-offset-x, var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-x)) var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-offset-y, var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-y))
                var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-blur, var(--ill-editor-settings-bar-settings-bar-text-shadow-blur)) var(--ill-editor-settings-bar-hover-settings-bar-text-shadow-color, var(--ill-editor-settings-bar-settings-bar-text-shadow-color));
   background-color: var(--ill-editor-settings-bar-hover-settings-bar-background, var(--ill-editor-settings-bar-settings-bar-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-settings-bar-hover-settings-bar-gradient-angle, var(--ill-editor-settings-bar-settings-bar-gradient-angle)),
+      var(--ill-editor-settings-bar-hover-settings-bar-gradient-from, var(--ill-editor-settings-bar-settings-bar-gradient-from)), var(--ill-editor-settings-bar-hover-settings-bar-gradient-to, var(--ill-editor-settings-bar-settings-bar-gradient-to)));
+  backdrop-filter: var(--ill-editor-settings-bar-hover-settings-bar-frost, var(--ill-editor-settings-bar-settings-bar-frost));
   padding: var(--ill-editor-settings-bar-hover-settings-bar-padding-top, var(--ill-editor-settings-bar-settings-bar-padding-top)) var(--ill-editor-settings-bar-hover-settings-bar-padding-right, var(--ill-editor-settings-bar-settings-bar-padding-right))
            var(--ill-editor-settings-bar-hover-settings-bar-padding-bottom, var(--ill-editor-settings-bar-settings-bar-padding-bottom)) var(--ill-editor-settings-bar-hover-settings-bar-padding-left, var(--ill-editor-settings-bar-settings-bar-padding-left));
   margin: var(--ill-editor-settings-bar-hover-settings-bar-margin-top, var(--ill-editor-settings-bar-settings-bar-margin-top)) var(--ill-editor-settings-bar-hover-settings-bar-margin-right, var(--ill-editor-settings-bar-settings-bar-margin-right))
@@ -4564,6 +4603,9 @@
 .illuminus-styled.journal-entry-page .page-metadata select:hover,
 .illuminus-styled .illuminus-preview__editor .page-metadata select:hover {
   background-color: var(--ill-editor-settings-bar-hover-field-background, var(--ill-editor-settings-bar-field-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-settings-bar-hover-field-gradient-angle, var(--ill-editor-settings-bar-field-gradient-angle)),
+      var(--ill-editor-settings-bar-hover-field-gradient-from, var(--ill-editor-settings-bar-field-gradient-from)), var(--ill-editor-settings-bar-hover-field-gradient-to, var(--ill-editor-settings-bar-field-gradient-to)));
+  backdrop-filter: var(--ill-editor-settings-bar-hover-field-frost, var(--ill-editor-settings-bar-field-frost));
   padding: var(--ill-editor-settings-bar-hover-field-padding-top, var(--ill-editor-settings-bar-field-padding-top)) var(--ill-editor-settings-bar-hover-field-padding-right, var(--ill-editor-settings-bar-field-padding-right))
            var(--ill-editor-settings-bar-hover-field-padding-bottom, var(--ill-editor-settings-bar-field-padding-bottom)) var(--ill-editor-settings-bar-hover-field-padding-left, var(--ill-editor-settings-bar-field-padding-left));
   border-width: var(--ill-editor-settings-bar-hover-field-border-top-width, var(--ill-editor-settings-bar-field-border-top-width)) var(--ill-editor-settings-bar-hover-field-border-right-width, var(--ill-editor-settings-bar-field-border-right-width))
@@ -4605,6 +4647,9 @@
 
 .illuminus-styled#prosemirror-dropdown ul:hover {
   background-color: var(--ill-editor-dropdowns-hover-list-background, var(--ill-editor-dropdowns-list-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-dropdowns-hover-list-gradient-angle, var(--ill-editor-dropdowns-list-gradient-angle)),
+      var(--ill-editor-dropdowns-hover-list-gradient-from, var(--ill-editor-dropdowns-list-gradient-from)), var(--ill-editor-dropdowns-hover-list-gradient-to, var(--ill-editor-dropdowns-list-gradient-to)));
+  backdrop-filter: var(--ill-editor-dropdowns-hover-list-frost, var(--ill-editor-dropdowns-list-frost));
   padding: var(--ill-editor-dropdowns-hover-list-padding-top, var(--ill-editor-dropdowns-list-padding-top)) var(--ill-editor-dropdowns-hover-list-padding-right, var(--ill-editor-dropdowns-list-padding-right))
            var(--ill-editor-dropdowns-hover-list-padding-bottom, var(--ill-editor-dropdowns-list-padding-bottom)) var(--ill-editor-dropdowns-hover-list-padding-left, var(--ill-editor-dropdowns-list-padding-left));
   border-width: var(--ill-editor-dropdowns-hover-list-border-top-width, var(--ill-editor-dropdowns-list-border-top-width)) var(--ill-editor-dropdowns-hover-list-border-right-width, var(--ill-editor-dropdowns-list-border-right-width))
@@ -4634,6 +4679,9 @@
   text-shadow: var(--ill-editor-dropdowns-hover-item-text-shadow-offset-x, var(--ill-editor-dropdowns-item-text-shadow-offset-x)) var(--ill-editor-dropdowns-hover-item-text-shadow-offset-y, var(--ill-editor-dropdowns-item-text-shadow-offset-y))
                var(--ill-editor-dropdowns-hover-item-text-shadow-blur, var(--ill-editor-dropdowns-item-text-shadow-blur)) var(--ill-editor-dropdowns-hover-item-text-shadow-color, var(--ill-editor-dropdowns-item-text-shadow-color));
   background-color: var(--ill-editor-dropdowns-hover-item-background, var(--ill-editor-dropdowns-item-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-dropdowns-hover-item-gradient-angle, var(--ill-editor-dropdowns-item-gradient-angle)),
+      var(--ill-editor-dropdowns-hover-item-gradient-from, var(--ill-editor-dropdowns-item-gradient-from)), var(--ill-editor-dropdowns-hover-item-gradient-to, var(--ill-editor-dropdowns-item-gradient-to)));
+  backdrop-filter: var(--ill-editor-dropdowns-hover-item-frost, var(--ill-editor-dropdowns-item-frost));
   padding: var(--ill-editor-dropdowns-hover-item-padding-top, var(--ill-editor-dropdowns-item-padding-top)) var(--ill-editor-dropdowns-hover-item-padding-right, var(--ill-editor-dropdowns-item-padding-right))
            var(--ill-editor-dropdowns-hover-item-padding-bottom, var(--ill-editor-dropdowns-item-padding-bottom)) var(--ill-editor-dropdowns-hover-item-padding-left, var(--ill-editor-dropdowns-item-padding-left));
   border-radius: var(--ill-editor-dropdowns-hover-item-corner-top-left, var(--ill-editor-dropdowns-item-corner-top-left)) var(--ill-editor-dropdowns-hover-item-corner-top-right, var(--ill-editor-dropdowns-item-corner-top-right))
@@ -4673,6 +4721,9 @@
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown):hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown):hover {
   background-color: var(--ill-editor-toolbar-toolbar-button-hover-background, var(--ill-editor-toolbar-toolbar-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-toolbar-hover-toolbar-button-gradient-angle, var(--ill-editor-toolbar-toolbar-button-gradient-angle)),
+      var(--ill-editor-toolbar-hover-toolbar-button-gradient-from, var(--ill-editor-toolbar-toolbar-button-gradient-from)), var(--ill-editor-toolbar-hover-toolbar-button-gradient-to, var(--ill-editor-toolbar-toolbar-button-gradient-to)));
+  backdrop-filter: var(--ill-editor-toolbar-hover-toolbar-button-frost, var(--ill-editor-toolbar-toolbar-button-frost));
   padding: var(--ill-editor-toolbar-hover-toolbar-button-padding-top, var(--ill-editor-toolbar-toolbar-button-padding-top)) var(--ill-editor-toolbar-hover-toolbar-button-padding-right, var(--ill-editor-toolbar-toolbar-button-padding-right))
            var(--ill-editor-toolbar-hover-toolbar-button-padding-bottom, var(--ill-editor-toolbar-toolbar-button-padding-bottom)) var(--ill-editor-toolbar-hover-toolbar-button-padding-left, var(--ill-editor-toolbar-toolbar-button-padding-left));
   border-width: var(--ill-editor-toolbar-hover-toolbar-button-border-top-width, var(--ill-editor-toolbar-toolbar-button-border-top-width)) var(--ill-editor-toolbar-hover-toolbar-button-border-right-width, var(--ill-editor-toolbar-toolbar-button-border-right-width))
@@ -4696,6 +4747,9 @@
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
   --button-text-color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer)));
   background-color: var(--ill-editor-dropdowns-dropdown-hover-background, var(--ill-editor-dropdowns-dropdown-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-dropdowns-hover-dropdown-gradient-angle, var(--ill-editor-dropdowns-dropdown-gradient-angle)),
+      var(--ill-editor-dropdowns-hover-dropdown-gradient-from, var(--ill-editor-dropdowns-dropdown-gradient-from)), var(--ill-editor-dropdowns-hover-dropdown-gradient-to, var(--ill-editor-dropdowns-dropdown-gradient-to)));
+  backdrop-filter: var(--ill-editor-dropdowns-hover-dropdown-frost, var(--ill-editor-dropdowns-dropdown-frost));
   padding: var(--ill-editor-dropdowns-hover-dropdown-padding-top, var(--ill-editor-dropdowns-dropdown-padding-top)) var(--ill-editor-dropdowns-hover-dropdown-padding-right, var(--ill-editor-dropdowns-dropdown-padding-right))
            var(--ill-editor-dropdowns-hover-dropdown-padding-bottom, var(--ill-editor-dropdowns-dropdown-padding-bottom)) var(--ill-editor-dropdowns-hover-dropdown-padding-left, var(--ill-editor-dropdowns-dropdown-padding-left));
   border-width: var(--ill-editor-dropdowns-hover-dropdown-border-top-width, var(--ill-editor-dropdowns-dropdown-border-top-width)) var(--ill-editor-dropdowns-hover-dropdown-border-right-width, var(--ill-editor-dropdowns-dropdown-border-right-width))
@@ -4732,6 +4786,9 @@
 
 .illuminus-styled .window-header:hover::after {
   background-color: var(--ill-window-hover-title-bar-background, var(--ill-window-title-bar-background, revert-layer));
+  background-image: linear-gradient(var(--ill-window-hover-title-bar-gradient-angle, var(--ill-window-title-bar-gradient-angle)),
+      var(--ill-window-hover-title-bar-gradient-from, var(--ill-window-title-bar-gradient-from)), var(--ill-window-hover-title-bar-gradient-to, var(--ill-window-title-bar-gradient-to)));
+  backdrop-filter: var(--ill-window-hover-title-bar-frost, var(--ill-window-title-bar-frost));
 }
 
 .illuminus-styled.journal-entry-page.application:hover::after,
@@ -4745,6 +4802,9 @@
 .illuminus-styled.journal-entry-page .window-header:hover::after,
 .illuminus-styled .illuminus-preview__editor .window-header:hover::after {
   background-color: var(--ill-editor-hover-title-bar-background, var(--ill-editor-title-bar-background, revert-layer));
+  background-image: linear-gradient(var(--ill-editor-hover-title-bar-gradient-angle, var(--ill-editor-title-bar-gradient-angle)),
+      var(--ill-editor-hover-title-bar-gradient-from, var(--ill-editor-title-bar-gradient-from)), var(--ill-editor-hover-title-bar-gradient-to, var(--ill-editor-title-bar-gradient-to)));
+  backdrop-filter: var(--ill-editor-hover-title-bar-frost, var(--ill-editor-title-bar-frost));
 }
 
 .illuminus-styled.sheet.journal-entry:hover,
@@ -4776,6 +4836,9 @@
 
 .illuminus-styled .journal-sidebar .toc li.page:hover {
   background-color: var(--ill-sidebar-entries-entry-hover-background, var(--ill-sidebar-entries-entry-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-entries-hover-entry-gradient-angle, var(--ill-sidebar-entries-entry-gradient-angle)),
+      var(--ill-sidebar-entries-hover-entry-gradient-from, var(--ill-sidebar-entries-entry-gradient-from)), var(--ill-sidebar-entries-hover-entry-gradient-to, var(--ill-sidebar-entries-entry-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-entries-hover-entry-frost, var(--ill-sidebar-entries-entry-frost));
   padding: var(--ill-sidebar-entries-hover-entry-padding-top, var(--ill-sidebar-entries-entry-padding-top)) var(--ill-sidebar-entries-hover-entry-padding-right, var(--ill-sidebar-entries-entry-padding-right))
            var(--ill-sidebar-entries-hover-entry-padding-bottom, var(--ill-sidebar-entries-entry-padding-bottom)) var(--ill-sidebar-entries-hover-entry-padding-left, var(--ill-sidebar-entries-entry-padding-left));
   margin: var(--ill-sidebar-entries-hover-entry-margin-top, var(--ill-sidebar-entries-entry-margin-top)) var(--ill-sidebar-entries-hover-entry-margin-right, var(--ill-sidebar-entries-entry-margin-right))
@@ -4827,6 +4890,9 @@
 
 .illuminus-styled .journal-sidebar .toc li.heading:hover {
   background-color: var(--ill-sidebar-headings-hover-heading-background, var(--ill-sidebar-headings-heading-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-headings-hover-heading-gradient-angle, var(--ill-sidebar-headings-heading-gradient-angle)),
+      var(--ill-sidebar-headings-hover-heading-gradient-from, var(--ill-sidebar-headings-heading-gradient-from)), var(--ill-sidebar-headings-hover-heading-gradient-to, var(--ill-sidebar-headings-heading-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-headings-hover-heading-frost, var(--ill-sidebar-headings-heading-frost));
   padding: var(--ill-sidebar-headings-hover-heading-padding-top, var(--ill-sidebar-headings-heading-padding-top)) var(--ill-sidebar-headings-hover-heading-padding-right, var(--ill-sidebar-headings-heading-padding-right))
            var(--ill-sidebar-headings-hover-heading-padding-bottom, var(--ill-sidebar-headings-heading-padding-bottom)) var(--ill-sidebar-headings-hover-heading-padding-left, var(--ill-sidebar-headings-heading-padding-left));
   margin: var(--ill-sidebar-headings-hover-heading-margin-top, var(--ill-sidebar-headings-heading-margin-top)) var(--ill-sidebar-headings-hover-heading-margin-right, var(--ill-sidebar-headings-heading-margin-right))
@@ -4859,6 +4925,9 @@
 .illuminus-styled .journal-sidebar .toc li.category:hover {
   text-align: var(--ill-sidebar-categories-hover-category-align, var(--ill-sidebar-categories-category-align, revert-layer));
   background-color: var(--ill-sidebar-categories-hover-category-background, var(--ill-sidebar-categories-category-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-categories-hover-category-gradient-angle, var(--ill-sidebar-categories-category-gradient-angle)),
+      var(--ill-sidebar-categories-hover-category-gradient-from, var(--ill-sidebar-categories-category-gradient-from)), var(--ill-sidebar-categories-hover-category-gradient-to, var(--ill-sidebar-categories-category-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-categories-hover-category-frost, var(--ill-sidebar-categories-category-frost));
   padding: var(--ill-sidebar-categories-hover-category-padding-top, var(--ill-sidebar-categories-category-padding-top)) var(--ill-sidebar-categories-hover-category-padding-right, var(--ill-sidebar-categories-category-padding-right))
            var(--ill-sidebar-categories-hover-category-padding-bottom, var(--ill-sidebar-categories-category-padding-bottom)) var(--ill-sidebar-categories-hover-category-padding-left, var(--ill-sidebar-categories-category-padding-left));
   margin: var(--ill-sidebar-categories-hover-category-margin-top, var(--ill-sidebar-categories-category-margin-top)) var(--ill-sidebar-categories-hover-category-margin-right, var(--ill-sidebar-categories-category-margin-right))
@@ -4894,6 +4963,9 @@
   --input-text-color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color, revert-layer));
   --input-placeholder-color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
   background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-search-hover-search-gradient-angle, var(--ill-sidebar-search-search-gradient-angle)),
+      var(--ill-sidebar-search-hover-search-gradient-from, var(--ill-sidebar-search-search-gradient-from)), var(--ill-sidebar-search-hover-search-gradient-to, var(--ill-sidebar-search-search-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-search-hover-search-frost, var(--ill-sidebar-search-search-frost));
   color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color, revert-layer));
   font-size: var(--ill-sidebar-search-hover-search-size, var(--ill-sidebar-search-search-size, revert-layer));
   border-width: var(--ill-sidebar-search-hover-search-border-top-width, var(--ill-sidebar-search-search-border-top-width)) var(--ill-sidebar-search-hover-search-border-right-width, var(--ill-sidebar-search-search-border-right-width))
@@ -4916,6 +4988,9 @@
   --button-border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
   color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color, revert-layer));
   background-color: var(--ill-sidebar-buttons-button-hover-background, var(--ill-sidebar-buttons-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-buttons-hover-button-gradient-angle, var(--ill-sidebar-buttons-button-gradient-angle)),
+      var(--ill-sidebar-buttons-hover-button-gradient-from, var(--ill-sidebar-buttons-button-gradient-from)), var(--ill-sidebar-buttons-hover-button-gradient-to, var(--ill-sidebar-buttons-button-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-buttons-hover-button-frost, var(--ill-sidebar-buttons-button-frost));
   border-width: var(--ill-sidebar-buttons-hover-button-border-width, var(--ill-sidebar-buttons-button-border-width, revert-layer));
   border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
   border-radius: var(--ill-sidebar-buttons-hover-button-corner-top-left, var(--ill-sidebar-buttons-button-corner-top-left)) var(--ill-sidebar-buttons-hover-button-corner-top-right, var(--ill-sidebar-buttons-button-corner-top-right))
@@ -5005,6 +5080,9 @@
 
 .illuminus-styled .journal-page-content mark:hover {
   background-color: var(--ill-body-hover-highlight-background, var(--ill-body-highlight-background));
+  background-image: linear-gradient(var(--ill-body-hover-highlight-gradient-angle, var(--ill-body-highlight-gradient-angle)),
+      var(--ill-body-hover-highlight-gradient-from, var(--ill-body-highlight-gradient-from)), var(--ill-body-hover-highlight-gradient-to, var(--ill-body-highlight-gradient-to)));
+  backdrop-filter: var(--ill-body-hover-highlight-frost, var(--ill-body-highlight-frost));
   color: var(--ill-body-hover-highlight-color, var(--ill-body-highlight-color));
 }
 
@@ -5039,6 +5117,9 @@
   font-size: var(--ill-body-hover-code-size, var(--ill-body-code-size));
   color: var(--ill-body-hover-code-color, var(--ill-body-code-color));
   background-color: var(--ill-body-hover-code-background, var(--ill-body-code-background));
+  background-image: linear-gradient(var(--ill-body-hover-code-gradient-angle, var(--ill-body-code-gradient-angle)),
+      var(--ill-body-hover-code-gradient-from, var(--ill-body-code-gradient-from)), var(--ill-body-hover-code-gradient-to, var(--ill-body-code-gradient-to)));
+  backdrop-filter: var(--ill-body-hover-code-frost, var(--ill-body-code-frost));
   box-shadow: var(--ill-body-hover-code-shadow-offset-x, var(--ill-body-code-shadow-offset-x)) var(--ill-body-hover-code-shadow-offset-y, var(--ill-body-code-shadow-offset-y))
               var(--ill-body-hover-code-shadow-blur, var(--ill-body-code-shadow-blur)) var(--ill-body-hover-code-shadow-spread, var(--ill-body-code-shadow-spread))
               var(--ill-body-hover-code-shadow-color, var(--ill-body-code-shadow-color)),
@@ -5073,6 +5154,9 @@
   margin-top: var(--ill-body-hover-code-block-margin-top, var(--ill-body-code-block-margin-top));
   margin-bottom: var(--ill-body-hover-code-block-margin-bottom, var(--ill-body-code-block-margin-bottom));
   background-color: var(--ill-body-hover-code-background, var(--ill-body-code-background));
+  background-image: linear-gradient(var(--ill-body-hover-code-gradient-angle, var(--ill-body-code-gradient-angle)),
+      var(--ill-body-hover-code-gradient-from, var(--ill-body-code-gradient-from)), var(--ill-body-hover-code-gradient-to, var(--ill-body-code-gradient-to)));
+  backdrop-filter: var(--ill-body-hover-code-frost, var(--ill-body-code-frost));
   box-shadow: var(--ill-body-hover-code-shadow-offset-x, var(--ill-body-code-shadow-offset-x)) var(--ill-body-hover-code-shadow-offset-y, var(--ill-body-code-shadow-offset-y))
               var(--ill-body-hover-code-shadow-blur, var(--ill-body-code-shadow-blur)) var(--ill-body-hover-code-shadow-spread, var(--ill-body-code-shadow-spread))
               var(--ill-body-hover-code-shadow-color, var(--ill-body-code-shadow-color)),
@@ -5088,6 +5172,9 @@
 
 .illuminus-styled .journal-page-content details:hover {
   background-color: var(--ill-boxes-hover-collapsible-background, var(--ill-boxes-collapsible-background));
+  background-image: linear-gradient(var(--ill-boxes-hover-collapsible-gradient-angle, var(--ill-boxes-collapsible-gradient-angle)),
+      var(--ill-boxes-hover-collapsible-gradient-from, var(--ill-boxes-collapsible-gradient-from)), var(--ill-boxes-hover-collapsible-gradient-to, var(--ill-boxes-collapsible-gradient-to)));
+  backdrop-filter: var(--ill-boxes-hover-collapsible-frost, var(--ill-boxes-collapsible-frost));
   border: var(--ill-boxes-hover-collapsible-border-width, var(--ill-boxes-collapsible-border-width)) solid var(--ill-boxes-hover-collapsible-border-color, var(--ill-boxes-collapsible-border-color));
   border-radius: var(--ill-boxes-hover-collapsible-corner-top-left, var(--ill-boxes-collapsible-corner-top-left)) var(--ill-boxes-hover-collapsible-corner-top-right, var(--ill-boxes-collapsible-corner-top-right))
                  var(--ill-boxes-hover-collapsible-corner-bottom-right, var(--ill-boxes-collapsible-corner-bottom-right)) var(--ill-boxes-hover-collapsible-corner-bottom-left, var(--ill-boxes-collapsible-corner-bottom-left));
@@ -5110,6 +5197,9 @@
   font-variant: var(--ill-boxes-hover-summary-caps-variant, var(--ill-boxes-summary-caps-variant));
   text-transform: var(--ill-boxes-hover-summary-caps-transform, var(--ill-boxes-summary-caps-transform));
   background-color: var(--ill-boxes-hover-summary-background, var(--ill-boxes-summary-background));
+  background-image: linear-gradient(var(--ill-boxes-hover-summary-gradient-angle, var(--ill-boxes-summary-gradient-angle)),
+      var(--ill-boxes-hover-summary-gradient-from, var(--ill-boxes-summary-gradient-from)), var(--ill-boxes-hover-summary-gradient-to, var(--ill-boxes-summary-gradient-to)));
+  backdrop-filter: var(--ill-boxes-hover-summary-frost, var(--ill-boxes-summary-frost));
   box-shadow: var(--ill-boxes-hover-summary-shadow-offset-x, var(--ill-boxes-summary-shadow-offset-x)) var(--ill-boxes-hover-summary-shadow-offset-y, var(--ill-boxes-summary-shadow-offset-y))
               var(--ill-boxes-hover-summary-shadow-blur, var(--ill-boxes-summary-shadow-blur)) var(--ill-boxes-hover-summary-shadow-spread, var(--ill-boxes-summary-shadow-spread))
               var(--ill-boxes-hover-summary-shadow-color, var(--ill-boxes-summary-shadow-color)),
@@ -5221,6 +5311,9 @@ iframe):hover {
 
 .illuminus-styled .journal-page-content section.secret.revealed:hover {
   background-color: var(--ill-secrets-hover-revealed-background, var(--ill-secrets-revealed-background));
+  background-image: linear-gradient(var(--ill-secrets-hover-revealed-gradient-angle, var(--ill-secrets-revealed-gradient-angle)),
+      var(--ill-secrets-hover-revealed-gradient-from, var(--ill-secrets-revealed-gradient-from)), var(--ill-secrets-hover-revealed-gradient-to, var(--ill-secrets-revealed-gradient-to)));
+  backdrop-filter: var(--ill-secrets-hover-revealed-frost, var(--ill-secrets-revealed-frost));
   box-shadow: var(--ill-secrets-hover-revealed-shadow-offset-x, var(--ill-secrets-revealed-shadow-offset-x)) var(--ill-secrets-hover-revealed-shadow-offset-y, var(--ill-secrets-revealed-shadow-offset-y))
               var(--ill-secrets-hover-revealed-shadow-blur, var(--ill-secrets-revealed-shadow-blur)) var(--ill-secrets-hover-revealed-shadow-spread, var(--ill-secrets-revealed-shadow-spread))
               var(--ill-secrets-hover-revealed-shadow-color, var(--ill-secrets-revealed-shadow-color)),
@@ -5249,6 +5342,9 @@ iframe):hover {
   --button-border-color: var(--ill-secrets-button-hover-border-color, var(--ill-secrets-button-border-color));
   color: var(--ill-secrets-button-hover-color, var(--ill-secrets-button-color));
   background-color: var(--ill-secrets-button-hover-background, var(--ill-secrets-button-background));
+  background-image: linear-gradient(var(--ill-secrets-hover-button-gradient-angle, var(--ill-secrets-button-gradient-angle)),
+      var(--ill-secrets-hover-button-gradient-from, var(--ill-secrets-button-gradient-from)), var(--ill-secrets-hover-button-gradient-to, var(--ill-secrets-button-gradient-to)));
+  backdrop-filter: var(--ill-secrets-hover-button-frost, var(--ill-secrets-button-frost));
   box-shadow: var(--ill-secrets-hover-button-shadow-offset-x, var(--ill-secrets-button-shadow-offset-x)) var(--ill-secrets-hover-button-shadow-offset-y, var(--ill-secrets-button-shadow-offset-y))
               var(--ill-secrets-hover-button-shadow-blur, var(--ill-secrets-button-shadow-blur)) var(--ill-secrets-hover-button-shadow-spread, var(--ill-secrets-button-shadow-spread))
               var(--ill-secrets-hover-button-shadow-color, var(--ill-secrets-button-shadow-color)),
@@ -5452,6 +5548,7 @@ iframe):hover {
   background-color: var(--ill-heading1-hover-background, var(--ill-heading1-background));
   background-image: linear-gradient(var(--ill-heading1-hover-gradient-angle, var(--ill-heading1-gradient-angle)),
     var(--ill-heading1-hover-gradient-from, var(--ill-heading1-gradient-from)), var(--ill-heading1-hover-gradient-to, var(--ill-heading1-gradient-to)));
+  backdrop-filter: var(--ill-heading1-hover-frost, var(--ill-heading1-frost));
   margin: var(--ill-heading1-hover-margin-top, var(--ill-heading1-margin-top)) var(--ill-heading1-hover-margin-right, var(--ill-heading1-margin-right)) var(--ill-heading1-hover-margin-bottom, var(--ill-heading1-margin-bottom)) var(--ill-heading1-hover-margin-left, var(--ill-heading1-margin-left));
   padding: var(--ill-heading1-hover-padding-top, var(--ill-heading1-padding-top)) var(--ill-heading1-hover-padding-right, var(--ill-heading1-padding-right)) var(--ill-heading1-hover-padding-bottom, var(--ill-heading1-padding-bottom)) var(--ill-heading1-hover-padding-left, var(--ill-heading1-padding-left));
   border-width: var(--ill-heading1-hover-border-top-width, var(--ill-heading1-border-top-width)) var(--ill-heading1-hover-border-right-width, var(--ill-heading1-border-right-width)) var(--ill-heading1-hover-border-bottom-width, var(--ill-heading1-border-bottom-width)) var(--ill-heading1-hover-border-left-width, var(--ill-heading1-border-left-width));
@@ -5529,6 +5626,7 @@ iframe):hover {
   background-color: var(--ill-heading2-hover-background, var(--ill-heading2-background));
   background-image: linear-gradient(var(--ill-heading2-hover-gradient-angle, var(--ill-heading2-gradient-angle)),
     var(--ill-heading2-hover-gradient-from, var(--ill-heading2-gradient-from)), var(--ill-heading2-hover-gradient-to, var(--ill-heading2-gradient-to)));
+  backdrop-filter: var(--ill-heading2-hover-frost, var(--ill-heading2-frost));
   margin: var(--ill-heading2-hover-margin-top, var(--ill-heading2-margin-top)) var(--ill-heading2-hover-margin-right, var(--ill-heading2-margin-right)) var(--ill-heading2-hover-margin-bottom, var(--ill-heading2-margin-bottom)) var(--ill-heading2-hover-margin-left, var(--ill-heading2-margin-left));
   padding: var(--ill-heading2-hover-padding-top, var(--ill-heading2-padding-top)) var(--ill-heading2-hover-padding-right, var(--ill-heading2-padding-right)) var(--ill-heading2-hover-padding-bottom, var(--ill-heading2-padding-bottom)) var(--ill-heading2-hover-padding-left, var(--ill-heading2-padding-left));
   border-width: var(--ill-heading2-hover-border-top-width, var(--ill-heading2-border-top-width)) var(--ill-heading2-hover-border-right-width, var(--ill-heading2-border-right-width)) var(--ill-heading2-hover-border-bottom-width, var(--ill-heading2-border-bottom-width)) var(--ill-heading2-hover-border-left-width, var(--ill-heading2-border-left-width));
@@ -5597,6 +5695,7 @@ iframe):hover {
   background-color: var(--ill-heading3-hover-background, var(--ill-heading3-background));
   background-image: linear-gradient(var(--ill-heading3-hover-gradient-angle, var(--ill-heading3-gradient-angle)),
     var(--ill-heading3-hover-gradient-from, var(--ill-heading3-gradient-from)), var(--ill-heading3-hover-gradient-to, var(--ill-heading3-gradient-to)));
+  backdrop-filter: var(--ill-heading3-hover-frost, var(--ill-heading3-frost));
   margin: var(--ill-heading3-hover-margin-top, var(--ill-heading3-margin-top)) var(--ill-heading3-hover-margin-right, var(--ill-heading3-margin-right)) var(--ill-heading3-hover-margin-bottom, var(--ill-heading3-margin-bottom)) var(--ill-heading3-hover-margin-left, var(--ill-heading3-margin-left));
   padding: var(--ill-heading3-hover-padding-top, var(--ill-heading3-padding-top)) var(--ill-heading3-hover-padding-right, var(--ill-heading3-padding-right)) var(--ill-heading3-hover-padding-bottom, var(--ill-heading3-padding-bottom)) var(--ill-heading3-hover-padding-left, var(--ill-heading3-padding-left));
   border-width: var(--ill-heading3-hover-border-top-width, var(--ill-heading3-border-top-width)) var(--ill-heading3-hover-border-right-width, var(--ill-heading3-border-right-width)) var(--ill-heading3-hover-border-bottom-width, var(--ill-heading3-border-bottom-width)) var(--ill-heading3-hover-border-left-width, var(--ill-heading3-border-left-width));
@@ -5665,6 +5764,7 @@ iframe):hover {
   background-color: var(--ill-heading4-hover-background, var(--ill-heading4-background));
   background-image: linear-gradient(var(--ill-heading4-hover-gradient-angle, var(--ill-heading4-gradient-angle)),
     var(--ill-heading4-hover-gradient-from, var(--ill-heading4-gradient-from)), var(--ill-heading4-hover-gradient-to, var(--ill-heading4-gradient-to)));
+  backdrop-filter: var(--ill-heading4-hover-frost, var(--ill-heading4-frost));
   margin: var(--ill-heading4-hover-margin-top, var(--ill-heading4-margin-top)) var(--ill-heading4-hover-margin-right, var(--ill-heading4-margin-right)) var(--ill-heading4-hover-margin-bottom, var(--ill-heading4-margin-bottom)) var(--ill-heading4-hover-margin-left, var(--ill-heading4-margin-left));
   padding: var(--ill-heading4-hover-padding-top, var(--ill-heading4-padding-top)) var(--ill-heading4-hover-padding-right, var(--ill-heading4-padding-right)) var(--ill-heading4-hover-padding-bottom, var(--ill-heading4-padding-bottom)) var(--ill-heading4-hover-padding-left, var(--ill-heading4-padding-left));
   border-width: var(--ill-heading4-hover-border-top-width, var(--ill-heading4-border-top-width)) var(--ill-heading4-hover-border-right-width, var(--ill-heading4-border-right-width)) var(--ill-heading4-hover-border-bottom-width, var(--ill-heading4-border-bottom-width)) var(--ill-heading4-hover-border-left-width, var(--ill-heading4-border-left-width));
@@ -5733,6 +5833,7 @@ iframe):hover {
   background-color: var(--ill-heading5-hover-background, var(--ill-heading5-background));
   background-image: linear-gradient(var(--ill-heading5-hover-gradient-angle, var(--ill-heading5-gradient-angle)),
     var(--ill-heading5-hover-gradient-from, var(--ill-heading5-gradient-from)), var(--ill-heading5-hover-gradient-to, var(--ill-heading5-gradient-to)));
+  backdrop-filter: var(--ill-heading5-hover-frost, var(--ill-heading5-frost));
   margin: var(--ill-heading5-hover-margin-top, var(--ill-heading5-margin-top)) var(--ill-heading5-hover-margin-right, var(--ill-heading5-margin-right)) var(--ill-heading5-hover-margin-bottom, var(--ill-heading5-margin-bottom)) var(--ill-heading5-hover-margin-left, var(--ill-heading5-margin-left));
   padding: var(--ill-heading5-hover-padding-top, var(--ill-heading5-padding-top)) var(--ill-heading5-hover-padding-right, var(--ill-heading5-padding-right)) var(--ill-heading5-hover-padding-bottom, var(--ill-heading5-padding-bottom)) var(--ill-heading5-hover-padding-left, var(--ill-heading5-padding-left));
   border-width: var(--ill-heading5-hover-border-top-width, var(--ill-heading5-border-top-width)) var(--ill-heading5-hover-border-right-width, var(--ill-heading5-border-right-width)) var(--ill-heading5-hover-border-bottom-width, var(--ill-heading5-border-bottom-width)) var(--ill-heading5-hover-border-left-width, var(--ill-heading5-border-left-width));
@@ -5801,6 +5902,7 @@ iframe):hover {
   background-color: var(--ill-heading6-hover-background, var(--ill-heading6-background));
   background-image: linear-gradient(var(--ill-heading6-hover-gradient-angle, var(--ill-heading6-gradient-angle)),
     var(--ill-heading6-hover-gradient-from, var(--ill-heading6-gradient-from)), var(--ill-heading6-hover-gradient-to, var(--ill-heading6-gradient-to)));
+  backdrop-filter: var(--ill-heading6-hover-frost, var(--ill-heading6-frost));
   margin: var(--ill-heading6-hover-margin-top, var(--ill-heading6-margin-top)) var(--ill-heading6-hover-margin-right, var(--ill-heading6-margin-right)) var(--ill-heading6-hover-margin-bottom, var(--ill-heading6-margin-bottom)) var(--ill-heading6-hover-margin-left, var(--ill-heading6-margin-left));
   padding: var(--ill-heading6-hover-padding-top, var(--ill-heading6-padding-top)) var(--ill-heading6-hover-padding-right, var(--ill-heading6-padding-right)) var(--ill-heading6-hover-padding-bottom, var(--ill-heading6-padding-bottom)) var(--ill-heading6-hover-padding-left, var(--ill-heading6-padding-left));
   border-width: var(--ill-heading6-hover-border-top-width, var(--ill-heading6-border-top-width)) var(--ill-heading6-hover-border-right-width, var(--ill-heading6-border-right-width)) var(--ill-heading6-hover-border-bottom-width, var(--ill-heading6-border-bottom-width)) var(--ill-heading6-hover-border-left-width, var(--ill-heading6-border-left-width));
@@ -7346,6 +7448,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-tables-hover-header-word-spacing, var(--ill-tables-header-word-spacing));
   text-align: var(--ill-tables-hover-header-align, var(--ill-tables-header-align));
   background-color: var(--ill-tables-hover-header-background, var(--ill-tables-header-background));
+  background-image: linear-gradient(var(--ill-tables-hover-header-gradient-angle, var(--ill-tables-header-gradient-angle)),
+    var(--ill-tables-hover-header-gradient-from, var(--ill-tables-header-gradient-from)), var(--ill-tables-hover-header-gradient-to, var(--ill-tables-header-gradient-to)));
+  backdrop-filter: var(--ill-tables-hover-header-frost, var(--ill-tables-header-frost));
   color: var(--ill-tables-hover-header-color, var(--ill-tables-header-color));
 }
 
@@ -7423,6 +7528,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-table01-hover-header-word-spacing, var(--ill-table01-header-word-spacing));
   text-align: var(--ill-table01-hover-header-align, var(--ill-table01-header-align));
   background-color: var(--ill-table01-hover-header-background, var(--ill-table01-header-background));
+  background-image: linear-gradient(var(--ill-table01-hover-header-gradient-angle, var(--ill-table01-header-gradient-angle)),
+    var(--ill-table01-hover-header-gradient-from, var(--ill-table01-header-gradient-from)), var(--ill-table01-hover-header-gradient-to, var(--ill-table01-header-gradient-to)));
+  backdrop-filter: var(--ill-table01-hover-header-frost, var(--ill-table01-header-frost));
   color: var(--ill-table01-hover-header-color, var(--ill-table01-header-color));
 }
 
@@ -7500,6 +7608,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-table02-hover-header-word-spacing, var(--ill-table02-header-word-spacing));
   text-align: var(--ill-table02-hover-header-align, var(--ill-table02-header-align));
   background-color: var(--ill-table02-hover-header-background, var(--ill-table02-header-background));
+  background-image: linear-gradient(var(--ill-table02-hover-header-gradient-angle, var(--ill-table02-header-gradient-angle)),
+    var(--ill-table02-hover-header-gradient-from, var(--ill-table02-header-gradient-from)), var(--ill-table02-hover-header-gradient-to, var(--ill-table02-header-gradient-to)));
+  backdrop-filter: var(--ill-table02-hover-header-frost, var(--ill-table02-header-frost));
   color: var(--ill-table02-hover-header-color, var(--ill-table02-header-color));
 }
 
@@ -7577,6 +7688,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-table03-hover-header-word-spacing, var(--ill-table03-header-word-spacing));
   text-align: var(--ill-table03-hover-header-align, var(--ill-table03-header-align));
   background-color: var(--ill-table03-hover-header-background, var(--ill-table03-header-background));
+  background-image: linear-gradient(var(--ill-table03-hover-header-gradient-angle, var(--ill-table03-header-gradient-angle)),
+    var(--ill-table03-hover-header-gradient-from, var(--ill-table03-header-gradient-from)), var(--ill-table03-hover-header-gradient-to, var(--ill-table03-header-gradient-to)));
+  backdrop-filter: var(--ill-table03-hover-header-frost, var(--ill-table03-header-frost));
   color: var(--ill-table03-hover-header-color, var(--ill-table03-header-color));
 }
 
@@ -7654,6 +7768,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-table04-hover-header-word-spacing, var(--ill-table04-header-word-spacing));
   text-align: var(--ill-table04-hover-header-align, var(--ill-table04-header-align));
   background-color: var(--ill-table04-hover-header-background, var(--ill-table04-header-background));
+  background-image: linear-gradient(var(--ill-table04-hover-header-gradient-angle, var(--ill-table04-header-gradient-angle)),
+    var(--ill-table04-hover-header-gradient-from, var(--ill-table04-header-gradient-from)), var(--ill-table04-hover-header-gradient-to, var(--ill-table04-header-gradient-to)));
+  backdrop-filter: var(--ill-table04-hover-header-frost, var(--ill-table04-header-frost));
   color: var(--ill-table04-hover-header-color, var(--ill-table04-header-color));
 }
 
@@ -7731,6 +7848,9 @@ blockquote):not(:empty))):hover {
   word-spacing: var(--ill-table05-hover-header-word-spacing, var(--ill-table05-header-word-spacing));
   text-align: var(--ill-table05-hover-header-align, var(--ill-table05-header-align));
   background-color: var(--ill-table05-hover-header-background, var(--ill-table05-header-background));
+  background-image: linear-gradient(var(--ill-table05-hover-header-gradient-angle, var(--ill-table05-header-gradient-angle)),
+    var(--ill-table05-hover-header-gradient-from, var(--ill-table05-header-gradient-from)), var(--ill-table05-hover-header-gradient-to, var(--ill-table05-header-gradient-to)));
+  backdrop-filter: var(--ill-table05-hover-header-frost, var(--ill-table05-header-frost));
   color: var(--ill-table05-hover-header-color, var(--ill-table05-header-color));
 }
 
@@ -8737,6 +8857,9 @@ blockquote):not(:empty))):hover {
 
 .illuminus-styled .journal-sidebar .toc li.page.active {
   background-color: var(--ill-sidebar-entries-entry-active-background, var(--ill-sidebar-entries-entry-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-entries-active-entry-gradient-angle, var(--ill-sidebar-entries-entry-gradient-angle)),
+      var(--ill-sidebar-entries-active-entry-gradient-from, var(--ill-sidebar-entries-entry-gradient-from)), var(--ill-sidebar-entries-active-entry-gradient-to, var(--ill-sidebar-entries-entry-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-entries-active-entry-frost, var(--ill-sidebar-entries-entry-frost));
   padding: var(--ill-sidebar-entries-active-entry-padding-top, var(--ill-sidebar-entries-entry-padding-top)) var(--ill-sidebar-entries-active-entry-padding-right, var(--ill-sidebar-entries-entry-padding-right))
            var(--ill-sidebar-entries-active-entry-padding-bottom, var(--ill-sidebar-entries-entry-padding-bottom)) var(--ill-sidebar-entries-active-entry-padding-left, var(--ill-sidebar-entries-entry-padding-left));
   margin: var(--ill-sidebar-entries-active-entry-margin-top, var(--ill-sidebar-entries-entry-margin-top)) var(--ill-sidebar-entries-active-entry-margin-right, var(--ill-sidebar-entries-entry-margin-right))
@@ -8773,6 +8896,9 @@ blockquote):not(:empty))):hover {
 
 .illuminus-styled .journal-sidebar .toc li.heading.illuminus-current {
   background-color: var(--ill-sidebar-headings-heading-active-background, var(--ill-sidebar-headings-heading-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-headings-active-heading-gradient-angle, var(--ill-sidebar-headings-heading-gradient-angle)),
+      var(--ill-sidebar-headings-active-heading-gradient-from, var(--ill-sidebar-headings-heading-gradient-from)), var(--ill-sidebar-headings-active-heading-gradient-to, var(--ill-sidebar-headings-heading-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-headings-active-heading-frost, var(--ill-sidebar-headings-heading-frost));
   padding: var(--ill-sidebar-headings-active-heading-padding-top, var(--ill-sidebar-headings-heading-padding-top)) var(--ill-sidebar-headings-active-heading-padding-right, var(--ill-sidebar-headings-heading-padding-right))
            var(--ill-sidebar-headings-active-heading-padding-bottom, var(--ill-sidebar-headings-heading-padding-bottom)) var(--ill-sidebar-headings-active-heading-padding-left, var(--ill-sidebar-headings-heading-padding-left));
   margin: var(--ill-sidebar-headings-active-heading-margin-top, var(--ill-sidebar-headings-heading-margin-top)) var(--ill-sidebar-headings-active-heading-margin-right, var(--ill-sidebar-headings-heading-margin-right))

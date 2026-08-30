@@ -37,7 +37,7 @@ Three things the build does that are worth knowing:
 ## What a sample may carry
 
 **No artwork.** Anything bundled with the module is redistributed under the
-repository's GPLv3 licence, which is a narrower gate than most "free for personal
+repository's GPLv3 license, which is a narrower gate than most "free for personal
 use" art packs allow. A sample that wants a texture should point at Foundry's own
 `icons/svg/…`, which is always present, or wait until artwork licensable that way
 is in the repository.

@@ -11,7 +11,7 @@
  *
  * The ids are derived from the names and are stable, so restoring a deleted
  * sample puts back the same one rather than a second copy. Anything bundled
- * travels under the repository's licence, which is why these carry no artwork:
+ * travels under the repository's license, which is why these carry no artwork:
  * every picture they could point at would have to be licensable that way too.
  *
  * Built against schema version 11.

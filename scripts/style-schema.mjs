@@ -185,16 +185,16 @@ function layoutFields(prefix = "", { flex = true, room = true, position = false,
 }
 
 /**
- * A fill that graduates from one colour to another.
+ * A fill that graduates from one color to another.
  *
- * A colour goes in `background-color`, and a gradient cannot: it is an image.
+ * A color goes in `background-color`, and a gradient cannot: it is an image.
  * The element's own `background-image` is free for it, because a background
  * *picture* rides on a layer of its own — which is what keeps a picture's
  * strength and blend mode independent of the lettering in front of it — so the
  * two never fight.
  *
  * Both ends start transparent, which is a gradient from nothing to nothing:
- * invisible until somebody sets a colour, and no different from the fill alone.
+ * invisible until somebody sets a color, and no different from the fill alone.
  * That is what lets this be offered on every fill without changing any style
  * that says nothing about it.
  */
@@ -474,7 +474,7 @@ function cornerFields(prefix, radius = 0) {
  * The controls for a folding marker: whether there is one, what it looks like,
  * and how far it turns when what it holds is open.
  *
- * Folding itself is behaviour rather than paint, so the switch is a real
+ * Folding itself is behavior rather than paint, so the switch is a real
  * control emitting a real property — the marker is always in the markup and the
  * stylesheet decides whether a reader can see it. That keeps the compiler's one
  * rule intact: a style supplies values, never rules.
@@ -633,7 +633,7 @@ function imageFields(prefix = "") {
     select(n("TextureBlend"), "normal", CHOICES.blend, { emit: emitKeyword }),
     num(n("TextureOpacity"), 100, "%", 0, 100, 1),
     // What is done to the picture itself before it is laid down: a scan softened
-    // until it reads as a wash, a photograph drained of its colour until it sits
+    // until it reads as a wash, a photograph drained of its color until it sits
     // under lettering, a texture darkened to hold ink. Each of these does
     // nothing at its default, so a picture nobody has touched is the picture.
     num(n("TextureBlur"), 0, "px", 0, 40, 0.5),
@@ -824,7 +824,7 @@ function bannerSections(defaults = {}) {
     },
     {
       id: "text",
-      // An outline is drawn *behind* the letterform rather than centred on its
+      // An outline is drawn *behind* the letterform rather than centerd on its
       // edge, which is what `paint-order` in the stylesheet is for: a stroke
       // painted over the fill eats into the shapes and thickens a display face
       // until it closes up.
@@ -841,14 +841,14 @@ function bannerSections(defaults = {}) {
       label: "ILLUMINUS.Sections.fillAndImage.label",
       hint: "ILLUMINUS.Sections.fillAndImage.hint",
       order: [
-        "background", "gradientFrom", "gradientTo", "gradientAngle",
+        "background", "gradientFrom", "gradientTo", "gradientAngle", "frost",
         DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend", "textureOpacity", "textureBlur", "textureBrightness", "textureContrast", "textureSaturation", "textureAge",
         DIVIDER, "innerShadowOffsetX", "innerShadowOffsetY", "innerShadowBlur",
         "innerShadowSpread", "innerShadowColor",
         DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor"
       ],
       fields: [col("background", defaults.background ?? "#00000000"),
-        ...gradientFields(), ...imageFields()]
+        ...gradientFields(), ...frostFields(), ...imageFields()]
     },
     {
       id: "padding",
@@ -1026,7 +1026,8 @@ function tableSections() {
     {
       id: "header",
       order: [
-        "headerBackground",
+        "headerBackground", "headerGradientFrom", "headerGradientTo", "headerGradientAngle",
+        "headerFrost",
         DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
         DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing", "headerWordSpacing",
         DIVIDER, "headerOutlineColor", "headerOutlineWidth",
@@ -1040,7 +1041,8 @@ function tableSections() {
         "headerShadowSpread", "headerShadowColor"
       ],
       fields: [
-        col("headerBackground", "#00000000"), ...imageFields("header"),
+        col("headerBackground", "#00000000"), ...gradientFields("header"), ...frostFields("header"),
+          ...imageFields("header"),
         col("headerColor", ""),
         font("headerFont", ""),
         num("headerSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
@@ -1170,7 +1172,7 @@ export const GROUPS = [
           // the same tab — so the pointed-at rule the generator mirrors for the
           // panel read the entry's color and painted the whole panel with it
           // the moment a pointer entered it.
-          col("entryBackground", "#00000000"), ...imageFields("entry"),
+          col("entryBackground", "entryGradientFrom", "entryGradientTo", "entryGradientAngle", "entryFrost", "#00000000"), ...gradientFields("entry"), ...frostFields("entry"), ...imageFields("entry"),
           col("entryHoverBackground", "#00000000"), ...imageFields("entryHover"),
           col("entryActiveBackground", "#00000000"), ...imageFields("entryActive"),
           ...spacingFields("entryPadding", 0, { max: 60 }),
@@ -1211,7 +1213,7 @@ export const GROUPS = [
           ...textStyleField("headingActiveTextStyle", "400", "normal"),
           num("headingActiveOutlineWidth", 0, "px", 0, 20, 0.5),
           col("headingActiveOutlineColor", ""),
-          col("headingBackground", "#00000000"), ...imageFields("heading"),
+          col("headingBackground", "headingGradientFrom", "headingGradientTo", "headingGradientAngle", "headingFrost", "#00000000"), ...gradientFields("heading"), ...frostFields("heading"), ...imageFields("heading"),
           col("headingActiveBackground", "#00000000"), ...imageFields("headingActive"),
           ...SIDES.map((side) => col(`headingActiveBorder${side}Color`, "")),
           ...spacingFields("headingPadding", 0, { max: 60 }),
@@ -1240,7 +1242,7 @@ export const GROUPS = [
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
           num("categoryWordSpacing", 0, "px", -10, 60, 0.5),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
-          col("categoryBackground", "#00000000"), ...imageFields("category"),
+          col("categoryBackground", "categoryGradientFrom", "categoryGradientTo", "categoryGradientAngle", "categoryFrost", "#00000000"), ...gradientFields("category"), ...frostFields("category"), ...imageFields("category"),
           // A category is a heading in a list of pages, so it needs room around
           // it as much as it needs lettering — without it the group name sits
           // hard against the first page under it.
@@ -1253,7 +1255,7 @@ export const GROUPS = [
       {
         id: "search",
         fields: [
-          col("searchBackground", "#00000000"), ...imageFields("search"),
+          col("searchBackground", "searchGradientFrom", "searchGradientTo", "searchGradientAngle", "searchFrost", "#00000000"), ...gradientFields("search"), ...frostFields("search"), ...imageFields("search"),
           col("searchColor", "#e7d1b1"),
           col("searchPlaceholderColor", "#8a8a8a"),
           num("searchSize", 14, "px", 6, 40, 1),
@@ -1265,7 +1267,7 @@ export const GROUPS = [
         id: "buttons",
         fields: [
           col("buttonColor", ""),
-          col("buttonBackground", ""), ...imageFields("button"),
+          col("buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", ""), ...gradientFields("button"), ...frostFields("button"), ...imageFields("button"),
           col("buttonBorderColor", ""),
           col("buttonHoverColor", ""),
           col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
@@ -1308,7 +1310,7 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
+          col("titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -1325,7 +1327,7 @@ export const GROUPS = [
         fields: [
           col("headerButtonColor", "#f7f3e8"),
           col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
+          col("headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
@@ -1337,7 +1339,7 @@ export const GROUPS = [
         fields: [
           col("pageButtonColor", "#e7d1b1"),
           col("pageButtonHoverColor", "#ffffff"),
-          col("pageButtonBackground", "#0b0a1380"), ...imageFields("pageButton"),
+          col("pageButtonBackground", "pageButtonGradientFrom", "pageButtonGradientTo", "pageButtonGradientAngle", "pageButtonFrost", "#0b0a1380"), ...gradientFields("pageButton"), ...frostFields("pageButton"), ...imageFields("pageButton"),
           col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
           num("pageButtonSize", 14, "px", 6, 48, 1),
           // No hovered twin for either: where the pencil sits is decided by one
@@ -1399,7 +1401,7 @@ export const GROUPS = [
           DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
         ],
         fields: [
-          // The name as Foundry draws it: a centred banner, larger than the
+          // The name as Foundry draws it: a centerd banner, larger than the
           // prose, on a bar of its own.
           ...textFields("", { size: 32, color: "#e7d1b1", align: "center" }),
           ...textShadowFields()
@@ -1619,13 +1621,13 @@ export const GROUPS = [
         id: "marks",
         order: [
           "quoteFont", "quoteColor", "quoteStyle",
-          DIVIDER, "highlightColor", "highlightBackground",
+          DIVIDER, "highlightColor", "highlightBackground", "highlightGradientFrom", "highlightGradientTo", "highlightGradientAngle", "highlightFrost",
           DIVIDER, "strikeColor", "strikeThickness",
           DIVIDER, "underlineColor", "underlineThickness", "underlineOffset",
           DIVIDER, "abbrColor", "abbrLine"
         ],
         fields: [
-          col("highlightBackground", "#e8c979"),
+          col("highlightBackground", "highlightGradientFrom", "highlightGradientTo", "highlightGradientAngle", "highlightFrost", "#e8c979"), ...gradientFields("highlight"), ...frostFields("highlight"),
           col("highlightColor", "#241b10"),
           col("strikeColor", ""),
           num("strikeThickness", 1, "px", 0, 12, 1),
@@ -1643,7 +1645,7 @@ export const GROUPS = [
         id: "code",
         order: [
           "codeFont", "codeSize", "codeColor", "codeBorderColor",
-          DIVIDER, "codeBackground",
+          DIVIDER, "codeBackground", "codeGradientFrom", "codeGradientTo", "codeGradientAngle", "codeFrost",
           DIVIDER, "codeTexture", "codeTextureFit", "codeTexturePosition",
           "codeTextureBlend", "codeTextureOpacity", "codeTextureBlur", "codeTextureBrightness", "codeTextureContrast", "codeTextureSaturation", "codeTextureAge",
           DIVIDER, "codeInnerShadowOffsetX", "codeInnerShadowOffsetY", "codeInnerShadowBlur",
@@ -1658,7 +1660,7 @@ export const GROUPS = [
           font("codeFont", "monospace"),
           num("codeSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("codeColor", ""),
-          col("codeBackground", "#00000000"), ...imageFields("code"),
+          col("codeBackground", "codeGradientFrom", "codeGradientTo", "codeGradientAngle", "codeFrost", "#00000000"), ...gradientFields("code"), ...frostFields("code"), ...imageFields("code"),
           ...spacingFields("codePadding", { top: 0, right: 4, bottom: 0, left: 4 }, { max: 60 }),
           ...cornerFields("codeCorner"),
           col("codeBorderColor", ""),
@@ -1822,7 +1824,7 @@ export const GROUPS = [
       {
         id: "revealed",
         order: [
-          "revealedBackground",
+          "revealedBackground", "revealedGradientFrom", "revealedGradientTo", "revealedGradientAngle", "revealedFrost",
           DIVIDER, "revealedTexture", "revealedTextureFit", "revealedTexturePosition",
           "revealedTextureBlend", "revealedTextureOpacity", "revealedTextureBlur", "revealedTextureBrightness", "revealedTextureContrast", "revealedTextureSaturation", "revealedTextureAge",
           DIVIDER, "revealedInnerShadowOffsetX", "revealedInnerShadowOffsetY",
@@ -1830,7 +1832,7 @@ export const GROUPS = [
           DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
           "revealedShadowSpread", "revealedShadowColor"
         ],
-        fields: [col("revealedBackground", "#0035000d"), ...imageFields("revealed")]
+        fields: [col("revealedBackground", "revealedGradientFrom", "revealedGradientTo", "revealedGradientAngle", "revealedFrost", "#0035000d"), ...gradientFields("revealed"), ...frostFields("revealed"), ...imageFields("revealed")]
       },
       {
         id: "text",
@@ -1882,7 +1884,7 @@ export const GROUPS = [
       {
         id: "revealButton",
         order: [
-          "buttonSize", "buttonColor", "buttonBackground",
+          "buttonSize", "buttonColor", "buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost",
           DIVIDER, "buttonBorderStyle", "buttonBorderColor", "buttonBorderWidth",
           DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
           "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerShape",
@@ -1895,7 +1897,7 @@ export const GROUPS = [
         ],
         fields: [
           col("buttonColor", "#f0f0e0"),
-          col("buttonBackground", "#00000000"), ...imageFields("button"),
+          col("buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", "#00000000"), ...gradientFields("button"), ...frostFields("button"), ...imageFields("button"),
           col("buttonBorderColor", "#8a8a8a"),
           col("buttonHoverColor", "#ffffff"),
           col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
@@ -2032,7 +2034,8 @@ export const GROUPS = [
       {
         id: "header",
         order: [
-          "headerBackground",
+          "headerBackground", "headerGradientFrom", "headerGradientTo", "headerGradientAngle",
+        "headerFrost",
           DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
           DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing", "headerWordSpacing",
           DIVIDER, "headerOutlineColor", "headerOutlineWidth",
@@ -2046,7 +2049,8 @@ export const GROUPS = [
           "headerShadowSpread", "headerShadowColor"
         ],
         fields: [
-          col("headerBackground", "#00000000"), ...imageFields("header"),
+          col("headerBackground", "#00000000"), ...gradientFields("header"), ...frostFields("header"),
+          ...imageFields("header"),
           col("headerColor", ""),
           font("headerFont", ""),
           num("headerSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
@@ -2165,9 +2169,9 @@ export const GROUPS = [
         order: [
           "summaryFont", "summarySize", "summaryColor", "collapsibleBorderColor",
           "summaryTextStyle", "summaryTextStyleSlant",
-          DIVIDER, "summaryCaps", "summaryBackground", "summaryPaddingTop", "summaryPaddingBottom",
+          DIVIDER, "summaryCaps", "summaryBackground", "summaryGradientFrom", "summaryGradientTo", "summaryGradientAngle", "summaryFrost", "summaryPaddingTop", "summaryPaddingBottom",
           "summaryPaddingLeft", "summaryPaddingRight",
-          DIVIDER, "collapsibleBackground", "collapsiblePaddingTop", "collapsiblePaddingBottom",
+          DIVIDER, "collapsibleBackground", "collapsibleGradientFrom", "collapsibleGradientTo", "collapsibleGradientAngle", "collapsibleFrost", "collapsiblePaddingTop", "collapsiblePaddingBottom",
           "collapsiblePaddingLeft", "collapsiblePaddingRight",
           DIVIDER, "summaryOutlineColor", "summaryOutlineWidth",
           DIVIDER, "summaryTextShadowOffsetX", "summaryTextShadowOffsetY",
@@ -2188,9 +2192,9 @@ export const GROUPS = [
           col("summaryColor", "#5e1914"),
           ...textStyleField("summaryTextStyle", "700", "normal"),
           select("summaryCaps", "none", CHOICES.caps, { emit: emitCaps }),
-          col("summaryBackground", "#00000000"), ...imageFields("summary"),
+          col("summaryBackground", "summaryGradientFrom", "summaryGradientTo", "summaryGradientAngle", "summaryFrost", "#00000000"), ...gradientFields("summary"), ...frostFields("summary"), ...imageFields("summary"),
           ...spacingFields("summaryPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 60 }),
-          col("collapsibleBackground", "#00000000"),
+          col("collapsibleBackground", "collapsibleGradientFrom", "collapsibleGradientTo", "collapsibleGradientAngle", "collapsibleFrost", "#00000000"), ...gradientFields("collapsible"), ...frostFields("collapsible"),
           col("collapsibleBorderColor", "#8a6a3d"),
           num("collapsibleBorderWidth", 1, "px", 0, 12, 1),
           ...cornerFields("collapsibleCorner", 3),
@@ -2232,7 +2236,7 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "#00000000"), ...imageFields("titleBar"),
+          col("titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -2249,7 +2253,7 @@ export const GROUPS = [
         fields: [
           col("headerButtonColor", "#f7f3e8"),
           col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "#00000000"), ...imageFields("headerButton"),
+          col("headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
@@ -2263,7 +2267,7 @@ export const GROUPS = [
       {
         id: "toolbar",
         fields: [
-          col("toolbarBackground", ""), ...imageFields("toolbar"),
+          col("toolbarBackground", "toolbarGradientFrom", "toolbarGradientTo", "toolbarGradientAngle", "toolbarFrost", ""), ...gradientFields("toolbar"), ...frostFields("toolbar"), ...imageFields("toolbar"),
           ...borderFields("toolbarBorder", { color: "#00000000" }),
           ...cornerFields("toolbarCorner", 6),
           ...spacingFields("toolbarPadding", 8, { max: 60 })
@@ -2275,7 +2279,7 @@ export const GROUPS = [
           col("toolbarColor", ""),
           col("toolbarHoverColor", ""),
           num("toolbarSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
-          col("toolbarButtonBackground", ""), ...imageFields("toolbarButton"),
+          col("toolbarButtonBackground", "toolbarButtonGradientFrom", "toolbarButtonGradientTo", "toolbarButtonGradientAngle", "toolbarButtonFrost", ""), ...gradientFields("toolbarButton"), ...frostFields("toolbarButton"), ...imageFields("toolbarButton"),
           col("toolbarButtonHoverBackground", "#00000000"),
           ...borderFields("toolbarButtonBorder", { color: "#00000000" }),
           ...cornerFields("toolbarButtonCorner", 4),
@@ -2296,7 +2300,7 @@ export const GROUPS = [
           col("dropdownColor", ""),
           col("dropdownHoverColor", ""),
           ...textStyleField("dropdownTextStyle", "inherit", "inherit", { inherit: true }),
-          col("dropdownBackground", "#00000000"), ...imageFields("dropdown"),
+          col("dropdownBackground", "dropdownGradientFrom", "dropdownGradientTo", "dropdownGradientAngle", "dropdownFrost", "#00000000"), ...gradientFields("dropdown"), ...frostFields("dropdown"), ...imageFields("dropdown"),
           col("dropdownHoverBackground", "#00000000"),
           ...borderFields("dropdownBorder", { color: "#00000000" }),
           ...cornerFields("dropdownCorner", 4),
@@ -2313,7 +2317,7 @@ export const GROUPS = [
           // until it is given something of its own: a size or a color set under
           // Page Settings wins, and one left alone takes what the strip says.
           ...textFields("settingsBar"),
-          col("settingsBarBackground", "#00000000"), ...imageFields("settingsBar"),
+          col("settingsBarBackground", "settingsBarGradientFrom", "settingsBarGradientTo", "settingsBarGradientAngle", "settingsBarFrost", "#00000000"), ...gradientFields("settingsBar"), ...frostFields("settingsBar"), ...imageFields("settingsBar"),
           ...borderFields("settingsBarBorder", { color: "#00000000" }),
           ...cornerFields("settingsBarCorner"),
           ...spacingFields("settingsBarPadding", 0, { max: 60 }),
@@ -2327,7 +2331,7 @@ export const GROUPS = [
       {
         id: "dropdownList",
         fields: [
-          col("listBackground", "#00000000"), ...imageFields("list"),
+          col("listBackground", "listGradientFrom", "listGradientTo", "listGradientAngle", "listFrost", "#00000000"), ...gradientFields("list"), ...frostFields("list"), ...imageFields("list"),
           ...borderFields("listBorder", { color: "#00000000" }),
           ...cornerFields("listCorner"),
           ...spacingFields("listPadding", 0, { max: 40 })
@@ -2340,7 +2344,7 @@ export const GROUPS = [
           num("itemSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
           col("itemColor", ""),
           ...textStyleField("itemTextStyle", "inherit", "inherit", { inherit: true }),
-          col("itemBackground", "#00000000"),
+          col("itemBackground", "itemGradientFrom", "itemGradientTo", "itemGradientAngle", "itemFrost", "#00000000"), ...gradientFields("item"), ...frostFields("item"),
           ...cornerFields("itemCorner"),
           ...spacingFields("itemPadding", 0, { max: 40 }),
           // The line core draws between the runs of entries.
@@ -2356,7 +2360,7 @@ export const GROUPS = [
           num("fieldSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
           col("fieldColor", ""),
           ...textStyleField("fieldTextStyle", "inherit", "inherit", { inherit: true }),
-          col("fieldBackground", ""), ...imageFields("field"),
+          col("fieldBackground", "fieldGradientFrom", "fieldGradientTo", "fieldGradientAngle", "fieldFrost", ""), ...gradientFields("field"), ...frostFields("field"), ...imageFields("field"),
           ...borderFields("fieldBorder", { width: 1, color: "#00000000" }),
           ...cornerFields("fieldCorner", 4),
           ...spacingFields("fieldPadding",
@@ -2586,7 +2590,7 @@ function isHoverName(name) {
  * Body text is left out: it is the one place a page-wide outline would be a
  * mistake rather than a decoration, and it is what everything else falls back
  * to. A list marker is left out because a marker is not a letterform — the
- * pseudo-element it is drawn in takes a colour and a face and nothing else.
+ * pseudo-element it is drawn in takes a color and a face and nothing else.
  */
 const NO_OUTLINE_GROUPS = new Set(["body"]);
 const NO_OUTLINE_FIELDS = new Set(["markerFont"]);
@@ -2892,7 +2896,7 @@ const LAYOUTS = {
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
       "letterSpacing", "wordSpacing", "lineHeight", "wrap", "hyphens", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
-      DIVIDER, "entryBackground", DIVIDER, "entryTexture", "entryTextureFit",
+      DIVIDER, "entryBackground", "entryGradientFrom", "entryGradientTo", "entryGradientAngle", "entryFrost", DIVIDER, "entryTexture", "entryTextureFit",
       "entryTexturePosition", "entryTextureBlend", "entryTextureOpacity", "entryTextureBlur", "entryTextureBrightness", "entryTextureContrast", "entryTextureSaturation", "entryTextureAge", DIVIDER,
       "entryInnerShadowOffsetX", "entryInnerShadowOffsetY", "entryInnerShadowBlur",
       "entryInnerShadowSpread", "entryInnerShadowColor", DIVIDER, "entryShadowOffsetX",
@@ -2911,7 +2915,7 @@ const LAYOUTS = {
       "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingHyphens", "headingIndent", DIVIDER,
       "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
       "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
-      "headingBackground", DIVIDER, "headingTexture", "headingTextureFit",
+      "headingBackground", "headingGradientFrom", "headingGradientTo", "headingGradientAngle", "headingFrost", DIVIDER, "headingTexture", "headingTextureFit",
       "headingTexturePosition", "headingTextureBlend", "headingTextureOpacity", "headingTextureBlur", "headingTextureBrightness", "headingTextureContrast", "headingTextureSaturation", "headingTextureAge", DIVIDER,
       "headingInnerShadowOffsetX", "headingInnerShadowOffsetY", "headingInnerShadowBlur",
       "headingInnerShadowSpread", "headingInnerShadowColor", DIVIDER, "headingShadowOffsetX",
@@ -2931,7 +2935,7 @@ const LAYOUTS = {
       "categoryTextStyleSlant", DIVIDER, "categoryAlign", "categoryCaps",
       "categoryLetterSpacing", "categoryWordSpacing", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
       DIVIDER, "categoryTextShadowOffsetX", "categoryTextShadowOffsetY",
-      "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground",
+      "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground", "categoryGradientFrom", "categoryGradientTo", "categoryGradientAngle", "categoryFrost",
       DIVIDER, "categoryTexture", "categoryTextureFit", "categoryTexturePosition",
       "categoryTextureBlend", "categoryTextureOpacity", "categoryTextureBlur", "categoryTextureBrightness", "categoryTextureContrast", "categoryTextureSaturation", "categoryTextureAge", DIVIDER, "categoryInnerShadowOffsetX",
       "categoryInnerShadowOffsetY", "categoryInnerShadowBlur", "categoryInnerShadowSpread",
@@ -2948,7 +2952,7 @@ const LAYOUTS = {
       "categoryCornerBottomRight", "categoryCornerShape"
     ] },
     search: { order: [
-      "searchSize", "searchPlaceholderColor", "searchColor", DIVIDER, "searchBackground",
+      "searchSize", "searchPlaceholderColor", "searchColor", DIVIDER, "searchBackground", "searchGradientFrom", "searchGradientTo", "searchGradientAngle", "searchFrost",
       DIVIDER, "searchTexture", "searchTextureFit", "searchTexturePosition",
       "searchTextureBlend", "searchTextureOpacity", "searchTextureBlur", "searchTextureBrightness", "searchTextureContrast", "searchTextureSaturation", "searchTextureAge", DIVIDER, "searchInnerShadowOffsetX",
       "searchInnerShadowOffsetY", "searchInnerShadowBlur", "searchInnerShadowSpread",
@@ -2962,7 +2966,7 @@ const LAYOUTS = {
       "searchCornerBottomRight", "searchCornerShape"
     ] },
     buttons: { order: [
-      "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", DIVIDER,
+      "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", DIVIDER,
       "buttonTexture", "buttonTextureFit", "buttonTexturePosition", "buttonTextureBlend",
       "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge", DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY",
       "buttonInnerShadowBlur", "buttonInnerShadowSpread", "buttonInnerShadowColor", DIVIDER,
@@ -2989,7 +2993,7 @@ const LAYOUTS = {
     titleBar: { order: [
       "font", "size", "color", "textStyle", "textStyleSlant", DIVIDER, "align", "caps",
       "letterSpacing", "wordSpacing", DIVIDER, "outlineColor", "outlineWidth", DIVIDER, "textShadowOffsetX",
-      "textShadowOffsetY", "textShadowBlur", "textShadowColor", DIVIDER, "titleBarBackground",
+      "textShadowOffsetY", "textShadowBlur", "textShadowColor", DIVIDER, "titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
       "titleBarTextureBlend", "titleBarTextureOpacity", "titleBarTextureBlur", "titleBarTextureBrightness", "titleBarTextureContrast", "titleBarTextureSaturation", "titleBarTextureAge", DIVIDER, "titleBarInnerShadowOffsetX",
       "titleBarInnerShadowOffsetY", "titleBarInnerShadowBlur", "titleBarInnerShadowSpread",
@@ -2998,7 +3002,7 @@ const LAYOUTS = {
       "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
     ] },
     headerButtons: { order: [
-      "headerButtonSize", "headerButtonColor", DIVIDER, "headerButtonBackground", DIVIDER,
+      "headerButtonSize", "headerButtonColor", DIVIDER, "headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", DIVIDER,
       "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
       "headerButtonTextureBlend", "headerButtonTextureOpacity", "headerButtonTextureBlur", "headerButtonTextureBrightness", "headerButtonTextureContrast", "headerButtonTextureSaturation", "headerButtonTextureAge", DIVIDER,
       "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
@@ -3018,7 +3022,7 @@ const LAYOUTS = {
     pageButton: { order: [
       "pageButtonAnchor", "pageButtonSide", "pageButtonOffset", "pageButtonTop", "pageButtonHoldTop",
       DIVIDER, "pageButtonSize", "pageButtonColor",
-      "pageButtonBackground", DIVIDER, "pageButtonTexture", "pageButtonTextureFit",
+      "pageButtonBackground", "pageButtonGradientFrom", "pageButtonGradientTo", "pageButtonGradientAngle", "pageButtonFrost", DIVIDER, "pageButtonTexture", "pageButtonTextureFit",
       "pageButtonTexturePosition", "pageButtonTextureBlend", "pageButtonTextureOpacity", "pageButtonTextureBlur", "pageButtonTextureBrightness", "pageButtonTextureContrast", "pageButtonTextureSaturation", "pageButtonTextureAge",
       DIVIDER, "pageButtonInnerShadowOffsetX", "pageButtonInnerShadowOffsetY",
       "pageButtonInnerShadowBlur", "pageButtonInnerShadowSpread", "pageButtonInnerShadowColor",
@@ -3037,7 +3041,7 @@ const LAYOUTS = {
     order: ["frameSize", "frame", "titleBar", "headerButtons", "settingsBar", "pageFields",
       "toolbar", "toolbarIcons", "dropdowns", "dropdownList", "dropdownItems"],
     dropdownList: { order: [
-      "listBackground", DIVIDER, "listTexture", "listTextureFit", "listTexturePosition",
+      "listBackground", "listGradientFrom", "listGradientTo", "listGradientAngle", "listFrost", DIVIDER, "listTexture", "listTextureFit", "listTexturePosition",
       "listTextureBlend", "listTextureOpacity", "listTextureBlur", "listTextureBrightness", "listTextureContrast", "listTextureSaturation", "listTextureAge",
       DIVIDER, "listInnerShadowOffsetX", "listInnerShadowOffsetY", "listInnerShadowBlur",
       "listInnerShadowSpread", "listInnerShadowColor",
@@ -3056,7 +3060,7 @@ const LAYOUTS = {
       DIVIDER, "itemOutlineColor", "itemOutlineWidth",
       DIVIDER, "itemTextShadowOffsetX", "itemTextShadowOffsetY", "itemTextShadowBlur",
       "itemTextShadowColor",
-      DIVIDER, "itemBackground",
+      DIVIDER, "itemBackground", "itemGradientFrom", "itemGradientTo", "itemGradientAngle", "itemFrost",
       DIVIDER, "itemPaddingTop", "itemPaddingBottom", "itemPaddingLeft", "itemPaddingRight",
       DIVIDER, "itemCornerTopLeft", "itemCornerTopRight", "itemCornerBottomLeft",
       "itemCornerBottomRight", "itemCornerShape",
@@ -3069,7 +3073,7 @@ const LAYOUTS = {
       DIVIDER, "settingsBarOutlineColor", "settingsBarOutlineWidth",
       DIVIDER, "settingsBarTextShadowOffsetX", "settingsBarTextShadowOffsetY",
       "settingsBarTextShadowBlur", "settingsBarTextShadowColor",
-      DIVIDER, "settingsBarBackground", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
+      DIVIDER, "settingsBarBackground", "settingsBarGradientFrom", "settingsBarGradientTo", "settingsBarGradientAngle", "settingsBarFrost", DIVIDER, "settingsBarTexture", "settingsBarTextureFit",
       "settingsBarTexturePosition", "settingsBarTextureBlend", "settingsBarTextureOpacity", "settingsBarTextureBlur", "settingsBarTextureBrightness", "settingsBarTextureContrast", "settingsBarTextureSaturation", "settingsBarTextureAge",
       DIVIDER, "settingsBarInnerShadowOffsetX", "settingsBarInnerShadowOffsetY",
       "settingsBarInnerShadowBlur", "settingsBarInnerShadowSpread", "settingsBarInnerShadowColor",
@@ -3102,7 +3106,7 @@ const LAYOUTS = {
       "cornerTopRight", "cornerBottomLeft", "cornerBottomRight", "cornerShape"
     ] },
     titleBar: { order: [
-      "titleBarBackground", DIVIDER, "font", "size", "color", "textStyle", "textStyleSlant",
+      "titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost", DIVIDER, "font", "size", "color", "textStyle", "textStyleSlant",
       DIVIDER, "align", "caps", "letterSpacing", "wordSpacing", DIVIDER, "outlineColor", "outlineWidth",
       DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor",
       DIVIDER, "titleBarTexture", "titleBarTextureFit", "titleBarTexturePosition",
@@ -3113,7 +3117,7 @@ const LAYOUTS = {
       "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"
     ] },
     headerButtons: { order: [
-      "headerButtonSize", "headerButtonColor", "headerButtonBackground", DIVIDER,
+      "headerButtonSize", "headerButtonColor", "headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", DIVIDER,
       "headerButtonTexture", "headerButtonTextureFit", "headerButtonTexturePosition",
       "headerButtonTextureBlend", "headerButtonTextureOpacity", "headerButtonTextureBlur", "headerButtonTextureBrightness", "headerButtonTextureContrast", "headerButtonTextureSaturation", "headerButtonTextureAge", DIVIDER,
       "headerButtonInnerShadowOffsetX", "headerButtonInnerShadowOffsetY",
@@ -3131,7 +3135,7 @@ const LAYOUTS = {
       "headerButtonCornerBottomRight", "headerButtonCornerShape"
     ] },
     toolbar: { order: [
-      "toolbarBackground", DIVIDER, "toolbarTexture", "toolbarTextureFit",
+      "toolbarBackground", "toolbarGradientFrom", "toolbarGradientTo", "toolbarGradientAngle", "toolbarFrost", DIVIDER, "toolbarTexture", "toolbarTextureFit",
       "toolbarTexturePosition", "toolbarTextureBlend", "toolbarTextureOpacity", "toolbarTextureBlur", "toolbarTextureBrightness", "toolbarTextureContrast", "toolbarTextureSaturation", "toolbarTextureAge", DIVIDER,
       "toolbarInnerShadowOffsetX", "toolbarInnerShadowOffsetY", "toolbarInnerShadowBlur",
       "toolbarInnerShadowSpread", "toolbarInnerShadowColor", DIVIDER, "toolbarShadowOffsetX",
@@ -3145,7 +3149,7 @@ const LAYOUTS = {
       "toolbarCornerBottomLeft", "toolbarCornerBottomRight", "toolbarCornerShape"
     ] },
     toolbarIcons: { order: [
-      "toolbarSize", "toolbarColor", DIVIDER, "toolbarButtonBackground",
+      "toolbarSize", "toolbarColor", DIVIDER, "toolbarButtonBackground", "toolbarButtonGradientFrom", "toolbarButtonGradientTo", "toolbarButtonGradientAngle", "toolbarButtonFrost",
       DIVIDER, "toolbarButtonTexture", "toolbarButtonTextureFit", "toolbarButtonTexturePosition",
       "toolbarButtonTextureBlend", "toolbarButtonTextureOpacity", "toolbarButtonTextureBlur", "toolbarButtonTextureBrightness", "toolbarButtonTextureContrast", "toolbarButtonTextureSaturation", "toolbarButtonTextureAge",
       DIVIDER, "toolbarButtonInnerShadowOffsetX", "toolbarButtonInnerShadowOffsetY",

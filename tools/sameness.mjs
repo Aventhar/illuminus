@@ -8,7 +8,7 @@
  * twice, compared property by property.
  *
  * Most differences are not differences. The rules always emit a declaration
- * where Foundry emits none — a shadow in a transparent colour, a solid border
+ * where Foundry emits none — a shadow in a transparent color, a solid border
  * of no width, a gradient from nothing to nothing — because a rule has to read
  * its variable whether or not the style has set one. Those compute differently
  * and paint identically, and `shows()` below is what tells them apart.

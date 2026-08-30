@@ -302,7 +302,7 @@ console.log("\n[10] No two controls share a name");
  * Every hovered and selected control is derived from an ordinary one and starts
  * empty, meaning "leave it as it is" — and the rule that reads it is written
  * `var(--twin, var(--ordinary))` so that emptiness reaches past it. But an
- * `emit` answers a value it does not recognise with a sensible one, which is
+ * `emit` answers a value it does not recognize with a sensible one, which is
  * right for the ordinary control and wrong here: the twin then holds a real
  * value, wins that chain, and changes the element the moment a pointer arrives.
  * 276 twins did. Pointing at a background picture re-tiled and re-cornered it,
@@ -401,6 +401,79 @@ console.log("\n[13] No rule overrides itself");
     for (const one of twice.slice(0, 4)) fail(`  ${one}`);
   } else {
     ok("no rule states a property twice with different values");
+  }
+}
+
+/* Two controls in one category answering to one name.
+ *
+ * A category may hold two of a thing — the line that folds a collapsible and
+ * the block it folds, a term and its definition — and most of their controls
+ * already say which they belong to, because the wording is built from the
+ * part's own name. A family whose wording is written without reference to the
+ * part came out the same for both, and a category showed two controls called
+ * "Top Padding" with nothing to tell them apart. `generate-lang.mjs` sweeps for
+ * this; the sweep is only as good as the words it has, so this says whether one
+ * was left over. */
+console.log("\n[14] No category holds two controls of one name");
+{
+  const clashes = [];
+  for (const group of GROUPS) {
+    const key = group.family ?? group.id;
+    for (const section of group.sections) {
+      const byLabel = new Map();
+      for (const field of section.fields) {
+        // Both spellings of a state, as the editor reads them: `hoverBackground`
+        // and `entryHoverBackground`. A state's control is shown in place of
+        // the one it stands in for, never beside it.
+        if (/^(hover|active)[A-Z]/.test(field.name) || /[a-z](Hover|Active)[A-Z]/.test(field.name)) continue;
+        const label = lang[`ILLUMINUS.Field.${key}.${field.name}.label`]
+          ?? lang[`ILLUMINUS.Field.${field.name}.label`];
+        if (!label) continue;
+        if (!byLabel.has(label)) byLabel.set(label, []);
+        byLabel.get(label).push(field.name);
+      }
+      for (const [label, names] of byLabel) {
+        if (names.length > 1) clashes.push(`${group.id}.${section.id}: ${names.length} controls called "${label}" (${names.join(", ")})`);
+      }
+    }
+  }
+  if (clashes.length) {
+    fail(`${clashes.length} categories hold two controls a person cannot tell apart`);
+    for (const one of clashes.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok("every control in a category has a name of its own");
+  }
+}
+
+/* US English, which the module says it uses.
+ *
+ * Nothing enforced it, and 2,072 British spellings had accumulated — 1,931 of
+ * them in wording a person reads. A file that says "colour" in one hint and
+ * "color" in the next reads as carelessly written, and the CSS property is
+ * spelled the American way regardless, so a stray "colour" in a hint sits next
+ * to `color` in the same sentence. */
+console.log("\n[15] US English");
+{
+  const BRITISH = ["colour", "centre", "grey", "licence", "recognise", "behaviour",
+    "favour", "honour", "neighbour", "organise", "realise", "analyse", "defence",
+    "travelled", "cancelled", "catalogue", "metre", "fibre"];
+  const looked = [
+    ["wording", Object.values(lang).join("\n")],
+    ["the skeleton", fs.readFileSync(path.join(ROOT, "styles/illuminus.css"), "utf8")],
+    ["the schema", fs.readFileSync(path.join(ROOT, "scripts/style-schema.mjs"), "utf8")]
+  ];
+  const found = [];
+  for (const [what, text] of looked) {
+    const lower = text.toLowerCase();
+    for (const word of BRITISH) {
+      const n = lower.split(word).length - 1;
+      if (n) found.push(`${what}: ${n}× "${word}"`);
+    }
+  }
+  if (found.length) {
+    fail(`British spellings, where the module says US English: ${found.slice(0, 5).join(", ")}`);
+  } else {
+    ok("wording, stylesheet and schema are all US English");
   }
 }
 

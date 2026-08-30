@@ -1537,7 +1537,7 @@ const forget = await cdp.evaluate(`(() => {
 const fg = JSON.parse(forget);
 check(fg.visible, "hovering a saved color reveals its remove button");
 check(fg.size !== "0x0", `which has a real hit area (${fg.size})`);
-check(fg.reachable, `and is the topmost element at its centre (got ${fg.topClass})`);
+check(fg.reachable, `and is the topmost element at its center (got ${fg.topClass})`);
 
 await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: fg.x, y: fg.y, buttons: 0 });
 await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: fg.x, y: fg.y, button: "left", buttons: 1, clickCount: 1 });
@@ -1692,7 +1692,7 @@ check(bl.afterReset === "#123456", `Reset returns to the saved value, not the sc
 // :hover, which a scripted MouseEvent does not trigger.
 console.log("\n[29] The editor's Illuminus menu");
 
-/** Centre of an element, in viewport coordinates. */
+/** Center of an element, in viewport coordinates. */
 const boxOf = async (expr) => {
   const raw = await cdp.evaluate(`(() => {
     const el = ${expr};
@@ -2364,7 +2364,7 @@ try {
       // An icon is a glyph in the ::before pseudo-element, which is where a
       // layer used to go — and a layer setting an empty content erased every
       // icon it touched. The button kept its fill, so it read as the icon
-      // colour not working rather than as the icon being gone.
+      // color not working rather than as the icon being gone.
       iconGlyph: getComputedStyle(root.querySelector(".window-header button.header-control"), "::before").content
     };
     window.__layers = {entryId: entry.id, styleId: style.id};
@@ -3439,7 +3439,7 @@ try {
   // The picker says a color two ways. RGB is what it keeps, HSL is worked out
   // for the sliders, so going there and back cannot drift the color — and the
   // hue shown is the one kept beside the color rather than read back out of it,
-  // since a grey has none to read and the slider would snap to red.
+  // since a gray has none to read and the slider would snap to red.
   const said = await cdp.evaluate(`(async () => {
     const { openColorPicker } = await import("/modules/illuminus/scripts/apps/color-picker.mjs");
     const anchor = document.createElement("div");
@@ -3535,12 +3535,12 @@ try {
     fill().querySelector('.illuminus-state__option[data-state="hover"]').click();
     await new Promise(r => setTimeout(r, 300));
     out.shownForHover = !button()?.classList.contains("is-hidden");
-    // Live while there is something to copy, and greyed once there is not.
+    // Live while there is something to copy, and grayed once there is not.
     out.liveBefore = !button().disabled;
 
     button().click();
     await new Promise(r => setTimeout(r, 800));
-    out.greyedAfter = button()?.disabled ?? "missing";
+    out.grayedAfter = button()?.disabled ?? "missing";
     out.hovered = api.getStyle(style.id).settings.boxes.hoverBackground;
     const working = app.element
       .querySelector('[data-field="boxes.hoverBackground"] color-picker')?.value;
@@ -3643,8 +3643,8 @@ try {
   check(sc.hiddenAtFirst === true, `nothing to copy while the ordinary controls are on show (${sc.hiddenAtFirst})`);
   check(sc.shownForHover, "the button appears with the hovered ones");
   check(sc.liveBefore, "live while the hovered controls hold something else");
-  check(sc.greyedAfter === true,
-    `and greyed once they already hold it (${sc.greyedAfter})`);
+  check(sc.grayedAfter === true,
+    `and grayed once they already hold it (${sc.grayedAfter})`);
   check((sc.control ?? "").toLowerCase().startsWith("#123456"),
     `and fills them from the ordinary values (${sc.control})`);
   check(sc.hovered === "#000000",
@@ -4065,7 +4065,7 @@ try {
     for (let i = 0; i < 80 && !out.scrolledIntoView; i++) {
       out.scrolledIntoView = inView();
       if (out.scrolledIntoView) break;
-      // A smooth scroll is animated and can be cancelled by whatever the
+      // A smooth scroll is animated and can be canceled by whatever the
       // browser was doing at the time — so ask once more, half way through,
       // rather than declaring a failure the next tab switch would have fixed.
       if (i === 30) app.changeTab("tables", "sheet");
@@ -4074,7 +4074,7 @@ try {
 
     // A family replaces the pane outright, so nothing there should be dimmed.
     // The Page tab's piece is the surface everything else sits on, so lighting
-    // it and dimming what it holds greyed the whole sample out.
+    // it and dimming what it holds grayed the whole sample out.
     out.page = await visit("page");
     // Inside the page, that is: the Box, Tag and Picture panes below it are
     // pages of their own, and dimming those is the point of dimming.
@@ -4173,7 +4173,7 @@ try {
     out.tag = named("tag01");
     out.lettering = app.element.textContent.includes("Lettering");
 
-    // Turned on first: a tab whose hovered state is switched off greys the
+    // Turned on first: a tab whose hovered state is switched off grays the
     // switch, and rightly — there is nothing to look at behind it.
     const enable = app.element.querySelector('[data-tab="boxes"] .illuminus-hover-off input');
     if (enable?.checked) {
@@ -4740,7 +4740,7 @@ try {
   check(/\d/.test(one.sheetMargin) && !/^0\w*(\s+0\w*)*$/.test(one.sheetMargin),
     `every sheet keeps a margin of its own (@page margin: ${one.sheetMargin || "none"})`);
   check(one.inks === "exact",
-    `and asks to be printed in colour rather than as an outline (${one.inks})`);
+    `and asks to be printed in color rather than as an outline (${one.inks})`);
   check(one.contentsIsFirst && one.contents.length >= 4,
     `a single document opens with a contents page (${one.contents.length} entries)`);
   check(one.contents.every((entry) => entry.found),
@@ -5598,7 +5598,7 @@ console.log("\n[55] A stylesheet on its own");
     `naming its typefaces without carrying them (${sheet.carriesFonts ? "carries" : "names only"})`);
 }
 
-// Folding is behaviour a style switches on: the marker is written into every
+// Folding is behavior a style switches on: the marker is written into every
 // heading that governs something, and the stylesheet decides whether a reader
 // can see it. That keeps the compiler's one rule — values, never rules — so the
 // check is that a value reaches a marker and that clicking it folds.
@@ -7114,7 +7114,7 @@ try {
   })()`);
 }
 
-// A fill can graduate from one colour to another. A colour goes in
+// A fill can graduate from one color to another. A color goes in
 // `background-color` and a gradient cannot — it is an image — so it goes on the
 // element's own `background-image`, which is free because a background picture
 // rides on a layer of its own. Both ends start clear, so a fill nobody has
@@ -7159,15 +7159,15 @@ try {
   })()`));
   check(/linear-gradient/.test(grad.image) && /122, 32, 16/.test(grad.image)
     && /43, 29, 18/.test(grad.image),
-    `a fill graduates from one colour to the other (${grad.image.slice(0, 78)})`);
+    `a fill graduates from one color to the other (${grad.image.slice(0, 78)})`);
   check(/90deg/.test(grad.image),
     `in the direction it was given (${(grad.image.match(/[0-9]+deg/) ?? ["none"])[0]})`);
   // Both ends clear is a gradient from nothing to nothing, which is the flat
   // fill it always was — the whole reason this could be offered on every fill.
   check(/rgba\(0, 0, 0, 0\)/.test(grad.plainImage) || grad.plainImage === "none",
-    `while a fill nobody graduated paints nothing over its colour (${grad.plainImage.slice(0, 60)})`);
+    `while a fill nobody graduated paints nothing over its color (${grad.plainImage.slice(0, 60)})`);
   check(grad.plainFill === "rgb(64, 32, 16)",
-    `and keeps the flat colour it was given (${grad.plainFill})`);
+    `and keeps the flat color it was given (${grad.plainFill})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -7218,7 +7218,7 @@ try {
     return JSON.stringify(out);
   })()`));
   check(/blur\(6px\)/.test(worked.worked) && /saturate\(0%?\)/.test(worked.worked),
-    `a picture can be softened and drained of its colour (${worked.worked.slice(0, 70)})`);
+    `a picture can be softened and drained of its color (${worked.worked.slice(0, 70)})`);
   check(/brightness\(0?\.6\)|brightness\(60%\)/.test(worked.worked),
     `and darkened, which is how a texture is made to hold ink`);
   // Every part at its own default is a filter that does nothing, which is what
@@ -7636,7 +7636,7 @@ try {
     await entry.sheet.close({force: true});
     return JSON.stringify({live, html: out.html});
   })()`));
-  const page = path.join(travelDir, "travelled.html");
+  const page = path.join(travelDir, "traveled.html");
   fs.writeFileSync(page, sent.html);
   const away = JSON.parse(await inCleanTab(`file://${page}`, `(() => {
     const read = (sel, prop) => getComputedStyle(document.querySelector(sel))[prop];

@@ -71,9 +71,9 @@ const layout = (group, fallback = "block") => `${displayed(group, fallback)}
   overflow: ${v(group, "overflow")};`;
 
 /**
- * A fill that graduates from one colour to another.
+ * A fill that graduates from one color to another.
  *
- * A colour goes in `background-color` and a gradient cannot — it is an image —
+ * A color goes in `background-color` and a gradient cannot — it is an image —
  * so it goes on the element's own `background-image`, which is free: a
  * background *picture* rides on a layer of its own. Both ends start
  * transparent, so a fill nobody has graduated is the fill alone.
@@ -90,8 +90,11 @@ const layout = (group, fallback = "block") => `${displayed(group, fallback)}
 const turned = (group) =>
   `  transform: ${vOr(group, "turn", "")} ${vOr(group, "scale", "")};`;
 
-const graduated = (group) => `  background-image: linear-gradient(${v(group, "gradientAngle")},
-    ${v(group, "gradientFrom")}, ${v(group, "gradientTo")});`;
+const graduated = (group, prefix = "") => {
+  const of = (part) => (prefix ? `${prefix}${part}` : part.charAt(0).toLowerCase() + part.slice(1));
+  return `  background-image: linear-gradient(${v(group, of("GradientAngle"))},
+    ${v(group, of("GradientFrom"))}, ${v(group, of("GradientTo"))});`;
+};
 
 const box = (group) => `  background-color: ${v(group, "background")};
   backdrop-filter: ${v(group, "frost")};
@@ -316,6 +319,8 @@ ${at.header} {
   word-spacing: ${v(group, "headerWordSpacing")};
   text-align: ${v(group, "headerAlign")};
   background-color: ${v(group, "headerBackground")};
+${graduated(group, "header")}
+  backdrop-filter: ${v(group, "headerFrost")};
   color: ${v(group, "headerColor")};
 }
 
@@ -663,6 +668,7 @@ ${layout(group, "block")}
                ${v(group, "textShadowBlur")} ${v(group, "textShadowColor")};
   background-color: ${v(group, "background")};
 ${graduated(group)}
+  backdrop-filter: ${v(group, "frost")};
   margin: ${sides(group, "margin")};
   padding: ${sides(group, "padding")};
   border-width: ${sides(group, "border", "Width")};
@@ -738,7 +744,7 @@ const HOVER_PROPS = [
  * `<input>`, which cannot hold a picture, so its fill and its edges are painted
  * on the header around it while the lettering stays on the input. The hovered
  * rule has to divide the same way — painting a hovered fill on the input put a
- * flat colour over the header's picture, which is exactly the box somebody sees
+ * flat color over the header's picture, which is exactly the box somebody sees
  * appear when they point at the title.
  */
 const hoverRules = (group, target) => {
@@ -865,7 +871,7 @@ const imageVar = (layer, part, suffix = "") => {
  * The layer rides on `::after` and not on `::before` because **FontAwesome owns
  * `::before`**: an icon is a glyph in that pseudo-element's `content`, and a
  * layer rule setting `content: ""` erased the icon on every button it touched.
- * The button kept its fill, so it read as "the icon colour does not work" when
+ * The button kept its fill, so it read as "the icon color does not work" when
  * the icon was not there at all.
  *
  * And it is appended to each member of a comma-joined selector, not to the list:

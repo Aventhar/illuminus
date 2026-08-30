@@ -63,7 +63,7 @@ export class IlluminusTemplateManager extends HandlebarsApplicationMixin(Applica
     const context = await super._prepareContext(options);
     context.templates = listTemplates().map((template) => ({
       ...template,
-      // Enough to recognise a template by without rendering its markup.
+      // Enough to recognize a template by without rendering its markup.
       summary: summarize(template.markup),
       bundled: Boolean(template.preset)
     }));

@@ -652,7 +652,7 @@ function skippedPages(entry) {
  * @param {string[]} options.entryIds   Journals to export.
  * @param {boolean} [options.secrets]   Include unrevealed secret passages.
  * @param {boolean} [options.pageBackground]  Print the page's own surface —
- *   its colour and its picture — rather than leaving the paper white.
+ *   its color and its picture — rather than leaving the paper white.
  * @param {"folder"|"file"|"print"} [options.format]  A folder of pages, one
  *   self-contained page, or one page built to be printed. The last two are the
  *   same document: a thing you can print is a thing you can email, and a

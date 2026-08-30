@@ -85,6 +85,23 @@ const BOX_PARTS = ["Width", "Style", "Color"];
  * control rather than beside it, five rows become one wrapped row, and the
  * search box still reads exactly what it read before.
  */
+/**
+ * What a gathered run is, read from the control names rather than from their
+ * wording.
+ *
+ * The qualifier below — "Inner Shadow Softness" less "Softness" — is the better
+ * name where it exists, because it is the tab's own words for the thing. But it
+ * is only there while the wording for that tab is loaded, and a run that falls
+ * back to a bare "Shadow" beside another bare "Shadow" tells a person nothing.
+ * The family always says which kind it is.
+ */
+function kindOfRun(cluster) {
+  if (cluster.kind === "picture") return "ILLUMINUS.Box.Picture";
+  if (/[Ii]nnerShadow$/.test(cluster.family)) return "ILLUMINUS.Box.InnerShadow";
+  if (/[Tt]extShadow$/.test(cluster.family)) return "ILLUMINUS.Box.TextShadow";
+  return "ILLUMINUS.Box.OuterShadow";
+}
+
 function clusterPartOf(name) {
   let m;
   if ((m = name.match(/^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
@@ -187,9 +204,17 @@ function boxRows(fields) {
         rows.push({ cluster: held });
       }
       // Where a category holds one of them there is no qualifier to take, and
-      // the run says plainly what it is instead.
-      held.plainName ??= game.i18n.localize(cluster.kind === "picture"
-        ? "ILLUMINUS.Box.Picture" : "ILLUMINUS.Box.Shadow");
+      // the run says plainly what it is instead — but which *kind* it is is
+      // known from the control's own name, and is said even then. A category
+      // holding an inner shadow and an outer one would otherwise show two runs
+      // both called "Shadow" whenever the qualifier below came to nothing,
+      // which it does for a whole tab the moment its wording is not loaded.
+      // Asked for rather than assumed: a language file that has not caught up
+      // has the older, plainer key and none of these, and Foundry answers a key
+      // it does not know with the key itself. Better the blunt word than that.
+      const kind = kindOfRun(cluster);
+      held.plainName ??= game.i18n.localize(game.i18n.has(kind) ? kind
+        : (cluster.kind === "picture" ? "ILLUMINUS.Box.Picture" : "ILLUMINUS.Box.Shadow"));
       // The run takes the qualifier the controls give up, which is the whole of
       // what a qualified label adds: "Inner Shadow Softness" less "Softness" is
       // the run's own name. Where a category holds one shadow the two labels
@@ -236,7 +261,7 @@ function boxRows(fields) {
       box.border.push({
         ...field,
         // The thickness of a side is drawn on that side of the box; its style
-        // and colour are shown for whichever side is chosen.
+        // and color are shown for whichever side is chosen.
         onEdge: part.part === "Width",
         // The line above this run is the run's now: left on the control as
         // well, it was drawn twice.
@@ -331,7 +356,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Whether the sample is deaf to the pointer.
    *
    * On by default. The sample answers a pointer exactly as a real journal does,
-   * which is how a hovered colour is judged — and a nuisance every other minute,
+   * which is how a hovered color is judged — and a nuisance every other minute,
    * since merely crossing the pane repaints whatever the mouse passed over.
    */
   #quietSample = true;
@@ -913,7 +938,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       // Neither what holds the focused piece nor what it holds. A wrapper that
       // dimmed would dim what is inside it however brightly the inside is
       // marked — and the Page tab's piece is the surface everything else sits
-      // on, so dimming its contents greyed the whole sample out and left the
+      // on, so dimming its contents grayed the whole sample out and left the
       // one tab whose setting covers the page with nothing to look at.
       part.classList.toggle("is-dimmed", Boolean(target) && part.dataset.part !== active
         && !part.contains(target) && !target.contains(part));
@@ -925,7 +950,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Put the focused piece of the sample where it can be seen.
    *
    * Dimming the rest is no help if the piece in question is below the fold —
-   * the Tables tab would show a greyed page and no table. The frame is scrolled
+   * the Tables tab would show a grayed page and no table. The frame is scrolled
    * by hand rather than with `scrollIntoView`, which would scroll the editor
    * window as well.
    */
@@ -1148,7 +1173,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       if (copy) {
         const twinned = present.some((state) => state.id === "normal") && chosen !== "normal";
         copy.classList.toggle("is-hidden", !twinned);
-        // Greyed where every control already holds what it would be given, so
+        // Grayed where every control already holds what it would be given, so
         // the button says whether pressing it would change anything rather than
         // looking the same either way.
         copy.disabled = twinned && key
@@ -1261,7 +1286,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       const field = event.target;
       if (!(field instanceof HTMLElement)) return;
       // A button pressed with Enter is a button being clicked, textareas take
-      // the newline, and anything editable keeps its own behaviour.
+      // the newline, and anything editable keeps its own behavior.
       if (field.matches("button, textarea") || field.isContentEditable) return;
 
       event.preventDefault();
@@ -1860,7 +1885,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     if (!picker) return;
     // The setting says which one is ordinary; holding Shift asks for the other,
     // so whichever a person keeps is one key away from the one they keep for
-    // the odd occasion — a picture's colour, or a reference open beside Foundry.
+    // the odd occasion — a picture's color, or a reference open beside Foundry.
     const screen = (getSetting(SETTINGS.eyedropper) === "screen") !== Boolean(event?.shiftKey);
     const hex = screen
       ? await IlluminusStyleEditor.#pickFromScreen()
@@ -2081,7 +2106,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /**
    * Say what a control or a section is for, on the click that asks.
    *
-   * The wording used to sit under every label, which is a paragraph of grey text
+   * The wording used to sit under every label, which is a paragraph of gray text
    * beside every one of six hundred controls — the tab you were reading became
    * mostly explanation. It is still in the markup, and still what the search box
    * searches; it is shown when somebody wants it.

@@ -22,7 +22,7 @@ styles/illuminus-generated.css   the repetitive ones, generated
 ```
 
 Keep it that way. It is what makes importing a stranger's style file safe: the worst a
-hostile style can do is set a colour you did not expect, because there is nowhere for it
+hostile style can do is set a color you did not expect, because there is nowhere for it
 to put a rule. It is also why every new capability has to be expressed as a *value* —
 which is a real constraint, and most of the interesting problems in this codebase come
 from working inside it.
@@ -41,7 +41,7 @@ block per style in use.
 | `scripts/migrations.mjs` | Forward migration of stored styles, one function per schema version |
 | `scripts/apps/style-editor.mjs` | The three-column editor: the parts tree, the sample, the settings |
 | `scripts/apps/style-manager.mjs` | The style library |
-| `scripts/apps/color-picker.mjs` | The colour picker and its eyedropper |
+| `scripts/apps/color-picker.mjs` | The color picker and its eyedropper |
 | `scripts/editor-menu.mjs` | The **Illuminus** menu in the page editor: boxes, tags, pictures, lists, tables, templates |
 | `scripts/export-html.mjs` | Journals out of Foundry: folder, one file, print, stylesheet |
 | `scripts/export-css.mjs` | Gathering the CSS that is actually painting a page |
@@ -179,7 +179,7 @@ await illuminus.buildJournalExport({            // the archive itself, unsaved
   means everywhere it appears — which is why hyphenation's is `breakAsNeeded` rather than
   `auto`.
 - **US English throughout** — strings, comments and identifiers alike. CSS property names
-  are US spelling anyway, so a stray `colour` in an identifier reads as a typo beside
+  are US spelling anyway, so a stray `color` in an identifier reads as a typo beside
   `borderTopColor`.
 - **Prefix every CSS class with `illuminus-`** so styles cannot leak into core UI.
 - **Anything that enumerates the families must be derived, not spelled out.** A hand-kept

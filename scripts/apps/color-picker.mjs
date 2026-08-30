@@ -148,12 +148,12 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
 
   const currentHex = () => rgbaToHex({ r: state.r, g: state.g, b: state.b, a: state.a / 100 });
 
-  /** Values for one group, derived from the shared colour. */
+  /** Values for one group, derived from the shared color. */
   const valuesFor = (group) => {
     if (group !== "hsl") return { r: state.r, g: state.g, b: state.b, a: state.a };
     // The hue shown is the one kept beside the color rather than the one read
     // back out of it. They agree wherever there is a hue to read, and where
-    // there is not — a grey, or anything at full lightness — reading it back
+    // there is not — a gray, or anything at full lightness — reading it back
     // says zero, and the slider would jump to red while the color stood still.
     return { ...rgbToHsl(state), h: hue, a: state.a };
   };
@@ -161,7 +161,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
   /**
    * Hue is kept beside the color rather than read back from it.
    *
-   * Every grey has the same red-green-blue, so a color picked at zero
+   * Every gray has the same red-green-blue, so a color picked at zero
    * saturation has no hue to recover — reading it back would snap the ramp to
    * red the moment the knob touched the left edge, and the shade under the
    * pointer would change while the pointer stood still.
@@ -244,7 +244,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
       // that was not lost already.
       const said = { ...valuesFor("hsl"), [key]: value };
       Object.assign(state, hslToRgb(said));
-      // Said rather than recovered, for the reason above: a grey has no hue to
+      // Said rather than recovered, for the reason above: a gray has no hue to
       // read back, and dragging saturation to nothing would otherwise throw
       // away the hue a person was working in.
       hue = said.h;

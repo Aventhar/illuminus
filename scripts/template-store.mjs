@@ -14,7 +14,7 @@ import { TEMPLATE_PRESETS } from "./template-presets.mjs";
  *
  *   - **Nothing is trusted.** A template's markup is never injected. It is
  *     parsed through Foundry's own ProseMirror schema at insertion time, which
- *     silently drops any element or attribute the editor does not recognise, so
+ *     silently drops any element or attribute the editor does not recognize, so
  *     an imported template from a stranger cannot smuggle in a script any more
  *     than a pasted paragraph can.
  *   - **They carry class names, not styling.** A template refers to Illuminus's

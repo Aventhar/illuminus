@@ -30,8 +30,8 @@
 .illuminus-styled .illuminus-preview__editor > .window-content {
   background-color: var(--ill-page-background);
   backdrop-filter: var(--ill-page-frost);
-  /* A surface that graduates rather than being one flat colour. Both ends start
-     clear, so a page nobody has graduated is the flat colour it always was. */
+  /* A surface that graduates rather than being one flat color. Both ends start
+     clear, so a page nobody has graduated is the flat color it always was. */
   background-image: linear-gradient(var(--ill-page-gradient-angle),
       var(--ill-page-gradient-from), var(--ill-page-gradient-to));
   border-width: var(--ill-page-border-top-width) var(--ill-page-border-right-width)
@@ -187,6 +187,12 @@
   --button-size: calc(var(--ill-window-header-button-size) * 1.7);
   color: var(--ill-window-header-button-color, revert-layer);
   background-color: var(--ill-window-header-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-window-header-button-gradient-angle),
+      var(--ill-window-header-button-gradient-from), var(--ill-window-header-button-gradient-to));
+  backdrop-filter: var(--ill-window-header-button-frost);
   font-size: var(--ill-window-header-button-size, revert-layer);
   border-width: var(--ill-window-header-button-border-top-width) var(--ill-window-header-button-border-right-width)
                 var(--ill-window-header-button-border-bottom-width) var(--ill-window-header-button-border-left-width);
@@ -244,6 +250,12 @@
   --button-background-color: var(--ill-window-page-button-background, revert-layer);
   color: var(--ill-window-page-button-color, revert-layer);
   background-color: var(--ill-window-page-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-window-page-button-gradient-angle),
+      var(--ill-window-page-button-gradient-from), var(--ill-window-page-button-gradient-to));
+  backdrop-filter: var(--ill-window-page-button-frost);
   font-size: var(--ill-window-page-button-size, revert-layer);
   border-width: var(--ill-window-page-button-border-top-width) var(--ill-window-page-button-border-right-width)
                 var(--ill-window-page-button-border-bottom-width) var(--ill-window-page-button-border-left-width);
@@ -314,6 +326,12 @@
   --button-size: calc(var(--ill-editor-header-button-size) * 1.7);
   color: var(--ill-editor-header-button-color, revert-layer);
   background-color: var(--ill-editor-header-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-header-button-gradient-angle),
+      var(--ill-editor-header-button-gradient-from), var(--ill-editor-header-button-gradient-to));
+  backdrop-filter: var(--ill-editor-header-button-frost);
   font-size: var(--ill-editor-header-button-size, revert-layer);
   border-width: var(--ill-editor-header-button-border-top-width) var(--ill-editor-header-button-border-right-width)
                 var(--ill-editor-header-button-border-bottom-width) var(--ill-editor-header-button-border-left-width);
@@ -332,6 +350,12 @@
 .illuminus-styled.journal-entry-page menu.editor-menu,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu {
   background-color: var(--ill-editor-toolbar-toolbar-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-toolbar-toolbar-gradient-angle),
+      var(--ill-editor-toolbar-toolbar-gradient-from), var(--ill-editor-toolbar-toolbar-gradient-to));
+  backdrop-filter: var(--ill-editor-toolbar-toolbar-frost);
   padding: var(--ill-editor-toolbar-toolbar-padding-top) var(--ill-editor-toolbar-toolbar-padding-right)
            var(--ill-editor-toolbar-toolbar-padding-bottom) var(--ill-editor-toolbar-toolbar-padding-left);
   border-width: var(--ill-editor-toolbar-toolbar-border-top-width) var(--ill-editor-toolbar-toolbar-border-right-width)
@@ -387,6 +411,12 @@
   text-shadow: var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-text-shadow-offset-y)
                var(--ill-editor-settings-bar-settings-bar-text-shadow-blur) var(--ill-editor-settings-bar-settings-bar-text-shadow-color);
   background-color: var(--ill-editor-settings-bar-settings-bar-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-settings-bar-settings-bar-gradient-angle),
+      var(--ill-editor-settings-bar-settings-bar-gradient-from), var(--ill-editor-settings-bar-settings-bar-gradient-to));
+  backdrop-filter: var(--ill-editor-settings-bar-settings-bar-frost);
   padding: var(--ill-editor-settings-bar-settings-bar-padding-top) var(--ill-editor-settings-bar-settings-bar-padding-right)
            var(--ill-editor-settings-bar-settings-bar-padding-bottom) var(--ill-editor-settings-bar-settings-bar-padding-left);
   margin: var(--ill-editor-settings-bar-settings-bar-margin-top) var(--ill-editor-settings-bar-settings-bar-margin-right)
@@ -418,6 +448,12 @@
 .illuminus-styled.journal-entry-page .page-metadata select,
 .illuminus-styled .illuminus-preview__editor .page-metadata select {
   background-color: var(--ill-editor-settings-bar-field-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-settings-bar-field-gradient-angle),
+      var(--ill-editor-settings-bar-field-gradient-from), var(--ill-editor-settings-bar-field-gradient-to));
+  backdrop-filter: var(--ill-editor-settings-bar-field-frost);
   padding: var(--ill-editor-settings-bar-field-padding-top) var(--ill-editor-settings-bar-field-padding-right)
            var(--ill-editor-settings-bar-field-padding-bottom) var(--ill-editor-settings-bar-field-padding-left);
   border-width: var(--ill-editor-settings-bar-field-border-top-width) var(--ill-editor-settings-bar-field-border-right-width)
@@ -473,6 +509,12 @@
    Foundry's: only paint is set here, never position. */
 .illuminus-styled#prosemirror-dropdown ul {
   background-color: var(--ill-editor-dropdowns-list-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-dropdowns-list-gradient-angle),
+      var(--ill-editor-dropdowns-list-gradient-from), var(--ill-editor-dropdowns-list-gradient-to));
+  backdrop-filter: var(--ill-editor-dropdowns-list-frost);
   padding: var(--ill-editor-dropdowns-list-padding-top) var(--ill-editor-dropdowns-list-padding-right)
            var(--ill-editor-dropdowns-list-padding-bottom) var(--ill-editor-dropdowns-list-padding-left);
   border-width: var(--ill-editor-dropdowns-list-border-top-width) var(--ill-editor-dropdowns-list-border-right-width)
@@ -506,6 +548,12 @@
   text-shadow: var(--ill-editor-dropdowns-item-text-shadow-offset-x) var(--ill-editor-dropdowns-item-text-shadow-offset-y)
                var(--ill-editor-dropdowns-item-text-shadow-blur) var(--ill-editor-dropdowns-item-text-shadow-color);
   background-color: var(--ill-editor-dropdowns-item-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-dropdowns-item-gradient-angle),
+      var(--ill-editor-dropdowns-item-gradient-from), var(--ill-editor-dropdowns-item-gradient-to));
+  backdrop-filter: var(--ill-editor-dropdowns-item-frost);
   padding: var(--ill-editor-dropdowns-item-padding-top) var(--ill-editor-dropdowns-item-padding-right)
            var(--ill-editor-dropdowns-item-padding-bottom) var(--ill-editor-dropdowns-item-padding-left);
   border-radius: var(--ill-editor-dropdowns-item-corner-top-left) var(--ill-editor-dropdowns-item-corner-top-right)
@@ -565,6 +613,12 @@
 .illuminus-styled.journal-entry-page menu.editor-menu button:not(.pm-dropdown),
 .illuminus-styled .illuminus-preview__editor menu.editor-menu button:not(.pm-dropdown) {
   background-color: var(--ill-editor-toolbar-toolbar-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-toolbar-toolbar-button-gradient-angle),
+      var(--ill-editor-toolbar-toolbar-button-gradient-from), var(--ill-editor-toolbar-toolbar-button-gradient-to));
+  backdrop-filter: var(--ill-editor-toolbar-toolbar-button-frost);
   padding: var(--ill-editor-toolbar-toolbar-button-padding-top) var(--ill-editor-toolbar-toolbar-button-padding-right)
            var(--ill-editor-toolbar-toolbar-button-padding-bottom) var(--ill-editor-toolbar-toolbar-button-padding-left);
   border-width: var(--ill-editor-toolbar-toolbar-button-border-top-width) var(--ill-editor-toolbar-toolbar-button-border-right-width)
@@ -591,6 +645,12 @@
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown {
   --button-text-color: var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer));
   background-color: var(--ill-editor-dropdowns-dropdown-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-dropdowns-dropdown-gradient-angle),
+      var(--ill-editor-dropdowns-dropdown-gradient-from), var(--ill-editor-dropdowns-dropdown-gradient-to));
+  backdrop-filter: var(--ill-editor-dropdowns-dropdown-frost);
   padding: var(--ill-editor-dropdowns-dropdown-padding-top) var(--ill-editor-dropdowns-dropdown-padding-right)
            var(--ill-editor-dropdowns-dropdown-padding-bottom) var(--ill-editor-dropdowns-dropdown-padding-left);
   border-width: var(--ill-editor-dropdowns-dropdown-border-top-width) var(--ill-editor-dropdowns-dropdown-border-right-width)
@@ -638,6 +698,12 @@
 
 .illuminus-styled .window-header::after {
   background-color: var(--ill-window-title-bar-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-window-title-bar-gradient-angle),
+      var(--ill-window-title-bar-gradient-from), var(--ill-window-title-bar-gradient-to));
+  backdrop-filter: var(--ill-window-title-bar-frost);
 }
 
 .illuminus-styled.journal-entry-page.application::after,
@@ -651,6 +717,12 @@
 .illuminus-styled.journal-entry-page .window-header::after,
 .illuminus-styled .illuminus-preview__editor .window-header::after {
   background-color: var(--ill-editor-title-bar-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-editor-title-bar-gradient-angle),
+      var(--ill-editor-title-bar-gradient-from), var(--ill-editor-title-bar-gradient-to));
+  backdrop-filter: var(--ill-editor-title-bar-frost);
 }
 
 
@@ -688,6 +760,12 @@
 /* Page entries */
 .illuminus-styled .journal-sidebar .toc li.page {
   background-color: var(--ill-sidebar-entries-entry-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-entries-entry-gradient-angle),
+      var(--ill-sidebar-entries-entry-gradient-from), var(--ill-sidebar-entries-entry-gradient-to));
+  backdrop-filter: var(--ill-sidebar-entries-entry-frost);
   padding: var(--ill-sidebar-entries-entry-padding-top) var(--ill-sidebar-entries-entry-padding-right)
            var(--ill-sidebar-entries-entry-padding-bottom) var(--ill-sidebar-entries-entry-padding-left);
   margin: var(--ill-sidebar-entries-entry-margin-top) var(--ill-sidebar-entries-entry-margin-right)
@@ -765,6 +843,12 @@
    carry spacing that pushes the rows apart. */
 .illuminus-styled .journal-sidebar .toc li.heading {
   background-color: var(--ill-sidebar-headings-heading-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-headings-heading-gradient-angle),
+      var(--ill-sidebar-headings-heading-gradient-from), var(--ill-sidebar-headings-heading-gradient-to));
+  backdrop-filter: var(--ill-sidebar-headings-heading-frost);
   padding: var(--ill-sidebar-headings-heading-padding-top) var(--ill-sidebar-headings-heading-padding-right)
            var(--ill-sidebar-headings-heading-padding-bottom) var(--ill-sidebar-headings-heading-padding-left);
   margin: var(--ill-sidebar-headings-heading-margin-top) var(--ill-sidebar-headings-heading-margin-right)
@@ -841,6 +925,12 @@
      inline box cannot be aligned — the Alignment control did nothing at all. */
   text-align: var(--ill-sidebar-categories-category-align, revert-layer);
   background-color: var(--ill-sidebar-categories-category-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-categories-category-gradient-angle),
+      var(--ill-sidebar-categories-category-gradient-from), var(--ill-sidebar-categories-category-gradient-to));
+  backdrop-filter: var(--ill-sidebar-categories-category-frost);
   padding: var(--ill-sidebar-categories-category-padding-top) var(--ill-sidebar-categories-category-padding-right)
            var(--ill-sidebar-categories-category-padding-bottom) var(--ill-sidebar-categories-category-padding-left);
   margin: var(--ill-sidebar-categories-category-margin-top) var(--ill-sidebar-categories-category-margin-right)
@@ -878,6 +968,12 @@
   --input-text-color: var(--ill-sidebar-search-search-color, revert-layer);
   --input-placeholder-color: var(--ill-sidebar-search-search-placeholder-color, revert-layer);
   background-color: var(--ill-sidebar-search-search-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-search-search-gradient-angle),
+      var(--ill-sidebar-search-search-gradient-from), var(--ill-sidebar-search-search-gradient-to));
+  backdrop-filter: var(--ill-sidebar-search-search-frost);
   color: var(--ill-sidebar-search-search-color, revert-layer);
   font-size: var(--ill-sidebar-search-search-size, revert-layer);
   border-width: var(--ill-sidebar-search-search-border-top-width) var(--ill-sidebar-search-search-border-right-width)
@@ -907,6 +1003,12 @@
   --button-hover-border-color: var(--ill-sidebar-buttons-button-hover-border-color, revert-layer);
   color: var(--ill-sidebar-buttons-button-color, revert-layer);
   background-color: var(--ill-sidebar-buttons-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-buttons-button-gradient-angle),
+      var(--ill-sidebar-buttons-button-gradient-from), var(--ill-sidebar-buttons-button-gradient-to));
+  backdrop-filter: var(--ill-sidebar-buttons-button-frost);
   border-width: var(--ill-sidebar-buttons-button-border-width, revert-layer);
   border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
   border-radius: var(--ill-sidebar-buttons-button-corner-top-left) var(--ill-sidebar-buttons-button-corner-top-right)
@@ -1071,6 +1173,12 @@
    until it is set here, which on parchment reads as a printing error. */
 .illuminus-styled .journal-page-content mark {
   background-color: var(--ill-body-highlight-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-body-highlight-gradient-angle),
+      var(--ill-body-highlight-gradient-from), var(--ill-body-highlight-gradient-to));
+  backdrop-filter: var(--ill-body-highlight-frost);
   color: var(--ill-body-highlight-color);
 }
 
@@ -1110,6 +1218,12 @@
   font-size: var(--ill-body-code-size);
   color: var(--ill-body-code-color);
   background-color: var(--ill-body-code-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-body-code-gradient-angle),
+      var(--ill-body-code-gradient-from), var(--ill-body-code-gradient-to));
+  backdrop-filter: var(--ill-body-code-frost);
   box-shadow: var(--ill-body-code-shadow-offset-x) var(--ill-body-code-shadow-offset-y)
               var(--ill-body-code-shadow-blur) var(--ill-body-code-shadow-spread)
               var(--ill-body-code-shadow-color),
@@ -1154,6 +1268,12 @@
   margin-top: var(--ill-body-code-block-margin-top);
   margin-bottom: var(--ill-body-code-block-margin-bottom);
   background-color: var(--ill-body-code-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-body-code-gradient-angle),
+      var(--ill-body-code-gradient-from), var(--ill-body-code-gradient-to));
+  backdrop-filter: var(--ill-body-code-frost);
   box-shadow: var(--ill-body-code-shadow-offset-x) var(--ill-body-code-shadow-offset-y)
               var(--ill-body-code-shadow-blur) var(--ill-body-code-shadow-spread)
               var(--ill-body-code-shadow-color),
@@ -1178,6 +1298,12 @@
 /* Foundry's disclosure widget: a <details> the reader can fold away. */
 .illuminus-styled .journal-page-content details {
   background-color: var(--ill-boxes-collapsible-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-boxes-collapsible-gradient-angle),
+      var(--ill-boxes-collapsible-gradient-from), var(--ill-boxes-collapsible-gradient-to));
+  backdrop-filter: var(--ill-boxes-collapsible-frost);
   border: var(--ill-boxes-collapsible-border-width) solid var(--ill-boxes-collapsible-border-color);
   border-radius: var(--ill-boxes-collapsible-corner-top-left) var(--ill-boxes-collapsible-corner-top-right)
                  var(--ill-boxes-collapsible-corner-bottom-right) var(--ill-boxes-collapsible-corner-bottom-left);
@@ -1203,6 +1329,12 @@
   font-variant: var(--ill-boxes-summary-caps-variant);
   text-transform: var(--ill-boxes-summary-caps-transform);
   background-color: var(--ill-boxes-summary-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-boxes-summary-gradient-angle),
+      var(--ill-boxes-summary-gradient-from), var(--ill-boxes-summary-gradient-to));
+  backdrop-filter: var(--ill-boxes-summary-frost);
   box-shadow: var(--ill-boxes-summary-shadow-offset-x) var(--ill-boxes-summary-shadow-offset-y)
               var(--ill-boxes-summary-shadow-blur) var(--ill-boxes-summary-shadow-spread)
               var(--ill-boxes-summary-shadow-color),
@@ -1348,6 +1480,12 @@
    table has already been shown. */
 .illuminus-styled .journal-page-content section.secret.revealed {
   background-color: var(--ill-secrets-revealed-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-secrets-revealed-gradient-angle),
+      var(--ill-secrets-revealed-gradient-from), var(--ill-secrets-revealed-gradient-to));
+  backdrop-filter: var(--ill-secrets-revealed-frost);
   box-shadow: var(--ill-secrets-revealed-shadow-offset-x) var(--ill-secrets-revealed-shadow-offset-y)
               var(--ill-secrets-revealed-shadow-blur) var(--ill-secrets-revealed-shadow-spread)
               var(--ill-secrets-revealed-shadow-color),
@@ -1383,6 +1521,12 @@
   isolation: isolate;
   color: var(--ill-secrets-button-color);
   background-color: var(--ill-secrets-button-background);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-secrets-button-gradient-angle),
+      var(--ill-secrets-button-gradient-from), var(--ill-secrets-button-gradient-to));
+  backdrop-filter: var(--ill-secrets-button-frost);
   box-shadow: var(--ill-secrets-button-shadow-offset-x) var(--ill-secrets-button-shadow-offset-y)
               var(--ill-secrets-button-shadow-blur) var(--ill-secrets-button-shadow-spread)
               var(--ill-secrets-button-shadow-color),
@@ -1856,7 +2000,7 @@
   min-width: 0;
 }
 
-/* Offered only where it can be honoured: a stylesheet is Illuminus's own work,
+/* Offered only where it can be honored: a stylesheet is Illuminus's own work,
    never the game system's. */
 .illuminus-export-dialog__option.is-refused {
   opacity: 0.5;
@@ -1884,7 +2028,7 @@
   display: none;
 }
 
-/* Shown but greyed where there is nothing to copy: every control in the
+/* Shown but grayed where there is nothing to copy: every control in the
    section already holds what the ordinary one holds, so pressing it would do
    nothing. Kept in place rather than hidden, because a button that comes and
    goes as the values change is harder to find than one that dims. */
@@ -1922,7 +2066,7 @@
   min-width: 0;
 }
 
-/* Offered only where it can be honoured: a stylesheet is Illuminus's own work,
+/* Offered only where it can be honored: a stylesheet is Illuminus's own work,
    never the game system's. */
 .illuminus-export-dialog__option.is-refused {
   opacity: 0.5;
@@ -2253,8 +2397,8 @@
 
 /* What a control is for, shown on the click that asks.
    Foundry's tooltip takes plain text, so the paragraphs an explanation is
-   written in survive only if the line breaks are honoured — without this the
-   whole thing runs together into one grey wall. */
+   written in survive only if the line breaks are honored — without this the
+   whole thing runs together into one gray wall. */
 #tooltip.illuminus-hint-tooltip {
   max-width: 26rem;
   white-space: pre-line;
@@ -3430,7 +3574,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 .illuminus-preview__frame .journal-sidebar {
   display: none;
   flex: 0 0 auto;
-  /* Honour the width control, but never let it crowd out the page. */
+  /* Honor the width control, but never let it crowd out the page. */
   width: min(var(--ill-sidebar-sidebar-width), 50%);
   flex-direction: column;
   overflow: hidden;
@@ -3795,7 +3939,7 @@ html.illuminus-picking * {
 }
 
 /* Each slot holds the color button and its remove button. The slot is the
-   positioning context, and it lifts above its neighbours while hovered so the
+   positioning context, and it lifts above its neighbors while hovered so the
    remove control is never painted under the next swatch in the grid. */
 .illuminus-cp__slot {
   position: relative;
@@ -3832,7 +3976,7 @@ html.illuminus-picking * {
 }
 
 /* Sits inside the slot rather than overhanging it, so it cannot fall under a
-   neighbour, and is large enough to actually hit. */
+   neighbor, and is large enough to actually hit. */
 /* Inside the slot, not overhanging it: an overhang on the last column runs
    past the edge of the panel. */
 .illuminus-cp__forget {

@@ -71,7 +71,7 @@ content's minimum, and a button's minimum width pushed a ten-column row past the
 its panel. Use `minmax(0, 1fr)` and give the items `min-width: 0`.
 
 **Click the way a person does.** `element.click()` skips hit testing, so a control that
-CSS has made unclickable still passes. Take the element's centre, ask
+CSS has made unclickable still passes. Take the element's center, ask
 `document.elementFromPoint`, assert it is the control, and click what comes back. A dead
 swatch shipped because a check called `.click()` directly.
 
@@ -132,7 +132,7 @@ These are all load-bearing and none are obvious from the code.
 - **A picture layer takes `position: relative` for its host,** which is not always the
   host's to give. The Edit pencil is `sticky` inside a container as tall as the page, and
   its own layer — and its pointed-at layer, whose host rule is the same button with the
-  state stripped off — held it still, so a styled journal never had Foundry's behaviour
+  state stripped off — held it still, so a styled journal never had Foundry's behavior
   and the pencil sat where the title is. Where a control decides an element's position,
   the layers must say `host: false` and leave it to the control.
 - **Setting one of core's own variables is the same trap.** The tick box on the page
@@ -148,7 +148,7 @@ These are all load-bearing and none are obvious from the code.
   it.** Every hovered and selected control is derived from an ordinary one and
   starts empty, and the rule reading it is written `var(--twin, var(--ordinary))`
   so that emptiness reaches past it. But an `emit` answers a value it does not
-  recognise with a sensible one — right for the ordinary control, where a stray
+  recognize with a sensible one — right for the ordinary control, where a stray
   value should still paint something, and wrong for a twin, which then holds a
   real value and wins the very chain meant to reach past it. **276 twins spoke
   this way**: pointing at a background picture re-tiled it, moved it to the
@@ -347,7 +347,7 @@ These are all load-bearing and none are obvious from the code.
 A template is stored markup, not styling. Two properties are load-bearing:
 
 - **It is parsed, never injected.** `foundry.prosemirror.dom.parseString(markup, schema)`
-  drops anything the editor does not recognise, so an imported template can carry no more
+  drops anything the editor does not recognize, so an imported template can carry no more
   than a person could have typed. Do not add a second sanitizer — two checks that can
   disagree are worse than one that cannot be bypassed.
 - **It names keys, not colors.** `illuminus-box--box01`, never `background: #5e1914`.
@@ -642,7 +642,7 @@ only get a worse answer.
   that does nothing. Counting `/Subtype /Link` is not enough; the check resolves every
   `/Dest` against the `/Dests` dictionary.
 - **Do not judge a PDF by macOS's thumbnailer.** `qlmanage` rendered a heavy text-shadow
-  as a grey box behind the title; Chrome's own viewer shows it correctly. Open the file
+  as a gray box behind the title; Chrome's own viewer shows it correctly. Open the file
   in a browser before believing a rendering bug.
 
 ## Exporting a stylesheet on its own
@@ -722,7 +722,7 @@ in the template library.
   any timeout, time the steps in isolation rather than believing a note.
 - **A whole run is about fifteen minutes** (640 assertions, 15m25s), so budget
   for that rather than killing one that looks stuck.
-- **A probe measuring module behaviour must reload the page first.** `.mjs`
+- **A probe measuring module behavior must reload the page first.** `.mjs`
   changes need a refresh and the sandbox does not hot-reload, so a script that
   connects and measures reads the code the page loaded, not the code on disk —
   and an A/B against `git stash` then shows no difference whichever way round it
@@ -876,6 +876,34 @@ person is pointing at. A rule that already says `:hover` is left alone by the
 mirror, so the honest answer there is to write that half by hand and let the
 mirror's version stand as the redundant one it is. Anything painting a child
 while a parent is pointed at wants the same thought.
+
+**A name that is worked out from wording fails when the wording is not there.**
+A gathered run was named by subtracting a control's short label from its long
+one, which is the better name where it exists — and nothing at all where a tab's
+wording has not loaded, leaving every box shadow answering to the bare word
+"Shadow". Two of those sat in any category holding an inner shadow and an outer
+one. What a run *is* is known from the control's own name (`innerShadow`,
+`textShadow`), so that is what it falls back to, guarded with `game.i18n.has`
+because a language file that has not caught up would otherwise print the key.
+Worth the general point: where a name is derived from another string, ask what
+it says when that string is missing.
+
+**A category may hold two of a thing, and then every control must say which.**
+The line that folds a collapsible and the block it folds; a term and its
+definition. Most controls already said so, because wording built from the part's
+own name gives "Heading Typeface" beside "Fill Color" — but a family whose
+wording ignores the part gave two "Top Padding" in one category. `generate-lang`
+sweeps every category at the end and qualifies a label used twice with its
+part's word, so a family added later is covered without anyone remembering, and
+`validate.mjs` [14] fails if a clash is left over. It skips state controls, which
+are shown in place of the control they stand in for rather than beside it —
+**both spellings**, `hoverBackground` and `entryHoverBackground`.
+
+**A sweep that records where a name appears must count, not collect.** The first
+version of this put each name against a *set* of the categories it appeared in,
+which cannot see two of one name inside a single category — the only kind that
+actually confuses anybody. It reported cross-category repeats for an hour while
+the real ones sat unmentioned.
 
 **A name a person reads is read against the whole tab, not one category.** Which
 lettering casts a shadow used to be asked of a category — so a tab whose three
@@ -1106,7 +1134,7 @@ sample's right edge, so the settings width is measured from *its* right edge and
 a drag leftwards widens the settings.
 
 **A piece the focused one holds is lit with it.** The Page tab's piece is the surface
-everything else sits on, so dimming everything that is not the focused part greyed the
+everything else sits on, so dimming everything that is not the focused part grayed the
 whole sample out and left the one tab covering the page with nothing to look at. Neither
 a part that holds the focused one nor a part it holds is dimmed — which also keeps a link
 lit inside the paragraph it sits in.
@@ -1170,8 +1198,8 @@ the named ones — the sidebar's Entry States holds pointed-at and current-page 
 because the ordinary entry is styled in the section above it, and offering it a "Normal"
 that showed nothing would be a lie. A control with no counterpart in another state
 belongs to all of them: a button's corner rounding does not change when pointed at.
-Turning the hovered state off greys the *hovered* controls and that switch's hovered
-choice only — greying the whole switch put the panel's current-page controls out of
+Turning the hovered state off grays the *hovered* controls and that switch's hovered
+choice only — graying the whole switch put the panel's current-page controls out of
 reach, since that switch offers pointed-at and current-page and no ordinary state at all.
 
 Filtering and the switch can hide the same control for different reasons, so they use
@@ -1315,7 +1343,7 @@ starts open, so a tab opens showing what the style *does*.
 **A box is drawn twice, as two pictures.** Spacing is one — the outer four around a
 dashed ring, the inner four on the box, and no outer ring at all where a thing has no
 space around it to set. Edges and corners are the other — a thickness on each edge, a
-radius at each corner, the chosen side's style and colour beneath, and the corner shape
+radius at each corner, the chosen side's style and color beneath, and the corner shape
 under it. Both merges happen in the schema, so a tab that kept Inner Spacing and Outer
 Spacing (or Border and Corners) apart ends up with one category and both orders follow;
 the tab maps did not have to be rewritten. **One family key per picture**: padding and
@@ -1334,13 +1362,13 @@ the lines around it the moment the control existed. That is the same trap as the
 and the scroll bars, and the rule it keeps teaching is: *where a control can override
 something the skeleton deliberately sets, the fallback must name what the skeleton set.*
 
-**A fill can graduate, and a picture can be worked.** A colour goes in
+**A fill can graduate, and a picture can be worked.** A color goes in
 `background-color` and a gradient cannot — it is an image — so it goes on the element's
 own `background-image`, which is free precisely because a background *picture* rides on a
 layer of its own. Both ends start transparent, which is why it could be offered on all 35
 fills without changing a style. The angle is **shown** as a degree sign and **written** as
 `deg`: a gradient given "90°" is one a browser throws away, and the fill then paints
-nothing at all. What is done to a picture — softness, brightness, contrast, colour, age —
+nothing at all. What is done to a picture — softness, brightness, contrast, color, age —
 is one `filter` on the layer, and **every part carries its own fallback**, because one
 unset part makes the whole declaration invalid and a picture somebody had blurred would
 come out sharp.
@@ -1406,7 +1434,7 @@ has to be kept, and the symptom is cosmetic enough to miss.
 `--color-cool-5-25/50` for raised surfaces, `--color-border` for hairlines,
 `--color-warm-2` for a chosen control, `--font-monospace` for values, the `--font-size-*`
 scale for sizes — and set no face of their own, so the window inherits Signika like the
-rest of the interface. Colours invented for the editor date it against the app around it.
+rest of the interface. Colors invented for the editor date it against the app around it.
 
 **A corner has a size and a shape.** `corner-shape` (Chromium 139+, and this is a
 Chromium app) sits beside `border-radius` and reads the same four sizes, so a corner set
@@ -1487,7 +1515,7 @@ drawn, which is right because the category has already said which shadow it is.
   it by hand — that exercises the migration on real data.
 - **US English throughout** — strings, comments, and identifiers alike: color, center,
   gray, license, recognize. CSS property names are US spelling anyway, so a stray
-  `colour` in an identifier reads as a typo next to `borderTopColor`.
+  `color` in an identifier reads as a typo next to `borderTopColor`.
 - **No CSS jargon in any user-facing string.** "Top Thickness", not "border-top-width".
   The GUI is for people who do not write CSS.
 - Never hard-code the module id or a user-facing string; import `MODULE_ID` and add a

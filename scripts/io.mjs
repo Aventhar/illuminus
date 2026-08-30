@@ -195,7 +195,7 @@ export function exportTemplates(ids) {
  *
  * The markup itself is not inspected here: it is parsed through Foundry's own
  * editor schema when it is inserted, which drops anything the editor does not
- * recognise. Checking it twice, in two different ways, would only invite the
+ * recognize. Checking it twice, in two different ways, would only invite the
  * two checks to disagree.
  * @param {any} parsed
  * @returns {object[]}

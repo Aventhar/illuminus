@@ -31,6 +31,30 @@ Two conventions worth knowing before you read it:
   roll — and drags one in when you drop a record into a page. Links → Text now
   has an Icon Color for it, and a hovered one beside it. Left empty it takes the
   link's own color, as it always did.
+- **US English throughout, which the module always said it used.** 2,072 British
+  spellings had accumulated, 1,931 of them in wording a person reads — a file
+  saying "colour" in one hint and "color" in the next, beside a CSS property
+  spelled the American way regardless. A check now holds the line.
+- **Every fill can graduate and frost.** 60 of the 70 fills in the schema now
+  offer both, against 31 and 25 — the contents panel's entries, sub-headings,
+  categories, search box and buttons; both window frames, their title bars and
+  every button on them; the page editor's bar, its settings, its toolbar and
+  drop-downs; a table's header row; highlighted and code text; a revealed
+  secret and its Reveal button; a collapsible and the line that folds it; and
+  the six heading levels, which had gradients and now frost too. The ten left
+  are the hovered fills, which take theirs from the control they stand in for.
+- **A gathered run says which kind it is.** Its name was worked out by taking
+  the short label away from the long one, so a tab whose wording had not loaded
+  showed every box shadow as a bare "Shadow" — two of them in any category
+  holding an inner and an outer, with nothing to tell them apart. The kind is
+  read from the control's own name now, so Inner, Outer and Text Shadow are
+  distinct whatever the wording is doing.
+- **No category holds two controls of one name.** A collapsible's disclosure
+  line and the block it folds had two "Top Padding", two "Frosting" and two of
+  each gradient control; a term and its definition had two "Text Style" and two
+  "Italic" on six tabs. Where a category holds two of a thing, each control now
+  says which it belongs to, in the same words that category already used for the
+  ones it got right.
 - **A lettering shadow says it is one.** It read "Shadow", which put it beside an
   Inner Shadow and an Outer Shadow with nothing to tell it from either — and
   where a tab letters several things, three runs answered to the one word. It
@@ -98,7 +122,7 @@ Two conventions worth knowing before you read it:
 - **Turn and Size.** A photograph pinned to the page at a slight angle, and a part
   drawn larger or smaller than the room it takes up.
 - **Gradients on every fill**, and **worked pictures** — a background picture can
-  be softened, brightened, drained of colour, or aged before it is laid down.
+  be softened, brightened, drained of color, or aged before it is laid down.
 - **Corner shapes.** A corner can be a bevel, a notch, a scoop or a squircle
   rather than a rounding, reading the same size `border-radius` does.
 - **Layout controls** on the parts that can carry them: display, row direction and
@@ -124,7 +148,7 @@ Two conventions worth knowing before you read it:
   always styled — the untreated thing, beside the named treatments of it.
 - **Inner and outer spacing are one diagram**, and **borders and corners another**:
   eight inputs around a dashed ring, and a thickness on each edge with the chosen
-  side's style and colour beneath it.
+  side's style and color beneath it.
 - **Repeating runs of controls are gathered and folded.** A box, a shadow and a
   picture each fold to a line saying what they are set to, built from the values
   themselves, and a run the style says nothing about reads "Nothing set" and
@@ -196,13 +220,13 @@ Two conventions worth knowing before you read it:
   so the current-page and chosen-heading controls would have silently stopped
   being derived.
 - **Panel buttons kept their hover** through the same split, which needed the new
-  parts naming in the list of tabs that ship real hovered colours.
+  parts naming in the list of tabs that ship real hovered colors.
 - **Two controls no longer write one setting.** Tag treatments had a Least Width
   from two different places; `validate.mjs` now refuses any group that declares a
   name twice.
 - **A tick box shows its tick again.** Writing Foundry's own `--checkbox-…`
   variables from unset controls *defined* them as empty, and both glyph layers
-  took the same colour.
+  took the same color.
 - **An unset control cannot rub out what it feeds.** A field emitting an empty
   value defines a custom property as empty rather than leaving it absent, which
   made `var(--x, fallback)` resolve to nothing.
@@ -211,7 +235,7 @@ Two conventions worth knowing before you read it:
 
 - **The Disable Hovered State switch.** An unset hovered control already changes
   nothing, so it only ever did something on the four tabs that ship real hovered
-  colours — and those are meant to answer the pointer.
+  colors — and those are meant to answer the pointer.
 
 - **Scroll bar controls.** Foundry states `scrollbar-width` and `scrollbar-color`
   on `*`, and Chromium answers a stated one by drawing the bar itself and ignoring
@@ -247,7 +271,7 @@ over the editor for order, sections, hints, hovering and the Page tab.
 
 A styled journal leaves Foundry as a folder of web pages, one self-contained
 file, a printable document, or a stylesheet on its own. Printing gained a
-contents page, real margins, colour, and an honest note about which browsers
+contents page, real margins, color, and an honest note about which browsers
 write a PDF whose links survive.
 
 ### 2026-08-11 to 2026-08-14 — the module
@@ -255,8 +279,8 @@ write a PDF whose links survive.
 Per-journal styling through a plain-language GUI; every compound property split
 into independent controls; tabs for the contents panel, the window, secrets, and
 everything else a page can hold; ten content blocks, picture treatments and
-inline tags with an Illuminus menu in the page editor; page templates; a colour
-picker with a shade ramp, named colours and an eyedropper that reads the page
+inline tags with an Illuminus menu in the page editor; page templates; a color
+picker with a shade ramp, named colors and an eyedropper that reads the page
 rather than the screen; and a search across every setting.
 
 ### 2026-08-16 — the artwork was removed

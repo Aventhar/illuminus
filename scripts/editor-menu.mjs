@@ -268,7 +268,7 @@ function isActive(state, typeName, groupId, prefix) {
  * Drop a stored template in at the cursor.
  *
  * The markup is parsed through Foundry's own schema rather than injected, so
- * anything the editor does not recognise is dropped on the way in — an imported
+ * anything the editor does not recognize is dropped on the way in — an imported
  * template cannot carry more than a person could have typed.
  * @param {string} markup
  */

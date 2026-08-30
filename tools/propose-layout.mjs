@@ -206,7 +206,7 @@ for (const group of strip) {
     let last = null;
     for (const field of rows) {
       const which = run(field.name);
-      // No line before whatever the runs did not recognise: those are a tab's
+      // No line before whatever the runs did not recognize: those are a tab's
       // own controls, and a line above them would promise a grouping that is not
       // there.
       if (last && which !== last && which !== "rest") out("---");

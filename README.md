@@ -68,13 +68,13 @@ it. "Top Thickness", not `border-top-width`.
 ### What that looks like in practice
 
 Nothing is collapsed into one control that ought to be four. Each of the four borders has
-its own thickness, style and colour; each corner its own rounding *and shape*; each side
+its own thickness, style and color; each corner its own rounding *and shape*; each side
 its own padding and margin. But four controls in a column is a poor way to describe a
 box, so the ones that describe a shape are drawn as that shape:
 
 ![The edges and corners diagram](docs/images/edges-diagram.png)
 
-A thickness at each corner, a side chosen underneath, and that side's style and colour
+A thickness at each corner, a side chosen underneath, and that side's style and color
 below it. Spacing works the same way — eight inputs around a dashed ring, the outer four
 for the room around the box and the inner four for the room inside it. Each of these
 folds to a single line saying what it is set to, built from the values themselves, and
@@ -99,17 +99,17 @@ any of this to use the module.
 - **Nothing is written to your world until you press Save**, and closing with unsaved
   changes asks first.
 
-### Its own colour picker
+### Its own color picker
 
-![The colour picker](docs/images/color-picker.png)
+![The color picker](docs/images/color-picker.png)
 
 Clicking a swatch opens Illuminus's picker rather than the operating system's — because
 the native one cannot express alpha, and a transparent setting would show as solid black.
 A shade square and hue strip to pick by eye, RGB sliders and numeric boxes to be exact,
-opacity, and the hex including its alpha. Saved colours belong to the style and can be
+opacity, and the hex including its alpha. Saved colors belong to the style and can be
 named — "Parchment", "Rust heading" — and dragged into the order you want.
 
-The eyedropper reads colours **out of the page** rather than off the screen. Point at
+The eyedropper reads colors **out of the page** rather than off the screen. Point at
 anything in the Foundry window — a fill, a border, lettering — and a readout follows the
 cursor showing exactly what will be taken. Unlike the operating system's sampler it needs
 no screen-capture permission, and it keeps transparency.
@@ -142,10 +142,10 @@ no screen-capture permission, and it keeps transparency.
   outlines and shadows on lettering, a drop cap that is a real element rather than
   `::first-letter` (so it can carry an outline), columns per heading level, and control
   over where lines may break and whether a long word may be hyphenated.
-- **Surfaces with depth.** A fill can graduate from one colour to another, or frost what
+- **Surfaces with depth.** A fill can graduate from one color to another, or frost what
   is behind it as frosted glass does. A background picture can sit behind any fill — with
   its own fit, position, blending and strength — and be softened, brightened, drained of
-  colour or aged before it is laid down. Shadows sit inside and outside.
+  color or aged before it is laid down. Shadows sit inside and outside.
 - **Shapes and placing.** A corner can be a bevel, a notch, a scoop or a squircle rather
   than a rounding. A picture can be cropped to a named shape — Square, Landscape,
   Widescreen, Panorama — saying which part to keep. A block can be turned a little, drawn
@@ -157,8 +157,8 @@ no screen-capture permission, and it keeps transparency.
 
 **Background images come from anywhere in your Foundry data** — your own art, a system's,
 another module's. A grayscale texture works best with a Fill Color under Multiply
-blending, so the texture supplies the grain and the colour supplies the hue; a picture
-carrying its own colour wants Fill Color set to white and Image Blending set to Normal.
+blending, so the texture supplies the grain and the color supplies the hue; a picture
+carrying its own color wants Fill Color set to white and Image Blending set to Normal.
 
 **Three sample styles ship with the module** — Default Basic, Fantasy Basic and SciFi
 Basic — seeded into a world the first time Illuminus runs there. Delete any you do not

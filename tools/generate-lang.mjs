@@ -65,6 +65,13 @@ put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
 put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");
 put("ILLUMINUS.Box.Shadow", "Shadow");
+// What a gathered run answers to when the tab's own wording gives up nothing.
+// Said apart from the bare word above, because a category holding both an inner
+// shadow and an outer one showed two runs called "Shadow" and no way to tell
+// which was which.
+put("ILLUMINUS.Box.InnerShadow", "Inner Shadow");
+put("ILLUMINUS.Box.OuterShadow", "Outer Shadow");
+put("ILLUMINUS.Box.TextShadow", "Text Shadow");
 put("ILLUMINUS.Box.Picture", "Picture");
 put("ILLUMINUS.Box.Spacing", "Spacing");
 put("ILLUMINUS.Box.Edges", "Edges and Corners");
@@ -629,21 +636,21 @@ const IMAGE_TEXT = {
     + "lettering needs the opposite — down to 60 or 70, until the page can hold light ink."],
   Contrast: ["Image Contrast",
     "How big the gap is between the picture's lightest and darkest parts. 100 leaves it "
-    + "alone, lower flattens it towards a single flat grey, higher makes the darks "
+    + "alone, lower flattens it towards a single flat gray, higher makes the darks "
     + "darker and the lights lighter.\n\n"
     + "Lowering it is usually what you want for a background. A parchment scan at 40 keeps "
     + "just enough grain to read as paper without any one blotch pulling the eye."],
-  Saturation: ["Image Colour",
-    "How much colour the picture keeps. 100 leaves it as it is; 0 drains it to grey.\n\n"
-    + "Draining it is worth trying even when you want a colourful page. Set this to 0 and "
+  Saturation: ["Image Color",
+    "How much color the picture keeps. 100 leaves it as it is; 0 drains it to gray.\n\n"
+    + "Draining it is worth trying even when you want a colorful page. Set this to 0 and "
     + "then tint the picture with the Fill Color underneath it using Multiply blending — "
-    + "you get the texture of the photograph with a colour you chose, rather than "
-    + "whatever colour the photograph happened to be."],
+    + "you get the texture of the photograph with a color you chose, rather than "
+    + "whatever color the photograph happened to be."],
   Age: ["Image Age",
     "Browns the picture, the way an old photograph or a sheet of paper yellows with age. "
-    + "0 leaves its own colours; 100 is fully sepia.\n\n"
+    + "0 leaves its own colors; 100 is fully sepia.\n\n"
     + "A quick way to make a modern photograph belong on a fantasy page. Try it around "
-    + "60 to 80 together with Image Colour turned down."],
+    + "60 to 80 together with Image Color turned down."],
   "": ["Background Image",
     "A picture laid behind this — a parchment scan, a stone texture, a photograph.\n\n"
     + "Point it at any image in your Foundry data: your own art, artwork from a game "
@@ -668,12 +675,12 @@ const IMAGE_TEXT = {
     "How the picture mixes with the Fill Color behind it, rather than simply covering "
     + "it up.\n\n"
     + "This is the trick that makes textures work, and it is worth learning one setting: "
-    + "**Multiply**. With a greyscale texture over a coloured fill, Multiply keeps every "
-    + "dark speck of the texture while letting the colour show through the light parts — "
-    + "so one grey parchment scan can be aged ivory on one style and cold slate on "
+    + "**Multiply**. With a grayscale texture over a colored fill, Multiply keeps every "
+    + "dark speck of the texture while letting the color show through the light parts — "
+    + "so one gray parchment scan can be aged ivory on one style and cold slate on "
     + "another, just by changing the Fill Color under it.\n\n"
     + "\"Normal\" means no mixing at all: the picture simply sits on top and the fill "
-    + "beneath it does nothing. Use that when the picture already has the colours you "
+    + "beneath it does nothing. Use that when the picture already has the colors you "
     + "want."],
   Opacity: ["Image Strength",
     "How strongly the picture shows through. 100 is the picture at full strength, 0 "
@@ -746,8 +753,8 @@ for (const name of names) {
           + "Keep it under about 2. The outline is painted *behind* the letterform "
           + "rather than over it, so it thickens the shape without eating into it — but "
           + "past a certain weight it closes up the gaps in letters like e and a."
-        : `What colour the outline around each ${of}letter is drawn in.\n\n`
-          + "Only shows if the Outline Thickness above is more than 0. A colour close "
+        : `What color the outline around each ${of}letter is drawn in.\n\n`
+          + "Only shows if the Outline Thickness above is more than 0. A color close "
           + "to the page's own background works best — the outline is meant to hold the "
           + "letters apart from what is behind them, not to be noticed itself.");
       continue;
@@ -804,9 +811,9 @@ for (const name of names) {
     } else {
       put(`ILLUMINUS.Field.${name}.label`, `${side} Color`);
       put(`ILLUMINUS.Field.${name}.hint`,
-        `What colour the ${lower} ${what} line is drawn in.\n\n`
+        `What color the ${lower} ${what} line is drawn in.\n\n`
         + "A line that is only slightly darker than the surface it sits on reads as a "
-        + "fold or a crease; one in a strong contrasting colour reads as a deliberate "
+        + "fold or a crease; one in a strong contrasting color reads as a deliberate "
         + "frame. Both are useful — just pick one on purpose.");
     }
     continue;
@@ -876,12 +883,12 @@ for (const name of names) {
         + "the shadow in so it peeks out only on one side, which is a neat way to get "
         + "a subtle lift without a dark halo all the way round."],
       Color: ["Color",
-        `${cast}This is what colour it is painted.\n\n`
-        + "Pure black almost always looks wrong. Real shadows take a colour from what "
+        `${cast}This is what color it is painted.\n\n`
+        + "Pure black almost always looks wrong. Real shadows take a color from what "
         + "they fall on, so on a warm parchment page a dark brown reads far better "
         + "than black. Turn the opacity down too — somewhere around 25% to 40% is "
         + "usually plenty.\n\n"
-        + "Set the colour fully transparent and there is no shadow at all, which is "
+        + "Set the color fully transparent and there is no shadow at all, which is "
         + "how you switch one off."]
     }[part];
     // The plain label. Where a shadow shares a section, the tab writes a
@@ -906,7 +913,7 @@ for (const name of names) {
       : `Draws ${of ? `the ${of}` : "this"} larger or smaller than the room it actually `
         + "takes up on the page. 100 is its normal size.\n\n"
         + "Because the room it occupies does not change, going above 100 makes it "
-        + "overhang its neighbours rather than pushing them aside — which is how you "
+        + "overhang its neighbors rather than pushing them aside — which is how you "
         + "get a picture that breaks out of its column, or a drop cap that spills into "
         + "the margin.\n\n"
         + "Below 100 it shrinks and leaves a gap around itself. Small steps: 105 is "
@@ -940,9 +947,36 @@ for (const name of names) {
         "Moves this to the right of where the page put it, in pixels. A negative "
         + "number moves it left.\n\n"
         + "As with Nudge Down, nothing moves out of the way — it just slides, and can "
-        + "overlap its neighbours. A few pixels either way is usually all you want; "
+        + "overlap its neighbors. A few pixels either way is usually all you want; "
         + "large numbers push things off the page entirely."]
     }[m[2].toLowerCase()];
+    put(`ILLUMINUS.Field.${name}.label`, wording[0]);
+    put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
+    continue;
+  }
+  // A fill that graduates: <prefix>GradientFrom / To / Angle, one set per fill.
+  if ((m = name.match(/^(.*?)[Gg]radient(From|To|Angle)$/))) {
+    const of = noun(m[1], "");
+    const it = of ? `the ${of}` : "this";
+    const wording = {
+      From: ["Graduated From",
+        `Fades ${it} from one color into another across the shape, instead of one `
+        + "flat color throughout. This is the color it starts at.\n\n"
+        + "Both ends start fully transparent, which means no fade at all — so nothing "
+        + "happens until you set them. Set both and you get a soft wash; set one and "
+        + "leave the other clear and it fades away to nothing, which is often the "
+        + "better-looking of the two."],
+      To: ["Graduated To",
+        "The color the fade runs into, at the far end of the direction set below.\n\n"
+        + "Leave this and Graduated From both fully transparent for an ordinary flat "
+        + "fill."],
+      Angle: ["Graduated Direction",
+        "Which way the fade runs, as an angle in degrees.\n\n"
+        + "180 runs from the top down, which is the usual one — it reads as light "
+        + "falling from above. 90 runs from the left across. 0 runs from the bottom "
+        + "up, and 135 runs diagonally.\n\n"
+        + "This does nothing while both ends are transparent."]
+    }[m[2]];
     put(`ILLUMINUS.Field.${name}.label`, wording[0]);
     put(`ILLUMINUS.Field.${name}.hint`, wording[1]);
     continue;
@@ -955,7 +989,7 @@ for (const name of names) {
       `Blurs whatever sits behind ${of ? `the ${of}` : "this"}, the way frosted `
       + "bathroom glass blurs what is on the other side of it.\n\n"
       + "It only shows if the fill in front of it is partly see-through — behind a "
-      + "solid colour there is nothing to see. So this works together with the Fill "
+      + "solid color there is nothing to see. So this works together with the Fill "
       + "Color's opacity: drop the fill to something like 60% and then frost what is "
       + "behind it, and you get a panel that feels like glass laid over the page "
       + "rather than a hole cut in it.\n\n"
@@ -1123,22 +1157,22 @@ const FIELD_TEXT = {
   pageButtonHoldTop: ["Hold At The Top", "The button stays at the top of the page instead of holding its place on screen as the page scrolls under it, which is what puts Foundry's across a heading half way down."],
   wrapEdges: ["Edges On Both Lines", "A tag long enough to break across two lines is one box in two halves, and a browser draws its edges only at the outer ends. Turn this on to draw both halves whole."],
   gradientFrom: ["Graduated From",
-    "Fades the fill from one colour into another across the shape, instead of one flat "
-    + "colour throughout. This is the colour it starts at.\n\n"
+    "Fades the fill from one color into another across the shape, instead of one flat "
+    + "color throughout. This is the color it starts at.\n\n"
     + "Both ends start fully transparent, which means no fade at all — so nothing "
     + "happens until you set both this and Graduated To.\n\n"
-    + "Keep the two colours close together. A parchment that fades from cream to a "
+    + "Keep the two colors close together. A parchment that fades from cream to a "
     + "slightly deeper cream looks like real paper catching the light; one that fades "
     + "from yellow to purple looks like a website from 1998."],
   gradientTo: ["Graduated To",
-    "The colour the fill fades into, at the far end of the direction set below.\n\n"
+    "The color the fill fades into, at the far end of the direction set below.\n\n"
     + "Leave both this and Graduated From fully transparent for an ordinary flat fill."],
   gradientAngle: ["Graduated Direction",
     "Which way the fade runs, as an angle in degrees.\n\n"
     + "180 runs from the top down, which is the usual one — it reads as light falling "
     + "from above. 90 runs from the left across. 0 runs from the bottom up, and 135 "
     + "runs diagonally.\n\n"
-    + "If you cannot see any fade at all, the two colours above are probably still "
+    + "If you cannot see any fade at all, the two colors above are probably still "
     + "transparent."],
   display: ["Layout",
     "Whether this stacks its contents down the page or lays them out in a row across "
@@ -1227,7 +1261,7 @@ const FIELD_TEXT = {
   textureBlur: ["Image Softness", IMAGE_TEXT["Blur"][1]],
   textureBrightness: ["Image Brightness", IMAGE_TEXT["Brightness"][1]],
   textureContrast: ["Image Contrast", IMAGE_TEXT["Contrast"][1]],
-  textureSaturation: ["Image Colour", IMAGE_TEXT["Saturation"][1]],
+  textureSaturation: ["Image Color", IMAGE_TEXT["Saturation"][1]],
   textureAge: ["Image Age", IMAGE_TEXT["Age"][1]],
   outlineWidth: ["Outline Thickness", "A line drawn around each letter. Leave at 0 for none."],
   outlineColor: ["Outline Color", "The color of the line drawn around each letter."],
@@ -1398,7 +1432,7 @@ const FIELD_TEXT = {
     + "and the safest; five is dramatic and needs a long enough first paragraph to sit "
     + "against, or it hangs off the bottom.\n\n"
     + "It is a real letter rather than a typographic trick, so everything else under "
-    + "Opening Capital applies to it — its own typeface, colour, outline and shadow. "
+    + "Opening Capital applies to it — its own typeface, color, outline and shadow. "
     + "Setting it in a display face while the rest of the page stays plain is the whole "
     + "effect."],
   dropCapFont: ["Opening Capital Typeface", "The typeface used for the opening capital. Leave as the journal's normal typeface to match the body."],
@@ -1426,7 +1460,7 @@ const FIELD_TEXT = {
     "Where the contents of a table cell sit, top to bottom, when the row is taller than "
     + "they are.\n\n"
     + "\"Top\" is right for most tables: when one cell has three lines and its "
-    + "neighbours have one, you want them all starting at the same height so the row "
+    + "neighbors have one, you want them all starting at the same height so the row "
     + "reads across. \"Middle\" suits short entries like numbers or single words."],
   width: ["Table Width",
     "How much of the width across the page this takes up.\n\n"
@@ -1744,6 +1778,68 @@ for (const group of GROUPS) {
 if (missing.length) {
   console.error("MISSING:\n  " + [...new Set(missing)].join("\n  "));
   process.exit(1);
+}
+
+/* ---------- Two controls in one category answering to one name ---------- */
+
+/*
+ * A category may hold two of a thing — the line that folds a collapsible and the
+ * block it folds, a term and its definition — and then each of their controls
+ * needs to say which it belongs to. Most already do, because the wording for a
+ * typeface or a color is built from the part's own name: "Heading Typeface"
+ * beside "Fill Color", "Term Color" beside "Definition Color". But a family
+ * whose wording is written without reference to the part — a padding, a
+ * gradient, a frosting — came out the same for both, and a category showed two
+ * controls called "Top Padding" with nothing to tell them apart.
+ *
+ * Swept here rather than fixed family by family, so a family added next year is
+ * covered without anyone remembering. Only a part with a word of its own is
+ * qualified: where one has none the other's qualifier is enough to tell them
+ * apart, which is the same bargain an outline strikes when a category holds a
+ * single typeface. `validate.mjs` [14] fails if a clash is left over.
+ */
+{
+  const wordFor = (prefix) => OUTLINE_WORD[prefix] ?? SHADOW_WORD[prefix] ?? "";
+  const shared = (names) => {
+    // What the colliding names have in common at the end is the control; what
+    // is left in front of it is the part.
+    let keep = 0;
+    outer: while (keep < names[0].length) {
+      const at = names[0].length - 1 - keep;
+      for (const other of names) {
+        if (other[other.length - 1 - keep] !== names[0][at]) break outer;
+      }
+      keep += 1;
+    }
+    return keep;
+  };
+  for (const group of GROUPS) {
+    const key = group.family ?? group.id;
+    for (const section of group.sections) {
+      const byLabel = new Map();
+      for (const field of section.fields) {
+        if (/^(hover|active)[A-Z]/.test(field.name)) continue;
+        const label = out[`ILLUMINUS.Field.${key}.${field.name}.label`]
+          ?? out[`ILLUMINUS.Field.${field.name}.label`];
+        if (!label) continue;
+        if (!byLabel.has(label)) byLabel.set(label, []);
+        byLabel.get(label).push(field.name);
+      }
+      for (const [label, names] of byLabel) {
+        if (names.length < 2) continue;
+        const tail = shared(names);
+        for (const name of names) {
+          const prefix = name.slice(0, name.length - tail);
+          const word = wordFor(prefix);
+          if (!word) continue;
+          put(`ILLUMINUS.Field.${key}.${name}.label`, `${word} ${label}`);
+          const hint = out[`ILLUMINUS.Field.${key}.${name}.hint`]
+            ?? out[`ILLUMINUS.Field.${name}.hint`];
+          if (hint) put(`ILLUMINUS.Field.${key}.${name}.hint`, hint);
+        }
+      }
+    }
+  }
 }
 
 /* ---------- The same controls in CSS's own words ---------- */

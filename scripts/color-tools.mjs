@@ -2,7 +2,7 @@
  * Color conversion, and sampling colors out of the page.
  *
  * Kept apart from the GUI because both the style editor's eyedropper button and
- * the color picker's own need the same behaviour, and because these are the
+ * the color picker's own need the same behavior, and because these are the
  * pieces worth testing directly.
  */
 

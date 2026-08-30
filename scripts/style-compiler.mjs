@@ -87,7 +87,7 @@ export function fieldToCss(field, value) {
   // which collapsed whatever was pointed at to nothing.
   if (field.type === "number" && field.emitZero === false && Number(value) === 0) return null;
   // A choice says it the same way, with an empty value, and for the same
-  // reason. An `emit` answers a value it does not recognise with a sensible
+  // reason. An `emit` answers a value it does not recognize with a sensible
   // one — which is right for the ordinary control, where a stray value should
   // still paint something — but a twin holding nothing is not a stray value,
   // and that answer then wins the very fallback chain meant to reach past it.

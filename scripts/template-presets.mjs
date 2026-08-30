@@ -10,7 +10,7 @@
  * deliberately, since a style is most likely to have configured those.
  *
  * The markup is parsed through Foundry's own editor schema when it is inserted,
- * so anything here that the editor does not recognise is dropped rather than
+ * so anything here that the editor does not recognize is dropped rather than
  * trusted. Keep to elements a person could have typed in the editor themselves.
  */
 

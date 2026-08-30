@@ -275,9 +275,9 @@ body {
     min-height: 100vh;
   }
 
-  /* Left out by default, colour and picture alike: it is the most expensive
+  /* Left out by default, color and picture alike: it is the most expensive
      thing on the page to print, and the headings, boxes, and tables still come
-     out in colour without it. */
+     out in color without it. */
   .illuminus-export:not(.illuminus-print-background) .journal-entry-content {
     background-color: transparent;
   }
