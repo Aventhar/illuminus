@@ -19,6 +19,53 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **Every part of a journal lights its own piece of the sample.** Opening the
+  contents panel or the page editor showed that thing picked out and the rest
+  dimmed, but opening one of the parts *inside* them — Page Entries, Sub-headings,
+  Category Rows, Page Numbers, the Search Box, Panel Buttons, the Page Settings
+  Bar, the Toolbar, the Drop-downs — fell back to the whole journal, which is
+  what the sample shows when it has nothing to point at. Each has a piece of its
+  own now. So does the Default Tag, which had the same gap for the same reason:
+  the sample carried treated tags and no plain one. A check refuses a part with
+  no piece, so a part split out later cannot lose its preview quietly.
+
+- **Every corner can be cut to its own shape.** A corner had a size and a shape,
+  but one shape served all four — so a bevel across the two upper corners with
+  the two below left square, which is an ordinary shape for a manuscript panel,
+  could not be asked for. Each corner states its own now, on all 56 of the
+  families that have corners. They are chosen a corner at a time, the way an
+  edge already chooses a side, and Match evens all four out again in one press —
+  on a key of its own, so evening out the sizes leaves the shapes alone. A style
+  saved before this keeps exactly the look it had: the one shape it stored is
+  given to each of the four corners. Schema version 12.
+
+- **The editor opens the way you left it.** The split between the sample and the
+  settings was already remembered; the window's own size was not, so a window
+  dragged wider went back to where it started every time it was opened. Both are
+  kept now, per person rather than per world, and the size is written once the
+  dragging stops rather than on every frame of it. Only the size, not the corner
+  it sat in: a remembered position is remembered against a window that may since
+  have changed monitor.
+- **And it opens wider the first time.** With nothing remembered yet the Live
+  Sample starts at 850 pixels and the settings beside it at 350, with the window
+  sized to hold both and the parts tree between them. The sample was 628 before,
+  which is narrower than the page it stands for; a page of prose at something
+  near its real width says more about a style than a wider column of controls
+  does.
+
+- **The contents panel can take a category from the page.** Its Fill and its
+  Border each carry a Copy from Page button, beside Match and Reset: one press
+  fills the whole category — the color, the gradient, the frosting, the picture
+  and how it sits, or every edge, corner and their colors — from the same
+  category on the page, hovered values included. The two are read side by side
+  in one window, and a surface that runs across both was a control-by-control
+  job before. It copies rather than links, as taking a level from the one above
+  it does: what lands is an ordinary edit, so Undo Changes still puts it back,
+  and the page it came from is untouched. A category is only offered it where
+  every control it holds exists on the page under the same name, which the
+  schema checks when it loads rather than the button assuming it — so the
+  panel's own width, which the page has no counterpart for, offers nothing.
+
 - **Every part of a category folds now.** A category is laid out in runs — the
   lettering, then how it is set out, then its outline — and until now only the
   runs with a family name to answer to could be shut: a shadow, a picture, a

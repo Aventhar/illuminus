@@ -612,5 +612,71 @@ console.log("\n[17] The interface's own words");
 }
 
 
+/* Every part of a journal has a piece of the sample to point at.
+ *
+ * The sample follows the open part: pieces carry `data-part="<group id>"`, and
+ * the editor dims the rest and scrolls the focused one into view. A part the
+ * sample has no piece for is left alone — which is silent, and reads as the
+ * part having no preview of its own rather than as a piece nobody wrote.
+ *
+ * That is what happened when the panel and the page editor were split into
+ * parts of their own: the pieces went on naming the two parents, so opening
+ * Page Entries or the Toolbar showed the whole journal exactly as the default
+ * does. A family member needs none — its family's own preview takes the pane. */
+console.log("\n[18] Every part has a piece of the sample");
+{
+  const markup = ["style-editor.hbs", "sample-page.hbs"]
+    .map((name) => fs.readFileSync(path.join(ROOT, "templates", name), "utf8")).join("\n");
+  const pieces = new Set([...markup.matchAll(/data-part="([^"]+)"/g)].map((found) => found[1]));
+  const orphans = GROUPS.filter((group) => !group.family && !pieces.has(group.id));
+  const strays = [...pieces].filter((id) => !GROUPS.some((group) => group.id === id));
+  if (orphans.length) {
+    fail(`${orphans.length} part(s) have no piece of the sample: ${orphans.map((g) => g.id).join(", ")}`);
+  } else {
+    ok(`all ${GROUPS.filter((g) => !g.family).length} parts have a piece of the sample to point at`);
+  }
+  if (strays.length) fail(`the sample names parts that do not exist: ${strays.join(", ")}`);
+  else ok("and every piece names a part that exists");
+}
+
+/* No class quietly overrides itself.
+ *
+ * The JavaScript twin of [13]. A class body keeps the *later* definition of a
+ * name and says nothing whatever about the one it replaced — so a second
+ * `_initializeApplicationOptions`, added to remember the window's size, threw
+ * away the one that gave each editor an id derived from its style. Every window
+ * then registered under a counter, `open()` stopped finding an open editor, and
+ * it read as the editor failing to open rather than as a method being gone.
+ *
+ * Read by indentation rather than by parsing: a method of a class sits at two
+ * spaces, and nothing else that looks like a definition does. */
+console.log("\n[19] No class overrides itself");
+{
+  const WORDS = new Set(["if", "for", "while", "switch", "catch", "return", "do", "else", "function"]);
+  const clashes = [];
+  const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory() ? walk(path.join(dir, entry.name))
+      : entry.name.endsWith(".mjs") ? [path.join(dir, entry.name)] : []);
+  for (const file of walk(path.join(ROOT, "scripts"))) {
+    const seen = new Map();
+    let where = null;
+    for (const [at, line] of fs.readFileSync(file, "utf8").split("\n").entries()) {
+      const opened = line.match(/^(?:export\s+)?class\s+(\w+)/);
+      if (opened) { where = opened[1]; seen.clear(); continue; }
+      const method = line.match(/^ {2}(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?([#\w]+)\s*\(/);
+      if (!where || !method || WORDS.has(method[1])) continue;
+      const already = seen.get(method[1]);
+      if (already) clashes.push(`${path.relative(ROOT, file)}: ${where}.${method[1]} at lines ${already} and ${at + 1}`);
+      else seen.set(method[1], at + 1);
+    }
+  }
+  if (clashes.length) {
+    fail(`${clashes.length} method(s) defined twice in one class`);
+    for (const one of clashes.slice(0, 6)) fail(`  ${one}`);
+  } else {
+    ok("no class defines the same method twice");
+  }
+}
+
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

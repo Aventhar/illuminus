@@ -423,6 +423,43 @@ function v10_to_v11(settings) {
   return out;
 }
 
+/**
+ * Version 11 -> 12.
+ *
+ * A corner had a size and a shape, but only one shape served all four — while
+ * `corner-shape` is a shorthand over four longhands exactly as `border-radius`
+ * is. Each corner states its own now, so the one value a style stored becomes
+ * the same value at each of the four corners: a style that said "bevel" goes on
+ * looking beveled, and nothing is lost, because there was only ever one answer
+ * to spread.
+ *
+ * The families are read from the schema rather than listed, so a corner family
+ * added since is carried too, and the twins come with them — `hoverCornerShape`
+ * is found by the same walk as `cornerShape`, since it is named the same way.
+ */
+function v11_to_v12(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  for (const group of GROUPS) {
+    const stored = out[group.id];
+    if (!stored || typeof stored !== "object") continue;
+    const spent = new Set();
+    for (const section of group.sections) {
+      for (const field of section.fields) {
+        const named = field.name.match(/^(.*[Cc]orner)(TopLeft|TopRight|BottomLeft|BottomRight)Shape$/);
+        if (!named) continue;
+        const was = `${named[1]}Shape`;
+        if (stored[was] === undefined) continue;
+        stored[field.name] = stored[was];
+        spent.add(was);
+      }
+    }
+    // Dropped only once every corner has been given it: four fields read the
+    // one old key, so deleting it inside the loop would leave three unset.
+    for (const was of spent) delete stored[was];
+  }
+  return out;
+}
+
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
@@ -433,7 +470,8 @@ const MIGRATIONS = {
   7: v7_to_v8,
   8: v8_to_v9,
   9: v9_to_v10,
-  10: v10_to_v11
+  10: v10_to_v11,
+  11: v11_to_v12
 };
 
 /**

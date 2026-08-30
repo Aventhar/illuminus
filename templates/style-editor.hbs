@@ -109,6 +109,15 @@
             {{localize "ILLUMINUS.Buttons.MatchSides"}}
           </button>
           {{/if}}
+          {{#if section.copyFrom}}
+          <button type="button" class="illuminus-reset" data-action="copyFromPart"
+                  data-group="{{group.id}}" data-section="{{section.id}}"
+                  data-from="{{section.copyFrom.group}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.CopyFromPartTooltip' part=section.copyFrom.label}}">
+            <i class="fa-solid fa-clone"></i>
+            {{localize "ILLUMINUS.Buttons.CopyFromPart" part=section.copyFrom.label}}
+          </button>
+          {{/if}}
           <button type="button" class="illuminus-reset" data-action="resetSection"
                   data-group="{{group.id}}" data-section="{{section.id}}"
                   data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetSectionTooltip'}}">
@@ -211,6 +220,15 @@
             {{localize "ILLUMINUS.Buttons.MatchSides"}}
           </button>
           {{/if}}
+          {{#if section.copyFrom}}
+          <button type="button" class="illuminus-reset" data-action="copyFromPart"
+                  data-group="{{family.current.id}}" data-section="{{section.id}}"
+                  data-from="{{section.copyFrom.group}}"
+                  data-tooltip="{{localize 'ILLUMINUS.Buttons.CopyFromPartTooltip' part=section.copyFrom.label}}">
+            <i class="fa-solid fa-clone"></i>
+            {{localize "ILLUMINUS.Buttons.CopyFromPart" part=section.copyFrom.label}}
+          </button>
+          {{/if}}
           <button type="button" class="illuminus-reset" data-action="resetSection"
                   data-group="{{family.current.id}}" data-section="{{section.id}}"
                   data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetSectionTooltip'}}">
@@ -278,34 +296,40 @@
         <button type="button" class="header-control icon fa-solid fa-xmark" disabled></button>
       </header>
       <div class="illuminus-preview__sheet">
+      {{!-- The panel, and the parts it holds. Each piece names the part that
+            styles it rather than leaving them all to the panel: a part with no
+            piece of its own dims nothing and scrolls to nothing, so opening
+            Page Entries showed the whole journal exactly as the default does.
+            The pieces nest, which the dimming already allows for — neither what
+            holds the focused piece nor what it holds is dimmed. --}}
       <aside class="sidebar journal-sidebar flexcol" data-part="sidebar">
-        <search>
+        <search data-part="sidebarSearch">
           <input type="search" placeholder="{{localize 'ILLUMINUS.Preview.Search'}}" disabled>
         </search>
         <nav class="toc">
           <ol>
-            <li class="category"><strong>{{localize "ILLUMINUS.Preview.Category"}}</strong></li>
-            <li class="page active">
+            <li class="category" data-part="sidebarCategories"><strong>{{localize "ILLUMINUS.Preview.Category"}}</strong></li>
+            <li class="page active" data-part="sidebarEntries">
               <div class="page-heading">
-                <span class="page-index">1</span>
+                <span class="page-index" data-part="sidebarNumbers">1</span>
                 <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.CurrentPage"}}</span>
               </div>
-              <ol class="headings">
+              <ol class="headings" data-part="sidebarHeadings">
                 {{!-- Marked as the one a reader chose, so the panel's Selected
                       controls have something to show. --}}
                 <li class="heading h2 illuminus-current"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
                 <li class="heading h3"><a class="heading-link ellipsis">{{localize "ILLUMINUS.Preview.SubHeading"}}</a></li>
               </ol>
             </li>
-            <li class="page">
+            <li class="page" data-part="sidebarEntries">
               <div class="page-heading">
-                <span class="page-index">2</span>
+                <span class="page-index" data-part="sidebarNumbers">2</span>
                 <span class="page-title ellipsis">{{localize "ILLUMINUS.Preview.PageEntry"}}</span>
               </div>
             </li>
           </ol>
         </nav>
-        <footer class="action-buttons flexrow">
+        <footer class="action-buttons flexrow" data-part="sidebarButtons">
           <button type="button" disabled>{{localize "ILLUMINUS.Preview.Button"}}</button>
         </footer>
       </aside>
@@ -364,7 +388,7 @@
                 their own on this part. --}}
           <header class="journal-header">
             <input class="title" type="text" value="{{localize "ILLUMINUS.Preview.EditorPageName"}}" disabled>
-            <div class="page-metadata flexrow">
+            <div class="page-metadata flexrow" data-part="editorSettingsBar">
               <div class="heading-level flexrow">
                 <label class="flex0 fa-solid fa-list-tree"></label>
                 <select disabled>
@@ -380,9 +404,9 @@
             </div>
           </header>
           <div class="journal-page-content editor prosemirror active illuminus-preview__prose">
-            <menu class="editor-menu">
-              <button type="button" class="pm-dropdown" disabled>{{localize "ILLUMINUS.Preview.EditorFormat"}}</button>
-              <button type="button" class="pm-dropdown" disabled>{{localize "ILLUMINUS.Preview.EditorIlluminus"}}</button>
+            <menu class="editor-menu" data-part="editorToolbar">
+              <button type="button" class="pm-dropdown" data-part="editorDropdowns" disabled>{{localize "ILLUMINUS.Preview.EditorFormat"}}</button>
+              <button type="button" class="pm-dropdown" data-part="editorDropdowns" disabled>{{localize "ILLUMINUS.Preview.EditorIlluminus"}}</button>
               <button type="button" class="icon fa-solid fa-bold" disabled></button>
               <button type="button" class="icon fa-solid fa-italic" disabled></button>
               <button type="button" class="icon fa-solid fa-link" disabled></button>

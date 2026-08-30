@@ -31,8 +31,9 @@ const vOr = (group, name, fallback) => `var(${varFor(group, name)}, ${fallback})
 
 const sides = (group, prefix, suffix = "") =>
   ["Top", "Right", "Bottom", "Left"].map((side) => v(group, `${prefix}${side}${suffix}`)).join(" ");
-const corners = (group, prefix) =>
-  ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((c) => v(group, `${prefix}${c}`)).join(" ");
+const corners = (group, prefix, suffix = "") =>
+  ["TopLeft", "TopRight", "BottomRight", "BottomLeft"]
+    .map((c) => v(group, `${prefix}${c}${suffix}`)).join(" ");
 const shadow = (group, prefix) =>
   `${v(group, `${prefix}OffsetX`)} ${v(group, `${prefix}OffsetY`)} `
   + `${v(group, `${prefix}Blur`)} ${v(group, `${prefix}Spread`)} ${v(group, `${prefix}Color`)}`;
@@ -105,7 +106,7 @@ ${graduated(group)}
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  corner-shape: ${v(group, "cornerShape")};
+  corner-shape: ${corners(group, "corner", "Shape")};
   box-shadow: ${shadow(group, "shadow")};`;
 
 
@@ -289,7 +290,7 @@ ${displayed(group, "table")}
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  corner-shape: ${v(group, "cornerShape")};
+  corner-shape: ${corners(group, "corner", "Shape")};
 }
 
 ${at.cells} {
@@ -485,7 +486,7 @@ ${graduated(group)}
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  corner-shape: ${v(group, "cornerShape")};
+  corner-shape: ${corners(group, "corner", "Shape")};
   box-shadow: ${shadow(group, "shadow")};
 }
 
@@ -563,7 +564,7 @@ ${graduated(group)}
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  corner-shape: ${v(group, "cornerShape")};
+  corner-shape: ${corners(group, "corner", "Shape")};
   box-shadow: ${shadow(group, "shadow")}, inset ${shadow(group, "innerShadow")};
   font-family: ${v(group, "font")};
   -webkit-text-stroke: ${v(group, "outlineWidth")} ${v(group, "outlineColor")};
@@ -675,7 +676,7 @@ ${graduated(group)}
   border-style: ${sides(group, "border", "Style")};
   border-color: ${sides(group, "border", "Color")};
   border-radius: ${corners(group, "corner")};
-  corner-shape: ${v(group, "cornerShape")};
+  corner-shape: ${corners(group, "corner", "Shape")};
 }
 `;
 

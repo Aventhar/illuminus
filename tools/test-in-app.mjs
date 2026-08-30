@@ -489,6 +489,31 @@ check(mg.kept.page.paddingTop === 32 && mg.kept.page.paddingLeft === 32,
 check(mg.kept.page.innerShadowBlur === 40, `the aged-edges toggle became a real inner shadow (blur ${mg.kept.page.innerShadowBlur})`);
 check(mg.kept.heading1.textStyle === "bold",
   `normal/bold became a numeric weight and then one Text Style (got ${mg.kept.heading1.textStyle})`);
+// One corner shape became four, so a style saved with a bevel has to arrive
+// beveled at every corner rather than losing the value to cleanSettings.
+const shaped = await cdp.evaluate(`(async () => {
+  const mod = await import("/modules/illuminus/scripts/migrations.mjs");
+  const v11 = {
+    page: {cornerShape: "bevel", hoverCornerShape: "scoop"},
+    box01: {cornerShape: "notch"},
+    sidebarEntries: {entryCornerShape: "scoop"}
+  };
+  const out = mod.migrateSettings(v11, 11);
+  const { cleanSettings } = await import("/modules/illuminus/scripts/style-schema.mjs");
+  return JSON.stringify({out, kept: cleanSettings(out)});
+})()`);
+const sh = JSON.parse(shaped);
+check(["cornerTopLeftShape", "cornerTopRightShape", "cornerBottomLeftShape", "cornerBottomRightShape"]
+  .every((name) => sh.kept.page?.[name] === "bevel"),
+  `one corner shape became four (got ${sh.kept.page?.cornerTopLeftShape}, ${sh.kept.page?.cornerBottomRightShape})`);
+check(sh.kept.page?.hoverCornerTopLeftShape === "scoop",
+  `and the hovered twin came with it (got ${sh.kept.page?.hoverCornerTopLeftShape})`);
+check(sh.kept.sidebarEntries?.entryCornerTopLeftShape === "scoop"
+  && sh.kept.box01?.cornerTopLeftShape === "notch",
+  "a prefixed family migrates the same way, read from the schema rather than listed");
+check(sh.out.page?.cornerShape === undefined,
+  "and the old name is gone, so nothing is left for the filter to drop");
+
 // Thickness and Slant merged into one control, so a v2 style has to arrive with
 // the nearest combined choice rather than losing both to cleanSettings.
 const merged = await cdp.evaluate(`(async () => {
@@ -6347,9 +6372,9 @@ try {
   check(border.slice(0, 4).every((row) => row.endsWith("Corner"))
     && border.includes("Top Thickness") && border.includes("Top Style")
     && border.filter((row) => row === "---").length === 0
-    && border.at(-1) === "Corner Shape",
-    `Border is one box: corners, thicknesses, the chosen side, and the shape `
-    + `(${border.slice(0, 4).join(", ")} … ${border.at(-1)})`);
+    && border.slice(-4).every((row) => row.endsWith("Corner Shape")),
+    `Border is one box: corners, thicknesses, the chosen side, and a shape for `
+    + `each corner (${border.slice(0, 4).join(", ")} … ${border.slice(-4).join(", ")})`);
   const pageNames = t.page.map((s) => s.name);
   check(JSON.stringify(pageNames) === JSON.stringify(
     ["Size and Position", "Fill and Image", "Spacing", "Border"]),
@@ -6843,7 +6868,9 @@ try {
     // starts folded away behind the line that says so.
     edge.open = true;
     await new Promise(r => setTimeout(r, 150));
-    const showing = () => [...edge.querySelectorAll(".illuminus-box__part")]
+    // Scoped to the edge: a corner's shape is a box part as well and carries no
+    // side at all, so an unscoped sweep answered "Top, undefined".
+    const showing = () => [...edge.querySelectorAll(".illuminus-box__edge .illuminus-box__part")]
       .filter((part) => getComputedStyle(part).display !== "none")
       .map((part) => part.dataset.side);
     const before = [...new Set(showing())];
@@ -6969,8 +6996,10 @@ try {
 
 // A corner has a size and a shape. Until browsers grew `corner-shape` only the
 // size could be said, so every corner in every style was a quarter circle; the
-// shape reads the same four sizes and cuts a different shape with them.
-console.log("\n[69] A corner can be cut to a shape");
+// shape reads the same four sizes and cuts a different shape with them — and
+// each corner states its own, because `corner-shape` is a shorthand over four
+// longhands exactly as `border-radius` is.
+console.log("\n[69] A corner can be cut to a shape, and each corner to its own");
 try {
   const shapes = JSON.parse(await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -6979,8 +7008,12 @@ try {
     }
     const style = await api.createStyle({name: "Corner Shape Probe", settings: {
       // The block a read-aloud box is built from, cut rather than rounded.
-      box01: {cornerTopLeft: 18, cornerTopRight: 18, cornerBottomLeft: 18,
-              cornerBottomRight: 18, cornerShape: "bevel", background: "#402010"},
+      // Four sizes alike, and four different cuts made with them — which is the
+      // whole of what one shape across four corners could not say.
+      box01: {cornerTopLeft: 18, cornerTopRight: 18, cornerBottomLeft: 18, cornerBottomRight: 18,
+              cornerTopLeftShape: "bevel", cornerTopRightShape: "scoop",
+              cornerBottomLeftShape: "notch", cornerBottomRightShape: "round",
+              background: "#402010"},
       // And a category that says nothing about it, which must stay as Foundry
       // draws it: round is the browser's own, so nothing changes.
       secrets: {cornerTopLeft: 10}
@@ -6996,8 +7029,11 @@ try {
     const box = root.querySelector("blockquote.illuminus-box--box01");
     const secret = root.querySelector("section.secret");
     const out = {
-      supported: CSS.supports("corner-shape", "bevel"),
+      supported: CSS.supports("corner-shape", "bevel")
+        && CSS.supports("corner-top-left-shape", "bevel"),
       shape: getComputedStyle(box).cornerShape,
+      corners: ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((c) =>
+        getComputedStyle(box).getPropertyValue("corner-" + c.replace(/([a-z])([A-Z])/, "$1-$2").toLowerCase() + "-shape")),
       radius: getComputedStyle(box).borderTopLeftRadius,
       unset: getComputedStyle(secret).cornerShape
     };
@@ -7008,10 +7044,13 @@ try {
     await api.deleteStyle(style.id);
     return JSON.stringify(out);
   })()`));
-  check(shapes.supported, "the browser can cut a corner to a shape");
+  check(shapes.supported, "the browser can cut a corner to a shape, and each corner on its own");
   check(/bevel/.test(shapes.shape ?? "") && shapes.radius === "18px",
     `a block's corners are cut rather than rounded, to the size they were given `
     + `(${shapes.shape}, ${shapes.radius})`);
+  // The point of four controls rather than one: four corners, four cuts, one size.
+  check(JSON.stringify(shapes.corners) === JSON.stringify(["bevel", "scoop", "round", "notch"]),
+    `each corner takes the shape it was given (${(shapes.corners ?? []).join(", ")})`);
   // The default is what a browser does anyway, so a style that says nothing
   // about a corner still looks exactly as it did.
   check(/round/.test(shapes.unset ?? ""),
@@ -8248,6 +8287,255 @@ try {
     }
     if (window.__fold?.styleId) await api.deleteStyle(window.__fold.styleId);
     window.__fold = undefined;
+  })()`);
+}
+
+/* --- Taking a category from another part ---------------------------------- */
+// The contents panel and the page are read side by side in one window, so the
+// panel's Fill and its Border can be taken from the page's in one press.
+// Copied rather than linked: what it writes is an ordinary edit in the working
+// copy, and the page it came from is left alone.
+//
+// Split across calls, because one call may open the editor or redraw it but
+// never both: it lays out some five thousand controls, and a machine under load
+// takes long enough over three of those to outlast the protocol timeout. That
+// is what this check spent two runs proving.
+console.log("\n[86] The panel can take a category from the page");
+const copyStage = async (body) => JSON.parse(await cdp.evaluate(`(async () => { ${body} })()`));
+try {
+  await copyStage(`
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.constructor.name.startsWith("Illuminus")) await open.close({force: true});
+    }
+    const style = api.listStyles().find(s => s.name === "Aged Parchment");
+    window.__copy = await api.openEditor(style.id);
+    return JSON.stringify("opened");`);
+  // Waited for rather than slept through: the editor lays out five thousand
+  // controls, and how long that takes depends on what else the machine is doing.
+  await cdp.waitFor('window.__copy?.element?.querySelectorAll(".illuminus-field[data-field]").length > 1000',
+    { label: "the editor's controls", timeout: 120000 });
+
+  const before = await copyStage(`
+    const el = window.__copy.element;
+    // Values the page would not be holding by chance, so a copy cannot be
+    // mistaken for the two parts having agreed already.
+    el.querySelector('[data-field="page.background"] color-picker').value = "#123456";
+    el.querySelector('[data-field="page.hoverBackground"] color-picker').value = "#654321";
+    el.querySelector('[data-field="page.borderTopWidth"] range-picker').value = 9;
+    await new Promise(r => setTimeout(r, 400));
+    const tool = (group, section) => el.querySelector(
+      '[data-action="copyFromPart"][data-group="' + group + '"][data-section="' + section + '"]');
+    return JSON.stringify({
+      fill: el.querySelector('[data-field="sidebar.background"] color-picker').value,
+      edge: Number(el.querySelector('[data-field="sidebar.borderTopWidth"] range-picker').value),
+      offered: {
+        fill: Boolean(tool("sidebar", "background")),
+        edges: Boolean(tool("sidebar", "border")),
+        // Not offered where the schema does not say so. The panel's own width
+        // has no counterpart on the page, and the page nothing to copy from.
+        size: Boolean(tool("sidebar", "layout")),
+        onPage: Boolean(el.querySelector('[data-action="copyFromPart"][data-group="page"]'))
+      }
+    });`);
+
+  // One press per call: each redraws the part.
+  for (const section of ["background", "border"]) {
+    await copyStage(`
+      window.__copy.element.querySelector(
+        '[data-action="copyFromPart"][data-group="sidebar"][data-section="${section}"]').click();
+      return JSON.stringify("clicked");`);
+    await new Promise((r) => setTimeout(r, 2500));
+  }
+
+  const after = await copyStage(`
+    const el = window.__copy.element;
+    const color = (path) => el.querySelector('[data-field="' + path + '"] color-picker').value;
+    const size = (path) => Number(el.querySelector('[data-field="' + path + '"] range-picker').value);
+    return JSON.stringify({
+      fill: color("sidebar.background"),
+      hoverFill: color("sidebar.hoverBackground"),
+      edge: size("sidebar.borderTopWidth"),
+      pageFill: color("page.background"),
+      pageEdge: size("page.borderTopWidth")
+    });`);
+
+  // A color element may hand back its value with an alpha byte on the end.
+  const hexOf = (value) => String(value).replace("#", "").toLowerCase().slice(0, 6);
+  check(before.offered.fill && before.offered.edges,
+    "the panel's Fill and Border each offer to copy from the page");
+  check(!before.offered.size,
+    "a category with no counterpart on the page does not offer it (the panel's own width)");
+  check(!before.offered.onPage,
+    "and the page, which has nothing to copy from, is offered nothing");
+  check(hexOf(before.fill) !== "123456",
+    `the panel did not already hold the page's fill (was ${before.fill})`);
+  check(hexOf(after.fill) === "123456", `copying takes the page's fill (got ${after.fill})`);
+  check(hexOf(after.hoverFill) === "654321",
+    `and takes the hovered value with it (got ${after.hoverFill})`);
+  check(after.edge === 9, `copying the Border takes the page's thickness (got ${after.edge})`);
+  check(hexOf(after.pageFill) === "123456" && after.pageEdge === 9,
+    "and the page it was copied from is left as it was");
+} finally {
+  await cdp.evaluate(`(async () => {
+    if (window.__copy) await window.__copy.close({force: true});
+    window.__copy = undefined;
+  })()`);
+}
+
+/* --- The widths the editor opens at --------------------------------------- */
+// Two questions, and the second is the one that matters in use: what a person
+// who has never opened it sees, and whether it comes back the way they left it.
+console.log("\n[87] The editor opens as it was left, and at a sensible size the first time");
+const paneStage = async (body) => JSON.parse(await cdp.evaluate(`(async () => { ${body} })()`));
+const openPanes = async () => {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.constructor.name.startsWith("Illuminus")) await open.close({force: true});
+    }
+    const style = api.listStyles().find(s => s.name === "Aged Parchment");
+    window.__panes = await api.openEditor(style.id);
+  })()`);
+  await cdp.waitFor('window.__panes?.element?.querySelectorAll(".illuminus-field[data-field]").length > 1000',
+    { label: "the editor's controls", timeout: 120000 });
+  return paneStage(`
+    const el = window.__panes.element;
+    const width = (sel) => Math.round(el.querySelector(sel).getBoundingClientRect().width);
+    const columns = el.querySelector(".illuminus-editor__columns");
+    return JSON.stringify({
+      window: Math.round(el.getBoundingClientRect().width),
+      height: Math.round(el.getBoundingClientRect().height),
+      tree: width(".illuminus-tree"),
+      sample: width(".illuminus-preview"),
+      settings: width(".illuminus-part.active"),
+      gap: parseFloat(getComputedStyle(columns).gap),
+      chrome: Math.round(el.getBoundingClientRect().width - columns.getBoundingClientRect().width)
+    });`);
+};
+const shutPanes = async () => cdp.evaluate(`(async () => {
+  if (window.__panes) await window.__panes.close({force: true});
+  window.__panes = undefined;
+})()`);
+try {
+  // Nothing remembered: the size the schema's own figures give.
+  await cdp.evaluate(`game.settings.set("illuminus", "editorView", {})`);
+  const first = await openPanes();
+  check(first.sample === 850, `the first time, the sample opens at 850 (got ${first.sample})`);
+  check(first.settings === 350, `and the settings at 350 (got ${first.settings})`);
+  // Stated as the sum rather than as 1422, so what has to be right is the
+  // arithmetic and not a number copied from one measurement to another.
+  check(first.window === first.tree + first.gap * 2 + first.sample + first.settings + first.chrome,
+    `with the window wide enough for all three (${first.window} = ${first.tree} + ${first.gap} + ${first.sample} + ${first.gap} + ${first.settings} + ${first.chrome})`);
+
+  // Left somewhere else, and closed.
+  await paneStage(`
+    window.__panes.setPosition({width: 1180, height: 700});
+    await new Promise(r => setTimeout(r, 900));
+    return JSON.stringify("resized");`);
+  await shutPanes();
+  await new Promise((r) => setTimeout(r, 800));
+  const kept = JSON.parse(await cdp.evaluate(
+    `JSON.stringify(game.settings.get("illuminus", "editorView").window ?? null)`));
+  check(kept?.width === 1180 && kept?.height === 700,
+    `the size it was left at is kept (${JSON.stringify(kept)})`);
+
+  const again = await openPanes();
+  check(again.window === 1180, `and it opens at that size next time (got ${again.window})`);
+  check(again.height === 700, `height as well as width (got ${again.height})`);
+  check(again.settings === 350 && again.sample < first.sample,
+    `the settings keep their width and the sample takes the difference (${again.settings}, ${again.sample})`);
+} finally {
+  await shutPanes();
+  await cdp.evaluate(`game.settings.set("illuminus", "editorView", {})`);
+}
+
+/* --- Four corner shapes, one at a time ------------------------------------ */
+// Each corner states its own shape, and four dropdowns in a 350-pixel column
+// would be a wall — so they are chosen the way an edge chooses a side, with the
+// other three left in the markup for the search box and the state switch.
+//
+// Split across calls for the same reason [86] is: opening the editor and
+// redrawing it are one call each.
+console.log("\n[88] The four corner shapes are chosen a corner at a time");
+const shapeStage = async (body) => JSON.parse(await cdp.evaluate(`(async () => { ${body} })()`));
+try {
+  await shapeStage(`
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.constructor.name.startsWith("Illuminus")) await open.close({force: true});
+    }
+    const style = api.listStyles().find(s => s.name === "Aged Parchment");
+    window.__shape = await api.openEditor(style.id);
+    return JSON.stringify("opened");`);
+  await cdp.waitFor('window.__shape?.element?.querySelectorAll(".illuminus-field[data-field]").length > 1000',
+    { label: "the editor's controls", timeout: 120000 });
+
+  // Choosing a side or a corner only shuffles what is on show — no redraw — so
+  // the whole chooser is one call.
+  const chosen = await shapeStage(`
+    const el = window.__shape.element;
+    const run = el.querySelector('.illuminus-part[data-tab="page"] .illuminus-box__run[data-run="edges"]');
+    const shapes = [...run.querySelectorAll('.illuminus-box__shape .illuminus-box__part')];
+    const seen = (node) => node.getClientRects().length > 0;
+    const out = {
+      controls: shapes.length,
+      corners: shapes.map(n => n.dataset.corner),
+      buttons: run.querySelectorAll('.illuminus-box__corner').length,
+      atFirst: shapes.filter(seen).map(n => n.dataset.corner)
+    };
+    run.querySelector('.illuminus-box__side[data-side="Left"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    out.afterSide = shapes.filter(seen).map(n => n.dataset.corner);
+    run.querySelector('.illuminus-box__corner[data-corner="BottomRight"]').click();
+    await new Promise(r => setTimeout(r, 250));
+    out.afterCorner = shapes.filter(seen).map(n => n.dataset.corner);
+    out.edgeStill = [...run.querySelectorAll('.illuminus-box__edge .illuminus-box__part')]
+      .filter(seen).map(n => n.dataset.side);
+    return JSON.stringify(out);`);
+
+  // Writing a value redraws the part, so it gets a call of its own.
+  await shapeStage(`
+    const el = window.__shape.element;
+    const set = (path, value) => {
+      const field = el.querySelector('[data-field="' + path + '"] select');
+      field.value = value;
+      field.dispatchEvent(new Event("change", {bubbles: true}));
+    };
+    set("page.cornerTopLeftShape", "bevel");
+    set("page.cornerBottomRightShape", "scoop");
+    return JSON.stringify("set");`);
+  await new Promise((r) => setTimeout(r, 2500));
+
+  const written = await shapeStage(`
+    const el = window.__shape.element;
+    const read = (path) => el.querySelector('[data-field="' + path + '"] select').value;
+    return JSON.stringify({
+      topLeft: read("page.cornerTopLeftShape"),
+      topRight: read("page.cornerTopRightShape"),
+      bottomRight: read("page.cornerBottomRightShape")
+    });`);
+
+  check(chosen.controls === 4 && chosen.buttons === 4,
+    `a corner family draws four shapes behind four buttons (${chosen.controls}, ${chosen.buttons})`);
+  check(JSON.stringify(chosen.corners) === JSON.stringify(["TopLeft", "TopRight", "BottomLeft", "BottomRight"]),
+    `one for each corner, in reading order (${chosen.corners.join(", ")})`);
+  check(chosen.atFirst.length === 1 && chosen.atFirst[0] === "TopLeft",
+    `and one on show to begin with (${chosen.atFirst.join(", ") || "none"})`);
+  // The bug this guards: a corner's control carries no side at all, so the rule
+  // hiding the other three sides hid all four shapes the moment a side was picked.
+  check(chosen.afterSide.length === 1,
+    `choosing a side leaves the shape on show (${chosen.afterSide.join(", ") || "none"})`);
+  check(chosen.afterCorner.length === 1 && chosen.afterCorner[0] === "BottomRight",
+    `choosing a corner swaps which shape is on show (${chosen.afterCorner.join(", ") || "none"})`);
+  check(chosen.edgeStill.every((side) => side === "Left"),
+    `and the side that was chosen is still the one on show (${[...new Set(chosen.edgeStill)].join(", ")})`);
+  check(written.topLeft === "bevel" && written.bottomRight === "scoop" && written.topRight === "round",
+    `each corner keeps its own shape (${written.topLeft}, ${written.topRight}, ${written.bottomRight})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    if (window.__shape) await window.__shape.close({force: true});
+    window.__shape = undefined;
   })()`);
 }
 

@@ -849,6 +849,19 @@ adding a control to a family, check `order` against `fields` in both directions;
 `tools/` has no check for the second, and the way to find them is to ask the
 schema rather than to read it.
 
+**A class can quietly override itself too, and it is worse.** A class body keeps
+the *later* definition of a name and says nothing at all about the one it
+replaced. A second `_initializeApplicationOptions`, added so the editor would
+open at the size it was last left at, threw away the one that gives each editor
+an id derived from its style — so every window registered under a counter,
+`open()` stopped finding an editor that was already open, and `instances.get(id)`
+answered `undefined`. It reads as the editor failing to open, three checks away
+from anything to do with window size, and the file had both methods sitting
+plainly two hundred lines apart. `validate.mjs` [19] refuses a class that defines
+one name twice, reading by indentation rather than by parsing, since a method
+sits at two spaces and nothing else that looks like one does. Before adding an
+override to a class this large, grep for the name.
+
 **A rule can quietly override itself, and the tools will not say so.** The secret
 passage's rule declared `box-shadow` twice — the whole of it, then an outer-only
 one thirty lines further down. Legal CSS: the later one wins, and the inner
@@ -1503,13 +1516,34 @@ has to be kept, and the symptom is cosmetic enough to miss.
 scale for sizes — and set no face of their own, so the window inherits Signika like the
 rest of the interface. Colors invented for the editor date it against the app around it.
 
-**A corner has a size and a shape.** `corner-shape` (Chromium 139+, and this is a
-Chromium app) sits beside `border-radius` and reads the same four sizes, so a corner set
-to 12 becomes a 12px bevel or scoop with no second measurement. It is a value like any
-other — the compiler still emits nothing but custom properties. `round` is the browser's
-own default, so a style that says nothing about a corner is unchanged, which check [69]
-asserts against a category that sets only a radius. Adding it meant naming it in
-thirty-one order lists, since a laid-out section must name every control it holds.
+**A corner has a size and a shape, and four of each.** `corner-shape` (Chromium 139+,
+and this is a Chromium app) sits beside `border-radius` and reads the same four sizes, so
+a corner set to 12 becomes a 12px bevel or scoop with no second measurement. It is a value
+like any other — the compiler still emits nothing but custom properties. `round` is the
+browser's own default, so a style that says nothing about a corner is unchanged, which
+check [69] asserts against a category that sets only a radius.
+
+It is a **shorthand over four longhands**, exactly as `border-radius` is — measured, not
+assumed: `corner-top-left-shape` and its three siblings each take a value, and one set
+alone leaves the others `round`. One shape across four sizes was therefore the odd half of
+the pair, and each corner states its own as of schema 12. Four things that cost a round
+each:
+
+- **`revert-layer` had to go.** Eighteen rules deferred with
+  `corner-shape: var(--…, revert-layer)`, legal while the value was one `var()` and not as
+  one of four — the CSS-wide keyword rule recorded above. They default to `round` instead,
+  which is what reverting landed on anyway, since Foundry sets no `corner-shape` of its own.
+- **The mirror reads `illuminus.css` from disk.** Regenerating before rewriting that file
+  mirrored the old single-value rules, and `validate.mjs` [1] then reported 120 hovered
+  twins nothing consumed. Run `generate-block-css.mjs` *after* editing the stylesheet.
+- **The side chooser hid them.** A corner's control carries no `data-side`, so
+  `.illuminus-box__run[data-side="Top"] .illuminus-box__part:not([data-side="Top"])`
+  matched all four shapes the moment a side was picked. The side rules are scoped to
+  `.illuminus-box__edge` now, and the corners have rules of their own under
+  `.illuminus-box__shape`. Check [88] is the assertion that would have caught it.
+- **Naming them is thirty-three order lists**, not the thirty-one the single control took,
+  and the prefixed spellings (`mediaCornerShape`, `entryCornerShape`) outnumber the bare
+  one — a sweep for `"cornerShape"` finds fourteen of thirty-three.
 
 **Two marks, two questions.** `is-default` is "unchanged since this editor was opened",
 which is what the changed counts and the fading are about. `is-unset` is "the style says

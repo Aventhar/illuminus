@@ -107,6 +107,13 @@ put("ILLUMINUS.Box.Top", "Top");
 put("ILLUMINUS.Box.Right", "Right");
 put("ILLUMINUS.Box.Bottom", "Bottom");
 put("ILLUMINUS.Box.Left", "Left");
+// The corners choose the same way the sides do, and separately: which side's
+// color is on show says nothing about which corner's shape is.
+put("ILLUMINUS.Box.WhichCorner", "Which corner");
+put("ILLUMINUS.Box.TopLeft", "Top Left");
+put("ILLUMINUS.Box.TopRight", "Top Right");
+put("ILLUMINUS.Box.BottomLeft", "Bottom Left");
+put("ILLUMINUS.Box.BottomRight", "Bottom Right");
 
 // What a run of plain controls is called, where the controls share no wording
 // of their own to take a name from. A category is written in runs — the
@@ -139,6 +146,10 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.MatchSidesTooltip": "Copy the first value in this section across the other sides or corners",
   "ILLUMINUS.Buttons.ResetSection": "Reset",
   "ILLUMINUS.Buttons.ResetSectionTooltip": "Return this section to its starting values",
+  // Named for where the values come from, since a bare "Copy" beside Match and
+  // Reset would not say what it copies or from what.
+  "ILLUMINUS.Buttons.CopyFromPart": "Copy from {part}",
+  "ILLUMINUS.Buttons.CopyFromPartTooltip": "Fill this section from the same section on the {part} part, as a starting point to change",
   "ILLUMINUS.Editor.StateNormal": "Normal",
   "ILLUMINUS.Editor.StateHover": "Hovered",
   "ILLUMINUS.Editor.StateActive": "Selected",
@@ -875,8 +886,8 @@ for (const name of names) {
       + "Large ones read as a modern app. Corners do not all have to match: rounding "
       + "only the two right-hand corners is a neat way to make a box look like a tab or "
       + "a bookmark.\n\n"
-      + "The Corner Shape control below decides *what* the cut looks like — this only "
-      + "says how big it is.");
+      + "The Corner Shape controls below decide *what* each cut looks like — this only "
+      + "says how big this one is.");
     continue;
   }
   // shadow family: <prefix><OffsetX|OffsetY|Blur|Spread|Color>
@@ -1106,19 +1117,24 @@ for (const name of names) {
       + "and once you notice it you cannot stop noticing it.");
     continue;
   }
-  // corner shape: <prefix>Shape, one per corner family.
-  if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
-    const of = noun(`${m[1]}Corner`, "");
-    put(`ILLUMINUS.Field.${name}.label`, "Corner Shape");
+  // corner shape: <prefix><Corner>Shape, four per corner family.
+  if ((m = name.match(/^(.*?)[Cc]orner(TopLeft|TopRight|BottomRight|BottomLeft)Shape$/))) {
+    const [, prefix, corner] = m;
+    const of = noun(`${prefix}Corner`, "");
+    const where = CORNER_WORD[corner];
+    put(`ILLUMINUS.Field.${name}.label`, `${where} Corner Shape`);
     put(`ILLUMINUS.Field.${name}.hint`,
-      `What kind of cut the corners${of ? ` of the ${of}` : ""} are given. They all use `
-      + "the four sizes set above — this only changes the shape of the cut.\n\n"
+      `What kind of cut the ${where.toLowerCase()} corner${of ? ` of the ${of}` : ""} is given. `
+      + "It uses the size set for that corner above — this only changes the shape of the cut.\n\n"
       + "\"Rounded\" is the ordinary curve everyone expects. \"Bevel\" cuts the "
       + "corner off flat, like a mitred picture frame or a cut gemstone — good for "
       + "anything meant to look built rather than printed. \"Notch\" cuts a square "
       + "step out of it. \"Scoop\" curves inward instead of outward, which makes a "
       + "box look like a stamped seal or a torn ticket.\n\n"
-      + "If nothing changes when you pick one, the corner sizes above are still 0 — "
+      + "Each corner is set on its own, so a bevel across the two upper corners with "
+      + "the two below left square is one setting away — the Match button evens all "
+      + "four out again.\n\n"
+      + "If nothing changes when you pick one, that corner's size above is still 0 — "
       + "there is no cut yet for this to shape.");
     continue;
   }

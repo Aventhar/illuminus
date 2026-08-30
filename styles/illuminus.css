@@ -42,7 +42,10 @@
                 var(--ill-page-border-bottom-color) var(--ill-page-border-left-color);
   border-radius: var(--ill-page-corner-top-left) var(--ill-page-corner-top-right)
                  var(--ill-page-corner-bottom-right) var(--ill-page-corner-bottom-left);
-  corner-shape: var(--ill-page-corner-shape);
+  corner-shape: var(--ill-page-corner-top-left-shape)
+                var(--ill-page-corner-top-right-shape)
+                var(--ill-page-corner-bottom-right-shape)
+                var(--ill-page-corner-bottom-left-shape);
   box-shadow:
     var(--ill-page-shadow-offset-x) var(--ill-page-shadow-offset-y)
     var(--ill-page-shadow-blur) var(--ill-page-shadow-spread) var(--ill-page-shadow-color),
@@ -150,7 +153,10 @@
                 var(--ill-window-border-bottom-color) var(--ill-window-border-left-color);
   border-radius: var(--ill-window-corner-top-left) var(--ill-window-corner-top-right)
                  var(--ill-window-corner-bottom-right) var(--ill-window-corner-bottom-left);
-  corner-shape: var(--ill-window-corner-shape, revert-layer);
+  corner-shape: var(--ill-window-corner-top-left-shape, round)
+                var(--ill-window-corner-top-right-shape, round)
+                var(--ill-window-corner-bottom-right-shape, round)
+                var(--ill-window-corner-bottom-left-shape, round);
 }
 
 .illuminus-styled .window-header {
@@ -202,7 +208,10 @@
                 var(--ill-window-header-button-border-bottom-color) var(--ill-window-header-button-border-left-color);
   border-radius: var(--ill-window-header-button-corner-top-left) var(--ill-window-header-button-corner-top-right)
                  var(--ill-window-header-button-corner-bottom-right) var(--ill-window-header-button-corner-bottom-left);
-  corner-shape: var(--ill-window-header-button-corner-shape, revert-layer);
+  corner-shape: var(--ill-window-header-button-corner-top-left-shape, round)
+                var(--ill-window-header-button-corner-top-right-shape, round)
+                var(--ill-window-header-button-corner-bottom-right-shape, round)
+                var(--ill-window-header-button-corner-bottom-left-shape, round);
 }
 
 
@@ -265,7 +274,10 @@
                 var(--ill-window-page-button-border-bottom-color) var(--ill-window-page-button-border-left-color);
   border-radius: var(--ill-window-page-button-corner-top-left) var(--ill-window-page-button-corner-top-right)
                  var(--ill-window-page-button-corner-bottom-right) var(--ill-window-page-button-corner-bottom-left);
-  corner-shape: var(--ill-window-page-button-corner-shape, revert-layer);
+  corner-shape: var(--ill-window-page-button-corner-top-left-shape, round)
+                var(--ill-window-page-button-corner-top-right-shape, round)
+                var(--ill-window-page-button-corner-bottom-right-shape, round)
+                var(--ill-window-page-button-corner-bottom-left-shape, round);
 }
 
 
@@ -292,7 +304,10 @@
                 var(--ill-editor-border-bottom-color) var(--ill-editor-border-left-color);
   border-radius: var(--ill-editor-corner-top-left) var(--ill-editor-corner-top-right)
                  var(--ill-editor-corner-bottom-right) var(--ill-editor-corner-bottom-left);
-  corner-shape: var(--ill-editor-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-corner-top-left-shape, round)
+                var(--ill-editor-corner-top-right-shape, round)
+                var(--ill-editor-corner-bottom-right-shape, round)
+                var(--ill-editor-corner-bottom-left-shape, round);
 }
 
 .illuminus-styled.journal-entry-page .window-header,
@@ -341,7 +356,10 @@
                 var(--ill-editor-header-button-border-bottom-color) var(--ill-editor-header-button-border-left-color);
   border-radius: var(--ill-editor-header-button-corner-top-left) var(--ill-editor-header-button-corner-top-right)
                  var(--ill-editor-header-button-corner-bottom-right) var(--ill-editor-header-button-corner-bottom-left);
-  corner-shape: var(--ill-editor-header-button-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-header-button-corner-top-left-shape, round)
+                var(--ill-editor-header-button-corner-top-right-shape, round)
+                var(--ill-editor-header-button-corner-bottom-right-shape, round)
+                var(--ill-editor-header-button-corner-bottom-left-shape, round);
 }
 
 /* The bar of controls above the prose. It is rebuilt from scratch on every
@@ -366,7 +384,10 @@
                 var(--ill-editor-toolbar-toolbar-border-bottom-color) var(--ill-editor-toolbar-toolbar-border-left-color);
   border-radius: var(--ill-editor-toolbar-toolbar-corner-top-left) var(--ill-editor-toolbar-toolbar-corner-top-right)
                  var(--ill-editor-toolbar-toolbar-corner-bottom-right) var(--ill-editor-toolbar-toolbar-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-toolbar-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-toolbar-toolbar-corner-top-left-shape, round)
+                var(--ill-editor-toolbar-toolbar-corner-top-right-shape, round)
+                var(--ill-editor-toolbar-toolbar-corner-bottom-right-shape, round)
+                var(--ill-editor-toolbar-toolbar-corner-bottom-left-shape, round);
 }
 
 /* Its controls: the drop-downs and the icon buttons alike. Core feeds a
@@ -429,7 +450,10 @@
                 var(--ill-editor-settings-bar-settings-bar-border-bottom-color) var(--ill-editor-settings-bar-settings-bar-border-left-color);
   border-radius: var(--ill-editor-settings-bar-settings-bar-corner-top-left) var(--ill-editor-settings-bar-settings-bar-corner-top-right)
                  var(--ill-editor-settings-bar-settings-bar-corner-bottom-right) var(--ill-editor-settings-bar-settings-bar-corner-bottom-left);
-  corner-shape: var(--ill-editor-settings-bar-settings-bar-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-settings-bar-settings-bar-corner-top-left-shape, round)
+                var(--ill-editor-settings-bar-settings-bar-corner-top-right-shape, round)
+                var(--ill-editor-settings-bar-settings-bar-corner-bottom-right-shape, round)
+                var(--ill-editor-settings-bar-settings-bar-corner-bottom-left-shape, round);
   box-shadow: var(--ill-editor-settings-bar-settings-bar-shadow-offset-x) var(--ill-editor-settings-bar-settings-bar-shadow-offset-y)
               var(--ill-editor-settings-bar-settings-bar-shadow-blur) var(--ill-editor-settings-bar-settings-bar-shadow-spread)
               var(--ill-editor-settings-bar-settings-bar-shadow-color),
@@ -464,7 +488,10 @@
                 var(--ill-editor-settings-bar-field-border-bottom-color) var(--ill-editor-settings-bar-field-border-left-color);
   border-radius: var(--ill-editor-settings-bar-field-corner-top-left) var(--ill-editor-settings-bar-field-corner-top-right)
                  var(--ill-editor-settings-bar-field-corner-bottom-right) var(--ill-editor-settings-bar-field-corner-bottom-left);
-  corner-shape: var(--ill-editor-settings-bar-field-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-settings-bar-field-corner-top-left-shape, round)
+                var(--ill-editor-settings-bar-field-corner-top-right-shape, round)
+                var(--ill-editor-settings-bar-field-corner-bottom-right-shape, round)
+                var(--ill-editor-settings-bar-field-corner-bottom-left-shape, round);
   box-shadow: var(--ill-editor-settings-bar-field-shadow-offset-x) var(--ill-editor-settings-bar-field-shadow-offset-y)
               var(--ill-editor-settings-bar-field-shadow-blur) var(--ill-editor-settings-bar-field-shadow-spread)
               var(--ill-editor-settings-bar-field-shadow-color),
@@ -525,7 +552,10 @@
                 var(--ill-editor-dropdowns-list-border-bottom-color) var(--ill-editor-dropdowns-list-border-left-color);
   border-radius: var(--ill-editor-dropdowns-list-corner-top-left) var(--ill-editor-dropdowns-list-corner-top-right)
                  var(--ill-editor-dropdowns-list-corner-bottom-right) var(--ill-editor-dropdowns-list-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-list-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-dropdowns-list-corner-top-left-shape, round)
+                var(--ill-editor-dropdowns-list-corner-top-right-shape, round)
+                var(--ill-editor-dropdowns-list-corner-bottom-right-shape, round)
+                var(--ill-editor-dropdowns-list-corner-bottom-left-shape, round);
   box-shadow: var(--ill-editor-dropdowns-list-shadow-offset-x) var(--ill-editor-dropdowns-list-shadow-offset-y)
               var(--ill-editor-dropdowns-list-shadow-blur) var(--ill-editor-dropdowns-list-shadow-spread)
               var(--ill-editor-dropdowns-list-shadow-color),
@@ -558,7 +588,10 @@
            var(--ill-editor-dropdowns-item-padding-bottom) var(--ill-editor-dropdowns-item-padding-left);
   border-radius: var(--ill-editor-dropdowns-item-corner-top-left) var(--ill-editor-dropdowns-item-corner-top-right)
                  var(--ill-editor-dropdowns-item-corner-bottom-right) var(--ill-editor-dropdowns-item-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-item-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-dropdowns-item-corner-top-left-shape, round)
+                var(--ill-editor-dropdowns-item-corner-top-right-shape, round)
+                var(--ill-editor-dropdowns-item-corner-bottom-right-shape, round)
+                var(--ill-editor-dropdowns-item-corner-bottom-left-shape, round);
 }
 
 /* The line core draws between one run of entries and the next. */
@@ -629,7 +662,10 @@
                 var(--ill-editor-toolbar-toolbar-button-border-bottom-color) var(--ill-editor-toolbar-toolbar-button-border-left-color);
   border-radius: var(--ill-editor-toolbar-toolbar-button-corner-top-left) var(--ill-editor-toolbar-toolbar-button-corner-top-right)
                  var(--ill-editor-toolbar-toolbar-button-corner-bottom-right) var(--ill-editor-toolbar-toolbar-button-corner-bottom-left);
-  corner-shape: var(--ill-editor-toolbar-toolbar-button-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-toolbar-toolbar-button-corner-top-left-shape, round)
+                var(--ill-editor-toolbar-toolbar-button-corner-top-right-shape, round)
+                var(--ill-editor-toolbar-toolbar-button-corner-bottom-right-shape, round)
+                var(--ill-editor-toolbar-toolbar-button-corner-bottom-left-shape, round);
   box-shadow: var(--ill-editor-toolbar-toolbar-button-shadow-offset-x) var(--ill-editor-toolbar-toolbar-button-shadow-offset-y)
               var(--ill-editor-toolbar-toolbar-button-shadow-blur) var(--ill-editor-toolbar-toolbar-button-shadow-spread)
               var(--ill-editor-toolbar-toolbar-button-shadow-color),
@@ -661,7 +697,10 @@
                 var(--ill-editor-dropdowns-dropdown-border-bottom-color) var(--ill-editor-dropdowns-dropdown-border-left-color);
   border-radius: var(--ill-editor-dropdowns-dropdown-corner-top-left) var(--ill-editor-dropdowns-dropdown-corner-top-right)
                  var(--ill-editor-dropdowns-dropdown-corner-bottom-right) var(--ill-editor-dropdowns-dropdown-corner-bottom-left);
-  corner-shape: var(--ill-editor-dropdowns-dropdown-corner-shape, revert-layer);
+  corner-shape: var(--ill-editor-dropdowns-dropdown-corner-top-left-shape, round)
+                var(--ill-editor-dropdowns-dropdown-corner-top-right-shape, round)
+                var(--ill-editor-dropdowns-dropdown-corner-bottom-right-shape, round)
+                var(--ill-editor-dropdowns-dropdown-corner-bottom-left-shape, round);
   box-shadow: var(--ill-editor-dropdowns-dropdown-shadow-offset-x) var(--ill-editor-dropdowns-dropdown-shadow-offset-y)
               var(--ill-editor-dropdowns-dropdown-shadow-blur) var(--ill-editor-dropdowns-dropdown-shadow-spread)
               var(--ill-editor-dropdowns-dropdown-shadow-color),
@@ -750,7 +789,10 @@
                 var(--ill-sidebar-border-bottom-color) var(--ill-sidebar-border-left-color);
   border-radius: var(--ill-sidebar-corner-top-left) var(--ill-sidebar-corner-top-right)
                  var(--ill-sidebar-corner-bottom-right) var(--ill-sidebar-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-corner-top-left-shape, round)
+                var(--ill-sidebar-corner-top-right-shape, round)
+                var(--ill-sidebar-corner-bottom-right-shape, round)
+                var(--ill-sidebar-corner-bottom-left-shape, round);
   box-shadow:
     inset var(--ill-sidebar-inner-shadow-offset-x) var(--ill-sidebar-inner-shadow-offset-y)
     var(--ill-sidebar-inner-shadow-blur) var(--ill-sidebar-inner-shadow-spread)
@@ -772,7 +814,10 @@
           var(--ill-sidebar-entries-entry-margin-bottom) var(--ill-sidebar-entries-entry-margin-left);
   border-radius: var(--ill-sidebar-entries-entry-corner-top-left) var(--ill-sidebar-entries-entry-corner-top-right)
                  var(--ill-sidebar-entries-entry-corner-bottom-right) var(--ill-sidebar-entries-entry-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-entries-entry-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-entries-entry-corner-top-left-shape, round)
+                var(--ill-sidebar-entries-entry-corner-top-right-shape, round)
+                var(--ill-sidebar-entries-entry-corner-bottom-right-shape, round)
+                var(--ill-sidebar-entries-entry-corner-bottom-left-shape, round);
   border-width: var(--ill-sidebar-entries-entry-border-top-width) var(--ill-sidebar-entries-entry-border-right-width)
                 var(--ill-sidebar-entries-entry-border-bottom-width) var(--ill-sidebar-entries-entry-border-left-width);
   border-style: var(--ill-sidebar-entries-entry-border-top-style) var(--ill-sidebar-entries-entry-border-right-style)
@@ -861,7 +906,10 @@
                 var(--ill-sidebar-headings-heading-border-bottom-color) var(--ill-sidebar-headings-heading-border-left-color);
   border-radius: var(--ill-sidebar-headings-heading-corner-top-left) var(--ill-sidebar-headings-heading-corner-top-right)
                  var(--ill-sidebar-headings-heading-corner-bottom-right) var(--ill-sidebar-headings-heading-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-headings-heading-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-headings-heading-corner-top-left-shape, round)
+                var(--ill-sidebar-headings-heading-corner-top-right-shape, round)
+                var(--ill-sidebar-headings-heading-corner-bottom-right-shape, round)
+                var(--ill-sidebar-headings-heading-corner-bottom-left-shape, round);
 }
 
 
@@ -943,7 +991,10 @@
                 var(--ill-sidebar-categories-category-border-bottom-color) var(--ill-sidebar-categories-category-border-left-color);
   border-radius: var(--ill-sidebar-categories-category-corner-top-left) var(--ill-sidebar-categories-category-corner-top-right)
                  var(--ill-sidebar-categories-category-corner-bottom-right) var(--ill-sidebar-categories-category-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-categories-category-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-categories-category-corner-top-left-shape, round)
+                var(--ill-sidebar-categories-category-corner-top-right-shape, round)
+                var(--ill-sidebar-categories-category-corner-bottom-right-shape, round)
+                var(--ill-sidebar-categories-category-corner-bottom-left-shape, round);
 }
 
 .illuminus-styled .journal-sidebar .toc li.category strong {
@@ -984,7 +1035,10 @@
                 var(--ill-sidebar-search-search-border-bottom-color) var(--ill-sidebar-search-search-border-left-color);
   border-radius: var(--ill-sidebar-search-search-corner-top-left) var(--ill-sidebar-search-search-corner-top-right)
                  var(--ill-sidebar-search-search-corner-bottom-right) var(--ill-sidebar-search-search-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-search-search-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-search-search-corner-top-left-shape, round)
+                var(--ill-sidebar-search-search-corner-top-right-shape, round)
+                var(--ill-sidebar-search-search-corner-bottom-right-shape, round)
+                var(--ill-sidebar-search-search-corner-bottom-left-shape, round);
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]::placeholder {
@@ -1013,7 +1067,10 @@
   border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
   border-radius: var(--ill-sidebar-buttons-button-corner-top-left) var(--ill-sidebar-buttons-button-corner-top-right)
                  var(--ill-sidebar-buttons-button-corner-bottom-right) var(--ill-sidebar-buttons-button-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-buttons-button-corner-shape, revert-layer);
+  corner-shape: var(--ill-sidebar-buttons-button-corner-top-left-shape, round)
+                var(--ill-sidebar-buttons-button-corner-top-right-shape, round)
+                var(--ill-sidebar-buttons-button-corner-bottom-right-shape, round)
+                var(--ill-sidebar-buttons-button-corner-bottom-left-shape, round);
 }
 
 
@@ -1045,7 +1102,10 @@
                 var(--ill-title-border-bottom-color) var(--ill-title-border-left-color);
   border-radius: var(--ill-title-corner-top-left) var(--ill-title-corner-top-right)
                  var(--ill-title-corner-bottom-right) var(--ill-title-corner-bottom-left);
-  corner-shape: var(--ill-title-corner-shape);
+  corner-shape: var(--ill-title-corner-top-left-shape)
+                var(--ill-title-corner-top-right-shape)
+                var(--ill-title-corner-bottom-right-shape)
+                var(--ill-title-corner-bottom-left-shape);
 }
 
 .illuminus-styled .journal-header .title {
@@ -1234,7 +1294,10 @@
            var(--ill-body-code-padding-bottom) var(--ill-body-code-padding-left);
   border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
                  var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
-  corner-shape: var(--ill-body-code-corner-shape);
+  corner-shape: var(--ill-body-code-corner-top-left-shape)
+                var(--ill-body-code-corner-top-right-shape)
+                var(--ill-body-code-corner-bottom-right-shape)
+                var(--ill-body-code-corner-bottom-left-shape);
   border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
 }
 
@@ -1283,7 +1346,10 @@
   color: var(--ill-body-code-color);
   border-radius: var(--ill-body-code-corner-top-left) var(--ill-body-code-corner-top-right)
                  var(--ill-body-code-corner-bottom-right) var(--ill-body-code-corner-bottom-left);
-  corner-shape: var(--ill-body-code-corner-shape);
+  corner-shape: var(--ill-body-code-corner-top-left-shape)
+                var(--ill-body-code-corner-top-right-shape)
+                var(--ill-body-code-corner-bottom-right-shape)
+                var(--ill-body-code-corner-bottom-left-shape);
   border: var(--ill-body-code-border-width) solid var(--ill-body-code-border-color);
 }
 
@@ -1307,7 +1373,10 @@
   border: var(--ill-boxes-collapsible-border-width) solid var(--ill-boxes-collapsible-border-color);
   border-radius: var(--ill-boxes-collapsible-corner-top-left) var(--ill-boxes-collapsible-corner-top-right)
                  var(--ill-boxes-collapsible-corner-bottom-right) var(--ill-boxes-collapsible-corner-bottom-left);
-  corner-shape: var(--ill-boxes-collapsible-corner-shape);
+  corner-shape: var(--ill-boxes-collapsible-corner-top-left-shape)
+                var(--ill-boxes-collapsible-corner-top-right-shape)
+                var(--ill-boxes-collapsible-corner-bottom-right-shape)
+                var(--ill-boxes-collapsible-corner-bottom-left-shape);
   padding: var(--ill-boxes-collapsible-padding-top) var(--ill-boxes-collapsible-padding-right)
            var(--ill-boxes-collapsible-padding-bottom) var(--ill-boxes-collapsible-padding-left);
   margin-top: var(--ill-boxes-collapsible-margin-top);
@@ -1382,7 +1451,10 @@
                 var(--ill-images-media-border-bottom-color) var(--ill-images-media-border-left-color);
   border-radius: var(--ill-images-media-corner-top-left) var(--ill-images-media-corner-top-right)
                  var(--ill-images-media-corner-bottom-right) var(--ill-images-media-corner-bottom-left);
-  corner-shape: var(--ill-images-media-corner-shape);
+  corner-shape: var(--ill-images-media-corner-top-left-shape)
+                var(--ill-images-media-corner-top-right-shape)
+                var(--ill-images-media-corner-bottom-right-shape)
+                var(--ill-images-media-corner-bottom-left-shape);
   box-shadow: var(--ill-images-media-shadow-offset-x) var(--ill-images-media-shadow-offset-y)
               var(--ill-images-media-shadow-blur) var(--ill-images-media-shadow-spread)
               var(--ill-images-media-shadow-color);
@@ -1435,7 +1507,10 @@
                 var(--ill-secrets-border-bottom-color) var(--ill-secrets-border-left-color);
   border-radius: var(--ill-secrets-corner-top-left) var(--ill-secrets-corner-top-right)
                  var(--ill-secrets-corner-bottom-right) var(--ill-secrets-corner-bottom-left);
-  corner-shape: var(--ill-secrets-corner-shape);
+  corner-shape: var(--ill-secrets-corner-top-left-shape)
+                var(--ill-secrets-corner-top-right-shape)
+                var(--ill-secrets-corner-bottom-right-shape)
+                var(--ill-secrets-corner-bottom-left-shape);
   font-family: var(--ill-secrets-font);
   -webkit-text-stroke: var(--ill-secrets-outline-width) var(--ill-secrets-outline-color);
   paint-order: stroke fill;
@@ -1538,7 +1613,10 @@
   border-style: var(--ill-secrets-button-border-style);
   border-radius: var(--ill-secrets-button-corner-top-left) var(--ill-secrets-button-corner-top-right)
                  var(--ill-secrets-button-corner-bottom-right) var(--ill-secrets-button-corner-bottom-left);
-  corner-shape: var(--ill-secrets-button-corner-shape);
+  corner-shape: var(--ill-secrets-button-corner-top-left-shape)
+                var(--ill-secrets-button-corner-top-right-shape)
+                var(--ill-secrets-button-corner-bottom-right-shape)
+                var(--ill-secrets-button-corner-bottom-left-shape);
   font-size: var(--ill-secrets-button-size);
 }
 
@@ -1638,7 +1716,10 @@
                 var(--ill-links-border-bottom-color) var(--ill-links-border-left-color);
   border-radius: var(--ill-links-corner-top-left) var(--ill-links-corner-top-right)
                  var(--ill-links-corner-bottom-right) var(--ill-links-corner-bottom-left);
-  corner-shape: var(--ill-links-corner-shape);
+  corner-shape: var(--ill-links-corner-top-left-shape)
+                var(--ill-links-corner-top-right-shape)
+                var(--ill-links-corner-bottom-right-shape)
+                var(--ill-links-corner-bottom-left-shape);
 }
 
 /* --- Lists -------------------------------------------------------------- */
@@ -1686,7 +1767,10 @@
                 var(--ill-boxes-border-bottom-color) var(--ill-boxes-border-left-color);
   border-radius: var(--ill-boxes-corner-top-left) var(--ill-boxes-corner-top-right)
                  var(--ill-boxes-corner-bottom-right) var(--ill-boxes-corner-bottom-left);
-  corner-shape: var(--ill-boxes-corner-shape);
+  corner-shape: var(--ill-boxes-corner-top-left-shape)
+                var(--ill-boxes-corner-top-right-shape)
+                var(--ill-boxes-corner-bottom-right-shape)
+                var(--ill-boxes-corner-bottom-left-shape);
   box-shadow: var(--ill-boxes-shadow-offset-x) var(--ill-boxes-shadow-offset-y)
               var(--ill-boxes-shadow-blur) var(--ill-boxes-shadow-spread) var(--ill-boxes-shadow-color);
 }
@@ -1729,7 +1813,10 @@
                 var(--ill-images-border-bottom-color) var(--ill-images-border-left-color);
   border-radius: var(--ill-images-corner-top-left) var(--ill-images-corner-top-right)
                  var(--ill-images-corner-bottom-right) var(--ill-images-corner-bottom-left);
-  corner-shape: var(--ill-images-corner-shape);
+  corner-shape: var(--ill-images-corner-top-left-shape)
+                var(--ill-images-corner-top-right-shape)
+                var(--ill-images-corner-bottom-right-shape)
+                var(--ill-images-corner-bottom-left-shape);
   box-shadow: var(--ill-images-shadow-offset-x) var(--ill-images-shadow-offset-y)
               var(--ill-images-shadow-blur) var(--ill-images-shadow-spread) var(--ill-images-shadow-color),
     inset var(--ill-images-inner-shadow-offset-x) var(--ill-images-inner-shadow-offset-y)
@@ -2369,8 +2456,13 @@
   /* The settings column, and the sample takes the rest of the window: a label
      and its control need two columns of room, and the sample is the half that
      benefits from whatever is left. The grip between them writes this width, so
-     dragging still moves the split. */
-  flex: 0 0 var(--illuminus-settings-width, 21rem);
+     dragging still moves the split.
+
+     350px, and the window is sized so that leaves the sample 850 — stated in
+     pixels rather than rem because the window's own width is worked out from
+     these two figures, and a root font size somebody has changed would put the
+     arithmetic out without changing the number written here. */
+  flex: 0 0 var(--illuminus-settings-width, 350px);
   min-width: 0;
 }
 
@@ -2826,16 +2918,49 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 }
 
 /* One side at a time: the rest are still here, and still read by the search
-   box, which is what keeps "Left Thickness" findable while Top is on show. */
-.illuminus-box__run[data-side="Top"] .illuminus-box__part:not([data-side="Top"]),
-.illuminus-box__run[data-side="Right"] .illuminus-box__part:not([data-side="Right"]),
-.illuminus-box__run[data-side="Bottom"] .illuminus-box__part:not([data-side="Bottom"]),
-.illuminus-box__run[data-side="Left"] .illuminus-box__part:not([data-side="Left"]) {
+   box, which is what keeps "Left Thickness" findable while Top is on show.
+
+   Scoped to the edge block rather than to the run: a corner's shape is a part
+   of the same run and carries no side at all, so an unscoped `:not([data-side])`
+   hid all four of them the moment a side was chosen. */
+.illuminus-box__run[data-side="Top"] .illuminus-box__edge .illuminus-box__part:not([data-side="Top"]),
+.illuminus-box__run[data-side="Right"] .illuminus-box__edge .illuminus-box__part:not([data-side="Right"]),
+.illuminus-box__run[data-side="Bottom"] .illuminus-box__edge .illuminus-box__part:not([data-side="Bottom"]),
+.illuminus-box__run[data-side="Left"] .illuminus-box__edge .illuminus-box__part:not([data-side="Left"]) {
   display: none;
 }
 
-/* The shape sits under the corners it cuts, as an ordinary row. */
+/* The four shapes sit under the corners they cut, one at a time, chosen the way
+   a side is. Which corner is on show is a question about looking at the part,
+   not about the style, so nothing about it is stored. */
+.illuminus-box__corners {
+  display: flex;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
+}
+
+.illuminus-box__corner {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.15rem 0.2rem;
+  font-size: var(--font-size-12);
+  border-radius: 3px;
+  background: var(--color-cool-5-50, rgb(11 10 19 / 50%));
+}
+
+.illuminus-box__corner.is-on {
+  background: var(--color-warm-2, #c9593f);
+  font-weight: 600;
+}
+
 .illuminus-box__shape { margin-top: 0.3rem; }
+
+.illuminus-box__run[data-corner="TopLeft"] .illuminus-box__shape .illuminus-box__part:not([data-corner="TopLeft"]),
+.illuminus-box__run[data-corner="TopRight"] .illuminus-box__shape .illuminus-box__part:not([data-corner="TopRight"]),
+.illuminus-box__run[data-corner="BottomLeft"] .illuminus-box__shape .illuminus-box__part:not([data-corner="BottomLeft"]),
+.illuminus-box__run[data-corner="BottomRight"] .illuminus-box__shape .illuminus-box__part:not([data-corner="BottomRight"]) {
+  display: none;
+}
 
 /* Found by the search box, and shown whichever side is chosen: a control the
    filter says exists has to be a control the part will show. */
@@ -3320,8 +3445,9 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 
 .illuminus-preview {
   /* Width is the user's, dragged from the grip below. Until it is dragged the
-     pane takes whatever the settings leave — five hundred pixels of controls,
-     and the sample gets the rest of the window however wide it has been made. */
+     pane takes whatever the settings leave — 350 pixels of controls and the
+     tree beside them — which at the window's own width is 850, and the sample
+     gets the rest of any room the window has been given since. */
   flex: 1 1 0;
   min-width: 0;
   display: flex;

@@ -98,10 +98,10 @@ function boxPartOf(name) {
   if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
     return { family: `${m[1]}Edges`, kind: "corner", corner: m[2] };
   }
-  // What those four corners are cut to belongs with them: it reads their sizes,
+  // What each corner is cut to belongs with the corners: it reads their sizes,
   // and on its own after the run it read as a control about nothing.
-  if ((m = name.match(/^(.*?)[Cc]ornerShape$/))) {
-    return { family: `${m[1]}Edges`, kind: "cornerShape" };
+  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})Shape$`)))) {
+    return { family: `${m[1]}Edges`, kind: "cornerShape", corner: m[2] };
   }
   if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
     // Both rings belong to one family, so the inner four and the outer four are
@@ -206,7 +206,7 @@ function boxRows(fields) {
         divider: field.divider,
         // Two pictures of a box: one for the space inside it and around it, and
         // one for the edge it is drawn with and the corners that edge turns.
-        border: [], corners: [], spacing: []
+        border: [], corners: [], cornerShapes: [], spacing: []
       };
       families.set(part.family, box);
       rows.push({ box });
@@ -240,7 +240,19 @@ function boxRows(fields) {
     else if (part.kind === "corner") {
       box.corners.push({ ...field, divider: false, corner: part.corner });
     } else if (part.kind === "cornerShape") {
-      box.cornerShape = { ...field, divider: false, short: field.plain };
+      // Shown one at a time under a chooser of their own, exactly as an edge
+      // shows one side: four shapes drawn at once would be four dropdowns in a
+      // column 350 pixels wide, and the corner they belong to is what the
+      // chooser says.
+      // The chooser above says which corner, so the label drops the corner it
+      // names and keeps what is left — the same trim a side's thickness gets.
+      const named = field.plain?.indexOf("Corner") ?? -1;
+      box.cornerShapes.push({
+        ...field,
+        divider: false,
+        short: named > 0 ? field.plain.slice(named) : field.plain,
+        corner: part.corner
+      });
     } else box.spacing.push({ ...field, divider: false, side: part.side, ring: part.kind });
   }
   // A line introduces a run, and a state's own run is the same run in another
@@ -261,7 +273,7 @@ function boxRows(fields) {
     // A box holds up to four runs, and each answers for itself: an edge nobody
     // has set stays closed while the corners beside it are open.
     // The edge, its corners and their shape are one run and answer as one.
-    box.edges = [...box.border, ...box.corners, ...(box.cornerShape ? [box.cornerShape] : [])];
+    box.edges = [...box.border, ...box.corners, ...box.cornerShapes];
     box.spacingSays = runSummary(box.spacing);
     box.edgesSays = runSummary(box.edges);
     box.open = box.spacingSays.open || box.edgesSays.open;
@@ -330,12 +342,28 @@ function looseRuns(rows) {
 export class IlluminusStyleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Give each editor window an id derived from the style it edits, so `open()`
-   * can find an already-open editor instead of stacking duplicates.
+   * can find an already-open editor instead of stacking duplicates — and open
+   * it at the size it was last left at.
+   *
+   * Both live here rather than in a method each: a class body keeps the *later*
+   * definition of a name and says nothing about the one it replaced, so a
+   * second `_initializeApplicationOptions` silently took the id away and every
+   * window registered under a counter instead of its style. That reads as the
+   * editor failing to open the second time.
+   *
+   * The size is read here rather than at render so it is right from the first
+   * frame instead of being corrected into place. Only the size, not where it
+   * sat: a remembered corner is remembered against a window that may since have
+   * changed monitor, and Foundry places a new one sensibly on its own.
    * @override
    */
   _initializeApplicationOptions(options) {
     const initialized = super._initializeApplicationOptions(options);
     initialized.uniqueId = options.styleId;
+    const kept = getSetting(SETTINGS.editorView)?.window;
+    if (Number.isFinite(kept?.width) && Number.isFinite(kept?.height)) {
+      initialized.position = { ...initialized.position, width: kept.width, height: kept.height };
+    }
     return initialized;
   }
 
@@ -381,6 +409,12 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /** Width the user has dragged the sample pane to, in pixels. */
   #previewWidth;
 
+  /** The window's own size, as it was last left. Read back in the constructor. */
+  #windowSize;
+
+  /** Holds off writing the size until the dragging has stopped. */
+  #sizeTimer;
+
   /**
    * How large the sample is drawn, as a percentage.
    *
@@ -420,6 +454,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     if (Number.isFinite(view.zoom)) this.#sampleZoom = view.zoom;
     if (typeof view.quiet === "boolean") this.#quietSample = view.quiet;
     if (Number.isFinite(view.settingsWidth)) this.#previewWidth = view.settingsWidth;
+    // Held so that keeping any *other* part of the view does not throw the size
+    // away — the size is read in the constructor, not here.
+    if (Number.isFinite(view.window?.width) && Number.isFinite(view.window?.height)) {
+      this.#windowSize = { width: view.window.width, height: view.window.height };
+    }
   }
 
   /** Keep how it is being used now, for the next time it is opened. */
@@ -427,8 +466,26 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     setSetting(SETTINGS.editorView, {
       zoom: this.#sampleZoom,
       quiet: this.#quietSample,
-      settingsWidth: this.#previewWidth
+      settingsWidth: this.#previewWidth,
+      window: this.#windowSize
     }).catch((error) => log.debug(`could not keep the editor's view: ${error?.message}`));
+  }
+
+  /**
+   * Keep the window's size as it is dragged.
+   *
+   * `_onPosition` answers every frame of a drag, so writing on each one would
+   * be a hundred writes for one resize. The size is held and written once the
+   * dragging stops. A minimized window reports the size of its title bar, which
+   * is not a size anybody chose, so it is not kept.
+   */
+  _onPosition(position) {
+    super._onPosition(position);
+    if (this.minimized) return;
+    if (!Number.isFinite(position?.width) || !Number.isFinite(position?.height)) return;
+    this.#windowSize = { width: Math.round(position.width), height: Math.round(position.height) };
+    clearTimeout(this.#sizeTimer);
+    this.#sizeTimer = setTimeout(() => this.#keepView(), 500);
   }
 
   /** What the filter box holds, kept across re-renders. */
@@ -463,13 +520,18 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resizable: true,
       contentClasses: ["standard-form"]
     },
-    // 300 for the settings and 800 for the sample, plus the 12px between them
-    // and the 34 Foundry's own window padding takes. The sample is the point of
-    // the window, so it gets the room: a page of prose at something near its
-    // real width says more than a wider column of controls does.
-    // Wide enough for five hundred pixels of settings and the sample beside
-    // them; the pane's own width is dragged from the grip between the two.
-    position: { width: 1200, height: 780 },
+    // The size it opens at the *first* time, and nothing more: after that the
+    // window remembers how it was left, and `_initializeApplicationOptions`
+    // puts that back over these.
+    //
+    // Sized so the sample opens at 850 and the settings at 350: the tree's 164,
+    // the 12px between each pair of columns twice, and the 34 Foundry's own
+    // window padding takes. The sample is the point of the window, so it gets
+    // the room — a page of prose at something near its real width says more
+    // than a wider column of controls does — and the settings get what two
+    // columns of label and control need. The tree is sized to the longest part
+    // name rather than to a figure, so 164 is measured rather than chosen.
+    position: { width: 1422, height: 780 },
     form: {
       handler: IlluminusStyleEditor.#onSubmit,
       submitOnChange: false,
@@ -487,6 +549,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       pickColor: IlluminusStyleEditor.#onPickColor,
       renameMember: IlluminusStyleEditor.#onRenameMember,
       copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
+      copyFromPart: IlluminusStyleEditor.#onCopyFromPart,
       foundryDefault: IlluminusStyleEditor.#onFoundryDefault,
       openColorPicker: IlluminusStyleEditor.#onOpenColorPicker,
       showHint: IlluminusStyleEditor.#onShowHint,
@@ -765,26 +828,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       // clearing the part is exactly that — said in those words on the one part
       // where "Reset Part" does not convey it.
       plainReset: group.id === "window",
-      sections: group.sections.map((section) => ({
-        id: section.id,
-        label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
-        // A section may name its own wording, for the rare case where the same
-        // section means something different on one part — the page's shadow,
-        // which Foundry's window clips and only an export ever shows.
-        hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
-        open: this.#expanded.has(`${group.id}.${section.id}`),
-        // Only sections whose fields repeat one property across sides or
-        // corners can offer to match them.
-        matchable: section.fields.some((field) => field.link),
-        rows: this.#foldedAs(boxRows(section.fields
-          .filter((field) => !field.chrome)
-          .map((field) => ({
-            ...this.#fieldContext(group, field, fonts),
-            // A line across the part before this control, where the section has
-            // laid its own controls out in runs.
-            divider: Boolean(section.dividers?.has(field.name))
-          }))))
-      }))
+      sections: this.#sectionsContext(group, fonts)
     }));
     context.buttons = [
       { type: "submit", icon: "fa-solid fa-floppy-disk", label: "ILLUMINUS.Buttons.Save" },
@@ -793,29 +837,48 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return context;
   }
 
+  /**
+   * Every category of one part, as the editor draws them.
+   *
+   * One copy, because the ordinary parts and the family parts were building
+   * this identically in two places and a category gaining a tool in one of them
+   * would have gained it on half the parts.
+   */
+  #sectionsContext(group, fonts) {
+    return group.sections.map((section) => ({
+      id: section.id,
+      label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
+      // A section may name its own wording, for the rare case where the same
+      // section means something different on one part — the page's shadow,
+      // which Foundry's window clips and only an export ever shows.
+      hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
+      open: this.#expanded.has(`${group.id}.${section.id}`),
+      // Only sections whose fields repeat one property across sides or
+      // corners can offer to match them.
+      matchable: section.fields.some((field) => field.link),
+      // The category this one can take its values from, where the schema says
+      // there is one. Named by the part's own label so the button says where
+      // the values would come from rather than that they come from somewhere.
+      copyFrom: section.copyFrom
+        ? { group: section.copyFrom, label: game.i18n.localize(`ILLUMINUS.Groups.${section.copyFrom}.label`) }
+        : null,
+      rows: this.#foldedAs(boxRows(section.fields
+        .filter((field) => !field.chrome)
+        .map((field) => ({
+          ...this.#fieldContext(group, field, fonts),
+          // A line across the part before this control, where the section has
+          // laid its own controls out in runs.
+          divider: Boolean(section.dividers?.has(field.name))
+        }))))
+    }));
+  }
+
   /** Sections and controls for one group, shared by page parts and family parts. */
   #groupContext(group, fonts) {
     return {
       id: group.id,
       hint: game.i18n.localize(`ILLUMINUS.Groups.${group.id}.hint`),
-      sections: group.sections.map((section) => ({
-        id: section.id,
-        label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
-        // A section may name its own wording, for the rare case where the same
-        // section means something different on one part — the page's shadow,
-        // which Foundry's window clips and only an export ever shows.
-        hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
-        open: this.#expanded.has(`${group.id}.${section.id}`),
-        matchable: section.fields.some((field) => field.link),
-        rows: this.#foldedAs(boxRows(section.fields
-          .filter((field) => !field.chrome)
-          .map((field) => ({
-            ...this.#fieldContext(group, field, fonts),
-            // A line across the part before this control, where the section has
-            // laid its own controls out in runs.
-            divider: Boolean(section.dividers?.has(field.name))
-          }))))
-      }))
+      sections: this.#sectionsContext(group, fonts)
     };
   }
 
@@ -1172,15 +1235,22 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   #activateBoxes() {
     for (const run of this.element.querySelectorAll('.illuminus-box__run[data-run="edges"]')) {
       run.dataset.side ||= "Top";
-      for (const button of run.querySelectorAll(".illuminus-box__side")) {
-        button.addEventListener("click", () => {
-          run.dataset.side = button.dataset.side;
-          for (const other of run.querySelectorAll(".illuminus-box__side")) {
-            other.classList.toggle("is-on", other === button);
-          }
-          this.#applyFilter();
-        });
-      }
+      run.dataset.corner ||= "TopLeft";
+      const choose = (selector, key) => {
+        for (const button of run.querySelectorAll(selector)) {
+          button.addEventListener("click", () => {
+            run.dataset[key] = button.dataset[key];
+            for (const other of run.querySelectorAll(selector)) {
+              other.classList.toggle("is-on", other === button);
+            }
+            this.#applyFilter();
+          });
+        }
+      };
+      choose(".illuminus-box__side", "side");
+      // The corners choose the same way, and separately: which side's color is
+      // on show says nothing about which corner's shape is.
+      choose(".illuminus-box__corner", "corner");
     }
   }
 
@@ -1732,6 +1802,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     super._onClose(options);
     closeColorPicker();
     clearPreview(this.#styleId);
+    // A resize and then a close inside half a second would otherwise lose the
+    // size to the timer the close cancels.
+    if (this.#sizeTimer) {
+      clearTimeout(this.#sizeTimer);
+      this.#sizeTimer = undefined;
+      this.#keepView();
+    }
   }
 
   /**
@@ -1954,6 +2031,33 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const to = target.dataset.into;
     if (!from || !to || !this.#working[from]) return;
     this.#working[to] = foundry.utils.deepClone(this.#working[from]);
+    this.#dirty = true;
+    this.#applyPreview();
+    this.render();
+  }
+
+  /**
+   * Take this category's values from the same category on another part.
+   *
+   * The contents panel and the page are read side by side in one window, and a
+   * surface that runs across both is the commonest thing to want — so the
+   * panel's Fill and its Border can be taken from the page's in one press.
+   *
+   * Copied rather than linked, as with taking a level from the one above it:
+   * the point is a starting place to change, not a part that follows another
+   * one about. Nothing is saved by this — it lands in the working copy like any
+   * other edit, so Undo Changes still puts it back.
+   *
+   * Every control here exists on the other part under the same name, which the
+   * schema checks when it is loaded rather than this trusting it.
+   */
+  static #onCopyFromPart(_event, target) {
+    const { group, section } = IlluminusStyleEditor.#sectionFrom(target);
+    const from = target.dataset.from;
+    if (!group || !section || !this.#working[from]) return;
+    for (const field of section.fields) {
+      this.#working[group.id][field.name] = this.#working[from][field.name];
+    }
     this.#dirty = true;
     this.#applyPreview();
     this.render();

@@ -6,3 +6,8 @@ dist/
 # Written on demand by tools/generate-settings-doc.mjs; a list of ten thousand
 # controls is out of date by the end of the week.
 SETTINGS.md
+
+# Personal session setup: the catch-up hook and the settings that run it.
+# Both name a path under one person's home directory.
+.claude/settings.local.json
+.claude/session-start.sh

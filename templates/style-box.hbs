@@ -85,10 +85,27 @@
     </div>
     {{/if}}
 
-    {{!-- What those four corners are cut to, under the box they turn. --}}
-    {{#if box.cornerShape}}
+    {{!-- What each of those four corners is cut to, under the box they turn.
+          One at a time, as the edge shows one side: the other three are still
+          in the markup, where the search box and the state switch read them. --}}
+    {{#if box.cornerShapes.length}}
+    <div class="illuminus-box__corners" role="group"
+         aria-label="{{localize 'ILLUMINUS.Box.WhichCorner'}}">
+      <button type="button" class="illuminus-box__corner is-on" data-corner="TopLeft">
+        {{localize "ILLUMINUS.Box.TopLeft"}}</button>
+      <button type="button" class="illuminus-box__corner" data-corner="TopRight">
+        {{localize "ILLUMINUS.Box.TopRight"}}</button>
+      <button type="button" class="illuminus-box__corner" data-corner="BottomLeft">
+        {{localize "ILLUMINUS.Box.BottomLeft"}}</button>
+      <button type="button" class="illuminus-box__corner" data-corner="BottomRight">
+        {{localize "ILLUMINUS.Box.BottomRight"}}</button>
+    </div>
     <div class="illuminus-box__shape">
-      {{> "modules/illuminus/templates/style-field.hbs" field=box.cornerShape}}
+      {{#each box.cornerShapes as |field|}}
+      <div class="illuminus-box__part" data-corner="{{field.corner}}">
+        {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+      </div>
+      {{/each}}
     </div>
     {{/if}}
   </details>

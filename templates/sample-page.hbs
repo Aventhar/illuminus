@@ -9,7 +9,14 @@
 <p data-part="body">{{localize "ILLUMINUS.Preview.Body"}}
   <a class="content-link" data-part="links">{{localize "ILLUMINUS.Preview.Link"}}</a>.
   {{localize "ILLUMINUS.Preview.BodyRest"}}</p>
-<p data-part="body">{{localize "ILLUMINUS.Preview.BodyTwo"}}</p>
+{{!-- A plain tag, carrying no treatment class, which is what the Default Tag
+      part paints. Without one the sample had no piece for that part, so opening
+      it dimmed nothing and scrolled to nothing — the same fall back to the
+      whole journal that the panel's and the editor's own parts had. --}}
+<p data-part="body">{{localize "ILLUMINUS.Preview.BodyTwo"}}
+  {{localize "ILLUMINUS.Preview.TagFlow"}}
+  <span class="illuminus-tag" data-part="tags">{{localize "ILLUMINUS.Preview.TagInline"}}</span>
+  {{localize "ILLUMINUS.Preview.TagFlowEnd"}}</p>
 <p data-part="body">{{localize "ILLUMINUS.Preview.BodyThree"}}</p>
 <hr data-part="body">
 {{!-- Mirrors what Foundry renders, Reveal button and all. --}}
