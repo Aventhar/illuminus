@@ -19,6 +19,26 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **Every part of a category folds now.** A category is laid out in runs — the
+  lettering, then how it is set out, then its outline — and until now only the
+  runs with a family name to answer to could be shut: a shadow, a picture, a
+  box. The 458 plain runs, up to twenty-one controls long, are each a line you
+  can fold, saying what the style has set inside it. A run the style has set
+  opens by itself and one it says nothing about starts shut, exactly as the
+  gathered runs already did, so a part opens showing what the style does. Nothing
+  is taken away: every control is still there with the words it always had.
+- **Unfold everything, or fold it.** Two controls, one at the head of the parts
+  tree and one beside a part's own name: the tree's opens every branch at once,
+  and the settings pane's opens every category on the part and every run inside
+  them. Each says which way it will go next. Unfolded stays unfolded when the
+  pane is redrawn, and folding one run by hand takes the answer back — from then
+  on you are reading them one at a time.
+- **A run names itself out of its controls.** Where they share any wording it is
+  theirs — "Term Outline" and "Definition Outline", "Quotation" and
+  "Abbreviation" — and where they share none it is the kind of run they make up:
+  Lettering, Arrangement, Fill, Size, Placing. So a run needs no wording of its
+  own and cannot fall out of step with what it holds, and a check refuses a run
+  nothing can name or two runs of one name in a category.
 - **The color picker says a color both ways.** Hue, saturation and lightness by
   default — which is how a person thinks about a color — with a switch beside
   the sliders for red, green and blue, remembered per person. The color it keeps
@@ -44,7 +64,7 @@ Two conventions worth knowing before you read it:
   the six heading levels, which had gradients and now frost too. The ten left
   are the hovered fills, which take theirs from the control they stand in for.
 - **A gathered run says which kind it is.** Its name was worked out by taking
-  the short label away from the long one, so a tab whose wording had not loaded
+  the short label away from the long one, so a part whose wording had not loaded
   showed every box shadow as a bare "Shadow" — two of them in any category
   holding an inner and an outer, with nothing to tell them apart. The kind is
   read from the control's own name now, so Inner, Outer and Text Shadow are
@@ -52,15 +72,15 @@ Two conventions worth knowing before you read it:
 - **No category holds two controls of one name.** A collapsible's disclosure
   line and the block it folds had two "Top Padding", two "Frosting" and two of
   each gradient control; a term and its definition had two "Text Style" and two
-  "Italic" on six tabs. Where a category holds two of a thing, each control now
+  "Italic" on six parts. Where a category holds two of a thing, each control now
   says which it belongs to, in the same words that category already used for the
   ones it got right.
 - **A lettering shadow says it is one.** It read "Shadow", which put it beside an
   Inner Shadow and an Outer Shadow with nothing to tell it from either — and
-  where a tab letters several things, three runs answered to the one word. It
-  reads "Text Shadow" now, with the part that casts it in front where a tab has
+  where a part letters several things, three runs answered to the one word. It
+  reads "Text Shadow" now, with the part that casts it in front where a part has
   more than one: the Tables tab reads Text Shadow, Header Text Shadow and
-  Caption Text Shadow. Reported on Links, found on twelve tabs.
+  Caption Text Shadow. Reported on Links, found on twelve parts.
 - **The Default Box and the Default Image are what their treatments are.** A
   plain box could not be given a width, floated, turned, or held in view while
   the page scrolled past, and a style could not reach a heading inside one —
@@ -69,7 +89,7 @@ Two conventions worth knowing before you read it:
   shading. Both now have what their treatments have, and the treatments gained
   the caption capitals only the Default had. Three things are deliberately not
   shared, and say why in the schema: a plain picture aligns with the margins
-  that tab already offers, states its width as a share of the column, and cannot
+  that part already offers, states its width as a share of the column, and cannot
   carry a background picture, because its fill sits on the picture itself rather
   than behind content.
 - **Gradients and frosting where they were promised and missing.** Five fill
@@ -155,14 +175,34 @@ Two conventions worth knowing before you read it:
   starts closed.
 - **The editor wears Foundry's own clothes** — its variables, its type scale, its
   monospace face — so it dates with the application rather than against it.
-- **Reset Tab and Reset All sit above the tab's own controls** rather than beside
+- **Reset Part and Reset All sit above the part's own controls** rather than beside
   them.
 - **The tree pane is sized to what it holds** rather than to a fixed width.
 - **Licensed under the GNU GPL v3** rather than MIT, so the module cannot be
   folded into something closed. Anything bundled travels under the same terms,
   which is a narrower gate for artwork than MIT was.
 
+### Changed
+
+- **Nothing is called a tab any more.** The parts of a journal have been a tree
+  since the strip of tabs was taken out, and the word survived in nine strings a
+  person reads — "Reset Tab", "every setting on this tab" — naming a control
+  that is not on the screen. They say *part* now, as the tree does, and a check
+  refuses a new one. The word is left where it means a paper tab: a box with
+  only its two right-hand corners rounded does look like one.
+
 ### Fixed
+
+- **A search now opens what it found.** A control matching the filter inside a
+  folded run was counted and not shown, so the count said one thing and the pane
+  showed an unbroken row of shut runs. Clearing the box hands each run back the
+  state it was drawn with.
+- **"Term Term Color".** The sweep that tells two controls of one name apart was
+  reading a state's control as an ordinary one where the state sits in the
+  middle of the name — `termHoverColor` rather than `hoverTermColor` — so it
+  found a clash between a control and its own pointed-at twin and qualified
+  both. Four labels in the Default List and the list treatments said their part
+  twice.
 
 - **The Live Sample clips its page as a real journal does.** Foundry states that
   on a journal sheet, and the sample deliberately mirrors the markup without
@@ -224,7 +264,7 @@ Two conventions worth knowing before you read it:
   so the current-page and chosen-heading controls would have silently stopped
   being derived.
 - **Panel buttons kept their hover** through the same split, which needed the new
-  parts naming in the list of tabs that ship real hovered colors.
+  parts naming in the list of parts that ship real hovered colors.
 - **Two controls no longer write one setting.** Tag treatments had a Least Width
   from two different places; `validate.mjs` now refuses any group that declares a
   name twice.
@@ -238,7 +278,7 @@ Two conventions worth knowing before you read it:
 ### Removed
 
 - **The Disable Hovered State switch.** An unset hovered control already changes
-  nothing, so it only ever did something on the four tabs that ship real hovered
+  nothing, so it only ever did something on the four parts that ship real hovered
   colors — and those are meant to answer the pointer.
 
 - **Scroll bar controls.** Foundry states `scrollbar-width` and `scrollbar-color`

@@ -163,7 +163,7 @@ These are all load-bearing and none are obvious from the code.
     nothing rather than `none`. No ordinary choice defaults to empty, so an empty
     one can only ever be a twin.
   - **A derived twin is marked `twin: true`, because a name cannot tell one.** A
-    tab may declare a hovered *element* by hand — the contents panel's pointed-at
+    part may declare a hovered *element* by hand — the contents panel's pointed-at
     entry has a picture of its own, whose strength of 100% is meant — and those
     wear "hover" in their name exactly as a derived twin does.
   - **`validate.mjs` [11] checks it statically**, over every twin in the schema
@@ -392,18 +392,18 @@ element's own fill rather than with the page beneath. The host also takes
 marks with `host: false`; forcing `relative` on a window root drops it into normal flow
 and shoves the interface sideways.
 
-Two fills deliberately have no image: the `<img>` fill on the Images tab, which sits
+Two fills deliberately have no image: the `<img>` fill on the Images part, which sits
 behind a picture rather than behind content and cannot host a layer, and table row and
 stripe colors, where `tr` cannot host one reliably.
 
 ## Headings
 
-Six levels, `heading1`..`heading6`, sharing one tab as the `headings` family. All six
+Six levels, `heading1`..`heading6`, sharing one part as the `headings` family. All six
 rule sets are written by `tools/generate-block-css.mjs`; levels 4 to 6 used to borrow
 level 3's rule wholesale.
 
-**The tab strip's order comes from `GROUPS`, not from `FAMILIES`.** A group gets its own
-tab where it is declared, a family gets one where its first member is declared, and
+**The order the parts are built in comes from `GROUPS`, not from `FAMILIES`.** A group gets its own
+part where it is declared, a family gets one where its first member is declared, and
 anything marked `strip: "end"` goes last however early it appears — which is how Sidebar
 and Window sit together at the end while styling different things. `FAMILIES` supplies
 only the icon, label, and whether members can be renamed (`renamable: false` for heading
@@ -592,7 +592,7 @@ only get a worse answer.
   printout stopped there too. `illuminus-export.css` states `position: static`, `height:
   auto`, and `overflow: visible` for `html, body`. Only a long journal shows this: every
   export in the checks fitted on one screen until one did not.
-- **A picture opens in the document, not in a tab.** A link to the file works in a folder
+- **A picture opens in the document, not in a part.** A link to the file works in a folder
   export and not in a single-file one, where the picture is a `data:` URI — browsers
   refuse to navigate to one at the top level and the tab opens blank. It is an anchor and
   `:target` instead, with the picture's own container becoming the overlay so nothing is
@@ -797,7 +797,7 @@ in the template library.
   frame `printDocument` writes into outlives its five-minute fallback and the run
   that made it — and a written `about:blank` frame reports its *parent's* URL, so
   each leftover is a page target sitting at `/game` that only its title tells apart
-  from the real tab. Twenty-two of them and 275 workers had accumulated before a
+  from the real part. Twenty-two of them and 275 workers had accumulated before a
   browser gave out. Two things follow, both now in `connect`: **pick the tab whose
   title is Foundry's**, since `targets.find(t => t.type === "page")` will happily
   attach a whole suite to a leftover print frame; and **close every other page
@@ -879,7 +879,7 @@ while a parent is pointed at wants the same thought.
 
 **A name that is worked out from wording fails when the wording is not there.**
 A gathered run was named by subtracting a control's short label from its long
-one, which is the better name where it exists — and nothing at all where a tab's
+one, which is the better name where it exists — and nothing at all where a part's
 wording has not loaded, leaving every box shadow answering to the bare word
 "Shadow". Two of those sat in any category holding an inner shadow and an outer
 one. What a run *is* is known from the control's own name (`innerShadow`,
@@ -905,36 +905,36 @@ which cannot see two of one name inside a single category — the only kind that
 actually confuses anybody. It reported cross-category repeats for an hour while
 the real ones sat unmentioned.
 
-**A name a person reads is read against the whole tab, not one category.** Which
-lettering casts a shadow used to be asked of a category — so a tab whose three
+**A name a person reads is read against the whole part, not one category.** Which
+lettering casts a shadow used to be asked of a category — so a part whose three
 categories each lettered something gave three runs all called "Shadow", and the
 one word sat beside Inner Shadow and Outer Shadow meaning something else again.
 `SHADOW_OWNERS` asks the group now. Two things fell out of it: a lettering shadow
 says "Text Shadow" rather than "Shadow", and the words naming which part casts one
 are kept apart from the outline words in `SHADOW_WORD`, because an outline sits
 beside its own typeface and needs no qualifier while a shadow is read against
-every other shadow on the tab. `tools/` has no check for a name used twice on one
-tab; the way to find them is to ask the schema and the lang file together.
+every other shadow on the part. `tools/` has no check for a name used twice on one
+part; the way to find them is to ask the schema and the lang file together.
 
 **A family's Default must be written by the same code as its members, or it
 drifts.** The Default Tag never did, because the generator builds it with
 `family === "tagStyles" || id === "tags"` — one loop, one set of rules. Boxes and
 Images excluded theirs and drifted 38 and 24 controls apart before anyone
-noticed, since nothing compares a tab against its own family. `blockPlacing`,
+noticed, since nothing compares a part against its own family. `blockPlacing`,
 `blockHeadings` and `pictureShaped` exist so both are written by the code their
 treatments are; `memberSelector` says what "the plain one" is for each, as
 "carries no treatment class" rather than by listing the five. Where a Default
 genuinely differs, say so in the schema beside the exclusion: a plain picture
-aligns with the margins its tab already offers (a treatment's `align` emits those
+aligns with the margins its part already offers (a treatment's `align` emits those
 same margins, so both would write one property), states its width as a share of
 the column, and cannot carry a background picture at all.
 
-**A `LAYOUTS` entry need not restate a tab's order of categories.** It did have
-to, which meant sharing a category's field order with another tab cost a second
-copy of the tab's section order as well. An entry with no `order` now lays out
-the categories it names and leaves the tab's own arrangement alone.
+**A `LAYOUTS` entry need not restate a part's order of categories.** It did have
+to, which meant sharing a category's field order with another part cost a second
+copy of the part's section order as well. An entry with no `order` now lays out
+the categories it names and leaves the part's own arrangement alone.
 
-**Comparing tabs against each other is how the rest were found.** Controls that
+**Comparing parts against each other is how the rest were found.** Controls that
 only ever make sense together — Letter Spacing and Word Spacing, Wrap and
 Hyphens, an outline's width and its color — are one-directional when a set is
 built by hand rather than by `textFields()`: 21 categories had Letter Spacing
@@ -970,8 +970,8 @@ work out, and each was wrong before it was right:
   leaves "blur", `innerShadowBlur` leaves "inner blur". Read from the property
   and not from the siblings, which is what makes it the same wherever a control
   appears: comparing against siblings gave a different answer per section, and
-  the panel's Color came out as "color (color)" while every other tab's read
-  "color". That alone accounted for 27 of 49 apparent disagreements between tabs.
+  the panel's Color came out as "color (color)" while every other part's read
+  "color". That alone accounted for 27 of 49 apparent disagreements between parts.
 
 **A state's control takes its ordinary control's wording**, since it writes the
 same property in a rule of its own — and stays out of the comparison above. Left
@@ -990,7 +990,7 @@ and no plain label reads like a property name.
 
 - **`SETTINGS.md`** is not kept in the repo — a list of two thousand controls is out
   of date by the end of the week. `node tools/generate-settings-doc.mjs` writes it when
-  one is wanted: every tab, every category, and every setting, in the order the editor
+  one is wanted: every part, every category, and every setting, in the order the editor
   draws them, read from the sorted schema and `lang/en.json`, so it is the interface
   written down rather than a second description of it. A state's own controls get no row
   of their own — the editor draws them in place of the control they stand in for, so the
@@ -1035,7 +1035,7 @@ matched `/^(block|picture)\d{2}$/` and silently discarded every tag name until i
 changed to check `GROUPS` instead. Renaming is per style, so the failure looked like the
 menu ignoring a label rather than the store dropping it.
 
-They share a tab each rather than taking thirty: `FAMILIES` in the editor, with a picker
+They share a part each rather than taking thirty: `FAMILIES` in the editor, with a picker
 choosing which member is built. Only the member on show is rendered, which is why the
 editor draws ~4,200 controls rather than the schema's ~10,000.
 
@@ -1047,14 +1047,14 @@ nothing and checks it still compiles once given a value.
 ## The journal title is an `<input>`
 
 Foundry renders a journal's name as `<input class="title">`, and a replaced element can
-carry no `::before` — so the Title tab's Background Image had nowhere to paint and did
+carry no `::before` — so the Title part's Background Image had nowhere to paint and did
 nothing at all. The picture now rides on `.journal-header` around it, which means the
 input must carry no fill of its own or it covers what is behind it: the box (fill,
 picture, edges, corners, spacing) is on the header, the lettering on the input. The
 export writes `<header class="journal-header"><h1 class="title">`, so one rule serves
 both.
 
-The same reasoning covers the Page tab's Outer Shadow, which the window clips: it is
+The same reasoning covers the Page part's Outer Shadow, which the window clips: it is
 kept because an *export* shows it, and its hint says so. A section may name its own hint
 key in the schema for cases like that.
 
@@ -1080,20 +1080,20 @@ comparing two styles means two journals rather than one being overwritten.
 
 ## Editor chrome
 
-**A tab can hold parts of its own, and `SPLIT` is where that is said.** The
-contents panel and the page editor were one tab each holding seven and nine
-hundred settings; each is now a tab keeping what is true of the whole of it,
+**A part can hold parts of its own, and `SPLIT` is where that is said.** The
+contents panel and the page editor were one part each holding seven and nine
+hundred settings; each is now a part keeping what is true of the whole of it,
 with Page Entries, the Search Box, the Page Settings Bar and the rest lifted out
 as parts. The split runs *after* the layout pass, because that is what settles
 which category holds what, and **every setting keeps the name it had** — only
-its tab changes — so `v10_to_v11` is that same table read backwards, from the
+its part changes — so `v10_to_v11` is that same table read backwards, from the
 schema rather than repeated. Three things had to move with the settings, and
 each was a silent failure until a check caught it:
 
 - **`SELECTED_SECTIONS` is keyed `group.section`.** `sidebar.entries` became
   `sidebarEntries.entries`, and without that the current-page and chosen-heading
   states stop being derived at all — the controls simply vanish.
-- **`HOVER_ON` names the tabs that ship real hovered colors**, and a part lifted
+- **`HOVER_ON` names the parts that ship real hovered colors**, and a part lifted
   out of one needs naming too, or every panel button quietly loses its hover.
 - **`IMAGE_LAYERS` and `HOVER_TWIN_ELSEWHERE` name a group per element**, so an
   element whose settings moved must be repointed at the part that holds them.
@@ -1104,7 +1104,7 @@ so a list built from `compileBaseRule()` misses every inherited control.
 
 **The window is a tree, a sample, and the settings, in that order across.** The
 parts of a journal hold one another — the window holds the page, the page holds
-its headings and its boxes — and a strip of tabs could not say so: a heading and
+its headings and its boxes — and a strip of parts could not say so: a heading and
 the window frame sat side by side as though they were the same kind of thing.
 `HOLDS` in `scripts/apps/style-editor.mjs` is the one place that says what holds
 what; everything else about the tree is read from the schema, and **a part named
@@ -1115,11 +1115,11 @@ load-bearing:
   the navigation must answer to that class — and core's styling for it is
   *unlayered*, so worn by the tree it reached every row and drew each one as a
   button that no module rule could quiet. The class lives on a hidden anchor
-  holding one empty span per tab, and the tree is styled by this module alone.
-- **Switching a tab does not re-render,** so the mark on the current part is
+  holding one empty span per part, and the tree is styled by this module alone.
+- **Switching a part does not re-render,** so the mark on the current part is
   moved by hand in `#markCurrentPart` — the same reason `changeTab` is
   overridden to move the sample's focus. It also opens every branch holding the
-  part on show, so a tab reached from the sample or a search is not folded away.
+  part on show, so a part reached from the sample or a search is not folded away.
 - **A family's own entry is not the part being worked on.** One of its members
   is, and marking both says the tree cannot tell them apart.
 - **Which branches are open lives on the window, not in the markup.** The tree is
@@ -1133,16 +1133,16 @@ asserting the layout rather than the picker. And the drag grip sits on the
 sample's right edge, so the settings width is measured from *its* right edge and
 a drag leftwards widens the settings.
 
-**A piece the focused one holds is lit with it.** The Page tab's piece is the surface
+**A piece the focused one holds is lit with it.** The Page part's piece is the surface
 everything else sits on, so dimming everything that is not the focused part grayed the
-whole sample out and left the one tab covering the page with nothing to look at. Neither
+whole sample out and left the one part covering the page with nothing to look at. Neither
 a part that holds the focused one nor a part it holds is dimmed — which also keeps a link
 lit inside the paragraph it sits in.
 
-The sample **follows the open tab**: pieces of it carry `data-part="<group id>"`, and
+The sample **follows the open part**: pieces of it carry `data-part="<group id>"`, and
 the editor dims the rest and scrolls the focused one into view. `changeTab` is overridden
-to do it, because switching tabs does not re-render. A family tab focuses the member its
-picker names, via `#activeGroupId()`, and a tab the sample has no piece for leaves it
+to do it, because switching parts does not re-render. A family part focuses the member its
+picker names, via `#activeGroupId()`, and a part the sample has no piece for leaves it
 alone.
 
 The filter and the per-state switch are both **derived from what is already in the DOM**,
@@ -1156,7 +1156,7 @@ rather than half-hidden.
 state's own counterpart — a color, a size, a spacing, a tick box — and the generator
 mirrors every rule under `:hover`, reading the twin first and falling back to the
 ordinary value, so an unset hovered control changes nothing rather than resetting the
-element. Every section of every tab takes part, the window frame and the contents panel
+element. Every section of every part takes part, the window frame and the contents panel
 included: they were left out on the grounds that neither is hovered as an object, which
 left most of their settings governing both states at once.
 
@@ -1167,17 +1167,17 @@ alone and applies the whole rule to `a` itself, so the links layer put `position
 absolute; inset: 0` on every content link in a styled journal and took them out of the
 flow. `eachBefore()` in the generator exists for that.
 
-**A hovered state is off until it is asked for.** Each tab holding anything hovered —
+**A hovered state is off until it is asked for.** Each part holding anything hovered —
 derived or written by hand — carries a `hoverOff` toggle, and the compiler emits none of
-that tab's hovered values while it is on, so the `:hover` rules fall through to the
+that part's hovered values while it is on, so the `:hover` rules fall through to the
 ordinary ones. That is what "nothing happens when you point at it" means in CSS, since a
 rule cannot decline to apply. The control is `chrome: true`: stored and exported like any
-other value, drawn beside the tab's name rather than in the list, and exempt from
+other value, drawn beside the part's name rather than in the list, and exempt from
 `validate.mjs`'s "every field emits a property" checks because it drives the compiler
 rather than the stylesheet.
 
 **Two things make that harder than "emit nothing", and both were bugs.** The toggle
-defaults to on (hovered state off) everywhere except the four tabs named in `HOVER_ON` —
+defaults to on (hovered state off) everywhere except the four parts named in `HOVER_ON` —
 the contents panel, the window, links, and secrets: those spell their hovered colors out
 by hand and ship real values for them, so starting switched off would take away something
 the style already does. They are also the four whose elements a reader points at on
@@ -1187,7 +1187,7 @@ where a hovered control ships a real default, staying quiet is not enough — th
 switch on. `unhovered()` in the compiler therefore points such a control at the ordinary
 one it stands in for (`--…-button-hover-color: var(--…-button-color)`), or at what the
 ordinary element paints where there is no such control — `transparent`, `none`. It stays
-quiet for the derived controls, whose defaults are empty, so a switched-off tab costs a
+quiet for the derived controls, whose defaults are empty, so a switched-off part costs a
 handful of declarations rather than a thousand. `ordinaryTwinFor` searches the control's
 own section only, so a hovered *entry* fill cannot fall back to the fill of the *panel*
 it sits in; `HOVER_TWIN_ELSEWHERE` names the one pair that genuinely spans two sections.
@@ -1208,11 +1208,11 @@ rather than the filter lying about what exists.
 
 ## The two windows, and the shadows
 
-**The Journal Editor tab styles the window Edit Page opens**, and every rule it writes
-out-specifies the Window tab's, which keeps the journal window. The two are separate
+**The Journal Editor part styles the window Edit Page opens**, and every rule it writes
+out-specifies the Window part's, which keeps the journal window. The two are separate
 deliberately: they are different windows doing different jobs. What is written *on* is
-still the page's own surface, painted by the Page tab, so what you type looks like what
-you will read — that is the one thing the editor tab does not own.
+still the page's own surface, painted by the Page part, so what you type looks like what
+you will read — that is the one thing the editor part does not own.
 
 **A shadow is derived from a picture.** A background picture and a shadow answer the same
 question — this is a surface, and this is how it sits on the page — so the schema gives
@@ -1253,7 +1253,7 @@ doing nothing. Two mechanisms carry that:
   (`zeroAs: "inherit"`), a lettering style of `inherit`, an alignment of `inherit` —
   all of them emit either nothing or the keyword, so the page's own value comes
   through whatever game system is painting it. `textFields()` defaults to that for
-  every tab.
+  every part.
 - **Anything not inherited is set to what Foundry paints**, measured rather than
   guessed: the page's dark ground, the heading scale and the rules under the first two
   levels, the link chip, the panel's dividers and page numbers. Those numbers come from
@@ -1268,7 +1268,7 @@ prove the ones a person cares about; this says how many are left. It went from 3
 differences to 8, and the last of those are decisions rather than faults. Five are
 the journal's header and its title control, which are documented above, and the page's
 own surface. One is the contents panel's chosen row, which Foundry gives a hairline.
-One is the Page tab's corners reaching both the journal's content area and the page
+One is the Page part's corners reaching both the journal's content area and the page
 editor's window, which Foundry rounds one of and not the other — a control painting two
 surfaces its owner treats differently, the same shape as the panel buttons, and it is
 set to match the journal because that is the surface a reader looks at.
@@ -1311,7 +1311,7 @@ and stays where it is.
 
 ## Gathered runs in the editor
 
-Three shapes repeat on every tab — a box (twelve edge controls, four corners, four
+Three shapes repeat on every part — a box (twelve edge controls, four corners, four
 spacings), a shadow (five), and a picture (five) — and they are the greater part of the
 4,200 controls. `boxRows()` in `scripts/apps/style-editor.mjs` gathers each into one run
 at render, from the field's *name*, the way the generators read it. Four things are
@@ -1323,7 +1323,7 @@ load-bearing.
   control is drawn, never whether it exists.
 - **Both spellings of a family.** A family with no prefix is `borderTopWidth` and one with
   a prefix is `codeBorderTopWidth`. Matching only the second gathered a handful and left
-  every plain family — which is most of them — spread down the tab as before.
+  every plain family — which is most of them — spread down the part as before.
 - **A line belongs to the run it introduces, and only one draws it.** The schema's
   dividers sit on fields; a gathered field must give its own up or the line is drawn twice,
   once by the run and once by the control inside it. A family holds up to four runs and
@@ -1338,15 +1338,65 @@ load-bearing.
 built by `runSummary()` from the controls' own values — the set ones, in the order they
 are drawn — so it needs no wording and cannot drift from what it describes. A run the
 style says nothing about reads "Nothing set" and starts folded; one the style has set
-starts open, so a tab opens showing what the style *does*.
+starts open, so a part opens showing what the style *does*.
+
+**The plain controls between two lines are a run as well, and naming them is the
+whole of the work.** A shadow, a picture and a box have a family name to answer
+to; the 458 runs a category is actually laid out in have none, which is why they
+were the last thing on a part that could not be folded. `looseRuns()` gathers each
+stack between two dividers and `nameRuns()` in `scripts/run-names.mjs` names it.
+Five things are load-bearing:
+
+- **The controls' own wording comes first.** Where every label in a run begins
+  with the same words, those words *are* the name — "Term Outline" beside
+  "Definition Outline", "Quotation" beside "Abbreviation" — and it is already
+  written, already translated, and already the part's own words for the thing. A
+  table naming a list's parts would be a second place to keep that in step.
+- **`RUN_KINDS` is only the fallback**, for a run whose labels share nothing: a
+  typeface beside a text size beside a color is "Lettering". It matches on
+  *suffixes* the schema already uses, so a control added later lands in the right
+  run unregistered, and **order is the whole of its meaning** — `OutlineColor`
+  must be asked before `Color`, or every outline answers to the lettering.
+- **The kind is a vote, not the first control.** A highlight's run reads
+  `color, background, gradientFrom, gradientTo, gradientAngle, frost`: the first
+  control says Lettering and the run is a Fill. The first control breaks a tie,
+  because the schema put it at the head.
+- **A category is where two runs of one name are told apart**, exactly as the
+  wording generator tells two controls apart — each takes the first word of its
+  own first control, unless the name already says it. Naming a run in isolation
+  cannot see the clash: a term's lettering and a definition's are both
+  "Lettering" until they are read side by side.
+- **A run of one control is not a run.** Folding a single row behind a line
+  saying what it holds costs a click and saves nothing, and it is what made
+  `width` and the size run both come out as "Size".
+
+`validate.mjs` [16] holds all of it over the whole schema in a second: every run
+is named, no category holds two of a name, and every kind has wording.
+
+**A folded run hides a filter hit, and the filter will still count it.** Every
+run — gathered or plain — is shut around its controls, so a search matching one
+inside a shut run said "1 result" over an unbroken row of shut lines. Each run
+carries `data-open` saying how it was rendered, and `#applyFilter` opens what
+matched and hands that state back when the box is cleared. The stamp is needed
+because the answer is "open if the style sets it", which is computed at render
+and gone by the time a filter runs.
+
+**A state can sit in the middle of a name, and a sweep that only looks at the
+front will find a clash that is not one.** `generate-lang`'s "two controls of one
+name" pass skipped `/^(hover|active)[A-Z]/` and therefore read `termHoverColor`
+as an ordinary control — which of course carries the same label as `termColor`,
+that being what a state's control is *for*. It qualified both, and the Default
+List read **"Term Term Color"**. Anything walking field names for states wants
+both spellings, and a guard against prepending a word the label already leads
+with.
 
 **A box is drawn twice, as two pictures.** Spacing is one — the outer four around a
 dashed ring, the inner four on the box, and no outer ring at all where a thing has no
 space around it to set. Edges and corners are the other — a thickness on each edge, a
 radius at each corner, the chosen side's style and color beneath, and the corner shape
-under it. Both merges happen in the schema, so a tab that kept Inner Spacing and Outer
+under it. Both merges happen in the schema, so a part that kept Inner Spacing and Outer
 Spacing (or Border and Corners) apart ends up with one category and both orders follow;
-the tab maps did not have to be rewritten. **One family key per picture**: padding and
+the part maps did not have to be rewritten. **One family key per picture**: padding and
 margin both key to `<prefix>Spacing`, border and corners both to `<prefix>Edges`. Keying
 them apart is what produced two boxes per category, one holding nothing but corners.
 
@@ -1458,8 +1508,8 @@ drawn, which is right because the category has already said which shadow it is.
 
 ## Conventions worth keeping
 
-- **A tab may lay itself out, and then it says so twice.** `SECTION_ORDER` and
-  `FIELD_ORDER` sort every tab so they read alike; a tab that wants its own
+- **A part may lay itself out, and then it says so twice.** `SECTION_ORDER` and
+  `FIELD_ORDER` sort every part so they read alike; a part that wants its own
   arrangement states `order` on the group (its sections) and `order` on a section
   (its controls), and the shared pass leaves it alone. `DIVIDER` — `"---"` — in a
   section's order draws a line before the control that follows it, which is how a
@@ -1470,13 +1520,13 @@ drawn, which is right because the category has already said which shadow it is.
   the schema throws at import — the same bargain `FIELD_ORDER` drives.
 - **A shadow sharing a section says which shadow it is.** "Softness" is enough in
   a category called Inner Shadow and ambiguous in one holding a fill, a picture
-  and two shadows. The qualifier is written as the *tab's* own wording rather
-  than the control's, so the Page tab's own Outer Shadow category keeps the short
-  labels while the Title tab, which holds both in one category, gets the long
+  and two shadows. The qualifier is written as the *part's* own wording rather
+  than the control's, so the Page part's own Outer Shadow category keeps the short
+  labels while the Title part, which holds both in one category, gets the long
   ones.
 - **Where a control appears is decided in one place.** `SECTION_ORDER` and
-  `FIELD_ORDER` at the foot of `style-schema.mjs` sort every tab after it is built,
-  so each tab reads the same way: text, fill, inner spacing, border, corners, shadow,
+  `FIELD_ORDER` at the foot of `style-schema.mjs` sort every part after it is built,
+  so each part reads the same way: text, fill, inner spacing, border, corners, shadow,
   outer spacing, size, then the parts inside. A section the list does not name throws
   at import rather than falling quietly to the end. Hovered controls are moved to sit
   against the ordinary control they replace, which is what keeps the two states in the
@@ -1484,11 +1534,11 @@ drawn, which is right because the category has already said which shadow it is.
   the rest.
 - **A state's control is named for the thing it belongs to, never for the state
   alone.** A listed page's pointed-at fill was `hoverBackground`, and the panel's
-  own fill is `background` in the same tab — so the mirror paired them and the
+  own fill is `background` in the same part — so the mirror paired them and the
   pointed-at rule it wrote for the *panel* painted the whole panel with the
   *entry's* color the moment a pointer entered it. They are `entryBackground`,
   `entryHoverBackground`, and `entryActiveBackground` now. Field names share one
-  namespace per tab, so a bare state word is a collision waiting to happen.
+  namespace per part, so a bare state word is a collision waiting to happen.
 - **A derived hovered twin needs its own "Match all sides" key.** The twin is a
   copy of the control it stands in for, and copying its `link` too meant Match
   took the *ordinary* corner and wrote it across the hovered ones as well —

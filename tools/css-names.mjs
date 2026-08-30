@@ -109,7 +109,7 @@ export function propertiesFor(sheets, variable) {
  * the same wherever a control appears. Comparing against siblings gave a
  * different answer in each section — the contents panel holds a second control
  * feeding `color`, so its Color came out as "color (color)" while every other
- * tab's read "color".
+ * part's read "color".
  */
 function qualifier(name, property) {
   const inProperty = new Set(property.split(/[^a-z]+/i).filter(Boolean));

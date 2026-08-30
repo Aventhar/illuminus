@@ -702,7 +702,7 @@ const HOVER_TARGETS = {
   heading5: ".illuminus-styled .journal-page-content h5",
   heading6: ".illuminus-styled .journal-page-content h6",
   // Ordinary text wherever it appears, so a list item or a table cell is
-  // covered by the Body tab rather than needing a hovered state of its own.
+  // covered by the Body part rather than needing a hovered state of its own.
   body: ["p", "li", "dd", "dt", "td"]
     .map((tag) => `.illuminus-styled .journal-page-content ${tag}`).join(", "),
   tables: ".illuminus-styled .journal-page-content table",
@@ -833,7 +833,7 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled .journal-sidebar button:hover", group: "sidebarButtons", prefix: "buttonHover" },
   // The layer goes on the header, not on the title inside it: Foundry renders a
   // journal's name as an `<input>`, and a replaced element has no `::before` to
-  // put a picture on — so the Title tab's Background Image had nowhere to paint
+  // put a picture on — so the Title part's Background Image had nowhere to paint
   // and silently did nothing. The header is the same width and a real element.
   { selector: ".illuminus-styled .journal-header", group: "title", prefix: "" },
   // The same selector the heading's own rule uses, so level 1's picture reaches

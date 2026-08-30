@@ -21,7 +21,7 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 globalThis.foundry = { utils: { deepClone: (o) => structuredClone(o) } };
 const { GROUPS, groupFields } = await import(`${ROOT}/scripts/style-schema.mjs`);
-// Each family shares one tab and only builds the member on show, so the editor
+// Each family shares one part and only builds the member on show, so the editor
 // holds far fewer controls than the schema defines. Derived rather than counted,
 // so adding a family or a level cannot make these expectations stale.
 const pageGroups = GROUPS.filter((g) => !g.family);
@@ -31,7 +31,7 @@ const shown = [...pageGroups, ...firstOfEach];
 const EXPECT = {
   tabs: pageGroups.length + families.length,
   sections: shown.reduce((n, g) => n + g.sections.length, 0),
-  // Chrome fields are stored with the style but drawn beside the tab's name
+  // Chrome fields are stored with the style but drawn beside the part's name
   // rather than in the list — the switch that turns a hovered state off.
   fields: shown.reduce((n, g) => n + groupFields(g).filter((f) => !f.chrome).length, 0)
 };
@@ -289,7 +289,7 @@ const editor = await cdp.evaluate(`(async () => {
   return JSON.stringify({
     rendered: !!el,
     tabs: el.querySelectorAll(".illuminus-tree__part[data-tab]:not([data-member])").length,
-    activeTabs: el.querySelectorAll(".illuminus-tab.active").length,
+    activeTabs: el.querySelectorAll(".illuminus-part.active").length,
     fields: el.querySelectorAll(".illuminus-field").length,
     colorPickers: el.querySelectorAll("color-picker").length,
     filePickers: el.querySelectorAll("file-picker").length,
@@ -363,7 +363,7 @@ const roundTrip = await cdp.evaluate(`(async () => {
 
   const original = api.getStyle(style.id);
   const copy = api.getStyle(created[0].id);
-  // Compare structurally: key order follows the schema, so reordering a tab
+  // Compare structurally: key order follows the schema, so reordering a part
   // would otherwise look like data loss.
   const stable = (value) => (value && typeof value === "object" && !Array.isArray(value))
     ? Object.fromEntries(Object.keys(value).sort().map((k) => [k, stable(value[k])]))
@@ -951,8 +951,8 @@ check(bd.middle.value.toLowerCase() === "#0a141e",
   `the middle still gives the fill, not a border (got ${bd.middle.value})`);
 check(bd.middle.readout.includes("Fill"), `and reports it as fill (got "${bd.middle.readout}")`);
 
-// Tab labels are short enough to sit on one line with their badge, and the
-// strip wraps rather than hiding a tab when the window narrows.
+// Part labels are short enough to sit on one line with their badge, and the
+// strip wraps rather than hiding a part when the window narrows.
 console.log("\n[21] The tab strip never hides a tab");
 const tabs = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
@@ -1331,8 +1331,11 @@ const cp = await cdp.evaluate(`(async () => {
   const el = app.element;
   // Sections start collapsed, so open the one holding the control first — a
   // person cannot click what is folded away either.
-  el.querySelector('[data-field="page.background"]').closest(".illuminus-section")
-    .querySelector("summary").click();
+  // Both are shut: a category, and the run of controls inside it. Every
+  // disclosure between the control and the part has to be opened, or the swatch
+  // has no box and the click lands on whatever is drawn there instead.
+  for (let shut = el.querySelector('[data-field="page.background"]').closest("details");
+    shut; shut = shut.parentElement?.closest("details")) shut.open = true;
   await new Promise(r => setTimeout(r, 300));
   const control = el.querySelector('[data-field="page.background"] color-picker');
   const swatch = el.querySelector('[data-field="page.background"] .illuminus-swatch');
@@ -1489,8 +1492,8 @@ const forgetSetup = await cdp.evaluate(`(async () => {
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1100));
   // Sections start collapsed; open the one holding the swatch first.
-  app.element.querySelector('[data-field="page.background"]').closest(".illuminus-section")
-    .querySelector("summary").click();
+  for (let shut = app.element.querySelector('[data-field="page.background"]').closest("details");
+    shut; shut = shut.parentElement?.closest("details")) shut.open = true;
   await new Promise(r => setTimeout(r, 300));
   const swatch = app.element.querySelector('[data-field="page.background"] .illuminus-swatch');
   const b = swatch.getBoundingClientRect();
@@ -1579,8 +1582,9 @@ console.log("\n[28] Saving sets the baseline that Reset returns to");
     await new Promise(r => setTimeout(r, 1200));
     app.changeTab("body", "sheet");
     await new Promise(r => setTimeout(r, 300));
-    const section = app.element.querySelector('.illuminus-tab[data-tab="body"] details.illuminus-section');
+    const section = app.element.querySelector('.illuminus-part[data-tab="body"] details.illuminus-section');
     section.open = true;
+    for (const run of section.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 300));
     // Assigned on the element that carries the name, which is what dispatches
     // the events — writing to the inner input does nothing at all.
@@ -1727,7 +1731,7 @@ const EDIT_SHEET = `[...foundry.applications.instances.values()].filter(
     && a.element?.parentElement === document.body).pop()`;
 
 /**
- * Open a file in a tab of its own and ask it a question.
+ * Open a file in a part of its own and ask it a question.
  *
  * The whole promise of the export is that it works away from Foundry, so it is
  * checked away from Foundry: a second tab, a second socket, and no module
@@ -2064,7 +2068,7 @@ check(hr.hidden.topWidth === "0px", `a thickness of 0 draws nothing (got ${hr.hi
 
 // Blocks and picture treatments take the preview pane over, because the journal
 // mock would leave a block a sliver of the width and its own width and wrapping
-// controls would then mean nothing. The panel must show the member the tab is
+// controls would then mean nothing. The panel must show the member the part is
 // actually editing, and take its look from the style being edited.
 console.log("\n[31] Block Styles and Picture Styles get their own preview");
 const panes = await cdp.evaluate(`(async () => {
@@ -2518,7 +2522,7 @@ try {
   })()`);
 }
 
-// Six levels share one tab, and it sits where the levels do rather than out
+// Six levels share one part, and it sits where the levels do rather than out
 // with the families at the end.
 const headingTab = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
@@ -2533,12 +2537,12 @@ const headingTab = await cdp.evaluate(`(async () => {
   const tabs = [...el.querySelectorAll(".illuminus-tree__part[data-tab]:not([data-member])")]
     .map(t => t.dataset.tab);
   const picker = el.querySelector('[data-family-picker="headings"]');
-  const before = el.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
+  const before = el.querySelector('.illuminus-part.active [data-field^="heading"]')?.dataset.field;
 
   picker.value = "heading5";
   picker.dispatchEvent(new Event("change"));
   await new Promise(r => setTimeout(r, 500));
-  const after = app.element.querySelector('.illuminus-tab.active [data-field^="heading"]')?.dataset.field;
+  const after = app.element.querySelector('.illuminus-part.active [data-field^="heading"]')?.dataset.field;
 
   await app.close({force: true});
   return JSON.stringify({tabs, levels: picker.options.length, before, after});
@@ -2557,7 +2561,7 @@ check(ht.before?.startsWith("heading1.") && ht.after?.startsWith("heading5."),
 // to outlive the re-render that every field change causes.
 const paneBox = async () => JSON.parse(await cdp.evaluate(`(() => {
   const app = [...foundry.applications.instances.values()].find(a => a.constructor.name === "IlluminusStyleEditor");
-  const el = app.element.querySelector(".illuminus-tab.active");
+  const el = app.element.querySelector(".illuminus-part.active");
   const g = app.element.querySelector(".illuminus-preview__grip").getBoundingClientRect();
   const b = el.getBoundingClientRect();
   const sample = app.element.querySelector(".illuminus-preview").getBoundingClientRect();
@@ -3033,7 +3037,7 @@ try {
   })()`);
 }
 
-// Two answers to "there are two thousand settings": search across every tab,
+// Two answers to "there are two thousand settings": search across every part,
 // and fold the pointed-at half of each pair away until it is wanted.
 console.log("\n[39] Finding a setting among thousands");
 try {
@@ -3049,37 +3053,37 @@ try {
       box.dispatchEvent(new Event("input"));
       await new Promise(r => setTimeout(r, 250));
     };
-    const visible = () => [...el.querySelectorAll(".illuminus-tab.active .illuminus-field")]
+    const visible = () => [...el.querySelectorAll(".illuminus-part.active .illuminus-field")]
       .filter(f => !f.classList.contains("is-filtered-out")).length;
 
     out.beforeFilter = visible();
     await type("shadow");
     out.afterFilter = visible();
-    // Dimming is measured on a word only one tab has. "Shadow" is on every tab
-    // now that lettering everywhere can cast one, so it narrows a tab without
+    // Dimming is measured on a word only one part has. "Shadow" is on every part
+    // now that lettering everywhere can cast one, so it narrows a part without
     // dimming any — which is right, and says nothing about dimming.
     await type("bullet");
     out.dimmedTabs = [...el.querySelectorAll(".illuminus-tree__part[data-tab]")]
       .filter(t => t.classList.contains("is-filtered-out")).length;
     // A section whose own name matches opens even when its controls are worded
-    // differently — an Inner Shadow's are all "shading". Measured on a tab that
-    // still has a category named for a shadow: the tabs laid out by hand hold
+    // differently — an Inner Shadow's are all "shading". Measured on a part that
+    // still has a category named for a shadow: the parts laid out by hand hold
     // both shadows inside Fill and Image, and name neither.
     // A category named for something none of its controls are called. The
     // shadows now share Fill and Image wherever they are, so Folding is the one
     // that reads that way: its controls are a marker, a size and a turn.
-    const shadowTab = [...el.querySelectorAll(".illuminus-tab")].find((one) =>
+    const shadowTab = [...el.querySelectorAll(".illuminus-part")].find((one) =>
       [...one.querySelectorAll(".illuminus-section__label")]
         .some((label) => /folding/i.test(label.textContent)));
-    const wasOn = el.querySelector(".illuminus-tab.active")?.dataset.tab;
+    const wasOn = el.querySelector(".illuminus-part.active")?.dataset.tab;
     if (shadowTab) app.changeTab(shadowTab.dataset.tab, "sheet");
     await new Promise(r => setTimeout(r, 200));
     await type("folding");
     out.shadowTab = shadowTab?.dataset.tab ?? "none";
-    out.openSections = [...el.querySelectorAll(".illuminus-tab.active .illuminus-section")]
+    out.openSections = [...el.querySelectorAll(".illuminus-part.active .illuminus-section")]
       .filter(s => s.open).length;
-    // Back where it was: everything after this counts controls on the tab the
-    // check started on, and a tab with eight times as many is not that.
+    // Back where it was: everything after this counts controls on the part the
+    // check started on, and a part with eight times as many is not that.
     if (wasOn) app.changeTab(wasOn, "sheet");
     await new Promise(r => setTimeout(r, 200));
     await type("");
@@ -3091,7 +3095,7 @@ try {
     // own now, as is everything else the panel holds.
     app.changeTab("sidebarButtons", "sheet");
     await new Promise(r => setTimeout(r, 400));
-    const buttons = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarButtons"] .illuminus-section')]
+    const buttons = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarButtons"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "buttons");
     buttons.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3111,7 +3115,7 @@ try {
     // compared with itself.
     app.changeTab("sidebarEntries", "sheet");
     await new Promise(r => setTimeout(r, 300));
-    const entryStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarEntries"] .illuminus-section')]
+    const entryStates = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarEntries"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "entries");
     entryStates.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3131,7 +3135,7 @@ try {
     // the heading a reader chose is as much a state as the page being read.
     app.changeTab("sidebarHeadings", "sheet");
     await new Promise(r => setTimeout(r, 300));
-    const headingStates = [...el.querySelectorAll('.illuminus-tab[data-tab="sidebarHeadings"] .illuminus-section')]
+    const headingStates = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarHeadings"] .illuminus-section')]
       .find(s => s.querySelector("summary")?.dataset.section === "subHeadings");
     headingStates.querySelector("summary").click();
     await new Promise(r => setTimeout(r, 300));
@@ -3205,8 +3209,8 @@ try {
     window.__pal = {styleId: style.id};
     const app = await api.openEditor(style.id);
     await new Promise(r => setTimeout(r, 1000));
-    app.element.querySelector('[data-field="page.background"]')
-      .closest(".illuminus-section").querySelector("summary").click();
+    for (let shut = app.element.querySelector('[data-field="page.background"]').closest("details");
+      shut; shut = shut.parentElement?.closest("details")) shut.open = true;
     await new Promise(r => setTimeout(r, 250));
     const swatch = app.element.querySelector('[data-field="page.background"] .illuminus-swatch');
     const box = swatch.getBoundingClientRect();
@@ -3261,8 +3265,8 @@ try {
   })()`);
 }
 
-// The Window tab's defaults are all "leave it as Foundry draws it", so clearing
-// that tab is exactly that — and it says so, on the one tab where "Reset Tab"
+// The Window part's defaults are all "leave it as Foundry draws it", so clearing
+// that part is exactly that — and it says so, on the one part where "Reset Part"
 // does not convey what resetting means.
 console.log("\n[56] Handing the window back to Foundry");
 try {
@@ -3285,7 +3289,7 @@ try {
     const before = app.element.querySelector('[data-field="window.headerButtonColor"] color-picker')?.value;
     button?.click();
     await new Promise(r => setTimeout(r, 700));
-    // Clearing a tab asks first, as it should.
+    // Clearing a part asks first, as it should.
     const asked = [...foundry.applications.instances.values()]
       .filter(a => a.constructor.name === "DialogV2").pop();
     out.asked = Boolean(asked);
@@ -3294,7 +3298,7 @@ try {
     const after = app.element.querySelector('[data-field="window.headerButtonColor"] color-picker')?.value;
     out.cleared = before !== after;
     out.after = after;
-    // Only that tab: the rest of the style is left alone.
+    // Only that part: the rest of the style is left alone.
     out.elsewhere = app.element.querySelector('[data-field="page.background"] color-picker')?.value;
 
     await app.close({force: true});
@@ -3771,7 +3775,7 @@ try {
     Object.assign(settings.title, {outlineWidth: 3, outlineColor: "#ff00ff"});
     Object.assign(settings.heading2, {outlineWidth: 2, outlineColor: "#00ff00"});
     // The controls are derived from wherever a typeface can be set, so the
-    // check reaches past the two tabs that had them written by hand.
+    // check reaches past the two parts that had them written by hand.
     Object.assign(settings.tables, {headerOutlineWidth: 1, headerOutlineColor: "#0000ff"});
     Object.assign(settings.images, {captionOutlineWidth: 1.5, captionOutlineColor: "#ffff00"});
     Object.assign(settings.links, {outlineWidth: 1, outlineColor: "#ff8800"});
@@ -4051,7 +4055,7 @@ try {
   })()`);
 }
 
-// The sample is a whole page, which is what makes it useful — so the tab you
+// The sample is a whole page, which is what makes it useful — so the part you
 // are on brings its own part forward rather than the sample showing that part
 // alone. A heading in isolation says nothing about how it sits in the text.
 console.log("\n[43] The sample follows the open tab");
@@ -4103,13 +4107,13 @@ try {
       if (out.scrolledIntoView) break;
       // A smooth scroll is animated and can be canceled by whatever the
       // browser was doing at the time — so ask once more, half way through,
-      // rather than declaring a failure the next tab switch would have fixed.
+      // rather than declaring a failure the next part switch would have fixed.
       if (i === 30) app.changeTab("tables", "sheet");
       await new Promise(r => setTimeout(r, 100));
     }
 
     // A family replaces the pane outright, so nothing there should be dimmed.
-    // The Page tab's piece is the surface everything else sits on, so lighting
+    // The Page part's piece is the surface everything else sits on, so lighting
     // it and dimming what it holds grayed the whole sample out.
     out.page = await visit("page");
     // Inside the page, that is: the Box, Tag and Picture panes below it are
@@ -4163,7 +4167,7 @@ try {
   })()`);
 }
 
-// Knowing where a control lives on one tab should be knowing where it lives on
+// Knowing where a control lives on one part should be knowing where it lives on
 // all of them. The schema settles that order; this checks the editor renders it,
 // and that switching to Hovered hides controls without shuffling the rest.
 console.log("\n[44] Every tab reads in the same order");
@@ -4176,7 +4180,7 @@ try {
       await new Promise(r => setTimeout(r, 100));
     }
 
-    // Grouped by the group each section was rendered for: a family tab renders
+    // Grouped by the group each section was rendered for: a family part renders
     // one member, so its sections are filed under that member's own id.
     const rendered = new Map();
     for (const summary of app.element.querySelectorAll("summary[data-section]")) {
@@ -4185,7 +4189,7 @@ try {
       rendered.set(summary.dataset.group, list);
     }
 
-    // A tab that lays itself out is exempt from the shared reading order: it
+    // A part that lays itself out is exempt from the shared reading order: it
     // has one of its own, which the schema states and this reads back.
     const ownOrder = schema.GROUPS.filter(g => g.order).map(g => g.id);
     const out = {tabs: rendered.size, wrongOrder: [], textNotFirst: [], ownOrder};
@@ -4197,8 +4201,8 @@ try {
     }
 
     // The convention itself, stated once rather than inferred from the schema
-    // it is checking: what a box style and a tag open with. Read from tabs that
-    // take the shared order — the Boxes tab states one of its own now, and a tab
+    // it is checking: what a box style and a tag open with. Read from parts that
+    // take the shared order — the Boxes part states one of its own now, and a part
     // that has been laid out by hand is not evidence about the shared one.
     // Read as names rather than as ids: a box's first category and a tag's are
     // the same question — how much room it takes — under two ids.
@@ -4207,9 +4211,13 @@ try {
         ?.querySelector(".illuminus-section__label")?.textContent.trim() ?? section);
     out.boxes = named("box01");
     out.tag = named("tag01");
-    out.lettering = app.element.textContent.includes("Lettering");
+    // Asked of the category names, not of the window: a run of plain controls
+    // inside a Text category is called Lettering, and reading the whole window's
+    // text found that instead of the category this is about.
+    out.lettering = [...app.element.querySelectorAll(".illuminus-section__label")]
+      .some((one) => one.textContent.trim() === "Lettering");
 
-    // Turned on first: a tab whose hovered state is switched off grays the
+    // Turned on first: a part whose hovered state is switched off grays the
     // switch, and rightly — there is nothing to look at behind it.
     const enable = app.element.querySelector('[data-tab="boxes"] .illuminus-hover-off input');
     if (enable?.checked) {
@@ -4230,7 +4238,7 @@ try {
 
     // Reached the way a person reaches it: the switch lives in a section's
     // header, which is not drawn at all until the section is open, and hit
-    // testing means nothing on a tab that is not the one showing.
+    // testing means nothing on a part that is not the one showing.
     app.changeTab("boxes", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const hit = (element) => {
@@ -4256,7 +4264,7 @@ try {
   const sh = JSON.parse(shape);
   check(sh.tabs >= 15 && sh.wrongOrder.length === 0,
     `all ${sh.tabs} tabs list their sections in the schema's order${sh.wrongOrder.length ? `:\n      ${sh.wrongOrder.join("\n      ")}` : ""}`);
-  // A tab that states its own section order is exempt: the Title tab opens with
+  // A part that states its own section order is exempt: the Title part opens with
   // Show Title, because whether the name is drawn at all comes before how it looks.
   check(sh.textNotFirst.filter((tab) => !sh.ownOrder?.includes(tab)).length === 0,
     `Text comes first wherever it exists${sh.textNotFirst.length ? ` (not on ${sh.textNotFirst.join(", ")})` : ""}`);
@@ -4266,7 +4274,7 @@ try {
   check(sh.boxes.join() === "Size and Position,Text,Fill and Image,Spacing"
     && sh.tag.join() === sh.boxes.join(),
     `a box and a tag open the same way (${sh.boxes.join(" > ")})`);
-  check(!sh.lettering, "and nothing is called Lettering any more");
+  check(!sh.lettering, "and no category is called Lettering any more");
   // With the state word taken off, the hovered controls must read as the
   // ordinary ones do — in the same order, and with the controls that have no
   // hovered twin (a thickness does not change when pointed at) still in place.
@@ -4292,7 +4300,7 @@ try {
 
 // The flagship of the export work: a styled journal has to survive leaving
 // Foundry entirely. Checked by unzipping the archive with the operating
-// system's own unzipper and rendering the result in a tab that has never heard
+// system's own unzipper and rendering the result in a part that has never heard
 // of Foundry, then reading computed styles there and comparing them with the
 // live page. Nothing less proves the promise.
 console.log("\n[45] A journal exports as web pages");
@@ -5526,7 +5534,13 @@ console.log("\n[54] The sample keeps up while a control is still being used");
     await new Promise(r => setTimeout(r, 1300));
     app.changeTab("body", "sheet");
     await new Promise(r => setTimeout(r, 300));
-    app.element.querySelector('.illuminus-tab[data-tab="body"] details.illuminus-section').open = true;
+    // The category, and the run of controls inside it: a control in a shut run
+    // has no box for a pointer to land on and cannot take the cursor, which
+    // reads as the sample failing to keep up rather than as nothing being
+    // dragged at all.
+    const open = app.element.querySelector('.illuminus-part[data-tab="body"] details.illuminus-section');
+    open.open = true;
+    for (const run of open.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 400));
     document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
     const slider = app.element.querySelector('[data-field="body.size"] input[type="range"]');
@@ -6036,8 +6050,8 @@ try {
 }
 
 // Two windows, styled apart: the journal's, whose width these limits clamp, and
-// the one Edit Page opens, which has a tab of its own. The editor's frame used
-// to be whatever the Window tab said, so there was no way to give the place you
+// the one Edit Page opens, which has a part of its own. The editor's frame used
+// to be whatever the Window part said, so there was no way to give the place you
 // write a look of its own.
 console.log("\n[60] The window's width, and the editor's own window");
 try {
@@ -6151,7 +6165,7 @@ try {
       // takes that one instead.
       rowSize: getComputedStyle(el.querySelector(".page-metadata .show-title")).fontSize,
       labelSize: getComputedStyle(el.querySelector(".page-metadata .show-title label")).fontSize,
-      // The page's own surface is what is written on, which the Page tab paints.
+      // The page's own surface is what is written on, which the Page part paints.
       surface: getComputedStyle(el.querySelector(":scope > .window-content")).backgroundColor
     });
   })()`);
@@ -6203,7 +6217,7 @@ try {
   })()`);
 }
 
-// The Title tab is laid out by hand rather than by the shared pass: fewer, longer
+// The Title part is laid out by hand rather than by the shared pass: fewer, longer
 // categories, each reading in runs with a line drawn between them. The order is
 // the point, so it is asserted rather than left to the pass that sorts the rest.
 console.log("\n[61] The Title tab reads as it was laid out");
@@ -6219,21 +6233,21 @@ try {
     await new Promise(r => setTimeout(r, 1600));
     // The controls are in the DOM whether or not their category is open, and a
     // closed one is what makes this affordable: opening every category on six
-    // tabs is a few thousand controls laid out at once, which took longer than
-    // the protocol will wait. Only the tab whose line is measured is opened.
+    // parts is a few thousand controls laid out at once, which took longer than
+    // the protocol will wait. Only the part whose line is measured is opened.
     const laidOut = {};
-    // The six levels share one tab, so the family's id is what opens it.
+    // The six levels share one part, so the family's id is what opens it.
     for (const which of ["title", "page", "headings", "body", "links", "lists",
       "tables", "boxes", "secrets", "images", "boxStyles", "window", "editor",
       "sidebar", "sidebarEntries", "sidebarHeadings", "sidebarCategories",
       "sidebarSearch", "sidebarButtons", "sidebarNumbers",
       "editorSettingsBar", "editorToolbar", "editorDropdowns"]) {
-      laidOut[which] = app.element.querySelector('.illuminus-tab[data-tab="' + which + '"]');
+      laidOut[which] = app.element.querySelector('.illuminus-part[data-tab="' + which + '"]');
     }
     const tab = laidOut.title;
 
     // Read from the class the state switch writes rather than from the computed
-    // style: six tabs of two and a half thousand controls is a great many forced
+    // style: six parts of two and a half thousand controls is a great many forced
     // layouts, and the run used to time out before it could say anything.
     const showing = (el) => !el.classList.contains("is-state-hidden")
       && !el.classList.contains("is-filtered-out");
@@ -6277,11 +6291,13 @@ try {
     const sidebar = named(laidOut.sidebar);
     const window_ = named(laidOut.window);
     const editor = named(laidOut.editor);
-    // Measured with the Title tab on show and one category open: a hidden tab's
+    // Measured with the Title part on show and one category open: a hidden part's
     // boxes are all zero, which reads as a line drawn nowhere rather than as one
     // drawn across.
     app.changeTab("title", "sheet");
-    tab.querySelector("details.illuminus-section").open = true;
+    const category = tab.querySelector("details.illuminus-section");
+    category.open = true;
+    for (const run of category.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 400));
     // A line between runs, not one of the pair closing the category off: those
     // sit tighter, and are drawn around every category whatever its layout.
@@ -6430,7 +6446,7 @@ try {
     `the lines are still there in the pointed-at state (${t.hovered.filter(r => r === "---").length})`);
   check(t.thickness === "1px" && t.width >= t.control - 2,
     `and each is drawn across the whole row (${t.thickness}, ${t.width} of ${t.control})`);
-  // Room either side, and enough contrast to be seen against the tab.
+  // Room either side, and enough contrast to be seen against the part.
   check(t.above === "16px" && t.below === "16px", `with room above and below (${t.above} / ${t.below})`);
   const alpha = Number(t.color.match(/[\d.]+\)$/)?.[0].slice(0, -1) ?? 1);
   check(alpha >= 0.25, `and a line that shows against the panel (${t.color})`);
@@ -6800,7 +6816,7 @@ try {
   })()`);
 }
 
-// The three shapes a tab repeats — a box, a shadow, a picture — gathered into
+// The three shapes a part repeats — a box, a shadow, a picture — gathered into
 // one run each. What matters is that gathering is a change of *layout only*:
 // every control the schema declares is still in the markup, still its own
 // field, because the state switch, the filter, the changed markers, Match all
@@ -6818,7 +6834,7 @@ try {
     window.__gathered = {styleId: style.id};
     app.changeTab("boxes", "sheet");
     await new Promise(r => setTimeout(r, 400));
-    const tab = app.element.querySelector('.illuminus-tab[data-tab="boxes"]');
+    const tab = app.element.querySelector('.illuminus-part[data-tab="boxes"]');
     for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
     await new Promise(r => setTimeout(r, 400));
 
@@ -6879,7 +6895,7 @@ try {
   })()`);
 }
 
-// Two ways in, for an editor with two thousand controls behind sixteen tabs.
+// Two ways in, for an editor with two thousand controls behind sixteen parts.
 console.log("\n[68] Reading back a style, and pointing at the thing you mean");
 try {
   const ways = JSON.parse(await cdp.evaluate(`(async () => {
@@ -6896,7 +6912,7 @@ try {
     app.changeTab("links", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const el = app.element;
-    const tab = el.querySelector('.illuminus-tab[data-tab="links"]');
+    const tab = el.querySelector('.illuminus-part[data-tab="links"]');
     const shown = () => [...tab.querySelectorAll(".illuminus-field[data-field]")]
       .filter((field) => !field.classList.contains("is-filtered-out"));
     const before = shown().length;
@@ -7703,7 +7719,7 @@ try {
 }
 
 // The parts of a journal hold one another — the window holds the page, the page
-// holds its headings — and a strip of tabs could not say so. The tree can, and
+// holds its headings — and a strip of parts could not say so. The tree can, and
 // it is the navigation now, so it has to reach every part the schema declares.
 console.log("\n[80] The tree reaches every part");
 try {
@@ -7720,7 +7736,7 @@ try {
     await new Promise(r => setTimeout(r, 1400));
     const el = app.element;
     const parts = [...el.querySelectorAll(".illuminus-tree__part")];
-    const panes = [...el.querySelectorAll(".illuminus-tab[data-tab]")].map((p) => p.dataset.tab);
+    const panes = [...el.querySelectorAll(".illuminus-part[data-tab]")].map((p) => p.dataset.tab);
     // Every pane has an entry, and no entry points at a pane that is not there.
     const reached = new Set(parts.map((p) => p.dataset.tab));
     // A part held by another is drawn inside it: Page sits under Window, and a
@@ -7743,9 +7759,9 @@ try {
     });
   })()`));
 
-  // Opening a heading level from the tree both switches the tab and sets the
+  // Opening a heading level from the tree both switches the part and sets the
   // picker, which is the one click the strip could not do. In a call of its
-  // own: choosing a member rebuilds the tab, and this sandbox draws the editor
+  // own: choosing a member rebuilds the part, and this sandbox draws the editor
   // in software — two of those renders in one call outlast any patience worth
   // giving a call that might genuinely be lost.
   const opened = JSON.parse(await cdp.evaluate(`(async () => {
@@ -7755,12 +7771,12 @@ try {
     level.click();
     await new Promise(r => setTimeout(r, 800));
     const out = {
-      tab: el.querySelector(".illuminus-tab.active")?.dataset.tab,
+      tab: el.querySelector(".illuminus-part.active")?.dataset.tab,
       picker: el.querySelector('[data-family-picker="headings"]')?.value,
       marked: [...el.querySelectorAll(".illuminus-tree__part.is-current")]
         .map((p) => p.dataset.member ?? p.dataset.tab),
       // What the settings pane says it is showing, against what the tree marks.
-      named: el.querySelector(".illuminus-tab.active .illuminus-tab__name")?.textContent.trim(),
+      named: el.querySelector(".illuminus-part.active .illuminus-part__name")?.textContent.trim(),
       treeSays: el.querySelector(".illuminus-tree__part.is-current .illuminus-tree__name")
         ?.textContent.trim()
     };
@@ -7912,9 +7928,9 @@ try {
   check(zoomed.unchanged, "while the style itself says exactly what it said before");
   check(zoomed.afterRender === zoomed.magnified && zoomed.sliderAfter === "150",
     `and a re-render does not snap it back (${zoomed.afterRender}px at ${zoomed.sliderAfter})`);
-  // The switch that used to sit above every tab is gone: an unset hovered
+  // The switch that used to sit above every part is gone: an unset hovered
   // control already changes nothing, so it only ever did something on the four
-  // tabs shipping real hovered colors.
+  // parts shipping real hovered colors.
   const gone = await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "No Switch Probe"});
@@ -8041,6 +8057,199 @@ try {
 console.log("\n[56] Console is clean");
 const errs = cdp.logs.filter((l) => (l.type === "exception" || l.type === "error") && /illuminus/i.test(l.text));
 check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n      ${errs.map(e => e.text.slice(0,200)).join("\n      ")}` : ""}`);
+
+// The last thing on a part that could not be folded away. A category is laid out
+// in runs — the schema draws a line and stacks the controls that belong
+// together under it — and those runs are now a disclosure like every other,
+// named from the controls' own wording where they share any.
+console.log("\n[84] A category's plain controls fold into named runs");
+try {
+  const runs = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Runs Probe"});
+    window.__runs = {styleId: style.id};
+    // A style that says something in one run and nothing in the run beside it,
+    // so "open what the style sets" has both answers to give.
+    const settings = foundry.utils.deepClone(api.getStyle(style.id).settings);
+    settings.body.size = 19;
+    await api.updateStyle(style.id, {settings});
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1800));
+    app.changeTab("body", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const tab = app.element.querySelector('.illuminus-part[data-tab="body"]');
+    for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
+    await new Promise(r => setTimeout(r, 400));
+
+    const named = (run) => run.querySelector(".illuminus-run__name")?.textContent.trim() ?? "";
+    const all = [...tab.querySelectorAll("details.illuminus-run")];
+    const text = [...tab.querySelectorAll("details.illuminus-section")]
+      .find((one) => one.querySelector("[data-section]")?.dataset.section === "text");
+    const inText = [...text.querySelectorAll("details.illuminus-run")];
+
+    // Every control is still its own field, gathered or not: the whole part's
+    // count is what the schema declares, not what is on show.
+    const schema = await import("/modules/illuminus/scripts/style-schema.mjs");
+    const group = schema.GROUPS.find((one) => one.id === "body");
+    const declared = schema.groupFields(group).filter((one) => !one.chrome).length;
+
+    // A run holding a hit opens for the filter, or the filter would count a
+    // control nobody can see.
+    const box = app.element.querySelector(".illuminus-filter__input");
+    const shut = inText.find((run) => !run.open);
+    const shutName = named(shut);
+    box.value = "hyphen";
+    box.dispatchEvent(new Event("input", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 400));
+    const openedByFilter = [...tab.querySelectorAll("details.illuminus-run")]
+      .filter((run) => run.open && [...run.querySelectorAll(".illuminus-field")]
+        .some((f) => !f.classList.contains("is-filtered-out"))).length;
+    box.value = "";
+    box.dispatchEvent(new Event("input", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 400));
+    const backAsFound = [...tab.querySelectorAll("details.illuminus-run")]
+      .every((run) => run.open === (run.dataset.open === "1"));
+
+    return JSON.stringify({
+      runs: all.length,
+      names: inText.map(named),
+      // No run may go unnamed, and none may repeat a name inside its category.
+      blank: all.filter((run) => !named(run)).length,
+      repeated: [...tab.querySelectorAll("details.illuminus-section")].some((section) => {
+        const here = [...section.querySelectorAll("details.illuminus-run")].map(named);
+        return new Set(here).size !== here.length;
+      }),
+      fields: tab.querySelectorAll(".illuminus-field[data-field]").length,
+      declared,
+      // The run the style has set opens by itself; the ones it says nothing
+      // about stay folded behind the line that says so.
+      openHasValue: inText.filter((run) => run.open)
+        .every((run) => !run.querySelector(".illuminus-run-says.is-unset")),
+      shutSaysNothing: Boolean(shut?.querySelector(".illuminus-run-says.is-unset")),
+      shutName, openedByFilter, backAsFound,
+      // A run of one control is left as the row it was: folding a single row
+      // behind a line saying what it holds costs a click and saves nothing.
+      singles: [...tab.querySelectorAll("details.illuminus-run")]
+        .filter((run) => new Set([...run.querySelectorAll(".illuminus-field[data-field]")]
+          .map((f) => f.dataset.field.toLowerCase()
+            .replace(/\.(hover|active)/, ".").replace(/(hover|active)/, ""))).size < 2).length
+    });
+  })()`));
+  check(runs.runs > 0, `a tab folds its plain controls into runs (${runs.runs} on the Text tab)`);
+  check(runs.blank === 0, "and every one of them is named");
+  check(!runs.repeated, "with no category holding two runs of one name");
+  check(runs.names.length >= 2 && runs.names.every((name) => name.length > 0),
+    `the Text category reads as its runs (${runs.names.join(", ")})`);
+  check(runs.fields === runs.declared,
+    `every control the schema declares is still in the markup (${runs.fields} of ${runs.declared})`);
+  check(runs.openHasValue && runs.shutSaysNothing,
+    `a run the style has set opens by itself, and one it has not says so (${runs.shutName})`);
+  check(runs.openedByFilter > 0,
+    `a run holding a filter hit opens, so the count is of controls one can see (${runs.openedByFilter})`);
+  check(runs.backAsFound,
+    "and clearing the box hands every run back the state it was rendered with");
+  check(runs.singles === 0, "a run of one control is left as the row it was");
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    if (window.__runs?.styleId) await api.deleteStyle(window.__runs.styleId);
+    window.__runs = undefined;
+  })()`);
+}
+
+// Everything folds, so everything has to be able to unfold at once. Two
+// controls, one for the tree and one for the settings beside it, each saying
+// which way it will go next.
+console.log("\n[85] Unfolding everything, and folding it again");
+try {
+  const fold = JSON.parse(await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    const style = await api.createStyle({name: "Fold Probe"});
+    window.__fold = {styleId: style.id};
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 1800));
+    app.changeTab("body", "sheet");
+    await new Promise(r => setTimeout(r, 400));
+    const out = {};
+    const pane = () => app.element.querySelector('.illuminus-part[data-tab="body"]');
+    const shut = () => [...pane().querySelectorAll("details")].filter(one => !one.open).length;
+    const all = () => pane().querySelectorAll("details").length;
+    out.total = all();
+    out.shutAtFirst = shut();
+
+    // Clicked the way a person clicks it, through hit testing.
+    const button = pane().querySelector(".illuminus-fold-all");
+    const b = button.getBoundingClientRect();
+    out.reachable = button.contains(document.elementFromPoint(
+      Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)));
+    button.click();
+    await new Promise(r => setTimeout(r, 250));
+    out.shutAfterUnfold = shut();
+    out.saysFold = button.dataset.tooltip;
+    button.click();
+    await new Promise(r => setTimeout(r, 250));
+    out.shutAfterFold = shut();
+    out.saysUnfold = button.dataset.tooltip;
+
+    // And it holds across a render, which a run has nowhere of its own to keep.
+    button.click();
+    await new Promise(r => setTimeout(r, 250));
+    app.render();
+    await new Promise(r => setTimeout(r, 2000));
+    out.shutAfterRender = shut();
+
+    // The tree's own, over branches rather than categories.
+    const tree = app.element.querySelector(".illuminus-tree");
+    const branches = () => [...tree.querySelectorAll(".illuminus-tree__item")]
+      .filter(item => item.querySelector(":scope > .illuminus-tree__level"));
+    out.branches = branches().length;
+    out.closedAtFirst = branches().filter(one => !one.classList.contains("is-open")).length;
+    const twist = tree.querySelector(".illuminus-fold-all");
+    twist.click();
+    await new Promise(r => setTimeout(r, 250));
+    out.closedAfterUnfold = branches().filter(one => !one.classList.contains("is-open")).length;
+    twist.click();
+    await new Promise(r => setTimeout(r, 250));
+    out.closedAfterFold = branches().filter(one => !one.classList.contains("is-open")).length;
+    // Shutting the tree must not shut the way back to the part being worked on.
+    out.currentReachable = Boolean(tree.querySelector(".illuminus-tree__part.is-current"));
+
+    await app.close({force: true});
+    return JSON.stringify(out);
+  })()`));
+  check(fold.reachable, "the settings pane's fold control is what the pointer reaches");
+  check(fold.shutAtFirst > 0 && fold.shutAfterUnfold === 0,
+    `one click unfolds every category and run on the part (${fold.shutAtFirst} of ${fold.total} shut, then none)`);
+  check(fold.shutAfterFold === fold.total,
+    `and the next click folds all ${fold.total} of them`);
+  check(fold.saysFold !== fold.saysUnfold,
+    `the control says which way it will go next (${fold.saysUnfold} / ${fold.saysFold})`);
+  check(fold.shutAfterRender === 0,
+    `unfolded stays unfolded across a re-render (${fold.shutAfterRender} shut)`);
+  check(fold.closedAtFirst > 0 && fold.closedAfterUnfold === 0,
+    `the tree's own opens every branch (${fold.closedAtFirst} of ${fold.branches} closed, then none)`);
+  check(fold.closedAfterFold > 0, `and shuts them again (${fold.closedAfterFold} closed)`);
+  check(fold.currentReachable,
+    "while the part being worked on is still shown, so the way back is never shut");
+} finally {
+  await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const app of [...foundry.applications.instances.values()]) {
+      if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
+    }
+    if (window.__fold?.styleId) await api.deleteStyle(window.__fold.styleId);
+    window.__fold = undefined;
+  })()`);
+}
 
 /* --- Clean up the test journal ------------------------------------------- */
 await cdp.evaluate(`(async () => {

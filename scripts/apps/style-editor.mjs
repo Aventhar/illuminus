@@ -5,13 +5,14 @@ import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-sc
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
 import { openColorPicker, closeColorPicker } from "./color-picker.mjs";
+import { STATES, stateOf, stateBase, nameRuns } from "../run-names.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
 /**
  * The tabbed editor for a single journal style.
  *
- * Every control on every tab is generated from `style-schema.mjs`, so the GUI
+ * Every control on every part is generated from `style-schema.mjs`, so the GUI
  * never needs touching when a style property is added. Only the family member
  * on show is built, which is why the window holds a few hundred controls rather
  * than the schema's two thousand.
@@ -20,41 +21,6 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
  * open journals and the sample pane restyle as the user drags a slider. Nothing
  * is written to the world until Save, and closing without saving discards.
  */
-/**
- * The states a control can belong to, in the order they are offered.
- *
- * A section declares its states simply by what its controls are called, so
- * `buttonHoverBackground` and `activeColor` need no registration beyond the
- * word itself.
- */
-const STATES = [
-  { id: "normal", label: "ILLUMINUS.Editor.StateNormal" },
-  { id: "hover", label: "ILLUMINUS.Editor.StateHover", match: /hover/i },
-  { id: "active", label: "ILLUMINUS.Editor.StateActive", match: /^active|Active/ }
-];
-
-/** Which state a control belongs to. Anything unmarked is the ordinary one. */
-function stateOf(name) {
-  return STATES.find((state) => state.match?.test(name))?.id ?? "normal";
-}
-
-/**
- * A field name with its state word removed, so counterparts can be matched.
- *
- * Both spellings occur — `buttonHoverBackground` and `hoverBackground` — so the
- * match is case-insensitive and the leading capital it leaves behind is put
- * back down.
- * @param {string} name
- * @returns {string} The shared stem, or the name itself when it has no state.
- */
-function stateBase(name) {
-  const state = STATES.find((entry) => entry.match?.test(name));
-  if (!state) return name;
-  const stripped = name.replace(state.match, "");
-  if (!stripped) return name;
-  return /[a-z]/.test(name[0]) ? stripped[0].toLowerCase() + stripped.slice(1) : stripped;
-}
-
 /**
  * The four sides, four corners, and the parts an edge is made of, as the schema
  * names them. Everything that reads a box family reads it from here.
@@ -79,7 +45,7 @@ const BOX_PARTS = ["Width", "Style", "Color"];
  * Five controls each — a shadow is two offsets, a softness, a size and a color;
  * a picture is the file, how it fits, where it sits, how it mixes and how
  * strongly it shows — and most categories carry a picture and two shadows, so
- * fifteen of the rows on a tab are these three shapes over and over.
+ * fifteen of the rows on a part are these three shapes over and over.
  *
  * Gathered they keep every word they had: laid out with the name above the
  * control rather than beside it, five rows become one wrapped row, and the
@@ -90,8 +56,8 @@ const BOX_PARTS = ["Width", "Style", "Color"];
  * wording.
  *
  * The qualifier below — "Inner Shadow Softness" less "Softness" — is the better
- * name where it exists, because it is the tab's own words for the thing. But it
- * is only there while the wording for that tab is loaded, and a run that falls
+ * name where it exists, because it is the part's own words for the thing. But it
+ * is only there while the wording for that part is loaded, and a run that falls
  * back to a bare "Shadow" beside another bare "Shadow" tells a person nothing.
  * The family always says which kind it is.
  */
@@ -122,7 +88,7 @@ function boxPartOf(name) {
   // Both spellings of the word: a family with no prefix is `borderTopWidth`,
   // and one with a prefix is `codeBorderTopWidth`. Matching only the second
   // gathered the handful of prefixed families and left every plain one — which
-  // is most of them — spread down the tab as before.
+  // is most of them — spread down the part as before.
   let m;
   // An edge and the corners it turns are one family, so they are drawn as one
   // box: two families meant two boxes, one of them holding nothing but corners.
@@ -149,7 +115,7 @@ function boxPartOf(name) {
  * A section's controls, with each box family gathered into one widget.
  *
  * Twelve edge controls, four corners and four spacings each, on forty-odd
- * categories: box families are the greater part of every tab and the least
+ * categories: box families are the bulk of every part of a journal and the least
  * interesting part of any of them. Gathered, a family reads as four rows —
  * inner spacing, outer spacing, corners, and an edge with a side to choose —
  * instead of twenty-four.
@@ -160,7 +126,7 @@ function boxPartOf(name) {
  * take those with it. What changes is where they are drawn.
  *
  * Rows come out in the order the schema laid them, with a family standing where
- * its first control stood — so a tab that was laid out by hand still reads the
+ * its first control stood — so a part that was laid out by hand still reads the
  * way it was written.
  * @param {object[]} fields  Field contexts, in order.
  * @returns {object[]}       Rows: a control, or a box family holding several.
@@ -170,7 +136,7 @@ function boxPartOf(name) {
  *
  * A run the style has nothing to say about is a run nobody needs open: it sits
  * closed, showing the one line that says so, and opens on a click. A run the
- * style *has* set opens by itself, so a tab starts by showing what the style
+ * style *has* set opens by itself, so a part starts by showing what the style
  * does rather than what it could do.
  *
  * The summary is read from the controls rather than written: their values, in
@@ -208,7 +174,7 @@ function boxRows(fields) {
       // known from the control's own name, and is said even then. A category
       // holding an inner shadow and an outer one would otherwise show two runs
       // both called "Shadow" whenever the qualifier below came to nothing,
-      // which it does for a whole tab the moment its wording is not loaded.
+      // which it does for a whole part the moment its wording is not loaded.
       // Asked for rather than assumed: a language file that has not caught up
       // has the older, plainer key and none of these, and Foundry answers a key
       // it does not know with the key itself. Better the blunt word than that.
@@ -300,7 +266,65 @@ function boxRows(fields) {
     box.edgesSays = runSummary(box.edges);
     box.open = box.spacingSays.open || box.edgesSays.open;
   }
-  return rows;
+  return looseRuns(rows);
+}
+
+/**
+ * The plain controls between two lines, gathered into a run of their own.
+ *
+ * The gathered shapes above are the ones a name can be read off — a shadow, a
+ * picture, a box — and everything else was left as a stack of rows under a line
+ * that said nothing. Those stacks are the runs a category is actually laid out
+ * in, twenty-one controls long at their worst, and they are what a person is
+ * scrolling past to reach the one they want.
+ *
+ * A run of one control is left alone: folding a single row behind a line that
+ * says what it holds costs a click and saves nothing.
+ * @param {object[]} rows  Rows from the gathering above, in order.
+ * @returns {object[]}     The same rows, with each stack of plain ones as one.
+ */
+function looseRuns(rows) {
+  const out = [];
+  let held = [];
+  const settle = () => {
+    if (!held.length) return;
+    // One control, counting a state's own as the control it stands in for: it
+    // stays the row it was.
+    const distinct = new Set(held.map((field) => stateBase(field.name)));
+    if (distinct.size < 2) out.push(...held.map((field) => ({ field })));
+    else {
+      out.push({ run: {
+        // The line the schema drew before this run introduces the run now, and
+        // the control it was written on gives it up — left on both, it was
+        // drawn twice.
+        divider: held[0].divider,
+        fields: held.map((field) => ({ ...field, divider: false })),
+        ...runSummary(held)
+      } });
+    }
+    held = [];
+  };
+  for (const row of rows) {
+    if (!row.field) { settle(); out.push(row); continue; }
+    if (row.field.divider) settle();
+    held.push(row.field);
+  }
+  settle();
+
+  // Named once the whole category is gathered, because two runs of one name can
+  // only be told apart against each other.
+  const runs = out.filter((row) => row.run);
+  const names = nameRuns(runs.map((row) => row.run.fields));
+  runs.forEach((row, at) => { row.run.name = names[at]; });
+  // A run nothing could name is no run: its controls stand as the rows they
+  // were, rather than folding behind a blank line.
+  return out.flatMap((row) => {
+    if (!row.run || row.run.name) return [row];
+    // And the line it took comes back with them, on the control it was
+    // written on.
+    return row.run.fields.map((field, at) =>
+      ({ field: at === 0 ? { ...field, divider: row.run.divider } : field }));
+  });
 }
 
 export class IlluminusStyleEditor extends HandlebarsApplicationMixin(ApplicationV2) {
@@ -335,10 +359,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /**
    * Sections the user has opened, so a re-render does not close them again.
-   * Everything starts collapsed: a tab holds up to nine sections and a hundred
+   * Everything starts collapsed: a part holds up to nine sections and a hundred
    * controls, and opening the one you came for beats scrolling past the rest.
    */
   #expanded = new Set();
+
+  /**
+   * What the last Fold Everything said, or nothing where nobody has said it.
+   *
+   * A category remembers its own state in `#expanded`, but a run of plain
+   * controls has nowhere to keep one — it is named and folded from what the
+   * style holds, and there is no stable key to file it under. So the *bulk*
+   * answer is kept instead, and a render honors it: unfold everything, change a
+   * treatment, and the pane comes back the way it was left rather than folding
+   * itself up again. Folding one run by hand drops it, because from then on the
+   * runs are being read one at a time.
+   * @type {boolean|null}
+   */
+  #foldAll = null;
 
   /** Width the user has dragged the sample pane to, in pixels. */
   #previewWidth;
@@ -399,7 +437,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    *
    * A control still holding its default already says so — it is drawn faded and
    * carries `is-default`, which is kept in step as values change — so this is a
-   * question the tab can answer without asking the store anything.
+   * question the part can answer without asking the store anything.
    */
   #onlySet = false;
 
@@ -410,7 +448,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
 
   /**
    * Which member of each family is on show. Ten blocks and ten picture
-   * treatments would be twenty more tabs; instead each family gets one tab with
+   * treatments would be twenty more parts; instead each family gets one part with
    * a picker, and only the chosen member's controls are built.
    */
   #showing = { headings: "heading1", boxStyles: "box01", tagStyles: "tag01", imageStyles: "image01" };
@@ -444,6 +482,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resetAll: IlluminusStyleEditor.#onResetAll,
       revert: IlluminusStyleEditor.#onRevert,
       toggleSection: IlluminusStyleEditor.#onToggleSection,
+      foldTree: IlluminusStyleEditor.#onFoldTree,
+      foldPart: IlluminusStyleEditor.#onFoldPart,
       pickColor: IlluminusStyleEditor.#onPickColor,
       renameMember: IlluminusStyleEditor.#onRenameMember,
       copyFromAbove: IlluminusStyleEditor.#onCopyFromAbove,
@@ -458,8 +498,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static PARTS = {
     body: {
       template: `modules/${MODULE_ID}/templates/style-editor.hbs`,
-      // Registered as partials: the controls, so the page tabs and the block and
-      // picture tabs render from one copy, and the sample page, which the
+      // Registered as partials: the controls, so the page parts and the block and
+      // picture parts render from one copy, and the sample page, which the
       // sample journal is also built from. A partial referenced by path is not
       // found unless it is named here.
       templates: [
@@ -467,6 +507,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         `modules/${MODULE_ID}/templates/style-box.hbs`,
         `modules/${MODULE_ID}/templates/style-box-cell.hbs`,
         `modules/${MODULE_ID}/templates/style-cluster.hbs`,
+        `modules/${MODULE_ID}/templates/style-run.hbs`,
         `modules/${MODULE_ID}/templates/style-run-says.hbs`,
         `modules/${MODULE_ID}/templates/style-tree-branch.hbs`,
         `modules/${MODULE_ID}/templates/sample-page.hbs`
@@ -478,8 +519,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   };
 
   /**
-   * Families, each shown as a single tab with a picker. Order comes from the
-   * schema, not from this list — a family's tab sits where its first member
+   * Families, each shown as a single part with a picker. Order comes from the
+   * schema, not from this list — a family's part sits where its first member
    * does, so six heading levels take one slot in the middle of the strip rather
    * than six at the end.
    */
@@ -501,7 +542,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * the tree — its order, its names, its counts — is read from the schema.
    *
    * A part named nowhere here sits at the root rather than vanishing, which is
-   * what keeps a new tab from being invisible until somebody remembers this
+   * what keeps a new part from being invisible until somebody remembers this
    * table.
    */
   static HOLDS = {
@@ -522,8 +563,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /**
    * The tree, in schema order within each parent.
    *
-   * Built from the same strip the tabs were built from, so a family is one
-   * entry where its first member is declared and a tab the strip sends to the
+   * Built from the same strip the parts were built from, so a family is one
+   * entry where its first member is declared and a part the strip sends to the
    * end still goes there. What changes is only that an entry can hold others.
    */
   static #buildTree() {
@@ -537,20 +578,20 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return roots;
   }
 
-  /** Groups that get a tab of their own, in strip order. */
+  /** Groups that get a part of their own, in strip order. */
   static get pageGroups() {
     return GROUPS.filter((group) => !group.family);
   }
 
-  /** One entry in the tab strip. */
+  /** One entry in the running order of parts. */
   static #tabFor(group) {
     return { id: group.id, icon: group.icon, label: `ILLUMINUS.Groups.${group.id}.label` };
   }
 
   /**
-   * The tab strip, in schema order: a group gets its own tab, and a family gets
+   * The running order of parts, in schema order: a group gets its own part, and a family gets
    * one where its first member appears. Anything marked `strip: "end"` goes
-   * last however early it is declared — the Window tab styles the frame rather
+   * last however early it is declared — the Window part styles the frame rather
    * than the page, so it sits after the rest.
    */
   static #buildStrip() {
@@ -573,15 +614,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static TABS = {
     sheet: {
       tabs: IlluminusStyleEditor.#buildStrip(),
-      // Named rather than taken from the first tab, so the strip can be
+      // Named rather than taken from the first part, so the strip can be
       // reordered without changing where the editor opens.
       initial: "page"
     }
   };
 
   /**
-   * The group the strip is currently showing: a page tab is its own group, and
-   * a family tab is whichever member its picker names.
+   * The group the strip is currently showing: a page part is its own group, and
+   * a family part is whichever member its picker names.
    */
   #activeGroupId() {
     const tab = this.tabGroups.sheet;
@@ -671,18 +712,18 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     });
 
     // Which member each family's own preview panel is built for. Taken from
-    // the same resolution as the tab above, so the panel can never end up
+    // the same resolution as the part above, so the panel can never end up
     // showing a different block from the one whose controls are on screen.
     context.preview = Object.fromEntries(context.families.map((family) =>
       [family.id, { id: family.current.id, label: family.current.label }]));
 
     // The tree down the left of the window. Its counts are the badges the strip
     // used to carry, and a family entry holds its members so a heading level is
-    // reached by opening Headings rather than by a picker inside a tab.
+    // reached by opening Headings rather than by a picker inside a part.
     const treeNode = (node) => {
       const family = IlluminusStyleEditor.FAMILIES.find((one) => one.id === node.id);
       const members = family ? GROUPS.filter((group) => group.family === family.id) : [];
-      // Which member the family is showing, resolved the same way the tab's own
+      // Which member the family is showing, resolved the same way the part's own
       // picker resolves it — an unset family shows its first member, so the
       // tree must mark that one rather than none.
       const current = members.find((one) => one.id === this.#showing[node.id]) ?? members[0];
@@ -711,8 +752,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       };
     };
     context.tree = IlluminusStyleEditor.#buildTree().map(treeNode);
-    // Every tab id, for the anchor core looks a pane up through.
-    context.tabIds = IlluminusStyleEditor.#buildStrip().map((entry) => entry.id);
+    // Every part id, for the anchor core looks a pane up through.
+    context.partIds = IlluminusStyleEditor.#buildStrip().map((entry) => entry.id);
 
     context.groups = IlluminusStyleEditor.pageGroups.map((group) => ({
       id: group.id,
@@ -721,28 +762,28 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       active: this.tabGroups.sheet === group.id,
       changedCount: this.#changedCount(group),
       // The window's defaults are all "leave it as Foundry draws it", so
-      // clearing the tab is exactly that — said in those words on the one tab
-      // where "Reset Tab" does not convey it.
+      // clearing the part is exactly that — said in those words on the one part
+      // where "Reset Part" does not convey it.
       plainReset: group.id === "window",
       sections: group.sections.map((section) => ({
         id: section.id,
         label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
         // A section may name its own wording, for the rare case where the same
-        // section means something different on one tab — the page's shadow,
+        // section means something different on one part — the page's shadow,
         // which Foundry's window clips and only an export ever shows.
         hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         // Only sections whose fields repeat one property across sides or
         // corners can offer to match them.
         matchable: section.fields.some((field) => field.link),
-        rows: boxRows(section.fields
+        rows: this.#foldedAs(boxRows(section.fields
           .filter((field) => !field.chrome)
           .map((field) => ({
             ...this.#fieldContext(group, field, fonts),
-            // A line across the tab before this control, where the section has
+            // A line across the part before this control, where the section has
             // laid its own controls out in runs.
             divider: Boolean(section.dividers?.has(field.name))
-          })))
+          }))))
       }))
     }));
     context.buttons = [
@@ -752,7 +793,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     return context;
   }
 
-  /** Sections and controls for one group, shared by page tabs and family tabs. */
+  /** Sections and controls for one group, shared by page parts and family parts. */
   #groupContext(group, fonts) {
     return {
       id: group.id,
@@ -761,24 +802,43 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         id: section.id,
         label: game.i18n.localize(section.label ?? `ILLUMINUS.Sections.${section.id}.label`),
         // A section may name its own wording, for the rare case where the same
-        // section means something different on one tab — the page's shadow,
+        // section means something different on one part — the page's shadow,
         // which Foundry's window clips and only an export ever shows.
         hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
         open: this.#expanded.has(`${group.id}.${section.id}`),
         matchable: section.fields.some((field) => field.link),
-        rows: boxRows(section.fields
+        rows: this.#foldedAs(boxRows(section.fields
           .filter((field) => !field.chrome)
           .map((field) => ({
             ...this.#fieldContext(group, field, fonts),
-            // A line across the tab before this control, where the section has
+            // A line across the part before this control, where the section has
             // laid its own controls out in runs.
             divider: Boolean(section.dividers?.has(field.name))
-          })))
+          }))))
       }))
     };
   }
 
-  /** How many controls in a group differ from their default, for the tab badge. */
+  /**
+   * Every run in a category folded the way Fold Everything last said, or left
+   * to answer for itself where nobody has said it.
+   *
+   * A category keeps its own state in `#expanded` and a run has nowhere to keep
+   * one, so this is where the bulk answer reaches the runs.
+   */
+  #foldedAs(rows) {
+    if (this.#foldAll === null) return rows;
+    for (const { box, cluster, run } of rows) {
+      if (run) run.open = this.#foldAll;
+      if (cluster) cluster.open = this.#foldAll;
+      if (!box) continue;
+      box.spacingSays.open = this.#foldAll;
+      box.edgesSays.open = this.#foldAll;
+    }
+    return rows;
+  }
+
+  /** How many controls in a group differ from their default, for the part badge. */
   #changedCount(group) {
     return groupFields(group)
       .filter((field) => this.#working?.[group.id]?.[field.name] !== this.#baselineFor(group.id, field)).length;
@@ -833,7 +893,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const context = {
       path: `${group.id}.${field.name}`,
       // Kept beside the path: what a control is within a box family is read
-      // from its name, and the path carries the tab's name in front of it.
+      // from its name, and the path carries the part's name in front of it.
       name: field.name,
       type: field.type,
       label: this.#fieldText(group, field, "label"),
@@ -879,26 +939,26 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /* -------------------------------------------- */
 
   /**
-   * Bring the part of the sample the open tab styles forward, and let the rest
+   * Bring the part of the sample the open part styles forward, and let the rest
    * fall back.
    *
    * Dimmed rather than hidden: a heading alone on a blank page says nothing
    * about whether it sits well against the text around it, and the sample is
-   * worth having precisely because it is a whole page. A tab the sample has no
+   * worth having precisely because it is a whole page. A part the sample has no
    * piece for — the families, which take the pane over entirely — leaves it be.
    */
 /**
    * Let the sample be the way in.
    *
-   * The editor already drives the sample from the open tab, dimming everything
-   * the tab does not paint. This turns that arrow round: point at the opening
-   * capital in the sample, click it, and the tab that sets it opens. With two
-   * thousand controls behind sixteen tabs, "where is that setting?" is the
+   * The editor already drives the sample from the open part, dimming everything
+   * the part does not paint. This turns that arrow round: point at the opening
+   * capital in the sample, click it, and the part that sets it opens. With two
+   * thousand controls behind sixteen parts, "where is that setting?" is the
    * question the editor is worst at answering, and the sample is the one place
    * where a person can see the thing they mean.
    *
-   * A piece belonging to a family opens the family's tab and asks its picker
-   * for that member, since `boxStyles` has one tab for ten of them.
+   * A piece belonging to a family opens the family's part and asks its picker
+   * for that member, since `boxStyles` has one part for ten of them.
    */
   #activateSampleParts() {
     const frame = this.element.querySelector(".illuminus-preview__frame");
@@ -931,15 +991,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     const parts = [...frame.querySelectorAll("[data-part]")];
     if (!parts.length) return;
 
-    // A family tab focuses the member its picker names, not the family itself.
+    // A family part focuses the member its picker names, not the family itself.
     const active = this.#activeGroupId();
     const target = parts.find((part) => part.dataset.part === active);
     for (const part of parts) {
       // Neither what holds the focused piece nor what it holds. A wrapper that
       // dimmed would dim what is inside it however brightly the inside is
-      // marked — and the Page tab's piece is the surface everything else sits
+      // marked — and the Page part's piece is the surface everything else sits
       // on, so dimming its contents grayed the whole sample out and left the
-      // one tab whose setting covers the page with nothing to look at.
+      // one part whose setting covers the page with nothing to look at.
       part.classList.toggle("is-dimmed", Boolean(target) && part.dataset.part !== active
         && !part.contains(target) && !target.contains(part));
     }
@@ -950,13 +1010,13 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Put the focused piece of the sample where it can be seen.
    *
    * Dimming the rest is no help if the piece in question is below the fold —
-   * the Tables tab would show a grayed page and no table. The frame is scrolled
+   * the Tables part would show a grayed page and no table. The frame is scrolled
    * by hand rather than with `scrollIntoView`, which would scroll the editor
    * window as well.
    */
   #scrollSampleTo(part, frame) {
     if (!part) return;
-    // Measured on the next frame: switching tabs is what asks for this, and a
+    // Measured on the next frame: switching parts is what asks for this, and a
     // pane that was hidden a moment ago has no size yet — every rectangle
     // reads as zero, and scrolling to zero is scrolling nowhere.
     requestAnimationFrame(() => {
@@ -973,7 +1033,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Fold each "when pointed at" control behind a switch.
    *
    * A button's ordinary colors and its hover colors sit side by side in the
-   * same section, which is most of why the Window and Sidebar tabs are the
+   * same section, which is most of why the Window and Sidebar parts are the
    * heaviest in the editor. The pairs are found by name — `buttonHoverBackground`
    * beside `buttonBackground` — so no schema change is needed and a new pair
    * gets the switch for free.
@@ -1107,7 +1167,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * one edge, and a person sets one side or all four — so the side is chosen
    * here and the rest are left in the markup, where the search box still reads
    * them. Nothing is stored: which side is on show is a question about looking
-   * at the tab, not about the style.
+   * at the part, not about the style.
    */
   #activateBoxes() {
     for (const run of this.element.querySelectorAll('.illuminus-box__run[data-run="edges"]')) {
@@ -1144,7 +1204,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       box.classList.toggle("is-state-hidden", runs.length > 0
         && runs.every((run) => run.classList.contains("is-state-hidden")));
     }
-    for (const cluster of this.element.querySelectorAll(".illuminus-cluster")) {
+    for (const cluster of this.element.querySelectorAll(".illuminus-cluster, .illuminus-run")) {
       const fields = [...cluster.querySelectorAll(".illuminus-field[data-field]")];
       cluster.classList.toggle("is-state-hidden", fields.length > 0 && fields.every(gone));
     }
@@ -1220,7 +1280,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         // A gathered run is content the same way a control is: the line
         // introducing one has nothing under it once that run has gone.
         const run = next.classList.contains("illuminus-box")
-          || next.classList.contains("illuminus-cluster");
+          || next.classList.contains("illuminus-cluster")
+          || next.classList.contains("illuminus-run");
         if (!run && !next.classList.contains("illuminus-field")) continue;
         if (!next.classList.contains("is-state-hidden")) { showing = true; break; }
       }
@@ -1229,11 +1290,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * A filter across every control in every tab.
+   * A filter across every control in every part.
    *
    * With well over two thousand settings, "where is the drop shadow for a
    * heading?" is the question the editor is worst at answering. Typing narrows
-   * the open tab to matching controls and dims the tabs that have none, so the
+   * the open part to matching controls and dims the parts that have none, so the
    * strip itself says where to look.
    */
   #activateFilter() {
@@ -1296,6 +1357,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     });
   }
 
+  /**
+   * A run opened or shut by hand ends the last bulk answer.
+   *
+   * From the moment somebody folds one run themselves they are reading the runs
+   * one at a time, and a render that unfolded the lot again — because Unfold
+   * Everything had been pressed some minutes before — would be undoing their
+   * work. Watched on the summary rather than on the element's `toggle` event,
+   * which the filter and the fold-all button fire themselves.
+   */
+  #watchRuns() {
+    this.element.addEventListener("click", (event) => {
+      const summary = event.target instanceof Element
+        ? event.target.closest(".illuminus-run__summary, .illuminus-cluster__summary, .illuminus-box__summary")
+        : null;
+      if (summary) this.#foldAll = null;
+    });
+  }
+
   /** Show only the controls matching the filter, and say where the rest are. */
   #applyFilter() {
     const term = this.#filter.trim().toLowerCase();
@@ -1308,7 +1387,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       field.classList.toggle("is-state-suppressed", Boolean(term));
     }
 
-    for (const tab of root.querySelectorAll(".illuminus-tab")) {
+    for (const tab of root.querySelectorAll(".illuminus-part")) {
       let tabMatches = 0;
       for (const section of tab.querySelectorAll(".illuminus-section")) {
         let sectionMatches = 0;
@@ -1323,10 +1402,22 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
             && (!term || wholeSection || field.textContent.toLowerCase().includes(term));
           field.classList.toggle("is-filtered-out", !hit);
           // An edge shows one side at a time, so a search for "Left Thickness"
-          // would find a control the tab is not showing. A hit brings its own
+          // would find a control the part is not showing. A hit brings its own
           // side out from behind whichever side is chosen.
           field.closest(".illuminus-box__part")?.classList.toggle("is-found", hit && Boolean(term));
           if (hit) sectionMatches += 1;
+        }
+        // A run is shut around the controls inside it, so a hit behind a folded
+        // one is a hit nobody can see — the filter would say it found something
+        // and show an unbroken row of closed runs. Open what matched, and hand
+        // each run back what it said about itself at render when the box is
+        // cleared: a run the style has set is open, and one it says nothing
+        // about is not.
+        for (const run of section.querySelectorAll(
+          ".illuminus-run, .illuminus-cluster, .illuminus-box__run")) {
+          if (!term && !this.#onlySet) { run.open = run.dataset.open === "1"; continue; }
+          run.open = [...run.querySelectorAll(".illuminus-field")]
+            .some((field) => !field.classList.contains("is-filtered-out"));
         }
         section.classList.toggle("is-filtered-out",
           (Boolean(term) || this.#onlySet) && !sectionMatches);
@@ -1433,7 +1524,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       grip.classList.add("is-dragging");
 
 
-      const right = this.element.querySelector(".illuminus-tab.active")?.getBoundingClientRect().right
+      const right = this.element.querySelector(".illuminus-part.active")?.getBoundingClientRect().right
         ?? this.element.getBoundingClientRect().right;
       const onMove = (move) => {
         // Measured from the settings column's right edge, which does not move,
@@ -1470,6 +1561,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       });
     }
     this.#holdEnter();
+    this.#watchRuns();
     // The sample is a picture of a page, so it gets what a page gets: each
     // heading's run of text wrapped, or the Columns settings would show nothing
     // here and everything in a journal.
@@ -1512,7 +1604,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Add a count of changed controls to each tab. Foundry's shared tab template
+   * Add a count of changed controls to each part. Foundry's shared part template
    * has no slot for one, so it is appended after the fact rather than forking
    * the template.
    */
@@ -1523,8 +1615,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /**
    * Showing a part, from the tree.
    *
-   * A family entry names the member as well as the tab, so opening Heading 3
-   * both switches to the Headings tab and sets its picker — one click where the
+   * A family entry names the member as well as the part, so opening Heading 3
+   * both switches to the Headings part and sets its picker — one click where the
    * strip took two.
    * @this {IlluminusStyleEditor}
    */
@@ -1562,7 +1654,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /**
    * Mark the tree entry for the part on show.
    *
-   * Switching a tab does not re-render, so the mark has to be moved by hand —
+   * Switching a part does not re-render, so the mark has to be moved by hand —
    * the same reason `changeTab` is overridden to move the sample's focus.
    */
   #markCurrentPart() {
@@ -1582,7 +1674,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         current = part;
       } else part.removeAttribute("aria-current");
     }
-    // Everything holding the part on show is opened, so a tab reached any other
+    // Everything holding the part on show is opened, so a part reached any other
     // way — the sample, a search — is visible in the tree rather than folded
     // away inside a branch.
     for (let item = current?.closest(".illuminus-tree__item"); item;
@@ -1594,7 +1686,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   }
 
   /**
-   * Following the strip, which switches tabs without a re-render.
+   * Following the strip, which switches parts without a re-render.
    * @override
    */
   changeTab(...args) {
@@ -1647,7 +1739,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    *
    * The picker edits through the same element the rest of the editor watches,
    * so its changes travel the ordinary path: live sample, changed marker, and
-   * tab badge all follow without special casing. Only OK keeps the result —
+   * part badge all follow without special casing. Only OK keeps the result —
    * anything else puts back the value the picker opened with.
    */
   static #onOpenColorPicker(_event, target) {
@@ -1735,7 +1827,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     }, 0);
   }
 
-  /** Refresh the "n changed" badge on a tab without re-rendering. */
+  /** Refresh the "n changed" badge on a part without re-rendering. */
   #updateTabBadge(groupId) {
     const group = GROUPS.find((g) => g.id === groupId);
     if (!group || !this.element) return;
@@ -2107,15 +2199,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Say what a control or a section is for, on the click that asks.
    *
    * The wording used to sit under every label, which is a paragraph of gray text
-   * beside every one of six hundred controls — the tab you were reading became
+   * beside every one of six hundred controls — the part you were reading became
    * mostly explanation. It is still in the markup, and still what the search box
    * searches; it is shown when somebody wants it.
    */
   static #onShowHint(event, target) {
     event.preventDefault();
     event.stopPropagation();
-    const hint = target.closest(".illuminus-field, .illuminus-section, .illuminus-tab__head")
-      ?.querySelector(".illuminus-field__hint, .illuminus-section__hint, .illuminus-tab__hint")
+    const hint = target.closest(".illuminus-field, .illuminus-section, .illuminus-part__head")
+      ?.querySelector(".illuminus-field__hint, .illuminus-section__hint, .illuminus-part__hint")
       ?.textContent?.trim();
     if (!hint) return;
     // A second click on the same icon puts it away, which is what a person
@@ -2132,6 +2224,63 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     else this.#expanded.add(key);
   }
 
+  /**
+   * Open every branch of the tree, or shut them all.
+   *
+   * Without re-rendering: the window lays out some four and a half thousand
+   * controls, and a tree that took two seconds to twist would not be worth
+   * twisting. The classes are the same ones a single twist sets, and
+   * `#openBranches` is kept in step so a render that happens later agrees.
+   */
+  static #onFoldTree(_event, target) {
+    const tree = this.element.querySelector(".illuminus-tree");
+    const branches = [...tree.querySelectorAll(".illuminus-tree__item")]
+      .filter((item) => item.querySelector(":scope > .illuminus-tree__level"));
+    const unfold = branches.some((item) => !item.classList.contains("is-open"));
+    for (const item of branches) {
+      item.classList.toggle("is-open", unfold);
+      const twist = item.querySelector(":scope > .illuminus-tree__row > .illuminus-tree__twist");
+      twist?.setAttribute("aria-expanded", String(unfold));
+      const branch = twist?.dataset.branch;
+      if (!branch) continue;
+      if (unfold) this.#openBranches.add(branch);
+      else this.#openBranches.delete(branch);
+    }
+    IlluminusStyleEditor.#markFold(target, unfold);
+  }
+
+  /**
+   * Open every category on the part being worked on, and every run inside them.
+   *
+   * Both at once rather than category by category: a category holding four
+   * folded runs is not open in any sense a person means by the word.
+   */
+  static #onFoldPart(_event, target) {
+    const pane = target.closest(".illuminus-part");
+    if (!pane) return;
+    const all = [...pane.querySelectorAll("details")];
+    const unfold = all.some((one) => !one.open);
+    for (const one of all) one.open = unfold;
+    // A category keeps its own state; a run has none to keep, so the bulk
+    // answer is what a later render reads.
+    for (const summary of pane.querySelectorAll(".illuminus-section > summary[data-section]")) {
+      const key = `${summary.dataset.group}.${summary.dataset.section}`;
+      if (unfold) this.#expanded.add(key);
+      else this.#expanded.delete(key);
+    }
+    this.#foldAll = unfold;
+    IlluminusStyleEditor.#markFold(target, unfold);
+  }
+
+  /** Say which way the button will go next, now that it has gone the other. */
+  static #markFold(button, unfolded) {
+    const say = game.i18n.localize(unfolded ? "ILLUMINUS.Editor.FoldAll" : "ILLUMINUS.Editor.UnfoldAll");
+    button.dataset.tooltip = say;
+    button.setAttribute("aria-label", say);
+    button.querySelector("i")?.setAttribute("class",
+      `fa-solid fa-angles-${unfolded ? "up" : "down"}`);
+  }
+
   /** Restore one section's controls to their schema defaults. */
   static async #onResetSection(_event, target) {
     const { group, section } = IlluminusStyleEditor.#sectionFrom(target);
@@ -2142,9 +2291,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.render();
   }
 
-  /** Restore the current tab's controls to their schema defaults. */
+  /** Restore the current part's controls to their schema defaults. */
   static async #onResetGroup(_event, target) {
-    // The button sits above the sample rather than inside the tab it resets, so
+    // The button sits above the sample rather than inside the part it resets, so
     // it names no group and the current one is worked out on the click.
     const group = GROUPS.find((g) => g.id === (target.dataset.group ?? this.#activeGroupId()));
     if (!group) return;
@@ -2164,7 +2313,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   /**
    * Hand the window back to Foundry.
    *
-   * Not the same as resetting the tab, which restores the values this style was
+   * Not the same as resetting the part, which restores the values this style was
    * last *saved* with — a style whose saved window is bright red resets to
    * bright red. This puts the schema's own values back, and those are all
    * "leave it as Foundry draws it": no fill, no picture, no edges of ours.
@@ -2182,7 +2331,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     this.render();
   }
 
-  /** Restore every control in every tab to its schema default. */
+  /** Restore every control in every part to its schema default. */
   static async #onResetAll() {
     const confirmed = await DialogV2.confirm({
       window: { title: "ILLUMINUS.Confirm.ResetAllTitle" },

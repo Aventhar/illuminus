@@ -1,0 +1,23 @@
+{{!-- The plain controls between two of a category's lines, as one run.
+
+      A category is written in runs — the lettering, then how it is set, then
+      its outline — and every other shape on a part could already be folded away
+      but these. The name is read from the controls' own wording where they
+      share any and from what kind of run it is where they do not, so it needs
+      no wording of its own and cannot fall out of step with what it holds.
+
+      Every control inside is still its own `.illuminus-field[data-field]` with
+      the words it always had: the state switch, the filter, the changed markers
+      and Reset all read the controls themselves. What changes is that the run
+      above them can be shut. --}}
+{{#if run.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
+<details class="illuminus-run" data-open="{{#if run.open}}1{{else}}0{{/if}}"
+         {{#if run.open}}open{{/if}}>
+  <summary class="illuminus-run__summary">
+    <span class="illuminus-run__name">{{run.name}}</span>
+    {{> "modules/illuminus/templates/style-run-says.hbs" says=run}}
+  </summary>
+  {{#each run.fields as |field|}}
+  {{> "modules/illuminus/templates/style-field.hbs" field=field}}
+  {{/each}}
+</details>

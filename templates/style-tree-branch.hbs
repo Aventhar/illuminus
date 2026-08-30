@@ -1,6 +1,6 @@
 {{!-- One level of the parts tree, which calls itself for what a part holds.
       A family draws its members as a level of their own, so a heading level is
-      reached by opening Headings rather than by a picker inside its tab. --}}
+      reached by opening Headings rather than by a picker inside its part. --}}
 <ul class="illuminus-tree__level">
   {{#each nodes as |node|}}
   <li class="illuminus-tree__item {{#if node.open}}is-open{{/if}}">

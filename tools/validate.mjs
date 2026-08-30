@@ -30,7 +30,7 @@ const baseRule = compileBaseRule();
 // given a value, and the stylesheet still has to name it.
 const emitted = new Set();
 // A chrome field is stored with a style and exported with it, but drives the
-// editor rather than the stylesheet — "is this tab's hovered state switched
+// editor rather than the stylesheet — "is this part's hovered state switched
 // off" is a question for the compiler, not a value any rule reads. A `noCss`
 // field is drawn in the list like any other and answers a question no value
 // can: where the Edit pencil hangs is a move made at render, since a page clips
@@ -279,7 +279,7 @@ try {
 
 /* Two controls writing one setting.
  *
- * A tab gathers its controls from several helpers, and two of them can declare
+ * A part gathers its controls from several helpers, and two of them can declare
  * the same name without either knowing: `tagSections` had a least width of its
  * own and `layoutFields` added a second, so every tag style drew two "Least
  * Width" rows writing one value. Nothing else notices — the name is legal, the
@@ -476,6 +476,141 @@ console.log("\n[15] US English");
     ok("wording, stylesheet and schema are all US English");
   }
 }
+
+/* Every run of plain controls can be named, and no category holds two runs of
+ * one name.
+ *
+ * A category is laid out in runs — the schema draws a line and stacks the
+ * controls that belong together under it — and the editor folds each run behind
+ * one row saying what it holds. That row needs a name, which is read from the
+ * controls' own wording where they share any and from `RUN_KINDS` where they do
+ * not. A run neither can name would draw a blank row, and two runs of one name
+ * in one category is the same confusion as two controls of one name, which [14]
+ * already refuses.
+ *
+ * Checked here rather than in the app because it is the whole schema in a
+ * second, so a run added next year is covered without anyone remembering. */
+console.log("\n[16] Every run of controls has a name");
+{
+  // Wording, as the editor reads it: a family's own key wins over the shared
+  // one, exactly as `#fieldText` resolves a label.
+  globalThis.game = { i18n: {
+    localize: (key) => lang[key] ?? key,
+    has: (key) => key in lang
+  } };
+  const { nameRuns, runKindOf, RUN_KINDS } = await import(`${ROOT}/scripts/run-names.mjs`);
+
+  const labelOf = (group, name) =>
+    lang[`ILLUMINUS.Field.${group.family ?? group.id}.${name}.label`]
+    ?? lang[`ILLUMINUS.Field.${name}.label`] ?? name;
+
+  // The two shapes the editor gathers before these runs are left over. Read
+  // from the names, as `boxPartOf` and `clusterPartOf` read them.
+  const gathered = (name) =>
+    /^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/.test(name)
+    || /^(.*?)[Tt]exture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/.test(name)
+    || /^(.*?)[Bb]order(Top|Right|Bottom|Left)(Width|Style|Color)$/.test(name)
+    || /^(.*?)[Cc]orner(TopLeft|TopRight|BottomLeft|BottomRight)$/.test(name)
+    || /^(.*?)[Cc]ornerShape$/.test(name)
+    || /^(.*?)([Pp]adding|[Mm]argin)(Top|Right|Bottom|Left)$/.test(name);
+
+  let runs = 0;
+  const nameless = [];
+  const clashes = [];
+  for (const group of GROUPS) {
+    for (const section of group.sections) {
+      const gathering = [];
+      let held = [];
+      const settle = () => {
+        if (held.length) {
+          const distinct = new Set(held.map((field) => field.name.replace(/^(hover|active)/, "")
+            .replace(/(Hover|Active)(?=[A-Z])/, "")));
+          if (distinct.size > 1) gathering.push(held);
+        }
+        held = [];
+      };
+      for (const field of section.fields) {
+        if (field.chrome) continue;
+        if (gathered(field.name)) { settle(); continue; }
+        if (section.dividers?.has(field.name)) settle();
+        held.push(field);
+      }
+      settle();
+      runs += gathering.length;
+      // Named the way the editor names them: a whole category at a time, so two
+      // runs of one name are told apart against each other.
+      const seen = nameRuns(gathering.map((run) => run.map((field) =>
+        ({ name: field.name, label: labelOf(group, field.name) }))));
+      seen.forEach((name, at) => {
+        if (name) return;
+        nameless.push(`${group.id}.${section.id}: ${gathering[at].map((f) => f.name).slice(0, 5).join(", ")}`);
+      });
+      const counted = new Map();
+      for (const name of seen) if (name) counted.set(name, (counted.get(name) ?? 0) + 1);
+      for (const [name, n] of counted) {
+        if (n > 1) clashes.push(`${group.id}.${section.id}: "${name}" ×${n}`);
+      }
+    }
+  }
+  if (nameless.length) {
+    fail(`${nameless.length} run(s) of controls that nothing can name — add a suffix to RUN_KINDS`);
+    for (const one of nameless.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok(`all ${runs} runs of controls are named`);
+  }
+  if (clashes.length) {
+    fail(`${clashes.length} categor(ies) hold two runs of one name`);
+    for (const one of clashes.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok("no category holds two runs of one name");
+  }
+
+  // And every word the table can reach for is written down. A kind with no
+  // wording prints its own key into the editor.
+  const unworded = RUN_KINDS.map(([kind]) => kind)
+    .filter((kind) => !(`ILLUMINUS.Run.${kind}` in lang));
+  if (unworded.length) fail(`run kinds with no wording: ${unworded.join(", ")}`);
+  else ok(`every one of the ${RUN_KINDS.length} run kinds has wording`);
+
+  // A control the table cannot place at all would make a run fall back to a
+  // name it did not choose. Not fatal on its own — a run is named from shared
+  // wording first — but worth saying.
+  const unplaced = allFields().filter(({ field }) =>
+    !field.chrome && !gathered(field.name) && !runKindOf(field.name)).length;
+  console.log(`  · ${unplaced} controls sit in no kind, and are named by the wording they share`);
+}
+
+
+/* The interface's own words for its own parts.
+ *
+ * The editor has not had a strip of parts since the parts of a journal became a
+ * tree, and a person told to "return every setting on this part" is being told
+ * about a control that is not on the screen. The word survived in nine strings
+ * after the tree was built, because nothing was looking.
+ *
+ * A paper part is a different word and a good one — a box with only its two
+ * right-hand corners rounded does look like an index part — so what is refused
+ * is the interface's own use of it. */
+console.log("\n[17] The interface's own words");
+{
+  const PAPER = /\btab\b(?=\s+or\s+a\s+bookmark)/i;
+  const wrong = [];
+  for (const [key, said] of Object.entries(lang)) {
+    if (typeof said !== "string") continue;
+    for (const found of said.matchAll(/\btabs?\b/gi)) {
+      if (PAPER.test(said.slice(found.index))) continue;
+      wrong.push(`${key}: "${said.slice(Math.max(0, found.index - 30), found.index + 30).replace(/\n/g, " ")}"`);
+      break;
+    }
+  }
+  if (wrong.length) {
+    fail(`${wrong.length} string(s) still call a part of a journal a tab`);
+    for (const one of wrong.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok("nothing a person reads calls a part of a journal a tab");
+  }
+}
+
 
 console.log(`\n${failures ? `FAILED — ${failures} problem(s)` : "ALL CHECKS PASSED"}\n`);
 process.exit(failures ? 1 : 0);

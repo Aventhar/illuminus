@@ -1,6 +1,6 @@
 <div class="illuminus-editor__layout">
   {{!-- Spans the window above both columns: a search that only looked in the
-        open tab would not answer "which tab has the shadow settings?" --}}
+        open part would not answer "which part has the shadow settings?" --}}
   <div class="illuminus-filter">
     <i class="fa-solid fa-magnifying-glass"></i>
     <input type="search" class="illuminus-filter__input" autocomplete="off"
@@ -19,7 +19,7 @@
   <div class="illuminus-editor__columns">
 
   {{!-- The parts of a journal, as they hold one another: the window holds the
-        page, the page holds its headings and its boxes. A strip of tabs could
+        page, the page holds its headings and its boxes. A strip of parts could
         not say that — a heading and the window frame sat side by side as though
         they were the same kind of thing. --}}
   {{!-- Core's own changeTab finds a pane through `.tabs [data-group][data-tab]`,
@@ -28,18 +28,34 @@
         that exists only to be found, so the tree is styled by this module
         alone. --}}
   <nav class="tabs illuminus-tree__anchor" hidden aria-hidden="true">
-    {{#each tabIds as |id|}}<span data-group="sheet" data-tab="{{id}}"></span>{{/each}}
+    {{#each partIds as |id|}}<span data-group="sheet" data-tab="{{id}}"></span>{{/each}}
   </nav>
 
   <nav class="illuminus-tree" aria-label="{{localize 'ILLUMINUS.Editor.PartsLabel'}}">
+    {{!-- Open every branch at once, or shut them. The tree is sixteen parts
+          deep in places, and reaching one of a treatment's ten members meant
+          twisting two branches open every time the window was opened. --}}
+    <div class="illuminus-tree__tools">
+      <button type="button" class="illuminus-fold-all" data-action="foldTree"
+              data-tooltip="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}"
+              aria-label="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}">
+        <i class="fa-solid fa-angles-down"></i>
+      </button>
+    </div>
     {{> "modules/illuminus/templates/style-tree-branch.hbs" nodes=tree}}
   </nav>
 
   {{#each groups as |group|}}
-  <section class="tab illuminus-tab {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
+  <section class="tab illuminus-part {{#if group.active}}active{{/if}}" data-group="sheet" data-tab="{{group.id}}">
 
-    <div class="illuminus-tab__tools">
-      <h3 class="illuminus-tab__name">{{group.label}}</h3>
+    <div class="illuminus-part__tools">
+      <h3 class="illuminus-part__name">{{group.label}}</h3>
+      {{!-- Every category on this part, and every run inside them. --}}
+      <button type="button" class="illuminus-fold-all" data-action="foldPart"
+              data-tooltip="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}"
+              aria-label="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}">
+        <i class="fa-solid fa-angles-down"></i>
+      </button>
       <button type="button" class="illuminus-reset" data-action="resetGroup"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
         <i class="fa-solid fa-rotate-left"></i>
@@ -52,11 +68,11 @@
       </button>
     </div>
 
-    <header class="illuminus-tab__head">
+    <header class="illuminus-part__head">
       {{!-- Behind an icon like every other explanation. It stays in the markup
             for the search box, and at a narrow settings column a paragraph
             here pushed the first control most of the way down the pane. --}}
-      <p class="hint illuminus-tab__hint">{{group.hint}}</p>
+      <p class="hint illuminus-part__hint">{{group.hint}}</p>
       <button type="button" class="illuminus-info" data-action="showHint"
               aria-label="{{group.hint}}">
         <i class="fa-solid fa-circle-info"></i>
@@ -110,6 +126,8 @@
         {{> "modules/illuminus/templates/style-box.hbs" box=row.box}}
         {{else if row.cluster}}
         {{> "modules/illuminus/templates/style-cluster.hbs" cluster=row.cluster}}
+        {{else if row.run}}
+        {{> "modules/illuminus/templates/style-run.hbs" run=row.run}}
         {{else}}
         {{> "modules/illuminus/templates/style-field.hbs" field=row.field}}
         {{/if}}
@@ -122,10 +140,16 @@
   {{/each}}
 
   {{#each families as |family|}}
-  <section class="tab illuminus-tab {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
+  <section class="tab illuminus-part {{#if family.active}}active{{/if}}" data-group="sheet" data-tab="{{family.id}}">
 
-    <div class="illuminus-tab__tools">
-      <h3 class="illuminus-tab__name">{{family.current.label}}</h3>
+    <div class="illuminus-part__tools">
+      <h3 class="illuminus-part__name">{{family.current.label}}</h3>
+      {{!-- Every category on this part, and every run inside them. --}}
+      <button type="button" class="illuminus-fold-all" data-action="foldPart"
+              data-tooltip="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}"
+              aria-label="{{localize 'ILLUMINUS.Editor.UnfoldAll'}}">
+        <i class="fa-solid fa-angles-down"></i>
+      </button>
       <button type="button" class="illuminus-reset" data-action="resetGroup"
               data-tooltip="{{localize 'ILLUMINUS.Buttons.ResetGroupTooltip'}}">
         <i class="fa-solid fa-rotate-left"></i>
@@ -138,7 +162,7 @@
       </button>
     </div>
 
-    <header class="illuminus-tab__head illuminus-family__head">
+    <header class="illuminus-part__head illuminus-family__head">
       <select data-family-picker="{{family.id}}" aria-label="{{family.nameLabel}}">
         {{#each family.members as |member|}}
         <option value="{{member.id}}" {{#if member.selected}}selected{{/if}}>{{member.label}}</option>
@@ -204,6 +228,8 @@
         {{> "modules/illuminus/templates/style-box.hbs" box=row.box}}
         {{else if row.cluster}}
         {{> "modules/illuminus/templates/style-cluster.hbs" cluster=row.cluster}}
+        {{else if row.run}}
+        {{> "modules/illuminus/templates/style-run.hbs" run=row.run}}
         {{else}}
         {{> "modules/illuminus/templates/style-field.hbs" field=row.field}}
         {{/if}}
@@ -284,7 +310,7 @@
         </footer>
       </aside>
 
-      {{!-- The page's own surface, so opening the Page tab lights something
+      {{!-- The page's own surface, so opening the Page part lights something
             rather than dimming everything the page contains. --}}
       <section class="journal-entry-content" data-part="page">
         <header class="journal-header" data-part="title">
@@ -312,7 +338,7 @@
       </div>
       </div>
 
-      {{!-- The window Edit Page opens, so the Journal Editor tab has something
+      {{!-- The window Edit Page opens, so the Journal Editor part has something
             to look at. It carries the classes the real one does, because the
             rules are scoped to them: an `.application` that is also a
             `.journal-entry-page`, a title bar with its buttons, the row of
@@ -334,8 +360,8 @@
         </header>
         <section class="window-content">
           {{!-- What a page is called, and the settings beside it: the name is the
-                Title tab's own control, and the two settings have a category of
-                their own on this tab. --}}
+                Title part's own control, and the two settings have a category of
+                their own on this part. --}}
           <header class="journal-header">
             <input class="title" type="text" value="{{localize "ILLUMINUS.Preview.EditorPageName"}}" disabled>
             <div class="page-metadata flexrow">
@@ -417,7 +443,7 @@
               <section class="journal-page-content">
                 <figure class="illuminus-image illuminus-image--{{preview.imageStyles.id}}">
                   {{!-- One of Foundry's own icons: the module carries no artwork, and the
-                       sample only needs something to demonstrate the Images tab on. --}}
+                       sample only needs something to demonstrate the Images part on. --}}
                   <img src="icons/svg/mystery-man.svg"
                        alt="{{localize 'ILLUMINUS.Preview.Caption'}}">
                   <figcaption>{{localize "ILLUMINUS.Preview.Caption"}}</figcaption>

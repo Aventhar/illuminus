@@ -61,8 +61,8 @@ hidden, because a heading alone on a blank page tells you nothing about how it s
 the text. Any real journal you have open repaints too.
 
 **Down the right, what can be said about the part you picked.** Around 4,200 settings in
-all, on 16 tabs — and close to 9,000 once every treatment is counted separately rather
-than one at a time — each labelled in ordinary language with a line of explanation under
+all, across 16 parts — and close to 9,000 once every treatment is counted separately
+rather than one at a time — each labeled in ordinary language with a line of explanation under
 it. "Top Thickness", not `border-top-width`.
 
 ### What that looks like in practice
@@ -78,8 +78,14 @@ A thickness at each corner, a side chosen underneath, and that side's style and 
 below it. Spacing works the same way — eight inputs around a dashed ring, the outer four
 for the room around the box and the inner four for the room inside it. Each of these
 folds to a single line saying what it is set to, built from the values themselves, and
-one the style says nothing about reads "Nothing set" and starts closed. A tab therefore
+one the style says nothing about reads "Nothing set" and starts closed. A part therefore
 opens showing what the style *does*.
+
+The plain controls between two of a category's lines fold the same way, under a name read
+out of the controls themselves — "Lettering", "Arrangement", "Outline", or "Term Outline"
+and "Definition Outline" where the words say which is which. When you want everything at
+once there is a control for that at the head of the parts tree and another beside a part's
+own name: one opens every branch, the other every category and every run inside it.
 
 **And if you already write CSS**, there is a switch for you. Configure Settings →
 Illuminus → **Setting Names** renames every control to the property it writes:

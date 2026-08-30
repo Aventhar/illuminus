@@ -70,10 +70,25 @@ put("ILLUMINUS.Editor.QuietSampleHint",
   + "sample. Turn it off when you want to see one; a real journal is unaffected "
   + "either way.");
 put("ILLUMINUS.Editor.PartsLabel", "The parts of a journal");
+// Open everything or shut it, in the tree and in the settings beside it. The
+// module's own verb for this is fold, which is what a heading does to the text
+// under it and what a listed page does to its headings.
+put("ILLUMINUS.Editor.UnfoldAll", "Unfold everything");
+put("ILLUMINUS.Editor.FoldAll", "Fold everything");
+// A part, not a part: the parts of a journal are a tree, and have been since the
+// strip of parts was taken out. The word survived in the wording for the reset
+// buttons, which is the one place a person was still told they were on one.
+put("ILLUMINUS.Buttons.ResetGroup", "Reset Part");
+put("ILLUMINUS.Buttons.ResetGroupTooltip", "Return every setting on this part to its starting value");
+put("ILLUMINUS.Buttons.ResetAllTooltip", "Return every setting on every part to its starting value");
+put("ILLUMINUS.Confirm.ResetGroup", "Return every setting on the \"{group}\" part to its starting value?");
+put("ILLUMINUS.Confirm.ResetGroupTitle", "Reset Part");
+put("ILLUMINUS.Confirm.ResetAll",
+  "Return every setting on every part to its starting value? Your unsaved work on this style will be lost.");
 put("ILLUMINUS.Editor.PartsTwist", "Show what this part holds");
 put("ILLUMINUS.Box.Unset", "Nothing set");
 put("ILLUMINUS.Box.Shadow", "Shadow");
-// What a gathered run answers to when the tab's own wording gives up nothing.
+// What a gathered run answers to when the part's own wording gives up nothing.
 // Said apart from the bare word above, because a category holding both an inner
 // shadow and an outer one showed two runs called "Shadow" and no way to tell
 // which was which.
@@ -92,6 +107,28 @@ put("ILLUMINUS.Box.Top", "Top");
 put("ILLUMINUS.Box.Right", "Right");
 put("ILLUMINUS.Box.Bottom", "Bottom");
 put("ILLUMINUS.Box.Left", "Left");
+
+// What a run of plain controls is called, where the controls share no wording
+// of their own to take a name from. A category is written in runs — the
+// lettering, then how it is set out, then its outline — and these are the words
+// for those runs. Read against `RUN_KINDS` in the editor, which says which
+// controls are of which kind; `validate.mjs` [16] holds the two together.
+put("ILLUMINUS.Run.Lettering", "Lettering");
+put("ILLUMINUS.Run.Arrangement", "Arrangement");
+put("ILLUMINUS.Run.Outline", "Outline");
+put("ILLUMINUS.Run.Fill", "Fill");
+put("ILLUMINUS.Run.Layout", "Layout");
+put("ILLUMINUS.Run.Size", "Size");
+put("ILLUMINUS.Run.Flow", "Flow");
+put("ILLUMINUS.Run.Placing", "Placing");
+put("ILLUMINUS.Run.Columns", "Columns");
+put("ILLUMINUS.Run.Folding", "Folding");
+put("ILLUMINUS.Run.Shape", "Shape");
+put("ILLUMINUS.Run.Rule", "Rule");
+put("ILLUMINUS.Run.Edge", "Edge");
+put("ILLUMINUS.Run.Line", "Line");
+put("ILLUMINUS.Run.Glow", "Glow");
+put("ILLUMINUS.Run.TickBox", "Tick Box");
 Object.assign(out, {
   "ILLUMINUS.Manager.Restore": "Restore Samples",
   "ILLUMINUS.Manager.RestoreTooltip": "Put back any style that came with Illuminus and is no longer here",
@@ -113,7 +150,7 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.SaveAndClose": "Save and Close",
   "ILLUMINUS.Buttons.Discard": "Discard Changes",
   "ILLUMINUS.Buttons.KeepEditing": "Keep Editing",
-  "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this tab differ from their starting value",
+  "ILLUMINUS.Editor.ChangedTooltip": "How many settings on this part differ from their starting value",
   "ILLUMINUS.Color.None": "None",
   "ILLUMINUS.Menu.Title": "Illuminus",
   "ILLUMINUS.Menu.Blocks": "Box",
@@ -158,8 +195,8 @@ Object.assign(out, {
   "ILLUMINUS.Buttons.CopyFrom": "Copy {name}",
   "ILLUMINUS.Buttons.CopyNormal": "Copy Normal",
   "ILLUMINUS.Buttons.FoundryDefault": "Use Foundry Default",
-  "ILLUMINUS.Confirm.FoundryDefault": "Clear every setting on this tab, leaving the window frame, title bar, and buttons as Foundry draws them?",
-  "ILLUMINUS.Buttons.FoundryDefaultTooltip": "Clear this tab, leaving the window frame, title bar, and buttons as Foundry draws them",
+  "ILLUMINUS.Confirm.FoundryDefault": "Clear every setting on this part, leaving the window frame, title bar, and buttons as Foundry draws them?",
+  "ILLUMINUS.Buttons.FoundryDefaultTooltip": "Clear this part, leaving the window frame, title bar, and buttons as Foundry draws them",
   "ILLUMINUS.Buttons.CopyNormalTooltip": "Fill these from the ordinary controls, as a starting point to change",
   "ILLUMINUS.Buttons.CopyFromTooltip": "Take every setting from the level above, as a starting point to change",
   // Named for what the window does rather than for the pen on the button: the
@@ -257,8 +294,8 @@ Object.assign(out, {
   "ILLUMINUS.Field.boxStyles.color.hint": "Color of the lettering inside this box. Leave empty to follow the page.",
   "ILLUMINUS.Field.boxStyles.size.hint": "How large the lettering is inside this box. 0 follows the page.",
   "ILLUMINUS.Field.boxStyles.lineHeight.hint": "Space between lines inside this box. 0 follows the page.",
-  "ILLUMINUS.Field.imageStyles.captionColor.hint": "Color of this image's caption. Leave empty to follow the Images tab.",
-  "ILLUMINUS.Field.imageStyles.captionSize.hint": "How large this image's caption is. 0 follows the Images tab.",
+  "ILLUMINUS.Field.imageStyles.captionColor.hint": "Color of this image's caption. Leave empty to follow the Images part.",
+  "ILLUMINUS.Field.imageStyles.captionSize.hint": "How large this image's caption is. 0 follows the Images part.",
   "ILLUMINUS.Families.imageStylesHint": "Styles you apply to a single image, overriding the page-wide Images settings. Pick one to style, and rename it to suit your content.",
   "ILLUMINUS.Buttons.OK": "OK",
   "ILLUMINUS.ColorPicker.Title": "Color",
@@ -383,7 +420,7 @@ Object.assign(out, {
 
 /* ---------- Groups ---------- */
 const GROUP_TEXT = {
-  editor: ["Journal Editor", "The window that opens when you edit a page \u2014 its frame and its title bar. What you write on is the page's own surface, set on the Page tab, and the rows of controls are the parts this holds."],
+  editor: ["Journal Editor", "The window that opens when you edit a page \u2014 its frame and its title bar. What you write on is the page's own surface, set on the Page part, and the rows of controls are the parts this holds."],
   editorSettingsBar: ["Page Settings Bar", "The strip above the editing controls: the page's name, its level, and whether its title is shown."],
   editorDropdowns: ["Drop-downs", "The Format and Illuminus menus in the editing bar, and the list each one opens."],
   editorToolbar: ["Toolbar", "The row of editing controls itself, and the icon buttons along it."],
@@ -424,7 +461,7 @@ for (let i = 1; i <= FAMILY_SIZE; i++) {
   const n = String(i).padStart(2, "0");
   put(`ILLUMINUS.Groups.box${n}.label`, `Box${n}`);
   put(`ILLUMINUS.Groups.box${n}.hint`,
-    "A box you wrap around content. Anything left as \"use the page setting\" follows the Body and Heading tabs.");
+    "A box you wrap around content. Anything left as \"use the page setting\" follows the Body and Heading parts.");
   put(`ILLUMINUS.Groups.image${n}.label`, `Image${n}`);
   put(`ILLUMINUS.Groups.image${n}.hint`,
     "A style you apply to one image, overriding the page-wide Images settings.");
@@ -483,7 +520,7 @@ const SECTION_TEXT = {
   cellPadding: ["Cell Spacing", "Room between a cell's edges and its contents"],
   caption: ["Caption", "The text beneath an image"],
   dividers: ["Dividers", "Horizontal rules between passages"],
-  blockHeadings: ["Headings Inside", "Headings within this box. Leave as the page setting to follow the Heading tabs"],
+  blockHeadings: ["Headings Inside", "Headings within this box. Leave as the page setting to follow the Heading parts"],
   entries: ["Page Entries", "Each page listed in the contents panel"],
   entryBorder: ["Entry Borders", "Lines around each listed page. Each edge is set separately"],
   entryStates: ["Current and Hovered", "How the page you are reading, and the one under the mouse, stand out"],
@@ -582,7 +619,7 @@ const names = [...new Set(allFields().map(({ field }) => field.name))];
  *
  * Under Opening Capital, a Color above an Outline Color above another Color
  * explains nothing — the shadow's says so. Wording is keyed by field name and a
- * name is shared across tabs, so where a tab does have a Text Shadow section of
+ * name is shared across parts, so where a part does have a Text Shadow section of
  * its own the label reads "Shadow Color" inside it, which is a word longer than
  * it needs to be rather than a word short of clear.
  */
@@ -592,18 +629,18 @@ const names = [...new Set(allFields().map(({ field }) => field.name))];
  * A shadow whose section holds nothing but its own five controls is named by
  * that section — Outer Shadow, Inner Shadow, Text Shadow — so "Softness" is the
  * whole of what the row needs to say. One sharing a section with a fill, a
- * picture, and a second shadow needs to say which shadow it is, or a tab reads
+ * picture, and a second shadow needs to say which shadow it is, or a part reads
  * Horizontal Offset twice and means two different things.
  */
 /**
- * Shadows that share a section with anything else, by tab.
+ * Shadows that share a section with anything else, by part.
  *
  * A shadow whose section holds nothing but its own five controls is named by
  * that section — Outer Shadow, Inner Shadow, Text Shadow — so "Softness" is the
  * whole of what the row needs to say. One sharing a section with a fill, a
- * picture, and a second shadow has to say which shadow it is, or the tab reads
- * "Horizontal Offset" twice and means two different things by it. Keyed by tab
- * because the same control is both, depending on how the tab is laid out.
+ * picture, and a second shadow has to say which shadow it is, or the part reads
+ * "Horizontal Offset" twice and means two different things by it. Keyed by part
+ * because the same control is both, depending on how the part is laid out.
  */
 const PARTS = /(OffsetX|OffsetY|Blur|Spread|Color)$/;
 const isShadow = (name) => /[Ss]hadow(OffsetX|OffsetY|Blur|Spread|Color)$/.test(name);
@@ -769,7 +806,7 @@ for (const name of names) {
     }
   }
   // background-image family: <prefix>Texture(|Fit|Position|Blend|Opacity).
-  // Only prefixed ones — the Page tab's own set is worded by hand.
+  // Only prefixed ones — the Page part's own set is worded by hand.
   if ((m = name.match(
     /^(.+?)Texture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/))) {
     const [, prefix, part] = m;
@@ -899,7 +936,7 @@ for (const name of names) {
         + "Set the color fully transparent and there is no shadow at all, which is "
         + "how you switch one off."]
     }[part];
-    // The plain label. Where a shadow shares a section, the tab writes a
+    // The plain label. Where a shadow shares a section, the part writes a
     // qualified one of its own below.
     put(`ILLUMINUS.Field.${name}.label`, text[0]);
     put(`ILLUMINUS.Field.${name}.hint`, text[1]);
@@ -1624,13 +1661,13 @@ for (const name of unmatched) {
  * is and the shorter label is the better one.
  */
 /*
- * Which lettering casts a shadow, where a tab letters more than one thing.
+ * Which lettering casts a shadow, where a part letters more than one thing.
  *
  * Separate from the outline words above, which are deliberately empty for a
  * category holding a single typeface: an outline sits beside its own typeface
  * and needs no qualifier, while a shadow is read against every other shadow on
- * the tab. Where the outline word would say nothing, or would say what another
- * part on the same tab already says, this names the part as its own category
+ * the part. Where the outline word would say nothing, or would say what another
+ * part on the same part already says, this names the part as its own category
  * does — the disclosure line is a Heading inside the Collapsible category and
  * also a Heading inside Headings Inside, and one of the two has to give.
  */
@@ -1642,10 +1679,10 @@ const SHADOW_WORD = {
 
 const SHADOW_OWNERS = new Map();
 for (const group of GROUPS) {
-  // Asked of the whole tab rather than of one category. A tab's categories are
+  // Asked of the whole part rather than of one category. A part's categories are
   // read together — the tree lists them, the search box crosses them — so three
   // categories each holding a lettering shadow gave three runs all called
-  // "Shadow", which is what the Tables tab did. Which lettering casts it is the
+  // "Shadow", which is what the Tables part did. Which lettering casts it is the
   // only thing that tells them apart.
   const families = new Set(groupFields(group).map((field) => field.name)
     .filter(isShadow).map((name) => ordinaryName(name).replace(PARTS, "")));
@@ -1664,10 +1701,10 @@ for (const key of SHARED_SHADOW) {
   if (!plain) continue;
   const family = ordinaryName(name).replace(PARTS, "");
   // A lettering shadow says so. It used to say "Shadow" and no more, which put
-  // it beside an Inner Shadow and an Outer Shadow on the same tab with nothing
-  // to tell it from either — and where a tab lettered several things, three
+  // it beside an Inner Shadow and an Outer Shadow on the same part with nothing
+  // to tell it from either — and where a part lettered several things, three
   // runs answered to the one word. Which lettering casts it comes first where
-  // a tab has more than one.
+  // a part has more than one.
   const owner = SHADOW_OWNERS.get(`${tab}.${family}`);
   const lead = /[Ii]nnerShadow$/.test(family) ? "Inner Shadow "
     : /[Tt]extShadow$/.test(family) ? `${owner ? `${owner} ` : ""}Text Shadow ` : "Outer Shadow ";
@@ -1826,7 +1863,13 @@ if (missing.length) {
     for (const section of group.sections) {
       const byLabel = new Map();
       for (const field of section.fields) {
-        if (/^(hover|active)[A-Z]/.test(field.name)) continue;
+        // Both spellings of a state, because both occur: `hoverColor` and
+        // `termHoverColor`. Matching only the first left `termHoverColor`
+        // colliding with `termColor` — the same label, as a state's control is
+        // meant to have — and the sweep qualified both, so the Default List
+        // read "Term Term Color".
+        if (/^(hover|active)[A-Z]/.test(field.name)
+          || /(Hover|Active)(?=[A-Z])/.test(field.name)) continue;
         const label = out[`ILLUMINUS.Field.${key}.${field.name}.label`]
           ?? out[`ILLUMINUS.Field.${field.name}.label`];
         if (!label) continue;
@@ -1839,7 +1882,8 @@ if (missing.length) {
         for (const name of names) {
           const prefix = name.slice(0, name.length - tail);
           const word = wordFor(prefix);
-          if (!word) continue;
+          // A label that already leads with its part's word says it once.
+          if (!word || label.startsWith(`${word} `)) continue;
           put(`ILLUMINUS.Field.${key}.${name}.label`, `${word} ${label}`);
           const hint = out[`ILLUMINUS.Field.${key}.${name}.hint`]
             ?? out[`ILLUMINUS.Field.${name}.hint`];
@@ -1859,8 +1903,8 @@ if (missing.length) {
  * stylesheets rather than written here — see `tools/css-names.mjs` — so a rule
  * that changes takes its wording with it.
  *
- * Keyed like every other label, by the control's own name, with a tab's own key
- * where one tab means something different by it: the contents panel holds two
+ * Keyed like every other label, by the control's own name, with a part's own key
+ * where one part means something different by it: the contents panel holds two
  * controls feeding `color`, so there one of them has to say which.
  */
 {
@@ -1872,7 +1916,7 @@ if (missing.length) {
     process.exit(1);
   }
 
-  // What each control writes, per tab, and what it writes most often.
+  // What each control writes, per part, and what it writes most often.
   const said = new Map();
   for (const group of GROUPS) {
     for (const field of groupFields(group)) {

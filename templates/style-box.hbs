@@ -12,7 +12,9 @@
 
   {{#if box.spacing.length}}
   {{#if box.lines.padding}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="spacing" {{#if box.spacingSays.open}}open{{/if}}>
+  <details class="illuminus-box__run" data-run="spacing"
+           data-open="{{#if box.spacingSays.open}}1{{else}}0{{/if}}"
+           {{#if box.spacingSays.open}}open{{/if}}>
     <summary class="illuminus-box__summary">
       <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Spacing"}}</span>
       {{> "modules/illuminus/templates/style-run-says.hbs" says=box.spacingSays}}
@@ -35,7 +37,9 @@
 
   {{#if box.edges.length}}
   {{#if box.lines.border}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
-  <details class="illuminus-box__run" data-run="edges" {{#if box.edgesSays.open}}open{{/if}}>
+  <details class="illuminus-box__run" data-run="edges"
+           data-open="{{#if box.edgesSays.open}}1{{else}}0{{/if}}"
+           {{#if box.edgesSays.open}}open{{/if}}>
     <summary class="illuminus-box__summary">
       <span class="illuminus-box__name">{{localize "ILLUMINUS.Box.Edges"}}</span>
       {{> "modules/illuminus/templates/style-run-says.hbs" says=box.edgesSays}}

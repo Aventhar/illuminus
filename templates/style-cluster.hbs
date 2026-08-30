@@ -5,6 +5,7 @@
       in. --}}
 {{#if cluster.divider}}<hr class="illuminus-divider" aria-hidden="true">{{/if}}
 <details class="illuminus-cluster" data-cluster="{{cluster.family}}" data-kind="{{cluster.kind}}"
+         data-open="{{#if cluster.open}}1{{else}}0{{/if}}"
          {{#if cluster.open}}open{{/if}}>
   <summary class="illuminus-cluster__summary">
     {{!-- Which of them this is, where a category holds more than one. Where it

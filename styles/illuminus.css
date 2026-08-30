@@ -271,11 +271,11 @@
 
 /* --- The page editor's window ------------------------------------------- */
 
-/* The window Edit Page opens. Every rule here out-specifies the Window tab's,
+/* The window Edit Page opens. Every rule here out-specifies the Window part's,
    which still applies to the journal window: they are two windows doing two
    jobs, and the frame that reads well around a page of prose is not always the
    one to write in. What is written *on* is the page's own surface, painted by
-   the Page tab — so what you type looks like what you will read.
+   the Page part — so what you type looks like what you will read.
 
    Nothing here may force `position: relative` on the window root: Foundry has
    already positioned it, and dropping it into normal flow shoves the interface
@@ -439,7 +439,7 @@
 }
 
 /* The page's own fields, above the prose: what the page is called is the
-   journal's name control, which the Title tab paints, and beside it the level
+   journal's name control, which the Title part paints, and beside it the level
    its heading takes and whether that heading is shown at all. */
 /* The box goes to the control alone. Foundry gives the drop-down a fill, a
    hairline and a rounding, and gives the words beside it none of that — so a
@@ -1022,8 +1022,8 @@
 /* The title's box goes on the header and its lettering on the input inside it.
    Foundry renders a journal's name as an `<input>`, and a replaced element can
    carry no `::before` — so a picture had nowhere to paint, and the input's own
-   fill covered anything painted behind it. Split this way the Title tab behaves
-   like every other tab: one real element carrying fill, picture, edges, and
+   fill covered anything painted behind it. Split this way the Title part behaves
+   like every other part: one real element carrying fill, picture, edges, and
    spacing, with the lettering on top. */
 .illuminus-styled .journal-header {
   display: var(--ill-title-shown);
@@ -2182,7 +2182,7 @@
 /* --- Style editor ------------------------------------------------------- */
 
 /* ApplicationV2 requires each template part to have a single root element, so
-   the editor body wraps its tabs and preview pane in one layout container. */
+   the editor body wraps its parts and preview pane in one layout container. */
 .illuminus-editor__body {
   display: flex;
   flex: 1;
@@ -2207,11 +2207,11 @@
 
 /* Three columns: what a journal is made of, what it looks like, and what can be
    said about the part chosen. The panes are written in the order the markup
-   wants — every tab pane is a sibling of the tree — so which column each lands
+   wants — every part pane is a sibling of the tree — so which column each lands
    in is stated here rather than by shuffling the template. */
 .illuminus-editor .illuminus-tree { order: 0; }
 .illuminus-editor .illuminus-preview { order: 1; }
-.illuminus-editor .illuminus-tab { order: 2; }
+.illuminus-editor .illuminus-part { order: 2; }
 
 /* The parts of a journal, as they hold one another. */
 .illuminus-tree {
@@ -2229,6 +2229,17 @@
   padding: 0.15rem 0.35rem 0.5rem 0;
   border-right: 1px solid var(--color-border, rgb(0 0 0 / 25%));
   font-size: var(--font-size-13, 0.8125rem);
+}
+
+/* Above the first branch, against a line of the tree's own: the tree is sized to
+   what it holds, so a button that stretched would decide the column's width for
+   it. */
+.illuminus-tree__tools {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 0.3rem;
+  margin-bottom: 0.3rem;
+  border-bottom: 1px solid var(--color-border, rgb(0 0 0 / 25%));
 }
 
 .illuminus-tree__level {
@@ -2351,7 +2362,7 @@
   opacity: 0.35;
 }
 
-.illuminus-editor .illuminus-tab {
+.illuminus-editor .illuminus-part {
   display: none;
   flex-direction: column;
   gap: 0.5rem;
@@ -2363,12 +2374,12 @@
   min-width: 0;
 }
 
-.illuminus-editor .illuminus-tab.active {
+.illuminus-editor .illuminus-part.active {
   display: flex;
 }
 
-/* The block and picture tabs carry a picker and a rename field rather than a
-   plain hint, since one tab stands in for ten groups. */
+/* The block and picture parts carry a picker and a rename field rather than a
+   plain hint, since one part stands in for ten groups. */
 .illuminus-family__head {
   align-items: center;
   flex-wrap: wrap;
@@ -2385,10 +2396,10 @@
   min-width: 6rem;
 }
 
-/* What clears the tab, on a row of its own above what the tab says: the two are
+/* What clears the part, on a row of its own above what the part says: the two are
    different kinds of thing, and mixing them put Reset All beside a switch that
-   changes what the tab shows. */
-.illuminus-tab__tools {
+   changes what the part shows. */
+.illuminus-part__tools {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -2420,7 +2431,7 @@
    window, and this says it again over the controls it opened — a person who
    has scrolled a thousand settings should not have to look back to the tree to
    remember what they are editing. */
-.illuminus-tab__name {
+.illuminus-part__name {
   flex: 1;
   min-width: 0;
   margin: 0;
@@ -2434,13 +2445,13 @@
   color: var(--color-text-light-highlight, #f0f0e0);
 }
 
-.illuminus-tab__head {
+.illuminus-part__head {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
 }
 
-.illuminus-tab__head .illuminus-info {
+.illuminus-part__head .illuminus-info {
   margin-right: auto;
 }
 
@@ -2448,6 +2459,17 @@
   flex: 0 0 auto;
   width: auto;
   font-size: var(--font-size-12, 12px);
+}
+
+/* Open everything, or shut it. Icon-only: the settings column is narrow, and a
+   third worded button beside Reset Part and Reset All pushed the part's own
+   name off the row. Which way it will go next is in the icon and the tooltip. */
+.illuminus-fold-all {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 0.4rem;
+  font-size: var(--font-size-12, 12px);
+  line-height: 1.6;
 }
 
 .illuminus-fields {
@@ -2461,7 +2483,7 @@
 
 /* --- Sections ----------------------------------------------------------- */
 
-/* With ~400 controls, collapsible sections are what keeps a tab navigable. */
+/* With ~400 controls, collapsible sections are what keeps a part navigable. */
 .illuminus-section {
   border: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 20%));
   border-radius: 4px;
@@ -2559,12 +2581,13 @@
 
 /* A run is a disclosure: the summary is one row saying what the run holds, and
    the controls open under it. A run the style says nothing about starts folded,
-   so a tab opens showing what the style does rather than what it could do. */
+   so a part opens showing what the style does rather than what it could do. */
 .illuminus-box__run {
   display: block;
 }
 
 .illuminus-box__summary,
+.illuminus-run__summary,
 .illuminus-cluster__summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr);
@@ -2576,10 +2599,11 @@
 }
 
 .illuminus-box__summary::-webkit-details-marker,
+.illuminus-run__summary::-webkit-details-marker,
 .illuminus-cluster__summary::-webkit-details-marker { display: none; }
 
 /* What the run holds, in its own values. Dimmed where there is nothing to say,
-   so a tab reads at a glance as what is set and what is not. */
+   so a part reads at a glance as what is set and what is not. */
 .illuminus-run-says {
   min-width: 0;
   overflow: hidden;
@@ -2600,6 +2624,7 @@
 }
 
 details[open] > .illuminus-box__summary > .illuminus-run-chevron,
+details[open] > .illuminus-run__summary > .illuminus-run-chevron,
 details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   transform: rotate(90deg);
 }
@@ -2813,7 +2838,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 .illuminus-box__shape { margin-top: 0.3rem; }
 
 /* Found by the search box, and shown whichever side is chosen: a control the
-   filter says exists has to be a control the tab will show. */
+   filter says exists has to be a control the part will show. */
 .illuminus-box__run .illuminus-box__part.is-found { display: block; }
 
 /* Only one of the two names shows: the full one everywhere, the short one
@@ -2887,13 +2912,28 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   opacity: 0.85;
 }
 
-/* A slider and a number box side by side in an eighth of the tab is a slider
+/* A slider and a number box side by side in an eighth of the part is a slider
    nobody can drag; the number is what a person types into here. */
 .illuminus-cluster .illuminus-field input[type="range"] { display: none; }
 
 .illuminus-cluster .illuminus-field input[type="number"] { width: 100%; }
 
 .illuminus-cluster.is-state-hidden { display: none; }
+
+/* The plain controls between two of a category's lines, folded behind the one
+   row that says what they hold. They keep the layout they had — a run is a
+   disclosure around the same rows, not a different way of drawing them — so the
+   controls inside sit against the run's own edge rather than being indented
+   again by it. */
+.illuminus-run {
+  display: block;
+}
+
+.illuminus-run__name {
+  font-weight: 600;
+}
+
+.illuminus-run.is-state-hidden { display: none; }
 
 /* A run with nothing left to show, and a family with no runs left, go with what
    they held — the same way a line between runs does. */
@@ -2965,7 +3005,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
    explanation with controls in it. */
 .illuminus-field__hint,
 .illuminus-section__hint,
-.illuminus-tab__hint {
+.illuminus-part__hint {
   display: none;
 }
 
@@ -3108,19 +3148,19 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   opacity: 0.6;
 }
 
-/* --- Tab badges --------------------------------------------------------- */
+/* --- Part badges --------------------------------------------------------- */
 
-/* Keep each tab on one line: without this the changed-count badge wraps below
+/* Keep each part on one line: without this the changed-count badge wraps below
    the label, and a two-word label splits around it. The strip itself wraps
-   between tabs instead, so narrowing the window never hides one. */
+   between parts instead, so narrowing the window never hides one. */
 .illuminus-editor nav.tabs {
   flex-wrap: wrap;
   row-gap: 0.15rem;
 }
 
-/* Each tab reads as a button: an outline it keeps whether or not it is chosen,
+/* Each part reads as a button: an outline it keeps whether or not it is chosen,
    so the strip does not shift when the selection moves, and a filled, brighter
-   one for the tab being edited. */
+   one for the part being edited. */
 .illuminus-editor nav.tabs [data-tab] {
   white-space: nowrap;
   padding: 0.2rem 0.55rem;
@@ -3232,7 +3272,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   pointer-events: none;
 }
 
-/* While a tab is open, the parts of the sample it does not style step back.
+/* While a part is open, the parts of the sample it does not style step back.
    Dimmed rather than hidden: a heading alone on a blank page says nothing about
    how it sits against the text around it. */
 .illuminus-preview__frame [data-part] {
@@ -3270,7 +3310,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   display: none;
 }
 
-/* A tab with no matches stays clickable — it is dimmed, not hidden, so the
+/* A part with no matches stays clickable — it is dimmed, not hidden, so the
    strip does not reflow under the pointer while the filter is being typed. */
 .illuminus-editor nav.tabs [data-tab].is-filtered-out {
   opacity: 0.35;
@@ -3416,24 +3456,24 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   min-height: 100%;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="boxStyles"].active) .illuminus-preview__window,
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="imageStyles"].active) .illuminus-preview__window,
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="tagStyles"].active) .illuminus-preview__window {
+.illuminus-editor__layout:has(.illuminus-part[data-tab="boxStyles"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-part[data-tab="imageStyles"].active) .illuminus-preview__window,
+.illuminus-editor__layout:has(.illuminus-part[data-tab="tagStyles"].active) .illuminus-preview__window {
   display: none;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="boxStyles"].active)
+.illuminus-editor__layout:has(.illuminus-part[data-tab="boxStyles"].active)
   .illuminus-preview__family[data-family="boxStyles"],
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="imageStyles"].active)
+.illuminus-editor__layout:has(.illuminus-part[data-tab="imageStyles"].active)
   .illuminus-preview__family[data-family="imageStyles"],
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="tagStyles"].active)
+.illuminus-editor__layout:has(.illuminus-part[data-tab="tagStyles"].active)
   .illuminus-preview__family[data-family="tagStyles"] {
   display: flex;
 }
 
-/* The editor window stands in for what Edit Page opens. Only the tab that
-   styles it has a use for it, and while that tab is open it takes the pane over
-   as a family tab does — the journal mock says nothing about a window that is
+/* The editor window stands in for what Edit Page opens. Only the part that
+   styles it has a use for it, and while that part is open it takes the pane over
+   as a family part does — the journal mock says nothing about a window that is
    not the journal's. */
 .illuminus-preview__editor {
   display: none;
@@ -3442,15 +3482,15 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   padding: 8px;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="editor"].active) .illuminus-preview__window {
+.illuminus-editor__layout:has(.illuminus-part[data-tab="editor"].active) .illuminus-preview__window {
   display: none;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="editor"].active) .illuminus-preview__editor {
+.illuminus-editor__layout:has(.illuminus-part[data-tab="editor"].active) .illuminus-preview__editor {
   display: flex;
 }
 
-/* Its title bar is the point of the tab, so it is drawn whenever the piece is. */
+/* Its title bar is the point of the part, so it is drawn whenever the piece is. */
 .illuminus-preview__frame .illuminus-preview__editor .window-header {
   display: flex;
   align-items: center;
@@ -3500,23 +3540,23 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 }
 
 /* Like the sidebar, the mock title bar and edit button appear only while the
-   tab that styles them is open. */
+   part that styles them is open. */
 .illuminus-preview__frame .window-header,
 .illuminus-preview__frame .edit-container {
   display: none;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="window"].active) .illuminus-preview__frame .window-header {
+.illuminus-editor__layout:has(.illuminus-part[data-tab="window"].active) .illuminus-preview__frame .window-header {
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-/* Shown while the Window tab is open, and placed by the controls rather than by
+/* Shown while the Window part is open, and placed by the controls rather than by
    a number written here: the sample answers to Which Side, Distance From Edge
    and Distance From Top like the real one. Only `display` and `position` are
    the sample's own. */
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="window"].active) .illuminus-preview__frame .edit-container {
+.illuminus-editor__layout:has(.illuminus-part[data-tab="window"].active) .illuminus-preview__frame .edit-container {
   display: block;
   position: absolute;
 }
@@ -3562,7 +3602,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   overflow: hidden;
 }
 
-/* The sample's header takes the Title tab's own spacing, like a real journal —
+/* The sample's header takes the Title part's own spacing, like a real journal —
    it used to be given a margin of its own, which quietly overrode it. */
 .illuminus-preview__frame .journal-header {
   text-align: center;
@@ -3575,8 +3615,8 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 /* Core's sidebar layout is scoped to a real journal sheet, so the sample needs
    just enough of it to be representative. Appearance still comes entirely from
    the skeleton rules above. */
-/* The sample sidebar appears only while the Sidebar tab is open. Showing it
-   always would permanently halve the page preview for the sake of one tab. */
+/* The sample sidebar appears only while the Sidebar part is open. Showing it
+   always would permanently halve the page preview for the sake of one part. */
 .illuminus-preview__frame .journal-sidebar {
   display: none;
   flex: 0 0 auto;
@@ -3586,7 +3626,7 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   overflow: hidden;
 }
 
-.illuminus-editor__layout:has(.illuminus-tab[data-tab="sidebar"].active)
+.illuminus-editor__layout:has(.illuminus-part[data-tab="sidebar"].active)
   .illuminus-preview__frame .journal-sidebar {
   display: flex;
 }

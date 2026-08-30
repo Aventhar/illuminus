@@ -7,8 +7,8 @@ import { CSS_VAR_PREFIX } from "./constants.mjs";
  * adding a control is a one-line change here plus a rule in
  * `styles/illuminus.css` that consumes the emitted custom property.
  *
- * Structure: GROUPS -> sections -> fields. A group is one tab; a section is one
- * collapsible block within that tab. Nothing here ever collapses two CSS
+ * Structure: GROUPS -> sections -> fields. A group is one part; a section is one
+ * collapsible block within that part. Nothing here ever collapses two CSS
  * properties into one control — each side of a border, each corner of a box,
  * and each component of a shadow is separately addressable.
  *
@@ -46,9 +46,9 @@ const SIDES = ["Top", "Right", "Bottom", "Left"];
 const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
 
 /**
- * What a section's own order writes to ask for a line across the tab.
+ * What a section's own order writes to ask for a line across the part.
  *
- * A tab laid out by hand reads in runs — the lettering, then how it is spaced,
+ * A part laid out by hand reads in runs — the lettering, then how it is spaced,
  * then what is drawn around it — and a line between them says so without a
  * heading for each.
  */
@@ -766,7 +766,7 @@ function imageSections() {
  *
  * A page is not columned as a whole: each heading governs the text beneath it,
  * so a chapter opening can run wide while the section under it sets in two.
- * That is why these live on the heading tabs rather than on Body. The text
+ * That is why these live on the heading parts rather than on Body. The text
  * above the first heading follows level 1, because the page's title is a level
  * 1 heading — so nothing needs a set of its own.
  *
@@ -804,7 +804,7 @@ function outlineFields(prefix = "") {
 /**
  * The order a heading level's categories read in, and the runs inside each.
  *
- * Laid out by hand, as the Title and Page tabs are: the lettering and its
+ * Laid out by hand, as the Title and Page parts are: the lettering and its
  * shadow are one question, the fill and its picture and both its shadows are
  * another, and the edges keep their corners.
  */
@@ -899,7 +899,7 @@ function bannerSections(defaults = {}) {
 }
 
 /* -------------------------------------------- */
-/*  Groups (one tab each)                       */
+/*  Groups (one part each)                       */
 /* -------------------------------------------- */
 
 /**
@@ -1127,7 +1127,7 @@ export const GROUPS = [
     id: "sidebar",
     icon: "fa-solid fa-list-tree",
     // Styles the window's contents panel rather than anything on the page, so
-    // its tab sits with the Window tab at the end of the strip.
+    // its part sits with the Window part at the end of the strip.
     strip: "end",
     sections: [
       {
@@ -1169,7 +1169,7 @@ export const GROUPS = [
           ...textStyleField("activeTextStyle", "400", "normal"),
           // Named for the entry rather than for the state alone. `hoverBackground`
           // was the entry's fill, but the panel's own fill is `background` in
-          // the same tab — so the pointed-at rule the generator mirrors for the
+          // the same part — so the pointed-at rule the generator mirrors for the
           // panel read the entry's color and painted the whole panel with it
           // the moment a pointer entered it.
           col("entryBackground", "entryGradientFrom", "entryGradientTo", "entryGradientAngle", "entryFrost", "#00000000"), ...gradientFields("entry"), ...frostFields("entry"), ...imageFields("entry"),
@@ -1282,7 +1282,7 @@ export const GROUPS = [
 {
     id: "window",
     icon: "fa-solid fa-window-maximize",
-    // Styles the frame rather than anything on the page, so its tab sits at the
+    // Styles the frame rather than anything on the page, so its part sits at the
     // end of the strip. Its position in this list is unaffected.
     strip: "end",
     sections: [
@@ -1448,7 +1448,7 @@ export const GROUPS = [
   {
     id: "page",
     icon: "fa-solid fa-scroll",
-    // Laid out by hand, as the Title tab is: the fill, its picture and both its
+    // Laid out by hand, as the Title part is: the fill, its picture and both its
     // shadows are one question about the surface, and the edges and their
     // corners are one question about what is drawn around it.
     order: ["layout", "background", "padding", "border"],
@@ -1548,7 +1548,7 @@ export const GROUPS = [
     })
   },
 
-  // Levels 4 to 6 carried on looking like level 3 until they got tabs of their
+  // Levels 4 to 6 carried on looking like level 3 until they got parts of their
   // own. Their defaults continue the same progression, so a style written
   // before they existed keeps the look it had.
   {
@@ -1585,8 +1585,8 @@ export const GROUPS = [
   {
     id: "body",
     icon: "fa-solid fa-paragraph",
-    // Laid out by hand, as the tabs before it are: what a run reads in is said
-    // by a line across the tab rather than by a category of its own.
+    // Laid out by hand, as the parts before it are: what a run reads in is said
+    // by a line across the part rather than by a category of its own.
     order: ["text", "paragraph", "dropCap", "marks", "code", "codeBlock", "dividers"],
     sections: [
       {
@@ -2213,7 +2213,7 @@ export const GROUPS = [
     // positions itself. It is styled apart from the journal window: the two are
     // different windows doing different jobs, and a frame that reads well around
     // a page of prose is not always the one to write in. What is written *on*
-    // is the page's own surface, which the Page tab paints — the same surface as
+    // is the page's own surface, which the Page part paints — the same surface as
     // the page it will become, so that what you type looks like what you will
     // read.
     strip: "end",
@@ -2402,9 +2402,9 @@ export const GROUPS = [
         // Laid out as the five picture treatments are, which the plain picture
         // was not: it could not be floated, flipped, cropped to a shape, held
         // in view, turned or nudged. Three of theirs are left out on purpose.
-        // Align is one: a treatment's emits the very margins this tab already
+        // Align is one: a treatment's emits the very margins this part already
         // offers, so both would write one property. Max Width is another — this
-        // tab states it as a share of the column, which is the more useful
+        // part states it as a share of the column, which is the more useful
         // answer for a picture, and `layoutFields` would add a second in pixels.
         // And a background picture is the third, which an `<img>` cannot carry:
         // its fill sits behind the picture rather than behind content, so there
@@ -2556,7 +2556,7 @@ function stateTwin(original, name, word) {
   // corners of a button overwrote its other states' corners with the ordinary
   // value, which reads as those settings not working.
   const link = original.link ? { link: stateNameFor(word, original.link) } : {};
-  // Marked as derived, because a name is not enough to tell one by. A tab can
+  // Marked as derived, because a name is not enough to tell one by. A part can
   // declare a hovered *element* by hand — the contents panel's pointed-at entry
   // has a picture of its own, whose strength of 100% is meant — and those
   // controls wear "hover" in their name exactly as a derived twin does. Only a
@@ -2657,12 +2657,12 @@ for (const group of GROUPS) {
 }
 
 /**
- * Tabs laid out by hand, as data.
+ * Parts laid out by hand, as data.
  *
- * The tabs done earliest say their arrangement in their own literal — an
- * `order` on the group and one on each section. That reads well for a tab whose
- * categories were also rewritten, and badly for seven tabs at once, so the rest
- * say it here: which categories the tab has, in which order, and what is in each
+ * The parts done earliest say their arrangement in their own literal — an
+ * `order` on the group and one on each section. That reads well for a part whose
+ * categories were also rewritten, and badly for seven parts at once, so the rest
+ * say it here: which categories the part has, in which order, and what is in each
  * of them. A control named for a category it did not belong to is moved into it,
  * which is how a category can hold what were two before.
  *
@@ -2702,7 +2702,7 @@ const LAYOUTS = {
       DIVIDER, "glowOffsetX", "glowOffsetY", "glowSize", "glowColor",
       DIVIDER, "shadowOffsetX", "shadowOffsetY", "shadowBlur", "shadowSpread", "shadowColor",
       // In the order a treatment reads them, so the plain picture and a treated
-      // one are the same tab with the same settings in the same places.
+      // one are the same part with the same settings in the same places.
       DIVIDER, "float", "width", "clear", "flip",
       DIVIDER, "pictureShape", "pictureCrop", "pictureFrom",
       DIVIDER, "display", "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow",
@@ -3196,12 +3196,12 @@ for (const [key, layout] of Object.entries(LAYOUTS)) {
         home.set(name, section);
       }
     }
-    // A table may lay out categories without restating the tab's own order of
+    // A table may lay out categories without restating the part's own order of
     // them — which is what an entry does when it exists only to share a list
-    // with another tab, as the plain box shares its treatments' two.
+    // with another part, as the plain box shares its treatments' two.
     if (layout.order) {
       group.order = layout.order;
-      // A category the layout does not name is one the tab no longer has; its
+      // A category the layout does not name is one the part no longer has; its
       // controls have been moved out by now, so an empty one simply goes.
       group.sections = group.sections.filter((section) =>
         layout.order.includes(section.id) || section.fields.length);
@@ -3212,21 +3212,21 @@ for (const [key, layout] of Object.entries(LAYOUTS)) {
 }
 
 /* -------------------------------------------- */
-/*  Tabs that hold parts of their own            */
+/*  Parts that hold parts of their own            */
 /* -------------------------------------------- */
 
 /**
- * Categories lifted out of the tab that held them, into parts of their own.
+ * Categories lifted out of the part that held them, into parts of their own.
  *
  * The contents panel and the page editor are the two largest things a style can
  * say anything about — seven hundred and nine hundred settings apiece — and
- * both were one tab. A reader looking for the search box's fill had one entry
+ * both were one part. A reader looking for the search box's fill had one entry
  * in the tree standing for all of it.
  *
  * They are split the way the page is: the thing itself keeps what is true of
  * the whole of it (its fill, its edges, the room inside it), and each piece it
  * holds becomes a part with its own entry, its own count and its own hovered
- * state. Every setting keeps the name it had — only the tab it belongs to
+ * state. Every setting keeps the name it had — only the part it belongs to
  * changes — so a migration is a table of which category went where.
  *
  * Run after the layout pass, because that is what settles which category holds
@@ -3249,7 +3249,7 @@ export const SPLIT = {
   ]
 };
 
-/** Which tab each moved category now belongs to, for the migration to read. */
+/** Which part each moved category now belongs to, for the migration to read. */
 export const SPLIT_HOME = Object.fromEntries(
   Object.entries(SPLIT).flatMap(([parentId, parts]) =>
     parts.flatMap((part) => part.sections.map((sectionId) => [`${parentId}.${sectionId}`, part.id]))));
@@ -3269,7 +3269,7 @@ for (const [parentId, parts] of Object.entries(SPLIT)) {
     made.push({
       id: part.id,
       icon: part.icon,
-      // Where the tab it came from sits, since it is part of that thing.
+      // Where the part it came from sits, since it is part of that thing.
       strip: parent.strip,
       order: taken.map((one) => one.id),
       sections: taken
@@ -3307,7 +3307,7 @@ export function ordinaryNameFor(name) {
 const HOVER_TWIN_ELSEWHERE = new Map([["sidebarEntries.hoverColor", "color"]]);
 
 /**
- * The field a hovered control falls back to when its tab's hovered state is
+ * The field a hovered control falls back to when its part's hovered state is
  * switched off, or null when the ordinary element paints nothing there.
  *
  * Only the same section is searched, so that a hovered entry fill does not fall
@@ -3332,7 +3332,7 @@ export function ordinaryTwinFor(group, hovered) {
 for (const group of GROUPS) {
   const taken = new Set(group.sections.flatMap((section) => section.fields.map((field) => field.name)));
   for (const section of group.sections) {
-      // Every section of every tab, the window frame and the contents panel
+      // Every section of every part, the window frame and the contents panel
       // included. They were left out on the grounds that neither is hovered as
       // an object — but a panel a pointer is inside is a thing that can answer
       // to it, and deciding for somebody which of their settings could
@@ -3397,17 +3397,17 @@ for (const group of GROUPS) {
  * controls one under another and eight in a row read as a wall. Drawn as a box
  * they are one question with eight answers: the inner four inside the box and
  * the outer four around it, each where it belongs. A category cannot hold half
- * a picture, so the two are merged wherever a tab has both.
+ * a picture, so the two are merged wherever a part has both.
  */
 for (const group of GROUPS) {
   const inner = group.sections.find((section) => section.id === "padding");
   const outer = group.sections.find((section) => section.id === "margin");
   if (!inner) continue;
   // Named for what it is either way: a category holding only the space inside
-  // draws the same box with nothing around it, and calling one tab's "Inner
+  // draws the same box with nothing around it, and calling one part's "Inner
   // Spacing" what another calls "Spacing" would be two names for one picture.
   inner.id = "spacing";
-  // The tab's own order names its categories, so it follows the rename whether
+  // The part's own order names its categories, so it follows the rename whether
   // or not there is an outer half to merge in.
   if (group.order) group.order = group.order.map((id) => (id === "padding" ? "spacing" : id));
   if (!outer) continue;
@@ -3422,7 +3422,7 @@ for (const group of GROUPS) {
     inner.dividers = new Set([...(inner.dividers ?? []), ...outer.dividers]);
   }
   group.sections = group.sections.filter((section) => section !== outer);
-  // A tab that lays itself out names its categories and their controls, so both
+  // A part that lays itself out names its categories and their controls, so both
   // lists follow the merge rather than being rewritten by hand forty times.
   if (group.order) group.order = group.order.filter((id) => id !== "margin");
 }
@@ -3432,7 +3432,7 @@ for (const group of GROUPS) {
  *
  * Same reasoning as the spacing above: they are one picture — a box with a
  * thickness on each edge and a radius at each corner — and a category cannot
- * hold half of one. Most tabs already keep them together; this is for the rest.
+ * hold half of one. Most parts already keep them together; this is for the rest.
  */
 for (const group of GROUPS) {
   const edges = group.sections.find((section) => section.id === "border");
@@ -3477,13 +3477,13 @@ for (const group of GROUPS) {
 /* -------------------------------------------- */
 
 /**
- * Every tab reads the same way, so that knowing where a control lives on one of
+ * Every part reads the same way, so that knowing where a control lives on one of
  * them is knowing where it lives on all of them: what the element is made of
  * first — its text, then its fill, its inner spacing, its edges, its shadow,
  * the room around it, and how much room it takes — and after that the parts
  * that live inside it, roughly in the order you meet them reading down the page.
  *
- * A tab lists whichever of these it has and skips the rest, and the two
+ * A part lists whichever of these it has and skips the rest, and the two
  * decorations that belong to lettering rather than to a box — a link's
  * underline, a body's opening capital — sit up with the text instead of down
  * with the paint.
@@ -3508,9 +3508,9 @@ const SECTION_ORDER = [
 ];
 
 /**
- * And within a section that more than one tab carries, the controls come in one
+ * And within a section that more than one part carries, the controls come in one
  * order too. Only the shared sections are listed: a section that exists on a
- * single tab has nothing to be consistent with, and its author's order is
+ * single part has nothing to be consistent with, and its author's order is
  * usually the meaningful one.
  *
  * Sections built by `spacingFields`, `borderFields` and their like are already
@@ -3552,7 +3552,7 @@ const FIELD_ORDER = {
 /**
  * The order the parts of one thing are set in, wherever they are set.
  *
- * `FIELD_ORDER` says it for the sections every tab shares, by naming controls
+ * `FIELD_ORDER` says it for the sections every part shares, by naming controls
  * outright. A section with its own vocabulary — a table's header row, a
  * definition's term — spells the same properties with a prefix, so the order is
  * read off the suffix instead. Controls whose suffix is not listed keep the
@@ -3596,12 +3596,12 @@ const suffixRank = (name, prefix) => {
 for (const group of GROUPS) {
   for (const section of group.sections) {
     if (!(group.order ?? SECTION_ORDER).includes(section.id)) {
-      throw new Error(`${group.id}: section "${section.id}" has no place in ${group.order ? "this tab's own order" : "SECTION_ORDER"}`);
+      throw new Error(`${group.id}: section "${section.id}" has no place in ${group.order ? "this part's own order" : "SECTION_ORDER"}`);
     }
     // A section may state its own order, and put a divider between the runs it
-    // reads in: "---" in the list is a line drawn across the tab before the
+    // reads in: "---" in the list is a line drawn across the part before the
     // control that follows it. The shared pass below is what every other section
-    // uses; this is for a tab somebody has laid out by hand.
+    // uses; this is for a part somebody has laid out by hand.
     if (section.order) {
       const wanted = section.order.filter((name) => name !== DIVIDER);
       const missing = section.fields.filter((field) =>
@@ -3658,7 +3658,7 @@ for (const group of GROUPS) {
 
     // A control's other states sit against it, in the order the switch offers
     // them: ordinary, pointed at, selected. Switching states then hides controls
-    // without shuffling the ones that stay, and a tab reads the same whichever
+    // without shuffling the ones that stay, and a part reads the same whichever
     // state is on show.
     // Both spellings of a state occur — `hoverColor` and `buttonHoverColor` —
     // so the word is taken out wherever it sits.
@@ -3684,8 +3684,8 @@ for (const group of GROUPS) {
     }
     section.fields = ordered;
   }
-  // A tab may state the order of its own sections, for one laid out by hand;
-  // every other tab takes the shared one, which is what keeps them alike.
+  // A part may state the order of its own sections, for one laid out by hand;
+  // every other part takes the shared one, which is what keeps them alike.
   const sections = group.order ?? SECTION_ORDER;
   group.sections.sort((a, b) => sections.indexOf(a.id) - sections.indexOf(b.id));
 }

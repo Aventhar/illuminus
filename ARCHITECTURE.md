@@ -40,6 +40,7 @@ block per style in use.
 | `scripts/style-injector.mjs` | Putting the compiled CSS into the document, and on the right journals |
 | `scripts/migrations.mjs` | Forward migration of stored styles, one function per schema version |
 | `scripts/apps/style-editor.mjs` | The three-column editor: the parts tree, the sample, the settings |
+| `scripts/run-names.mjs` | What a control's name says about it: which state it belongs to, and which run of a category it sits in |
 | `scripts/apps/style-manager.mjs` | The style library |
 | `scripts/apps/color-picker.mjs` | The color picker and its eyedropper |
 | `scripts/editor-menu.mjs` | The **Illuminus** menu in the page editor: boxes, tags, pictures, lists, tables, templates |
@@ -75,7 +76,7 @@ tools/sandbox.sh down
 
 **`validate.mjs`** cross-checks the things that rot silently: every custom property is
 emitted by the schema *and* consumed by the stylesheet, in both directions; no two
-controls in a tab share a name; every field, section and choice has a label and a hint;
+controls in a part share a name; every field, section and choice has a label and a hint;
 presets reference only real fields; hostile values cannot escape a declaration; and an
 exported archive really unzips, proved with the operating system's own `unzip` rather
 than with our reader agreeing with our writer.
@@ -116,7 +117,7 @@ Every schema change is three edits and two commands:
 1. The field in `scripts/style-schema.mjs`.
 2. A rule in `styles/illuminus.css` consuming its custom property — or a line in
    `tools/generate-block-css.mjs` if it belongs to a family.
-3. Name it in the tab's order list, if that tab states its own order.
+3. Name it in the part's order list, if that part states its own order.
 4. `node tools/generate-lang.mjs` and, if needed, `node tools/generate-block-css.mjs`.
 5. `node tools/validate.mjs`, which fails if you missed any of the above.
 
@@ -134,7 +135,7 @@ between the stored one and the current, so a version 1 style loaded today passes
 all of them.
 
 The most recent, version 11, is a good example of the shape they take: the contents panel
-and the page editor each became a tab holding parts of its own, every setting keeping the
+and the page editor each became a part holding smaller ones of its own, every setting keeping the
 name it had, so the migration reads the split table backwards out of the schema rather
 than repeating it — and a part added later cannot be forgotten.
 
