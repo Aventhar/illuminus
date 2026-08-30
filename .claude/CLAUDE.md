@@ -1206,6 +1206,23 @@ Filtering and the switch can hide the same control for different reasons, so the
 different classes: a filter hit un-hides a state-folded control (`is-state-suppressed`)
 rather than the filter lying about what exists.
 
+**A part is not a tab, and three other things are.** The parts of a journal are a
+tree, and nothing a person reads calls one a tab — `validate.mjs` [17] holds
+that. But the word is right in three other places, and a sweep will eat all
+three if it is not told:
+
+- **Foundry's contract keeps it.** `changeTab`, `tabGroups`, `data-tab`, and
+  `.tabs` are core's, and `changeTab` finds a pane through
+  `.tabs [data-group][data-tab]`. Ours were renamed — `.illuminus-part`,
+  `partIds` — and these were not.
+- **A browser tab is a browser tab.** Four comments about CDP, print frames and
+  a `data:` URI opening blank came out saying "part", which is nonsense.
+- **A paper tab is the good word.** A box with only its two right-hand corners
+  rounded does look like an index tab, and 152 hints say so.
+
+Sweep comments only — never code — and read the diff for the word in its other
+senses rather than trusting the pass.
+
 ## The two windows, and the shadows
 
 **The Journal Editor part styles the window Edit Page opens**, and every rule it writes
