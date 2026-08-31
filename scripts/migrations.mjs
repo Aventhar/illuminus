@@ -460,6 +460,30 @@ function v11_to_v12(settings) {
   return out;
 }
 
+/**
+ * Version 12 -> 13.
+ *
+ * A caption had one gap and no way to move it anywhere else: on a picture it
+ * was a lone `margin-top`, on a table a `padding-bottom` holding the table off
+ * it. Both are a proper Outer Spacing now, four sides like everything else, so
+ * the one number a style stored becomes the side it used to be.
+ *
+ * Which side depends on which caption it was, and that is read from the schema
+ * rather than listed: a table's caption sits above what it names, so its gap
+ * was underneath; a picture's sits below, so its gap was on top.
+ */
+function v12_to_v13(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  for (const group of GROUPS) {
+    const stored = out[group.id];
+    if (!stored || stored.captionSpacing === undefined) continue;
+    const captions = group.sections.some((section) => section.id === "tableCaption");
+    stored[captions ? "captionMarginBottom" : "captionMarginTop"] = stored.captionSpacing;
+    delete stored.captionSpacing;
+  }
+  return out;
+}
+
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
@@ -471,7 +495,8 @@ const MIGRATIONS = {
   8: v8_to_v9,
   9: v9_to_v10,
   10: v10_to_v11,
-  11: v11_to_v12
+  11: v11_to_v12,
+  12: v12_to_v13
 };
 
 /**

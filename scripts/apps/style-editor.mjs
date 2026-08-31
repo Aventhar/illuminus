@@ -1,7 +1,7 @@
 import { wrapHeadingSections } from "../heading-sections.mjs";
 import { markFolds } from "../collapsible.mjs";
 import { MODULE_ID, STYLED_CLASS, STYLE_ATTR, SETTINGS, getSetting, setSetting, log } from "../constants.mjs";
-import { GROUPS, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
+import { GROUPS, SPLIT, defaultSettings, cleanSettings, groupFields } from "../style-schema.mjs";
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
 import { openColorPicker, closeColorPicker } from "./color-picker.mjs";
@@ -416,13 +416,20 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   #sizeTimer;
 
   /**
-   * How large the sample is drawn, as a percentage.
+   * How large the sample is drawn, as a percentage of life size.
+   *
+   * 100 means the sample is drawn at exactly the size the journal itself is,
+   * so a setting can be judged against the real thing rather than against a
+   * smaller copy of it. It starts at 75, which is what the sample was always
+   * drawn at — that three quarters used to be stated separately in the
+   * stylesheet and multiplied by this, so the control said 100% while showing
+   * three quarters.
    *
    * Held on the window rather than in the markup for the same reason the open
    * branches are: the editor re-renders on every change, and a sample that
    * snapped back to full size mid-edit would be worse than no zoom at all.
    */
-  #sampleZoom = 100;
+  #sampleZoom = 75;
 
   /**
    * Whether the sample is deaf to the pointer.
@@ -1048,7 +1055,31 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     }
   }
 
+  /**
+   * Which preview the pane should be showing.
+   *
+   * The contents panel and the page editor each have a mock of their own, and
+   * the rules revealing them named those two parts alone — so opening one of
+   * the parts *inside* them showed the ordinary journal instead, which is what
+   * the pane shows when nothing has claimed it. Nine parts, every one of them
+   * lifted out of one of those two.
+   *
+   * Read from `SPLIT`, which is the table that did the lifting, rather than
+   * from a list beside it: a part lifted out tomorrow is covered without
+   * anyone remembering. The stamp is what the stylesheet keys on now, so the
+   * question is asked in one place rather than once per rule.
+   */
+  #markPreview() {
+    const layout = this.element.querySelector(".illuminus-editor__layout");
+    if (!layout) return;
+    const showing = this.#activeGroupId();
+    const parent = Object.entries(SPLIT).find(([, parts]) =>
+      parts.some((part) => part.id === showing))?.[0];
+    layout.dataset.preview = parent ?? this.tabGroups.sheet ?? showing;
+  }
+
   #focusSample() {
+    this.#markPreview();
     const frame = this.element.querySelector(".illuminus-preview__frame");
     if (!frame) return;
     const parts = [...frame.querySelectorAll("[data-part]")];
@@ -1073,9 +1104,15 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Put the focused piece of the sample where it can be seen.
    *
    * Dimming the rest is no help if the piece in question is below the fold —
-   * the Tables part would show a grayed page and no table. The frame is scrolled
-   * by hand rather than with `scrollIntoView`, which would scroll the editor
-   * window as well.
+   * the Tables part would show a grayed page and no table. Scrolled by hand
+   * rather than with `scrollIntoView`, which would scroll the editor window as
+   * well.
+   *
+   * Whatever actually scrolls is asked for rather than assumed. The frame used
+   * to be the only scroll container in the sample; now the pages scroll inside
+   * a journal-sized page and the panel's list inside the panel, exactly as they
+   * do in a real journal, so the box to move is the nearest one above the piece
+   * that has anywhere to move to.
    */
   #scrollSampleTo(part, frame) {
     if (!part) return;
@@ -1083,13 +1120,24 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     // pane that was hidden a moment ago has no size yet — every rectangle
     // reads as zero, and scrolling to zero is scrolling nowhere.
     requestAnimationFrame(() => {
+      const view = IlluminusStyleEditor.#scrollerFor(part, frame);
+      if (!view) return;
       const target = part.getBoundingClientRect();
-      const view = frame.getBoundingClientRect();
-      if (!view.height) return;
-      if (target.top >= view.top && target.bottom <= view.bottom) return;
-      const offset = target.top - view.top + frame.scrollTop;
-      frame.scrollTo({ top: Math.max(0, offset - 16), behavior: "smooth" });
+      const box = view.getBoundingClientRect();
+      if (!box.height) return;
+      if (target.top >= box.top && target.bottom <= box.bottom) return;
+      const offset = target.top - box.top + view.scrollTop;
+      view.scrollTo({ top: Math.max(0, offset - 16), behavior: "smooth" });
     });
+  }
+
+  /** The nearest box above this one that scrolls, or the frame if none does. */
+  static #scrollerFor(node, frame) {
+    for (let at = node.parentElement; at && at !== frame; at = at.parentElement) {
+      const how = getComputedStyle(at).overflowY;
+      if ((how === "auto" || how === "scroll") && at.scrollHeight > at.clientHeight + 1) return at;
+    }
+    return frame;
   }
 
   /**

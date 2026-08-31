@@ -19,6 +19,55 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **The sample fills its pane at every zoom.** Above 100% it shrank into the
+  top-left corner instead of magnifying — a percentage inside a zoomed box
+  already resolves in that box's own units, and it was being divided by the zoom
+  a second time.
+- **The sample's zoom says what it means.** The sample was drawn at three
+  quarters, stated in the stylesheet and multiplied by the zoom control — so
+  "100%" showed three quarters of life size, and because the rule scaling it
+  named only part of the page, the journal's title escaped it and drew a third
+  larger than the Heading 1 beneath it. There is one zoom now, it governs the
+  whole sample, and **100% is life size**: the sample drawn at the size the
+  journal itself is, so a setting can be judged against the real thing. It
+  starts at 75%, which is what you have been looking at all along, and the
+  slider runs from 25% since the old floor of 50% meant 37.5%.
+
+- **The contents panel's sample shows what a contents panel actually holds.**
+  Foundry draws four small controls beside the search box — a lock, the view
+  mode, the search mode, and the button that folds the panel away — and three at
+  the foot: a chevron either side of New Page. The sample had the box and one
+  plain button, so the Panel Buttons part had almost nothing to show and the
+  Search Box part nothing beside it. It carries all eight now, with Foundry's
+  own classes and icons, so what the controls paint is what a reader will see.
+  The box and the buttons keep to the top and bottom of the pane as they keep to
+  a window's, which is also how the buttons became visible at all: the panel
+  stands beside a whole page and is some two thousand pixels tall, so its foot
+  had been sitting far below anything anybody could scroll to.
+
+- **A caption has room on every side.** A table's caption and a picture's each
+  had a single gap — one holding the table off it, one holding it off the
+  picture — and no way to move it anywhere else. Both have a proper Outer
+  Spacing now, four sides named and drawn like every other part's, on all twelve
+  parts that have a caption. A style saved before this keeps the gap it had:
+  the number it stored becomes the side it used to be, under it for a table and
+  above it for a picture. Schema version 13.
+
+- **A table can be sized to what it holds.** Width Fits sits beside Width on
+  every table and its five treatments: leave it following the Width, shrink the
+  table to exactly what its contents need with every cell on one line, or
+  squeeze it as narrow as it will go. Measured on one table, same contents
+  throughout: the width above gave 500 pixels, the contents 290 on a single
+  line, the narrowest 48 over eight. Left to follow the Width it says nothing
+  whatever, so a style that has not touched it is unchanged.
+
+- **A part inside the contents panel or the page editor shows that thing's own
+  preview.** Opening the panel or the page editor swapped the Live Sample for a
+  mock of it; opening one of the nine parts *inside* them — Page Entries, the
+  Toolbar, the Drop-downs — showed the ordinary journal instead, which is what
+  the pane shows when nothing has claimed it. Which preview to show is worked
+  out from the table that lifted those parts out of their parents, so a part
+  lifted out later is covered without a rule of its own.
 - **Every part of a journal lights its own piece of the sample.** Opening the
   contents panel or the page editor showed that thing picked out and the rest
   dimmed, but opening one of the parts *inside* them — Page Entries, Sub-headings,
@@ -240,6 +289,38 @@ Two conventions worth knowing before you read it:
 
 ### Fixed
 
+- **A category row in the sample is the row a journal draws.** It was 30 pixels
+  tall and only as wide as its word, where a journal draws it 48 and the full
+  width of the panel — so the same box came out a different shape, and setting
+  its Inner Spacing to nothing changed none of it, because none of it was
+  padding. Core states that height on the list itself and its typeface on the
+  row, on a selector naming a real journal sheet that the sample is not inside.
+  The sample now quotes both, so an unset Typeface shows what a journal shows.
+- **The Live Sample is a window's worth of room, and the page scrolls inside
+  it.** It used to hold the whole page at once and scroll the pane instead,
+  which made the page's own surface as tall as everything written on it — 2,399
+  pixels against a real journal's 664. A background picture set to fill the area
+  was then stretched over a box three and a half times too tall, so it came out
+  magnified, flatter and darker than the same picture in the journal it stands
+  for. The sample is now shaped like the thing it represents: the surface is the
+  window's height and clips, the pages scroll within it, and the contents panel
+  beside them is simply as tall as the window, which is how its buttons got back
+  to the foot where a reader would look for them.
+- **The Live Sample is no longer darker than the journal it stands for.** What
+  is not in focus is dimmed and desaturated, and a part that had faded back up
+  was left carrying a filter that changed no color at all — but made it a
+  stacking context, so everything blending inside it composited against a
+  different backdrop than a real journal's does. The panel and the page now
+  match a real one exactly, measured property by property.
+- **The contents panel in the sample is the height of the pane.** It stretched to
+  the height of the whole sample page, so the buttons at its foot were some two
+  thousand pixels below anything you could scroll to.
+- **A hovered value standing behind another control now reaches the page.**
+  Where one control answers first and another stands behind it — a drop-down
+  taking the editing bar's lettering where it states none of its own — the
+  pointed-at rules were written around the outer control alone, so the inner
+  one's hovered value could never be reached at all. Nine declarations were
+  wrong this way, every one of them in the page editor's own furniture.
 - **A search now opens what it found.** A control matching the filter inside a
   folded run was counted and not shown, so the count said one thing and the pane
   showed an unbroken row of shut runs. Clearing the box hands each run back the
@@ -332,6 +413,15 @@ Two conventions worth knowing before you read it:
   on `*`, and Chromium answers a stated one by drawing the bar itself and ignoring
   every `::-webkit-scrollbar` rule — so a style could only take the whole bar or
   leave it, and the bar it drew was a poor thing beside Foundry's.
+
+### Fixed
+
+- **A hovered value behind another control now reaches the page.** Where one
+  control answers first and another stands behind it — a drop-down taking the
+  toolbar's lettering where it states none of its own — the pointed-at rules
+  were written around the outer control only, so the inner one's hovered value
+  could never be reached. Nine declarations were wrong this way, all of them in
+  the page editor's own furniture.
 
 ## Earlier work, before the changelog began
 

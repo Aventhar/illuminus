@@ -722,9 +722,14 @@ in the template library.
   any timeout, time the steps in isolation rather than believing a note.
 - **A whole run is about fifteen minutes** (640 assertions, 15m25s), so budget
   for that rather than killing one that looks stuck.
-- **A probe measuring module behavior must reload the page first.** `.mjs`
-  changes need a refresh and the sandbox does not hot-reload, so a script that
-  connects and measures reads the code the page loaded, not the code on disk —
+- **A probe measuring module behavior must reload the page first, and that
+  includes the stylesheet.** `.mjs` changes need a refresh and the sandbox sets
+  `hotReload: false`, so CSS is no different: a script that
+  connects and measures reads the code *and the styles* the page loaded, not what
+  is on disk. This cost a full round on the sample's zoom — the fix was correct,
+  the screenshot after it was identical, and the numbers said the old rule was
+  still in force. Navigate to `/game` and wait for `game.ready` before measuring
+  anything you have just edited —
   and an A/B against `git stash` then shows no difference whichever way round it
   is run, which reads as the fix being pointless.
 - **No backticks in anything written into a template literal.** The checks and
@@ -848,6 +853,110 @@ written as a layout and naming something absent is not obviously wrong. When
 adding a control to a family, check `order` against `fields` in both directions;
 `tools/` has no check for the second, and the way to find them is to ask the
 schema rather than to read it.
+
+**An identity filter is not nothing — it is a stacking context.** The sample
+dims what is not in focus with `opacity` and `filter: saturate(0.35)`, and
+transitioning the filter left a part that had animated *back* computing
+`saturate(1)`. That changes no color whatever, and it makes every lit part a
+stacking context that a real journal's page and panel do not have — so anything
+blending inside them composited against a different backdrop and the sample came
+out darker than the thing it stands for. Reported as "the layers are not
+stacking right", which was exactly it. Transition `opacity` alone. The same goes
+for any identity transform or `backdrop-filter`, both already noted elsewhere in
+this file for the same reason.
+
+**`revert-layer` reverts to nothing in the sample, and that is a whole class of
+difference.** Core's journal CSS is scoped to `.sheet.journal-entry.application`,
+which the sample is not inside — so a control that defers hands the element back
+to *nobody* there while handing it back to Foundry in a real journal. The
+Category Rows typeface read as the interface's own Signika in the sample and
+Modesto Condensed in the journal, from the same unset control. Core's layout for
+that row is missing for the same reason: `--line-height: 32px` is stated on
+`.toc`, so the row was 30 pixels tall against a journal's 48 — reported as the
+category being "a different shape", and no amount of Inner Spacing touched it
+because none of it is padding.
+
+Where the sample must match, quote core's own declaration rather than approximate
+it, and write a deferring control's chain with core's value in place of the
+revert (`var(--ill-…-font, var(--font-h1))`) so a control that *is* set still
+wins. The wider fix would be to carry `sheet journal-entry application` on the
+preview frame so every core rule applies, as the export already does — untried,
+and it would want the whole preview stylesheet re-checked.
+
+**Measure the sample at life size, or not at all.** It sits inside a `zoom`,
+and two things follow that make a reading at any other setting a lie. A length
+is laid out, snapped to whole device pixels, and reported back divided by the
+zoom — a border set to 7 reads `6.66667px` at three quarters. And
+`getBoundingClientRect` inside the zoom answers in the sample's own layout
+coordinates while one outside it — the pane, the window — answers in the
+screen's, so comparing the two compares different units: a panel exactly as tall
+as its pane measured 760 against 572. Five checks failed this way the moment the
+sample gained a default zoom, none of them wrong about the thing they tested.
+Set the zoom slider to 100 first, dispatching `input` and not `change` so it is
+not kept as somebody's own setting.
+
+**The sample is a window, not a page — and a picture will tell you if it is
+not.** The pane used to be the scroll container, with the whole journal grown to
+its full height inside it, so the page's own surface was as tall as everything
+written on it: 2,399 pixels against a real journal's 664. Every one of the
+*computed* values matched a real journal exactly — same picture, same `cover`,
+same blend, same filter — and it still looked wrong, because `cover` sizes to
+the box and the box was three and a half times too tall. Reported as the sample
+looking "darker, and flatter", which is precisely what a magnified texture looks
+like. The sample now mirrors the thing it stands for: `.journal-entry-content`
+is `height: 100%` and clips, `.journal-entry-pages` is `flex: 1; height: 0` and
+scrolls, which is what Foundry itself states. Two things follow: comparing
+computed styles is not enough where a value is *relative to a box*, so compare
+the boxes too; and `#scrollSampleTo` asks which box actually scrolls rather than
+assuming the frame, since the pages and the panel's list each scroll in their
+own now.
+
+**The sample's panel is the height of the pane, and nothing in it sticks.** Left
+to stretch, the contents panel took the height of the whole sample page — 2,351
+pixels beside a long one — so the buttons at its foot sat far below anything
+anybody could scroll to, and the Panel Buttons part could not be seen at all.
+Making those rows `position: sticky` fixed the wrong thing and put the search row
+over the panel's own top edge. The panel takes `--illuminus-pane-height`, which
+`#sizePane` measures from the frame and keeps up to date with a `ResizeObserver`:
+CSS cannot ask a scroll container how tall its visible box is, and the pane is
+dragged from the grip beside it.
+
+**Which preview the pane shows is a second question from which piece is lit,
+and a check can pass while the first is wrong.** The sample dims every piece but
+the focused one — and separately, the contents panel and the page editor each
+swap the whole pane for a mock of themselves, revealed by a rule naming those
+two parts. The nine parts lifted out of them lit their piece correctly inside a
+mock that was never displayed, so the pane showed the ordinary journal. A check
+asserting the dimming passed throughout, which is how it shipped: it measured
+the half that worked. The stamp is `data-preview` on the layout, written by
+`#markPreview` from `SPLIT` itself, and the check reads which mock is on screen
+as well as which piece is lit.
+
+**A comment can blind a tool that reads the stylesheet by punctuation.**
+`css-names.mjs` finds a declaration by what precedes it — the start, a semicolon
+or a brace — so a perfectly legal comment sitting between two declarations made
+the one after it invisible, and every control it fed came back with no CSS
+wording. `generate-lang.mjs` then failed with a list of ninety-six *controls*,
+naming nothing about the comment three files away. It strips comments before
+scanning now, as `pointedRules` already did for its own parse. Two lessons:
+a tool that parses CSS by hand wants comments gone first, and a generator that
+exits non-zero must be read to the end — `| tail -2` hid this failure entirely
+and the run looked fine while nothing had been written.
+
+**`max-content` is already the no-wrap width, and a probe can lie about that.**
+A table set to `max-content` takes the width it would have if nothing wrapped —
+so `white-space: nowrap` beside it changes the width by exactly zero, and a
+"fit the longest line" control offered next to "fit the contents" does nothing
+at all. The three answers worth having are the stated width, `max-content`
+(290px on one line, measured) and `min-content` (48px over eight).
+
+The way this was nearly shipped is the part worth keeping. The first probe
+"measured" 156px against 330px and looked decisive — but the two tables under
+test held **different sentences**, so it compared content, not wrapping. A probe
+comparing two settings must differ in the setting and in nothing else; put the
+same text in both and read the heights too, which is what makes the min-content
+case obvious. The in-app check caught it only because it asserted the two were
+different and they were 331 to 331.
 
 **A class can quietly override itself too, and it is worse.** A class body keeps
 the *later* definition of a name and says nothing at all about the one it

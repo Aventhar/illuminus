@@ -55,7 +55,14 @@ const BY_HAND = {
 const kebab = (name) => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
 /** Read both stylesheets once: which declaration each custom property lands in. */
-export function readStylesheets(css) {
+export function readStylesheets(rawCss) {
+  // Comments first. A declaration is found by what precedes it — the start, a
+  // semicolon or a brace — and a comment sitting between two declarations is
+  // none of those, so the one after it was silently skipped and every control
+  // it fed came back with no CSS wording at all. Perfectly legal CSS, and it
+  // took the whole generator down with an error naming the controls rather
+  // than the comment.
+  const css = rawCss.replace(/\/\*[\s\S]*?\*\//g, "");
   const usedBy = new Map();
   const aliases = new Map();
   const note = (name, prop) => {

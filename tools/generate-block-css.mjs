@@ -28,6 +28,8 @@ function varFor(group, name, suffix = "") {
 const v = (group, name, suffix) => `var(${varFor(group, name, suffix)})`;
 /** For values that may be absent, so the page's own setting shows through. */
 const vOr = (group, name, fallback) => `var(${varFor(group, name)}, ${fallback})`;
+/** One of the several properties a control emits, with what to do when it is silent. */
+const vIn = (group, name, suffix, fallback) => `var(${varFor(group, name, suffix)}, ${fallback})`;
 
 const sides = (group, prefix, suffix = "") =>
   ["Top", "Right", "Bottom", "Left"].map((side) => v(group, `${prefix}${side}${suffix}`)).join(" ");
@@ -266,7 +268,10 @@ const tableRules = (group) => {
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 ${at.table} {
-  width: ${v(group, "width")};
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: ${vIn(group, "widthFit", "width", v(group, "width"))};
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
 ${displayed(group, "table")}
@@ -347,7 +352,9 @@ ${at.caption} {
   font-variant: ${v(group, "captionCaps", "variant")};
   text-transform: ${v(group, "captionCaps", "transform")};
   text-align: ${v(group, "captionAlign")};
-  padding-bottom: ${v(group, "captionSpacing")};
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: ${sides(group, "captionMargin")};
 }
 `;
 };
@@ -518,7 +525,7 @@ ${memberSelector(group, " figcaption")} {
   text-transform: ${v(group, "captionCaps", "transform")};
   text-align: ${v(group, "captionAlign")};
   color: ${vOr(group, "captionColor", "inherit")};
-  margin-top: ${v(group, "captionSpacing")};
+  margin: ${sides(group, "captionMargin")};
 }
 `;
 
@@ -1232,7 +1239,13 @@ function readTwins(declaration, twinOf) {
     const whole = declaration.slice(found, end + 1);
     const name = whole.slice(4).match(/^--ill-[a-z0-9-]+/)?.[0] ?? "";
     const twin = twinOf(name);
-    out += twin ? `var(${twin}, ${whole})` : whole;
+    // Into the fallback as well, because a chain can be nested — one control
+    // answering first and another behind it — and wrapping only the outer call
+    // left the inner control's twin reaching nothing at all. The order that
+    // comes out is the honest one: this state's outer answer, then the
+    // ordinary outer, then this state's inner, then the ordinary inner.
+    const rebuilt = `var(${readTwins(whole.slice(4, -1), twinOf)})`;
+    out += twin ? `var(${twin}, ${rebuilt})` : rebuilt;
     at = end + 1;
   }
 }

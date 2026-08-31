@@ -421,7 +421,7 @@ Object.assign(out, {
   "ILLUMINUS.Preview.SubHeading": "Sub-heading",
   "ILLUMINUS.Preview.PageEntry": "Page entry",
   "ILLUMINUS.Preview.Search": "Search box",
-  "ILLUMINUS.Preview.Button": "Button",
+  "ILLUMINUS.Preview.Button": "New Page",
   "ILLUMINUS.Buttons.PickColor": "Pick a color from the screen",
   "ILLUMINUS.Buttons.PickColorTooltip": "Point at anything in the window to copy its color \u2014 fills, borders, and lettering. Hold Option/Alt for lettering, Escape to cancel. Hold Shift to use the other eyedropper instead: whichever of the two you have not made your usual one, under Configure Settings.",
   "ILLUMINUS.Picker.BackgroundMode": "Fill",
@@ -1139,7 +1139,7 @@ for (const name of names) {
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding|captionMargin)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
     // A gap is outside the edge whatever it is a gap around, so the two
     // families are told apart by the word rather than by the whole name.
@@ -1301,6 +1301,17 @@ const FIELD_TEXT = {
     "The tallest this may ever be drawn, in pixels. 0 means no limit.\n\n"
     + "Only set this together with What Will Not Fit below, or you will simply cut "
     + "the bottom off whatever is too long."],
+  widthFit: ["Width Fits",
+    "What decides how wide the table is drawn.\n\n"
+    + "\"The width above\" leaves the Width setting in charge, which is what a table "
+    + "has always done — usually the full width of the page.\n\n"
+    + "\"The contents\" shrinks the table to exactly what its contents need, with "
+    + "every cell on one line. A two-column table of short entries stops stretching "
+    + "across the page, and a stat block or a price list reads as one thing rather "
+    + "than as a wrapped mess.\n\n"
+    + "\"The narrowest it can be\" squeezes it as hard as it will go, wrapping every "
+    + "cell as much as possible. Rarely what you want on its own, but useful beside a "
+    + "picture or in a column of its own."],
   overflow: ["What Will Not Fit",
     "What to do with contents too big for the room this has — which only happens if "
     + "you have limited its width or height above.\n\n"
@@ -1619,6 +1630,11 @@ const FIELD_TEXT = {
   headingHoverColor: ["Text Color", "Color a sub-heading turns when the mouse is over it."],
   headingIndent: ["Indent", "How far the sub-headings are pushed in from the left."],
   headingLineHeight: ["Line Spacing", "How tall each sub-heading row is."],
+  categoryLineHeight: ["Line Spacing",
+    "How tall a category row is drawn, as a multiple of its lettering.\n\n"
+    + "Most of that row's height is this rather than its spacing, which is why "
+    + "setting the padding to nothing leaves it as tall as it was. 0 follows "
+    + "Foundry, which draws it at one and a half lines."],
   categoryFont: ["Typeface", "The typeface used for category headers."],
   categorySize: ["Text Size", "How large category headers are."],
   categoryColor: ["Text Color", "Color of category headers."],
@@ -1787,6 +1803,7 @@ const CHOICE_TEXT = {
   softLight: "Soft light (gentle)", hardLight: "Hard light (strong)", screen: "Screen (lightens)",
   luminosity: "Brightness only", colorBurn: "Burn (deepens color)",
   tile: "Repeat as tiles", cover: "Fill the area (may crop)", contain: "Fit inside the area", stretch: "Stretch to fit",
+  stated: "The width above", contents: "The contents", narrowest: "The narrowest it can be",
   topLeft: "Top left", top: "Top", topRight: "Top right",
   bottomLeft: "Bottom left", bottom: "Bottom", bottomRight: "Bottom right",
   scroll: "Scrolls with the page", fixed: "Stays still", local: "Scrolls with the text",

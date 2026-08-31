@@ -1010,6 +1010,11 @@
   text-transform: var(--ill-sidebar-categories-category-caps-transform, revert-layer);
   letter-spacing: var(--ill-sidebar-categories-category-letter-spacing, revert-layer);
   word-spacing: var(--ill-sidebar-categories-category-word-spacing, revert-layer);
+  /* Most of a category row's height is this: Foundry draws it at one and a half
+     line heights and it was the one part of the row a style could not touch. */
+  line-height: var(--ill-sidebar-categories-category-line-height, revert-layer);
+  text-wrap: var(--ill-sidebar-categories-category-wrap, revert-layer);
+  hyphens: var(--ill-sidebar-categories-category-hyphens, revert-layer);
   color: var(--ill-sidebar-categories-category-color, revert-layer);
 }
 
@@ -1840,7 +1845,8 @@
   text-transform: var(--ill-images-caption-caps-transform);
   text-align: var(--ill-images-caption-align);
   color: var(--ill-images-caption-color);
-  margin-top: var(--ill-images-caption-spacing);
+  margin: var(--ill-images-caption-margin-top) var(--ill-images-caption-margin-right)
+          var(--ill-images-caption-margin-bottom) var(--ill-images-caption-margin-left);
 }
 
 /* ==========================================================================
@@ -3400,8 +3406,13 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 /* While a part is open, the parts of the sample it does not style step back.
    Dimmed rather than hidden: a heading alone on a blank page says nothing about
    how it sits against the text around it. */
+/* Opacity alone. Transitioning `filter` leaves a lit part computing
+   `saturate(1)` once it has animated back — no change to any color, and a
+   stacking context all the same, which a real journal's page and panel do not
+   have. Anything blending inside them then composites against a different
+   backdrop, which is what made the sample darker than the thing it stands for. */
 .illuminus-preview__frame [data-part] {
-  transition: opacity 140ms ease, filter 140ms ease;
+  transition: opacity 140ms ease;
 }
 
 .illuminus-preview__frame [data-part].is-dimmed {
@@ -3548,26 +3559,54 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   border-radius: 4px;
 }
 
-/* The frame is the scroll container here, unlike the real sheet where an inner
-   element scrolls. The inner row carries min-height so the sidebar and page
-   both grow past the frame's height — pinning them to 100% would leave the
-   scrolled-past area with no background. */
-/* The window wrapper carries the min-height so both the mock title bar and the
-   sheet below it grow past the frame, keeping their backgrounds under anything
-   scrolled past. */
+/* The sample is a window's worth of room and the page scrolls inside it, which
+   is what a real journal is — the frame used to be the scroll container and the
+   page grew to hold everything at once. That made the page's surface as tall as
+   its contents: 2,399 pixels against a real journal's 664. A background picture
+   set to fill the area was then stretched over a box three and a half times too
+   tall, so it came out magnified, flatter and darker than the same picture in
+   the journal it stands for — the one thing the sample exists to get right.
+   Reported from use, and measured: same image, same `cover`, same everything
+   but the box. */
 .illuminus-preview__window {
+  /* It wears `.application` so core's journal rules reach the sample, and that
+     class is written for a window that floats above the interface: absolutely
+     placed, on the window layer, with a shadow and a frame of its own. This is a
+     piece of a window drawn in the flow of a pane, so those parts are taken back
+     out. Everything else core states for a journal is exactly what is wanted. */
+  position: static;
+  z-index: auto;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  /* And the smallest a journal window may be dragged to, 680 square, which is
+     about a window a person moves about rather than a picture of one inside a
+     pane: it made the sample overflow its own pane and scroll. */
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
   /* `zoom` rather than a transform: it reflows, so the frame scrolls honestly
-     and nothing inside becomes a containing block it was not before. */
-  zoom: var(--illuminus-sample-zoom, 1);
+     and nothing inside becomes a containing block it was not before.
+     0.75 is what the sample was always drawn at — it was stated separately and
+     the control multiplied it, so "100%" meant three quarters of life size.
+     It is the control's own starting value now, and 100% is life size. */
+  zoom: var(--illuminus-sample-zoom, 0.75);
+  /* A window's worth of room at every setting, which is what a journal gets.
+     Plainly 100%, with no dividing by the zoom: a percentage inside a zoomed
+     box already resolves in that box's own units, so the pane's 850 reads as
+     425 at 200% and rendering it doubles it back. Dividing as well halved it
+     again, and the sample sat in the top-left quarter of its pane with the
+     canvas showing through the rest. */
+  height: 100%;
+  width: 100%;
 }
 
 .illuminus-preview__sheet {
   display: flex;
   align-items: stretch;
   flex: 1;
+  min-height: 0;
 }
 
 /* Block Styles and Picture Styles get the whole pane instead of the journal
@@ -3608,11 +3647,15 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   padding: 8px;
 }
 
-.illuminus-editor__layout:has(.illuminus-part[data-tab="editor"].active) .illuminus-preview__window {
+/* Which preview the pane shows is stamped on the layout by the editor, from the
+   table that lifted these parts out of their parents — so a part inside the
+   page editor or the contents panel shows that thing's own mock rather than
+   falling back to the journal, and a part lifted out later needs no rule here. */
+.illuminus-editor__layout[data-preview="editor"] .illuminus-preview__window {
   display: none;
 }
 
-.illuminus-editor__layout:has(.illuminus-part[data-tab="editor"].active) .illuminus-preview__editor {
+.illuminus-editor__layout[data-preview="editor"] .illuminus-preview__editor {
   display: flex;
 }
 
@@ -3716,10 +3759,13 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 }
 
 .illuminus-preview__frame .journal-entry-content {
-  display: block;
+  /* A column, as the real one is, so the pages below the journal's title can
+     take the rest of the room and scroll in it. */
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
-  height: auto;
+  height: 100%;
   /* Clipped, as the real one is. Foundry states this on a journal sheet and the
      sample is not inside one, so a page given rounded corners kept them on its
      own edge while everything it held — the header, the first heading's band —
@@ -3734,8 +3780,15 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   text-align: center;
 }
 
+/* What scrolls. `flex: 1; height: 0` is Foundry's own way of saying "take the
+   rest of the column and let the overflow scroll", and the sample says it the
+   same way so a page's surface is a journal-sized box rather than a strip as
+   tall as everything written on it. */
 .illuminus-preview__frame .journal-entry-pages {
   display: block;
+  flex: 1;
+  height: 0;
+  overflow-y: auto;
 }
 
 /* Core's sidebar layout is scoped to a real journal sheet, so the sample needs
@@ -3749,16 +3802,47 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   /* Honor the width control, but never let it crowd out the page. */
   width: min(var(--ill-sidebar-sidebar-width), 50%);
   flex-direction: column;
+  /* As tall as the window it stands in, which it now simply is: the sheet
+     beside it has a height of its own, so the panel stretches to it and the
+     buttons at its foot are where a reader would find them. It was propped up
+     with a measured height and a sticky position while the page it stood beside
+     was as tall as its contents. */
   overflow: hidden;
 }
 
-.illuminus-editor__layout:has(.illuminus-part[data-tab="sidebar"].active)
-  .illuminus-preview__frame .journal-sidebar {
+/* And its list is what scrolls inside it, as a real panel's does. */
+/* A category row is laid out by core, on a selector the sample is not inside:
+   `.sheet.journal-entry.application` names a real journal sheet. So the row was
+   drawn 30 pixels tall and only as wide as its word, where a journal draws it 48
+   and the full width of the panel — the same box at a different size, which
+   reads as the same shape drawn wrong, and no amount of Inner Spacing touches it
+   because none of it is padding.
+
+   Only what core adds and no control of ours sets. The lettering — typeface,
+   size, capitals, letter spacing, color — is the Category Rows part's own, and
+   is left alone here. */
+.illuminus-preview__frame .journal-sidebar .toc li.category strong {
+  width: 100%;
+  display: inline-block;
+  line-height: var(--ill-sidebar-categories-category-line-height, calc(var(--line-height) * 1.5));
+  /* And the typeface a journal gives it when the control says nothing.
+     The control defers with `revert-layer`, which hands the element back to
+     whoever painted it — core, in a journal, and *nobody* in the sample, since
+     core's rule names a real sheet. So an unset Typeface read as the interface's
+     own Signika here and as Modesto Condensed in the journal. Stated as the same
+     chain with core's value in place of the revert, so a Typeface that is set
+     still wins. */
+  font-family: var(--ill-sidebar-categories-category-font, var(--font-h1));
+}
+
+.illuminus-editor__layout[data-preview="sidebar"] .illuminus-preview__frame .journal-sidebar {
   display: flex;
 }
 
 .illuminus-preview__frame .journal-sidebar search {
   display: flex;
+  align-items: center;
+  gap: 0.15rem;
   margin: 0.4rem;
 }
 
@@ -3767,8 +3851,27 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   min-width: 0;
 }
 
+/* The small controls either side of the box, at the size Foundry draws them:
+   square, and no wider than the glyph inside. Without a width they take an
+   equal share of the row and leave the box a sliver. */
+.illuminus-preview__frame .journal-sidebar search .inline-control {
+  flex: 0 0 auto;
+  width: 1.5em;
+  height: 1.5em;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+/* Core's own, quoted rather than approximated: it states these four on the list
+   itself, and `--line-height` is the one the category row below is measured in.
+   Without it that `calc()` was invalid and simply dropped, which drew the row at
+   its natural 30 pixels where a journal draws it 48. */
 .illuminus-preview__frame .journal-sidebar .toc {
+  --line-height: 32px;
   flex: 1;
+  height: 0;
+  overflow: hidden auto;
 }
 
 .illuminus-preview__frame .journal-sidebar .toc ol {
@@ -3791,24 +3894,40 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
 }
 
 .illuminus-preview__frame .journal-sidebar .action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   padding: 0.4rem;
+  /* Pushed to the foot of a panel that is now the pane's height. */
+  margin-top: auto;
 }
 
-.illuminus-preview__frame .journal-sidebar .action-buttons button {
-  width: 100%;
+/* A chevron either side of the button that makes a page: the two icons take
+   only their glyph, and the one with words takes what is left. */
+.illuminus-preview__frame .journal-sidebar .action-buttons button.icon {
+  flex: 0 0 auto;
+  width: 1.75em;
+  padding: 0;
 }
 
-/* Scale the sample down so a full page of elements fits the pane while keeping
-   every relative size faithful to the real thing.
-
-   On the page rather than on its content: a page's title sits in a header
-   *beside* the content, not inside it, so scaling only the content left the
-   title — heading level 1 — drawn a third larger than the levels below it at
-   the same setting. The page's own surface is left unscaled, so the sample
-   still fills the pane. */
-.illuminus-preview__frame .journal-entry-page > div {
-  zoom: 0.75;
+.illuminus-preview__frame .journal-sidebar .action-buttons button.create {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
 }
+
+/* Nothing scales the page on its own any more.
+
+   It used to, and only part of it: the rule named the article's own wrapper, so
+   the page's heading and words shrank while the journal's title — a header two
+   levels up, beside the pages rather than inside them — stayed at life size and
+   was drawn a third too large beside its own Heading 1. Barely visible, and
+   wrong in a sample whose whole job is to be believed. The window wrapper above
+   carries the one zoom there is, so everything in the sample is drawn at one
+   scale and every ratio in it is the journal's own. */
 
 /* --- Color picker ramp -------------------------------------------------- */
 

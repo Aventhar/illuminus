@@ -23,12 +23,24 @@ export async function connect(port = 9222) {
   // the frame outlives the run — which is why a browser that had served several
   // long runs would lose its page target mid-check and fail the suite with a
   // dead socket rather than with anything to do with what was being tested.
-  for (const stray of pages) {
-    if (stray.id === page.id) continue;
+  //
+  // Once at connect is not enough: a single run makes them too. The checks that
+  // print leave a frame apiece, and from then on any later check could be the
+  // one that dies — it has been three different ones, including checks nobody
+  // had touched. `tidy()` below is the same sweep, for a run to call once it
+  // has finished printing.
+  const tidy = async () => {
+    let open = [];
     try {
-      await fetch(`http://127.0.0.1:${port}/json/close/${stray.id}`);
-    } catch {}
-  }
+      open = (await (await fetch(`http://127.0.0.1:${port}/json`)).json())
+        .filter((t) => t.type === "page" && t.id !== page.id);
+    } catch { return 0; }
+    for (const stray of open) {
+      try { await fetch(`http://127.0.0.1:${port}/json/close/${stray.id}`); } catch {}
+    }
+    return open.length;
+  };
+  await tidy();
 
   const ws = new WebSocket(page.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
@@ -189,6 +201,6 @@ export async function connect(port = 9222) {
   const slowest = (howMany = 10) => (timing ?? [])
     .sort((a, b) => b.ms - a.ms).slice(0, howMany);
 
-  return { send, evaluate, goto, waitFor, mouse, click, logs, slowest,
+  return { send, evaluate, goto, waitFor, mouse, click, logs, slowest, tidy,
     close: () => ws.close() };
 }

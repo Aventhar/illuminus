@@ -1023,7 +1023,7 @@
   text-transform: var(--ill-image01-caption-caps-transform);
   text-align: var(--ill-image01-caption-align);
   color: var(--ill-image01-caption-color, inherit);
-  margin-top: var(--ill-image01-caption-spacing);
+  margin: var(--ill-image01-caption-margin-top) var(--ill-image01-caption-margin-right) var(--ill-image01-caption-margin-bottom) var(--ill-image01-caption-margin-left);
 }
 
 /* image02 */
@@ -1091,7 +1091,7 @@
   text-transform: var(--ill-image02-caption-caps-transform);
   text-align: var(--ill-image02-caption-align);
   color: var(--ill-image02-caption-color, inherit);
-  margin-top: var(--ill-image02-caption-spacing);
+  margin: var(--ill-image02-caption-margin-top) var(--ill-image02-caption-margin-right) var(--ill-image02-caption-margin-bottom) var(--ill-image02-caption-margin-left);
 }
 
 /* image03 */
@@ -1159,7 +1159,7 @@
   text-transform: var(--ill-image03-caption-caps-transform);
   text-align: var(--ill-image03-caption-align);
   color: var(--ill-image03-caption-color, inherit);
-  margin-top: var(--ill-image03-caption-spacing);
+  margin: var(--ill-image03-caption-margin-top) var(--ill-image03-caption-margin-right) var(--ill-image03-caption-margin-bottom) var(--ill-image03-caption-margin-left);
 }
 
 /* image04 */
@@ -1227,7 +1227,7 @@
   text-transform: var(--ill-image04-caption-caps-transform);
   text-align: var(--ill-image04-caption-align);
   color: var(--ill-image04-caption-color, inherit);
-  margin-top: var(--ill-image04-caption-spacing);
+  margin: var(--ill-image04-caption-margin-top) var(--ill-image04-caption-margin-right) var(--ill-image04-caption-margin-bottom) var(--ill-image04-caption-margin-left);
 }
 
 /* image05 */
@@ -1295,7 +1295,7 @@
   text-transform: var(--ill-image05-caption-caps-transform);
   text-align: var(--ill-image05-caption-align);
   color: var(--ill-image05-caption-color, inherit);
-  margin-top: var(--ill-image05-caption-spacing);
+  margin: var(--ill-image05-caption-margin-top) var(--ill-image05-caption-margin-right) var(--ill-image05-caption-margin-bottom) var(--ill-image05-caption-margin-left);
 }
 
 /* images — placed and cropped as its treatments are */
@@ -2175,7 +2175,10 @@
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table:not(.illuminus-table) {
-  width: var(--ill-tables-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-tables-width-fit-width, var(--ill-tables-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-tables-display, table);
@@ -2258,14 +2261,19 @@
   font-variant: var(--ill-tables-caption-caps-variant);
   text-transform: var(--ill-tables-caption-caps-transform);
   text-align: var(--ill-tables-caption-align);
-  padding-bottom: var(--ill-tables-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-tables-caption-margin-top) var(--ill-tables-caption-margin-right) var(--ill-tables-caption-margin-bottom) var(--ill-tables-caption-margin-left);
 }
 
 /* table01 */
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table.illuminus-table--table01 {
-  width: var(--ill-table01-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-table01-width-fit-width, var(--ill-table01-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-table01-display, table);
@@ -2348,14 +2356,19 @@
   font-variant: var(--ill-table01-caption-caps-variant);
   text-transform: var(--ill-table01-caption-caps-transform);
   text-align: var(--ill-table01-caption-align);
-  padding-bottom: var(--ill-table01-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-table01-caption-margin-top) var(--ill-table01-caption-margin-right) var(--ill-table01-caption-margin-bottom) var(--ill-table01-caption-margin-left);
 }
 
 /* table02 */
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table.illuminus-table--table02 {
-  width: var(--ill-table02-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-table02-width-fit-width, var(--ill-table02-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-table02-display, table);
@@ -2438,14 +2451,19 @@
   font-variant: var(--ill-table02-caption-caps-variant);
   text-transform: var(--ill-table02-caption-caps-transform);
   text-align: var(--ill-table02-caption-align);
-  padding-bottom: var(--ill-table02-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-table02-caption-margin-top) var(--ill-table02-caption-margin-right) var(--ill-table02-caption-margin-bottom) var(--ill-table02-caption-margin-left);
 }
 
 /* table03 */
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table.illuminus-table--table03 {
-  width: var(--ill-table03-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-table03-width-fit-width, var(--ill-table03-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-table03-display, table);
@@ -2528,14 +2546,19 @@
   font-variant: var(--ill-table03-caption-caps-variant);
   text-transform: var(--ill-table03-caption-caps-transform);
   text-align: var(--ill-table03-caption-align);
-  padding-bottom: var(--ill-table03-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-table03-caption-margin-top) var(--ill-table03-caption-margin-right) var(--ill-table03-caption-margin-bottom) var(--ill-table03-caption-margin-left);
 }
 
 /* table04 */
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table.illuminus-table--table04 {
-  width: var(--ill-table04-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-table04-width-fit-width, var(--ill-table04-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-table04-display, table);
@@ -2618,14 +2641,19 @@
   font-variant: var(--ill-table04-caption-caps-variant);
   text-transform: var(--ill-table04-caption-caps-transform);
   text-align: var(--ill-table04-caption-align);
-  padding-bottom: var(--ill-table04-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-table04-caption-margin-top) var(--ill-table04-caption-margin-right) var(--ill-table04-caption-margin-bottom) var(--ill-table04-caption-margin-left);
 }
 
 /* table05 */
 /* Separate borders rather than collapsed, so the table can carry its own frame
    and rounded corners independently of the lines between cells. */
 .illuminus-styled .journal-page-content table.illuminus-table--table05 {
-  width: var(--ill-table05-width);
+  /* Two controls over one property, and the order settles it: Width Fits
+     answers first and says nothing when it is set to follow the Width above,
+     so the fallback is reached rather than overridden. */
+  width: var(--ill-table05-width-fit-width, var(--ill-table05-width));
   /* A table laid out as something other than a table is the author's business;
      it falls back to the table it was. */
   display: var(--ill-table05-display, table);
@@ -2708,7 +2736,9 @@
   font-variant: var(--ill-table05-caption-caps-variant);
   text-transform: var(--ill-table05-caption-caps-transform);
   text-align: var(--ill-table05-caption-align);
-  padding-bottom: var(--ill-table05-caption-spacing);
+  /* Margins apply to a caption box, measured rather than assumed — a caption
+     given 20/10/30/40 moves by exactly that and the table grows to suit. */
+  margin: var(--ill-table05-caption-margin-top) var(--ill-table05-caption-margin-right) var(--ill-table05-caption-margin-bottom) var(--ill-table05-caption-margin-left);
 }
 
 .illuminus-styled section.journal-page-content .illuminus-box--box01:not(:has(:where(p, li, h1, h2, h3, h4, h5, h6, table, img, figure, blockquote):not(:empty))) {
@@ -4781,7 +4811,7 @@
 
 .illuminus-styled.journal-entry-page menu.editor-menu .pm-dropdown:hover,
 .illuminus-styled .illuminus-preview__editor menu.editor-menu .pm-dropdown:hover {
-  --button-text-color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer)));
+  --button-text-color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer))));
   background-color: var(--ill-editor-dropdowns-dropdown-hover-background, var(--ill-editor-dropdowns-dropdown-background, revert-layer));
   background-image: linear-gradient(var(--ill-editor-dropdowns-hover-dropdown-gradient-angle, var(--ill-editor-dropdowns-dropdown-gradient-angle)),
       var(--ill-editor-dropdowns-hover-dropdown-gradient-from, var(--ill-editor-dropdowns-dropdown-gradient-from)), var(--ill-editor-dropdowns-hover-dropdown-gradient-to, var(--ill-editor-dropdowns-dropdown-gradient-to)));
@@ -4807,10 +4837,10 @@
           var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-blur, var(--ill-editor-dropdowns-dropdown-inner-shadow-blur)) var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-spread, var(--ill-editor-dropdowns-dropdown-inner-shadow-spread))
           var(--ill-editor-dropdowns-hover-dropdown-inner-shadow-color, var(--ill-editor-dropdowns-dropdown-inner-shadow-color));
   font-family: var(--ill-editor-dropdowns-hover-dropdown-font, var(--ill-editor-dropdowns-dropdown-font, revert-layer));
-  font-size: var(--ill-editor-dropdowns-hover-dropdown-size, var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-toolbar-size, revert-layer)));
+  font-size: var(--ill-editor-dropdowns-hover-dropdown-size, var(--ill-editor-dropdowns-dropdown-size, var(--ill-editor-toolbar-hover-toolbar-size, var(--ill-editor-toolbar-toolbar-size, revert-layer))));
   font-weight: var(--ill-editor-dropdowns-hover-dropdown-text-style-weight, var(--ill-editor-dropdowns-dropdown-text-style-weight, revert-layer));
   font-style: var(--ill-editor-dropdowns-hover-dropdown-text-style-slant, var(--ill-editor-dropdowns-dropdown-text-style-slant, revert-layer));
-  color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-color, revert-layer)));
+  color: var(--ill-editor-dropdowns-dropdown-hover-color, var(--ill-editor-dropdowns-dropdown-color, var(--ill-editor-toolbar-toolbar-hover-color, var(--ill-editor-toolbar-toolbar-color, revert-layer))));
   -webkit-text-stroke: var(--ill-editor-dropdowns-hover-dropdown-outline-width, var(--ill-editor-dropdowns-dropdown-outline-width)) var(--ill-editor-dropdowns-hover-dropdown-outline-color, var(--ill-editor-dropdowns-dropdown-outline-color));
   text-shadow: var(--ill-editor-dropdowns-hover-dropdown-text-shadow-offset-x, var(--ill-editor-dropdowns-dropdown-text-shadow-offset-x)) var(--ill-editor-dropdowns-hover-dropdown-text-shadow-offset-y, var(--ill-editor-dropdowns-dropdown-text-shadow-offset-y))
                var(--ill-editor-dropdowns-hover-dropdown-text-shadow-blur, var(--ill-editor-dropdowns-dropdown-text-shadow-blur)) var(--ill-editor-dropdowns-hover-dropdown-text-shadow-color, var(--ill-editor-dropdowns-dropdown-text-shadow-color));
@@ -5006,6 +5036,9 @@
   text-transform: var(--ill-sidebar-categories-hover-category-caps-transform, var(--ill-sidebar-categories-category-caps-transform, revert-layer));
   letter-spacing: var(--ill-sidebar-categories-hover-category-letter-spacing, var(--ill-sidebar-categories-category-letter-spacing, revert-layer));
   word-spacing: var(--ill-sidebar-categories-hover-category-word-spacing, var(--ill-sidebar-categories-category-word-spacing, revert-layer));
+  line-height: var(--ill-sidebar-categories-hover-category-line-height, var(--ill-sidebar-categories-category-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-categories-hover-category-wrap, var(--ill-sidebar-categories-category-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-categories-hover-category-hyphens, var(--ill-sidebar-categories-category-hyphens, revert-layer));
   color: var(--ill-sidebar-categories-hover-category-color, var(--ill-sidebar-categories-category-color, revert-layer));
 }
 
@@ -5593,7 +5626,8 @@ iframe):hover {
   text-transform: var(--ill-images-hover-caption-caps-transform, var(--ill-images-caption-caps-transform));
   text-align: var(--ill-images-hover-caption-align, var(--ill-images-caption-align));
   color: var(--ill-images-hover-caption-color, var(--ill-images-caption-color));
-  margin-top: var(--ill-images-hover-caption-spacing, var(--ill-images-caption-spacing));
+  margin: var(--ill-images-hover-caption-margin-top, var(--ill-images-caption-margin-top)) var(--ill-images-hover-caption-margin-right, var(--ill-images-caption-margin-right))
+          var(--ill-images-hover-caption-margin-bottom, var(--ill-images-caption-margin-bottom)) var(--ill-images-hover-caption-margin-left, var(--ill-images-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-header h1:hover,
@@ -6491,7 +6525,7 @@ blockquote):not(:empty))):hover {
   text-transform: var(--ill-image01-hover-caption-caps-transform, var(--ill-image01-caption-caps-transform));
   text-align: var(--ill-image01-hover-caption-align, var(--ill-image01-caption-align));
   color: var(--ill-image01-hover-caption-color, var(--ill-image01-caption-color, inherit));
-  margin-top: var(--ill-image01-hover-caption-spacing, var(--ill-image01-caption-spacing));
+  margin: var(--ill-image01-hover-caption-margin-top, var(--ill-image01-caption-margin-top)) var(--ill-image01-hover-caption-margin-right, var(--ill-image01-caption-margin-right)) var(--ill-image01-hover-caption-margin-bottom, var(--ill-image01-caption-margin-bottom)) var(--ill-image01-hover-caption-margin-left, var(--ill-image01-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image02:hover {
@@ -6544,7 +6578,7 @@ blockquote):not(:empty))):hover {
   text-transform: var(--ill-image02-hover-caption-caps-transform, var(--ill-image02-caption-caps-transform));
   text-align: var(--ill-image02-hover-caption-align, var(--ill-image02-caption-align));
   color: var(--ill-image02-hover-caption-color, var(--ill-image02-caption-color, inherit));
-  margin-top: var(--ill-image02-hover-caption-spacing, var(--ill-image02-caption-spacing));
+  margin: var(--ill-image02-hover-caption-margin-top, var(--ill-image02-caption-margin-top)) var(--ill-image02-hover-caption-margin-right, var(--ill-image02-caption-margin-right)) var(--ill-image02-hover-caption-margin-bottom, var(--ill-image02-caption-margin-bottom)) var(--ill-image02-hover-caption-margin-left, var(--ill-image02-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image03:hover {
@@ -6597,7 +6631,7 @@ blockquote):not(:empty))):hover {
   text-transform: var(--ill-image03-hover-caption-caps-transform, var(--ill-image03-caption-caps-transform));
   text-align: var(--ill-image03-hover-caption-align, var(--ill-image03-caption-align));
   color: var(--ill-image03-hover-caption-color, var(--ill-image03-caption-color, inherit));
-  margin-top: var(--ill-image03-hover-caption-spacing, var(--ill-image03-caption-spacing));
+  margin: var(--ill-image03-hover-caption-margin-top, var(--ill-image03-caption-margin-top)) var(--ill-image03-hover-caption-margin-right, var(--ill-image03-caption-margin-right)) var(--ill-image03-hover-caption-margin-bottom, var(--ill-image03-caption-margin-bottom)) var(--ill-image03-hover-caption-margin-left, var(--ill-image03-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image04:hover {
@@ -6650,7 +6684,7 @@ blockquote):not(:empty))):hover {
   text-transform: var(--ill-image04-hover-caption-caps-transform, var(--ill-image04-caption-caps-transform));
   text-align: var(--ill-image04-hover-caption-align, var(--ill-image04-caption-align));
   color: var(--ill-image04-hover-caption-color, var(--ill-image04-caption-color, inherit));
-  margin-top: var(--ill-image04-hover-caption-spacing, var(--ill-image04-caption-spacing));
+  margin: var(--ill-image04-hover-caption-margin-top, var(--ill-image04-caption-margin-top)) var(--ill-image04-hover-caption-margin-right, var(--ill-image04-caption-margin-right)) var(--ill-image04-hover-caption-margin-bottom, var(--ill-image04-caption-margin-bottom)) var(--ill-image04-hover-caption-margin-left, var(--ill-image04-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content .illuminus-image--image05:hover {
@@ -6703,7 +6737,7 @@ blockquote):not(:empty))):hover {
   text-transform: var(--ill-image05-hover-caption-caps-transform, var(--ill-image05-caption-caps-transform));
   text-align: var(--ill-image05-hover-caption-align, var(--ill-image05-caption-align));
   color: var(--ill-image05-hover-caption-color, var(--ill-image05-caption-color, inherit));
-  margin-top: var(--ill-image05-hover-caption-spacing, var(--ill-image05-caption-spacing));
+  margin: var(--ill-image05-hover-caption-margin-top, var(--ill-image05-caption-margin-top)) var(--ill-image05-hover-caption-margin-right, var(--ill-image05-caption-margin-right)) var(--ill-image05-hover-caption-margin-bottom, var(--ill-image05-caption-margin-bottom)) var(--ill-image05-hover-caption-margin-left, var(--ill-image05-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content figure:not(.illuminus-image):hover {
@@ -7486,7 +7520,7 @@ blockquote):not(:empty))):hover {
 }
 
 .illuminus-styled .journal-page-content table:not(.illuminus-table):hover {
-  width: var(--ill-tables-hover-width, var(--ill-tables-width));
+  width: var(--ill-tables-hover-width-fit-width, var(--ill-tables-width-fit-width, var(--ill-tables-hover-width, var(--ill-tables-width))));
   display: var(--ill-tables-hover-display, var(--ill-tables-display, table));
   min-width: var(--ill-tables-hover-min-width, var(--ill-tables-min-width));
   max-width: var(--ill-tables-hover-max-width, var(--ill-tables-max-width));
@@ -7562,11 +7596,11 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-tables-hover-caption-caps-variant, var(--ill-tables-caption-caps-variant));
   text-transform: var(--ill-tables-hover-caption-caps-transform, var(--ill-tables-caption-caps-transform));
   text-align: var(--ill-tables-hover-caption-align, var(--ill-tables-caption-align));
-  padding-bottom: var(--ill-tables-hover-caption-spacing, var(--ill-tables-caption-spacing));
+  margin: var(--ill-tables-hover-caption-margin-top, var(--ill-tables-caption-margin-top)) var(--ill-tables-hover-caption-margin-right, var(--ill-tables-caption-margin-right)) var(--ill-tables-hover-caption-margin-bottom, var(--ill-tables-caption-margin-bottom)) var(--ill-tables-hover-caption-margin-left, var(--ill-tables-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content table.illuminus-table--table01:hover {
-  width: var(--ill-table01-hover-width, var(--ill-table01-width));
+  width: var(--ill-table01-hover-width-fit-width, var(--ill-table01-width-fit-width, var(--ill-table01-hover-width, var(--ill-table01-width))));
   display: var(--ill-table01-hover-display, var(--ill-table01-display, table));
   min-width: var(--ill-table01-hover-min-width, var(--ill-table01-min-width));
   max-width: var(--ill-table01-hover-max-width, var(--ill-table01-max-width));
@@ -7642,11 +7676,11 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-table01-hover-caption-caps-variant, var(--ill-table01-caption-caps-variant));
   text-transform: var(--ill-table01-hover-caption-caps-transform, var(--ill-table01-caption-caps-transform));
   text-align: var(--ill-table01-hover-caption-align, var(--ill-table01-caption-align));
-  padding-bottom: var(--ill-table01-hover-caption-spacing, var(--ill-table01-caption-spacing));
+  margin: var(--ill-table01-hover-caption-margin-top, var(--ill-table01-caption-margin-top)) var(--ill-table01-hover-caption-margin-right, var(--ill-table01-caption-margin-right)) var(--ill-table01-hover-caption-margin-bottom, var(--ill-table01-caption-margin-bottom)) var(--ill-table01-hover-caption-margin-left, var(--ill-table01-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content table.illuminus-table--table02:hover {
-  width: var(--ill-table02-hover-width, var(--ill-table02-width));
+  width: var(--ill-table02-hover-width-fit-width, var(--ill-table02-width-fit-width, var(--ill-table02-hover-width, var(--ill-table02-width))));
   display: var(--ill-table02-hover-display, var(--ill-table02-display, table));
   min-width: var(--ill-table02-hover-min-width, var(--ill-table02-min-width));
   max-width: var(--ill-table02-hover-max-width, var(--ill-table02-max-width));
@@ -7722,11 +7756,11 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-table02-hover-caption-caps-variant, var(--ill-table02-caption-caps-variant));
   text-transform: var(--ill-table02-hover-caption-caps-transform, var(--ill-table02-caption-caps-transform));
   text-align: var(--ill-table02-hover-caption-align, var(--ill-table02-caption-align));
-  padding-bottom: var(--ill-table02-hover-caption-spacing, var(--ill-table02-caption-spacing));
+  margin: var(--ill-table02-hover-caption-margin-top, var(--ill-table02-caption-margin-top)) var(--ill-table02-hover-caption-margin-right, var(--ill-table02-caption-margin-right)) var(--ill-table02-hover-caption-margin-bottom, var(--ill-table02-caption-margin-bottom)) var(--ill-table02-hover-caption-margin-left, var(--ill-table02-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content table.illuminus-table--table03:hover {
-  width: var(--ill-table03-hover-width, var(--ill-table03-width));
+  width: var(--ill-table03-hover-width-fit-width, var(--ill-table03-width-fit-width, var(--ill-table03-hover-width, var(--ill-table03-width))));
   display: var(--ill-table03-hover-display, var(--ill-table03-display, table));
   min-width: var(--ill-table03-hover-min-width, var(--ill-table03-min-width));
   max-width: var(--ill-table03-hover-max-width, var(--ill-table03-max-width));
@@ -7802,11 +7836,11 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-table03-hover-caption-caps-variant, var(--ill-table03-caption-caps-variant));
   text-transform: var(--ill-table03-hover-caption-caps-transform, var(--ill-table03-caption-caps-transform));
   text-align: var(--ill-table03-hover-caption-align, var(--ill-table03-caption-align));
-  padding-bottom: var(--ill-table03-hover-caption-spacing, var(--ill-table03-caption-spacing));
+  margin: var(--ill-table03-hover-caption-margin-top, var(--ill-table03-caption-margin-top)) var(--ill-table03-hover-caption-margin-right, var(--ill-table03-caption-margin-right)) var(--ill-table03-hover-caption-margin-bottom, var(--ill-table03-caption-margin-bottom)) var(--ill-table03-hover-caption-margin-left, var(--ill-table03-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content table.illuminus-table--table04:hover {
-  width: var(--ill-table04-hover-width, var(--ill-table04-width));
+  width: var(--ill-table04-hover-width-fit-width, var(--ill-table04-width-fit-width, var(--ill-table04-hover-width, var(--ill-table04-width))));
   display: var(--ill-table04-hover-display, var(--ill-table04-display, table));
   min-width: var(--ill-table04-hover-min-width, var(--ill-table04-min-width));
   max-width: var(--ill-table04-hover-max-width, var(--ill-table04-max-width));
@@ -7882,11 +7916,11 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-table04-hover-caption-caps-variant, var(--ill-table04-caption-caps-variant));
   text-transform: var(--ill-table04-hover-caption-caps-transform, var(--ill-table04-caption-caps-transform));
   text-align: var(--ill-table04-hover-caption-align, var(--ill-table04-caption-align));
-  padding-bottom: var(--ill-table04-hover-caption-spacing, var(--ill-table04-caption-spacing));
+  margin: var(--ill-table04-hover-caption-margin-top, var(--ill-table04-caption-margin-top)) var(--ill-table04-hover-caption-margin-right, var(--ill-table04-caption-margin-right)) var(--ill-table04-hover-caption-margin-bottom, var(--ill-table04-caption-margin-bottom)) var(--ill-table04-hover-caption-margin-left, var(--ill-table04-caption-margin-left));
 }
 
 .illuminus-styled .journal-page-content table.illuminus-table--table05:hover {
-  width: var(--ill-table05-hover-width, var(--ill-table05-width));
+  width: var(--ill-table05-hover-width-fit-width, var(--ill-table05-width-fit-width, var(--ill-table05-hover-width, var(--ill-table05-width))));
   display: var(--ill-table05-hover-display, var(--ill-table05-display, table));
   min-width: var(--ill-table05-hover-min-width, var(--ill-table05-min-width));
   max-width: var(--ill-table05-hover-max-width, var(--ill-table05-max-width));
@@ -7962,7 +7996,7 @@ blockquote):not(:empty))):hover {
   font-variant: var(--ill-table05-hover-caption-caps-variant, var(--ill-table05-caption-caps-variant));
   text-transform: var(--ill-table05-hover-caption-caps-transform, var(--ill-table05-caption-caps-transform));
   text-align: var(--ill-table05-hover-caption-align, var(--ill-table05-caption-align));
-  padding-bottom: var(--ill-table05-hover-caption-spacing, var(--ill-table05-caption-spacing));
+  margin: var(--ill-table05-hover-caption-margin-top, var(--ill-table05-caption-margin-top)) var(--ill-table05-hover-caption-margin-right, var(--ill-table05-caption-margin-right)) var(--ill-table05-hover-caption-margin-bottom, var(--ill-table05-caption-margin-bottom)) var(--ill-table05-hover-caption-margin-left, var(--ill-table05-caption-margin-left));
 }
 
 .illuminus-styled section.journal-page-content .illuminus-box--box01:not(:has(:where(p:hover,

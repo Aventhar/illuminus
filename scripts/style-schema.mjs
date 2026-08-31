@@ -82,6 +82,9 @@ const CHOICES = {
                 "lowerRoman", "upperRoman", "none"],
   blend: ["normal", "multiply", "overlay", "softLight", "hardLight", "screen", "luminosity", "colorBurn"],
   textureFit: ["tile", "cover", "contain", "stretch"],
+  // What decides a table's width. "Stated" leaves the Width control above in
+  // charge, which is what a table has always done.
+  widthFit: ["stated", "contents", "narrowest"],
   texturePosition: ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"],
   dropCap: ["none", "two", "three", "four", "five"],
   blockFloat: ["none", "left", "right"],
@@ -267,6 +270,25 @@ const emitCaps = (value) => ({
 }[value] ?? { transform: "none", variant: "normal" });
 
 /** Texture fit maps onto background-size plus background-repeat. */
+/**
+ * What a table's width follows.
+ *
+ * `stated` answers nothing at all, so the rule falls through to the Width
+ * control above it — two controls over one property, and the one that says
+ * "leave it to the other" has to be silent rather than write a value the
+ * fallback would never be reached past.
+ *
+ * `max-content` already means "as wide as the longest line": it is the width
+ * the table would take if nothing wrapped, so there is no separate answer for
+ * that and `white-space: nowrap` beside it changes nothing whatever. Measured
+ * on one table, same contents throughout: the width above gave 500, the
+ * contents 290 on one line, and the narrowest 48 over eight.
+ */
+const emitWidthFit = (value) => ({
+  contents: { width: "max-content" },
+  narrowest: { width: "min-content" }
+}[value] ?? null);
+
 const emitTextureFit = (value) => ({
   tile: { size: "auto", repeat: "repeat" },
   cover: { size: "cover", repeat: "no-repeat" },
@@ -764,7 +786,9 @@ function imageSections() {
         ...textStyleField("captionTextStyle", "inherit", "inherit", { inherit: true }),
         select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
         select("captionAlign", "inherit", ["inherit", ...CHOICES.align]),
-        num("captionSpacing", 4, "px", 0, 60, 1)
+        // The gap this had was a lone margin-top; it is the top of a proper
+        // Outer Spacing now, so the caption can be moved on every side.
+        ...spacingFields("captionMargin", { top: 4 }, { min: -40, max: 60 })
       ]
     }
   ];
@@ -995,9 +1019,10 @@ function tableSections() {
     // How wide the table is drawn, which is a question about the table rather
     // than about its lettering.
     { id: "layout",
-      order: ["width", DIVIDER, "display", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
+      order: ["width", "widthFit", DIVIDER, "display", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
       fields: [
         num("width", 100, "%", 10, 100, 1),
+        select("widthFit", "stated", CHOICES.widthFit, { emit: emitWidthFit }),
         ...layoutFields("", { flex: false, hide: false })
       ] },
     {
@@ -1091,7 +1116,7 @@ function tableSections() {
         DIVIDER, "captionAlign", "captionCaps",
         DIVIDER, "captionOutlineColor", "captionOutlineWidth",
         DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
-        "captionTextShadowBlur", "captionTextShadowColor", "captionSide", "captionSpacing"
+        "captionTextShadowBlur", "captionTextShadowColor", "captionSide", "captionMarginTop", "captionMarginRight", "captionMarginBottom", "captionMarginLeft"
       ],
       fields: [
         select("captionSide", "top", ["top", "bottom"]),
@@ -1101,7 +1126,9 @@ function tableSections() {
         ...textStyleField("captionTextStyle", "700", "italic"),
         select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
         select("captionAlign", "center", CHOICES.alignNoJustify),
-        num("captionSpacing", 6, "px", 0, 60, 1)
+        // Was a padding under the caption, holding the table off it. As an
+        // Outer Spacing it says the same thing and three more besides.
+        ...spacingFields("captionMargin", { bottom: 6 }, { min: -40, max: 60 })
       ]
     }
   ];
@@ -1259,6 +1286,12 @@ export const GROUPS = [
           select("categoryCaps", "uppercase", CHOICES.caps, { emit: emitCaps }),
           num("categoryLetterSpacing", 1, "px", -5, 40, 0.5),
           num("categoryWordSpacing", 0, "px", -10, 60, 0.5),
+          // Foundry draws a category row at one and a half line heights, which
+          // is most of how tall the row is — and it was the one part of that
+          // row a style could not touch. 0 leaves it to Foundry, as everywhere.
+          num("categoryLineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
+          select("categoryWrap", "inherit", CHOICES.wrap, { emit: emitWord }),
+          select("categoryHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens }),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
           col("categoryBackground", "categoryGradientFrom", "categoryGradientTo", "categoryGradientAngle", "categoryFrost", "#00000000"), ...gradientFields("category"), ...frostFields("category"), ...imageFields("category"),
           // A category is a heading in a list of pages, so it needs room around
@@ -2011,120 +2044,12 @@ export const GROUPS = [
     // Laid out by hand: the table itself, then the parts of it — the header row,
     // the rows beneath, a cell, and the caption.
     order: ["layout", "text", "margin", "border", "header", "rows", "cellPadding", "tableCaption"],
-    sections: [
-      // How wide the table is drawn, which is a question about the table rather
-      // than about its lettering.
-      { id: "layout",
-        order: ["width", DIVIDER, "display", DIVIDER, "minWidth", "maxWidth", "minHeight", "maxHeight", "overflow"],
-        fields: [
-          num("width", 100, "%", 10, 100, 1),
-          ...layoutFields("", { flex: false, hide: false })
-        ] },
-      {
-        id: "text",
-        order: [
-          "font", "size", "textColor",
-          DIVIDER, "align", "verticalAlign", "lineHeight", "wrap", "hyphens",
-          DIVIDER, "outlineColor", "outlineWidth",
-          DIVIDER, "textShadowOffsetX", "textShadowOffsetY", "textShadowBlur", "textShadowColor"
-        ],
-        fields: [
-          font("font", ""),
-          num("size", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
-          col("textColor", ""),
-          num("lineHeight", 0, "", 0, 4, 0.05, { zeroAs: "inherit" }),
-          select("align", "left", CHOICES.align),
-          select("verticalAlign", "middle", CHOICES.verticalAlign)
-        ]
-      },
-      {
-        id: "margin",
-        order: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
-        fields: spacingFields("margin", { top: 0, right: 0, bottom: 8, left: 0 }, { min: -100 })
-      },
-      {
-        id: "border",
-        order: [
-          "borderTopStyle", "borderTopColor", "borderTopWidth",
-          DIVIDER, "borderBottomStyle", "borderBottomColor", "borderBottomWidth",
-          DIVIDER, "borderLeftStyle", "borderLeftColor", "borderLeftWidth",
-          DIVIDER, "borderRightStyle", "borderRightColor", "borderRightWidth",
-          DIVIDER, "cornerTopLeft", "cornerTopRight", "cornerBottomLeft", "cornerBottomRight",
-      "cornerTopLeftShape", "cornerTopRightShape", "cornerBottomLeftShape", "cornerBottomRightShape"
-        ],
-        fields: [...borderFields("border"), ...cornerFields("corner")]
-      },
-      {
-        id: "header",
-        order: [
-          "headerBackground", "headerGradientFrom", "headerGradientTo", "headerGradientAngle",
-        "headerFrost",
-          DIVIDER, "headerFont", "headerSize", "headerColor", "headerTextStyle", "headerTextStyleSlant",
-          DIVIDER, "headerAlign", "headerCaps", "headerLetterSpacing", "headerWordSpacing",
-          DIVIDER, "headerOutlineColor", "headerOutlineWidth",
-          DIVIDER, "headerTextShadowOffsetX", "headerTextShadowOffsetY",
-          "headerTextShadowBlur", "headerTextShadowColor",
-          DIVIDER, "headerTexture", "headerTextureFit", "headerTexturePosition",
-          "headerTextureBlend", "headerTextureOpacity", "headerTextureBlur", "headerTextureBrightness", "headerTextureContrast", "headerTextureSaturation", "headerTextureAge",
-          DIVIDER, "headerInnerShadowOffsetX", "headerInnerShadowOffsetY", "headerInnerShadowBlur",
-          "headerInnerShadowSpread", "headerInnerShadowColor",
-          DIVIDER, "headerShadowOffsetX", "headerShadowOffsetY", "headerShadowBlur",
-          "headerShadowSpread", "headerShadowColor"
-        ],
-        fields: [
-          col("headerBackground", "#00000000"), ...gradientFields("header"), ...frostFields("header"),
-          ...imageFields("header"),
-          col("headerColor", ""),
-          font("headerFont", ""),
-          num("headerSize", 0, "px", 0, 100, 1, { zeroAs: "inherit" }),
-          ...textStyleField("headerTextStyle", "700", "normal"),
-          select("headerCaps", "none", CHOICES.caps, { emit: emitCaps }),
-          select("headerAlign", "left", CHOICES.align),
-          num("headerLetterSpacing", 0, "px", -5, 40, 0.5),
-          num("headerWordSpacing", 0, "px", -10, 60, 0.5)
-        ]
-      },
-      { id: "rows", order: ["rowColor", "stripeColor"],
-        fields: [col("stripeColor", "#00000010"), col("rowColor", "#00000000")] },
-      // A cell's own spacing and its edges are one question about a cell, so
-      // they read as one category.
-      {
-        id: "cellPadding",
-        label: "ILLUMINUS.Sections.cellStyles.label",
-        hint: "ILLUMINUS.Sections.cellStyles.hint",
-        order: [
-          "cellPaddingTop", "cellPaddingBottom", "cellPaddingLeft", "cellPaddingRight",
-          DIVIDER, "cellBorderTopStyle", "cellBorderTopColor", "cellBorderTopWidth",
-          DIVIDER, "cellBorderBottomStyle", "cellBorderBottomColor", "cellBorderBottomWidth",
-          DIVIDER, "cellBorderLeftStyle", "cellBorderLeftColor", "cellBorderLeftWidth",
-          DIVIDER, "cellBorderRightStyle", "cellBorderRightColor", "cellBorderRightWidth"
-        ],
-        fields: [
-          ...spacingFields("cellPadding", { top: 8, right: 16, bottom: 8, left: 16 }, { max: 80 }),
-          ...borderFields("cellBorder")
-        ]
-      },
-      {
-        id: "tableCaption",
-        order: [
-          "captionFont", "captionSize", "captionColor", "captionTextStyle", "captionTextStyleSlant",
-          DIVIDER, "captionAlign", "captionCaps",
-          DIVIDER, "captionOutlineColor", "captionOutlineWidth",
-          DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
-          "captionTextShadowBlur", "captionTextShadowColor", "captionSide", "captionSpacing"
-        ],
-        fields: [
-          select("captionSide", "top", ["top", "bottom"]),
-          font("captionFont", ""),
-          num("captionSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
-          col("captionColor", "#5a4326"),
-          ...textStyleField("captionTextStyle", "700", "italic"),
-          select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
-          select("captionAlign", "center", CHOICES.alignNoJustify),
-          num("captionSpacing", 6, "px", 0, 60, 1)
-        ]
-      }
-    ]
+    // Written by the same code as its treatments, so the Default Table cannot
+    // drift from them. They were two copies that happened to agree — 232 fields
+    // and every default identical — and the next control added to one of them
+    // would have been the end of that. Boxes and Images learned this the
+    // expensive way, 38 and 24 controls apart before anyone noticed.
+    sections: tableSections()
   },
 
   {
@@ -2486,7 +2411,7 @@ export const GROUPS = [
           ...textStyleField("captionTextStyle", "400", "italic"),
           select("captionCaps", "none", CHOICES.caps, { emit: emitCaps }),
           select("captionAlign", "center", CHOICES.alignNoJustify),
-          num("captionSpacing", 4, "px", 0, 60, 1)
+          ...spacingFields("captionMargin", { top: 4 }, { min: -40, max: 60 })
         ]
       }
     ]
@@ -2750,7 +2675,7 @@ const LAYOUTS = {
       "captionTextStyleSlant", DIVIDER, "captionAlign", "captionCaps", DIVIDER,
       "captionOutlineColor", "captionOutlineWidth", DIVIDER, "captionTextShadowOffsetX",
       "captionTextShadowOffsetY", "captionTextShadowBlur", "captionTextShadowColor",
-      "captionSpacing"
+      "captionMarginTop", "captionMarginRight", "captionMarginBottom", "captionMarginLeft"
     ] },
     media: { order: [
       "mediaMaxWidth", DIVIDER, "mediaShadowOffsetX", "mediaShadowOffsetY", "mediaShadowBlur",
@@ -2893,7 +2818,7 @@ const LAYOUTS = {
       "captionFont", "captionSize", "captionColor", "captionTextStyle",
       "captionTextStyleSlant", DIVIDER, "captionAlign", "captionCaps", DIVIDER, "captionOutlineColor",
       "captionOutlineWidth", DIVIDER, "captionTextShadowOffsetX", "captionTextShadowOffsetY",
-      "captionTextShadowBlur", "captionTextShadowColor", "captionSpacing"
+      "captionTextShadowBlur", "captionTextShadowColor", "captionMarginTop", "captionMarginRight", "captionMarginBottom", "captionMarginLeft"
     ] },
   },
   sidebar: {
@@ -2963,7 +2888,8 @@ const LAYOUTS = {
     category: { order: [
       "categoryFont", "categorySize", "categoryColor", "categoryTextStyle",
       "categoryTextStyleSlant", DIVIDER, "categoryAlign", "categoryCaps",
-      "categoryLetterSpacing", "categoryWordSpacing", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
+      "categoryLetterSpacing", "categoryWordSpacing", "categoryLineHeight",
+      "categoryWrap", "categoryHyphens", DIVIDER, "categoryOutlineColor", "categoryOutlineWidth",
       DIVIDER, "categoryTextShadowOffsetX", "categoryTextShadowOffsetY",
       "categoryTextShadowBlur", "categoryTextShadowColor", DIVIDER, "categoryBackground", "categoryGradientFrom", "categoryGradientTo", "categoryGradientAngle", "categoryFrost",
       DIVIDER, "categoryTexture", "categoryTextureFit", "categoryTexturePosition",
@@ -3575,7 +3501,7 @@ const FIELD_ORDER = {
     "captionFont", "captionSize", "captionColor", "captionTextStyle",
     "captionTextStyleSlant", "captionOutlineWidth", "captionOutlineColor", "captionTextShadowOffsetX",
     "captionTextShadowOffsetY", "captionTextShadowBlur", "captionTextShadowColor",
-    "captionCaps", "captionAlign", "captionSpacing"
+    "captionCaps", "captionAlign", "captionMarginTop", "captionMarginRight", "captionMarginBottom", "captionMarginLeft"
   ]
 };
 

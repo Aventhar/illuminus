@@ -272,9 +272,13 @@
       <label class="illuminus-preview__zoom">
         <i class="fa-solid fa-magnifying-glass"></i>
         <span class="illuminus-preview__zoom-label">{{localize "ILLUMINUS.Editor.Zoom"}}</span>
-        <input type="range" min="50" max="200" step="10" value="100"
+        {{!-- 75 to start with, which is the scale the sample was always drawn
+              at, and 100 is now life size — the same size the journal itself is
+              drawn at, so a setting can be judged against the real thing rather
+              than against a smaller copy of it. --}}
+        <input type="range" min="25" max="200" step="5" value="75"
                aria-label="{{localize 'ILLUMINUS.Editor.Zoom'}}">
-        <output class="illuminus-preview__zoom-read">100%</output>
+        <output class="illuminus-preview__zoom-read">75%</output>
       </label>
       {{!-- The sample answers the pointer the way a real journal does, which is
             useful for judging a hovered color and a nuisance the rest of the
@@ -289,7 +293,18 @@
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}
     <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
-      <div class="illuminus-preview__window">
+      {{!-- Foundry's own classes for a journal window, so that every rule core
+            writes for one applies to the sample as well. Core scopes its
+            journal styling to `.sheet.journal-entry.application`, and the sample
+            was not inside one — so anything stated there was simply absent (a
+            category row 30 pixels tall against a journal's 48, a listed page's
+            name at 17.5 against 32) and every control that defers with
+            `revert-layer` handed its element back to nobody rather than to
+            Foundry. `expanded` because core hides a listed page's title without
+            it. The stylesheet takes `.application`'s own placement back out
+            below: it is written for a floating window and this is a piece of
+            one, drawn in the flow of the pane. --}}
+      <div class="illuminus-preview__window sheet journal-entry application expanded">
       <header class="window-header" data-part="window">
         <h1 class="window-title">{{localize "ILLUMINUS.Preview.WindowTitle"}}</h1>
         <button type="button" class="header-control icon fa-solid fa-palette" disabled></button>
@@ -303,8 +318,21 @@
             The pieces nest, which the dimming already allows for — neither what
             holds the focused piece nor what it holds is dimmed. --}}
       <aside class="sidebar journal-sidebar flexcol" data-part="sidebar">
+        {{!-- Foundry's own search row, small controls and all: a lock, the
+              view mode, the search mode, the box itself, and the button that
+              folds the panel away. The Panel Buttons part styles every button
+              in here, so a row holding only the box left most of that part
+              with nothing whatever to show. --}}
         <search data-part="sidebarSearch">
+          <button type="button" class="inline-control lock-mode icon fa-solid fa-lock-open"
+                  data-part="sidebarButtons" disabled></button>
+          <button type="button" class="inline-control view-mode icon fas fa-note"
+                  data-part="sidebarButtons" disabled></button>
+          <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass"
+                  data-part="sidebarButtons" disabled></button>
           <input type="search" placeholder="{{localize 'ILLUMINUS.Preview.Search'}}" disabled>
+          <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right"
+                  data-part="sidebarButtons" disabled></button>
         </search>
         <nav class="toc">
           <ol>
@@ -329,8 +357,17 @@
             </li>
           </ol>
         </nav>
+        {{!-- Three buttons, as Foundry draws them: a chevron either side of the
+              one that makes a page. Foundry paints them two ways from one rule
+              of ours — the chevrons opaque and Create at half strength — which
+              a single button could not show. --}}
         <footer class="action-buttons flexrow" data-part="sidebarButtons">
-          <button type="button" disabled>{{localize "ILLUMINUS.Preview.Button"}}</button>
+          <button type="button" class="previous icon fas fa-chevron-left" disabled></button>
+          <button type="button" class="create" disabled>
+            <i class="fas fa-file-circle-plus" inert></i>
+            <span>{{localize "ILLUMINUS.Preview.Button"}}</span>
+          </button>
+          <button type="button" class="next icon fas fa-chevron-right" disabled></button>
         </footer>
       </aside>
 

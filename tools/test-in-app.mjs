@@ -49,6 +49,29 @@ const check = (cond, m) => cond ? ok(m) : fail(m);
  * users to pick from, newer ones a name to type. Handling both means an update
  * to Foundry does not read as the whole suite being broken.
  */
+/**
+ * Draw the sample at life size before measuring it.
+ *
+ * The sample sits inside a `zoom`, and two things follow that make a reading at
+ * any other setting a lie. A length is laid out, snapped to whole device pixels
+ * and then reported back divided by the zoom, so a border set to 7 reads as
+ * 6.66667 at three quarters. And a rectangle inside the zoom is given in the
+ * sample's own layout units while one outside it — the pane, say — is given in
+ * the screen's, so comparing the two compares different things.
+ *
+ * At 100% the sample is life size and both agree. Only `input` is dispatched,
+ * never `change`, so this is not kept as the person's own setting.
+ */
+const sampleAtLifeSize = `(() => {
+  const app = [...foundry.applications.instances.values()]
+    .find(a => a.constructor.name === "IlluminusStyleEditor");
+  const slider = app?.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+  if (!slider) return "no editor";
+  slider.value = "100";
+  slider.dispatchEvent(new Event("input", {bubbles: true}));
+  return "life size";
+})()`;
+
 const joinAndWait = async () => {
   await cdp.goto(`${BASE}/join`);
   await cdp.waitFor(`document.querySelector('select[name=userid], input[name=username]')`,
@@ -514,6 +537,23 @@ check(sh.kept.sidebarEntries?.entryCornerTopLeftShape === "scoop"
 check(sh.out.page?.cornerShape === undefined,
   "and the old name is gone, so nothing is left for the filter to drop");
 
+// A caption's one gap became a four-sided Outer Spacing, and which side it
+// lands on depends on which caption it was.
+const captioned = await cdp.evaluate(`(async () => {
+  const mod = await import("/modules/illuminus/scripts/migrations.mjs");
+  const v12 = { tables: {captionSpacing: 6}, images: {captionSpacing: 4}, image01: {captionSpacing: 9} };
+  const out = mod.migrateSettings(v12, 12);
+  const { cleanSettings } = await import("/modules/illuminus/scripts/style-schema.mjs");
+  return JSON.stringify({out, kept: cleanSettings(out)});
+})()`);
+const cap = JSON.parse(captioned);
+check(cap.kept.tables?.captionMarginBottom === 6,
+  `a table's caption gap became the space under it (got ${cap.kept.tables?.captionMarginBottom})`);
+check(cap.kept.images?.captionMarginTop === 4 && cap.kept.image01?.captionMarginTop === 9,
+  `a picture's became the space above it (got ${cap.kept.images?.captionMarginTop}, ${cap.kept.image01?.captionMarginTop})`);
+check(cap.out.tables?.captionSpacing === undefined && cap.out.images?.captionSpacing === undefined,
+  "and the old name is gone from both");
+
 // Thickness and Slant merged into one control, so a v2 style has to arrive with
 // the nearest combined choice rather than losing both to cleanSettings.
 const merged = await cdp.evaluate(`(async () => {
@@ -592,6 +632,12 @@ const matched = await cdp.evaluate(`(async () => {
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1000));
   const el = app.element;
+  // Measured at life size: a length read at any other setting comes back
+  // snapped and divided by the zoom.
+  const slider = el.querySelector('.illuminus-preview__zoom input[type="range"]');
+  slider.value = "100";
+  slider.dispatchEvent(new Event("input", {bubbles: true}));
+  await new Promise(r => setTimeout(r, 400));
 
   // Assigning to a Foundry form element's value setter fires input+change from
   // the element itself, which is exactly what a real user interaction does.
@@ -648,37 +694,57 @@ check(ms.ordinary.every(v => v === 2), `Match evens out the ordinary corners (go
 check(ms.hovered.every(v => v === 24),
   `and evens out the hovered ones on their own (got ${ms.hovered.join(", ")})`);
 
-// The preview frame is its own scroll container, so the sample page must grow
-// with its content — otherwise everything scrolled past has no page background.
-console.log("\n[15] Preview background covers the full scroll height");
+// Nothing scrolled past may show unpainted ground. The sample used to grow to
+// hold the whole journal and scroll the pane, so the page had to be as tall as
+// its contents or the ground ran out below them. It is a window's worth of room
+// now and the pages scroll inside it, exactly as a real journal does — so the
+// question is the other way round: the surface stays put and covers the pane
+// however far the pages are scrolled.
+console.log("\n[15] The page's ground covers the pane, scrolled or not");
 const previewBg = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   const style = api.listStyles().find(s => s.name === "Aged Parchment");
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 900));
   app.setPosition({width: 940, height: 700});
-  await new Promise(r => setTimeout(r, 400));
+  // Life size, so a rectangle inside the sample and one outside it agree.
+  const zoom = app.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+  zoom.value = "100";
+  zoom.dispatchEvent(new Event("input", {bubbles: true}));
+  await new Promise(r => setTimeout(r, 500));
 
   const el = app.element;
   const frame = el.querySelector(".illuminus-preview__frame");
-  const content = frame.querySelector(".journal-entry-content");
-  frame.scrollTop = frame.scrollHeight;
-  await new Promise(r => setTimeout(r, 250));
+  const surface = frame.querySelector(".journal-entry-content");
+  const pages = frame.querySelector(".journal-entry-pages");
+  const covers = () => {
+    const a = surface.getBoundingClientRect(), b = frame.getBoundingClientRect();
+    return a.top <= b.top + 1 && a.bottom >= b.bottom - 1;
+  };
+  const before = covers();
+  pages.scrollTop = pages.scrollHeight;
+  await new Promise(r => setTimeout(r, 300));
 
   const out = {
-    scrollable: frame.scrollHeight > frame.clientHeight,
-    scrollHeight: frame.scrollHeight,
-    contentHeight: content.offsetHeight,
-    bg: getComputedStyle(content).backgroundColor
+    pagesScroll: pages.scrollHeight > pages.clientHeight + 1,
+    scrolled: pages.scrollTop > 0,
+    frameStill: frame.scrollHeight <= frame.clientHeight + 1,
+    coversBefore: before,
+    coversAfter: covers(),
+    bg: getComputedStyle(surface).backgroundColor
   };
   await app.close({force: true});
   return JSON.stringify(out);
 })()`);
 const pb = JSON.parse(previewBg);
-check(pb.scrollable, `the sample is taller than its frame, so this is actually exercised (${pb.scrollHeight}px)`);
-check(pb.contentHeight >= pb.scrollHeight,
-  `page covers the whole scroll height (page ${pb.contentHeight}px vs scroll ${pb.scrollHeight}px)`);
-check(pb.bg === "rgb(236, 224, 198)", `and is still painted with the style color (got ${pb.bg})`);
+check(pb.pagesScroll && pb.scrolled,
+  "the pages scroll inside the page, as a real journal's do, so this is exercised");
+// The pane itself no longer scrolls: that was the old shape, and it is what made
+// the page's surface as tall as everything written on it.
+check(pb.frameStill, "while the pane itself has nothing to scroll");
+check(pb.coversBefore && pb.coversAfter,
+  `and the page's ground covers the pane at either end of that scroll (${pb.coversBefore} / ${pb.coversAfter})`);
+check(pb.bg === "rgb(236, 224, 198)", `still painted with the style color (got ${pb.bg})`);
 
 console.log("\n[16] Sidebar styling reaches a real journal sheet");
 const sidebar = await cdp.evaluate(`(async () => {
@@ -1151,6 +1217,11 @@ const assets = await cdp.evaluate(`(async () => {
   }});
   const app = await api.openEditor(style.id);
   await new Promise(r => setTimeout(r, 1200));
+  // Life size, or the border reads snapped and divided by the zoom.
+  const zoom = app.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+  zoom.value = "100";
+  zoom.dispatchEvent(new Event("input", {bubbles: true}));
+  await new Promise(r => setTimeout(r, 400));
   const freeze = document.createElement("style");
   freeze.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; }";
   document.head.append(freeze);
@@ -4149,6 +4220,86 @@ try {
 
     out.family = await visit("boxStyles");
 
+    // Every part the tree offers, read from the schema rather than hand-picked:
+    // a part split out of another and left without a piece of its own dims
+    // nothing at all, which reads as the default view rather than as anything
+    // being broken. That is what happened to the nine parts inside the contents
+    // panel and the page editor. Switching a part does not re-render, so the
+    // whole sweep costs about a second.
+    const { GROUPS } = await import("/modules/illuminus/scripts/style-schema.mjs");
+    out.sweep = {};
+    for (const group of GROUPS.filter(one => !one.family)) {
+      app.changeTab(group.id, "sheet");
+      await new Promise(r => setTimeout(r, 0));
+      const all = parts();
+      const onShow = (sel) => {
+        const node = app.element.querySelector(sel);
+        return Boolean(node && node.getClientRects().length);
+      };
+      out.sweep[group.id] = {
+        mine: all.filter(one => one.dataset.part === group.id).length,
+        mineLit: all.filter(one => one.dataset.part === group.id
+          && !one.classList.contains("is-dimmed")).length,
+        dimmed: all.filter(one => one.classList.contains("is-dimmed")).length,
+        // Which mock the pane is actually showing. Dimming the right piece is
+        // no use if the thing holding it was never put on screen: the page
+        // editor and the contents panel each have a mock of their own, and a
+        // part inside them used to show the ordinary journal instead.
+        editorMock: onShow(".illuminus-preview__editor"),
+        panel: onShow(".illuminus-preview__frame .journal-sidebar")
+      };
+    }
+
+    // Neither what holds the focused piece nor what it holds is dimmed, or a
+    // listed entry would be lit inside a gray panel.
+    app.changeTab("sidebarEntries", "sheet");
+    await new Promise(r => setTimeout(r, 0));
+    const shownAt = (part) => {
+      const node = app.element.querySelector('.illuminus-preview__frame [data-part="' + part + '"]');
+      return node ? !node.classList.contains("is-dimmed") : null;
+    };
+    out.nested = { entry: shownAt("sidebarEntries"), panel: shownAt("sidebar"),
+      number: shownAt("sidebarNumbers"), page: shownAt("page") };
+
+    // The panel's own furniture, which the Panel Buttons and Search Box parts
+    // style: Foundry draws four small controls beside the box and three buttons
+    // at the foot, and the mock had one plain button and nothing else. The foot
+    // is the part worth measuring — the panel stands beside a whole page and is
+    // thousands of pixels tall, so its buttons sat far below anything visible.
+    app.changeTab("sidebarButtons", "sheet");
+    // At life size, so the panel's own rectangle and the pane's are in the same
+    // units: inside the zoom a box is given in the sample's layout coordinates
+    // and outside it in the screen's.
+    const zoomAt = app.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+    zoomAt.value = "100";
+    zoomAt.dispatchEvent(new Event("input", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 400));
+    const seen = app.element.querySelector(".illuminus-preview__frame").getBoundingClientRect();
+    const foot = app.element.querySelector(".illuminus-preview__frame .action-buttons");
+    const footBox = foot.getBoundingClientRect();
+    const aside = app.element.querySelector(".illuminus-preview__frame .journal-sidebar");
+    const asideBox = aside.getBoundingClientRect();
+    out.furniture = {
+      searchControls: app.element
+        .querySelectorAll(".illuminus-preview__frame .journal-sidebar search .inline-control").length,
+      footerButtons: [...foot.querySelectorAll("button")]
+        .map(one => [...one.classList].find(c => ["previous", "create", "next"].includes(c)) ?? "?"),
+      footerInView: footBox.top < seen.bottom && footBox.bottom > seen.top,
+      // The panel is the height of the pane, as a real one is the height of its
+      // window. Left to stretch it took the whole page's height and its foot
+      // went out of reach — and nothing inside it then needs to stick to
+      // anything, which is what put the search row over the panel's top edge.
+      panelHeight: Math.round(asideBox.height),
+      paneHeight: Math.round(seen.height),
+      searchRides: Math.round(
+        app.element.querySelector(".illuminus-preview__frame .journal-sidebar search")
+          .getBoundingClientRect().top - asideBox.top),
+      // A part in focus carries no filter at all. An identity one changes no
+      // color and is a stacking context all the same, so whatever blends inside
+      // it composites against a different backdrop than a real journal's does.
+      litFilter: getComputedStyle(aside).filter
+    };
+
     // And the focus follows the level the picker names.
     app.changeTab("headings", "sheet");
     await new Promise(r => setTimeout(r, 300));
@@ -4181,6 +4332,50 @@ try {
     `a family tab, which replaces the pane outright, dims nothing (${fc.family.dimmed})`);
   check(JSON.stringify(fc.afterPick) === JSON.stringify(["page", "heading3"]),
     `the focus follows the member the picker names (lit ${fc.afterPick.join(", ")})`);
+  const swept = Object.entries(fc.sweep);
+  const noPiece = swept.filter(([, seen]) => seen.mine === 0).map(([tab]) => tab);
+  const unlit = swept.filter(([, seen]) => seen.mine > 0 && seen.mineLit === 0).map(([tab]) => tab);
+  const nothingDark = swept.filter(([, seen]) => seen.dimmed === 0).map(([tab]) => tab);
+  check(noPiece.length === 0,
+    `every part has a piece of the sample in the rendered page (${swept.length} parts${noPiece.length ? ", missing " + noPiece.join(", ") : ""})`);
+  check(unlit.length === 0,
+    `and opening any of them lights it${unlit.length ? ", except " + unlit.join(", ") : ""}`);
+  // The whole of the bug this guards: with no piece to focus, nothing is dimmed
+  // and the sample is indistinguishable from the default view.
+  check(nothingDark.length === 0,
+    `while the rest of the sample goes dark${nothingDark.length ? ", except " + nothingDark.join(", ") : ""}`);
+  // The mock each part belongs to, which is what a person sees before anything
+  // is dimmed at all. Read from the same table that lifted the parts out.
+  const editorParts = ["editor", "editorSettingsBar", "editorDropdowns", "editorToolbar"];
+  const panelParts = ["sidebar", "sidebarEntries", "sidebarHeadings", "sidebarCategories",
+    "sidebarSearch", "sidebarButtons", "sidebarNumbers"];
+  const noEditorMock = editorParts.filter((tab) => !fc.sweep[tab]?.editorMock);
+  const noPanel = panelParts.filter((tab) => !fc.sweep[tab]?.panel);
+  const strayEditorMock = swept.filter(([tab, seen]) =>
+    seen.editorMock && !editorParts.includes(tab)).map(([tab]) => tab);
+  check(noEditorMock.length === 0,
+    `the page editor's own parts all show its window${noEditorMock.length ? ", except " + noEditorMock.join(", ") : ""}`);
+  check(noPanel.length === 0,
+    `the contents panel's own parts all show the panel${noPanel.length ? ", except " + noPanel.join(", ") : ""}`);
+  check(strayEditorMock.length === 0,
+    `and no other part shows the editor's window${strayEditorMock.length ? " (" + strayEditorMock.join(", ") + ")" : ""}`);
+  check(fc.furniture.searchControls === 4,
+    `the search row carries the four small controls Foundry draws (${fc.furniture.searchControls})`);
+  check(JSON.stringify(fc.furniture.footerButtons) === JSON.stringify(["previous", "create", "next"]),
+    `and the foot its three buttons (${fc.furniture.footerButtons.join(", ")})`);
+  // The one that matters: a button nobody can see is a part nobody can style.
+  check(fc.furniture.footerInView,
+    "with the foot inside the pane, not far below a panel as tall as the page");
+  check(Math.abs(fc.furniture.panelHeight - fc.furniture.paneHeight) <= 2,
+    `the panel is the height of the pane (${fc.furniture.panelHeight} against ${fc.furniture.paneHeight})`);
+  check(fc.furniture.searchRides > 0,
+    `and the search row sits inside it rather than over its top edge (${fc.furniture.searchRides}px in)`);
+  // Reported as the sample looking darker than the journal it stands for.
+  check(fc.furniture.litFilter === "none",
+    `a part in focus carries no filter, so it composites as a real journal does (${fc.furniture.litFilter})`);
+  check(fc.nested.entry === true && fc.nested.panel === true && fc.nested.number === true,
+    "a part inside another lights it, the part holding it, and the part it holds");
+  check(fc.nested.page === false, "while the page beside them goes dark");
   check(fc.buttons.some((t) => /Illuminus Styles/.test(t))
     && fc.buttons.some((t) => /Illuminus Templates/.test(t)),
     `both sidebar buttons name the module (got ${fc.buttons.join(", ")})`);
@@ -4189,6 +4384,89 @@ try {
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.constructor.name.startsWith("Illuminus")) await app.close({force: true});
     }
+  })()`);
+}
+
+// The sample stands in for a journal, so where it differs from one it is lying.
+// Core's journal CSS names `.sheet.journal-entry.application`, which the sample
+// is not inside — so anything core states there is simply absent, and a control
+// that defers with `revert-layer` hands the element back to nobody. A category
+// row came out 30 pixels tall against a journal's 48, in the interface's own
+// typeface rather than the journal's, and read as the row being a different
+// shape that no Inner Spacing would fix.
+console.log("\n[91] The sample's contents panel is the panel a journal draws");
+try {
+  const same = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.constructor.name.startsWith("Illuminus")) await open.close({force: true});
+      else if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const style = api.listStyles().find(s => s.name === "Aged Parchment");
+    let entry = game.journal.getName("Panel Sameness");
+    if (entry) await entry.delete();
+    entry = await JournalEntry.create({name: "Panel Sameness"});
+    const made = await entry.createEmbeddedDocuments("JournalEntryCategory", [{name: "Category"}]);
+    await entry.createEmbeddedDocuments("JournalEntryPage", [
+      {name: "Current page", type: "text", category: made[0].id, text: {content: "<p>Words.</p>"}},
+      {name: "Page entry", type: "text", category: made[0].id, text: {content: "<p>More.</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true});
+    await new Promise(r => setTimeout(r, 1400));
+
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 2600));
+    app.changeTab("sidebar", "sheet");
+    // Life size, or every length reads snapped and divided by the zoom.
+    const zoom = app.element.querySelector('.illuminus-preview__zoom input[type="range"]');
+    zoom.value = "100";
+    zoom.dispatchEvent(new Event("input", {bubbles: true}));
+    await new Promise(r => setTimeout(r, 700));
+
+    // Only what a person would see: how large a thing is drawn and what it is
+    // drawn with. A color on an edge nobody draws is not a difference.
+    const WANT = ["lineHeight", "fontSize", "fontFamily", "textTransform", "letterSpacing",
+      "display", "paddingTop", "paddingBottom", "paddingLeft", "paddingRight", "textAlign"];
+    const of = (root, sel) => {
+      const node = root.querySelector(sel);
+      if (!node) return null;
+      const c = getComputedStyle(node), out = {};
+      for (const k of WANT) out[k] = c[k];
+      out.height = Math.round(node.getBoundingClientRect().height);
+      out.width = Math.round(node.getBoundingClientRect().width);
+      return out;
+    };
+    const real = entry.sheet.element;
+    const mock = app.element.querySelector(".illuminus-preview__frame");
+    const differ = (sel) => {
+      const a = of(real, sel), b = of(mock, sel);
+      if (!a || !b) return [(!a ? "real" : "sample") + " has no " + sel];
+      return Object.keys(a).filter(k => String(a[k]) !== String(b[k]))
+        .map(k => sel + " " + k + ": journal " + a[k] + ", sample " + b[k]);
+    };
+    const out = {
+      category: differ(".toc li.category"),
+      categoryText: differ(".toc li.category strong"),
+      pageEntry: differ(".toc li.page .page-title")
+    };
+    await app.close({force: true});
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify(out);
+  })()`);
+  const sm = JSON.parse(same);
+  check(sm.category.length === 0,
+    `a category row is drawn as a journal draws it${sm.category.length ? ": " + sm.category.join("; ") : ""}`);
+  check(sm.categoryText.length === 0,
+    `and its lettering too${sm.categoryText.length ? ": " + sm.categoryText.join("; ") : ""}`);
+  check(sm.pageEntry.length === 0,
+    `as is a listed page's name${sm.pageEntry.length ? ": " + sm.pageEntry.join("; ") : ""}`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Panel Sameness");
+    if (entry) await entry.delete();
   })()`);
 }
 
@@ -8101,6 +8379,17 @@ check(errs.length === 0, `no Illuminus errors in console${errs.length ? `:\n    
 // in runs — the schema draws a line and stacks the controls that belong
 // together under it — and those runs are now a disclosure like every other,
 // named from the controls' own wording where they share any.
+// Every check that printed left a frame behind: `afterprint` never fires in a
+// headless browser, so the module's own tidy-up is still waiting out its
+// five-minute fallback long after the run has moved on. A leftover is a page
+// target sitting at /game, and the suite has died at three different checks
+// because of them — [85], [86] and [89], none of which had anything to do with
+// printing. Swept here, once the printing is done.
+{
+  const strays = await cdp.tidy();
+  if (strays) console.log(`\n(closed ${strays} leftover print frame${strays === 1 ? "" : "s"})`);
+}
+
 console.log("\n[84] A category's plain controls fold into named runs");
 try {
   const runs = JSON.parse(await cdp.evaluate(`(async () => {
@@ -8536,6 +8825,130 @@ try {
   await cdp.evaluate(`(async () => {
     if (window.__shape) await window.__shape.close({force: true});
     window.__shape = undefined;
+  })()`);
+}
+
+/* --- A table can be sized to what it holds -------------------------------- */
+// Two controls over one property, so the order is the whole of it: Width Fits
+// answers first and says nothing at all when it is left to the Width above,
+// which is the only way the fallback is ever reached.
+console.log("\n[89] A table can be sized to its contents");
+try {
+  const fitted = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const wide = "<table><tbody><tr><td>a</td><td>a much longer cell of words that could wrap</td></tr></tbody></table>";
+    const entry = await JournalEntry.create({name: "Width Fits Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content: wide}}]);
+    const read = async (settings) => {
+      const style = await api.createStyle({name: "Width Fits Probe", settings});
+      await api.assignStyle(entry, style.id);
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      await new Promise(r => setTimeout(r, 900));
+      const table = entry.sheet.element.querySelector("table");
+      const out = {
+        width: Math.round(table.getBoundingClientRect().width),
+        height: Math.round(table.getBoundingClientRect().height)
+      };
+      await api.deleteStyle(style.id);
+      return out;
+    };
+    const stated = await read({tables: {width: 100, widthFit: "stated"}});
+    const half = await read({tables: {width: 50, widthFit: "stated"}});
+    const contents = await read({tables: {width: 100, widthFit: "contents"}});
+    const narrowest = await read({tables: {width: 100, widthFit: "narrowest"}});
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({stated, half, contents, narrowest});
+  })()`);
+  const wf = JSON.parse(fitted);
+  // Left to the Width control, the fit must be silent or the fallback is never
+  // reached — which is what setting Width to half proves.
+  check(wf.half.width < wf.stated.width - 20,
+    `left to follow the Width, the Width still governs (${wf.stated.width} at 100%, ${wf.half.width} at 50%)`);
+  check(wf.contents.width < wf.stated.width,
+    `fitting the contents shrinks the table to what it needs (${wf.stated.width} -> ${wf.contents.width})`);
+  // `max-content` is already the width nothing would wrap at, which is why
+  // there is no separate answer for "the longest line" — it was the same width
+  // to the pixel, and a control that changes nothing is worse than none.
+  check(wf.contents.height <= wf.stated.height,
+    `fitting the contents needs no more lines than the width above did (${wf.stated.height} -> ${wf.contents.height})`);
+  check(wf.narrowest.width < wf.contents.width,
+    `the narrowest squeezes further still (${wf.contents.width} -> ${wf.narrowest.width})`);
+  check(wf.narrowest.height > wf.contents.height,
+    `and pays for it in lines (${wf.contents.height} -> ${wf.narrowest.height})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Width Fits Journal");
+    if (entry) await entry.delete();
+    for (const style of game.modules.get("illuminus").api.listStyles()) {
+      if (style.name === "Width Fits Probe") await game.modules.get("illuminus").api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+/* --- A caption can be moved on every side --------------------------------- */
+// Both captions had one gap apiece and no way to move them anywhere else — a
+// table's held the table off it, a picture's held it off the picture. Margins
+// apply to a caption box as well as to a figcaption, which is measured here
+// rather than taken on trust.
+console.log("\n[90] A caption has room on every side");
+try {
+  const room = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Caption Room Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text", text: {content:
+      "<table><caption>Table caption</caption><tbody><tr><td>one</td></tr></tbody></table>" +
+      '<figure><img src="icons/svg/book.svg" width="80"><figcaption>Picture caption</figcaption></figure>'}}]);
+    const read = async (settings) => {
+      const style = await api.createStyle({name: "Caption Room Probe", settings});
+      await api.assignStyle(entry, style.id);
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id});
+      await new Promise(r => setTimeout(r, 900));
+      const root = entry.sheet.element;
+      const box = (sel) => {
+        const r = root.querySelector(sel).getBoundingClientRect();
+        return {left: Math.round(r.left), top: Math.round(r.top), width: Math.round(r.width)};
+      };
+      const out = {caption: box("table > caption"), figcaption: box("figure figcaption"),
+        table: box("table")};
+      await api.deleteStyle(style.id);
+      return out;
+    };
+    const plain = await read({tables: {captionMarginLeft: 0, captionMarginTop: 0},
+      images: {captionMarginLeft: 0, captionMarginTop: 0}});
+    const moved = await read({tables: {captionMarginLeft: 40, captionMarginTop: 20},
+      images: {captionMarginLeft: 40, captionMarginTop: 20}});
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({plain, moved});
+  })()`);
+  const cr = JSON.parse(room);
+  check(cr.moved.caption.left - cr.plain.caption.left === 40,
+    `a table caption takes room on its left (moved ${cr.moved.caption.left - cr.plain.caption.left}px)`);
+  check(cr.moved.caption.top - cr.plain.caption.top === 20,
+    `and above it (moved ${cr.moved.caption.top - cr.plain.caption.top}px)`);
+  check(cr.moved.figcaption.left - cr.plain.figcaption.left === 40,
+    `a picture caption takes room on its left too (moved ${cr.moved.figcaption.left - cr.plain.figcaption.left}px)`);
+  check(cr.moved.caption.width < cr.plain.caption.width,
+    `and the caption narrows by what it gave away (${cr.plain.caption.width} -> ${cr.moved.caption.width})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Caption Room Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Caption Room Probe") await api.deleteStyle(style.id);
+    }
   })()`);
 }
 
