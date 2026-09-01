@@ -425,7 +425,8 @@ console.log("\n[14] No category holds two controls of one name");
         // Both spellings of a state, as the editor reads them: `hoverBackground`
         // and `entryHoverBackground`. A state's control is shown in place of
         // the one it stands in for, never beside it.
-        if (/^(hover|active)[A-Z]/.test(field.name) || /[a-z](Hover|Active)[A-Z]/.test(field.name)) continue;
+        if (/^(hover|active|collapsed)[A-Z]/.test(field.name)
+          || /[a-z](Hover|Active|Collapsed)[A-Z]/.test(field.name)) continue;
         const label = lang[`ILLUMINUS.Field.${key}.${field.name}.label`]
           ?? lang[`ILLUMINUS.Field.${field.name}.label`];
         if (!label) continue;
@@ -498,21 +499,19 @@ console.log("\n[16] Every run of controls has a name");
     localize: (key) => lang[key] ?? key,
     has: (key) => key in lang
   } };
-  const { nameRuns, runKindOf, RUN_KINDS } = await import(`${ROOT}/scripts/run-names.mjs`);
+  const { nameRuns, runKindOf, RUN_KINDS, boxPartOf, clusterPartOf, stateBase, stateOf } =
+    await import(`${ROOT}/scripts/run-names.mjs`);
 
   const labelOf = (group, name) =>
     lang[`ILLUMINUS.Field.${group.family ?? group.id}.${name}.label`]
     ?? lang[`ILLUMINUS.Field.${name}.label`] ?? name;
 
-  // The two shapes the editor gathers before these runs are left over. Read
-  // from the names, as `boxPartOf` and `clusterPartOf` read them.
-  const gathered = (name) =>
-    /^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/.test(name)
-    || /^(.*?)[Tt]exture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/.test(name)
-    || /^(.*?)[Bb]order(Top|Right|Bottom|Left)(Width|Style|Color)$/.test(name)
-    || /^(.*?)[Cc]orner(TopLeft|TopRight|BottomLeft|BottomRight)$/.test(name)
-    || /^(.*?)[Cc]ornerShape$/.test(name)
-    || /^(.*?)([Pp]adding|[Mm]argin)(Top|Right|Bottom|Left)$/.test(name);
+  // The two shapes the editor gathers before these runs are left over — asked
+  // of the editor's own functions rather than of a copy of its regexes. The
+  // copy that used to live here had already drifted: it still looked for a
+  // single `cornerShape` after each corner had grown one of its own, so four
+  // controls the editor gathers were counted here as loose ones.
+  const gathered = (name) => Boolean(boxPartOf(name) ?? clusterPartOf(name));
 
   let runs = 0;
   const nameless = [];
@@ -563,6 +562,45 @@ console.log("\n[16] Every run of controls has a name");
     for (const one of clashes.slice(0, 4)) fail(`  ${one}`);
   } else {
     ok("no category holds two runs of one name");
+  }
+
+  // A gathered family, twice over, because its state is spelled two ways.
+  //
+  // The runs above are the loose controls; a box, a shadow and a picture are
+  // gathered before them and were never compared with each other. A state's
+  // control is named either way round — `activeHeadingBorderTopWidth` where it
+  // was derived, `headingActiveBorderTopColor` where the schema states it by
+  // hand — so one family came out as two, drawn as two runs with one name
+  // between them. Sub-Headings showed two "Edges and Corners" under Selected,
+  // one holding the widths and the other the colors, and nothing here saw it.
+  const split = [];
+  for (const group of GROUPS) {
+    for (const section of group.sections) {
+      const seen = new Map();
+      for (const field of section.fields) {
+        const part = boxPartOf(field.name) ?? clusterPartOf(field.name);
+        if (!part) continue;
+        // One run per family per state: what a family *is* with its state word
+        // taken out, and which state it is in.
+        const key = `${stateBase(part.family)}|${stateOf(part.family)}`;
+        const held = seen.get(key);
+        if (held && held !== part.family) {
+          split.push(`${group.id}.${section.id}: ${stateBase(part.family)} is two runs `
+            + `(${held} and ${part.family})`);
+        } else seen.set(key, part.family);
+      }
+    }
+  }
+  // Counted once per family, not once per control: four controls collide for
+  // every one family that is split, and "4 families" sends somebody looking for
+  // three more that are not there.
+  const splits = [...new Set(split)];
+  if (splits.length) {
+    fail(`${splits.length} ${splits.length === 1 ? "family is" : "families are"} `
+      + "drawn as two runs of one name");
+    for (const one of splits.slice(0, 4)) fail(`  ${one}`);
+  } else {
+    ok("no gathered family is drawn twice under two spellings of its state");
   }
 
   // And every word the table can reach for is written down. A kind with no

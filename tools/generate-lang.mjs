@@ -153,6 +153,7 @@ Object.assign(out, {
   "ILLUMINUS.Editor.StateNormal": "Normal",
   "ILLUMINUS.Editor.StateHover": "Hovered",
   "ILLUMINUS.Editor.StateActive": "Selected",
+  "ILLUMINUS.Editor.StateCollapsed": "Folded",
   "ILLUMINUS.Editor.FilterPlaceholder": "Search every setting\u2026",
   "ILLUMINUS.Editor.FilterCount": "{count} match(es)",
   "ILLUMINUS.Editor.ResizePreview": "Drag to resize the sample",
@@ -323,6 +324,8 @@ Object.assign(out, {
   "ILLUMINUS.ColorPicker.Saved": "Saved Colors",
   "ILLUMINUS.ColorPicker.SaveColor": "Save",
   "ILLUMINUS.ColorPicker.Forget": "Remove this color (or press Delete)",
+  "ILLUMINUS.Confirm.ForgetColorTitle": "Remove Saved Color",
+  "ILLUMINUS.Confirm.ForgetColor": "Remove {color} from the saved colors? A palette is built up over a whole style, and there is no putting one back.",
   // The sample names each element after the setting that controls it, so it
   // reads as a legend rather than as a page of prose.
   "ILLUMINUS.Sample.Folder": "Samples",
@@ -540,6 +543,10 @@ const SECTION_TEXT = {
   category: ["Categories", "The group headings between the pages, and the rows they sit in"],
   search: ["Search Box", "The search field at the top of the panel"],
   buttons: ["Buttons", "The controls beside the search box and along the bottom"],
+  topButtons: ["Top Buttons",
+    "The small controls beside the search box \u2014 the lock, the view mode, the search mode, and the one that folds the panel away"],
+  bottomButtons: ["Bottom Buttons",
+    "The three at the foot of the panel \u2014 a chevron either side of New Page"],
   frame: ["Window Frame", "The edge of the window, visible around the page"],
   titleBar: ["Title Bar", "The strip across the top carrying the journal's name"],
   headerButtons: ["Title Bar Buttons", "The icon buttons at the right of the title bar, including Illuminus's own"],
@@ -606,7 +613,8 @@ const CORNER_WORD = {
 };
 /** A prefix with its state word taken out, or null when it carries none. */
 const withoutState = (name) => {
-  const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
+  const stripped = name.replace(/^(hover|active|collapsed)/, "")
+    .replace(/(Hover|Active|Collapsed)(?=[A-Z])/, "");
   if (stripped === name || !stripped) return null;
   return stripped[0].toLowerCase() + stripped.slice(1);
 };
@@ -756,7 +764,7 @@ const CROWDED_OUTLINE = new Set(GROUPS.flatMap((group) => group.sections.flatMap
     .filter((field) => /OutlineWidth$|^outlineWidth$/.test(field.name))
     // A state's own outline is the same family as the one it stands in for, so
     // it does not make a section crowded — the switch tells them apart.
-    .filter((field) => !/^(hover|active)|(Hover|Active)(?=[A-Z])/.test(field.name))
+    .filter((field) => !/^(hover|active|collapsed)|(Hover|Active|Collapsed)(?=[A-Z])/.test(field.name))
     .map((field) => field.name.replace(/OutlineWidth$/, "")));
   return prefixes.size > 1
     ? section.fields.filter((field) => /Outline(Width|Color)$/.test(field.name)).map((field) => field.name)
@@ -1139,7 +1147,7 @@ for (const name of names) {
     continue;
   }
   // spacing family: <prefix><Side>
-  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding|captionMargin)(Top|Right|Bottom|Left)$/))) {
+  if ((m = name.match(/^(padding|margin|cellPadding|entryPadding|entryMargin|headingPadding|headingMargin|categoryPadding|categoryMargin|codePadding|codeBlockPadding|summaryPadding|collapsiblePadding|toolbarPadding|toolbarButtonPadding|dropdownPadding|fieldPadding|settingsBarPadding|settingsBarMargin|listPadding|itemPadding|captionMargin|topButtonPadding|topButtonMargin|bottomButtonPadding|bottomButtonMargin|searchPadding|searchMargin)(Top|Right|Bottom|Left)$/))) {
     const [, prefix, side] = m;
     // A gap is outside the edge whatever it is a gap around, so the two
     // families are told apart by the word rather than by the whole name.
@@ -1599,7 +1607,25 @@ const FIELD_TEXT = {
   headingRuleStyle: ["Rule Style", "What the line above a heading looks like."],
   headingRuleColor: ["Rule Color", "Color of the line above a heading."],
 
-  sidebarWidth: ["Panel Width", "How wide the contents panel is."],
+  sidebarWidth: ["Panel Width",
+    "How wide the contents panel is.\n\n"
+    + "Switch the state above to Folded to say how wide it is once a reader "
+    + "has folded it away \u2014 as with every other setting on the panel, the "
+    + "folded answer is this same control under that state. Foundry's own "
+    + "folded width is 40, about enough for the button that unfolds it."],
+  unfoldFloat: ["Unfold Button Floats",
+    "Lets the folded panel keep nothing but the button that unfolds it again, "
+    + "floating over the page rather than sitting in the panel.\n\n"
+    + "That button lives inside the panel, so a narrow folded Panel Width hides "
+    + "it, and a reader who cannot see it cannot get the panel back. Switch "
+    + "this on and the folded width may go all the way to 0: the panel "
+    + "disappears entirely and the button remains, placed by the two settings "
+    + "below."],
+  unfoldFloatTop: ["Unfold Button Distance From Top",
+    "How far down from the top of the folded panel the floating button sits."],
+  unfoldFloatLeft: ["Unfold Button Distance From Left",
+    "How far in from the window's edge the floating button sits. A little is "
+    + "usually enough to clear the window's own rounded corner."],
   titleBarBackground: ["Fill Color", "Color of the strip across the top of the window."],
   headerButtonColor: ["Icon Color", "Color of the title bar's icon buttons."],
   headerButtonHoverColor: ["Icon Color", "Icon color while the mouse is over a title bar button."],
@@ -1652,13 +1678,31 @@ const FIELD_TEXT = {
   searchColor: ["Text Color", "Color of what you type into the search box."],
   searchPlaceholderColor: ["Prompt Color", "Color of the grayed-out prompt shown while the search box is empty."],
   searchSize: ["Text Size", "How large the search box lettering is."],
-  buttonColor: ["Text Color", "Text and icon color on the panel's buttons."],
-  buttonBackground: ["Fill Color", "Color inside the panel's buttons."],
-  buttonBorderColor: ["Border Color", "Color of the outline around the panel's buttons."],
-  buttonBorderWidth: ["Border Thickness", "How heavy the outline around the panel's buttons is."],
-  buttonHoverColor: ["Text Color", "Text color while the mouse is over a button."],
-  buttonHoverBackground: ["Fill Color", "Color inside a button while the mouse is over it."],
-  buttonHoverBorderColor: ["Border Color", "Edge color while the mouse is over a button."]
+  // The Reveal button on a secret passage, which shares these names and is a
+  // different button entirely — the panel's own are the two sets below.
+  buttonColor: ["Text Color", "Text and icon color on the Reveal button."],
+  buttonBackground: ["Fill Color", "Color inside the Reveal button."],
+  buttonBorderColor: ["Border Color", "Color of the outline around the Reveal button."],
+  buttonBorderWidth: ["Border Thickness", "How heavy the outline around the Reveal button is."],
+  buttonHoverColor: ["Text Color", "Text color while the mouse is over the Reveal button."],
+  buttonHoverBackground: ["Fill Color", "Color inside the Reveal button while the mouse is over it."],
+  buttonHoverBorderColor: ["Border Color", "Edge color while the mouse is over the Reveal button."],
+  // The panel's two lots of buttons, said once and worded for each: the small
+  // controls beside the search box, and the three at the foot. Foundry draws
+  // them differently — the top ones come with no fill and no edge — so what a
+  // hint says about "the buttons" has to say which.
+  ...Object.fromEntries([
+    ["topButton", "the controls beside the search box"],
+    ["bottomButton", "the buttons at the foot of the panel"]
+  ].flatMap(([prefix, of]) => [
+    [`${prefix}Color`, ["Text Color", `Text and icon color on ${of}.`]],
+    [`${prefix}Background`, ["Fill Color", `Color inside ${of}.`]],
+    [`${prefix}BorderColor`, ["Border Color", `Color of the outline around ${of}.`]],
+    [`${prefix}BorderWidth`, ["Border Thickness", `How heavy the outline around ${of} is.`]],
+    [`${prefix}HoverColor`, ["Text Color", `Text color while the mouse is over one of ${of}.`]],
+    [`${prefix}HoverBackground`, ["Fill Color", `Color inside one of ${of} while the mouse is over it.`]],
+    [`${prefix}HoverBorderColor`, ["Border Color", `Edge color while the mouse is over one of ${of}.`]]
+  ]))
 };
 for (const [name, [label, hint]] of Object.entries(FIELD_TEXT)) {
   put(`ILLUMINUS.Field.${name}.label`, label);
@@ -1901,8 +1945,8 @@ if (missing.length) {
         // colliding with `termColor` — the same label, as a state's control is
         // meant to have — and the sweep qualified both, so the Default List
         // read "Term Term Color".
-        if (/^(hover|active)[A-Z]/.test(field.name)
-          || /(Hover|Active)(?=[A-Z])/.test(field.name)) continue;
+        if (/^(hover|active|collapsed)[A-Z]/.test(field.name)
+          || /(Hover|Active|Collapsed)(?=[A-Z])/.test(field.name)) continue;
         const label = out[`ILLUMINUS.Field.${key}.${field.name}.label`]
           ?? out[`ILLUMINUS.Field.${field.name}.label`];
         if (!label) continue;

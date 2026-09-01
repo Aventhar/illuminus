@@ -835,10 +835,27 @@ const IMAGE_LAYERS = [
   { selector: ".illuminus-styled .journal-sidebar .toc li.page", group: "sidebarEntries", prefix: "entry" },
   { selector: ".illuminus-styled .journal-sidebar .toc li.page:hover", group: "sidebarEntries", prefix: "entryHover" },
   { selector: ".illuminus-styled .journal-sidebar .toc li.heading", group: "sidebarHeadings", prefix: "heading" },
-  { selector: ".illuminus-styled .journal-sidebar .toc li.category", group: "sidebarCategories", prefix: "category" },
+  // The one layer that rides on `::before`, and the reason is the mirror image
+  // of why every other one rides on `::after`.
+  //
+  // Foundry draws a *folded* category as a FontAwesome glyph in this element's
+  // `::after` — `content: "\\f219"`, `display: block`, `line-height` — and that
+  // is also what gives the row its height once the category's name is hidden.
+  // A layer here set `content: ""` and `position: absolute`, which erased the
+  // glyph and left the row with nothing to stand on: it collapsed to the height
+  // of its own borders, and a style that painted the category drew a short bar
+  // across the folded panel with no name against it. Reported as a stray mark,
+  // which is exactly what it looked like.
+  //
+  // `::before` is free on this element in both states, so the layer moves and
+  // core keeps its glyph.
+  { selector: ".illuminus-styled .journal-sidebar .toc li.category", group: "sidebarCategories",
+    prefix: "category", on: "::before" },
   { selector: '.illuminus-styled .journal-sidebar search input[type="search"]', group: "sidebarSearch", prefix: "search" },
-  { selector: ".illuminus-styled .journal-sidebar button", group: "sidebarButtons", prefix: "button" },
-  { selector: ".illuminus-styled .journal-sidebar button:hover", group: "sidebarButtons", prefix: "buttonHover" },
+  { selector: ".illuminus-styled .journal-sidebar search button", group: "sidebarButtons", prefix: "topButton" },
+  { selector: ".illuminus-styled .journal-sidebar search button:hover", group: "sidebarButtons", prefix: "topButtonHover" },
+  { selector: ".illuminus-styled .journal-sidebar .action-buttons button", group: "sidebarButtons", prefix: "bottomButton" },
+  { selector: ".illuminus-styled .journal-sidebar .action-buttons button:hover", group: "sidebarButtons", prefix: "bottomButtonHover" },
   // The layer goes on the header, not on the title inside it: Foundry renders a
   // journal's name as an `<input>`, and a replaced element has no `::before` to
   // put a picture on — so the Title part's Background Image had nowhere to paint
@@ -888,9 +905,9 @@ const imageVar = (layer, part, suffix = "") => {
  * content link in a styled journal. The same trap as appending `:hover` to a
  * list, and it fails just as quietly.
  */
-const eachAfter = (selector) => selector
+const eachAfter = (selector, on = "::after") => selector
   .split(",")
-  .map((one) => `${one.trim()}::after`)
+  .map((one) => `${one.trim()}${on}`)
   .join(",\n");
 
 /**
@@ -931,7 +948,7 @@ ${layerHost(layer.selector)} {
 ${layer.host === false ? "" : `  position: ${hostPosition(layer)};\n`}  isolation: isolate;
 }
 
-${eachAfter(layer.selector)} {
+${eachAfter(layer.selector, layer.on)} {
   content: "";
   position: absolute;
   inset: 0;
@@ -1207,6 +1224,32 @@ const hoverTwinOf = varsFor("hover");
 /** And when it is the one being read, or the one a reader chose. */
 const activeTwinOf = varsFor("active");
 
+/** And when the contents panel has been folded away. */
+const collapsedTwinOf = varsFor("collapsed");
+
+/**
+ * One rule as it reads for a folded contents panel, or null where it is not
+ * about the panel at all.
+ *
+ * The state lives on the sheet's own root — Foundry takes `expanded` off it —
+ * so unlike `:hover` this is a prefix rather than a suffix, and the `:not()` is
+ * a class's worth of specificity, which is what makes the folded rule win over
+ * the ordinary one it was written from.
+ *
+ * Only the panel. Nothing else in a journal is folded away, and mirroring every
+ * rule in the file would double the stylesheet to say nothing.
+ */
+const folded = (selector) => {
+  if (!/\.journal-sidebar/.test(selector)) return null;
+  const out = selector.split(",").map((one) => {
+    const trimmed = one.trim();
+    if (!trimmed.startsWith(".illuminus-styled")) return null;
+    if (/:not\(\.expanded\)/.test(trimmed)) return null;
+    return trimmed.replace(/^\.illuminus-styled/, ".illuminus-styled:not(.expanded)");
+  });
+  return out.every(Boolean) ? out.join(",\n") : null;
+};
+
 /** A selector with `:hover` on it, before any pseudo-element it ends with. */
 const pointedAt = (selector) => selector.split(",").map((one) => {
   const trimmed = one.trim();
@@ -1298,12 +1341,16 @@ const CHOSEN = [
   [/(\.journal-sidebar \.toc )li\.page(?![-\w.])/g, "$1li.page.active"],
   [/(\.journal-sidebar \.toc )\.page-title/g, "$1li.page.active .page-title"],
   [/(\.journal-sidebar \.toc )li\.heading(?![-\w.])/g, "$1li.heading.illuminus-current"],
-  [/(\.journal-sidebar \.toc )\.heading-link/g, "$1li.heading.illuminus-current .heading-link"]
+  [/(\.journal-sidebar \.toc )\.heading-link/g, "$1li.heading.illuminus-current .heading-link"],
+  // The search box is chosen by being typed in. Rewriting the input itself
+  // rather than the whole selector puts `:focus` in the right place in the
+  // placeholder's rule too, where it has to come before the pseudo-element.
+  [/(search input\[type="search"\])/g, "$1:focus"]
 ];
 
 /** One selector as it reads for the chosen row, or null where it is not one. */
 const chosen = (selector) => {
-  if (/\.active|illuminus-current|\.context/.test(selector)) return null;
+  if (/\.active|illuminus-current|\.context|:focus/.test(selector)) return null;
   const out = selector.split(",").map((one) => {
     const trimmed = one.trim();
     for (const [pattern, replacement] of CHOSEN) {
@@ -1327,7 +1374,9 @@ const written = fs.readFileSync(`${ROOT}/styles/illuminus.css`, "utf8");
 const hovers = pointedRules(written) + pointedRules(ordinary);
 const selected = pointedRules(written, { twinOf: activeTwinOf, selector: chosen })
   + pointedRules(ordinary, { twinOf: activeTwinOf, selector: chosen });
-const out = `${ordinary}${hovers}${selected}`;
+const collapsed = pointedRules(written, { twinOf: collapsedTwinOf, selector: folded })
+  + pointedRules(ordinary, { twinOf: collapsedTwinOf, selector: folded });
+const out = `${ordinary}${hovers}${selected}${collapsed}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
   + `${GROUPS.filter((g) => g.family).length} groups`);

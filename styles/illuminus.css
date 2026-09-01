@@ -772,6 +772,12 @@
 .illuminus-styled.sheet.journal-entry,
 .illuminus-preview__frame.illuminus-styled {
   --sidebar-width-expanded: var(--ill-sidebar-sidebar-width, revert-layer);
+  /* The folded width is the Panel Width under the Collapsed state, and it is
+     read here rather than inside a folded rule on purpose: `toggleSidebar`
+     asks for *both* widths and resizes the window by the difference, at a
+     moment when the panel is still expanded. A value only defined once the
+     panel had folded would be missing exactly when core wanted it. */
+  --sidebar-width-collapsed: var(--ill-sidebar-collapsed-sidebar-width, revert-layer);
 }
 
 .illuminus-styled .journal-sidebar {
@@ -797,6 +803,81 @@
     inset var(--ill-sidebar-inner-shadow-offset-x) var(--ill-sidebar-inner-shadow-offset-y)
     var(--ill-sidebar-inner-shadow-blur) var(--ill-sidebar-inner-shadow-spread)
     var(--ill-sidebar-inner-shadow-color);
+}
+
+/* A folded panel lists nothing.
+   
+   Foundry keeps its contents list in a folded panel: every page becomes a strip
+   of its number, and every category a small mark drawn in the row's own
+   `content`. Under a decorative style that reads as debris rather than as
+   navigation — and the mark in particular is unreachable by any control, since
+   a style supplies values and that glyph is core's own.
+   
+   So it is settled here rather than offered: a folded panel shows its own
+   surface and its buttons. What it costs is Foundry's folded navigation, where
+   a page number can be clicked to jump to that page; unfolding is a click away
+   and the panel is a click away from that.
+   
+   The rows go, never the list. `.toc` carries `flex: 1`, so hiding *it* pulls
+   the buttons at the foot up under the search row — the list keeps its box and
+   holds them down. */
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.page,
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.category {
+  display: none;
+}
+
+/* A folded panel with nothing in it but the way back.
+   
+   Foundry keeps the unfold button inside the panel, so a folded width narrow
+   enough to be worth having is narrow enough to clip the one control that
+   undoes it. The button cannot be hung somewhere roomier — core's
+   `toggleSidebar` finds it with `sidebar.querySelector(".collapse-toggle")` and
+   then reads its dataset, so a button that has left the panel throws inside
+   core's own handler. It escapes by painting instead.
+   
+   Three rules, one switch, and each half is load-bearing. The panel stops
+   clipping and is *lifted*: it carries `isolation: isolate` so a background
+   picture blends with its own fill rather than with the window, which makes it
+   a stacking context — so the button can only rise above the page beside it if
+   the panel does. Everything else the folded panel still draws is put away,
+   or a 0-wide panel spills its footer buttons over the page as well. And the
+   button leaves the flow, to be placed by controls of its own.
+   
+   Every one of these falls back to what Foundry does, so a style that has not
+   asked for this is unchanged. */
+.illuminus-styled:not(.expanded) .journal-sidebar {
+  overflow: var(--ill-sidebar-unfold-float, hidden);
+  z-index: var(--ill-sidebar-unfold-float-lift, revert-layer);
+  /* A folded width of 0 is not 0 without this. The panel is a flex item, and a
+     flex item's automatic minimum size is its content's — so `flex-basis: 0`
+     still leaves it as wide as the narrowest thing inside it, which is the
+     search row's own left and right padding. Measured at 16px against a
+     Collapsed Pane Width of nothing. The same trap as `minmax(0, 1fr)`. */
+  min-width: var(--ill-sidebar-unfold-float-shrink, revert-layer);
+}
+
+/* The page area keeps its own stacking to itself while the panel floats over
+   it. Without this the panel's lift is a coincidence rather than a rule: the
+   page area is `position: relative` with no z-index of its own, so it makes no
+   stacking context, and everything positioned inside it competes directly with
+   the panel beside it. The journal's own header is `z-index: 1` — ours, because
+   the title's background picture rides on it — which ties with the lifted panel
+   and then wins on document order, putting the way back underneath the
+   journal's name. Contained, the panel clears the whole page area at once. */
+.illuminus-styled:not(.expanded) .journal-entry-content {
+  isolation: var(--ill-sidebar-unfold-float-contain, revert-layer);
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc,
+.illuminus-styled:not(.expanded) .journal-sidebar .action-buttons,
+.illuminus-styled:not(.expanded) .journal-sidebar search > *:not(.collapse-toggle) {
+  display: var(--ill-sidebar-unfold-float-others, revert-layer);
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .collapse-toggle {
+  position: var(--ill-sidebar-unfold-float-place, revert-layer);
+  top: var(--ill-sidebar-unfold-float-top, revert-layer);
+  left: var(--ill-sidebar-unfold-float-left, revert-layer);
 }
 
 /* Page entries */
@@ -1020,6 +1101,13 @@
 
 /* Search box */
 .illuminus-styled .journal-sidebar search input[type="search"] {
+  /* Room inside the box and around it. Stated rather than deferred: four
+     properties cannot fall back to whatever painted them, so the defaults are
+     Foundry's own — `0 0.5rem` inside, nothing outside. */
+  padding: var(--ill-sidebar-search-search-padding-top) var(--ill-sidebar-search-search-padding-right)
+           var(--ill-sidebar-search-search-padding-bottom) var(--ill-sidebar-search-search-padding-left);
+  margin: var(--ill-sidebar-search-search-margin-top) var(--ill-sidebar-search-search-margin-right)
+          var(--ill-sidebar-search-search-margin-bottom) var(--ill-sidebar-search-search-margin-left);
   --input-background-color: var(--ill-sidebar-search-search-background, revert-layer);
   --input-text-color: var(--ill-sidebar-search-search-color, revert-layer);
   --input-placeholder-color: var(--ill-sidebar-search-search-placeholder-color, revert-layer);
@@ -1050,32 +1138,70 @@
   color: var(--ill-sidebar-search-search-placeholder-color, revert-layer);
 }
 
-/* Footer buttons, and the small controls beside the search box.
+/* Two lots of them, and Foundry draws them differently: the small controls
+   beside the search box come with no fill and no edge, and the three at the
+   foot are ordinary buttons. One shared set could not say that.
 
    Not the folding markers: those are ours, they are buttons because that is
    what a thing you click is, and the panel's Buttons controls are about
    Foundry's own — a marker taking a button's fill and edges would be a box
    around every folded row. */
-.illuminus-styled .journal-sidebar button:not(.illuminus-fold) {
-  --button-text-color: var(--ill-sidebar-buttons-button-color, revert-layer);
-  --button-border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
-  --button-hover-border-color: var(--ill-sidebar-buttons-button-hover-border-color, revert-layer);
-  color: var(--ill-sidebar-buttons-button-color, revert-layer);
-  background-color: var(--ill-sidebar-buttons-button-background, revert-layer);
+.illuminus-styled .journal-sidebar search button:not(.illuminus-fold) {
+  --button-text-color: var(--ill-sidebar-buttons-top-button-color, revert-layer);
+  --button-border-color: var(--ill-sidebar-buttons-top-button-border-color, revert-layer);
+  --button-hover-border-color: var(--ill-sidebar-buttons-top-button-hover-border-color, revert-layer);
+  /* Room inside the button and around it. Both are stated rather than deferred:
+     four properties cannot fall back to `revert-layer`, so the defaults are
+     what Foundry paints — `0 0.5rem` inside, nothing outside. */
+  padding: var(--ill-sidebar-buttons-top-button-padding-top) var(--ill-sidebar-buttons-top-button-padding-right)
+           var(--ill-sidebar-buttons-top-button-padding-bottom) var(--ill-sidebar-buttons-top-button-padding-left);
+  margin: var(--ill-sidebar-buttons-top-button-margin-top) var(--ill-sidebar-buttons-top-button-margin-right)
+          var(--ill-sidebar-buttons-top-button-margin-bottom) var(--ill-sidebar-buttons-top-button-margin-left);
+  color: var(--ill-sidebar-buttons-top-button-color, revert-layer);
+  background-color: var(--ill-sidebar-buttons-top-button-background, revert-layer);
   /* A fill that graduates rather than being one flat color, and blurs what
      is behind it. Both ends start clear and the blur at nothing, so a fill
      nobody has graduated or frosted is the flat color it always was. */
-  background-image: linear-gradient(var(--ill-sidebar-buttons-button-gradient-angle),
-      var(--ill-sidebar-buttons-button-gradient-from), var(--ill-sidebar-buttons-button-gradient-to));
-  backdrop-filter: var(--ill-sidebar-buttons-button-frost);
-  border-width: var(--ill-sidebar-buttons-button-border-width, revert-layer);
-  border-color: var(--ill-sidebar-buttons-button-border-color, revert-layer);
-  border-radius: var(--ill-sidebar-buttons-button-corner-top-left) var(--ill-sidebar-buttons-button-corner-top-right)
-                 var(--ill-sidebar-buttons-button-corner-bottom-right) var(--ill-sidebar-buttons-button-corner-bottom-left);
-  corner-shape: var(--ill-sidebar-buttons-button-corner-top-left-shape, round)
-                var(--ill-sidebar-buttons-button-corner-top-right-shape, round)
-                var(--ill-sidebar-buttons-button-corner-bottom-right-shape, round)
-                var(--ill-sidebar-buttons-button-corner-bottom-left-shape, round);
+  background-image: linear-gradient(var(--ill-sidebar-buttons-top-button-gradient-angle),
+      var(--ill-sidebar-buttons-top-button-gradient-from), var(--ill-sidebar-buttons-top-button-gradient-to));
+  backdrop-filter: var(--ill-sidebar-buttons-top-button-frost);
+  border-width: var(--ill-sidebar-buttons-top-button-border-width, revert-layer);
+  border-color: var(--ill-sidebar-buttons-top-button-border-color, revert-layer);
+  border-radius: var(--ill-sidebar-buttons-top-button-corner-top-left) var(--ill-sidebar-buttons-top-button-corner-top-right)
+                 var(--ill-sidebar-buttons-top-button-corner-bottom-right) var(--ill-sidebar-buttons-top-button-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-buttons-top-button-corner-top-left-shape, round)
+                var(--ill-sidebar-buttons-top-button-corner-top-right-shape, round)
+                var(--ill-sidebar-buttons-top-button-corner-bottom-right-shape, round)
+                var(--ill-sidebar-buttons-top-button-corner-bottom-left-shape, round);
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button:not(.illuminus-fold) {
+  --button-text-color: var(--ill-sidebar-buttons-bottom-button-color, revert-layer);
+  --button-border-color: var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer);
+  --button-hover-border-color: var(--ill-sidebar-buttons-bottom-button-hover-border-color, revert-layer);
+  /* Room inside the button and around it. Both are stated rather than deferred:
+     four properties cannot fall back to `revert-layer`, so the defaults are
+     what Foundry paints — `0 0.5rem` inside, nothing outside. */
+  padding: var(--ill-sidebar-buttons-bottom-button-padding-top) var(--ill-sidebar-buttons-bottom-button-padding-right)
+           var(--ill-sidebar-buttons-bottom-button-padding-bottom) var(--ill-sidebar-buttons-bottom-button-padding-left);
+  margin: var(--ill-sidebar-buttons-bottom-button-margin-top) var(--ill-sidebar-buttons-bottom-button-margin-right)
+          var(--ill-sidebar-buttons-bottom-button-margin-bottom) var(--ill-sidebar-buttons-bottom-button-margin-left);
+  color: var(--ill-sidebar-buttons-bottom-button-color, revert-layer);
+  background-color: var(--ill-sidebar-buttons-bottom-button-background, revert-layer);
+  /* A fill that graduates rather than being one flat color, and blurs what
+     is behind it. Both ends start clear and the blur at nothing, so a fill
+     nobody has graduated or frosted is the flat color it always was. */
+  background-image: linear-gradient(var(--ill-sidebar-buttons-bottom-button-gradient-angle),
+      var(--ill-sidebar-buttons-bottom-button-gradient-from), var(--ill-sidebar-buttons-bottom-button-gradient-to));
+  backdrop-filter: var(--ill-sidebar-buttons-bottom-button-frost);
+  border-width: var(--ill-sidebar-buttons-bottom-button-border-width, revert-layer);
+  border-color: var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer);
+  border-radius: var(--ill-sidebar-buttons-bottom-button-corner-top-left) var(--ill-sidebar-buttons-bottom-button-corner-top-right)
+                 var(--ill-sidebar-buttons-bottom-button-corner-bottom-right) var(--ill-sidebar-buttons-bottom-button-corner-bottom-left);
+  corner-shape: var(--ill-sidebar-buttons-bottom-button-corner-top-left-shape, round)
+                var(--ill-sidebar-buttons-bottom-button-corner-top-right-shape, round)
+                var(--ill-sidebar-buttons-bottom-button-corner-bottom-right-shape, round)
+                var(--ill-sidebar-buttons-bottom-button-corner-bottom-left-shape, round);
 }
 
 
@@ -2588,12 +2714,32 @@
   padding: 0.15rem 0.4rem 0.4rem;
 }
 
-.illuminus-section > summary {
+/* The name and the answers about the whole category, held against the top of
+   the settings while its controls scroll past — both of them, because knowing
+   which category you are in matters as much as being able to reach its state
+   switch. One block rather than two pinned at different offsets: the category
+   stopped being a fold-away, so its name no longer has to be a summary. */
+.illuminus-section__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -0.4rem;
+  padding: 0.15rem 0.4rem 0;
+  /* Opaque, not the window's own ground: that is nine tenths of a color over
+     the canvas, and a tenth of the controls passing underneath showed through
+     as a ghost of the row above. */
+  background: var(--color-cool-5, rgb(11 10 19));
+  /* An edge to pass under. Without one the first control scrolling behind the
+     block is cut off mid-word against nothing, which reads as a fault rather
+     than as the block being held where it is. */
+  border-bottom: 1px solid var(--color-border-light-tertiary, rgb(0 0 0 / 25%));
+}
+
+.illuminus-section__name {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.3rem 0.1rem;
-  cursor: pointer;
 }
 
 /* The chevron is the open/closed marker, so the browser's own triangle would be
@@ -2601,26 +2747,6 @@
    alongside `display: list-item` removal for Chrome. */
 .illuminus-section > summary {
   list-style: none;
-}
-
-.illuminus-section > summary::-webkit-details-marker {
-  display: none;
-}
-
-.illuminus-section__chevron {
-  flex: 0 0 auto;
-  width: 0.75em;
-  font-size: var(--font-size-11, 11px);
-  opacity: 0.75;
-  transition: transform 120ms ease;
-}
-
-.illuminus-section[open] > summary .illuminus-section__chevron {
-  transform: rotate(90deg);
-}
-
-.illuminus-section > summary:hover {
-  color: var(--color-text-emphatic, #f0f0e0);
 }
 
 .illuminus-section__label {
@@ -2642,10 +2768,6 @@
 .illuminus-state {
   flex: 0 1 auto;
   min-width: 0;
-}
-
-.illuminus-section:not([open]) .illuminus-section__tools {
-  display: none;
 }
 
 /* --- Fields ------------------------------------------------------------- */
@@ -3839,11 +3961,30 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   display: flex;
 }
 
+/* The editor's own form does not reach inside the sample.
+   
+   The pane sits in the editor's `.standard-form`, and core sizes every button
+   in one from `--input-height` — a rule a real journal's buttons never match,
+   because a journal is not a form. It drew the panel's footer buttons 32px
+   where a journal draws them 28, and it would reach any other button a mock
+   grows later. Foundry's own default for a button is quoted back in its place.
+   
+   The two classes core sizes by hand are left to it: `.inline-control` states
+   24px and `.header-control` 1.5rem, and both already win in a journal. */
+.illuminus-preview__frame button:not(.inline-control):not(.header-control) {
+  --button-size: 2em;
+}
+
+/* Core's own, quoted rather than approximated. It states these four on the
+   search row itself, and the row's spacing is what sets the buttons apart from
+   each other and from the box: `0.15rem` between them against Foundry's 8px
+   drew a tighter row than the journal it stands for. */
 .illuminus-preview__frame .journal-sidebar search {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.15rem;
-  margin: 0.4rem;
+  gap: 8px;
+  margin: 8px;
 }
 
 .illuminus-preview__frame .journal-sidebar search input {
@@ -3851,16 +3992,14 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   min-width: 0;
 }
 
-/* The small controls either side of the box, at the size Foundry draws them:
-   square, and no wider than the glyph inside. Without a width they take an
-   equal share of the row and leave the box a sliver. */
+/* The small controls either side of the box. Only the flex part is ours —
+   without it they take an equal share of the row and leave the box a sliver.
+   Their size is Foundry's: `.inline-control` states `--button-size: 24px` and
+   core's own `button` rule reads it, which reaches the sample as it reaches a
+   journal. Stating `1.5em` here drew them a few pixels short of the real ones
+   at whatever size the row's lettering happened to be. */
 .illuminus-preview__frame .journal-sidebar search .inline-control {
   flex: 0 0 auto;
-  width: 1.5em;
-  height: 1.5em;
-  display: grid;
-  place-items: center;
-  padding: 0;
 }
 
 /* Core's own, quoted rather than approximated: it states these four on the list
@@ -3893,21 +4032,22 @@ details[open] > .illuminus-cluster__summary > .illuminus-run-chevron {
   white-space: nowrap;
 }
 
+/* Core's spacing again, quoted: `padding: 16px; gap: 8px`. */
 .illuminus-preview__frame .journal-sidebar .action-buttons {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.4rem;
+  gap: 8px;
+  padding: 16px;
   /* Pushed to the foot of a panel that is now the pane's height. */
   margin-top: auto;
 }
 
 /* A chevron either side of the button that makes a page: the two icons take
-   only their glyph, and the one with words takes what is left. */
+   only their glyph, and the one with words takes what is left. The width is
+   core's own for those two — `flex: 0 0 30px` — rather than a share of the
+   row's lettering. */
 .illuminus-preview__frame .journal-sidebar .action-buttons button.icon {
-  flex: 0 0 auto;
-  width: 1.75em;
-  padding: 0;
+  flex: 0 0 30px;
 }
 
 .illuminus-preview__frame .journal-sidebar .action-buttons button.create {

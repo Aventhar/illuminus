@@ -3328,7 +3328,7 @@
   isolation: isolate;
 }
 
-.illuminus-styled .journal-sidebar .toc li.category::after {
+.illuminus-styled .journal-sidebar .toc li.category::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -3379,60 +3379,116 @@
           sepia(var(--ill-sidebar-search-search-texture-age, 0%));
 }
 
-.illuminus-styled .journal-sidebar button {
+.illuminus-styled .journal-sidebar search button {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-sidebar button::after {
+.illuminus-styled .journal-sidebar search button::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-sidebar-buttons-button-texture);
-  background-size: var(--ill-sidebar-buttons-button-texture-fit-size);
-  background-repeat: var(--ill-sidebar-buttons-button-texture-fit-repeat);
-  background-position: var(--ill-sidebar-buttons-button-texture-position);
-  mix-blend-mode: var(--ill-sidebar-buttons-button-texture-blend);
-  opacity: var(--ill-sidebar-buttons-button-texture-opacity);
+  background-image: var(--ill-sidebar-buttons-top-button-texture);
+  background-size: var(--ill-sidebar-buttons-top-button-texture-fit-size);
+  background-repeat: var(--ill-sidebar-buttons-top-button-texture-fit-repeat);
+  background-position: var(--ill-sidebar-buttons-top-button-texture-position);
+  mix-blend-mode: var(--ill-sidebar-buttons-top-button-texture-blend);
+  opacity: var(--ill-sidebar-buttons-top-button-texture-opacity);
   /* What is done to the picture before it is laid down. Every part carries its
      own fallback: one unset part makes the whole declaration invalid, and a
      picture somebody had blurred would then not be blurred at all. */
-  filter: blur(var(--ill-sidebar-buttons-button-texture-blur, 0px))
-          brightness(var(--ill-sidebar-buttons-button-texture-brightness, 100%))
-          contrast(var(--ill-sidebar-buttons-button-texture-contrast, 100%))
-          saturate(var(--ill-sidebar-buttons-button-texture-saturation, 100%))
-          sepia(var(--ill-sidebar-buttons-button-texture-age, 0%));
+  filter: blur(var(--ill-sidebar-buttons-top-button-texture-blur, 0px))
+          brightness(var(--ill-sidebar-buttons-top-button-texture-brightness, 100%))
+          contrast(var(--ill-sidebar-buttons-top-button-texture-contrast, 100%))
+          saturate(var(--ill-sidebar-buttons-top-button-texture-saturation, 100%))
+          sepia(var(--ill-sidebar-buttons-top-button-texture-age, 0%));
 }
 
-.illuminus-styled .journal-sidebar button {
+.illuminus-styled .journal-sidebar search button {
   position: relative;
   isolation: isolate;
 }
 
-.illuminus-styled .journal-sidebar button:hover::after {
+.illuminus-styled .journal-sidebar search button:hover::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
-  background-image: var(--ill-sidebar-buttons-button-hover-texture);
-  background-size: var(--ill-sidebar-buttons-button-hover-texture-fit-size);
-  background-repeat: var(--ill-sidebar-buttons-button-hover-texture-fit-repeat);
-  background-position: var(--ill-sidebar-buttons-button-hover-texture-position);
-  mix-blend-mode: var(--ill-sidebar-buttons-button-hover-texture-blend);
-  opacity: var(--ill-sidebar-buttons-button-hover-texture-opacity);
+  background-image: var(--ill-sidebar-buttons-top-button-hover-texture);
+  background-size: var(--ill-sidebar-buttons-top-button-hover-texture-fit-size);
+  background-repeat: var(--ill-sidebar-buttons-top-button-hover-texture-fit-repeat);
+  background-position: var(--ill-sidebar-buttons-top-button-hover-texture-position);
+  mix-blend-mode: var(--ill-sidebar-buttons-top-button-hover-texture-blend);
+  opacity: var(--ill-sidebar-buttons-top-button-hover-texture-opacity);
   /* What is done to the picture before it is laid down. Every part carries its
      own fallback: one unset part makes the whole declaration invalid, and a
      picture somebody had blurred would then not be blurred at all. */
-  filter: blur(var(--ill-sidebar-buttons-button-hover-texture-blur, 0px))
-          brightness(var(--ill-sidebar-buttons-button-hover-texture-brightness, 100%))
-          contrast(var(--ill-sidebar-buttons-button-hover-texture-contrast, 100%))
-          saturate(var(--ill-sidebar-buttons-button-hover-texture-saturation, 100%))
-          sepia(var(--ill-sidebar-buttons-button-hover-texture-age, 0%));
+  filter: blur(var(--ill-sidebar-buttons-top-button-hover-texture-blur, 0px))
+          brightness(var(--ill-sidebar-buttons-top-button-hover-texture-brightness, 100%))
+          contrast(var(--ill-sidebar-buttons-top-button-hover-texture-contrast, 100%))
+          saturate(var(--ill-sidebar-buttons-top-button-hover-texture-saturation, 100%))
+          sepia(var(--ill-sidebar-buttons-top-button-hover-texture-age, 0%));
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-buttons-bottom-button-texture);
+  background-size: var(--ill-sidebar-buttons-bottom-button-texture-fit-size);
+  background-repeat: var(--ill-sidebar-buttons-bottom-button-texture-fit-repeat);
+  background-position: var(--ill-sidebar-buttons-bottom-button-texture-position);
+  mix-blend-mode: var(--ill-sidebar-buttons-bottom-button-texture-blend);
+  opacity: var(--ill-sidebar-buttons-bottom-button-texture-opacity);
+  /* What is done to the picture before it is laid down. Every part carries its
+     own fallback: one unset part makes the whole declaration invalid, and a
+     picture somebody had blurred would then not be blurred at all. */
+  filter: blur(var(--ill-sidebar-buttons-bottom-button-texture-blur, 0px))
+          brightness(var(--ill-sidebar-buttons-bottom-button-texture-brightness, 100%))
+          contrast(var(--ill-sidebar-buttons-bottom-button-texture-contrast, 100%))
+          saturate(var(--ill-sidebar-buttons-bottom-button-texture-saturation, 100%))
+          sepia(var(--ill-sidebar-buttons-bottom-button-texture-age, 0%));
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button {
+  position: relative;
+  isolation: isolate;
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: var(--ill-sidebar-buttons-bottom-button-hover-texture);
+  background-size: var(--ill-sidebar-buttons-bottom-button-hover-texture-fit-size);
+  background-repeat: var(--ill-sidebar-buttons-bottom-button-hover-texture-fit-repeat);
+  background-position: var(--ill-sidebar-buttons-bottom-button-hover-texture-position);
+  mix-blend-mode: var(--ill-sidebar-buttons-bottom-button-hover-texture-blend);
+  opacity: var(--ill-sidebar-buttons-bottom-button-hover-texture-opacity);
+  /* What is done to the picture before it is laid down. Every part carries its
+     own fallback: one unset part makes the whole declaration invalid, and a
+     picture somebody had blurred would then not be blurred at all. */
+  filter: blur(var(--ill-sidebar-buttons-bottom-button-hover-texture-blur, 0px))
+          brightness(var(--ill-sidebar-buttons-bottom-button-hover-texture-brightness, 100%))
+          contrast(var(--ill-sidebar-buttons-bottom-button-hover-texture-contrast, 100%))
+          saturate(var(--ill-sidebar-buttons-bottom-button-hover-texture-saturation, 100%))
+          sepia(var(--ill-sidebar-buttons-bottom-button-hover-texture-age, 0%));
 }
 
 .illuminus-styled .journal-header {
@@ -4232,9 +4288,14 @@
               inset var(--ill-sidebar-search-search-inner-shadow-offset-x) var(--ill-sidebar-search-search-inner-shadow-offset-y) var(--ill-sidebar-search-search-inner-shadow-blur) var(--ill-sidebar-search-search-inner-shadow-spread) var(--ill-sidebar-search-search-inner-shadow-color);
 }
 
-.illuminus-styled .journal-sidebar button {
-  box-shadow: var(--ill-sidebar-buttons-button-shadow-offset-x) var(--ill-sidebar-buttons-button-shadow-offset-y) var(--ill-sidebar-buttons-button-shadow-blur) var(--ill-sidebar-buttons-button-shadow-spread) var(--ill-sidebar-buttons-button-shadow-color),
-              inset var(--ill-sidebar-buttons-button-inner-shadow-offset-x) var(--ill-sidebar-buttons-button-inner-shadow-offset-y) var(--ill-sidebar-buttons-button-inner-shadow-blur) var(--ill-sidebar-buttons-button-inner-shadow-spread) var(--ill-sidebar-buttons-button-inner-shadow-color);
+.illuminus-styled .journal-sidebar search button {
+  box-shadow: var(--ill-sidebar-buttons-top-button-shadow-offset-x) var(--ill-sidebar-buttons-top-button-shadow-offset-y) var(--ill-sidebar-buttons-top-button-shadow-blur) var(--ill-sidebar-buttons-top-button-shadow-spread) var(--ill-sidebar-buttons-top-button-shadow-color),
+              inset var(--ill-sidebar-buttons-top-button-inner-shadow-offset-x) var(--ill-sidebar-buttons-top-button-inner-shadow-offset-y) var(--ill-sidebar-buttons-top-button-inner-shadow-blur) var(--ill-sidebar-buttons-top-button-inner-shadow-spread) var(--ill-sidebar-buttons-top-button-inner-shadow-color);
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button {
+  box-shadow: var(--ill-sidebar-buttons-bottom-button-shadow-offset-x) var(--ill-sidebar-buttons-bottom-button-shadow-offset-y) var(--ill-sidebar-buttons-bottom-button-shadow-blur) var(--ill-sidebar-buttons-bottom-button-shadow-spread) var(--ill-sidebar-buttons-bottom-button-shadow-color),
+              inset var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-x) var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-y) var(--ill-sidebar-buttons-bottom-button-inner-shadow-blur) var(--ill-sidebar-buttons-bottom-button-inner-shadow-spread) var(--ill-sidebar-buttons-bottom-button-inner-shadow-color);
 }
 
 .illuminus-styled .journal-header {
@@ -5043,6 +5104,10 @@
 }
 
 .illuminus-styled .journal-sidebar search input[type="search"]:hover {
+  padding: var(--ill-sidebar-search-hover-search-padding-top, var(--ill-sidebar-search-search-padding-top)) var(--ill-sidebar-search-hover-search-padding-right, var(--ill-sidebar-search-search-padding-right))
+           var(--ill-sidebar-search-hover-search-padding-bottom, var(--ill-sidebar-search-search-padding-bottom)) var(--ill-sidebar-search-hover-search-padding-left, var(--ill-sidebar-search-search-padding-left));
+  margin: var(--ill-sidebar-search-hover-search-margin-top, var(--ill-sidebar-search-search-margin-top)) var(--ill-sidebar-search-hover-search-margin-right, var(--ill-sidebar-search-search-margin-right))
+          var(--ill-sidebar-search-hover-search-margin-bottom, var(--ill-sidebar-search-search-margin-bottom)) var(--ill-sidebar-search-hover-search-margin-left, var(--ill-sidebar-search-search-margin-left));
   --input-background-color: var(--ill-sidebar-search-hover-search-background, var(--ill-sidebar-search-search-background, revert-layer));
   --input-text-color: var(--ill-sidebar-search-hover-search-color, var(--ill-sidebar-search-search-color, revert-layer));
   --input-placeholder-color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
@@ -5070,22 +5135,48 @@
   color: var(--ill-sidebar-search-hover-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
 }
 
-.illuminus-styled .journal-sidebar button:not(.illuminus-fold):hover {
-  --button-text-color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color, revert-layer));
-  --button-border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
-  color: var(--ill-sidebar-buttons-button-hover-color, var(--ill-sidebar-buttons-button-color, revert-layer));
-  background-color: var(--ill-sidebar-buttons-button-hover-background, var(--ill-sidebar-buttons-button-background, revert-layer));
-  background-image: linear-gradient(var(--ill-sidebar-buttons-hover-button-gradient-angle, var(--ill-sidebar-buttons-button-gradient-angle)),
-      var(--ill-sidebar-buttons-hover-button-gradient-from, var(--ill-sidebar-buttons-button-gradient-from)), var(--ill-sidebar-buttons-hover-button-gradient-to, var(--ill-sidebar-buttons-button-gradient-to)));
-  backdrop-filter: var(--ill-sidebar-buttons-hover-button-frost, var(--ill-sidebar-buttons-button-frost));
-  border-width: var(--ill-sidebar-buttons-hover-button-border-width, var(--ill-sidebar-buttons-button-border-width, revert-layer));
-  border-color: var(--ill-sidebar-buttons-button-hover-border-color, var(--ill-sidebar-buttons-button-border-color, revert-layer));
-  border-radius: var(--ill-sidebar-buttons-hover-button-corner-top-left, var(--ill-sidebar-buttons-button-corner-top-left)) var(--ill-sidebar-buttons-hover-button-corner-top-right, var(--ill-sidebar-buttons-button-corner-top-right))
-                 var(--ill-sidebar-buttons-hover-button-corner-bottom-right, var(--ill-sidebar-buttons-button-corner-bottom-right)) var(--ill-sidebar-buttons-hover-button-corner-bottom-left, var(--ill-sidebar-buttons-button-corner-bottom-left));
-  corner-shape: var(--ill-sidebar-buttons-hover-button-corner-top-left-shape, var(--ill-sidebar-buttons-button-corner-top-left-shape, round))
-                var(--ill-sidebar-buttons-hover-button-corner-top-right-shape, var(--ill-sidebar-buttons-button-corner-top-right-shape, round))
-                var(--ill-sidebar-buttons-hover-button-corner-bottom-right-shape, var(--ill-sidebar-buttons-button-corner-bottom-right-shape, round))
-                var(--ill-sidebar-buttons-hover-button-corner-bottom-left-shape, var(--ill-sidebar-buttons-button-corner-bottom-left-shape, round));
+.illuminus-styled .journal-sidebar search button:not(.illuminus-fold):hover {
+  --button-text-color: var(--ill-sidebar-buttons-top-button-hover-color, var(--ill-sidebar-buttons-top-button-color, revert-layer));
+  --button-border-color: var(--ill-sidebar-buttons-top-button-hover-border-color, var(--ill-sidebar-buttons-top-button-border-color, revert-layer));
+  padding: var(--ill-sidebar-buttons-hover-top-button-padding-top, var(--ill-sidebar-buttons-top-button-padding-top)) var(--ill-sidebar-buttons-hover-top-button-padding-right, var(--ill-sidebar-buttons-top-button-padding-right))
+           var(--ill-sidebar-buttons-hover-top-button-padding-bottom, var(--ill-sidebar-buttons-top-button-padding-bottom)) var(--ill-sidebar-buttons-hover-top-button-padding-left, var(--ill-sidebar-buttons-top-button-padding-left));
+  margin: var(--ill-sidebar-buttons-hover-top-button-margin-top, var(--ill-sidebar-buttons-top-button-margin-top)) var(--ill-sidebar-buttons-hover-top-button-margin-right, var(--ill-sidebar-buttons-top-button-margin-right))
+          var(--ill-sidebar-buttons-hover-top-button-margin-bottom, var(--ill-sidebar-buttons-top-button-margin-bottom)) var(--ill-sidebar-buttons-hover-top-button-margin-left, var(--ill-sidebar-buttons-top-button-margin-left));
+  color: var(--ill-sidebar-buttons-top-button-hover-color, var(--ill-sidebar-buttons-top-button-color, revert-layer));
+  background-color: var(--ill-sidebar-buttons-top-button-hover-background, var(--ill-sidebar-buttons-top-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-buttons-hover-top-button-gradient-angle, var(--ill-sidebar-buttons-top-button-gradient-angle)),
+      var(--ill-sidebar-buttons-hover-top-button-gradient-from, var(--ill-sidebar-buttons-top-button-gradient-from)), var(--ill-sidebar-buttons-hover-top-button-gradient-to, var(--ill-sidebar-buttons-top-button-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-buttons-hover-top-button-frost, var(--ill-sidebar-buttons-top-button-frost));
+  border-width: var(--ill-sidebar-buttons-hover-top-button-border-width, var(--ill-sidebar-buttons-top-button-border-width, revert-layer));
+  border-color: var(--ill-sidebar-buttons-top-button-hover-border-color, var(--ill-sidebar-buttons-top-button-border-color, revert-layer));
+  border-radius: var(--ill-sidebar-buttons-hover-top-button-corner-top-left, var(--ill-sidebar-buttons-top-button-corner-top-left)) var(--ill-sidebar-buttons-hover-top-button-corner-top-right, var(--ill-sidebar-buttons-top-button-corner-top-right))
+                 var(--ill-sidebar-buttons-hover-top-button-corner-bottom-right, var(--ill-sidebar-buttons-top-button-corner-bottom-right)) var(--ill-sidebar-buttons-hover-top-button-corner-bottom-left, var(--ill-sidebar-buttons-top-button-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-buttons-hover-top-button-corner-top-left-shape, var(--ill-sidebar-buttons-top-button-corner-top-left-shape, round))
+                var(--ill-sidebar-buttons-hover-top-button-corner-top-right-shape, var(--ill-sidebar-buttons-top-button-corner-top-right-shape, round))
+                var(--ill-sidebar-buttons-hover-top-button-corner-bottom-right-shape, var(--ill-sidebar-buttons-top-button-corner-bottom-right-shape, round))
+                var(--ill-sidebar-buttons-hover-top-button-corner-bottom-left-shape, var(--ill-sidebar-buttons-top-button-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button:not(.illuminus-fold):hover {
+  --button-text-color: var(--ill-sidebar-buttons-bottom-button-hover-color, var(--ill-sidebar-buttons-bottom-button-color, revert-layer));
+  --button-border-color: var(--ill-sidebar-buttons-bottom-button-hover-border-color, var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer));
+  padding: var(--ill-sidebar-buttons-hover-bottom-button-padding-top, var(--ill-sidebar-buttons-bottom-button-padding-top)) var(--ill-sidebar-buttons-hover-bottom-button-padding-right, var(--ill-sidebar-buttons-bottom-button-padding-right))
+           var(--ill-sidebar-buttons-hover-bottom-button-padding-bottom, var(--ill-sidebar-buttons-bottom-button-padding-bottom)) var(--ill-sidebar-buttons-hover-bottom-button-padding-left, var(--ill-sidebar-buttons-bottom-button-padding-left));
+  margin: var(--ill-sidebar-buttons-hover-bottom-button-margin-top, var(--ill-sidebar-buttons-bottom-button-margin-top)) var(--ill-sidebar-buttons-hover-bottom-button-margin-right, var(--ill-sidebar-buttons-bottom-button-margin-right))
+          var(--ill-sidebar-buttons-hover-bottom-button-margin-bottom, var(--ill-sidebar-buttons-bottom-button-margin-bottom)) var(--ill-sidebar-buttons-hover-bottom-button-margin-left, var(--ill-sidebar-buttons-bottom-button-margin-left));
+  color: var(--ill-sidebar-buttons-bottom-button-hover-color, var(--ill-sidebar-buttons-bottom-button-color, revert-layer));
+  background-color: var(--ill-sidebar-buttons-bottom-button-hover-background, var(--ill-sidebar-buttons-bottom-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-buttons-hover-bottom-button-gradient-angle, var(--ill-sidebar-buttons-bottom-button-gradient-angle)),
+      var(--ill-sidebar-buttons-hover-bottom-button-gradient-from, var(--ill-sidebar-buttons-bottom-button-gradient-from)), var(--ill-sidebar-buttons-hover-bottom-button-gradient-to, var(--ill-sidebar-buttons-bottom-button-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-buttons-hover-bottom-button-frost, var(--ill-sidebar-buttons-bottom-button-frost));
+  border-width: var(--ill-sidebar-buttons-hover-bottom-button-border-width, var(--ill-sidebar-buttons-bottom-button-border-width, revert-layer));
+  border-color: var(--ill-sidebar-buttons-bottom-button-hover-border-color, var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer));
+  border-radius: var(--ill-sidebar-buttons-hover-bottom-button-corner-top-left, var(--ill-sidebar-buttons-bottom-button-corner-top-left)) var(--ill-sidebar-buttons-hover-bottom-button-corner-top-right, var(--ill-sidebar-buttons-bottom-button-corner-top-right))
+                 var(--ill-sidebar-buttons-hover-bottom-button-corner-bottom-right, var(--ill-sidebar-buttons-bottom-button-corner-bottom-right)) var(--ill-sidebar-buttons-hover-bottom-button-corner-bottom-left, var(--ill-sidebar-buttons-bottom-button-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-buttons-hover-bottom-button-corner-top-left-shape, var(--ill-sidebar-buttons-bottom-button-corner-top-left-shape, round))
+                var(--ill-sidebar-buttons-hover-bottom-button-corner-top-right-shape, var(--ill-sidebar-buttons-bottom-button-corner-top-right-shape, round))
+                var(--ill-sidebar-buttons-hover-bottom-button-corner-bottom-right-shape, var(--ill-sidebar-buttons-bottom-button-corner-bottom-right-shape, round))
+                var(--ill-sidebar-buttons-hover-bottom-button-corner-bottom-left-shape, var(--ill-sidebar-buttons-bottom-button-corner-bottom-left-shape, round));
 }
 
 .illuminus-styled .journal-header:hover {
@@ -8305,7 +8396,7 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-sidebar-headings-hover-heading-texture-age, var(--ill-sidebar-headings-heading-texture-age, 0%)));
 }
 
-.illuminus-styled .journal-sidebar .toc li.category:hover::after {
+.illuminus-styled .journal-sidebar .toc li.category:hover::before {
   background-image: var(--ill-sidebar-categories-hover-category-texture, var(--ill-sidebar-categories-category-texture));
   background-size: var(--ill-sidebar-categories-hover-category-texture-fit-size, var(--ill-sidebar-categories-category-texture-fit-size));
   background-repeat: var(--ill-sidebar-categories-hover-category-texture-fit-repeat, var(--ill-sidebar-categories-category-texture-fit-repeat));
@@ -8333,18 +8424,32 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-sidebar-search-hover-search-texture-age, var(--ill-sidebar-search-search-texture-age, 0%)));
 }
 
-.illuminus-styled .journal-sidebar button:hover::after {
-  background-image: var(--ill-sidebar-buttons-button-hover-texture, var(--ill-sidebar-buttons-button-texture));
-  background-size: var(--ill-sidebar-buttons-button-hover-texture-fit-size, var(--ill-sidebar-buttons-button-texture-fit-size));
-  background-repeat: var(--ill-sidebar-buttons-button-hover-texture-fit-repeat, var(--ill-sidebar-buttons-button-texture-fit-repeat));
-  background-position: var(--ill-sidebar-buttons-button-hover-texture-position, var(--ill-sidebar-buttons-button-texture-position));
-  mix-blend-mode: var(--ill-sidebar-buttons-button-hover-texture-blend, var(--ill-sidebar-buttons-button-texture-blend));
-  opacity: var(--ill-sidebar-buttons-button-hover-texture-opacity, var(--ill-sidebar-buttons-button-texture-opacity));
-  filter: blur(var(--ill-sidebar-buttons-button-hover-texture-blur, var(--ill-sidebar-buttons-button-texture-blur, 0px)))
-          brightness(var(--ill-sidebar-buttons-button-hover-texture-brightness, var(--ill-sidebar-buttons-button-texture-brightness, 100%)))
-          contrast(var(--ill-sidebar-buttons-button-hover-texture-contrast, var(--ill-sidebar-buttons-button-texture-contrast, 100%)))
-          saturate(var(--ill-sidebar-buttons-button-hover-texture-saturation, var(--ill-sidebar-buttons-button-texture-saturation, 100%)))
-          sepia(var(--ill-sidebar-buttons-button-hover-texture-age, var(--ill-sidebar-buttons-button-texture-age, 0%)));
+.illuminus-styled .journal-sidebar search button:hover::after {
+  background-image: var(--ill-sidebar-buttons-top-button-hover-texture, var(--ill-sidebar-buttons-top-button-texture));
+  background-size: var(--ill-sidebar-buttons-top-button-hover-texture-fit-size, var(--ill-sidebar-buttons-top-button-texture-fit-size));
+  background-repeat: var(--ill-sidebar-buttons-top-button-hover-texture-fit-repeat, var(--ill-sidebar-buttons-top-button-texture-fit-repeat));
+  background-position: var(--ill-sidebar-buttons-top-button-hover-texture-position, var(--ill-sidebar-buttons-top-button-texture-position));
+  mix-blend-mode: var(--ill-sidebar-buttons-top-button-hover-texture-blend, var(--ill-sidebar-buttons-top-button-texture-blend));
+  opacity: var(--ill-sidebar-buttons-top-button-hover-texture-opacity, var(--ill-sidebar-buttons-top-button-texture-opacity));
+  filter: blur(var(--ill-sidebar-buttons-top-button-hover-texture-blur, var(--ill-sidebar-buttons-top-button-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-buttons-top-button-hover-texture-brightness, var(--ill-sidebar-buttons-top-button-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-buttons-top-button-hover-texture-contrast, var(--ill-sidebar-buttons-top-button-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-buttons-top-button-hover-texture-saturation, var(--ill-sidebar-buttons-top-button-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-buttons-top-button-hover-texture-age, var(--ill-sidebar-buttons-top-button-texture-age, 0%)));
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button:hover::after {
+  background-image: var(--ill-sidebar-buttons-bottom-button-hover-texture, var(--ill-sidebar-buttons-bottom-button-texture));
+  background-size: var(--ill-sidebar-buttons-bottom-button-hover-texture-fit-size, var(--ill-sidebar-buttons-bottom-button-texture-fit-size));
+  background-repeat: var(--ill-sidebar-buttons-bottom-button-hover-texture-fit-repeat, var(--ill-sidebar-buttons-bottom-button-texture-fit-repeat));
+  background-position: var(--ill-sidebar-buttons-bottom-button-hover-texture-position, var(--ill-sidebar-buttons-bottom-button-texture-position));
+  mix-blend-mode: var(--ill-sidebar-buttons-bottom-button-hover-texture-blend, var(--ill-sidebar-buttons-bottom-button-texture-blend));
+  opacity: var(--ill-sidebar-buttons-bottom-button-hover-texture-opacity, var(--ill-sidebar-buttons-bottom-button-texture-opacity));
+  filter: blur(var(--ill-sidebar-buttons-bottom-button-hover-texture-blur, var(--ill-sidebar-buttons-bottom-button-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-buttons-bottom-button-hover-texture-brightness, var(--ill-sidebar-buttons-bottom-button-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-buttons-bottom-button-hover-texture-contrast, var(--ill-sidebar-buttons-bottom-button-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-buttons-bottom-button-hover-texture-saturation, var(--ill-sidebar-buttons-bottom-button-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-buttons-bottom-button-hover-texture-age, var(--ill-sidebar-buttons-bottom-button-texture-age, 0%)));
 }
 
 .illuminus-styled .journal-header:hover::after {
@@ -8842,9 +8947,14 @@ blockquote):not(:empty))):hover {
               inset var(--ill-sidebar-search-hover-search-inner-shadow-offset-x, var(--ill-sidebar-search-search-inner-shadow-offset-x)) var(--ill-sidebar-search-hover-search-inner-shadow-offset-y, var(--ill-sidebar-search-search-inner-shadow-offset-y)) var(--ill-sidebar-search-hover-search-inner-shadow-blur, var(--ill-sidebar-search-search-inner-shadow-blur)) var(--ill-sidebar-search-hover-search-inner-shadow-spread, var(--ill-sidebar-search-search-inner-shadow-spread)) var(--ill-sidebar-search-hover-search-inner-shadow-color, var(--ill-sidebar-search-search-inner-shadow-color));
 }
 
-.illuminus-styled .journal-sidebar button:hover {
-  box-shadow: var(--ill-sidebar-buttons-hover-button-shadow-offset-x, var(--ill-sidebar-buttons-button-shadow-offset-x)) var(--ill-sidebar-buttons-hover-button-shadow-offset-y, var(--ill-sidebar-buttons-button-shadow-offset-y)) var(--ill-sidebar-buttons-hover-button-shadow-blur, var(--ill-sidebar-buttons-button-shadow-blur)) var(--ill-sidebar-buttons-hover-button-shadow-spread, var(--ill-sidebar-buttons-button-shadow-spread)) var(--ill-sidebar-buttons-hover-button-shadow-color, var(--ill-sidebar-buttons-button-shadow-color)),
-              inset var(--ill-sidebar-buttons-hover-button-inner-shadow-offset-x, var(--ill-sidebar-buttons-button-inner-shadow-offset-x)) var(--ill-sidebar-buttons-hover-button-inner-shadow-offset-y, var(--ill-sidebar-buttons-button-inner-shadow-offset-y)) var(--ill-sidebar-buttons-hover-button-inner-shadow-blur, var(--ill-sidebar-buttons-button-inner-shadow-blur)) var(--ill-sidebar-buttons-hover-button-inner-shadow-spread, var(--ill-sidebar-buttons-button-inner-shadow-spread)) var(--ill-sidebar-buttons-hover-button-inner-shadow-color, var(--ill-sidebar-buttons-button-inner-shadow-color));
+.illuminus-styled .journal-sidebar search button:hover {
+  box-shadow: var(--ill-sidebar-buttons-hover-top-button-shadow-offset-x, var(--ill-sidebar-buttons-top-button-shadow-offset-x)) var(--ill-sidebar-buttons-hover-top-button-shadow-offset-y, var(--ill-sidebar-buttons-top-button-shadow-offset-y)) var(--ill-sidebar-buttons-hover-top-button-shadow-blur, var(--ill-sidebar-buttons-top-button-shadow-blur)) var(--ill-sidebar-buttons-hover-top-button-shadow-spread, var(--ill-sidebar-buttons-top-button-shadow-spread)) var(--ill-sidebar-buttons-hover-top-button-shadow-color, var(--ill-sidebar-buttons-top-button-shadow-color)),
+              inset var(--ill-sidebar-buttons-hover-top-button-inner-shadow-offset-x, var(--ill-sidebar-buttons-top-button-inner-shadow-offset-x)) var(--ill-sidebar-buttons-hover-top-button-inner-shadow-offset-y, var(--ill-sidebar-buttons-top-button-inner-shadow-offset-y)) var(--ill-sidebar-buttons-hover-top-button-inner-shadow-blur, var(--ill-sidebar-buttons-top-button-inner-shadow-blur)) var(--ill-sidebar-buttons-hover-top-button-inner-shadow-spread, var(--ill-sidebar-buttons-top-button-inner-shadow-spread)) var(--ill-sidebar-buttons-hover-top-button-inner-shadow-color, var(--ill-sidebar-buttons-top-button-inner-shadow-color));
+}
+
+.illuminus-styled .journal-sidebar .action-buttons button:hover {
+  box-shadow: var(--ill-sidebar-buttons-hover-bottom-button-shadow-offset-x, var(--ill-sidebar-buttons-bottom-button-shadow-offset-x)) var(--ill-sidebar-buttons-hover-bottom-button-shadow-offset-y, var(--ill-sidebar-buttons-bottom-button-shadow-offset-y)) var(--ill-sidebar-buttons-hover-bottom-button-shadow-blur, var(--ill-sidebar-buttons-bottom-button-shadow-blur)) var(--ill-sidebar-buttons-hover-bottom-button-shadow-spread, var(--ill-sidebar-buttons-bottom-button-shadow-spread)) var(--ill-sidebar-buttons-hover-bottom-button-shadow-color, var(--ill-sidebar-buttons-bottom-button-shadow-color)),
+              inset var(--ill-sidebar-buttons-hover-bottom-button-inner-shadow-offset-x, var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-x)) var(--ill-sidebar-buttons-hover-bottom-button-inner-shadow-offset-y, var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-y)) var(--ill-sidebar-buttons-hover-bottom-button-inner-shadow-blur, var(--ill-sidebar-buttons-bottom-button-inner-shadow-blur)) var(--ill-sidebar-buttons-hover-bottom-button-inner-shadow-spread, var(--ill-sidebar-buttons-bottom-button-inner-shadow-spread)) var(--ill-sidebar-buttons-hover-bottom-button-inner-shadow-color, var(--ill-sidebar-buttons-bottom-button-inner-shadow-color));
 }
 
 .illuminus-styled .journal-header:hover {
@@ -9055,6 +9165,38 @@ blockquote):not(:empty))):hover {
   color: var(--ill-sidebar-headings-heading-active-color, var(--ill-sidebar-headings-heading-color, revert-layer));
 }
 
+.illuminus-styled .journal-sidebar search input[type="search"]:focus {
+  padding: var(--ill-sidebar-search-active-search-padding-top, var(--ill-sidebar-search-search-padding-top)) var(--ill-sidebar-search-active-search-padding-right, var(--ill-sidebar-search-search-padding-right))
+           var(--ill-sidebar-search-active-search-padding-bottom, var(--ill-sidebar-search-search-padding-bottom)) var(--ill-sidebar-search-active-search-padding-left, var(--ill-sidebar-search-search-padding-left));
+  margin: var(--ill-sidebar-search-active-search-margin-top, var(--ill-sidebar-search-search-margin-top)) var(--ill-sidebar-search-active-search-margin-right, var(--ill-sidebar-search-search-margin-right))
+          var(--ill-sidebar-search-active-search-margin-bottom, var(--ill-sidebar-search-search-margin-bottom)) var(--ill-sidebar-search-active-search-margin-left, var(--ill-sidebar-search-search-margin-left));
+  --input-background-color: var(--ill-sidebar-search-active-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  --input-text-color: var(--ill-sidebar-search-active-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  --input-placeholder-color: var(--ill-sidebar-search-active-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
+  background-color: var(--ill-sidebar-search-active-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-search-active-search-gradient-angle, var(--ill-sidebar-search-search-gradient-angle)),
+      var(--ill-sidebar-search-active-search-gradient-from, var(--ill-sidebar-search-search-gradient-from)), var(--ill-sidebar-search-active-search-gradient-to, var(--ill-sidebar-search-search-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-search-active-search-frost, var(--ill-sidebar-search-search-frost));
+  color: var(--ill-sidebar-search-active-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  font-size: var(--ill-sidebar-search-active-search-size, var(--ill-sidebar-search-search-size, revert-layer));
+  border-width: var(--ill-sidebar-search-active-search-border-top-width, var(--ill-sidebar-search-search-border-top-width)) var(--ill-sidebar-search-active-search-border-right-width, var(--ill-sidebar-search-search-border-right-width))
+                var(--ill-sidebar-search-active-search-border-bottom-width, var(--ill-sidebar-search-search-border-bottom-width)) var(--ill-sidebar-search-active-search-border-left-width, var(--ill-sidebar-search-search-border-left-width));
+  border-style: var(--ill-sidebar-search-active-search-border-top-style, var(--ill-sidebar-search-search-border-top-style)) var(--ill-sidebar-search-active-search-border-right-style, var(--ill-sidebar-search-search-border-right-style))
+                var(--ill-sidebar-search-active-search-border-bottom-style, var(--ill-sidebar-search-search-border-bottom-style)) var(--ill-sidebar-search-active-search-border-left-style, var(--ill-sidebar-search-search-border-left-style));
+  border-color: var(--ill-sidebar-search-active-search-border-top-color, var(--ill-sidebar-search-search-border-top-color)) var(--ill-sidebar-search-active-search-border-right-color, var(--ill-sidebar-search-search-border-right-color))
+                var(--ill-sidebar-search-active-search-border-bottom-color, var(--ill-sidebar-search-search-border-bottom-color)) var(--ill-sidebar-search-active-search-border-left-color, var(--ill-sidebar-search-search-border-left-color));
+  border-radius: var(--ill-sidebar-search-active-search-corner-top-left, var(--ill-sidebar-search-search-corner-top-left)) var(--ill-sidebar-search-active-search-corner-top-right, var(--ill-sidebar-search-search-corner-top-right))
+                 var(--ill-sidebar-search-active-search-corner-bottom-right, var(--ill-sidebar-search-search-corner-bottom-right)) var(--ill-sidebar-search-active-search-corner-bottom-left, var(--ill-sidebar-search-search-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-search-active-search-corner-top-left-shape, var(--ill-sidebar-search-search-corner-top-left-shape, round))
+                var(--ill-sidebar-search-active-search-corner-top-right-shape, var(--ill-sidebar-search-search-corner-top-right-shape, round))
+                var(--ill-sidebar-search-active-search-corner-bottom-right-shape, var(--ill-sidebar-search-search-corner-bottom-right-shape, round))
+                var(--ill-sidebar-search-active-search-corner-bottom-left-shape, var(--ill-sidebar-search-search-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled .journal-sidebar search input[type="search"]:focus::placeholder {
+  color: var(--ill-sidebar-search-active-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
+}
+
 .illuminus-styled .journal-sidebar .toc li.page.active::after {
   background-image: var(--ill-sidebar-entries-entry-active-texture, var(--ill-sidebar-entries-entry-texture));
   background-size: var(--ill-sidebar-entries-entry-active-texture-fit-size, var(--ill-sidebar-entries-entry-texture-fit-size));
@@ -9083,6 +9225,20 @@ blockquote):not(:empty))):hover {
           sepia(var(--ill-sidebar-headings-heading-active-texture-age, var(--ill-sidebar-headings-heading-texture-age, 0%)));
 }
 
+.illuminus-styled .journal-sidebar search input[type="search"]:focus::after {
+  background-image: var(--ill-sidebar-search-active-search-texture, var(--ill-sidebar-search-search-texture));
+  background-size: var(--ill-sidebar-search-active-search-texture-fit-size, var(--ill-sidebar-search-search-texture-fit-size));
+  background-repeat: var(--ill-sidebar-search-active-search-texture-fit-repeat, var(--ill-sidebar-search-search-texture-fit-repeat));
+  background-position: var(--ill-sidebar-search-active-search-texture-position, var(--ill-sidebar-search-search-texture-position));
+  mix-blend-mode: var(--ill-sidebar-search-active-search-texture-blend, var(--ill-sidebar-search-search-texture-blend));
+  opacity: var(--ill-sidebar-search-active-search-texture-opacity, var(--ill-sidebar-search-search-texture-opacity));
+  filter: blur(var(--ill-sidebar-search-active-search-texture-blur, var(--ill-sidebar-search-search-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-search-active-search-texture-brightness, var(--ill-sidebar-search-search-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-search-active-search-texture-contrast, var(--ill-sidebar-search-search-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-search-active-search-texture-saturation, var(--ill-sidebar-search-search-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-search-active-search-texture-age, var(--ill-sidebar-search-search-texture-age, 0%)));
+}
+
 .illuminus-styled .journal-sidebar .toc li.page.active {
   box-shadow: var(--ill-sidebar-entries-active-entry-shadow-offset-x, var(--ill-sidebar-entries-entry-shadow-offset-x)) var(--ill-sidebar-entries-active-entry-shadow-offset-y, var(--ill-sidebar-entries-entry-shadow-offset-y)) var(--ill-sidebar-entries-active-entry-shadow-blur, var(--ill-sidebar-entries-entry-shadow-blur)) var(--ill-sidebar-entries-active-entry-shadow-spread, var(--ill-sidebar-entries-entry-shadow-spread)) var(--ill-sidebar-entries-active-entry-shadow-color, var(--ill-sidebar-entries-entry-shadow-color)),
               inset var(--ill-sidebar-entries-active-entry-inner-shadow-offset-x, var(--ill-sidebar-entries-entry-inner-shadow-offset-x)) var(--ill-sidebar-entries-active-entry-inner-shadow-offset-y, var(--ill-sidebar-entries-entry-inner-shadow-offset-y)) var(--ill-sidebar-entries-active-entry-inner-shadow-blur, var(--ill-sidebar-entries-entry-inner-shadow-blur)) var(--ill-sidebar-entries-active-entry-inner-shadow-spread, var(--ill-sidebar-entries-entry-inner-shadow-spread)) var(--ill-sidebar-entries-active-entry-inner-shadow-color, var(--ill-sidebar-entries-entry-inner-shadow-color));
@@ -9091,4 +9247,379 @@ blockquote):not(:empty))):hover {
 .illuminus-styled .journal-sidebar .toc li.heading.illuminus-current {
   box-shadow: var(--ill-sidebar-headings-active-heading-shadow-offset-x, var(--ill-sidebar-headings-heading-shadow-offset-x)) var(--ill-sidebar-headings-active-heading-shadow-offset-y, var(--ill-sidebar-headings-heading-shadow-offset-y)) var(--ill-sidebar-headings-active-heading-shadow-blur, var(--ill-sidebar-headings-heading-shadow-blur)) var(--ill-sidebar-headings-active-heading-shadow-spread, var(--ill-sidebar-headings-heading-shadow-spread)) var(--ill-sidebar-headings-active-heading-shadow-color, var(--ill-sidebar-headings-heading-shadow-color)),
               inset var(--ill-sidebar-headings-active-heading-inner-shadow-offset-x, var(--ill-sidebar-headings-heading-inner-shadow-offset-x)) var(--ill-sidebar-headings-active-heading-inner-shadow-offset-y, var(--ill-sidebar-headings-heading-inner-shadow-offset-y)) var(--ill-sidebar-headings-active-heading-inner-shadow-blur, var(--ill-sidebar-headings-heading-inner-shadow-blur)) var(--ill-sidebar-headings-active-heading-inner-shadow-spread, var(--ill-sidebar-headings-heading-inner-shadow-spread)) var(--ill-sidebar-headings-active-heading-inner-shadow-color, var(--ill-sidebar-headings-heading-inner-shadow-color));
+}
+
+.illuminus-styled .journal-sidebar search input[type="search"]:focus {
+  box-shadow: var(--ill-sidebar-search-active-search-shadow-offset-x, var(--ill-sidebar-search-search-shadow-offset-x)) var(--ill-sidebar-search-active-search-shadow-offset-y, var(--ill-sidebar-search-search-shadow-offset-y)) var(--ill-sidebar-search-active-search-shadow-blur, var(--ill-sidebar-search-search-shadow-blur)) var(--ill-sidebar-search-active-search-shadow-spread, var(--ill-sidebar-search-search-shadow-spread)) var(--ill-sidebar-search-active-search-shadow-color, var(--ill-sidebar-search-search-shadow-color)),
+              inset var(--ill-sidebar-search-active-search-inner-shadow-offset-x, var(--ill-sidebar-search-search-inner-shadow-offset-x)) var(--ill-sidebar-search-active-search-inner-shadow-offset-y, var(--ill-sidebar-search-search-inner-shadow-offset-y)) var(--ill-sidebar-search-active-search-inner-shadow-blur, var(--ill-sidebar-search-search-inner-shadow-blur)) var(--ill-sidebar-search-active-search-inner-shadow-spread, var(--ill-sidebar-search-search-inner-shadow-spread)) var(--ill-sidebar-search-active-search-inner-shadow-color, var(--ill-sidebar-search-search-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar {
+  background-color: var(--ill-sidebar-collapsed-background, var(--ill-sidebar-background, revert-layer));
+  backdrop-filter: var(--ill-sidebar-collapsed-frost, var(--ill-sidebar-frost, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-collapsed-gradient-angle, var(--ill-sidebar-gradient-angle)),
+      var(--ill-sidebar-collapsed-gradient-from, var(--ill-sidebar-gradient-from)), var(--ill-sidebar-collapsed-gradient-to, var(--ill-sidebar-gradient-to)));
+  padding: var(--ill-sidebar-collapsed-padding-top, var(--ill-sidebar-padding-top)) var(--ill-sidebar-collapsed-padding-right, var(--ill-sidebar-padding-right))
+           var(--ill-sidebar-collapsed-padding-bottom, var(--ill-sidebar-padding-bottom)) var(--ill-sidebar-collapsed-padding-left, var(--ill-sidebar-padding-left));
+  border-width: var(--ill-sidebar-collapsed-border-top-width, var(--ill-sidebar-border-top-width)) var(--ill-sidebar-collapsed-border-right-width, var(--ill-sidebar-border-right-width))
+                var(--ill-sidebar-collapsed-border-bottom-width, var(--ill-sidebar-border-bottom-width)) var(--ill-sidebar-collapsed-border-left-width, var(--ill-sidebar-border-left-width));
+  border-style: var(--ill-sidebar-collapsed-border-top-style, var(--ill-sidebar-border-top-style)) var(--ill-sidebar-collapsed-border-right-style, var(--ill-sidebar-border-right-style))
+                var(--ill-sidebar-collapsed-border-bottom-style, var(--ill-sidebar-border-bottom-style)) var(--ill-sidebar-collapsed-border-left-style, var(--ill-sidebar-border-left-style));
+  border-color: var(--ill-sidebar-collapsed-border-top-color, var(--ill-sidebar-border-top-color)) var(--ill-sidebar-collapsed-border-right-color, var(--ill-sidebar-border-right-color))
+                var(--ill-sidebar-collapsed-border-bottom-color, var(--ill-sidebar-border-bottom-color)) var(--ill-sidebar-collapsed-border-left-color, var(--ill-sidebar-border-left-color));
+  border-radius: var(--ill-sidebar-collapsed-corner-top-left, var(--ill-sidebar-corner-top-left)) var(--ill-sidebar-collapsed-corner-top-right, var(--ill-sidebar-corner-top-right))
+                 var(--ill-sidebar-collapsed-corner-bottom-right, var(--ill-sidebar-corner-bottom-right)) var(--ill-sidebar-collapsed-corner-bottom-left, var(--ill-sidebar-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-collapsed-corner-top-left-shape, var(--ill-sidebar-corner-top-left-shape, round))
+                var(--ill-sidebar-collapsed-corner-top-right-shape, var(--ill-sidebar-corner-top-right-shape, round))
+                var(--ill-sidebar-collapsed-corner-bottom-right-shape, var(--ill-sidebar-corner-bottom-right-shape, round))
+                var(--ill-sidebar-collapsed-corner-bottom-left-shape, var(--ill-sidebar-corner-bottom-left-shape, round));
+  box-shadow:
+    inset var(--ill-sidebar-collapsed-inner-shadow-offset-x, var(--ill-sidebar-inner-shadow-offset-x)) var(--ill-sidebar-collapsed-inner-shadow-offset-y, var(--ill-sidebar-inner-shadow-offset-y))
+    var(--ill-sidebar-collapsed-inner-shadow-blur, var(--ill-sidebar-inner-shadow-blur)) var(--ill-sidebar-collapsed-inner-shadow-spread, var(--ill-sidebar-inner-shadow-spread))
+    var(--ill-sidebar-collapsed-inner-shadow-color, var(--ill-sidebar-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.page {
+  background-color: var(--ill-sidebar-entries-collapsed-entry-background, var(--ill-sidebar-entries-entry-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-entries-collapsed-entry-gradient-angle, var(--ill-sidebar-entries-entry-gradient-angle)),
+      var(--ill-sidebar-entries-collapsed-entry-gradient-from, var(--ill-sidebar-entries-entry-gradient-from)), var(--ill-sidebar-entries-collapsed-entry-gradient-to, var(--ill-sidebar-entries-entry-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-entries-collapsed-entry-frost, var(--ill-sidebar-entries-entry-frost));
+  padding: var(--ill-sidebar-entries-collapsed-entry-padding-top, var(--ill-sidebar-entries-entry-padding-top)) var(--ill-sidebar-entries-collapsed-entry-padding-right, var(--ill-sidebar-entries-entry-padding-right))
+           var(--ill-sidebar-entries-collapsed-entry-padding-bottom, var(--ill-sidebar-entries-entry-padding-bottom)) var(--ill-sidebar-entries-collapsed-entry-padding-left, var(--ill-sidebar-entries-entry-padding-left));
+  margin: var(--ill-sidebar-entries-collapsed-entry-margin-top, var(--ill-sidebar-entries-entry-margin-top)) var(--ill-sidebar-entries-collapsed-entry-margin-right, var(--ill-sidebar-entries-entry-margin-right))
+          var(--ill-sidebar-entries-collapsed-entry-margin-bottom, var(--ill-sidebar-entries-entry-margin-bottom)) var(--ill-sidebar-entries-collapsed-entry-margin-left, var(--ill-sidebar-entries-entry-margin-left));
+  border-radius: var(--ill-sidebar-entries-collapsed-entry-corner-top-left, var(--ill-sidebar-entries-entry-corner-top-left)) var(--ill-sidebar-entries-collapsed-entry-corner-top-right, var(--ill-sidebar-entries-entry-corner-top-right))
+                 var(--ill-sidebar-entries-collapsed-entry-corner-bottom-right, var(--ill-sidebar-entries-entry-corner-bottom-right)) var(--ill-sidebar-entries-collapsed-entry-corner-bottom-left, var(--ill-sidebar-entries-entry-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-entries-collapsed-entry-corner-top-left-shape, var(--ill-sidebar-entries-entry-corner-top-left-shape, round))
+                var(--ill-sidebar-entries-collapsed-entry-corner-top-right-shape, var(--ill-sidebar-entries-entry-corner-top-right-shape, round))
+                var(--ill-sidebar-entries-collapsed-entry-corner-bottom-right-shape, var(--ill-sidebar-entries-entry-corner-bottom-right-shape, round))
+                var(--ill-sidebar-entries-collapsed-entry-corner-bottom-left-shape, var(--ill-sidebar-entries-entry-corner-bottom-left-shape, round));
+  border-width: var(--ill-sidebar-entries-collapsed-entry-border-top-width, var(--ill-sidebar-entries-entry-border-top-width)) var(--ill-sidebar-entries-collapsed-entry-border-right-width, var(--ill-sidebar-entries-entry-border-right-width))
+                var(--ill-sidebar-entries-collapsed-entry-border-bottom-width, var(--ill-sidebar-entries-entry-border-bottom-width)) var(--ill-sidebar-entries-collapsed-entry-border-left-width, var(--ill-sidebar-entries-entry-border-left-width));
+  border-style: var(--ill-sidebar-entries-collapsed-entry-border-top-style, var(--ill-sidebar-entries-entry-border-top-style)) var(--ill-sidebar-entries-collapsed-entry-border-right-style, var(--ill-sidebar-entries-entry-border-right-style))
+                var(--ill-sidebar-entries-collapsed-entry-border-bottom-style, var(--ill-sidebar-entries-entry-border-bottom-style)) var(--ill-sidebar-entries-collapsed-entry-border-left-style, var(--ill-sidebar-entries-entry-border-left-style));
+  border-color: var(--ill-sidebar-entries-collapsed-entry-border-top-color, var(--ill-sidebar-entries-entry-border-top-color)) var(--ill-sidebar-entries-collapsed-entry-border-right-color, var(--ill-sidebar-entries-entry-border-right-color))
+                var(--ill-sidebar-entries-collapsed-entry-border-bottom-color, var(--ill-sidebar-entries-entry-border-bottom-color)) var(--ill-sidebar-entries-collapsed-entry-border-left-color, var(--ill-sidebar-entries-entry-border-left-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc .page-title {
+  font-family: var(--ill-sidebar-entries-collapsed-font, var(--ill-sidebar-entries-font, revert-layer));
+  -webkit-text-stroke: var(--ill-sidebar-entries-collapsed-outline-width, var(--ill-sidebar-entries-outline-width)) var(--ill-sidebar-entries-collapsed-outline-color, var(--ill-sidebar-entries-outline-color));
+  text-shadow: var(--ill-sidebar-entries-collapsed-text-shadow-offset-x, var(--ill-sidebar-entries-text-shadow-offset-x)) var(--ill-sidebar-entries-collapsed-text-shadow-offset-y, var(--ill-sidebar-entries-text-shadow-offset-y))
+               var(--ill-sidebar-entries-collapsed-text-shadow-blur, var(--ill-sidebar-entries-text-shadow-blur)) var(--ill-sidebar-entries-collapsed-text-shadow-color, var(--ill-sidebar-entries-text-shadow-color));
+  font-size: var(--ill-sidebar-entries-collapsed-size, var(--ill-sidebar-entries-size, revert-layer));
+  font-weight: var(--ill-sidebar-entries-collapsed-text-style-weight, var(--ill-sidebar-entries-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-entries-collapsed-text-style-slant, var(--ill-sidebar-entries-text-style-slant, revert-layer));
+  font-variant: var(--ill-sidebar-entries-collapsed-caps-variant, var(--ill-sidebar-entries-caps-variant, revert-layer));
+  text-transform: var(--ill-sidebar-entries-collapsed-caps-transform, var(--ill-sidebar-entries-caps-transform, revert-layer));
+  letter-spacing: var(--ill-sidebar-entries-collapsed-letter-spacing, var(--ill-sidebar-entries-letter-spacing, revert-layer));
+  word-spacing: var(--ill-sidebar-entries-collapsed-word-spacing, var(--ill-sidebar-entries-word-spacing, revert-layer));
+  line-height: var(--ill-sidebar-entries-collapsed-line-height, var(--ill-sidebar-entries-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-entries-collapsed-wrap, var(--ill-sidebar-entries-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-entries-collapsed-hyphens, var(--ill-sidebar-entries-hyphens, revert-layer));
+  text-align: var(--ill-sidebar-entries-collapsed-align, var(--ill-sidebar-entries-align, revert-layer));
+  color: var(--ill-sidebar-entries-collapsed-color, var(--ill-sidebar-entries-color, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc .page-index,
+.illuminus-styled:not(.expanded) .journal-sidebar .toc .page-number {
+  display: var(--ill-sidebar-numbers-collapsed-number-shown, var(--ill-sidebar-numbers-number-shown, revert-layer));
+  color: var(--ill-sidebar-numbers-collapsed-number-color, var(--ill-sidebar-numbers-number-color, revert-layer));
+  font-size: var(--ill-sidebar-numbers-collapsed-number-size, var(--ill-sidebar-numbers-number-size, revert-layer));
+  font-weight: var(--ill-sidebar-numbers-collapsed-number-text-style-weight, var(--ill-sidebar-numbers-number-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-numbers-collapsed-number-text-style-slant, var(--ill-sidebar-numbers-number-text-style-slant, revert-layer));
+  text-align: var(--ill-sidebar-numbers-collapsed-number-align, var(--ill-sidebar-numbers-number-align, revert-layer));
+  width: var(--ill-sidebar-numbers-collapsed-number-width, var(--ill-sidebar-numbers-number-width, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc .headings {
+  margin-left: var(--ill-sidebar-headings-collapsed-heading-indent, var(--ill-sidebar-headings-heading-indent, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.heading {
+  background-color: var(--ill-sidebar-headings-collapsed-heading-background, var(--ill-sidebar-headings-heading-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-headings-collapsed-heading-gradient-angle, var(--ill-sidebar-headings-heading-gradient-angle)),
+      var(--ill-sidebar-headings-collapsed-heading-gradient-from, var(--ill-sidebar-headings-heading-gradient-from)), var(--ill-sidebar-headings-collapsed-heading-gradient-to, var(--ill-sidebar-headings-heading-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-headings-collapsed-heading-frost, var(--ill-sidebar-headings-heading-frost));
+  padding: var(--ill-sidebar-headings-collapsed-heading-padding-top, var(--ill-sidebar-headings-heading-padding-top)) var(--ill-sidebar-headings-collapsed-heading-padding-right, var(--ill-sidebar-headings-heading-padding-right))
+           var(--ill-sidebar-headings-collapsed-heading-padding-bottom, var(--ill-sidebar-headings-heading-padding-bottom)) var(--ill-sidebar-headings-collapsed-heading-padding-left, var(--ill-sidebar-headings-heading-padding-left));
+  margin: var(--ill-sidebar-headings-collapsed-heading-margin-top, var(--ill-sidebar-headings-heading-margin-top)) var(--ill-sidebar-headings-collapsed-heading-margin-right, var(--ill-sidebar-headings-heading-margin-right))
+          var(--ill-sidebar-headings-collapsed-heading-margin-bottom, var(--ill-sidebar-headings-heading-margin-bottom)) var(--ill-sidebar-headings-collapsed-heading-margin-left, var(--ill-sidebar-headings-heading-margin-left));
+  border-width: var(--ill-sidebar-headings-collapsed-heading-border-top-width, var(--ill-sidebar-headings-heading-border-top-width)) var(--ill-sidebar-headings-collapsed-heading-border-right-width, var(--ill-sidebar-headings-heading-border-right-width))
+                var(--ill-sidebar-headings-collapsed-heading-border-bottom-width, var(--ill-sidebar-headings-heading-border-bottom-width)) var(--ill-sidebar-headings-collapsed-heading-border-left-width, var(--ill-sidebar-headings-heading-border-left-width));
+  border-style: var(--ill-sidebar-headings-collapsed-heading-border-top-style, var(--ill-sidebar-headings-heading-border-top-style)) var(--ill-sidebar-headings-collapsed-heading-border-right-style, var(--ill-sidebar-headings-heading-border-right-style))
+                var(--ill-sidebar-headings-collapsed-heading-border-bottom-style, var(--ill-sidebar-headings-heading-border-bottom-style)) var(--ill-sidebar-headings-collapsed-heading-border-left-style, var(--ill-sidebar-headings-heading-border-left-style));
+  border-color: var(--ill-sidebar-headings-collapsed-heading-border-top-color, var(--ill-sidebar-headings-heading-border-top-color)) var(--ill-sidebar-headings-collapsed-heading-border-right-color, var(--ill-sidebar-headings-heading-border-right-color))
+                var(--ill-sidebar-headings-collapsed-heading-border-bottom-color, var(--ill-sidebar-headings-heading-border-bottom-color)) var(--ill-sidebar-headings-collapsed-heading-border-left-color, var(--ill-sidebar-headings-heading-border-left-color));
+  border-radius: var(--ill-sidebar-headings-collapsed-heading-corner-top-left, var(--ill-sidebar-headings-heading-corner-top-left)) var(--ill-sidebar-headings-collapsed-heading-corner-top-right, var(--ill-sidebar-headings-heading-corner-top-right))
+                 var(--ill-sidebar-headings-collapsed-heading-corner-bottom-right, var(--ill-sidebar-headings-heading-corner-bottom-right)) var(--ill-sidebar-headings-collapsed-heading-corner-bottom-left, var(--ill-sidebar-headings-heading-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-headings-collapsed-heading-corner-top-left-shape, var(--ill-sidebar-headings-heading-corner-top-left-shape, round))
+                var(--ill-sidebar-headings-collapsed-heading-corner-top-right-shape, var(--ill-sidebar-headings-heading-corner-top-right-shape, round))
+                var(--ill-sidebar-headings-collapsed-heading-corner-bottom-right-shape, var(--ill-sidebar-headings-heading-corner-bottom-right-shape, round))
+                var(--ill-sidebar-headings-collapsed-heading-corner-bottom-left-shape, var(--ill-sidebar-headings-heading-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc .heading-link {
+  font-family: var(--ill-sidebar-headings-collapsed-heading-font, var(--ill-sidebar-headings-heading-font, revert-layer));
+  -webkit-text-stroke: var(--ill-sidebar-headings-collapsed-heading-outline-width, var(--ill-sidebar-headings-heading-outline-width)) var(--ill-sidebar-headings-collapsed-heading-outline-color, var(--ill-sidebar-headings-heading-outline-color));
+  text-shadow: var(--ill-sidebar-headings-collapsed-heading-text-shadow-offset-x, var(--ill-sidebar-headings-heading-text-shadow-offset-x)) var(--ill-sidebar-headings-collapsed-heading-text-shadow-offset-y, var(--ill-sidebar-headings-heading-text-shadow-offset-y))
+               var(--ill-sidebar-headings-collapsed-heading-text-shadow-blur, var(--ill-sidebar-headings-heading-text-shadow-blur)) var(--ill-sidebar-headings-collapsed-heading-text-shadow-color, var(--ill-sidebar-headings-heading-text-shadow-color));
+  font-size: var(--ill-sidebar-headings-collapsed-heading-size, var(--ill-sidebar-headings-heading-size, revert-layer));
+  font-weight: var(--ill-sidebar-headings-collapsed-heading-text-style-weight, var(--ill-sidebar-headings-heading-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-headings-collapsed-heading-text-style-slant, var(--ill-sidebar-headings-heading-text-style-slant, revert-layer));
+  line-height: var(--ill-sidebar-headings-collapsed-heading-line-height, var(--ill-sidebar-headings-heading-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-headings-collapsed-heading-wrap, var(--ill-sidebar-headings-heading-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-headings-collapsed-heading-hyphens, var(--ill-sidebar-headings-heading-hyphens, revert-layer));
+  color: var(--ill-sidebar-headings-collapsed-heading-color, var(--ill-sidebar-headings-heading-color, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.category {
+  text-align: var(--ill-sidebar-categories-collapsed-category-align, var(--ill-sidebar-categories-category-align, revert-layer));
+  background-color: var(--ill-sidebar-categories-collapsed-category-background, var(--ill-sidebar-categories-category-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-categories-collapsed-category-gradient-angle, var(--ill-sidebar-categories-category-gradient-angle)),
+      var(--ill-sidebar-categories-collapsed-category-gradient-from, var(--ill-sidebar-categories-category-gradient-from)), var(--ill-sidebar-categories-collapsed-category-gradient-to, var(--ill-sidebar-categories-category-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-categories-collapsed-category-frost, var(--ill-sidebar-categories-category-frost));
+  padding: var(--ill-sidebar-categories-collapsed-category-padding-top, var(--ill-sidebar-categories-category-padding-top)) var(--ill-sidebar-categories-collapsed-category-padding-right, var(--ill-sidebar-categories-category-padding-right))
+           var(--ill-sidebar-categories-collapsed-category-padding-bottom, var(--ill-sidebar-categories-category-padding-bottom)) var(--ill-sidebar-categories-collapsed-category-padding-left, var(--ill-sidebar-categories-category-padding-left));
+  margin: var(--ill-sidebar-categories-collapsed-category-margin-top, var(--ill-sidebar-categories-category-margin-top)) var(--ill-sidebar-categories-collapsed-category-margin-right, var(--ill-sidebar-categories-category-margin-right))
+          var(--ill-sidebar-categories-collapsed-category-margin-bottom, var(--ill-sidebar-categories-category-margin-bottom)) var(--ill-sidebar-categories-collapsed-category-margin-left, var(--ill-sidebar-categories-category-margin-left));
+  border-width: var(--ill-sidebar-categories-collapsed-category-border-top-width, var(--ill-sidebar-categories-category-border-top-width)) var(--ill-sidebar-categories-collapsed-category-border-right-width, var(--ill-sidebar-categories-category-border-right-width))
+                var(--ill-sidebar-categories-collapsed-category-border-bottom-width, var(--ill-sidebar-categories-category-border-bottom-width)) var(--ill-sidebar-categories-collapsed-category-border-left-width, var(--ill-sidebar-categories-category-border-left-width));
+  border-style: var(--ill-sidebar-categories-collapsed-category-border-top-style, var(--ill-sidebar-categories-category-border-top-style)) var(--ill-sidebar-categories-collapsed-category-border-right-style, var(--ill-sidebar-categories-category-border-right-style))
+                var(--ill-sidebar-categories-collapsed-category-border-bottom-style, var(--ill-sidebar-categories-category-border-bottom-style)) var(--ill-sidebar-categories-collapsed-category-border-left-style, var(--ill-sidebar-categories-category-border-left-style));
+  border-color: var(--ill-sidebar-categories-collapsed-category-border-top-color, var(--ill-sidebar-categories-category-border-top-color)) var(--ill-sidebar-categories-collapsed-category-border-right-color, var(--ill-sidebar-categories-category-border-right-color))
+                var(--ill-sidebar-categories-collapsed-category-border-bottom-color, var(--ill-sidebar-categories-category-border-bottom-color)) var(--ill-sidebar-categories-collapsed-category-border-left-color, var(--ill-sidebar-categories-category-border-left-color));
+  border-radius: var(--ill-sidebar-categories-collapsed-category-corner-top-left, var(--ill-sidebar-categories-category-corner-top-left)) var(--ill-sidebar-categories-collapsed-category-corner-top-right, var(--ill-sidebar-categories-category-corner-top-right))
+                 var(--ill-sidebar-categories-collapsed-category-corner-bottom-right, var(--ill-sidebar-categories-category-corner-bottom-right)) var(--ill-sidebar-categories-collapsed-category-corner-bottom-left, var(--ill-sidebar-categories-category-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-categories-collapsed-category-corner-top-left-shape, var(--ill-sidebar-categories-category-corner-top-left-shape, round))
+                var(--ill-sidebar-categories-collapsed-category-corner-top-right-shape, var(--ill-sidebar-categories-category-corner-top-right-shape, round))
+                var(--ill-sidebar-categories-collapsed-category-corner-bottom-right-shape, var(--ill-sidebar-categories-category-corner-bottom-right-shape, round))
+                var(--ill-sidebar-categories-collapsed-category-corner-bottom-left-shape, var(--ill-sidebar-categories-category-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.category strong {
+  font-family: var(--ill-sidebar-categories-collapsed-category-font, var(--ill-sidebar-categories-category-font, revert-layer));
+  -webkit-text-stroke: var(--ill-sidebar-categories-collapsed-category-outline-width, var(--ill-sidebar-categories-category-outline-width)) var(--ill-sidebar-categories-collapsed-category-outline-color, var(--ill-sidebar-categories-category-outline-color));
+  text-shadow: var(--ill-sidebar-categories-collapsed-category-text-shadow-offset-x, var(--ill-sidebar-categories-category-text-shadow-offset-x)) var(--ill-sidebar-categories-collapsed-category-text-shadow-offset-y, var(--ill-sidebar-categories-category-text-shadow-offset-y))
+               var(--ill-sidebar-categories-collapsed-category-text-shadow-blur, var(--ill-sidebar-categories-category-text-shadow-blur)) var(--ill-sidebar-categories-collapsed-category-text-shadow-color, var(--ill-sidebar-categories-category-text-shadow-color));
+  font-size: var(--ill-sidebar-categories-collapsed-category-size, var(--ill-sidebar-categories-category-size, revert-layer));
+  font-weight: var(--ill-sidebar-categories-collapsed-category-text-style-weight, var(--ill-sidebar-categories-category-text-style-weight, revert-layer));
+  font-style: var(--ill-sidebar-categories-collapsed-category-text-style-slant, var(--ill-sidebar-categories-category-text-style-slant, revert-layer));
+  font-variant: var(--ill-sidebar-categories-collapsed-category-caps-variant, var(--ill-sidebar-categories-category-caps-variant, revert-layer));
+  text-transform: var(--ill-sidebar-categories-collapsed-category-caps-transform, var(--ill-sidebar-categories-category-caps-transform, revert-layer));
+  letter-spacing: var(--ill-sidebar-categories-collapsed-category-letter-spacing, var(--ill-sidebar-categories-category-letter-spacing, revert-layer));
+  word-spacing: var(--ill-sidebar-categories-collapsed-category-word-spacing, var(--ill-sidebar-categories-category-word-spacing, revert-layer));
+  line-height: var(--ill-sidebar-categories-collapsed-category-line-height, var(--ill-sidebar-categories-category-line-height, revert-layer));
+  text-wrap: var(--ill-sidebar-categories-collapsed-category-wrap, var(--ill-sidebar-categories-category-wrap, revert-layer));
+  hyphens: var(--ill-sidebar-categories-collapsed-category-hyphens, var(--ill-sidebar-categories-category-hyphens, revert-layer));
+  color: var(--ill-sidebar-categories-collapsed-category-color, var(--ill-sidebar-categories-category-color, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search input[type="search"] {
+  padding: var(--ill-sidebar-search-collapsed-search-padding-top, var(--ill-sidebar-search-search-padding-top)) var(--ill-sidebar-search-collapsed-search-padding-right, var(--ill-sidebar-search-search-padding-right))
+           var(--ill-sidebar-search-collapsed-search-padding-bottom, var(--ill-sidebar-search-search-padding-bottom)) var(--ill-sidebar-search-collapsed-search-padding-left, var(--ill-sidebar-search-search-padding-left));
+  margin: var(--ill-sidebar-search-collapsed-search-margin-top, var(--ill-sidebar-search-search-margin-top)) var(--ill-sidebar-search-collapsed-search-margin-right, var(--ill-sidebar-search-search-margin-right))
+          var(--ill-sidebar-search-collapsed-search-margin-bottom, var(--ill-sidebar-search-search-margin-bottom)) var(--ill-sidebar-search-collapsed-search-margin-left, var(--ill-sidebar-search-search-margin-left));
+  --input-background-color: var(--ill-sidebar-search-collapsed-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  --input-text-color: var(--ill-sidebar-search-collapsed-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  --input-placeholder-color: var(--ill-sidebar-search-collapsed-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
+  background-color: var(--ill-sidebar-search-collapsed-search-background, var(--ill-sidebar-search-search-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-search-collapsed-search-gradient-angle, var(--ill-sidebar-search-search-gradient-angle)),
+      var(--ill-sidebar-search-collapsed-search-gradient-from, var(--ill-sidebar-search-search-gradient-from)), var(--ill-sidebar-search-collapsed-search-gradient-to, var(--ill-sidebar-search-search-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-search-collapsed-search-frost, var(--ill-sidebar-search-search-frost));
+  color: var(--ill-sidebar-search-collapsed-search-color, var(--ill-sidebar-search-search-color, revert-layer));
+  font-size: var(--ill-sidebar-search-collapsed-search-size, var(--ill-sidebar-search-search-size, revert-layer));
+  border-width: var(--ill-sidebar-search-collapsed-search-border-top-width, var(--ill-sidebar-search-search-border-top-width)) var(--ill-sidebar-search-collapsed-search-border-right-width, var(--ill-sidebar-search-search-border-right-width))
+                var(--ill-sidebar-search-collapsed-search-border-bottom-width, var(--ill-sidebar-search-search-border-bottom-width)) var(--ill-sidebar-search-collapsed-search-border-left-width, var(--ill-sidebar-search-search-border-left-width));
+  border-style: var(--ill-sidebar-search-collapsed-search-border-top-style, var(--ill-sidebar-search-search-border-top-style)) var(--ill-sidebar-search-collapsed-search-border-right-style, var(--ill-sidebar-search-search-border-right-style))
+                var(--ill-sidebar-search-collapsed-search-border-bottom-style, var(--ill-sidebar-search-search-border-bottom-style)) var(--ill-sidebar-search-collapsed-search-border-left-style, var(--ill-sidebar-search-search-border-left-style));
+  border-color: var(--ill-sidebar-search-collapsed-search-border-top-color, var(--ill-sidebar-search-search-border-top-color)) var(--ill-sidebar-search-collapsed-search-border-right-color, var(--ill-sidebar-search-search-border-right-color))
+                var(--ill-sidebar-search-collapsed-search-border-bottom-color, var(--ill-sidebar-search-search-border-bottom-color)) var(--ill-sidebar-search-collapsed-search-border-left-color, var(--ill-sidebar-search-search-border-left-color));
+  border-radius: var(--ill-sidebar-search-collapsed-search-corner-top-left, var(--ill-sidebar-search-search-corner-top-left)) var(--ill-sidebar-search-collapsed-search-corner-top-right, var(--ill-sidebar-search-search-corner-top-right))
+                 var(--ill-sidebar-search-collapsed-search-corner-bottom-right, var(--ill-sidebar-search-search-corner-bottom-right)) var(--ill-sidebar-search-collapsed-search-corner-bottom-left, var(--ill-sidebar-search-search-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-search-collapsed-search-corner-top-left-shape, var(--ill-sidebar-search-search-corner-top-left-shape, round))
+                var(--ill-sidebar-search-collapsed-search-corner-top-right-shape, var(--ill-sidebar-search-search-corner-top-right-shape, round))
+                var(--ill-sidebar-search-collapsed-search-corner-bottom-right-shape, var(--ill-sidebar-search-search-corner-bottom-right-shape, round))
+                var(--ill-sidebar-search-collapsed-search-corner-bottom-left-shape, var(--ill-sidebar-search-search-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search input[type="search"]::placeholder {
+  color: var(--ill-sidebar-search-collapsed-search-placeholder-color, var(--ill-sidebar-search-search-placeholder-color, revert-layer));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search button:not(.illuminus-fold) {
+  --button-text-color: var(--ill-sidebar-buttons-collapsed-top-button-color, var(--ill-sidebar-buttons-top-button-color, revert-layer));
+  --button-border-color: var(--ill-sidebar-buttons-collapsed-top-button-border-color, var(--ill-sidebar-buttons-top-button-border-color, revert-layer));
+  padding: var(--ill-sidebar-buttons-collapsed-top-button-padding-top, var(--ill-sidebar-buttons-top-button-padding-top)) var(--ill-sidebar-buttons-collapsed-top-button-padding-right, var(--ill-sidebar-buttons-top-button-padding-right))
+           var(--ill-sidebar-buttons-collapsed-top-button-padding-bottom, var(--ill-sidebar-buttons-top-button-padding-bottom)) var(--ill-sidebar-buttons-collapsed-top-button-padding-left, var(--ill-sidebar-buttons-top-button-padding-left));
+  margin: var(--ill-sidebar-buttons-collapsed-top-button-margin-top, var(--ill-sidebar-buttons-top-button-margin-top)) var(--ill-sidebar-buttons-collapsed-top-button-margin-right, var(--ill-sidebar-buttons-top-button-margin-right))
+          var(--ill-sidebar-buttons-collapsed-top-button-margin-bottom, var(--ill-sidebar-buttons-top-button-margin-bottom)) var(--ill-sidebar-buttons-collapsed-top-button-margin-left, var(--ill-sidebar-buttons-top-button-margin-left));
+  color: var(--ill-sidebar-buttons-collapsed-top-button-color, var(--ill-sidebar-buttons-top-button-color, revert-layer));
+  background-color: var(--ill-sidebar-buttons-collapsed-top-button-background, var(--ill-sidebar-buttons-top-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-buttons-collapsed-top-button-gradient-angle, var(--ill-sidebar-buttons-top-button-gradient-angle)),
+      var(--ill-sidebar-buttons-collapsed-top-button-gradient-from, var(--ill-sidebar-buttons-top-button-gradient-from)), var(--ill-sidebar-buttons-collapsed-top-button-gradient-to, var(--ill-sidebar-buttons-top-button-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-buttons-collapsed-top-button-frost, var(--ill-sidebar-buttons-top-button-frost));
+  border-width: var(--ill-sidebar-buttons-collapsed-top-button-border-width, var(--ill-sidebar-buttons-top-button-border-width, revert-layer));
+  border-color: var(--ill-sidebar-buttons-collapsed-top-button-border-color, var(--ill-sidebar-buttons-top-button-border-color, revert-layer));
+  border-radius: var(--ill-sidebar-buttons-collapsed-top-button-corner-top-left, var(--ill-sidebar-buttons-top-button-corner-top-left)) var(--ill-sidebar-buttons-collapsed-top-button-corner-top-right, var(--ill-sidebar-buttons-top-button-corner-top-right))
+                 var(--ill-sidebar-buttons-collapsed-top-button-corner-bottom-right, var(--ill-sidebar-buttons-top-button-corner-bottom-right)) var(--ill-sidebar-buttons-collapsed-top-button-corner-bottom-left, var(--ill-sidebar-buttons-top-button-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-buttons-collapsed-top-button-corner-top-left-shape, var(--ill-sidebar-buttons-top-button-corner-top-left-shape, round))
+                var(--ill-sidebar-buttons-collapsed-top-button-corner-top-right-shape, var(--ill-sidebar-buttons-top-button-corner-top-right-shape, round))
+                var(--ill-sidebar-buttons-collapsed-top-button-corner-bottom-right-shape, var(--ill-sidebar-buttons-top-button-corner-bottom-right-shape, round))
+                var(--ill-sidebar-buttons-collapsed-top-button-corner-bottom-left-shape, var(--ill-sidebar-buttons-top-button-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .action-buttons button:not(.illuminus-fold) {
+  --button-text-color: var(--ill-sidebar-buttons-collapsed-bottom-button-color, var(--ill-sidebar-buttons-bottom-button-color, revert-layer));
+  --button-border-color: var(--ill-sidebar-buttons-collapsed-bottom-button-border-color, var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer));
+  padding: var(--ill-sidebar-buttons-collapsed-bottom-button-padding-top, var(--ill-sidebar-buttons-bottom-button-padding-top)) var(--ill-sidebar-buttons-collapsed-bottom-button-padding-right, var(--ill-sidebar-buttons-bottom-button-padding-right))
+           var(--ill-sidebar-buttons-collapsed-bottom-button-padding-bottom, var(--ill-sidebar-buttons-bottom-button-padding-bottom)) var(--ill-sidebar-buttons-collapsed-bottom-button-padding-left, var(--ill-sidebar-buttons-bottom-button-padding-left));
+  margin: var(--ill-sidebar-buttons-collapsed-bottom-button-margin-top, var(--ill-sidebar-buttons-bottom-button-margin-top)) var(--ill-sidebar-buttons-collapsed-bottom-button-margin-right, var(--ill-sidebar-buttons-bottom-button-margin-right))
+          var(--ill-sidebar-buttons-collapsed-bottom-button-margin-bottom, var(--ill-sidebar-buttons-bottom-button-margin-bottom)) var(--ill-sidebar-buttons-collapsed-bottom-button-margin-left, var(--ill-sidebar-buttons-bottom-button-margin-left));
+  color: var(--ill-sidebar-buttons-collapsed-bottom-button-color, var(--ill-sidebar-buttons-bottom-button-color, revert-layer));
+  background-color: var(--ill-sidebar-buttons-collapsed-bottom-button-background, var(--ill-sidebar-buttons-bottom-button-background, revert-layer));
+  background-image: linear-gradient(var(--ill-sidebar-buttons-collapsed-bottom-button-gradient-angle, var(--ill-sidebar-buttons-bottom-button-gradient-angle)),
+      var(--ill-sidebar-buttons-collapsed-bottom-button-gradient-from, var(--ill-sidebar-buttons-bottom-button-gradient-from)), var(--ill-sidebar-buttons-collapsed-bottom-button-gradient-to, var(--ill-sidebar-buttons-bottom-button-gradient-to)));
+  backdrop-filter: var(--ill-sidebar-buttons-collapsed-bottom-button-frost, var(--ill-sidebar-buttons-bottom-button-frost));
+  border-width: var(--ill-sidebar-buttons-collapsed-bottom-button-border-width, var(--ill-sidebar-buttons-bottom-button-border-width, revert-layer));
+  border-color: var(--ill-sidebar-buttons-collapsed-bottom-button-border-color, var(--ill-sidebar-buttons-bottom-button-border-color, revert-layer));
+  border-radius: var(--ill-sidebar-buttons-collapsed-bottom-button-corner-top-left, var(--ill-sidebar-buttons-bottom-button-corner-top-left)) var(--ill-sidebar-buttons-collapsed-bottom-button-corner-top-right, var(--ill-sidebar-buttons-bottom-button-corner-top-right))
+                 var(--ill-sidebar-buttons-collapsed-bottom-button-corner-bottom-right, var(--ill-sidebar-buttons-bottom-button-corner-bottom-right)) var(--ill-sidebar-buttons-collapsed-bottom-button-corner-bottom-left, var(--ill-sidebar-buttons-bottom-button-corner-bottom-left));
+  corner-shape: var(--ill-sidebar-buttons-collapsed-bottom-button-corner-top-left-shape, var(--ill-sidebar-buttons-bottom-button-corner-top-left-shape, round))
+                var(--ill-sidebar-buttons-collapsed-bottom-button-corner-top-right-shape, var(--ill-sidebar-buttons-bottom-button-corner-top-right-shape, round))
+                var(--ill-sidebar-buttons-collapsed-bottom-button-corner-bottom-right-shape, var(--ill-sidebar-buttons-bottom-button-corner-bottom-right-shape, round))
+                var(--ill-sidebar-buttons-collapsed-bottom-button-corner-bottom-left-shape, var(--ill-sidebar-buttons-bottom-button-corner-bottom-left-shape, round));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar::after {
+  background-image: var(--ill-sidebar-collapsed-texture, var(--ill-sidebar-texture));
+  background-size: var(--ill-sidebar-collapsed-texture-fit-size, var(--ill-sidebar-texture-fit-size));
+  background-repeat: var(--ill-sidebar-collapsed-texture-fit-repeat, var(--ill-sidebar-texture-fit-repeat));
+  background-position: var(--ill-sidebar-collapsed-texture-position, var(--ill-sidebar-texture-position));
+  mix-blend-mode: var(--ill-sidebar-collapsed-texture-blend, var(--ill-sidebar-texture-blend));
+  opacity: var(--ill-sidebar-collapsed-texture-opacity, var(--ill-sidebar-texture-opacity));
+  filter: blur(var(--ill-sidebar-collapsed-texture-blur, var(--ill-sidebar-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-collapsed-texture-brightness, var(--ill-sidebar-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-collapsed-texture-contrast, var(--ill-sidebar-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-collapsed-texture-saturation, var(--ill-sidebar-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-collapsed-texture-age, var(--ill-sidebar-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.page::after {
+  background-image: var(--ill-sidebar-entries-collapsed-entry-texture, var(--ill-sidebar-entries-entry-texture));
+  background-size: var(--ill-sidebar-entries-collapsed-entry-texture-fit-size, var(--ill-sidebar-entries-entry-texture-fit-size));
+  background-repeat: var(--ill-sidebar-entries-collapsed-entry-texture-fit-repeat, var(--ill-sidebar-entries-entry-texture-fit-repeat));
+  background-position: var(--ill-sidebar-entries-collapsed-entry-texture-position, var(--ill-sidebar-entries-entry-texture-position));
+  mix-blend-mode: var(--ill-sidebar-entries-collapsed-entry-texture-blend, var(--ill-sidebar-entries-entry-texture-blend));
+  opacity: var(--ill-sidebar-entries-collapsed-entry-texture-opacity, var(--ill-sidebar-entries-entry-texture-opacity));
+  filter: blur(var(--ill-sidebar-entries-collapsed-entry-texture-blur, var(--ill-sidebar-entries-entry-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-entries-collapsed-entry-texture-brightness, var(--ill-sidebar-entries-entry-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-entries-collapsed-entry-texture-contrast, var(--ill-sidebar-entries-entry-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-entries-collapsed-entry-texture-saturation, var(--ill-sidebar-entries-entry-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-entries-collapsed-entry-texture-age, var(--ill-sidebar-entries-entry-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.heading::after {
+  background-image: var(--ill-sidebar-headings-collapsed-heading-texture, var(--ill-sidebar-headings-heading-texture));
+  background-size: var(--ill-sidebar-headings-collapsed-heading-texture-fit-size, var(--ill-sidebar-headings-heading-texture-fit-size));
+  background-repeat: var(--ill-sidebar-headings-collapsed-heading-texture-fit-repeat, var(--ill-sidebar-headings-heading-texture-fit-repeat));
+  background-position: var(--ill-sidebar-headings-collapsed-heading-texture-position, var(--ill-sidebar-headings-heading-texture-position));
+  mix-blend-mode: var(--ill-sidebar-headings-collapsed-heading-texture-blend, var(--ill-sidebar-headings-heading-texture-blend));
+  opacity: var(--ill-sidebar-headings-collapsed-heading-texture-opacity, var(--ill-sidebar-headings-heading-texture-opacity));
+  filter: blur(var(--ill-sidebar-headings-collapsed-heading-texture-blur, var(--ill-sidebar-headings-heading-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-headings-collapsed-heading-texture-brightness, var(--ill-sidebar-headings-heading-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-headings-collapsed-heading-texture-contrast, var(--ill-sidebar-headings-heading-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-headings-collapsed-heading-texture-saturation, var(--ill-sidebar-headings-heading-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-headings-collapsed-heading-texture-age, var(--ill-sidebar-headings-heading-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.category::before {
+  background-image: var(--ill-sidebar-categories-collapsed-category-texture, var(--ill-sidebar-categories-category-texture));
+  background-size: var(--ill-sidebar-categories-collapsed-category-texture-fit-size, var(--ill-sidebar-categories-category-texture-fit-size));
+  background-repeat: var(--ill-sidebar-categories-collapsed-category-texture-fit-repeat, var(--ill-sidebar-categories-category-texture-fit-repeat));
+  background-position: var(--ill-sidebar-categories-collapsed-category-texture-position, var(--ill-sidebar-categories-category-texture-position));
+  mix-blend-mode: var(--ill-sidebar-categories-collapsed-category-texture-blend, var(--ill-sidebar-categories-category-texture-blend));
+  opacity: var(--ill-sidebar-categories-collapsed-category-texture-opacity, var(--ill-sidebar-categories-category-texture-opacity));
+  filter: blur(var(--ill-sidebar-categories-collapsed-category-texture-blur, var(--ill-sidebar-categories-category-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-categories-collapsed-category-texture-brightness, var(--ill-sidebar-categories-category-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-categories-collapsed-category-texture-contrast, var(--ill-sidebar-categories-category-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-categories-collapsed-category-texture-saturation, var(--ill-sidebar-categories-category-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-categories-collapsed-category-texture-age, var(--ill-sidebar-categories-category-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search input[type="search"]::after {
+  background-image: var(--ill-sidebar-search-collapsed-search-texture, var(--ill-sidebar-search-search-texture));
+  background-size: var(--ill-sidebar-search-collapsed-search-texture-fit-size, var(--ill-sidebar-search-search-texture-fit-size));
+  background-repeat: var(--ill-sidebar-search-collapsed-search-texture-fit-repeat, var(--ill-sidebar-search-search-texture-fit-repeat));
+  background-position: var(--ill-sidebar-search-collapsed-search-texture-position, var(--ill-sidebar-search-search-texture-position));
+  mix-blend-mode: var(--ill-sidebar-search-collapsed-search-texture-blend, var(--ill-sidebar-search-search-texture-blend));
+  opacity: var(--ill-sidebar-search-collapsed-search-texture-opacity, var(--ill-sidebar-search-search-texture-opacity));
+  filter: blur(var(--ill-sidebar-search-collapsed-search-texture-blur, var(--ill-sidebar-search-search-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-search-collapsed-search-texture-brightness, var(--ill-sidebar-search-search-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-search-collapsed-search-texture-contrast, var(--ill-sidebar-search-search-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-search-collapsed-search-texture-saturation, var(--ill-sidebar-search-search-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-search-collapsed-search-texture-age, var(--ill-sidebar-search-search-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search button::after {
+  background-image: var(--ill-sidebar-buttons-collapsed-top-button-texture, var(--ill-sidebar-buttons-top-button-texture));
+  background-size: var(--ill-sidebar-buttons-collapsed-top-button-texture-fit-size, var(--ill-sidebar-buttons-top-button-texture-fit-size));
+  background-repeat: var(--ill-sidebar-buttons-collapsed-top-button-texture-fit-repeat, var(--ill-sidebar-buttons-top-button-texture-fit-repeat));
+  background-position: var(--ill-sidebar-buttons-collapsed-top-button-texture-position, var(--ill-sidebar-buttons-top-button-texture-position));
+  mix-blend-mode: var(--ill-sidebar-buttons-collapsed-top-button-texture-blend, var(--ill-sidebar-buttons-top-button-texture-blend));
+  opacity: var(--ill-sidebar-buttons-collapsed-top-button-texture-opacity, var(--ill-sidebar-buttons-top-button-texture-opacity));
+  filter: blur(var(--ill-sidebar-buttons-collapsed-top-button-texture-blur, var(--ill-sidebar-buttons-top-button-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-buttons-collapsed-top-button-texture-brightness, var(--ill-sidebar-buttons-top-button-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-buttons-collapsed-top-button-texture-contrast, var(--ill-sidebar-buttons-top-button-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-buttons-collapsed-top-button-texture-saturation, var(--ill-sidebar-buttons-top-button-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-buttons-collapsed-top-button-texture-age, var(--ill-sidebar-buttons-top-button-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .action-buttons button::after {
+  background-image: var(--ill-sidebar-buttons-collapsed-bottom-button-texture, var(--ill-sidebar-buttons-bottom-button-texture));
+  background-size: var(--ill-sidebar-buttons-collapsed-bottom-button-texture-fit-size, var(--ill-sidebar-buttons-bottom-button-texture-fit-size));
+  background-repeat: var(--ill-sidebar-buttons-collapsed-bottom-button-texture-fit-repeat, var(--ill-sidebar-buttons-bottom-button-texture-fit-repeat));
+  background-position: var(--ill-sidebar-buttons-collapsed-bottom-button-texture-position, var(--ill-sidebar-buttons-bottom-button-texture-position));
+  mix-blend-mode: var(--ill-sidebar-buttons-collapsed-bottom-button-texture-blend, var(--ill-sidebar-buttons-bottom-button-texture-blend));
+  opacity: var(--ill-sidebar-buttons-collapsed-bottom-button-texture-opacity, var(--ill-sidebar-buttons-bottom-button-texture-opacity));
+  filter: blur(var(--ill-sidebar-buttons-collapsed-bottom-button-texture-blur, var(--ill-sidebar-buttons-bottom-button-texture-blur, 0px)))
+          brightness(var(--ill-sidebar-buttons-collapsed-bottom-button-texture-brightness, var(--ill-sidebar-buttons-bottom-button-texture-brightness, 100%)))
+          contrast(var(--ill-sidebar-buttons-collapsed-bottom-button-texture-contrast, var(--ill-sidebar-buttons-bottom-button-texture-contrast, 100%)))
+          saturate(var(--ill-sidebar-buttons-collapsed-bottom-button-texture-saturation, var(--ill-sidebar-buttons-bottom-button-texture-saturation, 100%)))
+          sepia(var(--ill-sidebar-buttons-collapsed-bottom-button-texture-age, var(--ill-sidebar-buttons-bottom-button-texture-age, 0%)));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar {
+  box-shadow: var(--ill-sidebar-collapsed-shadow-offset-x, var(--ill-sidebar-shadow-offset-x)) var(--ill-sidebar-collapsed-shadow-offset-y, var(--ill-sidebar-shadow-offset-y)) var(--ill-sidebar-collapsed-shadow-blur, var(--ill-sidebar-shadow-blur)) var(--ill-sidebar-collapsed-shadow-spread, var(--ill-sidebar-shadow-spread)) var(--ill-sidebar-collapsed-shadow-color, var(--ill-sidebar-shadow-color)),
+              inset var(--ill-sidebar-collapsed-inner-shadow-offset-x, var(--ill-sidebar-inner-shadow-offset-x)) var(--ill-sidebar-collapsed-inner-shadow-offset-y, var(--ill-sidebar-inner-shadow-offset-y)) var(--ill-sidebar-collapsed-inner-shadow-blur, var(--ill-sidebar-inner-shadow-blur)) var(--ill-sidebar-collapsed-inner-shadow-spread, var(--ill-sidebar-inner-shadow-spread)) var(--ill-sidebar-collapsed-inner-shadow-color, var(--ill-sidebar-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.page {
+  box-shadow: var(--ill-sidebar-entries-collapsed-entry-shadow-offset-x, var(--ill-sidebar-entries-entry-shadow-offset-x)) var(--ill-sidebar-entries-collapsed-entry-shadow-offset-y, var(--ill-sidebar-entries-entry-shadow-offset-y)) var(--ill-sidebar-entries-collapsed-entry-shadow-blur, var(--ill-sidebar-entries-entry-shadow-blur)) var(--ill-sidebar-entries-collapsed-entry-shadow-spread, var(--ill-sidebar-entries-entry-shadow-spread)) var(--ill-sidebar-entries-collapsed-entry-shadow-color, var(--ill-sidebar-entries-entry-shadow-color)),
+              inset var(--ill-sidebar-entries-collapsed-entry-inner-shadow-offset-x, var(--ill-sidebar-entries-entry-inner-shadow-offset-x)) var(--ill-sidebar-entries-collapsed-entry-inner-shadow-offset-y, var(--ill-sidebar-entries-entry-inner-shadow-offset-y)) var(--ill-sidebar-entries-collapsed-entry-inner-shadow-blur, var(--ill-sidebar-entries-entry-inner-shadow-blur)) var(--ill-sidebar-entries-collapsed-entry-inner-shadow-spread, var(--ill-sidebar-entries-entry-inner-shadow-spread)) var(--ill-sidebar-entries-collapsed-entry-inner-shadow-color, var(--ill-sidebar-entries-entry-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.heading {
+  box-shadow: var(--ill-sidebar-headings-collapsed-heading-shadow-offset-x, var(--ill-sidebar-headings-heading-shadow-offset-x)) var(--ill-sidebar-headings-collapsed-heading-shadow-offset-y, var(--ill-sidebar-headings-heading-shadow-offset-y)) var(--ill-sidebar-headings-collapsed-heading-shadow-blur, var(--ill-sidebar-headings-heading-shadow-blur)) var(--ill-sidebar-headings-collapsed-heading-shadow-spread, var(--ill-sidebar-headings-heading-shadow-spread)) var(--ill-sidebar-headings-collapsed-heading-shadow-color, var(--ill-sidebar-headings-heading-shadow-color)),
+              inset var(--ill-sidebar-headings-collapsed-heading-inner-shadow-offset-x, var(--ill-sidebar-headings-heading-inner-shadow-offset-x)) var(--ill-sidebar-headings-collapsed-heading-inner-shadow-offset-y, var(--ill-sidebar-headings-heading-inner-shadow-offset-y)) var(--ill-sidebar-headings-collapsed-heading-inner-shadow-blur, var(--ill-sidebar-headings-heading-inner-shadow-blur)) var(--ill-sidebar-headings-collapsed-heading-inner-shadow-spread, var(--ill-sidebar-headings-heading-inner-shadow-spread)) var(--ill-sidebar-headings-collapsed-heading-inner-shadow-color, var(--ill-sidebar-headings-heading-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .toc li.category {
+  box-shadow: var(--ill-sidebar-categories-collapsed-category-shadow-offset-x, var(--ill-sidebar-categories-category-shadow-offset-x)) var(--ill-sidebar-categories-collapsed-category-shadow-offset-y, var(--ill-sidebar-categories-category-shadow-offset-y)) var(--ill-sidebar-categories-collapsed-category-shadow-blur, var(--ill-sidebar-categories-category-shadow-blur)) var(--ill-sidebar-categories-collapsed-category-shadow-spread, var(--ill-sidebar-categories-category-shadow-spread)) var(--ill-sidebar-categories-collapsed-category-shadow-color, var(--ill-sidebar-categories-category-shadow-color)),
+              inset var(--ill-sidebar-categories-collapsed-category-inner-shadow-offset-x, var(--ill-sidebar-categories-category-inner-shadow-offset-x)) var(--ill-sidebar-categories-collapsed-category-inner-shadow-offset-y, var(--ill-sidebar-categories-category-inner-shadow-offset-y)) var(--ill-sidebar-categories-collapsed-category-inner-shadow-blur, var(--ill-sidebar-categories-category-inner-shadow-blur)) var(--ill-sidebar-categories-collapsed-category-inner-shadow-spread, var(--ill-sidebar-categories-category-inner-shadow-spread)) var(--ill-sidebar-categories-collapsed-category-inner-shadow-color, var(--ill-sidebar-categories-category-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search input[type="search"] {
+  box-shadow: var(--ill-sidebar-search-collapsed-search-shadow-offset-x, var(--ill-sidebar-search-search-shadow-offset-x)) var(--ill-sidebar-search-collapsed-search-shadow-offset-y, var(--ill-sidebar-search-search-shadow-offset-y)) var(--ill-sidebar-search-collapsed-search-shadow-blur, var(--ill-sidebar-search-search-shadow-blur)) var(--ill-sidebar-search-collapsed-search-shadow-spread, var(--ill-sidebar-search-search-shadow-spread)) var(--ill-sidebar-search-collapsed-search-shadow-color, var(--ill-sidebar-search-search-shadow-color)),
+              inset var(--ill-sidebar-search-collapsed-search-inner-shadow-offset-x, var(--ill-sidebar-search-search-inner-shadow-offset-x)) var(--ill-sidebar-search-collapsed-search-inner-shadow-offset-y, var(--ill-sidebar-search-search-inner-shadow-offset-y)) var(--ill-sidebar-search-collapsed-search-inner-shadow-blur, var(--ill-sidebar-search-search-inner-shadow-blur)) var(--ill-sidebar-search-collapsed-search-inner-shadow-spread, var(--ill-sidebar-search-search-inner-shadow-spread)) var(--ill-sidebar-search-collapsed-search-inner-shadow-color, var(--ill-sidebar-search-search-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar search button {
+  box-shadow: var(--ill-sidebar-buttons-collapsed-top-button-shadow-offset-x, var(--ill-sidebar-buttons-top-button-shadow-offset-x)) var(--ill-sidebar-buttons-collapsed-top-button-shadow-offset-y, var(--ill-sidebar-buttons-top-button-shadow-offset-y)) var(--ill-sidebar-buttons-collapsed-top-button-shadow-blur, var(--ill-sidebar-buttons-top-button-shadow-blur)) var(--ill-sidebar-buttons-collapsed-top-button-shadow-spread, var(--ill-sidebar-buttons-top-button-shadow-spread)) var(--ill-sidebar-buttons-collapsed-top-button-shadow-color, var(--ill-sidebar-buttons-top-button-shadow-color)),
+              inset var(--ill-sidebar-buttons-collapsed-top-button-inner-shadow-offset-x, var(--ill-sidebar-buttons-top-button-inner-shadow-offset-x)) var(--ill-sidebar-buttons-collapsed-top-button-inner-shadow-offset-y, var(--ill-sidebar-buttons-top-button-inner-shadow-offset-y)) var(--ill-sidebar-buttons-collapsed-top-button-inner-shadow-blur, var(--ill-sidebar-buttons-top-button-inner-shadow-blur)) var(--ill-sidebar-buttons-collapsed-top-button-inner-shadow-spread, var(--ill-sidebar-buttons-top-button-inner-shadow-spread)) var(--ill-sidebar-buttons-collapsed-top-button-inner-shadow-color, var(--ill-sidebar-buttons-top-button-inner-shadow-color));
+}
+
+.illuminus-styled:not(.expanded) .journal-sidebar .action-buttons button {
+  box-shadow: var(--ill-sidebar-buttons-collapsed-bottom-button-shadow-offset-x, var(--ill-sidebar-buttons-bottom-button-shadow-offset-x)) var(--ill-sidebar-buttons-collapsed-bottom-button-shadow-offset-y, var(--ill-sidebar-buttons-bottom-button-shadow-offset-y)) var(--ill-sidebar-buttons-collapsed-bottom-button-shadow-blur, var(--ill-sidebar-buttons-bottom-button-shadow-blur)) var(--ill-sidebar-buttons-collapsed-bottom-button-shadow-spread, var(--ill-sidebar-buttons-bottom-button-shadow-spread)) var(--ill-sidebar-buttons-collapsed-bottom-button-shadow-color, var(--ill-sidebar-buttons-bottom-button-shadow-color)),
+              inset var(--ill-sidebar-buttons-collapsed-bottom-button-inner-shadow-offset-x, var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-x)) var(--ill-sidebar-buttons-collapsed-bottom-button-inner-shadow-offset-y, var(--ill-sidebar-buttons-bottom-button-inner-shadow-offset-y)) var(--ill-sidebar-buttons-collapsed-bottom-button-inner-shadow-blur, var(--ill-sidebar-buttons-bottom-button-inner-shadow-blur)) var(--ill-sidebar-buttons-collapsed-bottom-button-inner-shadow-spread, var(--ill-sidebar-buttons-bottom-button-inner-shadow-spread)) var(--ill-sidebar-buttons-collapsed-bottom-button-inner-shadow-color, var(--ill-sidebar-buttons-bottom-button-inner-shadow-color));
 }

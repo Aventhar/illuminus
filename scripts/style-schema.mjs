@@ -476,6 +476,38 @@ function borderFields(prefix, { width = 0, style = "solid", color = "#8a6a3d" } 
 }
 
 /**
+ * One set of panel buttons: what they are painted with, and the room they take.
+ *
+ * The contents panel has two lots of them and Foundry draws them differently —
+ * the small controls beside the search box come with no fill and no edge, and
+ * the three at the foot are ordinary buttons — so one shared set could not
+ * express what a journal already does. They are written by this rather than
+ * twice over, because two hand-written copies of forty-four controls agree
+ * exactly until the day somebody adds a forty-fifth to one of them.
+ */
+function panelButtonFields(prefix) {
+  return [
+    col(`${prefix}Color`, ""),
+    col(`${prefix}Background`, ""),
+    ...gradientFields(prefix), ...frostFields(prefix), ...imageFields(prefix),
+    col(`${prefix}BorderColor`, ""),
+    col(`${prefix}HoverColor`, ""),
+    col(`${prefix}HoverBackground`, "#00000000"), ...imageFields(`${prefix}Hover`),
+    col(`${prefix}HoverBorderColor`, "#c9a961"),
+    num(`${prefix}BorderWidth`, 1, "px", 0, 12, 1),
+    // Room inside a button and around it. The defaults are Foundry's own, read
+    // from its stylesheet rather than guessed: a button is `padding: 0 0.5rem`,
+    // and the panel's own rule states `margin: 0` on them. A padding cannot
+    // defer — `revert-layer` is the whole value or none of it, and this one is
+    // four properties — so the default has to be what core paints or every
+    // style would flatten it.
+    ...spacingFields(`${prefix}Padding`, { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 }),
+    ...spacingFields(`${prefix}Margin`, 0, { min: -40, max: 60 }),
+    ...cornerFields(`${prefix}Corner`, 4)
+  ];
+}
+
+/**
  * Eight fields: a size and a shape at each of the four corners.
  *
  * A corner has a size and a shape, and until browsers grew `corner-shape` only
@@ -1180,7 +1212,53 @@ export const GROUPS = [
         ]
       },
       { id: "padding", fields: spacingFields("padding", 0, { max: 80 }) },
-      { id: "layout", fields: [num("sidebarWidth", 300, "px", 120, 700, 10)] },
+      { id: "layout", fields: [
+        // What this is worth once a reader folds the panel away is the same
+        // control under the Collapsed state, which is where every other
+        // question about a folded panel is answered too. Foundry's own folded
+        // width is 40, about enough for the button that unfolds it again.
+        num("sidebarWidth", 300, "px", 120, 700, 10),
+        // Declared by hand rather than derived, because a folded width of 0 is
+        // a real answer and a derived twin has no way to give it: a number twin
+        // holds zero to mean "nothing to say", so 0 emitted nothing and Foundry
+        // put its own 40 back — which reads as the control being ignored.
+        //
+        // Having a default it cannot defer with `revert-layer`, so the default
+        // *is* Foundry's own 40: an untouched style folds to exactly what an
+        // unstyled journal folds to. What it costs is a game system that sets a
+        // folded width of its own, which this would override. Nothing needs to
+        // be said for silence, because there is nothing a folded panel could
+        // fall back to — the ordinary Panel Width is the width it is not.
+        num("collapsedSidebarWidth", 40, "px", 0, 200, 5),
+        // Let the folded panel keep nothing but the way out of it.
+        //
+        // The button that unfolds the panel lives inside the panel, so a
+        // folded width small enough to be worth having is small enough to hide
+        // it — and a reader who cannot see the button cannot get the panel
+        // back, since whether it is folded is remembered per reader.
+        //
+        // It cannot simply be moved somewhere roomier: core's `toggleSidebar`
+        // looks the button up *inside* the panel and reads its dataset, so a
+        // button hung anywhere else throws inside core's own handler. It stays
+        // where it is and escapes by painting instead — the panel stops
+        // clipping, everything else in it is put away, and the button is lifted
+        // out of the flow and placed by the two controls below. The panel is
+        // raised as it goes: it isolates, to keep a background picture blending
+        // with its own fill, so nothing inside it can rise above the page
+        // beside it unless the panel itself does.
+        //
+        // Four properties, one switch: two controls saying one thing is what
+        // this module is for avoiding.
+        {
+          type: "toggle", name: "unfoldFloat", default: false, noTwin: true,
+          emit: (on) => (on
+            ? { "": "visible", others: "none", place: "absolute", lift: "1", shrink: "0",
+                contain: "isolate" }
+            : { "": "hidden" })
+        },
+        num("unfoldFloatTop", 0, "px", -40, 600, 1, { noTwin: true }),
+        num("unfoldFloatLeft", 4, "px", -40, 600, 1, { noTwin: true })
+      ] },
       // The edges merge with the corners below into one category, and the copy
       // travels with them: it is declared on the half that survives the merge.
       { id: "border", copyFrom: "page", fields: borderFields("border", { color: "#00000000" }) },
@@ -1217,7 +1295,7 @@ export const GROUPS = [
           // the same part — so the pointed-at rule the generator mirrors for the
           // panel read the entry's color and painted the whole panel with it
           // the moment a pointer entered it.
-          col("entryBackground", "entryGradientFrom", "entryGradientTo", "entryGradientAngle", "entryFrost", "#00000000"), ...gradientFields("entry"), ...frostFields("entry"), ...imageFields("entry"),
+          col("entryBackground", "#00000000"), ...gradientFields("entry"), ...frostFields("entry"), ...imageFields("entry"),
           col("entryHoverBackground", "#00000000"), ...imageFields("entryHover"),
           col("entryActiveBackground", "#00000000"), ...imageFields("entryActive"),
           ...spacingFields("entryPadding", 0, { max: 60 }),
@@ -1258,7 +1336,7 @@ export const GROUPS = [
           ...textStyleField("headingActiveTextStyle", "400", "normal"),
           num("headingActiveOutlineWidth", 0, "px", 0, 20, 0.5),
           col("headingActiveOutlineColor", ""),
-          col("headingBackground", "headingGradientFrom", "headingGradientTo", "headingGradientAngle", "headingFrost", "#00000000"), ...gradientFields("heading"), ...frostFields("heading"), ...imageFields("heading"),
+          col("headingBackground", "#00000000"), ...gradientFields("heading"), ...frostFields("heading"), ...imageFields("heading"),
           col("headingActiveBackground", "#00000000"), ...imageFields("headingActive"),
           ...SIDES.map((side) => col(`headingActiveBorder${side}Color`, "")),
           ...spacingFields("headingPadding", 0, { max: 60 }),
@@ -1293,7 +1371,7 @@ export const GROUPS = [
           select("categoryWrap", "inherit", CHOICES.wrap, { emit: emitWord }),
           select("categoryHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens }),
           select("categoryAlign", "center", CHOICES.alignNoJustify),
-          col("categoryBackground", "categoryGradientFrom", "categoryGradientTo", "categoryGradientAngle", "categoryFrost", "#00000000"), ...gradientFields("category"), ...frostFields("category"), ...imageFields("category"),
+          col("categoryBackground", "#00000000"), ...gradientFields("category"), ...frostFields("category"), ...imageFields("category"),
           // A category is a heading in a list of pages, so it needs room around
           // it as much as it needs lettering — without it the group name sits
           // hard against the first page under it.
@@ -1306,26 +1384,29 @@ export const GROUPS = [
       {
         id: "search",
         fields: [
-          col("searchBackground", "searchGradientFrom", "searchGradientTo", "searchGradientAngle", "searchFrost", "#00000000"), ...gradientFields("search"), ...frostFields("search"), ...imageFields("search"),
+          col("searchBackground", "#00000000"), ...gradientFields("search"), ...frostFields("search"), ...imageFields("search"),
           col("searchColor", "#e7d1b1"),
           col("searchPlaceholderColor", "#8a8a8a"),
           num("searchSize", 14, "px", 6, 40, 1),
           ...borderFields("searchBorder", { width: 1, color: "#00000000" }),
-          ...cornerFields("searchCorner", 4)
+          ...cornerFields("searchCorner", 4),
+          // Room inside the box and around it, on the box itself — the row it
+          // sits in belongs to the small controls beside it as much as to the
+          // box. Foundry gives the input `padding: 0 0.5rem` and no margin of
+          // its own, and those are the defaults: a spacing is four properties
+          // and four properties cannot defer, so anything else would flatten
+          // what core paints.
+          ...spacingFields("searchPadding", { top: 0, right: 8, bottom: 0, left: 8 }, { max: 60 }),
+          ...spacingFields("searchMargin", 0, { min: -40, max: 60 })
         ]
       },
       {
-        id: "buttons",
-        fields: [
-          col("buttonColor", ""),
-          col("buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", ""), ...gradientFields("button"), ...frostFields("button"), ...imageFields("button"),
-          col("buttonBorderColor", ""),
-          col("buttonHoverColor", ""),
-          col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
-          col("buttonHoverBorderColor", "#c9a961"),
-          num("buttonBorderWidth", 1, "px", 0, 12, 1),
-          ...cornerFields("buttonCorner", 4)
-        ]
+        id: "topButtons",
+        fields: panelButtonFields("topButton")
+      },
+      {
+        id: "bottomButtons",
+        fields: panelButtonFields("bottomButton")
       }
     ]
   },
@@ -1361,7 +1442,7 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
+          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -1378,7 +1459,7 @@ export const GROUPS = [
         fields: [
           col("headerButtonColor", "#f7f3e8"),
           col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
+          col("headerButtonBackground", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
@@ -1390,7 +1471,7 @@ export const GROUPS = [
         fields: [
           col("pageButtonColor", "#e7d1b1"),
           col("pageButtonHoverColor", "#ffffff"),
-          col("pageButtonBackground", "pageButtonGradientFrom", "pageButtonGradientTo", "pageButtonGradientAngle", "pageButtonFrost", "#0b0a1380"), ...gradientFields("pageButton"), ...frostFields("pageButton"), ...imageFields("pageButton"),
+          col("pageButtonBackground", "#0b0a1380"), ...gradientFields("pageButton"), ...frostFields("pageButton"), ...imageFields("pageButton"),
           col("pageButtonHoverBackground", "#0b0a13cc"), ...imageFields("pageButtonHover"),
           num("pageButtonSize", 14, "px", 6, 48, 1),
           // No hovered twin for either: where the pencil sits is decided by one
@@ -1680,7 +1761,7 @@ export const GROUPS = [
           DIVIDER, "abbrColor", "abbrLine"
         ],
         fields: [
-          col("highlightBackground", "highlightGradientFrom", "highlightGradientTo", "highlightGradientAngle", "highlightFrost", "#e8c979"), ...gradientFields("highlight"), ...frostFields("highlight"),
+          col("highlightBackground", "#e8c979"), ...gradientFields("highlight"), ...frostFields("highlight"),
           col("highlightColor", "#241b10"),
           col("strikeColor", ""),
           num("strikeThickness", 1, "px", 0, 12, 1),
@@ -1713,7 +1794,7 @@ export const GROUPS = [
           font("codeFont", "monospace"),
           num("codeSize", 0, "px", 0, 120, 1, { zeroAs: "inherit" }),
           col("codeColor", ""),
-          col("codeBackground", "codeGradientFrom", "codeGradientTo", "codeGradientAngle", "codeFrost", "#00000000"), ...gradientFields("code"), ...frostFields("code"), ...imageFields("code"),
+          col("codeBackground", "#00000000"), ...gradientFields("code"), ...frostFields("code"), ...imageFields("code"),
           ...spacingFields("codePadding", { top: 0, right: 4, bottom: 0, left: 4 }, { max: 60 }),
           ...cornerFields("codeCorner"),
           col("codeBorderColor", ""),
@@ -1886,7 +1967,7 @@ export const GROUPS = [
           DIVIDER, "revealedShadowOffsetX", "revealedShadowOffsetY", "revealedShadowBlur",
           "revealedShadowSpread", "revealedShadowColor"
         ],
-        fields: [col("revealedBackground", "revealedGradientFrom", "revealedGradientTo", "revealedGradientAngle", "revealedFrost", "#0035000d"), ...gradientFields("revealed"), ...frostFields("revealed"), ...imageFields("revealed")]
+        fields: [col("revealedBackground", "#0035000d"), ...gradientFields("revealed"), ...frostFields("revealed"), ...imageFields("revealed")]
       },
       {
         id: "text",
@@ -1952,7 +2033,7 @@ export const GROUPS = [
         ],
         fields: [
           col("buttonColor", "#f0f0e0"),
-          col("buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", "#00000000"), ...gradientFields("button"), ...frostFields("button"), ...imageFields("button"),
+          col("buttonBackground", "#00000000"), ...gradientFields("button"), ...frostFields("button"), ...imageFields("button"),
           col("buttonBorderColor", "#8a8a8a"),
           col("buttonHoverColor", "#ffffff"),
           col("buttonHoverBackground", "#00000000"), ...imageFields("buttonHover"),
@@ -2141,9 +2222,9 @@ export const GROUPS = [
           col("summaryColor", "#5e1914"),
           ...textStyleField("summaryTextStyle", "700", "normal"),
           select("summaryCaps", "none", CHOICES.caps, { emit: emitCaps }),
-          col("summaryBackground", "summaryGradientFrom", "summaryGradientTo", "summaryGradientAngle", "summaryFrost", "#00000000"), ...gradientFields("summary"), ...frostFields("summary"), ...imageFields("summary"),
+          col("summaryBackground", "#00000000"), ...gradientFields("summary"), ...frostFields("summary"), ...imageFields("summary"),
           ...spacingFields("summaryPadding", { top: 4, right: 8, bottom: 4, left: 8 }, { max: 60 }),
-          col("collapsibleBackground", "collapsibleGradientFrom", "collapsibleGradientTo", "collapsibleGradientAngle", "collapsibleFrost", "#00000000"), ...gradientFields("collapsible"), ...frostFields("collapsible"),
+          col("collapsibleBackground", "#00000000"), ...gradientFields("collapsible"), ...frostFields("collapsible"),
           col("collapsibleBorderColor", "#8a6a3d"),
           num("collapsibleBorderWidth", 1, "px", 0, 12, 1),
           ...cornerFields("collapsibleCorner", 3),
@@ -2185,7 +2266,7 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "titleBarGradientFrom", "titleBarGradientTo", "titleBarGradientAngle", "titleBarFrost", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
+          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -2202,7 +2283,7 @@ export const GROUPS = [
         fields: [
           col("headerButtonColor", "#f7f3e8"),
           col("headerButtonHoverColor", "#ffffff"),
-          col("headerButtonBackground", "headerButtonGradientFrom", "headerButtonGradientTo", "headerButtonGradientAngle", "headerButtonFrost", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
+          col("headerButtonBackground", "#00000000"), ...gradientFields("headerButton"), ...frostFields("headerButton"), ...imageFields("headerButton"),
           col("headerButtonHoverBackground", "#00000000"), ...imageFields("headerButtonHover"),
           num("headerButtonSize", 14, "px", 6, 48, 1),
           ...borderFields("headerButtonBorder", { color: "#00000000" }),
@@ -2216,7 +2297,7 @@ export const GROUPS = [
       {
         id: "toolbar",
         fields: [
-          col("toolbarBackground", "toolbarGradientFrom", "toolbarGradientTo", "toolbarGradientAngle", "toolbarFrost", ""), ...gradientFields("toolbar"), ...frostFields("toolbar"), ...imageFields("toolbar"),
+          col("toolbarBackground", ""), ...gradientFields("toolbar"), ...frostFields("toolbar"), ...imageFields("toolbar"),
           ...borderFields("toolbarBorder", { color: "#00000000" }),
           ...cornerFields("toolbarCorner", 6),
           ...spacingFields("toolbarPadding", 8, { max: 60 })
@@ -2228,7 +2309,7 @@ export const GROUPS = [
           col("toolbarColor", ""),
           col("toolbarHoverColor", ""),
           num("toolbarSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
-          col("toolbarButtonBackground", "toolbarButtonGradientFrom", "toolbarButtonGradientTo", "toolbarButtonGradientAngle", "toolbarButtonFrost", ""), ...gradientFields("toolbarButton"), ...frostFields("toolbarButton"), ...imageFields("toolbarButton"),
+          col("toolbarButtonBackground", ""), ...gradientFields("toolbarButton"), ...frostFields("toolbarButton"), ...imageFields("toolbarButton"),
           col("toolbarButtonHoverBackground", "#00000000"),
           ...borderFields("toolbarButtonBorder", { color: "#00000000" }),
           ...cornerFields("toolbarButtonCorner", 4),
@@ -2249,7 +2330,7 @@ export const GROUPS = [
           col("dropdownColor", ""),
           col("dropdownHoverColor", ""),
           ...textStyleField("dropdownTextStyle", "inherit", "inherit", { inherit: true }),
-          col("dropdownBackground", "dropdownGradientFrom", "dropdownGradientTo", "dropdownGradientAngle", "dropdownFrost", "#00000000"), ...gradientFields("dropdown"), ...frostFields("dropdown"), ...imageFields("dropdown"),
+          col("dropdownBackground", "#00000000"), ...gradientFields("dropdown"), ...frostFields("dropdown"), ...imageFields("dropdown"),
           col("dropdownHoverBackground", "#00000000"),
           ...borderFields("dropdownBorder", { color: "#00000000" }),
           ...cornerFields("dropdownCorner", 4),
@@ -2266,7 +2347,7 @@ export const GROUPS = [
           // until it is given something of its own: a size or a color set under
           // Page Settings wins, and one left alone takes what the strip says.
           ...textFields("settingsBar"),
-          col("settingsBarBackground", "settingsBarGradientFrom", "settingsBarGradientTo", "settingsBarGradientAngle", "settingsBarFrost", "#00000000"), ...gradientFields("settingsBar"), ...frostFields("settingsBar"), ...imageFields("settingsBar"),
+          col("settingsBarBackground", "#00000000"), ...gradientFields("settingsBar"), ...frostFields("settingsBar"), ...imageFields("settingsBar"),
           ...borderFields("settingsBarBorder", { color: "#00000000" }),
           ...cornerFields("settingsBarCorner"),
           ...spacingFields("settingsBarPadding", 0, { max: 60 }),
@@ -2280,7 +2361,7 @@ export const GROUPS = [
       {
         id: "dropdownList",
         fields: [
-          col("listBackground", "listGradientFrom", "listGradientTo", "listGradientAngle", "listFrost", "#00000000"), ...gradientFields("list"), ...frostFields("list"), ...imageFields("list"),
+          col("listBackground", "#00000000"), ...gradientFields("list"), ...frostFields("list"), ...imageFields("list"),
           ...borderFields("listBorder", { color: "#00000000" }),
           ...cornerFields("listCorner"),
           ...spacingFields("listPadding", 0, { max: 40 })
@@ -2293,7 +2374,7 @@ export const GROUPS = [
           num("itemSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
           col("itemColor", ""),
           ...textStyleField("itemTextStyle", "inherit", "inherit", { inherit: true }),
-          col("itemBackground", "itemGradientFrom", "itemGradientTo", "itemGradientAngle", "itemFrost", "#00000000"), ...gradientFields("item"), ...frostFields("item"),
+          col("itemBackground", "#00000000"), ...gradientFields("item"), ...frostFields("item"),
           ...cornerFields("itemCorner"),
           ...spacingFields("itemPadding", 0, { max: 40 }),
           // The line core draws between the runs of entries.
@@ -2309,7 +2390,7 @@ export const GROUPS = [
           num("fieldSize", 0, "px", 0, 40, 1, { zeroAs: "inherit" }),
           col("fieldColor", ""),
           ...textStyleField("fieldTextStyle", "inherit", "inherit", { inherit: true }),
-          col("fieldBackground", "fieldGradientFrom", "fieldGradientTo", "fieldGradientAngle", "fieldFrost", ""), ...gradientFields("field"), ...frostFields("field"), ...imageFields("field"),
+          col("fieldBackground", ""), ...gradientFields("field"), ...frostFields("field"), ...imageFields("field"),
           ...borderFields("fieldBorder", { width: 1, color: "#00000000" }),
           ...cornerFields("fieldCorner", 4),
           ...spacingFields("fieldPadding",
@@ -2526,6 +2607,12 @@ export function hoverNameFor(name) {
 /** Whether a name is the hovered twin of some other control. */
 function isHoverName(name) {
   return /^hover[A-Z]/.test(name);
+}
+
+/** Whether a name belongs to any state rather than to the ordinary control. */
+function isStateName(name) {
+  return /^(hover|active|collapsed)[A-Z]/.test(name)
+    || /(Hover|Active|Collapsed)[A-Z]/.test(name);
 }
 
 /**
@@ -2823,9 +2910,10 @@ const LAYOUTS = {
   },
   sidebar: {
     order: ["layout", "background", "gradientFrom", "gradientTo", "gradientAngle", "padding", "border", "category", "number", "entries",
-      "subHeadings", "search", "buttons"],
+      "subHeadings", "search", "topButtons", "bottomButtons"],
     layout: { order: [
-      "sidebarWidth"
+      "sidebarWidth", "collapsedSidebarWidth", DIVIDER,
+      "unfoldFloat", "unfoldFloatTop", "unfoldFloatLeft"
     ] },
     background: { label: "ILLUMINUS.Sections.fillAndImage.label", hint: "ILLUMINUS.Sections.fillAndImage.hint", order: [
       "background", "gradientFrom", "gradientTo", "gradientAngle", "frost", DIVIDER, "texture", "textureFit", "texturePosition", "textureBlend",
@@ -2919,17 +3007,29 @@ const LAYOUTS = {
       "searchBorderLeftStyle", "searchBorderLeftColor", "searchBorderLeftWidth", DIVIDER,
       "searchBorderRightStyle", "searchBorderRightColor", "searchBorderRightWidth", DIVIDER,
       "searchCornerTopLeft", "searchCornerTopRight", "searchCornerBottomLeft",
-      "searchCornerBottomRight", "searchCornerTopLeftShape", "searchCornerTopRightShape", "searchCornerBottomLeftShape", "searchCornerBottomRightShape"
+      "searchCornerBottomRight", "searchCornerTopLeftShape", "searchCornerTopRightShape", "searchCornerBottomLeftShape", "searchCornerBottomRightShape", DIVIDER,
+      "searchPaddingTop", "searchPaddingRight", "searchPaddingBottom", "searchPaddingLeft",
+      "searchMarginTop", "searchMarginRight", "searchMarginBottom", "searchMarginLeft"
     ] },
-    buttons: { order: [
-      "buttonColor", "buttonBorderColor", DIVIDER, "buttonBackground", "buttonGradientFrom", "buttonGradientTo", "buttonGradientAngle", "buttonFrost", DIVIDER,
-      "buttonTexture", "buttonTextureFit", "buttonTexturePosition", "buttonTextureBlend",
-      "buttonTextureOpacity", "buttonTextureBlur", "buttonTextureBrightness", "buttonTextureContrast", "buttonTextureSaturation", "buttonTextureAge", DIVIDER, "buttonInnerShadowOffsetX", "buttonInnerShadowOffsetY",
-      "buttonInnerShadowBlur", "buttonInnerShadowSpread", "buttonInnerShadowColor", DIVIDER,
-      "buttonShadowOffsetX", "buttonShadowOffsetY", "buttonShadowBlur", "buttonShadowSpread",
-      "buttonShadowColor", DIVIDER, "buttonCornerTopLeft", "buttonCornerTopRight",
-      "buttonCornerBottomLeft", "buttonCornerBottomRight", "buttonCornerTopLeftShape", "buttonCornerTopRightShape", "buttonCornerBottomLeftShape", "buttonCornerBottomRightShape", "buttonBorderWidth", DIVIDER
-    ] },
+    // One order for both sets, as the controls themselves are one definition.
+    // The prefix already ends in the word, so a name is the prefix and what
+    // follows it: `topButton` + `Color`.
+    ...Object.fromEntries(["topButton", "bottomButton"].map((prefix) => [`${prefix}s`, { order: [
+      `${prefix}Color`, `${prefix}BorderColor`, DIVIDER,
+      `${prefix}Background`, `${prefix}GradientFrom`, `${prefix}GradientTo`, `${prefix}GradientAngle`, `${prefix}Frost`, DIVIDER,
+      `${prefix}Texture`, `${prefix}TextureFit`, `${prefix}TexturePosition`, `${prefix}TextureBlend`,
+      `${prefix}TextureOpacity`, `${prefix}TextureBlur`, `${prefix}TextureBrightness`, `${prefix}TextureContrast`,
+      `${prefix}TextureSaturation`, `${prefix}TextureAge`, DIVIDER,
+      `${prefix}InnerShadowOffsetX`, `${prefix}InnerShadowOffsetY`, `${prefix}InnerShadowBlur`,
+      `${prefix}InnerShadowSpread`, `${prefix}InnerShadowColor`, DIVIDER,
+      `${prefix}ShadowOffsetX`, `${prefix}ShadowOffsetY`, `${prefix}ShadowBlur`, `${prefix}ShadowSpread`,
+      `${prefix}ShadowColor`, DIVIDER,
+      `${prefix}CornerTopLeft`, `${prefix}CornerTopRight`, `${prefix}CornerBottomLeft`, `${prefix}CornerBottomRight`,
+      `${prefix}CornerTopLeftShape`, `${prefix}CornerTopRightShape`, `${prefix}CornerBottomLeftShape`, `${prefix}CornerBottomRightShape`,
+      `${prefix}BorderWidth`, DIVIDER,
+      `${prefix}PaddingTop`, `${prefix}PaddingRight`, `${prefix}PaddingBottom`, `${prefix}PaddingLeft`,
+      `${prefix}MarginTop`, `${prefix}MarginRight`, `${prefix}MarginBottom`, `${prefix}MarginLeft`
+    ] }])),
   },
   window: {
     order: ["frameSize", "frame", "titleBar", "headerButtons", "pageButton"],
@@ -3194,7 +3294,7 @@ export const SPLIT = {
     { id: "sidebarHeadings", icon: "fa-solid fa-list-tree", sections: ["subHeadings"] },
     { id: "sidebarCategories", icon: "fa-solid fa-folder", sections: ["category"] },
     { id: "sidebarSearch", icon: "fa-solid fa-magnifying-glass", sections: ["search"] },
-    { id: "sidebarButtons", icon: "fa-solid fa-square-caret-down", sections: ["buttons"] },
+    { id: "sidebarButtons", icon: "fa-solid fa-square-caret-down", sections: ["topButtons", "bottomButtons"] },
     { id: "sidebarNumbers", icon: "fa-solid fa-hashtag", sections: ["number"] }
   ],
   editor: [
@@ -3406,7 +3506,13 @@ for (const group of GROUPS) {
   if (group.order) group.order = group.order.filter((id) => id !== "corners");
 }
 
-const SELECTED_SECTIONS = new Set(["sidebarEntries.entries", "sidebarHeadings.subHeadings"]);
+// A search box's third state is the one it is in while somebody is typing in
+// it, which is what Selected means for a control rather than for a row in a
+// list. The sample's search box is a real input, so it shows this the moment it
+// is clicked — no state has to be faked for it.
+const SELECTED_SECTIONS = new Set([
+  "sidebarEntries.entries", "sidebarHeadings.subHeadings", "sidebarSearch.search"
+]);
 
 for (const group of GROUPS) {
   for (const section of group.sections) {
@@ -3459,7 +3565,7 @@ const SECTION_ORDER = [
   "tableCaption", "caption", "media", "collapsible", "revealed",
   "revealButton", "dividers", "fold",
   // The contents panel, then the window
-  "number", "entries", "subHeadings", "category", "search", "buttons",
+  "number", "entries", "subHeadings", "category", "search", "topButtons", "bottomButtons",
   "frame", "frameSize", "titleBar", "headerButtons", "pageButton", "toolbar"
 ];
 
@@ -3473,7 +3579,47 @@ const SECTION_ORDER = [
  * identical wherever they appear, and are left out.
  */
 /** Whether a name belongs to a state rather than to the ordinary control. */
-const stateNamed = (name) => /^(hover|active)|(Hover|Active)(?=[A-Z])/.test(name);
+const stateNamed = (name) =>
+  /^(hover|active|collapsed)|(Hover|Active|Collapsed)(?=[A-Z])/.test(name);
+
+/**
+ * The contents panel answers to being folded away, in every part of it.
+ *
+ * Unlike pointed-at and selected, this is a state of the *whole panel* rather
+ * than of a row inside it: Foundry shrinks the panel to a strip, hides the
+ * search box, the page titles and the Create button, and swaps each category's
+ * name for an icon. What is left is worth styling on its own terms — and a
+ * style could say nothing whatever about it before, beyond a width.
+ *
+ * Every part inside the panel takes part, and nothing outside it does, because
+ * nowhere else in a journal is folded away. The width is the reason the state
+ * pays for itself twice over: the Collapsed state's Panel Width *is* the folded
+ * width, so the one control answers the one question under both states rather
+ * than standing beside itself under another name.
+ *
+ * Derived last, after the pointed-at and selected twins, so a state never
+ * shadows a state: there is no folded-and-pointed-at.
+ */
+const COLLAPSED_GROUPS = new Set(GROUPS.filter((group) => /^sidebar/.test(group.id))
+  .map((group) => group.id));
+
+for (const group of GROUPS) {
+  if (!COLLAPSED_GROUPS.has(group.id)) continue;
+  for (const section of group.sections) {
+    const taken = new Set(section.fields.map((field) => field.name));
+    for (const original of section.fields.filter((field) =>
+      !isStateName(field.name) && !field.chrome && !field.noTwin)) {
+      const folded = stateNameFor("collapsed", original.name);
+      // Both spellings, as everywhere else: a part may state a folded control
+      // of its own one day, and one control per thing is the point.
+      const own = original.name.match(/^[a-z]+(?=[A-Z])/)?.[0] ?? "";
+      const infix = own ? `${own}Collapsed${original.name.slice(own.length)}` : folded;
+      if (taken.has(folded) || taken.has(infix)) continue;
+      taken.add(folded);
+      section.fields.push(stateTwin(original, folded, "collapsed"));
+    }
+  }
+}
 
 const FIELD_ORDER = {
   text: [
@@ -3492,7 +3638,7 @@ const FIELD_ORDER = {
     "innerShadowColor"
   ],
   layout: [
-    "shown", "float", "width", "maxWidth", "sidebarWidth", "align", "clear",
+    "shown", "float", "width", "maxWidth", "sidebarWidth", "collapsedSidebarWidth", "unfoldFloat", "unfoldFloatTop", "unfoldFloatLeft", "align", "clear",
     "flip", "pictureShape", "pictureCrop", "pictureFrom",
     "opacity", "indent", "itemSpacing", "whenEmpty"
   ],
@@ -3586,8 +3732,8 @@ for (const group of GROUPS) {
       // Already placed.
     } else if (order) {
       for (const field of section.fields) {
-        // A hovered control is placed against its own below, not by this list.
-        if (order.includes(field.name) || isHoverName(field.name)) continue;
+        // A state's control is placed against its own below, not by this list.
+        if (order.includes(field.name) || isStateName(field.name)) continue;
         throw new Error(`${group.id}.${section.id}: "${field.name}" has no place in FIELD_ORDER.${section.id}`);
       }
       section.fields.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
@@ -3619,7 +3765,8 @@ for (const group of GROUPS) {
     // Both spellings of a state occur — `hoverColor` and `buttonHoverColor` —
     // so the word is taken out wherever it sits.
     const stemOf = (name) => {
-      const stripped = name.replace(/^(hover|active)/, "").replace(/(Hover|Active)(?=[A-Z])/, "");
+      const stripped = name.replace(/^(hover|active|collapsed)/, "")
+        .replace(/(Hover|Active|Collapsed)(?=[A-Z])/, "");
       if (stripped === name || !stripped) return name;
       return stripped[0].toLowerCase() + stripped.slice(1);
     };
@@ -3631,7 +3778,7 @@ for (const group of GROUPS) {
       // for it; one without a counterpart stands where it is.
       if (stem !== field.name && has.has(stem)) continue;
       ordered.push(field);
-      for (const state of ["hover", "active"]) {
+      for (const state of ["hover", "active", "collapsed"]) {
         const twin = section.fields.find((other) =>
           other.name !== field.name && stemOf(other.name) === field.name
           && new RegExp(`^${state}|${state[0].toUpperCase()}${state.slice(1)}`).test(other.name));
@@ -3667,7 +3814,13 @@ for (const group of GROUPS) {
     const from = GROUPS.find((candidate) => candidate.id === section.copyFrom);
     if (!from) throw new Error(`${group.id}.${section.id}: nothing called "${section.copyFrom}" to copy from`);
     const theirs = new Set(groupFields(from).map((field) => field.name));
-    const missing = section.fields.find((field) => !theirs.has(field.name));
+    // A state the source part does not have is not a gap in the copy. The page
+    // is never folded away, so the panel's Collapsed controls have nothing on
+    // the page to answer to, and Copy from Page leaves them where they are —
+    // which is right: what a folded panel looks like is not what a page looks
+    // like. Every ordinary control must still be there, which is the check.
+    const missing = section.fields.find((field) =>
+      !stateNamed(field.name) && !theirs.has(field.name));
     if (missing) {
       throw new Error(`${group.id}.${section.id}: "${missing.name}" is not on ${from.id}, so it cannot be copied from it`);
     }
@@ -3746,6 +3899,18 @@ export function cleanSettings(settings) {
       const asString = String(value);
       if (!field.choices.includes(asString)) continue;
       coerced = asString;
+    } else if (field.type === "color") {
+      // A color is a color or it is nothing. Twenty-three fills once defaulted
+      // to the *name* of the control beside them — `col` takes a default, and
+      // they had been written as though it took the companion fields too — and
+      // a stored value of "buttonGradientFrom" is a defined custom property
+      // holding nonsense, which makes its declaration invalid at computed-value
+      // time. That is not the same as absent: the property falls back to its
+      // initial value rather than to whatever Foundry painted, so those fills
+      // could never leave core's own alone. Dropping what is not a color here
+      // means a style saved under the old defaults is cleaned as it loads.
+      coerced = String(value);
+      if (coerced && !coerced.startsWith("#")) continue;
     } else {
       coerced = String(value);
     }

@@ -259,6 +259,40 @@ These are all load-bearing and none are obvious from the code.
   picker. The overlay is positioned from the input's measured rect, because the color
   element's internal spacing is not ours to assume — aligning to the row's edge left it
   five pixels off its click target.
+- **Core owns `::after` on a folded category, which is the one exception to the
+  rule below.** Foundry draws a folded category's name as a glyph in
+  `li.category::after` — `content: "\f219"`, `display: block`,
+  `line-height` — and that block is also what gives the row its height once the
+  name itself is hidden. A picture layer there set `content: ""` and
+  `position: absolute`, which erased the glyph *and* took the row's height with
+  it: it collapsed to the height of its own borders, so a style that painted the
+  category drew a short bar across the folded panel with no name against it.
+  Reported as "a stray yellow mark", which is exactly what it looked like, and
+  invisible until somebody folded a styled panel. That layer rides on `::before`
+  instead (`on: "::before"` in `IMAGE_LAYERS`), which is free on that element in
+  both states. Note the conflict is no longer *observable*, since a folded panel
+  now hides its rows outright — the layer stays off `::after` because the clash
+  is real whether or not anything currently shows it, and moving it back would
+  reintroduce a fault nobody could see until the hiding was revisited. There is
+  no check guarding it for exactly that reason: a check asserting something no
+  person can see is a check that will one day be deleted as noise, and this note
+  is the better keeper of it. The general lesson: before hanging a layer on an element, check
+  what *core* already draws in both of its pseudo-elements — the rule below says
+  `::before` is spoken for, and this says the answer is per element, not global.
+  A row whose height comes from a pseudo-element is the part that makes it
+  expensive: erasing the content silently removes the box as well.
+- **A folded panel lists nothing, and that is a rule rather than a value.**
+  Foundry replaces a folded category's name with a glyph in the row's own
+  `content` and lists every page as a strip of numbers, so "nothing but the
+  buttons" is unreachable by any color, spacing or edge — which is the compiler
+  emitting values alone, working as intended. It was briefly a `Shown` toggle
+  per row kind; with no choice left to offer it belongs in the stylesheet, and
+  the schema is smaller for it. Two things survive from the attempt: hide the
+  **rows**, never the list, because `.toc` carries `flex: 1` and hiding it pulls
+  the footer buttons up under the search row; and had it stayed a control, its
+  **on** value would have had to be what core lays the row out as (`list-item`
+  for a category, `flex` for a page), since an unset `display` computes to
+  `inline` and runs every entry into one line.
 - **FontAwesome owns `::before`.** An icon is a glyph in that pseudo-element's `content`,
   so a background layer rule setting `content: ""` erases the icon on every button it
   touches — the button keeps its fill, which reads as "the icon color does not work"
@@ -296,6 +330,43 @@ These are all load-bearing and none are obvious from the code.
   `rgb(53 0 121 / 5%)` and a revealed one `rgb(0 53 0 / 5%)`, and a new style ships
   both — so "nothing happens when I click Reveal" is usually the toggle working and
   the difference being invisible. Measure the two fills before believing otherwise.
+- **The button that unfolds the contents panel cannot leave the panel.**
+  `toggleSidebar()` finds it with `sidebar.querySelector(".collapse-toggle")`
+  and then reads `button.dataset`, so a button hung anywhere else throws inside
+  core's own handler — which rules out the Edit pencil's fix, the obvious one to
+  reach for, since this is the same shape of problem: the thing that undoes a
+  state is trapped inside what the state shrinks. It escapes by *painting*
+  instead, which takes four properties and therefore one control emitting four:
+  the panel stops clipping, the panel is lifted (it carries `isolation:
+  isolate` for its background picture, so nothing inside it can rise above the
+  page beside it unless the panel itself does), everything else the folded panel
+  still draws is put away — a 0-wide panel with `overflow: visible` otherwise
+  spills its footer buttons across the page — and the button leaves the flow to
+  be placed by controls of its own. Note `toggleSidebar` also *reads* both width
+  variables and resizes the window by the difference, so the collapsed width is
+  arithmetic as well as appearance. Two more that each cost a round:
+  - **A folded width of 0 is not 0.** The panel is a flex item, and a flex
+    item's automatic minimum size is its content's — so `flex-basis: 0` leaves
+    it as wide as the narrowest thing inside it, measured at 16px, which is the
+    search row's own left and right padding. It wants `min-width: 0`, the same
+    trap as `minmax(0, 1fr)`.
+  - **Lifting the panel is not enough on its own.** The page area is
+    `position: relative` with no z-index, so it makes no stacking context and
+    everything positioned inside it competes directly with the panel beside it.
+    The journal's own header is `z-index: 1` — ours, because the title's
+    background picture rides on it — which ties with the lifted panel and wins
+    on document order, putting the way back *underneath the journal's name*. The
+    page area has to be contained (`isolation: isolate`) so the panel clears all
+    of it at once; beating the header with a 2 would be a coincidence, not a
+    rule. `elementsFromPoint` reading position, z-index and isolation for every
+    layer at the button's middle is what found it — the reachability check alone
+    said only that something else was on top.
+- **A control emitting several properties keys its suffixes bare.**
+  `cssVarFor` supplies the join, so `{ others: "none" }` gives
+  `--x-collapsed-float-others` and `{ "-others": "none" }` gives
+  `--x-collapsed-float--others`, which validate [1] reports from both ends at
+  once — as a variable the stylesheet reads and nothing emits, *and* one the
+  schema emits and nothing reads. Two complaints, one typo.
 - **Render hooks fire for the whole inheritance chain.** `renderJournalEntrySheet` fires
   for system subclasses too, so hooking the core class is enough.
 - **An ApplicationV2 part template must have exactly one root element.** More than one
@@ -883,6 +954,35 @@ wins. The wider fix would be to carry `sheet journal-entry application` on the
 preview frame so every core rule applies, as the export already does — untried,
 and it would want the whole preview stylesheet re-checked.
 
+**The editor's own form reaches inside the sample.** The pane sits in the
+editor's `.standard-form`, and core states `--button-size: var(--input-height)`
+for every button in one — a rule a real journal's buttons never match, because a
+journal is not a form. It drew the contents panel's footer buttons 32px against
+a journal's 28, and it would reach any button a mock grows later. The sample's
+buttons are handed Foundry's own default back (`2em`), excepting the two classes
+core sizes by hand: `.inline-control` states 24px and `.header-control` 1.5rem,
+and both already win in a journal. The wider point is that the editor is an
+application with opinions about forms, and the sample is inside it — anything
+the mock grows wants checking against a real journal rather than against how it
+looks.
+
+**A rectangle of 0 with every computed value right means an ancestor is
+`display: none`.** The pane swaps in a mock of the contents panel only while the
+panel is the open part, so measuring anything in it while another part is open
+reads a hidden tree: `getComputedStyle` answers 24px and `getBoundingClientRect`
+answers 0. It reads as the rule having been deleted. Switch the part first
+(`changeTab`), and pick the mock that has `getClientRects().length` rather than
+the first one in the markup — there is more than one `.journal-sidebar` in the
+editor.
+
+**A sample that approximates core drifts by a different amount per style, which
+is why it reads as "slightly off" rather than as a fixed error.** The panel's
+rows stated a gap in `rem` and a button in `em` where Foundry states `8px` and
+`24px` — so the buttons tracked the style's lettering in the sample and stayed
+put in a journal. Four of them, found by eye. `[95]` measures six lengths in
+both and asserts they agree, which is the assertion worth writing whenever the
+sample restates something core already says.
+
 **Measure the sample at life size, or not at all.** It sits inside a `zoom`,
 and two things follow that make a reading at any other setting a lie. A length
 is laid out, snapped to whole device pixels, and reported back divided by the
@@ -1370,6 +1470,47 @@ back to the ordinary value instead of painting nothing. A control that belongs t
 list rather than to a row in it says `noSelected: true` — the sub-headings' Indent is
 the one.
 
+**A state need not be a state of an element — the panel is folded as a whole.**
+Pointed-at and selected are states of a row; Folded is a state of the contents
+panel, and every part inside it takes part (411 controls, `COLLAPSED_GROUPS`).
+The mirror already allowed for it: `pointedRules` takes a twin table and a
+selector rewrite, so `folded()` prefixes `:not(.expanded)` onto the sheet root
+rather than appending a pseudo-class, which is a class's worth of specificity
+and therefore wins over the ordinary rule it was written from. It is gated on
+`.journal-sidebar`, because nothing else in a journal folds and mirroring the
+whole file would double the stylesheet to say nothing. Four things cost a round
+each, and three are general:
+
+- **Adding a state word means teaching six places, not one.** `STATES` in
+  `run-names.mjs`, `stateNamed` and `stemOf` and the state-ranking loop and the
+  order-check exemption in the schema, three regexes in `generate-lang.mjs`, and
+  check [14] in `validate.mjs`. Each fails loudly except the lang ones, which
+  fail *quietly* by treating a twin as an ordinary control with a duplicate
+  label — the "Term Term Color" bug, already recorded above.
+- **A control already named for the new word stops being a control.** The three
+  settings placing the floating unfold button were `collapsedFloat…`, which
+  `stateOf` then read as folded controls. They are `unfoldFloat…`, and the
+  lesson is to check existing names before adopting a state word.
+- **A section's own `order` and a `copyFrom` both have to let a state through.**
+  The order check throws on any control it does not name, and `copyFrom`
+  requires every control to exist on the source part — the page is never folded,
+  so the panel's Folded controls have nothing there to answer to. Both exempt
+  state controls now; the `copyFrom` one still holds every *ordinary* control.
+- **A value core's JavaScript reads cannot live inside the state's rule.**
+  `toggleSidebar` asks for both widths and resizes the window by the difference,
+  while the panel is still expanded — so the folded width is read on the base
+  rule (`--sidebar-width-collapsed: var(--ill-sidebar-collapsed-sidebar-width)`),
+  not inside a `:not(.expanded)` one. A state's *variable* is emitted always;
+  only the rule reading it is conditional, and that is what makes this possible.
+
+**`expanded` belongs on the preview frame, not only on the window mock inside
+it.** The frame is the `.illuminus-styled` element, so `.illuminus-styled:not(.expanded)`
+matched the sample every moment of its life — a rule written for a folded panel
+was permanently on there while being correct in a journal. The frame carries
+`expanded` as a journal's own root does, and `#showFolded` takes it off both
+that and the window mock when a Folded control is the one being set. Anything
+keyed on a class Foundry puts on the *sheet root* wants the same check.
+
 **The contents panel's Selected heading is the module's own mark.** Foundry marks the page
 being read and nothing finer, so `scripts/toc-current.mjs` marks the listed heading a
 reader clicked — under the same three rules as the folding markers: nothing stored,
@@ -1613,6 +1754,27 @@ picture's own shape, which is what a journal does now) and `object-fit` to
 `cover`, because a named shape the picture is squashed into was not what was
 asked for. And a browser answers `object-position: top` as `50% 0%`, so a check
 must read what it says rather than what was written.
+
+**A state is spelled two ways, and a run keyed on the spelling is drawn
+twice.** `activeHeadingBorderTopWidth` where the twin was derived,
+`headingActiveBorderTopColor` where the schema states it by hand — the same
+family in the same state, and `boxPartOf` keyed on the prefix as written, so it
+came out as two families and the editor drew two runs with one name between
+them. Sub-Headings showed two "Edges and Corners" under Selected, one holding
+the widths and the other the colors. `oneSpelling()` puts the state word at the
+front before the family is keyed. Two things worth keeping:
+
+- **`boxPartOf` and `clusterPartOf` live in `scripts/run-names.mjs`** so the
+  editor and `validate.mjs` read a name the same way. Check [16] used to carry a
+  *copy* of their regexes, and the copy had already drifted — it still looked
+  for a single `cornerShape` after each corner grew one of its own, so four
+  controls the editor gathers were counted there as loose ones. A checker that
+  reimplements what it checks will eventually check something else.
+- **Check [16] only ever compared the loose runs**, never the gathered ones, so
+  nothing could have caught this. It now also refuses two gathered families that
+  share a stem and a state. Reported per *family*: four controls collide for
+  every one family that splits, and "4 families" sends somebody looking for
+  three more that are not there.
 
 **Anything added to a family must be added to the run that gathers it.** `clusterPartOf`
 matched five picture parts by name; the five new ones fell outside it and were drawn as

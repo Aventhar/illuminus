@@ -19,6 +19,65 @@ Two conventions worth knowing before you read it:
 
 ### Added
 
+- **The contents panel can be styled folded as well as open.** A third state
+  beside Normal and Hovered — **Folded** — on the panel and every part inside
+  it, four hundred and eleven controls in all: its fill, its picture, its edges
+  and corners and spacing, its entries, its categories, its search box, both
+  sets of buttons, its page numbers. Foundry shrinks the panel to a strip, hides
+  the search box and the page titles, and swaps each category's name for an
+  icon; a style could say nothing whatever about any of that before. An unset
+  Folded control falls through to the ordinary one, so a style that has not
+  asked for it looks exactly as it did.
+- **How wide the folded panel is, is the Panel Width under that state** — one
+  control answering one question under both states rather than standing beside
+  itself under a second name. Foundry's own folded width is 40.
+- **The sample folds itself** while a Folded control is the one being set, so
+  what the state does can be seen while it is being chosen.
+- **Unfold Button Floats**, which is what makes a width of 0 honest. Switched on,
+  the folded panel keeps nothing but the button that unfolds it, floating over
+  the page where two settings of its own place it. The button cannot simply be
+  moved somewhere roomier — core looks it up inside the panel and would throw —
+  so it escapes by painting: the panel stops clipping and is lifted above the
+  page, everything else in it is put away, and the button leaves the flow. One
+  switch writes all four, because two controls saying one thing is the thing
+  this module exists to avoid. With it on, the folded width may honestly be 0:
+  the panel disappears and the button remains.
+- **The search box says when it is being typed in.** A Selected state in full —
+  fifty-six controls, derived by the same mirror that gives a listed page one —
+  where before the box looked the same whether or not the cursor was in it. For
+  a control rather than a row in a list, Selected is the state it is in while
+  somebody uses it, so the rules read `:focus`. The Live Sample's search box is
+  a real input, so clicking it shows the state with nothing faked.
+- **The search box has room inside it and around it.** Inner and Outer Spacing
+  on the Sidebar's Search Box, with Foundry's own defaults — `0 0.5rem` inside
+  the box and nothing outside it. On the box itself rather than the row it sits
+  in, since that row belongs to the controls beside it as much as to the box.
+- **The panel's buttons are two sets, not one.** Foundry draws them
+  differently — the small controls beside the search box come with no fill and
+  no edge, the three at the foot are ordinary buttons — and a single set of
+  controls could not say what a journal already does. Top Buttons and Bottom
+  Buttons now, forty-four controls each, written by one definition so they
+  cannot drift apart. A style saved before this keeps exactly the look it had:
+  whatever it said about the buttons it now says about both. Schema version 14.
+- **Removing a saved color asks first.** A palette is built up over a whole
+  style and there is no putting one back, so the one irreversible thing in the
+  color picker now says which color it is about — by name where it has one — and
+  waits. Both ways in ask: the cross that appears under the pointer and the
+  Delete key on a focused swatch, since a warning on one of them is not a
+  warning. Answering with Escape means "keep it" and no longer closes the picker
+  along with the question.
+- **The panel's buttons have room inside them and around them.** Inner and
+  Outer Spacing on the Sidebar's Panel Buttons, drawn as the box every other
+  part's spacing is. The defaults are Foundry's own, read from its stylesheet
+  rather than guessed — `0 0.5rem` inside a button and nothing outside — because
+  a spacing is four properties and four properties cannot defer to whatever
+  painted them, so a default of nothing would have flattened what Foundry draws.
+- **A category no longer folds, and its name stays where you can see it.** The
+  name and the answers about the whole category — which state it is showing,
+  Match, Reset, Copy from Page — are one block held against the top of the
+  settings while its controls scroll past. Folding the category you are working
+  in only ever hid the controls you came for; the runs inside it still fold, and
+  Fold Everything now means those.
 - **The sample fills its pane at every zoom.** Above 100% it shrank into the
   top-left corner instead of magnifying — a percentage inside a zoomed box
   already resolves in that box's own units, and it was being divided by the zoom
@@ -32,7 +91,6 @@ Two conventions worth knowing before you read it:
   journal itself is, so a setting can be judged against the real thing. It
   starts at 75%, which is what you have been looking at all along, and the
   slider runs from 25% since the old floor of 50% meant 37.5%.
-
 - **The contents panel's sample shows what a contents panel actually holds.**
   Foundry draws four small controls beside the search box — a lock, the view
   mode, the search mode, and the button that folds the panel away — and three at
@@ -44,7 +102,6 @@ Two conventions worth knowing before you read it:
   a window's, which is also how the buttons became visible at all: the panel
   stands beside a whole page and is some two thousand pixels tall, so its foot
   had been sitting far below anything anybody could scroll to.
-
 - **A caption has room on every side.** A table's caption and a picture's each
   had a single gap — one holding the table off it, one holding it off the
   picture — and no way to move it anywhere else. Both have a proper Outer
@@ -52,7 +109,6 @@ Two conventions worth knowing before you read it:
   parts that have a caption. A style saved before this keeps the gap it had:
   the number it stored becomes the side it used to be, under it for a table and
   above it for a picture. Schema version 13.
-
 - **A table can be sized to what it holds.** Width Fits sits beside Width on
   every table and its five treatments: leave it following the Width, shrink the
   table to exactly what its contents need with every cell on one line, or
@@ -60,7 +116,6 @@ Two conventions worth knowing before you read it:
   throughout: the width above gave 500 pixels, the contents 290 on a single
   line, the narrowest 48 over eight. Left to follow the Width it says nothing
   whatever, so a style that has not touched it is unchanged.
-
 - **A part inside the contents panel or the page editor shows that thing's own
   preview.** Opening the panel or the page editor swapped the Live Sample for a
   mock of it; opening one of the nine parts *inside* them — Page Entries, the
@@ -77,7 +132,6 @@ Two conventions worth knowing before you read it:
   own now. So does the Default Tag, which had the same gap for the same reason:
   the sample carried treated tags and no plain one. A check refuses a part with
   no piece, so a part split out later cannot lose its preview quietly.
-
 - **Every corner can be cut to its own shape.** A corner had a size and a shape,
   but one shape served all four — so a bevel across the two upper corners with
   the two below left square, which is an ordinary shape for a manuscript panel,
@@ -87,7 +141,6 @@ Two conventions worth knowing before you read it:
   on a key of its own, so evening out the sizes leaves the shapes alone. A style
   saved before this keeps exactly the look it had: the one shape it stored is
   given to each of the four corners. Schema version 12.
-
 - **The editor opens the way you left it.** The split between the sample and the
   settings was already remembered; the window's own size was not, so a window
   dragged wider went back to where it started every time it was opened. Both are
@@ -101,7 +154,6 @@ Two conventions worth knowing before you read it:
   which is narrower than the page it stands for; a page of prose at something
   near its real width says more about a style than a wider column of controls
   does.
-
 - **The contents panel can take a category from the page.** Its Fill and its
   Border each carry a Copy from Page button, beside Match and Reset: one press
   fills the whole category — the color, the gradient, the frosting, the picture
@@ -114,7 +166,6 @@ Two conventions worth knowing before you read it:
   every control it holds exists on the page under the same name, which the
   schema checks when it loads rather than the button assuming it — so the
   panel's own width, which the page has no counterpart for, offers nothing.
-
 - **Every part of a category folds now.** A category is laid out in runs — the
   lettering, then how it is set out, then its outline — and until now only the
   runs with a family name to answer to could be shut: a shadow, a picture, a
@@ -256,6 +307,13 @@ Two conventions worth knowing before you read it:
 
 ### Changed
 
+- **A folded contents panel lists nothing.** Foundry keeps the list in a folded
+  panel — every page a strip of its number, every category a small mark — and
+  under a decorative style that reads as debris rather than as navigation. A
+  folded panel now shows its own surface and its buttons, and nothing else. It
+  is settled rather than offered, because the mark a folded category draws is
+  core's own content and no control could reach it. What it costs is Foundry's
+  folded navigation, where a page number can be clicked to jump to that page.
 - **Every treatment family holds five members rather than ten.** Ten meant eight
   nobody used and a full set of settings for each in every style file. Even with
   lists and tables added, the schema came out smaller than before: 8,983 fields
@@ -277,9 +335,6 @@ Two conventions worth knowing before you read it:
 - **Licensed under the GNU GPL v3** rather than MIT, so the module cannot be
   folded into something closed. Anything bundled travels under the same terms,
   which is a narrower gate for artwork than MIT was.
-
-### Changed
-
 - **Nothing is called a tab any more.** The parts of a journal have been a tree
   since the strip of tabs was taken out, and the word survived in nine strings a
   person reads — "Reset Tab", "every setting on this tab" — naming a control
@@ -287,8 +342,41 @@ Two conventions worth knowing before you read it:
   refuses a new one. The word is left where it means a paper tab: a box with
   only its two right-hand corners rounded does look like one.
 
+### Removed
+
+- **The Disable Hovered State switch.** An unset hovered control already changes
+  nothing, so it only ever did something on the four parts that ship real hovered
+  colors — and those are meant to answer the pointer.
+- **Scroll bar controls.** Foundry states `scrollbar-width` and `scrollbar-color`
+  on `*`, and Chromium answers a stated one by drawing the bar itself and ignoring
+  every `::-webkit-scrollbar` rule — so a style could only take the whole bar or
+  leave it, and the bar it drew was a poor thing beside Foundry's.
+
 ### Fixed
 
+- **A folded contents panel no longer draws a stray mark where a category is.**
+  Foundry draws a folded category's name as an icon, and that icon is also what
+  gives the row its height — and this module's background-picture layer was
+  sitting on the same element, erasing it. The row collapsed to the height of
+  its own edges, so any style that painted a category drew a short bar across
+  the folded panel with nothing against it. The category's picture has a layer
+  of its own now, and the icon is Foundry's again.
+- **The Live Sample's button rows are the rows a journal draws.** The search
+  row's spacing, its small controls, the footer's spacing and its chevrons were
+  each approximated — a gap in `rem`, a button in `em` — where Foundry states
+  them in pixels, so they tracked the style's own lettering in the sample and
+  stayed put in a journal. And the editor's form reached inside the sample:
+  core sizes every button in a `.standard-form` from `--input-height`, which a
+  journal's buttons never match, drawing the footer's buttons 32px against a
+  journal's 28. Six lengths, measured in both, now agree exactly.
+- **Twenty-three fills could never leave Foundry's own colour alone.** Their
+  default was the *name* of the control beside them — `col` takes a default and
+  those calls had been written as though it took the companion fields too — so
+  each emitted a colour that is not one. That is not the same as emitting
+  nothing: the declaration becomes invalid and falls back to transparent rather
+  than to whatever painted underneath, so a fill nobody had touched quietly
+  erased what Foundry draws. A colour is now refused unless it is one, which
+  also cleans a style saved under the old defaults as it loads.
 - **A category row in the sample is the row a journal draws.** It was 30 pixels
   tall and only as wide as its word, where a journal draws it 48 and the full
   width of the panel — so the same box came out a different shape, and setting
@@ -331,7 +419,6 @@ Two conventions worth knowing before you read it:
   found a clash between a control and its own pointed-at twin and qualified
   both. Four labels in the Default List and the list treatments said their part
   twice.
-
 - **The Live Sample clips its page as a real journal does.** Foundry states that
   on a journal sheet, and the sample deliberately mirrors the markup without
   being inside one — so a page given rounded corners kept them on its own edge
@@ -342,7 +429,6 @@ Two conventions worth knowing before you read it:
   the inner-shading controls went on writing a value nothing read. Both
   stylesheets were swept for the same fault and this was the only one; a check
   now refuses any rule that states a property two ways.
-
 - **Pointing at anything no longer changed it.** Every hovered and selected
   control is derived from an ordinary one and starts empty, meaning "leave it
   alone" — but an unset one was answering with a sensible default rather than
@@ -387,7 +473,6 @@ Two conventions worth knowing before you read it:
 - **A derived hovered control spoke at zero.** A field's own `emit` ran before
   "nothing to say at zero", so a hovered Size twin emitted `scale(0)` and would
   have collapsed whatever was pointed at.
-
 - **The Selected state survived the panel split.** It is keyed `group.section`,
   so the current-page and chosen-heading controls would have silently stopped
   being derived.
@@ -402,20 +487,6 @@ Two conventions worth knowing before you read it:
 - **An unset control cannot rub out what it feeds.** A field emitting an empty
   value defines a custom property as empty rather than leaving it absent, which
   made `var(--x, fallback)` resolve to nothing.
-
-### Removed
-
-- **The Disable Hovered State switch.** An unset hovered control already changes
-  nothing, so it only ever did something on the four parts that ship real hovered
-  colors — and those are meant to answer the pointer.
-
-- **Scroll bar controls.** Foundry states `scrollbar-width` and `scrollbar-color`
-  on `*`, and Chromium answers a stated one by drawing the bar itself and ignoring
-  every `::-webkit-scrollbar` rule — so a style could only take the whole bar or
-  leave it, and the bar it drew was a poor thing beside Foundry's.
-
-### Fixed
-
 - **A hovered value behind another control now reaches the page.** Where one
   control answers first and another stands behind it — a drop-down taking the
   toolbar's lettering where it states none of its own — the pointed-at rules

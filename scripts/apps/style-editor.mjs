@@ -5,7 +5,8 @@ import { GROUPS, SPLIT, defaultSettings, cleanSettings, groupFields } from "../s
 import { getStyle, updateStyle } from "../style-store.mjs";
 import { setPreview, clearPreview, refreshStyles } from "../style-injector.mjs";
 import { openColorPicker, closeColorPicker } from "./color-picker.mjs";
-import { STATES, stateOf, stateBase, nameRuns } from "../run-names.mjs";
+import { STATES, stateOf, stateBase, nameRuns, boxPartOf, clusterPartOf }
+  from "../run-names.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -25,9 +26,7 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
  * The four sides, four corners, and the parts an edge is made of, as the schema
  * names them. Everything that reads a box family reads it from here.
  */
-const BOX_SIDES = ["Top", "Right", "Bottom", "Left"];
-const BOX_CORNERS = ["TopLeft", "TopRight", "BottomLeft", "BottomRight"];
-const BOX_PARTS = ["Width", "Style", "Color"];
+
 
 /**
  * What a control is, within a box: which family it belongs to and which part of
@@ -66,49 +65,6 @@ function kindOfRun(cluster) {
   if (/[Ii]nnerShadow$/.test(cluster.family)) return "ILLUMINUS.Box.InnerShadow";
   if (/[Tt]extShadow$/.test(cluster.family)) return "ILLUMINUS.Box.TextShadow";
   return "ILLUMINUS.Box.OuterShadow";
-}
-
-function clusterPartOf(name) {
-  let m;
-  if ((m = name.match(/^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
-    return { family: `${m[1]}${m[2]}`, kind: "shadow" };
-  }
-  // Everything a picture is given, including what is done to it before it is
-  // laid down: they are one run, and the five worked out of the picture were
-  // being drawn as loose rows under it.
-  if ((m = name.match(
-    /^(.*?)[Tt]exture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/))) {
-    return { family: `${m[1]}Texture`, kind: "picture" };
-  }
-  return null;
-}
-
-function boxPartOf(name) {
-  const sides = BOX_SIDES.join("|");
-  // Both spellings of the word: a family with no prefix is `borderTopWidth`,
-  // and one with a prefix is `codeBorderTopWidth`. Matching only the second
-  // gathered the handful of prefixed families and left every plain one — which
-  // is most of them — spread down the part as before.
-  let m;
-  // An edge and the corners it turns are one family, so they are drawn as one
-  // box: two families meant two boxes, one of them holding nothing but corners.
-  if ((m = name.match(new RegExp(`^(.*?)[Bb]order(${sides})(${BOX_PARTS.join("|")})$`)))) {
-    return { family: `${m[1]}Edges`, kind: "border", side: m[2], part: m[3] };
-  }
-  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
-    return { family: `${m[1]}Edges`, kind: "corner", corner: m[2] };
-  }
-  // What each corner is cut to belongs with the corners: it reads their sizes,
-  // and on its own after the run it read as a control about nothing.
-  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})Shape$`)))) {
-    return { family: `${m[1]}Edges`, kind: "cornerShape", corner: m[2] };
-  }
-  if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
-    // Both rings belong to one family, so the inner four and the outer four are
-    // gathered into the same run and drawn as one box.
-    return { family: `${m[1]}Spacing`, kind: m[2].toLowerCase(), side: m[3] };
-  }
-  return null;
 }
 
 /**
@@ -386,17 +342,9 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   #dirty = false;
 
   /**
-   * Sections the user has opened, so a re-render does not close them again.
-   * Everything starts collapsed: a part holds up to nine sections and a hundred
-   * controls, and opening the one you came for beats scrolling past the rest.
-   */
-  #expanded = new Set();
-
-  /**
    * What the last Fold Everything said, or nothing where nobody has said it.
    *
-   * A category remembers its own state in `#expanded`, but a run of plain
-   * controls has nowhere to keep one — it is named and folded from what the
+   * A run of plain controls has nowhere to keep a state of its own — it is named and folded from what the
    * style holds, and there is no stable key to file it under. So the *bulk*
    * answer is kept instead, and a render honors it: unfold everything, change a
    * treatment, and the pane comes back the way it was left rather than folding
@@ -550,7 +498,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       resetGroup: IlluminusStyleEditor.#onResetGroup,
       resetAll: IlluminusStyleEditor.#onResetAll,
       revert: IlluminusStyleEditor.#onRevert,
-      toggleSection: IlluminusStyleEditor.#onToggleSection,
       foldTree: IlluminusStyleEditor.#onFoldTree,
       foldPart: IlluminusStyleEditor.#onFoldPart,
       pickColor: IlluminusStyleEditor.#onPickColor,
@@ -859,7 +806,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       // section means something different on one part — the page's shadow,
       // which Foundry's window clips and only an export ever shows.
       hint: game.i18n.localize(section.hint ?? `ILLUMINUS.Sections.${section.id}.hint`),
-      open: this.#expanded.has(`${group.id}.${section.id}`),
       // Only sections whose fields repeat one property across sides or
       // corners can offer to match them.
       matchable: section.fields.some((field) => field.link),
@@ -893,8 +839,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * Every run in a category folded the way Fold Everything last said, or left
    * to answer for itself where nobody has said it.
    *
-   * A category keeps its own state in `#expanded` and a run has nowhere to keep
-   * one, so this is where the bulk answer reaches the runs.
+   * A category is always open now and a run has nowhere to keep a state of its
+   * own, so this is where the bulk answer reaches the runs.
    */
   #foldedAs(rows) {
     if (this.#foldAll === null) return rows;
@@ -1154,7 +1100,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
       const present = this.#statesIn(section);
       if (present.length < 2) continue;
 
-      const key = section.querySelector("summary")?.dataset;
+      const key = section.querySelector(".illuminus-section__head")?.dataset;
       const id = key ? `${key.group}.${key.section}` : section.dataset.section;
       const tools = section.querySelector(".illuminus-section__tools");
       if (!tools || tools.querySelector(".illuminus-state")) continue;
@@ -1226,7 +1172,7 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
    * belong to, and copying one section should not reach into another.
    */
   #copyStateFromNormal(sectionElement) {
-    const key = sectionElement.querySelector("summary")?.dataset;
+    const key = sectionElement.querySelector(".illuminus-section__head")?.dataset;
     if (!key) return;
     const group = GROUPS.find((candidate) => candidate.id === key.group);
     const section = group?.sections.find((candidate) => candidate.id === key.section);
@@ -1328,12 +1274,30 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     }
   }
 
+  /**
+   * Show the sample folded while a folded control is the one being set.
+   *
+   * `expanded` sits on the sample's frame as it sits on a journal's own root,
+   * and on the window mock inside it as core's own rules want — so both come
+   * off together. Nothing is stored: it is a way of looking at the style, not
+   * part of it, and it goes back the moment another state is chosen.
+   */
+  #showFolded(folded) {
+    for (const el of this.element.querySelectorAll(
+      ".illuminus-preview__frame, .illuminus-preview__window")) {
+      el.classList.toggle("expanded", !folded);
+    }
+  }
+
   /** Show one state's controls per section, hiding the other's. */
   #applyStates() {
+    // Any section asking for the folded panel folds the sample; the parts of a
+    // panel are read together, so one of them saying so is enough.
+    this.#showFolded([...this.#states.values()].includes("collapsed"));
     for (const section of this.element.querySelectorAll(".illuminus-section")) {
       const wrap = section.querySelector(".illuminus-state");
       if (!wrap) continue;
-      const key = section.querySelector("summary")?.dataset;
+      const key = section.querySelector(".illuminus-section__head")?.dataset;
       const id = key ? `${key.group}.${key.section}` : section.dataset.section;
       const present = this.#statesIn(section);
       const chosen = this.#states.get(id)
@@ -1512,8 +1476,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         // A section whose own name matches shows everything in it. Searching
         // "shadow" should find Inner Shadow, whose controls are worded
         // "shading" and would otherwise all miss.
-        const summary = section.querySelector("summary")?.textContent.toLowerCase() ?? "";
-        const wholeSection = Boolean(term) && summary.includes(term);
+        // The category's own name, and not the row of answers beside it: the
+        // head holds both now, and searching "match" would otherwise light up
+        // every category in the part.
+        const named = section.querySelector(".illuminus-section__name")?.textContent.toLowerCase() ?? "";
+        const wholeSection = Boolean(term) && named.includes(term);
         for (const field of section.querySelectorAll(".illuminus-field")) {
           const set = !this.#onlySet || !field.classList.contains("is-unset");
           const hit = set
@@ -1539,11 +1506,8 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
         }
         section.classList.toggle("is-filtered-out",
           (Boolean(term) || this.#onlySet) && !sectionMatches);
-        // Open what matched, and hand the author's own open/closed state back
-        // when the box is cleared.
-        const key = section.querySelector("summary")?.dataset;
-        const wasOpen = key ? this.#expanded.has(`${key.group}.${key.section}`) : false;
-        section.open = term || this.#onlySet ? sectionMatches > 0 : wasOpen;
+        // A category has no open or shut state to hand back any more: it is
+        // dimmed where it holds nothing, and the runs inside it are what open.
         tabMatches += sectionMatches;
       }
       counts.set(tab.dataset.tab, tabMatches);
@@ -2369,13 +2333,6 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
     game.tooltip.activate(target, { text: hint, direction: "LEFT", cssClass: "illuminus-hint-tooltip" });
   }
 
-  /** Collapse or expand a section, remembering the choice across re-renders. */
-  static #onToggleSection(_event, target) {
-    const key = `${target.dataset.group}.${target.dataset.section}`;
-    if (this.#expanded.has(key)) this.#expanded.delete(key);
-    else this.#expanded.add(key);
-  }
-
   /**
    * Open every branch of the tree, or shut them all.
    *
@@ -2410,16 +2367,11 @@ export class IlluminusStyleEditor extends HandlebarsApplicationMixin(Application
   static #onFoldPart(_event, target) {
     const pane = target.closest(".illuminus-part");
     if (!pane) return;
+    // Every `details` in a part is a run: a category is not one of them any
+    // more, so this folds what a person means by folding.
     const all = [...pane.querySelectorAll("details")];
     const unfold = all.some((one) => !one.open);
     for (const one of all) one.open = unfold;
-    // A category keeps its own state; a run has none to keep, so the bulk
-    // answer is what a later render reads.
-    for (const summary of pane.querySelectorAll(".illuminus-section > summary[data-section]")) {
-      const key = `${summary.dataset.group}.${summary.dataset.section}`;
-      if (unfold) this.#expanded.add(key);
-      else this.#expanded.delete(key);
-    }
     this.#foldAll = unfold;
     IlluminusStyleEditor.#markFold(target, unfold);
   }

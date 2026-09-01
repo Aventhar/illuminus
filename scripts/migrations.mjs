@@ -484,6 +484,62 @@ function v12_to_v13(settings) {
   return out;
 }
 
+/**
+ * Version 13 -> 14.
+ *
+ * The contents panel's buttons were one set of controls painting eight buttons
+ * — the four small ones beside the search box and the three at its foot — and
+ * Foundry draws those two lots differently, so one set could not say what a
+ * journal already does. They are two now, and whatever a style said about the
+ * buttons it says about both: the panel looks exactly as it did, and the two
+ * halves can be told apart from here on.
+ */
+function v13_to_v14(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const held = out.sidebarButtons;
+  if (!held || typeof held !== "object") return out;
+  for (const [name, value] of Object.entries(held)) {
+    const said = name.match(/^(hover|active)?[Bb]utton(.*)$/);
+    if (!said) continue;
+    const state = said[1] ?? "";
+    const rest = said[2];
+    for (const half of ["topButton", "bottomButton"]) {
+      // A state's control keeps its state at the front, as it was written.
+      held[state ? state + half[0].toUpperCase() + half.slice(1) + rest : half + rest] = value;
+    }
+    delete held[name];
+  }
+  return out;
+}
+
+/**
+ * Version 14 -> 15.
+ *
+ * The contents panel answers to being folded away, in every part of it, so the
+ * one control that used to ask about a folded panel — how wide it is — becomes
+ * the Panel Width under the Folded state, where the other four hundred answers
+ * now live too. The three controls that place the floating unfold button lose
+ * their `collapsed` prefix at the same time, because the word has become a
+ * state's and a control named for a state is read as one.
+ */
+function v14_to_v15(settings) {
+  const out = foundry.utils.deepClone(settings ?? {});
+  const held = out.sidebar;
+  if (!held || typeof held !== "object") return out;
+  const moved = {
+    sidebarCollapsedWidth: "collapsedSidebarWidth",
+    collapsedFloat: "unfoldFloat",
+    collapsedFloatTop: "unfoldFloatTop",
+    collapsedFloatLeft: "unfoldFloatLeft"
+  };
+  for (const [was, now] of Object.entries(moved)) {
+    if (held[was] === undefined) continue;
+    held[now] = held[was];
+    delete held[was];
+  }
+  return out;
+}
+
 const MIGRATIONS = {
   1: v1_to_v2,
   2: v2_to_v3,
@@ -496,7 +552,9 @@ const MIGRATIONS = {
   9: v9_to_v10,
   10: v10_to_v11,
   11: v11_to_v12,
-  12: v12_to_v13
+  12: v12_to_v13,
+  13: v13_to_v14,
+  14: v14_to_v15
 };
 
 /**

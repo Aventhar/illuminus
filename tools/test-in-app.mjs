@@ -675,16 +675,16 @@ const matchedStates = await cdp.evaluate(`(async () => {
   };
   const read = (path) => Number(el.querySelector('[data-field="' + path + '"] range-picker').value);
 
-  set("sidebarButtons.buttonCornerTopLeft", 2);
-  set("sidebarButtons.hoverButtonCornerTopLeft", 24);
+  set("sidebarButtons.bottomButtonCornerTopLeft", 2);
+  set("sidebarButtons.hoverBottomButtonCornerTopLeft", 24);
   await new Promise(r => setTimeout(r, 400));
-  el.querySelector('[data-action="matchSides"][data-group="sidebarButtons"][data-section="buttons"]').click();
+  el.querySelector('[data-action="matchSides"][data-group="sidebarButtons"][data-section="bottomButtons"]').click();
   await new Promise(r => setTimeout(r, 600));
 
   const corners = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"];
   const after = {
-    ordinary: corners.map(c => read("sidebarButtons.buttonCorner" + c)),
-    hovered: corners.map(c => read("sidebarButtons.hoverButtonCorner" + c))
+    ordinary: corners.map(c => read("sidebarButtons.bottomButtonCorner" + c)),
+    hovered: corners.map(c => read("sidebarButtons.hoverBottomButtonCorner" + c))
   };
   await app.close({force: true});
   return JSON.stringify(after);
@@ -1643,6 +1643,37 @@ await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: fg.x, y: f
 await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: fg.x, y: fg.y, button: "left", buttons: 0, clickCount: 1 });
 await new Promise((r) => setTimeout(r, 400));
 
+// It asks first now: a palette is built up over a whole style and there is no
+// putting a color back. Answered by finding the dialog that actually holds the
+// button — an answered one lingers for the length of its closing animation, so
+// "the first application whose name has Dialog in it" can be one on its way out.
+const answer = async (which) => cdp.evaluate(`(async () => {
+  let dialog = null;
+  for (let i = 0; i < 60 && !dialog; i++) {
+    dialog = [...foundry.applications.instances.values()]
+      .find(a => a.element?.querySelector('button[data-action="${which}"]'));
+    if (!dialog) await new Promise(r => setTimeout(r, 100));
+  }
+  if (!dialog) return JSON.stringify({asked: false});
+  dialog.element.querySelector('button[data-action="${which}"]').click();
+  await new Promise(r => setTimeout(r, 500));
+  return JSON.stringify({asked: true});
+})()`);
+
+const declined = JSON.parse(await answer("no"));
+check(declined.asked, "removing a saved color asks first");
+const keptCount = JSON.parse(await cdp.evaluate(
+  `JSON.stringify(document.querySelectorAll('.illuminus-cp__swatches .illuminus-cp__swatch[data-hex]').length)`));
+check(keptCount === 3, `and saying no keeps it (${keptCount} left)`);
+
+// Again, and through with it this time.
+await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: fg.x, y: fg.y, buttons: 0 });
+await new Promise((r) => setTimeout(r, 200));
+await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: fg.x, y: fg.y, button: "left", buttons: 1, clickCount: 1 });
+await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: fg.x, y: fg.y, button: "left", buttons: 0, clickCount: 1 });
+const agreed = JSON.parse(await answer("yes"));
+check(agreed.asked, "and asks again the second time");
+
 const forgetResult = await cdp.evaluate(`(async () => {
   const api = game.modules.get("illuminus").api;
   // Scoped to the saved row: the recently-used row below it holds swatches too,
@@ -1678,8 +1709,7 @@ console.log("\n[28] Saving sets the baseline that Reset returns to");
     await new Promise(r => setTimeout(r, 1200));
     app.changeTab("body", "sheet");
     await new Promise(r => setTimeout(r, 300));
-    const section = app.element.querySelector('.illuminus-part[data-tab="body"] details.illuminus-section');
-    section.open = true;
+    const section = app.element.querySelector('.illuminus-part[data-tab="body"] .illuminus-section');
     for (const run of section.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 300));
     // Assigned on the element that carries the name, which is what dispatches
@@ -2426,7 +2456,7 @@ try {
     const IMG = "icons/svg/mystery-man.svg";
     Object.assign(settings.tables, {headerBackground: "#5e1914", headerTexture: IMG, headerTextureOpacity: 60});
     Object.assign(settings.heading1, {background: "#5e1914", texture: IMG, textureFit: "tile"});
-    Object.assign(settings.sidebarButtons, {buttonBackground: "#222222", buttonTexture: IMG});
+    Object.assign(settings.sidebarButtons, {bottomButtonBackground: "#222222", bottomButtonTexture: IMG});
     Object.assign(settings.title, {background: "#2b1d12", texture: IMG});
     settings.box01.texture = IMG;
     await api.updateStyle(style.id, {settings});
@@ -2454,7 +2484,9 @@ try {
     const out = {
       tableHeader: layer("thead th"),
       heading: layer(".journal-page-content h1"),
-      sidebarButton: layer(".journal-sidebar button"),
+      // The foot's buttons, which is where the texture above was set: the first
+      // button in the panel is now one of the small ones beside the search box.
+      sidebarButton: layer(".journal-sidebar .action-buttons button"),
       block: layer(".illuminus-box--box01"),
       // The journal's name is an <input>, which can carry no ::before at all —
       // so its picture goes on the header around it, and the input must keep no
@@ -3176,7 +3208,9 @@ try {
     await new Promise(r => setTimeout(r, 200));
     await type("folding");
     out.shadowTab = shadowTab?.dataset.tab ?? "none";
-    out.openSections = [...el.querySelectorAll(".illuminus-part.active .illuminus-section")]
+    // A category no longer opens or shuts; what the filter opens is the runs
+    // inside it, which is what this counts now.
+    out.openSections = [...el.querySelectorAll(".illuminus-part.active .illuminus-section details")]
       .filter(s => s.open).length;
     // Back where it was: everything after this counts controls on the part the
     // check started on, and a part with eight times as many is not that.
@@ -3192,8 +3226,7 @@ try {
     app.changeTab("sidebarButtons", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const buttons = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarButtons"] .illuminus-section')]
-      .find(s => s.querySelector("summary")?.dataset.section === "buttons");
-    buttons.querySelector("summary").click();
+      .find(s => s.querySelector(".illuminus-section__head")?.dataset.section === "bottomButtons");
     await new Promise(r => setTimeout(r, 300));
     const hoverFields = () => [...buttons.querySelectorAll(".illuminus-field[data-field]")]
       .filter(f => /hover/i.test(f.dataset.field));
@@ -3203,7 +3236,7 @@ try {
     await new Promise(r => setTimeout(r, 300));
     out.hoverShownAfter = hoverFields().every(f => !f.classList.contains("is-state-hidden"));
     out.normalHiddenAfter = [...buttons.querySelectorAll(".illuminus-field[data-field]")]
-      .filter(f => f.dataset.field.endsWith(".buttonColor"))
+      .filter(f => f.dataset.field.endsWith(".bottomButtonColor"))
       .every(f => f.classList.contains("is-state-hidden"));
 
     // A listed page is set in one section, in its three states — which is what
@@ -3212,8 +3245,7 @@ try {
     app.changeTab("sidebarEntries", "sheet");
     await new Promise(r => setTimeout(r, 300));
     const entryStates = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarEntries"] .illuminus-section')]
-      .find(s => s.querySelector("summary")?.dataset.section === "entries");
-    entryStates.querySelector("summary").click();
+      .find(s => s.querySelector(".illuminus-section__head")?.dataset.section === "entries");
     await new Promise(r => setTimeout(r, 300));
     out.entryStateOptions = [...entryStates.querySelectorAll(".illuminus-state__option")]
       .map(b => b.dataset.state);
@@ -3232,8 +3264,7 @@ try {
     app.changeTab("sidebarHeadings", "sheet");
     await new Promise(r => setTimeout(r, 300));
     const headingStates = [...el.querySelectorAll('.illuminus-part[data-tab="sidebarHeadings"] .illuminus-section')]
-      .find(s => s.querySelector("summary")?.dataset.section === "subHeadings");
-    headingStates.querySelector("summary").click();
+      .find(s => s.querySelector(".illuminus-section__head")?.dataset.section === "subHeadings");
     await new Promise(r => setTimeout(r, 300));
     const headingShown = () => [...headingStates.querySelectorAll(".illuminus-field")]
       .filter(f => !f.classList.contains("is-state-hidden")).length;
@@ -3268,9 +3299,11 @@ try {
   check(f.hoverHiddenNormally, "whose pointed-at controls are folded away by default");
   check(f.hoverShownAfter && f.normalHiddenAfter, "and swap in when it is switched");
   check(f.filterReachesHidden, "searching still reaches a control the switch folded away");
-  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["normal", "hover", "active"]),
-    `a listed page offers all three of its states in one section (got ${f.entryStateOptions.join(", ")})`);
-  check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected"]),
+  // Four now: the panel answers to being folded away as well, and every part
+  // inside it does — a state of the whole panel rather than of one row in it.
+  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["normal", "hover", "active", "collapsed"]),
+    `a listed page offers all four of its states in one section (got ${f.entryStateOptions.join(", ")})`);
+  check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected", "Folded"]),
     `named as a person would name them (got ${f.entryStateLabels.join(", ")})`);
   // Neither state shows everything: one at a time is the whole point of the
   // switch.
@@ -3281,8 +3314,8 @@ try {
   // governing every row at once: the page being read has its own of everything.
   check(f.entryFirst === f.entryOnActive,
     `a listed page offers as much when it is the one being read (${f.entryFirst} then ${f.entryOnActive})`);
-  check(JSON.stringify(f.headingStateOptions) === JSON.stringify(["normal", "hover", "active"]),
-    `a listed heading offers the same three states (${f.headingStateOptions?.join(", ")})`);
+  check(JSON.stringify(f.headingStateOptions) === JSON.stringify(["normal", "hover", "active", "collapsed"]),
+    `a listed heading offers the same four states (${f.headingStateOptions?.join(", ")})`);
   check(f.headingNormal > 0 && f.headingNormal === f.headingOnActive,
     `and as much for the one a reader chose (${f.headingNormal} then ${f.headingOnActive})`);
 } finally {
@@ -3374,7 +3407,7 @@ try {
     await api.updateStyle(style.id, {settings});
 
     const app = await api.openEditor(style.id);
-    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+    for (let i = 0; i < 200 && !app.element?.querySelector(".illuminus-section__head"); i++) {
       await new Promise(r => setTimeout(r, 100));
     }
     app.changeTab("window", "sheet");
@@ -3655,14 +3688,14 @@ try {
     await api.updateStyle(style.id, {settings});
 
     const app = await api.openEditor(style.id);
-    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+    for (let i = 0; i < 200 && !app.element?.querySelector(".illuminus-section__head"); i++) {
       await new Promise(r => setTimeout(r, 100));
     }
     app.changeTab("boxes", "sheet");
     await new Promise(r => setTimeout(r, 500));
 
     const fill = () => app.element
-      .querySelector('summary[data-group="boxes"][data-section="background"]').closest(".illuminus-section");
+      .querySelector('.illuminus-section__head[data-group="boxes"][data-section="background"]').closest(".illuminus-section");
     const button = () => fill().querySelector(".illuminus-state__copy");
     const out = {};
 
@@ -4030,8 +4063,8 @@ try {
     settings.heading2.borderTopStyle = "solid";
     // A button's corners, which are a number rather than a color: the twin has
     // to reach a size as well as a paint, and Match must not have flattened it.
-    settings.sidebarButtons.buttonCornerTopLeft = 2;
-    settings.sidebarButtons.hoverButtonCornerTopLeft = 24;
+    settings.sidebarButtons.bottomButtonCornerTopLeft = 2;
+    settings.sidebarButtons.hoverBottomButtonCornerTopLeft = 24;
     await api.updateStyle(style.id, {settings});
 
     const entry = await JournalEntry.create({name: "Hover Test Journal"});
@@ -4061,7 +4094,7 @@ try {
     // under the panel's own edge, and hovering what covers it proves nothing.
     // Foundry's own buttons: a folding marker is a button too, and the panel's
     // Buttons controls deliberately leave it alone.
-    const buttons = [...entry.sheet.element.querySelectorAll(".journal-sidebar button:not(.illuminus-fold)")];
+    const buttons = [...entry.sheet.element.querySelectorAll(".journal-sidebar .action-buttons button:not(.illuminus-fold)")];
     const reachable = buttons.findIndex((b) => {
       const r = b.getBoundingClientRect();
       return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)?.closest("button") === b;
@@ -4120,7 +4153,7 @@ try {
   const quoteHovered = await readAfterHover(`root.querySelector(".journal-page-content blockquote")`, "backgroundColor");
   const h2Hovered = await readAfterHover(`root.querySelector(".journal-page-content h2")`, "borderTopColor");
   const buttonRadius = await readAfterHover(
-    `[...root.querySelectorAll(".journal-sidebar button:not(.illuminus-fold)")][window.__hover.buttonIndex]`,
+    `[...root.querySelectorAll(".journal-sidebar .action-buttons button:not(.illuminus-fold)")][window.__hover.buttonIndex]`,
     "borderTopLeftRadius");
 
   // Move away and the ordinary color comes back.
@@ -4479,14 +4512,14 @@ try {
     const schema = await import("/modules/illuminus/scripts/style-schema.mjs");
     const api = game.modules.get("illuminus").api;
     const app = await api.openEditor(api.listStyles()[0].id);
-    for (let i = 0; i < 200 && !app.element?.querySelector("summary[data-section]"); i++) {
+    for (let i = 0; i < 200 && !app.element?.querySelector(".illuminus-section__head"); i++) {
       await new Promise(r => setTimeout(r, 100));
     }
 
     // Grouped by the group each section was rendered for: a family part renders
     // one member, so its sections are filed under that member's own id.
     const rendered = new Map();
-    for (const summary of app.element.querySelectorAll("summary[data-section]")) {
+    for (const summary of app.element.querySelectorAll(".illuminus-section__head")) {
       const list = rendered.get(summary.dataset.group) ?? [];
       list.push(summary.dataset.section);
       rendered.set(summary.dataset.group, list);
@@ -4510,7 +4543,7 @@ try {
     // Read as names rather than as ids: a box's first category and a tag's are
     // the same question — how much room it takes — under two ids.
     const named = (id) => (rendered.get(id) ?? []).slice(0, 4).map((section) =>
-      app.element.querySelector('summary[data-group="' + id + '"][data-section="' + section + '"]')
+      app.element.querySelector('.illuminus-section__head[data-group="' + id + '"][data-section="' + section + '"]')
         ?.querySelector(".illuminus-section__label")?.textContent.trim() ?? section);
     out.boxes = named("box01");
     out.tag = named("tag01");
@@ -4529,29 +4562,27 @@ try {
       await new Promise(r => setTimeout(r, 500));
     }
 
-    // Hovered hides, never reorders. The section is left closed and re-found
-    // each time: opening one re-renders, and a node held across that is a
-    // detached copy that accepts clicks and shows nothing.
+    // Hovered hides, never reorders. The category is re-found each time rather
+    // than held: a node kept across a re-render is a detached copy that accepts
+    // clicks and shows nothing.
     const border = () => app.element
-      .querySelector('summary[data-group="boxes"][data-section="border"]').closest(".illuminus-section");
+      .querySelector('.illuminus-section__head[data-group="boxes"][data-section="border"]').closest(".illuminus-section");
     const showing = () => [...border().querySelectorAll(".illuminus-field[data-field]")]
       .filter(f => !f.classList.contains("is-state-hidden"))
       .map(f => f.dataset.field.split(".")[1]);
     out.normal = showing();
 
-    // Reached the way a person reaches it: the switch lives in a section's
-    // header, which is not drawn at all until the section is open, and hit
-    // testing means nothing on a part that is not the one showing.
+    // Reached the way a person reaches it, and hit-tested: a switch that CSS has
+    // put out of reach still answers a direct click. Hit testing means
+    // nothing on a part that is not the one showing, so the part is opened
+    // first — the category no longer needs opening, being always open now.
     app.changeTab("boxes", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const hit = (element) => {
       const spot = element.getBoundingClientRect();
       return document.elementFromPoint(spot.left + spot.width / 2, spot.top + spot.height / 2);
     };
-    const summary = border().querySelector("summary");
-    summary.scrollIntoView({ block: "center" });
-    await new Promise(r => setTimeout(r, 300));
-    hit(summary).click();
+    border().scrollIntoView({ block: "center" });
     await new Promise(r => setTimeout(r, 300));
 
     const button = border().querySelector('.illuminus-state__option[data-state="hover"]');
@@ -5591,7 +5622,7 @@ try {
     const api = game.modules.get("illuminus").api;
     const style = await api.createStyle({name: "Hover Effect Probe", settings: {
       lists: {markerColor: "#112233", markerHoverColor: "#ff0000"},
-      sidebarButtons: {buttonColor: "#112233", buttonHoverColor: "#00ff00"}
+      sidebarButtons: {bottomButtonColor: "#112233", bottomButtonHoverColor: "#00ff00"}
     }});
     const entry = await JournalEntry.create({name: "Illuminus Hover Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage", [{
@@ -5612,14 +5643,14 @@ try {
     return JSON.stringify({
       styleId: style.id, entryId: entry.id,
       li: at(root.querySelector(".journal-page-content li")),
-      button: at(root.querySelector(".journal-sidebar button"))
+      button: at(root.querySelector(".journal-sidebar .action-buttons button"))
     });
   })()`));
 
   const paint = async () => JSON.parse(await cdp.evaluate(`(() => {
     const root = game.journal.get(${JSON.stringify(setup.entryId)}).sheet.element;
     const li = root.querySelector(".journal-page-content li");
-    const button = root.querySelector(".journal-sidebar button");
+    const button = root.querySelector(".journal-sidebar .action-buttons button");
     return JSON.stringify({
       marker: getComputedStyle(li, "::marker").color,
       button: getComputedStyle(button).color,
@@ -5841,7 +5872,7 @@ console.log("\n[54] The sample keeps up while a control is still being used");
     // has no box for a pointer to land on and cannot take the cursor, which
     // reads as the sample failing to keep up rather than as nothing being
     // dragged at all.
-    const open = app.element.querySelector('.illuminus-part[data-tab="body"] details.illuminus-section');
+    const open = app.element.querySelector('.illuminus-part[data-tab="body"] .illuminus-section');
     open.open = true;
     for (const run of open.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 400));
@@ -6313,7 +6344,7 @@ try {
     [".journal-page-content li", "a list item"],
     [".journal-page-content blockquote", "a box"],
     [".journal-sidebar .toc li.page", "a listed page"],
-    [".journal-sidebar button:not(.illuminus-fold)", "a panel button"],
+    [".journal-sidebar .action-buttons button:not(.illuminus-fold)", "a panel button"],
     [".journal-header .title", "the journal's name"]
   ];
   const extra = [];
@@ -6561,14 +6592,14 @@ try {
       .filter(showing)
       .map(el => el.classList.contains("illuminus-divider") ? "---"
         : el.querySelector(".illuminus-field__label").textContent.trim());
-    const sections = [...tab.querySelectorAll("details.illuminus-section")].map(section => ({
+    const sections = [...tab.querySelectorAll(".illuminus-section")].map(section => ({
       name: section.querySelector(".illuminus-section__label").textContent.trim(),
       rows: read(section)
     }));
 
     // A line with a run under it, whichever state is on show: the divider is
     // written before an ordinary control, so a state used to strand it.
-    const text = [...tab.querySelectorAll("details.illuminus-section")]
+    const text = [...tab.querySelectorAll(".illuminus-section")]
       .find(s => s.querySelector(".illuminus-section__label").textContent.trim() === "Text");
     text.open = true;
     text.querySelector('.illuminus-state__option[data-state="hover"]').click();
@@ -6577,7 +6608,7 @@ try {
 
     // Measured while the window is still open: a closed application's element
     // is detached, and a detached element has no computed style at all.
-    const named = (tab) => [...tab.querySelectorAll("details.illuminus-section")].map(section => ({
+    const named = (tab) => [...tab.querySelectorAll(".illuminus-section")].map(section => ({
       name: section.querySelector(".illuminus-section__label").textContent.trim(),
       rows: read(section)
     }));
@@ -6598,7 +6629,7 @@ try {
     // boxes are all zero, which reads as a line drawn nowhere rather than as one
     // drawn across.
     app.changeTab("title", "sheet");
-    const category = tab.querySelector("details.illuminus-section");
+    const category = tab.querySelector(".illuminus-section");
     category.open = true;
     for (const run of category.querySelectorAll("details")) run.open = true;
     await new Promise(r => setTimeout(r, 400));
@@ -6729,7 +6760,7 @@ try {
     sidebarHeadings: ["Sub-Headings"],
     sidebarCategories: ["Categories"],
     sidebarSearch: ["Search Box"],
-    sidebarButtons: ["Buttons"],
+    sidebarButtons: ["Top Buttons", "Bottom Buttons"],
     sidebarNumbers: ["Numbering"],
     window: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons", "Edit Button"],
     editor: ["Size and Position", "Window Frame", "Title Bar", "Title Bar Buttons"],
@@ -7138,7 +7169,6 @@ try {
     app.changeTab("boxes", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const tab = app.element.querySelector('.illuminus-part[data-tab="boxes"]');
-    for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
     await new Promise(r => setTimeout(r, 400));
 
     const edge = tab.querySelector('.illuminus-box__run[data-run="edges"]');
@@ -8409,12 +8439,11 @@ try {
     app.changeTab("body", "sheet");
     await new Promise(r => setTimeout(r, 400));
     const tab = app.element.querySelector('.illuminus-part[data-tab="body"]');
-    for (const section of tab.querySelectorAll("details.illuminus-section")) section.open = true;
     await new Promise(r => setTimeout(r, 400));
 
     const named = (run) => run.querySelector(".illuminus-run__name")?.textContent.trim() ?? "";
     const all = [...tab.querySelectorAll("details.illuminus-run")];
-    const text = [...tab.querySelectorAll("details.illuminus-section")]
+    const text = [...tab.querySelectorAll(".illuminus-section")]
       .find((one) => one.querySelector("[data-section]")?.dataset.section === "text");
     const inText = [...text.querySelectorAll("details.illuminus-run")];
 
@@ -8446,7 +8475,7 @@ try {
       names: inText.map(named),
       // No run may go unnamed, and none may repeat a name inside its category.
       blank: all.filter((run) => !named(run)).length,
-      repeated: [...tab.querySelectorAll("details.illuminus-section")].some((section) => {
+      repeated: [...tab.querySelectorAll(".illuminus-section")].some((section) => {
         const here = [...section.querySelectorAll("details.illuminus-run")].map(named);
         return new Set(here).size !== here.length;
       }),
@@ -8948,6 +8977,401 @@ try {
     const api = game.modules.get("illuminus").api;
     for (const style of api.listStyles()) {
       if (style.name === "Caption Room Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[93] A folded panel can keep nothing but the way back");
+try {
+  const folded = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Folded Panel Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>one</p>"}}]);
+    const read = async (settings) => {
+      const style = await api.createStyle({name: "Folded Panel Probe", settings});
+      await api.assignStyle(entry, style.id);
+      // Rendered open every time. Whether the panel is folded is remembered on
+      // the application, so a second reading would otherwise begin where the
+      // first left off and the toggle below would unfold it instead.
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+      await new Promise(r => setTimeout(r, 700));
+      entry.sheet.setPosition({left: 120, top: 80, width: 900, height: 640});
+      await new Promise(r => setTimeout(r, 300));
+      // The hardware-acceleration notice sits exactly where the panel's top is,
+      // and a hit test aimed there lands on the notice rather than the button.
+      document.querySelectorAll("#notifications .notification").forEach(n => n.remove());
+      game.tooltip.deactivate();
+      document.querySelector("#tooltip")?.remove();
+      entry.sheet.toggleSidebar();
+      await new Promise(r => setTimeout(r, 1400));
+      const root = entry.sheet.element;
+      const aside = root.querySelector(".journal-sidebar");
+      const button = aside.querySelector(".collapse-toggle");
+      const cs = getComputedStyle(aside);
+      const box = button.getBoundingClientRect();
+      // Clicked the way a person does: ask what is actually painted at the
+      // button's middle rather than trusting that it has a rectangle. A panel
+      // that clips it leaves the box exactly where it was and simply does not
+      // draw it, so a rect alone proves nothing.
+      const at = document.elementFromPoint(Math.round(box.left + box.width / 2),
+                                           Math.round(box.top + box.height / 2));
+      const out = {
+        collapsedWidth: cs.getPropertyValue("--sidebar-width-collapsed").trim(),
+        asideWidth: Math.round(aside.getBoundingClientRect().width),
+        overflow: cs.overflow,
+        place: getComputedStyle(button).position,
+        toc: getComputedStyle(root.querySelector(".toc")).display,
+        reachable: Boolean(at) && (at === button || button.contains(at)),
+        // What was found instead, which is the whole of the diagnosis when this
+        // fails: the first time, it was the journal's own title painting over
+        // the button, and the reading alone would not have said so.
+        found: at ? at.tagName.toLowerCase() + "." + [...at.classList].join(".") : "nothing"
+      };
+      // And pressing it puts the panel back, which is the only thing a reader
+      // cares about. Clicked the way a person does — whatever is painted at the
+      // button's middle, rather than the button we went looking for.
+      if (out.reachable) {
+        at.click();
+        await new Promise(r => setTimeout(r, 1400));
+        out.cameBack = entry.sheet.sidebarExpanded === true;
+      }
+      await api.deleteStyle(style.id);
+      return out;
+    };
+    const floats = await read({sidebar:
+      {collapsedSidebarWidth: 0, unfoldFloat: true, unfoldFloatLeft: 6, unfoldFloatTop: 6}});
+    const buried = await read({sidebar: {collapsedSidebarWidth: 0, unfoldFloat: false}});
+    const foundrys = await read({sidebar: {collapsedSidebarWidth: 40, unfoldFloat: false}});
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({floats, buried, foundrys});
+  })()`);
+  const fp = JSON.parse(folded);
+  check(fp.floats.collapsedWidth === "0px",
+    `the folded width reaches core's own variable (got ${fp.floats.collapsedWidth})`);
+  check(fp.floats.asideWidth === 0,
+    `and the panel takes no room at all (got ${fp.floats.asideWidth}px)`);
+  check(fp.floats.toc === "none",
+    `what is left of the panel is put away (contents panel: ${fp.floats.toc})`);
+  check(fp.floats.overflow === "visible" && fp.floats.place === "absolute",
+    `the button leaves the flow and the panel stops clipping it `
+    + `(${fp.floats.overflow}, ${fp.floats.place})`);
+  // The whole of the feature: a panel folded to nothing still has a way back.
+  check(fp.floats.reachable === true,
+    `the way back can be clicked with the panel folded to nothing (found ${fp.floats.found})`);
+  check(fp.floats.cameBack === true,
+    "and pressing it brings the panel back");
+  check(fp.buried.reachable === false,
+    "and without the switch the same panel buries it, which is what the switch is for");
+  check(fp.foundrys.reachable === true,
+    "Foundry's own folded width is untouched by any of it");
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Folded Panel Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Folded Panel Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[94] The search box says when it is being typed in");
+try {
+  const typing = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Search State Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>one</p>"}}]);
+    // A Selected color on the fill and none on the lettering, so the same
+    // reading covers both halves: what a state says, and what it leaves alone.
+    const style = await api.createStyle({name: "Search State Probe", settings: {sidebarSearch: {
+      searchBackground: "#112233", activeSearchBackground: "#aa3311", searchColor: "#c8d2de"
+    }}});
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+    await new Promise(r => setTimeout(r, 800));
+    const input = entry.sheet.element.querySelector("search input[type=search]");
+    const cs = () => getComputedStyle(input);
+    const out = {resting: cs().backgroundColor, restingColor: cs().color};
+    input.focus();
+    await new Promise(r => setTimeout(r, 300));
+    out.focused = cs().backgroundColor;
+    out.focusedColor = cs().color;
+    out.reallyFocused = input.matches(":focus");
+    input.blur();
+    await new Promise(r => setTimeout(r, 300));
+    out.after = cs().backgroundColor;
+    await api.deleteStyle(style.id);
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify(out);
+  })()`);
+  const ss = JSON.parse(typing);
+  check(ss.reallyFocused === true, "the search box takes focus");
+  check(ss.resting === "rgb(17, 34, 51)", `its resting fill is the style's (got ${ss.resting})`);
+  check(ss.focused === "rgb(170, 51, 17)", `and the Selected fill applies while typing (got ${ss.focused})`);
+  check(ss.after === "rgb(17, 34, 51)", `and is given back afterwards (got ${ss.after})`);
+  // A state's control must be free to say nothing: the lettering has no
+  // Selected color, so it keeps the ordinary one rather than being rubbed out.
+  check(ss.focusedColor === ss.restingColor,
+    `a Selected control nobody set changes nothing (${ss.restingColor} -> ${ss.focusedColor})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Search State Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Search State Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[95] The sample's button rows are the rows a journal draws");
+try {
+  const rows = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    // The editor remembers how it was left, and a width or zoom a previous
+    // check dragged to would be measured instead of the one this sets.
+    await game.settings.set("illuminus", "editorView", {});
+    const style = await api.createStyle({name: "Panel Rows Probe"});
+    const entry = await JournalEntry.create({name: "Panel Rows Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>one</p>"}}]);
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+    await new Promise(r => setTimeout(r, 900));
+    const box = (root, sel) => {
+      const el = root.querySelector(sel);
+      if (!el) return "missing";
+      const r = el.getBoundingClientRect();
+      return Math.round(r.width) + "x" + Math.round(r.height);
+    };
+    const rowOf = (root, sel) => {
+      const el = root.querySelector(sel);
+      if (!el) return "missing";
+      const c = getComputedStyle(el);
+      return c.columnGap + "/" + c.paddingTop;
+    };
+    const readPanel = (root) => ({
+      searchButton: box(root, "search .inline-control"),
+      searchInput: box(root, "search input[type=search]"),
+      searchRow: rowOf(root, "search"),
+      footButton: box(root, ".action-buttons button.previous"),
+      footCreate: box(root, ".action-buttons button.create"),
+      footRow: rowOf(root, ".action-buttons")
+    });
+    const journal = readPanel(entry.sheet.element);
+    const app = await api.openEditor(style.id);
+    await new Promise(r => setTimeout(r, 2500));
+    // The pane swaps in a mock of the panel when the panel is the open part, so
+    // measuring while another part is open reads a hidden tree — every computed
+    // value right and every rectangle 0.
+    app.changeTab("sidebar", "sheet");
+    await new Promise(r => setTimeout(r, 700));
+    ${sampleAtLifeSize};
+    await new Promise(r => setTimeout(r, 700));
+    const shown = [...app.element.querySelectorAll(".illuminus-preview__frame .journal-sidebar")]
+      .find(el => el.getClientRects().length);
+    const sample = shown ? readPanel(shown.closest(".illuminus-preview__frame")) : {};
+    await app.close({force: true});
+    await api.deleteStyle(style.id);
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({journal, sample, shown: Boolean(shown),
+      differ: Object.keys(journal).filter(k => journal[k] !== sample[k])});
+  })()`);
+  const pr = JSON.parse(rows);
+  check(pr.shown === true, "the panel's own mock is what the pane shows for the panel");
+  check(pr.journal.searchButton === "24x24",
+    `a journal's search buttons are Foundry's 24 square (got ${pr.journal.searchButton})`);
+  // Every one of these was approximated once — a gap in rem, a button in em —
+  // and each drifted by a different amount as a style changed the lettering,
+  // which is why it read as a slight difference rather than a fixed offset.
+  check(pr.differ.length === 0,
+    `the sample's rows measure as a journal's does (${pr.differ.length
+      ? pr.differ.map(k => `${k}: ${pr.journal[k]} vs ${pr.sample[k]}`).join("; ") : "all six agree"})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.constructor.name === "IlluminusStyleEditor") await open.close({force: true});
+    }
+    const entry = game.journal.getName("Panel Rows Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Panel Rows Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[96] The contents panel can be styled folded as well as open");
+try {
+  const state = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Folded State Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "P", type: "text", text: {content: "<p>one</p>"}}]);
+    // A fill and a width said twice, and an edge said once: the third is what
+    // proves a folded control nobody set still paints the ordinary value rather
+    // than rubbing it out.
+    const style = await api.createStyle({name: "Folded State Probe", settings: {sidebar: {
+      background: "#112233", collapsedBackground: "#aa3311",
+      sidebarWidth: 300, collapsedSidebarWidth: 90,
+      borderTopWidth: 3, borderTopStyle: "solid", borderTopColor: "#44ff88"
+    }}});
+    await api.assignStyle(entry, style.id);
+    await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+    await new Promise(r => setTimeout(r, 900));
+    entry.sheet.setPosition({left: 120, top: 80, width: 900, height: 640});
+    await new Promise(r => setTimeout(r, 300));
+    const aside = () => entry.sheet.element.querySelector(".journal-sidebar");
+    const read = () => {
+      const c = getComputedStyle(aside());
+      return {fill: c.backgroundColor, edge: c.borderTopColor,
+        width: Math.round(aside().getBoundingClientRect().width)};
+    };
+    const open = read();
+    entry.sheet.toggleSidebar();
+    await new Promise(r => setTimeout(r, 1400));
+    const shut = read();
+    entry.sheet.toggleSidebar();
+    await new Promise(r => setTimeout(r, 1400));
+    const again = read();
+    await api.deleteStyle(style.id);
+    for (const o of [...foundry.applications.instances.values()]) {
+      if (o.document?.documentName?.startsWith("JournalEntry")) await o.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({open, shut, again});
+  })()`);
+  const fs2 = JSON.parse(state);
+  check(fs2.open.fill === "rgb(17, 34, 51)",
+    `the panel's own fill applies while it is open (got ${fs2.open.fill})`);
+  check(fs2.shut.fill === "rgb(170, 51, 17)",
+    `and the Folded fill takes over once it is folded (got ${fs2.shut.fill})`);
+  check(fs2.again.fill === "rgb(17, 34, 51)",
+    `and is given back on unfolding (got ${fs2.again.fill})`);
+  check(fs2.open.width === 300 && fs2.shut.width === 90,
+    `Panel Width answers under both states (${fs2.open.width} open, ${fs2.shut.width} folded)`);
+  // The whole reason a state's rule is written `var(--folded, var(--ordinary))`.
+  check(fs2.shut.edge === fs2.open.edge,
+    `a Folded control nobody set changes nothing (${fs2.open.edge} -> ${fs2.shut.edge})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Folded State Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Folded State Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[98] A folded panel shows nothing but its buttons");
+try {
+  const bare = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const o of [...foundry.applications.instances.values()]) {
+      if (o.document?.documentName?.startsWith("JournalEntry")) await o.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Bare Folded Journal"});
+    const made = await entry.createEmbeddedDocuments("JournalEntryCategory", [{name: "Category"}]);
+    await entry.createEmbeddedDocuments("JournalEntryPage", [
+      {name: "One", type: "text", category: made[0].id, text: {content: "<p>a</p>"}},
+      {name: "Two", type: "text", category: made[0].id, text: {content: "<p>b</p>"}}
+    ]);
+    const read = async (styled) => {
+      let style = null;
+      if (styled) {
+        // Painted the way a style paints a panel, so a row that were still
+        // drawn would be plain to see rather than merely present.
+        style = await api.createStyle({name: "Bare Folded Probe", settings: {
+          sidebar: {collapsedSidebarWidth: 60, background: "#3a2412"},
+          sidebarEntries: {entryBackground: "#5e3a18"},
+          sidebarCategories: {categoryBackground: "#f2e6c8",
+            categoryBorderTopWidth: 2, categoryBorderTopStyle: "solid",
+            categoryBorderTopColor: "#e8c979"}
+        }});
+        await api.assignStyle(entry, style.id);
+      } else await api.assignStyle(entry, "");
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+      await new Promise(r => setTimeout(r, 900));
+      entry.sheet.setPosition({left: 80, top: 60, width: 900, height: 620});
+      await new Promise(r => setTimeout(r, 300));
+      entry.sheet.toggleSidebar();
+      await new Promise(r => setTimeout(r, 1400));
+      const aside = entry.sheet.element.querySelector(".journal-sidebar");
+      const drawn = [...aside.querySelectorAll(".toc *")].filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      }).map((el) => el.tagName.toLowerCase() + "." + String(el.className).trim().split(/\\s+/)[0]);
+      const buttons = [...aside.querySelectorAll("button")].filter((b) => {
+        const r = b.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      }).length;
+      const foot = aside.querySelector(".action-buttons").getBoundingClientRect();
+      const panel = aside.getBoundingClientRect();
+      const out = {drawn, buttons, footFromBottom: Math.round(panel.bottom - foot.bottom)};
+      entry.sheet.toggleSidebar();
+      await new Promise(r => setTimeout(r, 1400));
+      out.expanded = [...aside.querySelectorAll(".toc li")].filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      }).length;
+      if (style) await api.deleteStyle(style.id);
+      return out;
+    };
+    // Foundry's own first, which is the thing being departed from.
+    const bare = await read(false);
+    const styled = await read(true);
+    for (const o of [...foundry.applications.instances.values()]) {
+      if (o.document?.documentName?.startsWith("JournalEntry")) await o.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({bare, styled});
+  })()`);
+  const bf = JSON.parse(bare);
+  check(bf.bare.drawn.length > 0,
+    `Foundry lists its pages in a folded panel (${bf.bare.drawn.length} things drawn)`);
+  // The departure, and the reason for it: a folded category is a mark in core's
+  // own `content`, which no control could ever reach.
+  check(bf.styled.drawn.length === 0,
+    `a styled one shows none of them (${bf.styled.drawn.join(", ") || "nothing drawn"})`);
+  check(bf.styled.buttons === bf.bare.buttons && bf.styled.buttons >= 3,
+    `while every button Foundry draws stays (${bf.styled.buttons} of ${bf.bare.buttons})`);
+  // The rows are hidden and not the list: `.toc` carries the height that keeps
+  // the footer at the foot, so hiding it pulls the buttons up under the others.
+  check(bf.styled.footFromBottom === bf.bare.footFromBottom,
+    `and the buttons at the foot stay at the foot (${bf.bare.footFromBottom} -> ${bf.styled.footFromBottom})`);
+  check(bf.styled.expanded === bf.bare.expanded && bf.styled.expanded > 0,
+    `an open panel lists everything as before (${bf.bare.expanded} rows -> ${bf.styled.expanded})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Bare Folded Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Bare Folded Probe") await api.deleteStyle(style.id);
     }
   })()`);
 }

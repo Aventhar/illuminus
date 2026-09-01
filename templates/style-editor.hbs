@@ -89,16 +89,21 @@
 
     <div class="illuminus-fields scrollable">
       {{#each group.sections as |section|}}
-      <details class="illuminus-section" {{#if section.open}}open{{/if}}>
-        <summary data-action="toggleSection" data-group="{{group.id}}" data-section="{{section.id}}">
-          <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
-          <span class="illuminus-section__label">{{section.label}}</span>
-          <button type="button" class="illuminus-info" data-action="showHint"
-                  aria-label="{{section.hint}}">
-            <i class="fa-solid fa-circle-info"></i>
-          </button>
-          <span class="illuminus-section__hint">{{section.hint}}</span>
-        </summary>
+      {{!-- A category does not fold. The runs inside it do — a category is where
+            you are, and folding the place you are standing only ever hid the
+            controls you had come for. Its name and the answers that apply to the
+            whole of it are one block, held against the top of the settings while
+            the controls scroll past. --}}
+      <section class="illuminus-section">
+        <header class="illuminus-section__head" data-group="{{group.id}}" data-section="{{section.id}}">
+          <div class="illuminus-section__name">
+            <span class="illuminus-section__label">{{section.label}}</span>
+            <button type="button" class="illuminus-info" data-action="showHint"
+                    aria-label="{{section.hint}}">
+              <i class="fa-solid fa-circle-info"></i>
+            </button>
+            <span class="illuminus-section__hint">{{section.hint}}</span>
+          </div>
 
         <div class="illuminus-section__tools">
           {{#if section.matchable}}
@@ -129,6 +134,8 @@
         {{!-- A line above the first control and below the last, so a category
               reads as a block of its own rather than running into the one
               beneath it. The ones between the runs are written by the schema. --}}
+        </header>
+
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
         {{#each section.rows as |row|}}
         {{#if row.box}}
@@ -142,7 +149,7 @@
         {{/if}}
         {{/each}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
-      </details>
+      </section>
       {{/each}}
     </div>
   </section>
@@ -200,16 +207,21 @@
 
     <div class="illuminus-fields scrollable">
       {{#each family.current.sections as |section|}}
-      <details class="illuminus-section" {{#if section.open}}open{{/if}}>
-        <summary data-action="toggleSection" data-group="{{family.current.id}}" data-section="{{section.id}}">
-          <i class="fa-solid fa-chevron-right illuminus-section__chevron"></i>
-          <span class="illuminus-section__label">{{section.label}}</span>
-          <button type="button" class="illuminus-info" data-action="showHint"
-                  aria-label="{{section.hint}}">
-            <i class="fa-solid fa-circle-info"></i>
-          </button>
-          <span class="illuminus-section__hint">{{section.hint}}</span>
-        </summary>
+      {{!-- A category does not fold. The runs inside it do — a category is where
+            you are, and folding the place you are standing only ever hid the
+            controls you had come for. Its name and the answers that apply to the
+            whole of it are one block, held against the top of the settings while
+            the controls scroll past. --}}
+      <section class="illuminus-section">
+        <header class="illuminus-section__head" data-group="{{family.current.id}}" data-section="{{section.id}}">
+          <div class="illuminus-section__name">
+            <span class="illuminus-section__label">{{section.label}}</span>
+            <button type="button" class="illuminus-info" data-action="showHint"
+                    aria-label="{{section.hint}}">
+              <i class="fa-solid fa-circle-info"></i>
+            </button>
+            <span class="illuminus-section__hint">{{section.hint}}</span>
+          </div>
 
         <div class="illuminus-section__tools">
           {{#if section.matchable}}
@@ -240,6 +252,8 @@
         {{!-- A line above the first control and below the last, so a category
               reads as a block of its own rather than running into the one
               beneath it. The ones between the runs are written by the schema. --}}
+        </header>
+
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
         {{#each section.rows as |row|}}
         {{#if row.box}}
@@ -253,7 +267,7 @@
         {{/if}}
         {{/each}}
         <hr class="illuminus-divider illuminus-divider--edge" aria-hidden="true">
-      </details>
+      </section>
       {{/each}}
     </div>
   </section>
@@ -292,7 +306,11 @@
     </header>
 
     {{!-- Mirrors the journal sheet DOM so the compiled rules apply here unchanged. --}}
-    <div class="{{styledClass}} illuminus-preview__frame" {{styleAttr}}="{{styleId}}">
+    {{!-- `expanded` sits here as it sits on a journal's own root: a rule written
+          for a folded panel is `:not(.expanded)`, and without it here that rule
+          matched the sample every moment of its life. The editor takes it off
+          when somebody asks to see the folded state. --}}
+    <div class="{{styledClass}} illuminus-preview__frame expanded" {{styleAttr}}="{{styleId}}">
       {{!-- Foundry's own classes for a journal window, so that every rule core
             writes for one applies to the sample as well. Core scopes its
             journal styling to `.sheet.journal-entry.application`, and the sample

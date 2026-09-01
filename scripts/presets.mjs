@@ -14,7 +14,7 @@
  * travels under the repository's license, which is why these carry no artwork:
  * every picture they could point at would have to be licensable that way too.
  *
- * Built against schema version 13.
+ * Built against schema version 14.
  */
 
 export const PRESETS = [
@@ -23,19 +23,11 @@ export const PRESETS = [
     "name": "Default Basic",
     "description": "An Example that preserves Foundry's native Journal look, while extending your layout options",
     "settings": {
-      "sidebarEntries": {
-        "entryBackground": "#00000000"
-      },
       "sidebarHeadings": {
-        "headingIndent": 16,
-        "headingBackground": "#00000000"
-      },
-      "sidebarCategories": {
-        "categoryBackground": "#00000000"
+        "headingIndent": 16
       },
       "sidebarSearch": {
         "searchColor": "",
-        "searchBackground": "#00000000",
         "searchBorderTopWidth": 0,
         "searchBorderBottomWidth": 0,
         "searchBorderLeftWidth": 0,
@@ -46,23 +38,25 @@ export const PRESETS = [
         "searchCornerBottomRight": 3
       },
       "sidebarButtons": {
-        "buttonBackground": "#00000000",
-        "buttonCornerTopLeft": 3,
-        "buttonCornerTopRight": 3,
-        "buttonCornerBottomLeft": 3,
-        "buttonCornerBottomRight": 3
+        "topButtonBackground": "#00000000",
+        "topButtonCornerTopLeft": 3,
+        "topButtonCornerTopRight": 3,
+        "topButtonCornerBottomLeft": 3,
+        "topButtonCornerBottomRight": 3,
+        "bottomButtonBackground": "#00000000",
+        "bottomButtonCornerTopLeft": 3,
+        "bottomButtonCornerTopRight": 3,
+        "bottomButtonCornerBottomLeft": 3,
+        "bottomButtonCornerBottomRight": 3
       },
       "window": {
         "textStyle": "bold",
-        "titleBarBackground": "#00000000",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
-        "headerButtonCornerBottomRight": 3,
-        "pageButtonBackground": "#0b0a1380"
+        "headerButtonCornerBottomRight": 3
       },
       "page": {
         "cornerTopLeft": 0,
@@ -71,31 +65,18 @@ export const PRESETS = [
         "cornerBottomRight": 0
       },
       "body": {
-        "marginTop": 0,
-        "highlightBackground": "#e8c979",
-        "codeBackground": "#00000000"
-      },
-      "secrets": {
-        "revealedBackground": "#0035000d",
-        "buttonBackground": "#00000000"
-      },
-      "boxes": {
-        "summaryBackground": "#00000000",
-        "collapsibleBackground": "#00000000"
+        "marginTop": 0
       },
       "editor": {
-        "titleBarBackground": "#00000000",
         "textStyle": "bold",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
         "headerButtonCornerBottomRight": 3
       },
       "editorSettingsBar": {
-        "settingsBarBackground": "#00000000",
         "fieldBackground": "#00000000",
         "fieldBorderTopWidth": 0,
         "fieldBorderRightWidth": 0,
@@ -109,7 +90,6 @@ export const PRESETS = [
         "fieldPaddingLeft": 0
       },
       "editorDropdowns": {
-        "dropdownBackground": "#00000000",
         "dropdownCornerTopLeft": 0,
         "dropdownCornerTopRight": 0,
         "dropdownCornerBottomRight": 0,
@@ -117,9 +97,7 @@ export const PRESETS = [
         "dropdownPaddingTop": 0,
         "dropdownPaddingRight": 0,
         "dropdownPaddingBottom": 0,
-        "dropdownPaddingLeft": 0,
-        "listBackground": "#00000000",
-        "itemBackground": "#00000000"
+        "dropdownPaddingLeft": 0
       },
       "editorToolbar": {
         "toolbarBackground": "#00000000",
@@ -253,7 +231,6 @@ export const PRESETS = [
         "activeOutlineWidth": 3,
         "hoverTextShadowColor": "#00000000",
         "activeTextShadowColor": "#00000000",
-        "entryBackground": "#00000000",
         "hoverEntryGradientFrom": "#00000000",
         "activeEntryGradientFrom": "#00000000",
         "hoverEntryGradientTo": "#00000000",
@@ -321,8 +298,7 @@ export const PRESETS = [
         "activeEntryCornerBottomRightShape": "round"
       },
       "sidebarHeadings": {
-        "headingIndent": 10,
-        "headingBackground": "#00000000"
+        "headingIndent": 10
       },
       "sidebarCategories": {
         "categoryFont": "Amiri",
@@ -412,7 +388,6 @@ export const PRESETS = [
       },
       "sidebarSearch": {
         "searchColor": "",
-        "searchBackground": "#00000000",
         "searchBorderTopWidth": 0,
         "searchBorderBottomWidth": 0,
         "searchBorderLeftWidth": 0,
@@ -423,11 +398,16 @@ export const PRESETS = [
         "searchCornerBottomRight": 3
       },
       "sidebarButtons": {
-        "buttonBackground": "#00000000",
-        "buttonCornerTopLeft": 3,
-        "buttonCornerTopRight": 3,
-        "buttonCornerBottomLeft": 3,
-        "buttonCornerBottomRight": 3
+        "topButtonBackground": "#00000000",
+        "topButtonCornerTopLeft": 3,
+        "topButtonCornerTopRight": 3,
+        "topButtonCornerBottomLeft": 3,
+        "topButtonCornerBottomRight": 3,
+        "bottomButtonBackground": "#00000000",
+        "bottomButtonCornerTopLeft": 3,
+        "bottomButtonCornerTopRight": 3,
+        "bottomButtonCornerBottomLeft": 3,
+        "bottomButtonCornerBottomRight": 3
       },
       "sidebarNumbers": {
         "numberShown": false,
@@ -442,15 +422,12 @@ export const PRESETS = [
       },
       "window": {
         "textStyle": "bold",
-        "titleBarBackground": "#00000000",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
-        "headerButtonCornerBottomRight": 3,
-        "pageButtonBackground": "#0b0a1380"
+        "headerButtonCornerBottomRight": 3
       },
       "title": {
         "font": "Amiri",
@@ -1126,7 +1103,6 @@ export const PRESETS = [
         "hoverQuoteStyle": "italic",
         "highlightColor": "#00003c",
         "hoverHighlightColor": "#00003c",
-        "highlightBackground": "#e8c979",
         "hoverHighlightBackground": "#e8c979",
         "strikeColor": "#a00000",
         "hoverStrikeColor": "#a00000",
@@ -1149,7 +1125,6 @@ export const PRESETS = [
         "hoverCodeColor": "#0000ff",
         "codeBorderColor": "#000000",
         "hoverCodeBorderColor": "#000000",
-        "codeBackground": "#00000000",
         "hoverCodeBackground": "#00000000",
         "hoverCodeTextureFit": "cover",
         "hoverCodeTexturePosition": "center",
@@ -1555,23 +1530,16 @@ export const PRESETS = [
         "hoverCaptionTextShadowColor": "#00000000",
         "hoverCaptionSide": "top"
       },
-      "boxes": {
-        "summaryBackground": "#00000000",
-        "collapsibleBackground": "#00000000"
-      },
       "editor": {
-        "titleBarBackground": "#00000000",
         "textStyle": "bold",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
         "headerButtonCornerBottomRight": 3
       },
       "editorSettingsBar": {
-        "settingsBarBackground": "#00000000",
         "fieldBackground": "#00000000",
         "fieldBorderTopWidth": 0,
         "fieldBorderRightWidth": 0,
@@ -1585,7 +1553,6 @@ export const PRESETS = [
         "fieldPaddingLeft": 0
       },
       "editorDropdowns": {
-        "dropdownBackground": "#00000000",
         "dropdownCornerTopLeft": 0,
         "dropdownCornerTopRight": 0,
         "dropdownCornerBottomRight": 0,
@@ -1593,9 +1560,7 @@ export const PRESETS = [
         "dropdownPaddingTop": 0,
         "dropdownPaddingRight": 0,
         "dropdownPaddingBottom": 0,
-        "dropdownPaddingLeft": 0,
-        "listBackground": "#00000000",
-        "itemBackground": "#00000000"
+        "dropdownPaddingLeft": 0
       },
       "editorToolbar": {
         "toolbarBackground": "#00000000",
@@ -1689,19 +1654,11 @@ export const PRESETS = [
     "name": "SciFi Basic",
     "description": "An Example SciFi Theme",
     "settings": {
-      "sidebarEntries": {
-        "entryBackground": "#00000000"
-      },
       "sidebarHeadings": {
-        "headingIndent": 16,
-        "headingBackground": "#00000000"
-      },
-      "sidebarCategories": {
-        "categoryBackground": "#00000000"
+        "headingIndent": 16
       },
       "sidebarSearch": {
         "searchColor": "",
-        "searchBackground": "#00000000",
         "searchBorderTopWidth": 0,
         "searchBorderBottomWidth": 0,
         "searchBorderLeftWidth": 0,
@@ -1712,23 +1669,25 @@ export const PRESETS = [
         "searchCornerBottomRight": 3
       },
       "sidebarButtons": {
-        "buttonBackground": "#00000000",
-        "buttonCornerTopLeft": 3,
-        "buttonCornerTopRight": 3,
-        "buttonCornerBottomLeft": 3,
-        "buttonCornerBottomRight": 3
+        "topButtonBackground": "#00000000",
+        "topButtonCornerTopLeft": 3,
+        "topButtonCornerTopRight": 3,
+        "topButtonCornerBottomLeft": 3,
+        "topButtonCornerBottomRight": 3,
+        "bottomButtonBackground": "#00000000",
+        "bottomButtonCornerTopLeft": 3,
+        "bottomButtonCornerTopRight": 3,
+        "bottomButtonCornerBottomLeft": 3,
+        "bottomButtonCornerBottomRight": 3
       },
       "window": {
         "textStyle": "bold",
-        "titleBarBackground": "#00000000",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
-        "headerButtonCornerBottomRight": 3,
-        "pageButtonBackground": "#0b0a1380"
+        "headerButtonCornerBottomRight": 3
       },
       "page": {
         "cornerTopLeft": 0,
@@ -1737,31 +1696,18 @@ export const PRESETS = [
         "cornerBottomRight": 0
       },
       "body": {
-        "marginTop": 0,
-        "highlightBackground": "#e8c979",
-        "codeBackground": "#00000000"
-      },
-      "secrets": {
-        "revealedBackground": "#0035000d",
-        "buttonBackground": "#00000000"
-      },
-      "boxes": {
-        "summaryBackground": "#00000000",
-        "collapsibleBackground": "#00000000"
+        "marginTop": 0
       },
       "editor": {
-        "titleBarBackground": "#00000000",
         "textStyle": "bold",
         "paddingLeft": 0,
         "paddingRight": 0,
-        "headerButtonBackground": "#00000000",
         "headerButtonCornerTopLeft": 3,
         "headerButtonCornerTopRight": 3,
         "headerButtonCornerBottomLeft": 3,
         "headerButtonCornerBottomRight": 3
       },
       "editorSettingsBar": {
-        "settingsBarBackground": "#00000000",
         "fieldBackground": "#00000000",
         "fieldBorderTopWidth": 0,
         "fieldBorderRightWidth": 0,
@@ -1775,7 +1721,6 @@ export const PRESETS = [
         "fieldPaddingLeft": 0
       },
       "editorDropdowns": {
-        "dropdownBackground": "#00000000",
         "dropdownCornerTopLeft": 0,
         "dropdownCornerTopRight": 0,
         "dropdownCornerBottomRight": 0,
@@ -1783,9 +1728,7 @@ export const PRESETS = [
         "dropdownPaddingTop": 0,
         "dropdownPaddingRight": 0,
         "dropdownPaddingBottom": 0,
-        "dropdownPaddingLeft": 0,
-        "listBackground": "#00000000",
-        "itemBackground": "#00000000"
+        "dropdownPaddingLeft": 0
       },
       "editorToolbar": {
         "toolbarBackground": "#00000000",

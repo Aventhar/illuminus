@@ -417,6 +417,46 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
 
   /* --- Buttons --------------------------------------------------------- */
 
+  /** Set while the question below is on screen, so Escape answers it alone. */
+  let asking = false;
+
+  /**
+   * Forget a saved color, having asked first.
+   *
+   * A palette is built up over a whole style and there is no putting one back,
+   * so the one irreversible thing in this window asks before doing it. Both
+   * ways in come through here — the small cross that appears under the pointer
+   * and the Delete key on a focused swatch — because a warning on one of them
+   * is not a warning.
+   *
+   * Found again by identity rather than by the index it was clicked at: the
+   * question is answered a moment later, and the list may have been dragged
+   * into a different order in between.
+   */
+  const forget = async (index) => {
+    const entry = saved[index];
+    if (entry === undefined) return;
+    const hex = entry?.hex ?? entry;
+    const name = entry?.name;
+    asking = true;
+    let sure = false;
+    try {
+      sure = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("ILLUMINUS.Confirm.ForgetColorTitle") },
+        content: `<p>${game.i18n.format("ILLUMINUS.Confirm.ForgetColor", {
+          color: name ? `${name} (${hex})` : hex
+        })}</p>`
+      });
+    } finally {
+      asking = false;
+    }
+    if (!sure) return;
+    const at = saved.indexOf(entry);
+    if (at < 0) return;
+    saved.splice(at, 1);
+    persist();
+  };
+
   root.addEventListener("click", async (event) => {
     // Read from the element that carries the action, not from whatever child
     // was clicked — an icon inside a button has no dataset of its own.
@@ -427,8 +467,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
 
     if (action === "forget") {
       event.stopPropagation();
-      saved.splice(Number(control.dataset.index), 1);
-      persist();
+      await forget(Number(control.dataset.index));
     } else if (action === "use") {
       const value = hexToRgba(control.dataset.hex);
       if (!value) return;
@@ -579,8 +618,7 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
     const cell = event.target.closest("[data-cp='use']");
     if (!cell) return;
     event.preventDefault();
-    saved.splice(Number(cell.dataset.index), 1);
-    persist();
+    forget(Number(cell.dataset.index));
   });
 
   root.querySelector(".illuminus-cp__bar").addEventListener("pointerdown", (event) => {
@@ -603,7 +641,11 @@ export function openColorPicker({ anchor, value, onChange, onCommit, swatches = 
 
   const onKey = (event) => {
     if (event.key !== "Escape") return;
-    // Sampling owns the window while it runs; Escape belongs to it.
+    // Sampling owns the window while it runs; Escape belongs to it. So does a
+    // question about forgetting a color — answering that one with Escape would
+    // otherwise close the picker as well, and put the color back to what it
+    // was, which is not what "no, keep it" means.
+    if (asking) return;
     if (document.documentElement.classList.contains("illuminus-picking")) return;
     event.preventDefault();
     event.stopPropagation();

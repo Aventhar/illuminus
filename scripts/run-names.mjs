@@ -17,7 +17,11 @@
 export const STATES = [
   { id: "normal", label: "ILLUMINUS.Editor.StateNormal" },
   { id: "hover", label: "ILLUMINUS.Editor.StateHover", match: /hover/i },
-  { id: "active", label: "ILLUMINUS.Editor.StateActive", match: /^active|Active/ }
+  { id: "active", label: "ILLUMINUS.Editor.StateActive", match: /^active|Active/ },
+  // The contents panel folded away. Unlike the other two this is a state of the
+  // whole panel rather than of one row in it, which is why every part inside
+  // the panel offers it and nothing outside the panel does.
+  { id: "collapsed", label: "ILLUMINUS.Editor.StateCollapsed", match: /^collapsed|Collapsed/ }
 ];
 
 /** Which state a control belongs to. Anything unmarked is the ordinary one. */
@@ -163,4 +167,72 @@ export function nameRuns(runs) {
     const word = (runs[at][0]?.label ?? "").split(" ")[0];
     return word && !name.split(" ").includes(word) ? `${word} ${name}` : name;
   });
+}
+
+
+/* ---- Which run a control belongs to, read from its name ---- */
+
+export const BOX_SIDES = ["Top", "Right", "Bottom", "Left"];
+export const BOX_CORNERS = ["TopLeft", "TopRight", "BottomLeft", "BottomRight"];
+export const BOX_PARTS = ["Width", "Style", "Color"];
+
+/**
+ * One family, however its state word is spelled.
+ *
+ * A state's control is named either way round — `activeHeadingBorderTopWidth`
+ * where it was derived, `headingActiveBorderTopColor` where the schema states
+ * it by hand — and both are the *same* family in the same state. Keyed on the
+ * prefix as written, they came out as two families and were drawn as two runs
+ * with one name between them: Sub-Headings showed two "Edges and Corners" under
+ * Selected, one holding the widths and the other the colors.
+ * @param {string} prefix  Whatever stands before the family's own word.
+ * @returns {string}       The same prefix with any state word at the front.
+ */
+export function oneSpelling(prefix) {
+  const said = prefix.match(/^([a-z]+)(Hover|Active|Collapsed)(.*)$/);
+  if (!said) return prefix;
+  return `${said[2].toLowerCase()}${said[1][0].toUpperCase()}${said[1].slice(1)}${said[3]}`;
+}
+
+export function clusterPartOf(name) {
+  let m;
+  if ((m = name.match(/^(.*?)([Tt]ext[Ss]hadow|[Ii]nner[Ss]hadow|[Ss]hadow)(OffsetX|OffsetY|Blur|Spread|Color)$/))) {
+    return { family: `${oneSpelling(m[1])}${m[2]}`, kind: "shadow" };
+  }
+  // Everything a picture is given, including what is done to it before it is
+  // laid down: they are one run, and the five worked out of the picture were
+  // being drawn as loose rows under it.
+  if ((m = name.match(
+    /^(.*?)[Tt]exture(Fit|Position|Blend|Opacity|Blur|Brightness|Contrast|Saturation|Age)?$/))) {
+    return { family: `${oneSpelling(m[1])}Texture`, kind: "picture" };
+  }
+  return null;
+}
+
+export function boxPartOf(name) {
+  const sides = BOX_SIDES.join("|");
+  // Both spellings of the word: a family with no prefix is `borderTopWidth`,
+  // and one with a prefix is `codeBorderTopWidth`. Matching only the second
+  // gathered the handful of prefixed families and left every plain one — which
+  // is most of them — spread down the part as before.
+  let m;
+  // An edge and the corners it turns are one family, so they are drawn as one
+  // box: two families meant two boxes, one of them holding nothing but corners.
+  if ((m = name.match(new RegExp(`^(.*?)[Bb]order(${sides})(${BOX_PARTS.join("|")})$`)))) {
+    return { family: `${oneSpelling(m[1])}Edges`, kind: "border", side: m[2], part: m[3] };
+  }
+  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})$`)))) {
+    return { family: `${oneSpelling(m[1])}Edges`, kind: "corner", corner: m[2] };
+  }
+  // What each corner is cut to belongs with the corners: it reads their sizes,
+  // and on its own after the run it read as a control about nothing.
+  if ((m = name.match(new RegExp(`^(.*?)[Cc]orner(${BOX_CORNERS.join("|")})Shape$`)))) {
+    return { family: `${oneSpelling(m[1])}Edges`, kind: "cornerShape", corner: m[2] };
+  }
+  if ((m = name.match(new RegExp(`^(.*?)([Pp]adding|[Mm]argin)(${sides})$`)))) {
+    // Both rings belong to one family, so the inner four and the outer four are
+    // gathered into the same run and drawn as one box.
+    return { family: `${oneSpelling(m[1])}Spacing`, kind: m[2].toLowerCase(), side: m[3] };
+  }
+  return null;
 }
