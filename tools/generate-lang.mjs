@@ -1599,8 +1599,12 @@ const FIELD_TEXT = {
   headingSize: ["Text Size", "Size of headings inside this box. 0 follows the page."],
   headingColor: ["Text Color", "Color of headings inside this box. Leave empty to follow the page."],
   headingWeight: ["Thickness", "How heavy headings inside this block are."],
-  headingCaps: ["Capitals", "Capitalization of headings inside this block."],
-  headingAlign: ["Alignment", "Which edge headings inside this block line up against."],
+  // Read in a block and in the contents panel alike, for the same reason
+  // `headingAlign` is: the wording is keyed by the control's name.
+  headingCaps: ["Capitals", "How the headings are capitalized."],
+  // Read in a block and in the contents panel alike, since the wording is
+  // keyed by the control's name and both parts call it `headingAlign`.
+  headingAlign: ["Alignment", "Which edge the headings line up against."],
   headingMarginTop: ["Gap Above", "Space above a heading inside this box."],
   headingMarginBottom: ["Gap Below", "Space below a heading inside this box."],
   headingRuleWidth: ["Rule Thickness", "A line above each heading inside this block. 0 draws nothing."],

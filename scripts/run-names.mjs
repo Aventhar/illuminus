@@ -19,8 +19,9 @@ export const STATES = [
   { id: "hover", label: "ILLUMINUS.Editor.StateHover", match: /hover/i },
   { id: "active", label: "ILLUMINUS.Editor.StateActive", match: /^active|Active/ },
   // The contents panel folded away. Unlike the other two this is a state of the
-  // whole panel rather than of one row in it, which is why every part inside
-  // the panel offers it and nothing outside the panel does.
+  // whole panel rather than of one row in it, and it is offered only where
+  // something can be seen while it holds: how wide the strip is, and the
+  // buttons the strip is left holding. A folded panel lists nothing at all.
   { id: "collapsed", label: "ILLUMINUS.Editor.StateCollapsed", match: /^collapsed|Collapsed/ }
 ];
 

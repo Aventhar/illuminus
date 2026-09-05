@@ -1270,7 +1270,11 @@ const texture = await cdp.evaluate(`(async () => {
   await new Promise(r => setTimeout(r, 1200));
 
   const content = entry.sheet.element.querySelector(".journal-entry-content");
-  const url = getComputedStyle(content, "::after").backgroundImage.match(/url\\("([^"]+)"\\)/)?.[1];
+  // Either place the picture may be painted: on the element, where it runs
+  // under a border, or on the layer, where a strength and a filter reach it.
+  const url = [getComputedStyle(content).backgroundImage,
+    getComputedStyle(content, "::after").backgroundImage]
+    .map((one) => one.match(/url\\("([^"]+)"\\)/)?.[1]).find(Boolean);
   const res = url ? await fetch(url) : null;
   const out = {url, ok: res?.ok ?? false, doubled: (url ?? "").includes("styles/modules")};
 
@@ -2470,13 +2474,19 @@ try {
     await new Promise(r => setTimeout(r, 1400));
 
     const root = entry.sheet.element;
+    // A picture is painted by the element or by the layer over it, never both:
+    // the element where it must run under a border, the layer where a strength
+    // or a filter has to reach it. So the reading asks both.
     const layer = (sel) => {
       const el = root.querySelector(sel);
       if (!el) return {missing: true};
       const before = getComputedStyle(el, "::after");
+      const onLayer = /mystery-man/.test(before.backgroundImage);
+      const painted = onLayer ? before : getComputedStyle(el);
       return {
-        image: /mystery-man/.test(before.backgroundImage),
-        opacity: before.opacity, repeat: before.backgroundRepeat,
+        image: /mystery-man/.test(painted.backgroundImage),
+        onLayer,
+        opacity: before.opacity, repeat: painted.backgroundRepeat.split(",")[0].trim(),
         // Behind the lettering, not over it.
         behind: before.zIndex, isolated: getComputedStyle(el).isolation
       };
@@ -3231,6 +3241,11 @@ try {
     const hoverFields = () => [...buttons.querySelectorAll(".illuminus-field[data-field]")]
       .filter(f => /hover/i.test(f.dataset.field));
     out.hasSwitch = !!buttons.querySelector(".illuminus-state");
+    // And the folded half. The way out of a folded panel is one of these
+    // buttons, so this is the one part inside the panel that is still there to
+    // be looked at once it is folded — and the only one offering the state.
+    out.buttonStateOptions = [...buttons.querySelectorAll(".illuminus-state__option")]
+      .map(b => b.dataset.state);
     out.hoverHiddenNormally = hoverFields().every(f => f.classList.contains("is-state-hidden"));
     buttons.querySelector('.illuminus-state__option[data-state="hover"]').click();
     await new Promise(r => setTimeout(r, 300));
@@ -3299,11 +3314,17 @@ try {
   check(f.hoverHiddenNormally, "whose pointed-at controls are folded away by default");
   check(f.hoverShownAfter && f.normalHiddenAfter, "and swap in when it is switched");
   check(f.filterReachesHidden, "searching still reaches a control the switch folded away");
-  // Four now: the panel answers to being folded away as well, and every part
-  // inside it does — a state of the whole panel rather than of one row in it.
-  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["normal", "hover", "active", "collapsed"]),
-    `a listed page offers all four of its states in one section (got ${f.entryStateOptions.join(", ")})`);
-  check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected", "Folded"]),
+  // Three, not four: the panel answers to being folded away and so do its
+  // buttons, because they are what is left when it is. A listed page is not —
+  // a folded panel lists nothing at all, so a folded Page Entry would be a set
+  // of controls painting something nobody can see.
+  // No Selected among them: a button is pointed at and pressed, never chosen,
+  // so the section offers only the states it actually has controls for.
+  check(JSON.stringify(f.buttonStateOptions) === JSON.stringify(["normal", "hover", "collapsed"]),
+    `the panel's buttons answer to a folded panel (got ${f.buttonStateOptions.join(", ")})`);
+  check(JSON.stringify(f.entryStateOptions) === JSON.stringify(["normal", "hover", "active"]),
+    `a listed page offers all three of its states in one section (got ${f.entryStateOptions.join(", ")})`);
+  check(JSON.stringify(f.entryStateLabels) === JSON.stringify(["Normal", "Hovered", "Selected"]),
     `named as a person would name them (got ${f.entryStateLabels.join(", ")})`);
   // Neither state shows everything: one at a time is the whole point of the
   // switch.
@@ -3314,8 +3335,8 @@ try {
   // governing every row at once: the page being read has its own of everything.
   check(f.entryFirst === f.entryOnActive,
     `a listed page offers as much when it is the one being read (${f.entryFirst} then ${f.entryOnActive})`);
-  check(JSON.stringify(f.headingStateOptions) === JSON.stringify(["normal", "hover", "active", "collapsed"]),
-    `a listed heading offers the same four states (${f.headingStateOptions?.join(", ")})`);
+  check(JSON.stringify(f.headingStateOptions) === JSON.stringify(["normal", "hover", "active"]),
+    `a listed heading offers the same three states (${f.headingStateOptions?.join(", ")})`);
   check(f.headingNormal > 0 && f.headingNormal === f.headingOnActive,
     `and as much for the one a reader chose (${f.headingNormal} then ${f.headingOnActive})`);
 } finally {
@@ -5601,7 +5622,10 @@ const scale = await cdp.evaluate(`(async () => {
       sizes["h" + level] = el ? getComputedStyle(el).fontSize : null;
     }
     const title = app.element.querySelector('.illuminus-preview__frame .journal-page-header h1');
-    sizes.titleLayer = title ? getComputedStyle(title, "::after").backgroundImage : null;
+    sizes.titleLayer = title
+      ? [getComputedStyle(title, "::after").backgroundImage, getComputedStyle(title).backgroundImage]
+        .find((one) => /url\\(/.test(one)) ?? "none"
+      : null;
     freeze.remove();
     await app.close({force: true});
     return JSON.stringify(sizes);
@@ -7321,7 +7345,12 @@ try {
       box01: {cornerTopLeft: 18, cornerTopRight: 18, cornerBottomLeft: 18, cornerBottomRight: 18,
               cornerTopLeftShape: "bevel", cornerTopRightShape: "scoop",
               cornerBottomLeftShape: "notch", cornerBottomRightShape: "round",
-              background: "#402010"},
+              background: "#402010",
+              // A picture too, because the layer it rides on is the half that
+              // was wrong: it copied the host's radius and not its shape, so a
+              // scooped box wore a rounded texture that bulged out past its own
+              // border. Found by eye on a real style, not by any reading here.
+              texture: "icons/svg/circle.svg", textureOpacity: 100},
       // And a category that says nothing about it, which must stay as Foundry
       // draws it: round is the browser's own, so nothing changes.
       secrets: {cornerTopLeft: 10}
@@ -7336,14 +7365,30 @@ try {
     const root = entry.sheet.element;
     const box = root.querySelector("blockquote.illuminus-box--box01");
     const secret = root.querySelector("section.secret");
+    // Each keyword is an alias of a superellipse, and a browser is free to
+    // answer with either spelling — Chromium serializes the curve rather than
+    // the word it was given, so a check reading the word alone starts failing
+    // on a browser update while the module is doing exactly what it did. Both
+    // are the same corner; the words are what a person set.
+    const WORDS = {"superellipse(0)": "bevel", "superellipse(-1)": "scoop",
+      "superellipse(1)": "round", "superellipse(-infinity)": "notch"};
+    const named = (value) => String(value ?? "").trim().split(" ")
+      .map((one) => WORDS[one] ?? one).join(" ");
     const out = {
       supported: CSS.supports("corner-shape", "bevel")
         && CSS.supports("corner-top-left-shape", "bevel"),
-      shape: getComputedStyle(box).cornerShape,
+      shape: named(getComputedStyle(box).cornerShape),
       corners: ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((c) =>
-        getComputedStyle(box).getPropertyValue("corner-" + c.replace(/([a-z])([A-Z])/, "$1-$2").toLowerCase() + "-shape")),
+        named(getComputedStyle(box).getPropertyValue("corner-" + c.replace(/([a-z])([A-Z])/, "$1-$2").toLowerCase() + "-shape"))),
+      // The same four, read off the picture layer rather than the box.
+      layerCorners: ["TopLeft", "TopRight", "BottomRight", "BottomLeft"].map((c) =>
+        named(getComputedStyle(box, "::after").getPropertyValue("corner-" + c.replace(/([a-z])([A-Z])/, "$1-$2").toLowerCase() + "-shape"))),
+      // Wherever the picture is painted: on the element where it runs under the
+      // border, on the layer where a filter has to reach it.
+      layerImage: (/url\\(/.test(getComputedStyle(box, "::after").backgroundImage)
+        ? getComputedStyle(box, "::after") : getComputedStyle(box)).backgroundImage.slice(0, 40),
       radius: getComputedStyle(box).borderTopLeftRadius,
-      unset: getComputedStyle(secret).cornerShape
+      unset: named(getComputedStyle(secret).cornerShape)
     };
     for (const app of [...foundry.applications.instances.values()]) {
       if (app.document?.documentName?.startsWith("JournalEntry")) await app.close({force: true});
@@ -7363,6 +7408,14 @@ try {
   // about a corner still looks exactly as it did.
   check(/round/.test(shapes.unset ?? ""),
     `and a corner nobody has shaped is round, as Foundry draws it (${shapes.unset})`);
+  // The picture is cut to the same corner as the box it sits in. It was not:
+  // the layer inherited the radius and kept the browser's own round shape, so
+  // every textured surface a style had beveled, scooped or notched wore a
+  // rounded picture that painted over its own border.
+  check(/url\(/.test(shapes.layerImage ?? ""),
+    `the box carries a picture to cut (${shapes.layerImage})`);
+  check(JSON.stringify(shapes.layerCorners) === JSON.stringify(shapes.corners),
+    `and its picture takes the same four shapes (${(shapes.layerCorners ?? []).join(", ")})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const api = game.modules.get("illuminus").api;
@@ -9231,23 +9284,32 @@ try {
     const entry = await JournalEntry.create({name: "Folded State Journal"});
     await entry.createEmbeddedDocuments("JournalEntryPage",
       [{name: "P", type: "text", text: {content: "<p>one</p>"}}]);
-    // A fill and a width said twice, and an edge said once: the third is what
-    // proves a folded control nobody set still paints the ordinary value rather
-    // than rubbing it out.
-    const style = await api.createStyle({name: "Folded State Probe", settings: {sidebar: {
-      background: "#112233", collapsedBackground: "#aa3311",
-      sidebarWidth: 300, collapsedSidebarWidth: 90,
-      borderTopWidth: 3, borderTopStyle: "solid", borderTopColor: "#44ff88"
-    }}});
+    // A fill and a width said twice, and a lettering color said once: the third
+    // is what proves a folded control nobody set still paints the ordinary
+    // value rather than rubbing it out.
+    //
+    // The fill is a button's, because the buttons are what a folded panel is
+    // left holding — the panel's own fill has no Folded control any more, and
+    // neither has anything it lists, since a folded panel lists nothing.
+    const style = await api.createStyle({name: "Folded State Probe", settings: {
+      sidebar: {sidebarWidth: 300, collapsedSidebarWidth: 90},
+      sidebarButtons: {
+        bottomButtonBackground: "#112233", collapsedBottomButtonBackground: "#aa3311",
+        bottomButtonColor: "#44ff88"
+      }
+    }});
     await api.assignStyle(entry, style.id);
     await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
     await new Promise(r => setTimeout(r, 900));
     entry.sheet.setPosition({left: 120, top: 80, width: 900, height: 640});
     await new Promise(r => setTimeout(r, 300));
     const aside = () => entry.sheet.element.querySelector(".journal-sidebar");
+    // Previous rather than Create: core hides Create outright once the panel is
+    // folded, so the reading would be of an element with no box.
+    const button = () => aside().querySelector(".action-buttons button.previous");
     const read = () => {
-      const c = getComputedStyle(aside());
-      return {fill: c.backgroundColor, edge: c.borderTopColor,
+      const c = getComputedStyle(button());
+      return {fill: c.backgroundColor, ink: c.color,
         width: Math.round(aside().getBoundingClientRect().width)};
     };
     const open = read();
@@ -9266,7 +9328,7 @@ try {
   })()`);
   const fs2 = JSON.parse(state);
   check(fs2.open.fill === "rgb(17, 34, 51)",
-    `the panel's own fill applies while it is open (got ${fs2.open.fill})`);
+    `a panel button's own fill applies while it is open (got ${fs2.open.fill})`);
   check(fs2.shut.fill === "rgb(170, 51, 17)",
     `and the Folded fill takes over once it is folded (got ${fs2.shut.fill})`);
   check(fs2.again.fill === "rgb(17, 34, 51)",
@@ -9274,8 +9336,8 @@ try {
   check(fs2.open.width === 300 && fs2.shut.width === 90,
     `Panel Width answers under both states (${fs2.open.width} open, ${fs2.shut.width} folded)`);
   // The whole reason a state's rule is written `var(--folded, var(--ordinary))`.
-  check(fs2.shut.edge === fs2.open.edge,
-    `a Folded control nobody set changes nothing (${fs2.open.edge} -> ${fs2.shut.edge})`);
+  check(fs2.shut.ink === fs2.open.ink,
+    `a Folded control nobody set changes nothing (${fs2.open.ink} -> ${fs2.shut.ink})`);
 } finally {
   await cdp.evaluate(`(async () => {
     const entry = game.journal.getName("Folded State Journal");
@@ -9375,6 +9437,172 @@ try {
     }
   })()`);
 }
+
+console.log("\n[99] A listed sub-heading can be lined up, and set in capitals");
+try {
+  const lined = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Sub-heading Align Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage", [{name: "P", type: "text",
+      text: {content: "<h2>Alpha</h2><p>one</p><h2>Beta</h2><p>two</p>"}}]);
+    const read = async (settings) => {
+      const style = await api.createStyle({name: "Sub-heading Align Probe",
+        settings: {sidebarHeadings: settings}});
+      await api.assignStyle(entry, style.id);
+      // The list of headings is drawn only under the page being read, so the
+      // sheet has to be rendered on that page for there to be anything to line
+      // up at all.
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+      await new Promise(r => setTimeout(r, 800));
+      // Measured once it has a box, not once the wait is over. A sheet that is
+      // still settling answers a rect of zeros, and the reading then says the
+      // words did not move when what happened is that nothing was drawn yet.
+      const found = () => entry.sheet.element
+        .querySelector(".journal-sidebar .toc ol.headings .heading-link");
+      let link = found();
+      for (let tries = 0; tries < 20; tries += 1) {
+        link = found();
+        if (link && link.getBoundingClientRect().width > 0) break;
+        await new Promise(r => setTimeout(r, 100));
+      }
+      const out = {found: Boolean(link && link.getBoundingClientRect().width > 0)};
+      if (link) {
+        out.align = getComputedStyle(link).textAlign;
+        out.caps = getComputedStyle(link).textTransform;
+        // Where the words actually are, not what the declaration says. The link
+        // is laid out full width, so a rule that parses and never moves anything
+        // would pass a reading of the property alone — which is the whole risk
+        // with an alignment, and how the category's own control was written on
+        // the wrong element the first time.
+        const range = document.createRange();
+        range.selectNodeContents(link);
+        const words = range.getBoundingClientRect();
+        const box = link.getBoundingClientRect();
+        out.offset = Math.round(words.left - box.left);
+        out.width = Math.round(box.width);
+        // The words themselves, which is how capitals are read: a capital is
+        // wider than the letter it stands for, so the same heading takes more
+        // room. Reading the text cannot say — a transform paints the letters
+        // differently and leaves the text alone.
+        out.wordsWide = Math.round(words.width);
+      }
+      await api.deleteStyle(style.id);
+      return out;
+    };
+    const out = {
+      left: await read({headingAlign: "left"}),
+      center: await read({headingAlign: "center"}),
+      right: await read({headingAlign: "right"}),
+      shouted: await read({headingAlign: "left", headingCaps: "uppercase"})
+    };
+    for (const open of [...foundry.applications.instances.values()]) {
+      if (open.document?.documentName?.startsWith("JournalEntry")) await open.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify(out);
+  })()`);
+  const al = JSON.parse(lined);
+  check(al.left.found && al.center.found && al.right.found && al.shouted.found,
+    "a page being read lists its sub-headings, in every reading");
+  check(al.right.align === "right" && al.left.align === "left",
+    `the control reaches the listed heading (${al.left.align}, ${al.right.align})`);
+  check(al.right.offset > al.left.offset,
+    `and the words move with it (${al.left.offset}px from the left, then ${al.right.offset}px)`);
+  check(al.center.offset > al.left.offset && al.center.offset < al.right.offset,
+    `with center between the two (${al.center.offset}px of ${al.center.width}px)`);
+  // And the same section's Capitals, which is the other thing a listed heading
+  // could not be told to do.
+  check(al.shouted.caps === "uppercase" && al.left.caps !== "uppercase",
+    `Capitals reaches the listed heading too (${al.left.caps} -> ${al.shouted.caps})`);
+  check(al.shouted.wordsWide > al.left.wordsWide,
+    `and the heading is actually set in them (${al.left.wordsWide}px -> ${al.shouted.wordsWide}px wide)`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Sub-heading Align Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Sub-heading Align Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
+console.log("\n[100] A picture runs under a border that lets anything through");
+try {
+  const under = await cdp.evaluate(`(async () => {
+    const api = game.modules.get("illuminus").api;
+    for (const a of [...foundry.applications.instances.values()]) {
+      if (a.document?.documentName?.startsWith("JournalEntry")) await a.close({force: true});
+    }
+    const entry = await JournalEntry.create({name: "Under Border Journal"});
+    await entry.createEmbeddedDocuments("JournalEntryPage",
+      [{name: "Under Border Page", type: "text", text: {content: "<p>one</p>"}}]);
+    const edges = {
+      borderTopWidth: 10, borderTopStyle: "double", borderTopColor: "#ffc87d",
+      borderRightWidth: 10, borderRightStyle: "double", borderRightColor: "#ffc87d",
+      borderBottomWidth: 10, borderBottomStyle: "double", borderBottomColor: "#ffc87d",
+      borderLeftWidth: 10, borderLeftStyle: "double", borderLeftColor: "#ffc87d"
+    };
+    const read = async (extra) => {
+      const style = await api.createStyle({name: "Under Border Probe", settings: {title: {
+        background: "#321900", texture: "icons/svg/circle.svg", textureBlend: "overlay",
+        ...edges, ...extra
+      }}});
+      await api.assignStyle(entry, style.id);
+      await entry.sheet.render({force: true, pageId: entry.pages.contents[0].id, expanded: true});
+      await new Promise(r => setTimeout(r, 800));
+      const header = entry.sheet.element.querySelector(".journal-header");
+      const host = getComputedStyle(header);
+      const layer = getComputedStyle(header, "::after");
+      const out = {
+        onHost: /url\\(/.test(host.backgroundImage),
+        onLayer: /url\\(/.test(layer.backgroundImage),
+        origin: host.backgroundOrigin.split(",")[0].trim(),
+        // The blend has to travel with the picture, or the copy under the
+        // border is a different color from the surface beside it.
+        blend: host.backgroundBlendMode.split(",")[0].trim()
+      };
+      await api.deleteStyle(style.id);
+      return out;
+    };
+    // A picture nobody has dimmed or filtered: the element paints it, so it
+    // runs under the border, and the layer stands down.
+    const plain = await read({});
+    // And one that has been aged, which a background layer cannot do: the layer
+    // takes it back and the band under the border stays the fill.
+    const aged = await read({textureAge: 60});
+    for (const a of [...foundry.applications.instances.values()]) {
+      if (a.document?.documentName?.startsWith("JournalEntry")) await a.close({force: true});
+    }
+    await entry.delete();
+    return JSON.stringify({plain, aged});
+  })()`);
+  const ub = JSON.parse(under);
+  check(ub.plain.onHost && !ub.plain.onLayer,
+    `an untouched picture is painted by the element, so a gapped border shows it `
+    + `(host ${ub.plain.onHost}, layer ${ub.plain.onLayer})`);
+  check(ub.plain.origin === "border-box",
+    `and reaches the border box rather than stopping at the padding box (${ub.plain.origin})`);
+  check(ub.plain.blend === "overlay",
+    `carrying its blend with it (${ub.plain.blend})`);
+  // Never both: an overlay laid down twice is not an overlay.
+  check(ub.aged.onLayer && !ub.aged.onHost,
+    `a picture with a filter goes back to the layer, which is the only thing `
+    + `that can filter it (host ${ub.aged.onHost}, layer ${ub.aged.onLayer})`);
+} finally {
+  await cdp.evaluate(`(async () => {
+    const entry = game.journal.getName("Under Border Journal");
+    if (entry) await entry.delete();
+    const api = game.modules.get("illuminus").api;
+    for (const style of api.listStyles()) {
+      if (style.name === "Under Border Probe") await api.deleteStyle(style.id);
+    }
+  })()`);
+}
+
 
 /* --- Clean up the test journal ------------------------------------------- */
 await cdp.evaluate(`(async () => {

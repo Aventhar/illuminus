@@ -687,10 +687,16 @@ function boxSections() {
  * picture can be laid over it. Named `<prefix>Texture` to match the two that
  * already existed, which keeps `cssVarFor` and the generated layers uniform.
  */
-function imageFields(prefix = "") {
+function imageFields(prefix = "", { under = true } = {}) {
   const n = (suffix) => (prefix ? `${prefix}${suffix}` : suffix.charAt(0).toLowerCase() + suffix.slice(1));
   return [
-    { type: "image", name: n("Texture"), default: "" },
+    // `under: false` where the fill this picture belongs to is painted on the
+    // layer rather than on the element — the window frames and their title
+    // bars, so that a fill of None leaves Foundry's own showing. The element
+    // there has no fill of its own for a second copy to blend with, and the
+    // layer's fill would cover it, so such a picture cannot run under a border
+    // and the compiler does not publish a copy for it.
+    { type: "image", name: n("Texture"), default: "", under },
     select(n("TextureFit"), "cover", CHOICES.textureFit, { emit: emitTextureFit }),
     select(n("TexturePosition"), "center", CHOICES.texturePosition, { emit: emitTexturePosition }),
     select(n("TextureBlend"), "normal", CHOICES.blend, { emit: emitKeyword }),
@@ -1351,7 +1357,16 @@ export const GROUPS = [
           num("headingIndent", 40, "px", 0, 120, 2, { noSelected: true }),
           num("headingLineHeight", 2.3, "", 0.5, 5, 0.05),
           select("headingWrap", "inherit", CHOICES.wrap, { emit: emitWord }),
-          select("headingHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens })
+          select("headingHyphens", "inherit", CHOICES.hyphens, { emit: emitHyphens }),
+          // Which end of the row the heading sits at, as a category row and a
+          // page number already ask. No justify: these are two or three words
+          // on one line, and Foundry says nothing about their alignment, so
+          // `inherit` is what leaves the panel exactly as it draws it.
+          select("headingAlign", "inherit", ["inherit", ...CHOICES.alignNoJustify]),
+          // And whether they are set in capitals, as a category row already is
+          // — Foundry draws that row in uppercase and says nothing about the
+          // headings under it, so this one starts by following the panel.
+          select("headingCaps", "inherit", ["inherit", ...CHOICES.caps], { emit: emitCaps })
         ]
       },
       {
@@ -1421,7 +1436,8 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...frostFields(),
+          ...imageFields("", { under: false }),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -1442,7 +1458,8 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
+          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"),
+          ...imageFields("titleBar", { under: false }),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -2251,7 +2268,8 @@ export const GROUPS = [
       {
         id: "frame",
         fields: [
-          col("background", "#00000000"), ...gradientFields(), ...frostFields(), ...imageFields(),
+          col("background", "#00000000"), ...gradientFields(), ...frostFields(),
+          ...imageFields("", { under: false }),
           ...borderFields("border", { color: "#00000000" }),
           ...cornerFields("corner")
         ]
@@ -2266,7 +2284,8 @@ export const GROUPS = [
       {
         id: "titleBar",
         fields: [
-          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"), ...imageFields("titleBar"),
+          col("titleBarBackground", "#00000000"), ...gradientFields("titleBar"), ...frostFields("titleBar"),
+          ...imageFields("titleBar", { under: false }),
           font("font", ""),
           num("size", 0, "px", 0, 60, 1, { zeroAs: "inherit" }),
           col("color", ""),
@@ -2955,7 +2974,7 @@ const LAYOUTS = {
     ] },
     subHeadings: { order: [
       "headingFont", "headingSize", "headingColor", "headingTextStyle",
-      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingHyphens", "headingIndent", DIVIDER,
+      "headingTextStyleSlant", DIVIDER, "headingLineHeight", "headingWrap", "headingHyphens", "headingAlign", "headingCaps", "headingIndent", DIVIDER,
       "headingOutlineColor", "headingOutlineWidth", DIVIDER, "headingTextShadowOffsetX",
       "headingTextShadowOffsetY", "headingTextShadowBlur", "headingTextShadowColor", DIVIDER,
       "headingBackground", "headingGradientFrom", "headingGradientTo", "headingGradientAngle", "headingFrost", DIVIDER, "headingTexture", "headingTextureFit",
@@ -3583,29 +3602,42 @@ const stateNamed = (name) =>
   /^(hover|active|collapsed)|(Hover|Active|Collapsed)(?=[A-Z])/.test(name);
 
 /**
- * The contents panel answers to being folded away, in every part of it.
+ * The contents panel answers to being folded away, in what is left of it when
+ * it is.
  *
  * Unlike pointed-at and selected, this is a state of the *whole panel* rather
- * than of a row inside it: Foundry shrinks the panel to a strip, hides the
- * search box, the page titles and the Create button, and swaps each category's
- * name for an icon. What is left is worth styling on its own terms — and a
- * style could say nothing whatever about it before, beyond a width.
+ * than of a row inside it: Foundry shrinks the panel to a strip, and the module
+ * leaves nothing in that strip but the button that undoes it. So the state is
+ * offered where a person can see what it does, and nowhere else — which is two
+ * places rather than the seven parts of the panel it began as.
  *
- * Every part inside the panel takes part, and nothing outside it does, because
- * nowhere else in a journal is folded away. The width is the reason the state
- * pays for itself twice over: the Collapsed state's Panel Width *is* the folded
- * width, so the one control answers the one question under both states rather
- * than standing beside itself under another name.
+ * The panel's own Size and Position, because the folded width is read by
+ * Foundry's own JavaScript and is the whole of what a style has to say about a
+ * strip: a fill, a picture, an edge or a corner on a panel 0 or 40 pixels wide
+ * paints nothing anybody looks at, and the panel keeps painting whatever it
+ * paints open. And all of the panel's buttons, since the way back out is one of
+ * them and is the only thing still inside.
+ *
+ * The rows are the other 322 controls, and every one of them painted something
+ * a folded panel does not draw — a Page Entry, a Sub-heading, a Category Row,
+ * the Search Box, a Page Number. A control that can never show is worse than a
+ * missing one, because it reads as broken rather than as absent.
+ *
+ * The width is the reason the state pays for itself twice over: the Collapsed
+ * state's Panel Width *is* the folded width, so the one control answers the one
+ * question under both states rather than standing beside itself under another
+ * name.
  *
  * Derived last, after the pointed-at and selected twins, so a state never
  * shadows a state: there is no folded-and-pointed-at.
  */
-const COLLAPSED_GROUPS = new Set(GROUPS.filter((group) => /^sidebar/.test(group.id))
-  .map((group) => group.id));
+const COLLAPSED_SECTIONS = { sidebar: new Set(["layout"]), sidebarButtons: true };
 
 for (const group of GROUPS) {
-  if (!COLLAPSED_GROUPS.has(group.id)) continue;
+  const folds = COLLAPSED_SECTIONS[group.id];
+  if (!folds) continue;
   for (const section of group.sections) {
+    if (folds !== true && !folds.has(section.id)) continue;
     const taken = new Set(section.fields.map((field) => field.name));
     for (const original of section.fields.filter((field) =>
       !isStateName(field.name) && !field.chrome && !field.noTwin)) {

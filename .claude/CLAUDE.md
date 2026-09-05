@@ -809,6 +809,13 @@ in the template library.
   and node fails to parse the file with an error pointing at a line some way
   from the one at fault. It has cost four rounds in one sitting. Write the
   comment without them.
+- **And no bare `\s`, `\d` or `\w` either.** A template literal resolves an
+  unrecognized escape to the letter itself, so a regex written `/\s+/` in a
+  probe reaches the page as `/s+/` — which matches the letter s. A shape check
+  splitting a computed value on whitespace split `superellipse(0)` into
+  " uperellip e(0)" instead, and reported the corners as broken. Either double
+  the backslash or write the regex without one; the mangled word in the failure
+  message is the tell, and it is easy to read past.
 - **Pick a test value the browser would never pick.** A check asserting our
   bullet did not reach the editor's menus used `square` — and `disc, circle,
   square` is the sequence a browser walks for nested lists, which the menus are.
@@ -1472,7 +1479,17 @@ the one.
 
 **A state need not be a state of an element — the panel is folded as a whole.**
 Pointed-at and selected are states of a row; Folded is a state of the contents
-panel, and every part inside it takes part (411 controls, `COLLAPSED_GROUPS`).
+panel, and it is offered only where a person can see what it does:
+`COLLAPSED_SECTIONS` names the panel's own Size and Position and the whole of
+its buttons, 89 controls. It was every section of every part inside the panel,
+411 — and the other 322 painted things a folded panel does not draw, since the
+panel is a strip that lists nothing and the module leaves nothing in it but the
+way back out. Two shapes of that, worth telling apart: a whole *part* with
+nothing to show folded (a Page Entry, a Category Row, the Search Box), and a
+*section* of a part that shows (the panel's own fill, picture, edges and
+spacing, none of which is looked at on a strip 0 or 40 pixels wide). Hence a
+table of sections rather than a set of groups. A control that can never show is
+worse than a missing one, because it reads as broken rather than as absent.
 The mirror already allowed for it: `pointedRules` takes a twin table and a
 selector rewrite, so `folded()` prefixes `:not(.expanded)` onto the sheet root
 rather than appending a pseudo-class, which is a class's worth of specificity
@@ -1787,6 +1804,92 @@ has to be kept, and the symptom is cosmetic enough to miss.
 scale for sizes — and set no face of their own, so the window inherits Signika like the
 rest of the interface. Colors invented for the editor date it against the app around it.
 
+**`background:` is a shorthand, and it resets what the picture needs.** Three
+rules said `background: var(--…-background)` for what is only a color — the
+journal's name, a link, a picture's own fill — and a shorthand puts every
+longhand it does not name back to its initial value, including the origin, size,
+repeat and blend the under-border copy is painted with. It cost nothing while
+those longhands were unset. It costs a state: a mirror restates *that*
+declaration and not the literals beside it, so the shorthand reset the origin
+the moment a pointer arrived, and check [59] reported `a link: background-origin`
+changing under the pointer — three sections from anything to do with links. They
+are `background-color` now. Anything reading a longhand this module sets
+elsewhere wants the longhand here too.
+
+**A picture is painted in one of two places, and the compiler chooses.** A
+border that lets anything through shows the element's own background, and the
+picture rides on a layer over the *padding* box — so a `double` border on a
+textured surface ran a band of flat fill between its strokes. The element paints
+the picture as well now (`graduated()` in the generator, and the same five
+declarations by hand in `illuminus.css`), and `compileDeclarations` makes the two
+copies **complements**: whichever place paints it, the other gets `none`. Five
+things are load-bearing:
+
+- **Never both.** An overlay laid down twice is not an overlay. That is why it is
+  a complement rather than an addition.
+- **`background-blend-mode` equals `mix-blend-mode` here, measured.** Blending
+  the picture against the element's own fill computes pixel for pixel what the
+  layer computes against an isolated backdrop of that fill: worst channel
+  difference 1 over `overlay`, `multiply`, `screen` and `normal`, zero pixels
+  differing by more than that. Do not take that on trust in a future rework —
+  it is a two-minute check.
+- **A strength or a filter sends it back to the layer.** A background layer takes
+  neither, so `underCopy` answers `none` for any of Opacity, Blur, Brightness,
+  Contrast, Saturation or Age away from its default, and the band stays the fill.
+  A state's own picture asks its own controls first and falls back to the
+  ordinary ones, which is the chain the rule reading them is written as.
+- **`background-origin: border-box` is what makes it reach.** Positioned to the
+  padding box, a `cover` picture stops exactly where the band is and the whole
+  thing does nothing.
+- **Four fills cannot do it at all**, and say so in the schema
+  (`imageFields(prefix, { under: false })`): the two window frames and their two
+  title bars paint their *fill* on the layer, so that a fill of None leaves
+  Foundry's own showing — the element has nothing of its own for a second copy to
+  blend with. Measured: 53 of 57 pictures can, 4 cannot.
+
+**A frame cannot be moved onto the picture layer, and this is why.** A border
+that lets anything through — a double line, a dashed one, a color with alpha —
+shows the element's own background, and the fill covers the border box while the
+picture layer stops at the padding box. So a `double` border on a textured
+surface runs a band of flat color between its two strokes. It looks like a
+layering bug and it is not one; it is the two halves of a surface occupying
+different boxes. **Both ways out were built, and both failed:**
+
+- **Widening the layer to the border box swallows the frame.** At `z-index: -1`
+  a pseudo-element paints *above* its host's border, not below it, so the
+  picture covered the border entirely.
+- **Drawing the frame on the layer blends the frame.** The layer carries
+  `mix-blend-mode`, `opacity` and `filter` — that is the whole reason it exists —
+  so the border went through them too. Measured against a real style whose title
+  texture blends `overlay`: a clean gold double frame came out dark and mottled,
+  and the author reported it as the change making things worse. It also needed
+  the host to give its border color up, which needed a give-up rule after every
+  state mirror, which needed a table of the seven hosts that clip (a clipping
+  host cuts the layer back and would then draw no border at all), which needed
+  the compiler to publish a width of 0 for a side whose line style is None (or
+  the layer hung past an edge that drew nothing). Five props under one bad idea.
+
+It would take a **third** element to carry the frame above the blended layer, and
+`::before` is not free — FontAwesome owns it on a button, and core's glyph owns
+it on a folded category row. Reverted on 2026-09-03, deliberately: the band in a
+gapped border is the lesser fault. Do not try either route again without that
+third element.
+
+**A picture layer takes its host's radius and must take its shape too.** The
+layer says `border-radius: inherit`, which was the whole of it for as long as a
+corner was only a size — so when corners grew a shape, every textured surface
+became a rounded rectangle under a host that had been beveled, scooped or
+notched. A scoop is the round corner's complement, so the picture painted
+exactly the bite the fill had been carved out of and bulged past a border curving
+the other way. Reported as "a layer compositing issue with these corners", which
+is what it looks like. `corner-shape: inherit` goes beside every
+`border-radius: inherit` — 57 generated layers, the treated picture's own `img`,
+the tag's layer, and six hand-written ones. The general rule: **a property
+inherited onto a layer to keep it in step with its host is a pair with whatever
+that property is later split into**, and nothing warns you, because both halves
+are valid CSS on their own. Check [69] reads the shape off the layer as well as
+off the box.
+
 **A corner has a size and a shape, and four of each.** `corner-shape` (Chromium 139+,
 and this is a Chromium app) sits beside `border-radius` and reads the same four sizes, so
 a corner set to 12 becomes a 12px bevel or scoop with no second measurement. It is a value
@@ -1815,6 +1918,14 @@ each:
 - **Naming them is thirty-three order lists**, not the thirty-one the single control took,
   and the prefixed spellings (`mediaCornerShape`, `entryCornerShape`) outnumber the bare
   one — a sweep for `"cornerShape"` finds fourteen of thirty-three.
+- **Each keyword is an alias of a superellipse, and the browser answers with the
+  curve.** `bevel` computes to `superellipse(0)`, `scoop` to `superellipse(-1)`,
+  `round` to `superellipse(1)` and `notch` to `superellipse(-infinity)` — so check [69]
+  began failing three assertions at once on a Chrome update while the module was doing
+  exactly what it had always done, and the failure reads as the corners having stopped
+  working. It maps the computed value back to the word before comparing. The general
+  lesson: where a value has two legal spellings, a check must compare the *thing* and not
+  the string a browser happens to serialize this year.
 
 **Two marks, two questions.** `is-default` is "unchanged since this editor was opened",
 which is what the changed counts and the fading are about. `is-unset` is "the style says

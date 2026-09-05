@@ -17,17 +17,44 @@ Two conventions worth knowing before you read it:
 
 ## [Unreleased]
 
+### Fixed
+
+- **A background picture now runs under a border that lets anything through.** A
+  double line, a dashed one, or any color with alpha shows what is behind it,
+  and what was behind it was the flat fill: the picture stopped where the border
+  began, so a textured surface came out with a band of plain color running
+  between the two strokes of its own frame. The element paints the picture
+  itself now, clipped to its border box as its fill already is, and the layer
+  over the padding box stands down — one copy, never two. Where the copy could
+  not be honest the layer keeps it instead: a picture given a strength below
+  full or any of the five filters, none of which a background can take. Nothing
+  changes for such a picture, and nothing changes for the window frames or their
+  title bars, whose fill is painted on the layer by design.
+- **A background picture now takes the corner shape of what it sits in.** The
+  picture rides on a layer of its own, and that layer copied the host's corner
+  *size* without its *shape* — so a surface beveled, scooped or notched wore a
+  rounded picture, which painted over the very corner the border was curving
+  away from. Every textured surface is affected: pages, titles, boxes, pictures,
+  tags, panel rows, window frames.
+
 ### Added
 
+- **Sub-headings in the contents panel can be lined up, and set in capitals.**
+  **Alignment** and **Capitals** beside their line breaking, as a category row
+  already had both. The alignment goes on the link rather than on the row around
+  it — Foundry lays that link out at the full width of the panel, so aligning the
+  row cannot move anything. Both start at Use the page setting, which leaves the
+  panel exactly as Foundry draws it.
 - **The contents panel can be styled folded as well as open.** A third state
-  beside Normal and Hovered — **Folded** — on the panel and every part inside
-  it, four hundred and eleven controls in all: its fill, its picture, its edges
-  and corners and spacing, its entries, its categories, its search box, both
-  sets of buttons, its page numbers. Foundry shrinks the panel to a strip, hides
-  the search box and the page titles, and swaps each category's name for an
-  icon; a style could say nothing whatever about any of that before. An unset
-  Folded control falls through to the ordinary one, so a style that has not
-  asked for it looks exactly as it did.
+  beside Normal and Hovered — **Folded** — where there is something to see:
+  how wide the folded panel is, and both sets of its buttons, in every part they
+  have. Foundry shrinks the panel to a strip and the module leaves nothing in it
+  but the way back out, so the way back out is what a style gets to dress. An
+  unset Folded control falls through to the ordinary one, so a style that has
+  not asked for it looks exactly as it did. Nothing else is offered the state:
+  a folded panel lists no entries, categories, sub-headings, page numbers or
+  search box, and its own fill, picture, edges and spacing are not looked at on
+  a strip that narrow.
 - **How wide the folded panel is, is the Panel Width under that state** — one
   control answering one question under both states rather than standing beside
   itself under a second name. Foundry's own folded width is 40.

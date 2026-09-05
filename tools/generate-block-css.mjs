@@ -93,10 +93,40 @@ const layout = (group, fallback = "block") => `${displayed(group, fallback)}
 const turned = (group) =>
   `  transform: ${vOr(group, "turn", "")} ${vOr(group, "scale", "")};`;
 
+/**
+ * A fill that graduates, and the strip of its picture that runs under a border.
+ *
+ * The picture proper rides on a layer over the padding box, where a strength
+ * and a filter can reach it — but a layer stops where the border begins, so a
+ * border that lets anything through showed a band of flat fill between its
+ * strokes. The element paints the picture as well, clipped to its border box as
+ * its fill already is, and the compiler makes the two copies complements: one
+ * or the other, never both, since laying a picture down twice is not the same
+ * picture. Where the copy could not be honest — a strength or a filter, which a
+ * background layer cannot take — the compiler answers `none` here and the layer
+ * paints as it always did.
+ *
+ * `background-origin: border-box` is what makes it reach: positioned to the
+ * padding box, a `cover` picture stops exactly where the band is.
+ */
 const graduated = (group, prefix = "") => {
   const of = (part) => (prefix ? `${prefix}${part}` : part.charAt(0).toLowerCase() + part.slice(1));
-  return `  background-image: linear-gradient(${v(group, of("GradientAngle"))},
-    ${v(group, of("GradientFrom"))}, ${v(group, of("GradientTo"))});`;
+  const gradient = `linear-gradient(${v(group, of("GradientAngle"))},
+    ${v(group, of("GradientFrom"))}, ${v(group, of("GradientTo"))})`;
+  // Only where this fill has a picture at all, and one that may run under a
+  // border: a window frame's fill is painted on its layer, so the element has
+  // nothing of its own for a second copy to blend with.
+  const picture = (group.sections ?? []).flatMap((section) => section.fields)
+    .find((field) => field.name === of("Texture") && field.under !== false);
+  if (!picture) return `  background-image: ${gradient};`;
+  const part = (name, suffix) => v(group, of(`Texture${name}`), suffix);
+  return `  background-image: ${vIn(group, of("Texture"), "under", "none")},
+    ${gradient};
+  background-size: ${part("Fit", "size")}, auto;
+  background-repeat: ${part("Fit", "repeat")}, repeat;
+  background-position: ${part("Position")}, 0% 0%;
+  background-blend-mode: ${part("Blend")}, normal;
+  background-origin: border-box;`;
 };
 
 const box = (group) => `  background-color: ${v(group, "background")};
@@ -506,6 +536,7 @@ ${pictureShaped(group)}
   /* The page-wide picture frame would otherwise apply on top of this one. */
   border: none;
   border-radius: inherit;
+  corner-shape: inherit;
   box-shadow: none;
   margin: 0;
   padding: 0;
@@ -943,6 +974,25 @@ const hostPosition = (layer) => {
   return offered ? vOr(group, name, "relative") : "relative";
 };
 
+
+/**
+ * The layer sits on the host's **padding box**, and has to.
+ *
+ * It would be better on the border box: a border that lets anything through — a
+ * double line, a dashed one, a color with alpha — shows what is behind it, and
+ * what is behind it should be this picture rather than the flat fill. Both ways
+ * of getting there were built and both failed, so the comment is here instead
+ * of the code.
+ *
+ * Widened alone, the layer paints *above* the host's own border, at a negative
+ * z-index, and swallowed the frame whole. Drawing the frame on the layer as well
+ * put the frame inside this element's `mix-blend-mode`, `opacity` and `filter` —
+ * which is the whole reason the layer exists — so a style blending its picture
+ * came out with a blended frame: measured against Fantasy Basic, whose gold
+ * double border went dark and mottled under an `overlay` texture. It would take
+ * a third element, and `::before` is not free (FontAwesome owns it on a button,
+ * core's glyph on a folded category row).
+ */
 const imageLayer = (layer) => `
 ${layerHost(layer.selector)} {
 ${layer.host === false ? "" : `  position: ${hostPosition(layer)};\n`}  isolation: isolate;
@@ -955,6 +1005,12 @@ ${eachAfter(layer.selector, layer.on)} {
   z-index: -1;
   pointer-events: none;
   border-radius: inherit;
+  /* Both halves of a corner, not just its size. A corner is a radius *and* a
+     shape, and inheriting the radius alone left every picture a rounded
+     rectangle under a host that had been beveled, scooped or notched — the
+     texture bulging out past a border curving the other way. The shape is a
+     shorthand over four longhands, so inheriting takes each corner's own. */
+  corner-shape: inherit;
   background-image: ${imageVar(layer, "")};
   background-size: ${imageVar(layer, "Fit", "size")};
   background-repeat: ${imageVar(layer, "Fit", "repeat")};
@@ -1023,6 +1079,7 @@ const header = `/* =============================================================
   inset: 0;
   z-index: -1;
   border-radius: inherit;
+  corner-shape: inherit;
   pointer-events: none;
 }
 
@@ -1376,6 +1433,7 @@ const selected = pointedRules(written, { twinOf: activeTwinOf, selector: chosen 
   + pointedRules(ordinary, { twinOf: activeTwinOf, selector: chosen });
 const collapsed = pointedRules(written, { twinOf: collapsedTwinOf, selector: folded })
   + pointedRules(ordinary, { twinOf: collapsedTwinOf, selector: folded });
+
 const out = `${ordinary}${hovers}${selected}${collapsed}`;
 fs.writeFileSync(`${ROOT}/styles/illuminus-generated.css`, out);
 console.log(`wrote styles/illuminus-generated.css — ${out.split("\n").length} lines, `
